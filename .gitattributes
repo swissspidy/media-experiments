@@ -1,0 +1,8 @@
+.github export-ignore
+bin export-ignore
+tests export-ignore
+.* export-ignore
+codecov.yml export-ignore
+package.json export-ignore
+package-lock.json export-ignore
+*.xml.dist export-ignore

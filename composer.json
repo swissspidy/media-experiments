@@ -1,0 +1,39 @@
+{
+	"name": "swissspidy/media-experiments",
+	"description": "WordPress media experiments",
+	"license": "Apache-2.0",
+	"type": "wordpress-plugin",
+	"authors": [
+		{
+			"name": "Pascal Birchler",
+			"email": "swissspidy@chat.wordpress.org",
+			"homepage": "https://pascalbirchler.com",
+			"role": "Developer"
+		}
+	],
+	"require": {
+		"php": ">=8.0",
+		"ext-json": "*",
+		"google/cloud-videointelligence": "dev-main",
+		"google/cloud-storage": "dev-main"
+	},
+	"require-dev": {
+		"dealerdirect/phpcodesniffer-composer-installer": "^1.0.0",
+		"phpcompatibility/phpcompatibility-wp": "^2.0",
+		"roave/security-advisories": "dev-latest",
+		"wp-coding-standards/wpcs": "dev-develop",
+		"yoast/phpunit-polyfills": "^1.0.1"
+	},
+	"minimum-stability": "dev",
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	},
+	"scripts": {
+		"format": "vendor/bin/phpcbf --report-summary --report-source .",
+		"lint": "vendor/bin/phpcs --report-summary --report-source .",
+		"test": "vendor/bin/phpunit",
+		"test:multisite": "vendor/bin/phpunit -c phpunit-multisite.xml.dist"
+	}
+}
