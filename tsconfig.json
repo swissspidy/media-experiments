@@ -1,0 +1,23 @@
+{
+	"references": [
+		{
+			"path": "packages/edit-post"
+		},
+		{
+			"path": "packages/ffmpeg"
+		},
+		{
+			"path": "packages/heif"
+		},
+		{
+			"path": "packages/media-utils"
+		},
+		{
+			"path": "packages/upload-media"
+		},
+		{
+			"path": "packages/vips"
+		}
+	],
+	"files": []
+}

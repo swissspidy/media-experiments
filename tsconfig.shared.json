@@ -1,0 +1,33 @@
+{
+	"compilerOptions": {
+		"allowJs": true,
+		"checkJs": true,
+		"allowSyntheticDefaultImports": true,
+		"jsx": "preserve",
+		"target": "ES2020",
+		"module": "ES2020",
+		"lib": ["dom", "dom.iterable", "esnext"],
+		"declaration": true,
+		"declarationMap": true,
+		"composite": true,
+		"emitDeclarationOnly": true,
+		"strict": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+		"verbatimModuleSyntax": true,
+		"moduleResolution": "node",
+		"esModuleInterop": false,
+		"resolveJsonModule": true,
+		"allowUnreachableCode": false,
+		"allowUnusedLabels": false,
+		"forceConsistentCasingInFileNames": true,
+		"noEmitOnError": true,
+		"pretty": true,
+		"sourceMap": true,
+		"typeRoots": ["./@types", "./node_modules/@types"],
+		"types": ["jest", "node"]
+	},
+	"exclude": ["packages/*/dist-types/**", "packages/*/dist/**"]
+}

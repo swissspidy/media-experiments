@@ -1,0 +1,49 @@
+{
+	"name": "@mexp/upload-media",
+	"version": "0.0.1",
+	"description": "Core media upload logic",
+	"private": true,
+	"author": "",
+	"license": "Apache-2.0",
+	"keywords": [
+		"wordpress",
+		"media"
+	],
+	"homepage": "https://github.com/swissspidy/media-experiments/tree/HEAD/packages/upload-media/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/swissspidy/media-experiments.git",
+		"directory": "packages/upload-media"
+	},
+	"bugs": {
+		"url": "https://github.com/swissspidy/media-experiments/issues"
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"main": "dist/index.js",
+	"types": "dist-types/index.d.ts",
+	"source": "src/index.ts",
+	"exports": {
+		".": {
+			"default": "./src/index.ts"
+		}
+	},
+	"dependencies": {
+		"@mexp/ffmpeg": "*",
+		"@mexp/heif": "*",
+		"@mexp/media-utils": "*",
+		"@mexp/pdf": "*",
+		"@mexp/vips": "*",
+		"@wordpress/api-fetch": "^6.33.0",
+		"@wordpress/blob": "^3.36.0",
+		"@wordpress/core-data": "^6.12.0",
+		"@wordpress/data": "^9.6.0",
+		"@wordpress/i18n": "^4.27.0",
+		"@wordpress/preferences": "^3.5.0",
+		"blurhash": "^2.0.5",
+		"fast-average-color": "^9.3.0",
+		"uuid": "^9.0.0",
+		"wp-types": "^3.61.0"
+	}
+}
