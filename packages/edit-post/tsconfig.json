@@ -1,0 +1,19 @@
+{
+	"extends": "../../tsconfig.shared.json",
+	"compilerOptions": {
+		"rootDir": "src",
+		"declarationDir": "dist-types"
+	},
+	"references": [
+		{ "path": "../media-utils" },
+		{ "path": "../upload-media" }
+	],
+	"include": [
+		"src/mediaRecording/@types/**/*",
+		"src/mediaRecording/crossOriginIsolation/**/*",
+		"src/mediaRecording/icons/**/*",
+		"src/mediaRecording/constants.ts",
+		"src/mediaRecording/utils.ts",
+		"src/utils/**/*"
+	]
+}

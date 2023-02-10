@@ -1,0 +1,62 @@
+{
+	"name": "@mexp/edit-post",
+	"version": "0.0.1",
+	"description": "Main WordPress post editor integration",
+	"private": true,
+	"author": "",
+	"license": "Apache-2.0",
+	"keywords": [
+		"wordpress",
+		"gutenberg",
+		"media",
+		"editor",
+		"post"
+	],
+	"homepage": "https://github.com/swissspidy/media-experiments/tree/HEAD/packages/edit-post/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/swissspidy/media-experiments.git",
+		"directory": "packages/edit-post"
+	},
+	"bugs": {
+		"url": "https://github.com/swissspidy/media-experiments/issues"
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"main": "dist/index.js",
+	"types": "dist-types/index.d.ts",
+	"source": "src/index.ts",
+	"exports": {
+		".": {
+			"default": "./src/index.ts"
+		}
+	},
+	"dependencies": {
+		"@mediapipe/selfie_segmentation": "^0.1.1675465747",
+		"@mexp/media-utils": "*",
+		"@mexp/upload-media": "*",
+		"@wordpress/blob": "^3.36.0",
+		"@wordpress/block-editor": "^12.5.0",
+		"@wordpress/blocks": "^12.10.0",
+		"@wordpress/components": "^25.2.0",
+		"@wordpress/compose": "^6.10.0",
+		"@wordpress/core-data": "^6.12.0",
+		"@wordpress/data": "^9.6.0",
+		"@wordpress/dom-ready": "^3.36.0",
+		"@wordpress/edit-post": "^7.13.0",
+		"@wordpress/editor": "^13.13.0",
+		"@wordpress/element": "^5.14.0",
+		"@wordpress/hooks": "^3.36.0",
+		"@wordpress/i18n": "^4.33.0",
+		"@wordpress/icons": "^9.24.0",
+		"@wordpress/interface": "^5.13.0",
+		"@wordpress/media-utils": "^4.28.0",
+		"@wordpress/notices": "^4.1.0",
+		"@wordpress/plugins": "^6.4.0",
+		"@wordpress/preferences": "^3.10.0",
+		"image-capture": "^0.4.0",
+		"react-blurhash": "^0.3.0",
+		"react-compare-slider": "^2.2.0"
+	}
+}

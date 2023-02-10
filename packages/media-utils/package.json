@@ -1,0 +1,33 @@
+{
+	"name": "@mexp/media-utils",
+	"version": "0.0.1",
+	"description": "Various media utils",
+	"private": true,
+	"author": "",
+	"license": "Apache-2.0",
+	"keywords": [
+		"wordpress",
+		"media",
+		"utilities"
+	],
+	"homepage": "https://github.com/swissspidy/media-experiments/tree/HEAD/packages/media-utils/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/swissspidy/media-experiments.git",
+		"directory": "packages/media-utils"
+	},
+	"bugs": {
+		"url": "https://github.com/swissspidy/media-experiments/issues"
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"main": "dist/index.js",
+	"types": "dist-types/index.d.ts",
+	"source": "src/index.ts",
+	"exports": {
+		".": {
+			"default": "./src/index.ts"
+		}
+	}
+}

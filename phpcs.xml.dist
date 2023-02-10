@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<ruleset name="WordPress Coding Standards for Media Experiments Plugin">
+	<description>A custom set of code standard rules for Media Experiments.</description>
+
+	<rule ref="WordPress-Core">
+		<exclude name="Universal.Arrays.DisallowShortArraySyntax" />
+	</rule>
+
+	<rule ref="WordPress-Docs">
+		<exclude-pattern>*/tests/*</exclude-pattern>
+	</rule>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" value="media-experiments" />
+		</properties>
+	</rule>
+
+	<!-- Make sure we prefix everything in the global namespace. -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array" value="mexp,MediaExperiments,media_experiments" />
+		</properties>
+	</rule>
+
+	<!-- We only support the latest major WordPress release. -->
+	<config name="minimum_supported_wp_version" value="6.1" />
+	<rule ref="WordPress.WP.DeprecatedFunctions" />
+
+	<!-- Check all PHP files in directory tree by default. -->
+	<arg name="extensions" value="php"/>
+	<file>.</file>
+
+	<!-- File Layout: Declare symbols or run code, but not both. -->
+	<rule ref="PSR1.Files.SideEffects" />
+
+	<!-- Prevent false positives for IDE annotations. -->
+	<rule ref="Squiz.PHP.CommentedOutCode">
+		<properties>
+			<property name="maxPercentage" value="75" />
+		</properties>
+	</rule>
+
+	<!-- Test for PHP 5.6+ compatibility. -->
+	<config name="testVersion" value="8.0-"/>
+
+	<exclude-pattern>*/build/*</exclude-pattern>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*/tests/*/bootstrap.php</exclude-pattern>
+	<exclude-pattern>*/tests/e2e/plugins/*</exclude-pattern>
+	<exclude-pattern>*/tests/phpunit/data/*</exclude-pattern>
+</ruleset>

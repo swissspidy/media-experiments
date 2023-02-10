@@ -1,0 +1,38 @@
+{
+	"name": "@mexp/pdf",
+	"version": "0.0.1",
+	"description": "PDF utils",
+	"private": true,
+	"author": "",
+	"license": "Apache-2.0",
+	"keywords": [
+		"wordpress",
+		"media",
+		"pdf",
+		"pdf.js"
+	],
+	"homepage": "https://github.com/swissspidy/media-experiments/tree/HEAD/packages/pdf/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/swissspidy/media-experiments.git",
+		"directory": "packages/pdf"
+	},
+	"bugs": {
+		"url": "https://github.com/swissspidy/media-experiments/issues"
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"main": "dist/index.js",
+	"types": "dist-types/index.d.ts",
+	"source": "src/index.ts",
+	"exports": {
+		".": {
+			"default": "./src/index.ts"
+		}
+	},
+	"dependencies": {
+		"@mexp/media-utils": "*",
+		"pdfjs-dist": "^3.11.174"
+	}
+}

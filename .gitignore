@@ -1,0 +1,11 @@
+/artifacts
+/build
+/node_modules
+/vendor
+.wp-env.override.json
+phpcs.xml
+phpunit.xml
+phpunit-multisite.xml
+.phpunit.result.cache
+tsconfig.tsbuildinfo
+dist-types

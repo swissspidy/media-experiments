@@ -1,0 +1,15 @@
+{
+	"extends": "../../tsconfig.shared.json",
+	"compilerOptions": {
+		"rootDir": "src",
+		"declarationDir": "dist-types"
+	},
+	"references": [
+		{ "path": "../ffmpeg" },
+		{ "path": "../heif" },
+		{ "path": "../media-utils" },
+		{ "path": "../pdf" },
+		{ "path": "../vips" }
+	],
+	"include": [ "src/**/*" ]
+}

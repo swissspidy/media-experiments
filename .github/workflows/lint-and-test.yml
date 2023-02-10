@@ -1,0 +1,212 @@
+name: Lint and Test
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+
+jobs:
+    lint-js:
+        name: JS Lints
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+
+            - name: Setup Node
+              uses: actions/setup-node@v3
+              with:
+                  node-version-file: '.nvmrc'
+                  cache: npm
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: package.json Lint
+              run: npm run lint:pkg-json
+
+            - name: Lint JS
+              run: npm run lint:js
+
+            - name: Lint CSS
+              run: npm run lint:css
+
+            - name: Lint Markdown
+              run: npm run lint:md:docs
+
+            - name: Type checking
+              run: npm run build:package-types
+
+    lint-php:
+        name: PHP Lints
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '8.0'
+                  coverage: none
+                  tools: composer, cs2pr
+
+            - name: Get Composer cache directory
+              id: composer-cache
+              run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+            - name: Setup Composer cache
+              uses: pat-s/always-upload-cache@v3.0.11
+              with:
+                  path: ${{ steps.composer-cache.outputs.dir }}
+                  key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-composer-
+                      ${{ runner.os }}-
+
+            - name: Validate composer.json
+              run: composer validate --no-check-all --strict
+
+            - name: Install dependencies
+              run: composer install
+
+            - name: Lint PHP
+              run: composer lint
+
+    unit-js:
+        name: JS Tests
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Run tests
+              run: npm run test:unit -- --collectCoverage
+
+            - name: Upload code coverage report
+              uses: codecov/codecov-action@v3.1.4
+              with:
+                  file: artifacts/logs/lcov.info
+                  flags: js
+
+    unit-php:
+        name: 'PHP ${{ matrix.php }} - WP ${{ matrix.wp }}'
+        runs-on: ubuntu-latest
+        services:
+            mysql:
+                image: mariadb:latest
+                env:
+                    MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: true
+                    MARIADB_DATABASE: wordpress_test
+                    MARIADB_MYSQL_LOCALHOST_USER: 1
+                    MARIADB_MYSQL_LOCALHOST_GRANTS: USAGE
+                ports:
+                    - 3306
+                options: --health-cmd="healthcheck.sh --su-mysql --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
+        continue-on-error: ${{ matrix.experimental }}
+        strategy:
+            matrix:
+                php: ['8.0']
+                wp: ['latest']
+                coverage: [false]
+                experimental: [false]
+                include:
+                    - php: '8.0'
+                      wp: 'latest'
+                      coverage: true
+                      experimental: false
+
+                    - php: '8.2'
+                      wp: 'trunk'
+                      experimental: true
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+
+            - name: Get Composer cache directory
+              id: composer-cache
+              run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+            - name: Setup Composer cache
+              uses: pat-s/always-upload-cache@v3.0.11
+              with:
+                  path: ${{ steps.composer-cache.outputs.dir }}
+                  key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-composer-
+                      ${{ runner.os }}-
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: ${{ matrix.php }}
+                  extensions: mysql
+                  coverage: xdebug
+                  tools: composer, cs2pr
+
+            - name: Shutdown default MySQL service
+              run: sudo service mysql stop
+
+            - name: Verify MariaDB connection
+              run: |
+                  while ! mysqladmin ping -h"127.0.0.1" -P"${{ job.services.mysql.ports[3306] }}" --silent; do
+                    sleep 1
+                  done
+
+            - name: Set up tests
+              run: bash bin/install-wp-tests.sh wordpress_test root '' 127.0.0.1:${{ job.services.mysql.ports['3306'] }} ${{ matrix.wp }} true
+
+            - name: Install PHP dependencies
+              uses: 'ramsey/composer-install@v2'
+              with:
+                  composer-options: '--prefer-dist --no-progress --no-interaction --no-scripts'
+
+            # Installs a different PHPUnit version depending on the WP/PHP version combo we're testing against.
+            #
+            # | WP  / PHP | PHPUnit |
+            # |-----------|---------|
+            # | *   / 5.6 | 5       |
+            # | *   / 7.4 | 9       |
+            # | *   / 8   | 9       |
+            #
+            # See https://make.wordpress.org/core/handbook/references/phpunit-compatibility-and-wordpress-versions/
+            - name: Update PHPUnit
+              run: |
+                  if [[ $PHP_VERSION == "7.4" || $PHP_VERSION == "8.0" || $PHP_VERSION == "8.1" || $PHP_VERSION == "8.2" ]]; then
+                    echo "Installing latest version of PHPUnit"
+                    composer update --ignore-platform-reqs --no-interaction --no-scripts yoast/phpunit-polyfills --with-dependencies
+                  fi
+              env:
+                  WP_VERSION: ${{ matrix.wp }}
+                  PHP_VERSION: ${{ matrix.php }}
+
+            - name: Run tests
+              run: |
+                  composer test
+                  composer test:multisite
+              if: ${{ ! matrix.coverage }}
+
+            - name: Run tests with coverage
+              run: |
+                  composer test -- --coverage-clover coverage.xml
+                  composer test:multisite -- --coverage-clover coverage-multisite.xml
+              if: ${{ matrix.coverage }}
+
+            - name: Upload code coverage report
+              uses: codecov/codecov-action@v3.1.4
+              with:
+                  file: artifacts/coverage.xml
+                  flags: default
+              if: ${{ matrix.coverage }}
+
+            - name: Upload code coverage report
+              uses: codecov/codecov-action@v3.1.4
+              with:
+                  file: coverage-multisite.xml
+                  flags: multisite
+              if: ${{ matrix.coverage }}
