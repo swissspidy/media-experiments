@@ -26,7 +26,7 @@ function addMultiFileTransformToBlock(settings, name: string) {
 						)
 					);
 				},
-				transform(files) {
+				transform(files: File[]) {
 					const blocks = [];
 
 					files.forEach((file) => {

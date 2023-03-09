@@ -1,6 +1,29 @@
 import apiFetch from '@wordpress/api-fetch';
 
-import { Attachment, RestAttachment } from './store/types';
+import type {
+	Attachment,
+	CreateRestAttachment,
+	RestAttachment,
+} from './store/types';
+
+/**
+ * Recursively flatten data passed to form data, to allow using multi-level objects.
+ *
+ * @param {FormData} formData Form data object.
+ * @param {string} key Key to amend to form data object
+ * @param {string|Object} data Data to be amended to form data.
+ */
+function flattenFormData(formData, key, data) {
+	if (typeof data === 'object') {
+		for (const name in data) {
+			if (Object.prototype.hasOwnProperty.call(data, name)) {
+				flattenFormData(formData, `${key}[${name}]`, data[name]);
+			}
+		}
+	} else {
+		formData.append(key, data);
+	}
+}
 
 /**
  * Upload a file to the server.
@@ -12,16 +35,14 @@ import { Attachment, RestAttachment } from './store/types';
  */
 function createMediaFromFile(
 	file: File,
-	additionalData: Record<string, string | number> = {}
+	additionalData: CreateRestAttachment = {}
 ) {
 	// Create upload payload.
 	const data = new window.FormData();
 	data.append('file', file, file.name || file.type.replace('/', '.'));
-	if (additionalData) {
-		Object.entries(additionalData).forEach(([key, value]) =>
-			data.append(key, String(value))
-		);
-	}
+	Object.entries(additionalData).forEach(([key, value]) =>
+		flattenFormData(data, key, value)
+	);
 
 	return apiFetch<RestAttachment>({
 		path: '/wp/v2/media',
@@ -40,7 +61,7 @@ function createMediaFromFile(
  */
 export function updateMediaItem(
 	id: RestAttachment['id'],
-	data: Partial<RestAttachment>
+	data: CreateRestAttachment
 ) {
 	return apiFetch<RestAttachment>({
 		path: `/wp/v2/media/${id}`,
@@ -51,7 +72,7 @@ export function updateMediaItem(
 
 export async function uploadToServer(
 	file: File,
-	additionalData: Record<string, string | number> = {}
+	additionalData: CreateRestAttachment = {}
 ) {
 	const savedMedia = await createMediaFromFile(file, additionalData);
 

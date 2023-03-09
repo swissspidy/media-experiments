@@ -6,3 +6,5 @@ codecov.yml export-ignore
 package.json export-ignore
 package-lock.json export-ignore
 *.xml.dist export-ignore
+
+tsconfig.json linguist-language=jsonc

@@ -2,6 +2,7 @@ import {
 	MEDIA_TRANSCODING_MAX_FILE_SIZE,
 	TRANSCODABLE_MIME_TYPES,
 } from './constants';
+import UploadError from './uploadError';
 
 // TODO: Make work for HEIF, GIF and audio as well.
 export function canTranscodeFile(file: File) {
@@ -79,6 +80,27 @@ export function getFileBasename(name: string): string {
 export function getFileNameFromUrl(url: string): string {
 	const tail = url.split('/').at(-1);
 	return tail.split(/[#?]/).at(0) ?? tail;
+}
+
+export async function fetchRemoteFile(url: string) {
+	const response = await fetch(url);
+	if (!response.ok) {
+		throw new Error(`Could not fetch remote file: ${response.status}`);
+	}
+
+	const name = getFileNameFromUrl(url);
+	const blob = await response.blob();
+	const file = blobToFile(blob, name, blob.type);
+
+	if (!blob.type) {
+		throw new UploadError({
+			code: 'FETCH_REMOTE_FILE_ERROR',
+			message: 'File could not be uploaded',
+			file,
+		});
+	}
+
+	return file;
 }
 
 export function getCanvasBlob(
@@ -173,6 +195,22 @@ function seekVideo(video: HTMLVideoElement, offset = 0.99): Promise<void> {
 
 		video.currentTime = offset;
 	});
+}
+
+/**
+ * Determines whether a video element has audio tracks.
+ *
+ * @param src Video URL.
+ * @return Whether the video has audio or not.
+ */
+export async function videoHasAudio(src: string) {
+	const video = await preloadVideo(src);
+	await seekVideo(video);
+	return Boolean(
+		video.mozHasAudio ||
+			Boolean(video.webkitAudioDecodedByteCount) ||
+			(video.audioTracks ? video.audioTracks.length > 0 : false)
+	);
 }
 
 export async function getPosterFromVideo(

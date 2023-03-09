@@ -5,26 +5,18 @@ import { select, dispatch, subscribe } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as editorStore } from '@wordpress/editor';
 import { store as noticesStore } from '@wordpress/notices';
-import { createBlobURL } from '@wordpress/blob';
+import { store as coreStore } from '@wordpress/core-data';
 
 import { store as uploadStore } from './store';
-
-import {
+import type {
+	AdditionalData,
 	OnChangeHandler,
 	OnErrorHandler,
 	QueueItem,
-	TranscodingType,
+	WP_REST_API_Term,
 } from './store/types';
 import UploadError from './uploadError';
-import {
-	getFileBasename,
-	getPosterFromVideo,
-	isAnimatedGif,
-	isHeifImage,
-	canTranscodeFile,
-	getMimeTypesArray,
-} from './utils';
-import { getMediaTypeFromMimeType } from '../utils';
+import { canTranscodeFile, getMimeTypesArray } from './utils';
 
 const { createInfoNotice, createSuccessNotice, createErrorNotice } =
 	dispatch(noticesStore);
@@ -33,7 +25,7 @@ const noop = () => {};
 
 interface UploadMediaArgs {
 	// Additional data to include in the request.
-	additionalData?: Record<string, string | number>;
+	additionalData?: AdditionalData;
 	// Array with the types of media that can be uploaded, if unset all types are allowed.
 	allowedTypes?: string[];
 	// List of files.
@@ -71,7 +63,7 @@ export default function uploadMedia({
 		maxUploadFileSize || getEditorSettings().maxUploadFileSize;
 
 	// Allowed type specified by consumer.
-	const isAllowedType = (fileType) => {
+	const isAllowedType = (fileType: string) => {
 		if (!allowedTypes) {
 			return true;
 		}
@@ -88,7 +80,7 @@ export default function uploadMedia({
 
 	// Allowed types for the current WP_User.
 	const allowedMimeTypesForUser = getMimeTypesArray(wpAllowedMimeTypes);
-	const isAllowedMimeTypeForUser = (fileType) => {
+	const isAllowedMimeTypeForUser = (fileType: string) => {
 		return allowedMimeTypesForUser.includes(fileType);
 	};
 
@@ -226,89 +218,9 @@ subscribe(() => {
 // and eventually upload items to the server.
 subscribe(() => {
 	const items: QueueItem[] = select(uploadStore).getPendingItems();
-
-	// TODO: can the Promise.all be avoided and replaced with a simple for loop?
-	// No need to await promises.
-	void Promise.all(
-		items.map(async (item: QueueItem) => {
-			const { id, file } = item;
-
-			dispatch(uploadStore).prepareItem(id);
-
-			const mediaType = getMediaTypeFromMimeType(file.type);
-			const blobUrl = createBlobURL(file);
-
-			const canTranscode = canTranscodeFile(file);
-
-			console.log('Pending item', item, mediaType, canTranscode);
-
-			switch (mediaType) {
-				case 'image':
-					const fileBuffer = await file.arrayBuffer();
-
-					// TODO: Here we could convert all images to WebP/AVIF/xyz by default.
-
-					const isHeif = isHeifImage(fileBuffer);
-					const isGif = isAnimatedGif(fileBuffer);
-
-					if (isHeif) {
-						// TODO: Do we need a placeholder for a HEIF image?
-						// Maybe a base64 encoded 1x1 gray PNG?
-						// Use preloadImage() and getImageDimensions() so see if browser can render it.
-						// Image/Video block already have a placeholder state.
-						dispatch(uploadStore).prepareForTranscoding(
-							id,
-							TranscodingType.Heif
-						);
-						return;
-					}
-
-					if (isGif && canTranscode) {
-						dispatch(uploadStore).prepareForTranscoding(
-							id,
-							TranscodingType.Gif
-						);
-						return;
-					}
-
-					break;
-
-				case 'video':
-					// TODO: is this the right place?
-					// Causes another state update.
-					const poster = await getPosterFromVideo(
-						blobUrl,
-						`${getFileBasename(item.file.name)}-poster`
-					);
-					dispatch(uploadStore).addPoster(id, poster);
-
-					console.log('add poster for video', item, poster);
-
-					// TODO: First check if video already meets criteria, e.g. with mediainfo.js.
-					// No need to compress a video that's already quite small.
-
-					if (canTranscode) {
-						dispatch(uploadStore).prepareForTranscoding(id);
-						return;
-					}
-
-					break;
-
-				case 'audio':
-					if (canTranscode) {
-						dispatch(uploadStore).prepareForTranscoding(
-							id,
-							TranscodingType.Audio
-						);
-						return;
-					}
-
-					break;
-			}
-
-			dispatch(uploadStore).uploadItem(id);
-		})
-	);
+	for (const { id } of items) {
+		void dispatch(uploadStore).prepareItem(id);
+	}
 }, uploadStore);
 
 subscribe(() => {
@@ -358,60 +270,20 @@ subscribe(() => {
 
 subscribe(() => {
 	const items: QueueItem[] = select(uploadStore).getPendingTranscodingItems();
-	for (const item of items) {
-		const { transcode } = item;
-
-		// Prevent simultaneous ffmpeg processes to reduce resource usage.
-		const isTranscoding = select(uploadStore).isTranscoding();
-
-		console.log('pending transcoding for', item, isTranscoding);
-
-		switch (transcode) {
-			case TranscodingType.Heif:
-				void dispatch(uploadStore).convertHeifItem(item.id);
-				break;
-
-			case TranscodingType.Gif:
-				if (isTranscoding) {
-					continue;
-				}
-
-				void dispatch(uploadStore).convertGifItem(item.id);
-				break;
-
-			case TranscodingType.Audio:
-				if (isTranscoding) {
-					continue;
-				}
-
-				void dispatch(uploadStore).optimizeAudioItem(item.id);
-				break;
-
-			default:
-				if (isTranscoding) {
-					continue;
-				}
-
-				void dispatch(uploadStore).optimizeVideoItem(item.id);
-				break;
-		}
+	for (const { id } of items) {
+		void dispatch(uploadStore).maybeTranscodeItem(id);
 	}
 }, uploadStore);
 
 subscribe(() => {
 	const items: QueueItem[] = select(uploadStore).getUploadedItems();
 
-	for (const { id } of items) {
-		void dispatch(uploadStore).completeItem(id);
-	}
-}, uploadStore);
-
-subscribe(() => {
-	const items: QueueItem[] = select(uploadStore).getCompletedItems();
 	for (const item of items) {
-		const { id, onSuccess, attachment } = item;
+		const { id, onChange, onSuccess, attachment } = item;
+		console.log('Complete item', item, onSuccess, attachment);
+		onChange?.([attachment]);
 		onSuccess?.([attachment]);
-		dispatch(uploadStore).removeItem(id);
+		void dispatch(uploadStore).completeItem(id);
 	}
 }, uploadStore);
 
@@ -423,3 +295,24 @@ subscribe(() => {
 		dispatch(uploadStore).removeItem(id);
 	}
 }, uploadStore);
+
+// The WordPress REST API requires passing term IDs instead of slugs.
+// We are storing them here in a simple slug => id map so that we can
+// still reference them by slug to make things a bit easier.
+const unsubscribeCoreStore = subscribe(() => {
+	const termObjects: WP_REST_API_Term[] | null = select(
+		coreStore
+	).getEntityRecords('taxonomy', 'mexp_media_source');
+	if (termObjects === null) {
+		return;
+	}
+
+	const terms: Record<string, number> = {};
+
+	for (const termObject of termObjects) {
+		terms[termObject.slug] = termObject.id;
+	}
+
+	dispatch(uploadStore).setMediaSourceTerms(terms);
+	unsubscribeCoreStore();
+}, coreStore);

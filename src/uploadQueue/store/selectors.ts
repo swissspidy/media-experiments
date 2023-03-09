@@ -1,6 +1,6 @@
-import { ItemStatus, QueueItemId, QueueState } from './types';
+import { ItemStatus, QueueItemId, State } from './types';
 
-export function getItems(state: QueueState, status?: ItemStatus) {
+export function getItems(state: State, status?: ItemStatus) {
 	if (status) {
 		return state.queue.filter((item) => item.status === status);
 	}
@@ -8,58 +8,68 @@ export function getItems(state: QueueState, status?: ItemStatus) {
 	return state.queue;
 }
 
-export function getPendingItems(state: QueueState) {
+export function getPendingItems(state: State) {
 	return getItems(state, ItemStatus.Pending);
 }
 
-export function getPendingTranscodingItems(state: QueueState) {
+export function getPendingTranscodingItems(state: State) {
 	return getItems(state, ItemStatus.PendingTranscoding);
 }
 
-export function getTranscodedItems(state: QueueState) {
+export function getTranscodedItems(state: State) {
 	return getItems(state, ItemStatus.Transcoded);
 }
 
-export function getUploadedItems(state: QueueState) {
+export function getUploadedItems(state: State) {
 	return getItems(state, ItemStatus.Uploaded);
 }
 
-export function getCancelledItems(state: QueueState) {
+export function getCancelledItems(state: State) {
 	return getItems(state, ItemStatus.Cancelled);
 }
 
-export function getCompletedItems(state: QueueState) {
-	return getItems(state, ItemStatus.Completed);
-}
-
-export function getInProgressItems(state: QueueState) {
+export function getInProgressItems(state: State) {
 	return state.queue.filter(
 		({ status }) =>
 			![
-				ItemStatus.Completed,
 				ItemStatus.Cancelled,
 				ItemStatus.Pending,
+				ItemStatus.Transcoding,
+				ItemStatus.Uploading,
+				ItemStatus.Uploaded,
 			].includes(status)
 	);
 }
 
-export function getItem(state: QueueState, id: QueueItemId) {
+export function getItem(state: State, id: QueueItemId) {
 	return state.queue.find((item) => item.id === id);
 }
 
-export function isTranscoding(state: QueueState) {
+export function isTranscoding(state: State) {
 	return state.queue.some(({ status }) => status == ItemStatus.Transcoding);
 }
 
 // Todo: change forceIsSaving in GB depending on this selector.
 // See https://github.com/WordPress/gutenberg/blob/a889ec84318fe5ee9ee76f1226b30283b27c99a7/packages/edit-post/src/components/header/index.js#L35
-export function isUploading(state: QueueState) {
+export function isUploading(state: State) {
 	return state.queue.some(
 		({ status }) =>
-			![
-				ItemStatus.Completed,
-				ItemStatus.Cancelled,
-				ItemStatus.Pending,
-			].includes(status)
+			![ItemStatus.Cancelled, ItemStatus.Pending].includes(status)
 	);
+}
+
+export function isUploadingByUrl(state: State, url: string) {
+	return state.queue.some(
+		(item) => item.attachment?.url === url || item.sourceUrl === url
+	);
+}
+
+export function isUploadingById(state: State, id: number) {
+	return state.queue.some(
+		(item) => item.attachment?.id === id || item.sourceAttachmentId === id
+	);
+}
+
+export function getMediaSourceTermId(state: State, slug: string) {
+	return state.mediaSourceTerms[slug];
 }

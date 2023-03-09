@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { MAX_VIDEO_RESOLUTION } from './constants';
 import { blobToFile, getFileBasename } from './utils';
-import { FFmpeg } from '@ffmpeg/ffmpeg';
+import type { FFmpeg } from '@ffmpeg/ffmpeg';
 
 const FFMPEG_CONFIG = {
 	CODEC: [
@@ -79,7 +79,7 @@ function readFile(file: File): Promise<Uint8Array> {
 			target: {
 				error: { code },
 			},
-		}) => reject(Error(`Could not read file (Code: ${code})`));
+		}) => reject(new Error(`Could not read file (Code: ${code})`));
 		reader.readAsArrayBuffer(file);
 	});
 }
@@ -87,14 +87,14 @@ function readFile(file: File): Promise<Uint8Array> {
 async function loadFFmpeg(file: File) {
 	const { createFFmpeg } = await import(
 		/* webpackChunkName: "chunk-ffmpeg" */
-		/* webpackExports: ["createFFmpeg", "fetchFile"] */
+		/* webpackExports: ["createFFmpeg"] */
 		'@ffmpeg/ffmpeg'
 	);
 
 	const ffmpeg = createFFmpeg({
 		corePath: ffmpegCoreUrl,
 		// log: isDevelopment,
-		log: true,
+		// log: true,
 	});
 	await ffmpeg.load();
 

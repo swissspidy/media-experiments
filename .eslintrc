@@ -1,3 +1,14 @@
 {
-	"extends": [ "plugin:@wordpress/eslint-plugin/recommended" ]
+	"root": true,
+	"extends": [
+		"plugin:@wordpress/eslint-plugin/recommended"
+	],
+	"rules": {
+		"@wordpress/no-unused-vars-before-return": ["error", {
+			"excludePattern": "^use"
+		}],
+		"@wordpress/i18n-text-domain": ["error", {
+			"allowedTextDomain": "media-experiments"
+		}]
+	}
 }

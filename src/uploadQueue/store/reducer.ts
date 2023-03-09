@@ -1,22 +1,37 @@
-import { ItemStatus, QueueItem, Type } from './types';
-
-interface State {
-	queue: QueueItem[];
-}
+import {
+	State,
+	AddAction,
+	AddPosterAction,
+	CancelAction,
+	ItemStatus,
+	PrepareAction,
+	RemoveAction,
+	TranscodingFinishAction,
+	TranscodingPrepareAction,
+	TranscodingStartAction,
+	Type,
+	UploadFinishAction,
+	UploadStartAction,
+	SetMediaSourceTermsAction,
+} from './types';
 
 const DEFAULT_STATE: State = {
 	queue: [],
+	mediaSourceTerms: {},
 };
 
 type Action =
-	| ReturnType<typeof import('./actions').addItem>
-	| ReturnType<typeof import('./actions').prepareItem>
-	| ReturnType<typeof import('./actions').startUploading>
-	| ReturnType<typeof import('./actions').finishUploading>
-	| ReturnType<typeof import('./actions').completeItem>
-	| ReturnType<typeof import('./actions').cancelItem>
-	| ReturnType<typeof import('./actions').removeItem>
-	| ReturnType<typeof import('./actions').addPoster>;
+	| AddAction
+	| PrepareAction
+	| TranscodingPrepareAction
+	| TranscodingStartAction
+	| TranscodingFinishAction
+	| UploadStartAction
+	| UploadFinishAction
+	| CancelAction
+	| RemoveAction
+	| AddPosterAction
+	| SetMediaSourceTermsAction;
 
 function reducer(state = DEFAULT_STATE, action: Action) {
 	console.log('reducer', state.queue, action);
@@ -119,26 +134,11 @@ function reducer(state = DEFAULT_STATE, action: Action) {
 					item.id === action.id
 						? {
 								...item,
-								// Should free up memory maybe?
-								file: undefined,
 								status: ItemStatus.Uploaded,
 								attachment: {
 									...item.attachment,
 									...action.attachment,
 								},
-						  }
-						: item
-				),
-			};
-
-		case Type.Complete:
-			return {
-				...state,
-				queue: state.queue.map((item) =>
-					item.id === action.id
-						? {
-								...item,
-								status: ItemStatus.Completed,
 						  }
 						: item
 				),
@@ -166,6 +166,13 @@ function reducer(state = DEFAULT_STATE, action: Action) {
 				...state,
 				queue: state.queue.filter((item) => item.id !== action.id),
 			};
+
+		case Type.SetMediaSourceTerms: {
+			return {
+				...state,
+				mediaSourceTerms: action.terms,
+			};
+		}
 	}
 
 	return state;
