@@ -184,6 +184,29 @@ export async function transcodeVideo(file: File) {
 }
 
 /**
+ * Mute a video using FFmpeg.
+ *
+ * @param file Original video file object.
+ * @return Processed video file object.
+ */
+export async function muteVideo(file: File) {
+	const outputFileName = `${getFileBasename(file.name)}.mp4`;
+	return runFFmpegWithConfig(
+		file,
+		[
+			// Input filename.
+			'-i',
+			file.name,
+			'-vcodec',
+			'copy',
+			'-an',
+		],
+		'video/mp4',
+		outputFileName
+	);
+}
+
+/**
  * Transcode an audio file using FFmpeg.
  *
  * @param file Original audio file object.

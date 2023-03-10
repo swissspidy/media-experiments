@@ -1,3 +1,9 @@
+import { encode } from 'blurhash';
+import {
+	FastAverageColor,
+	type FastAverageColorResource,
+} from 'fast-average-color';
+
 import {
 	MEDIA_TRANSCODING_MAX_FILE_SIZE,
 	TRANSCODABLE_MIME_TYPES,
@@ -166,14 +172,32 @@ function preloadVideoMetadata(src: string): Promise<HTMLVideoElement> {
 	});
 }
 
-async function preloadVideo(src: string): Promise<HTMLVideoElement> {
+async function preloadVideo(src: string) {
 	const video = await preloadVideoMetadata(src);
 
-	return new Promise((resolve, reject) => {
+	return new Promise<HTMLVideoElement>((resolve, reject) => {
 		video.addEventListener('canplay', () => resolve(video), { once: true });
 		video.addEventListener('error', reject);
 
 		video.preload = 'auto';
+	});
+}
+
+function preloadImage(src: string, width?: number, height?: number) {
+	return new Promise<HTMLImageElement>((resolve, reject) => {
+		// If no width or height are provided, set them to undefined
+		// so that is preloaded with its full dimensions.
+		// Avoids creating an image with 0x0 dimensions.
+		const image = new window.Image(
+			width ? Number(width) : undefined,
+			height ? Number(height) : undefined
+		);
+		image.addEventListener('load', () => resolve(image));
+		image.addEventListener('error', (error) => reject(error));
+		image.decoding = 'async';
+		image.crossOrigin = 'anonymous';
+
+		image.src = src;
 	});
 }
 
@@ -324,4 +348,62 @@ export function isAnimatedGif(buffer: ArrayBuffer): boolean {
 	}
 
 	return frames > 1;
+}
+
+const isDevelopment =
+	typeof process !== 'undefined' &&
+	process.env &&
+	process.env.NODE_ENV !== 'production';
+
+/**
+ * Get dominant color from an image or video.
+ *
+ * @param image Image URL or video/img/canvas element.
+ * @return Hex string (e.g. #ff0000)
+ */
+export async function getDominantColor(
+	image: string | FastAverageColorResource
+) {
+	const fac = new FastAverageColor();
+	const { hex, error } = await fac.getColorAsync(image, {
+		defaultColor: [255, 255, 255, 255],
+		// Errors that come up don't reject the promise, so error
+		// logging has to be silenced with this option.
+		silent: !isDevelopment,
+		crossOrigin: 'anonymous',
+	});
+
+	if (error) {
+		throw error;
+	}
+
+	return hex;
+}
+
+function getImageData(image: HTMLImageElement, width?: number) {
+	const canvas = document.createElement('canvas');
+	const desiredWidth = width || image.naturalWidth;
+	const desiredHeight =
+		(image.naturalHeight / image.naturalWidth) * desiredWidth;
+	canvas.width = desiredWidth;
+	canvas.height = desiredHeight;
+
+	const ctx = canvas.getContext('2d');
+
+	// If the contextType doesn't match a possible drawing context,
+	// or differs from the first contextType requested, null is returned.
+	if (!ctx) {
+		throw new Error('Could not get context');
+	}
+
+	ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+	return ctx.getImageData(0, 0, desiredWidth, desiredHeight);
+}
+
+export async function getBlurHash(image: string) {
+	const img = await preloadImage(image);
+	/// Scale down for performance reasons.
+	// See https://github.com/woltapp/blurhash/blob/cb151cab5b7d9cd3eef624e12e30381c6d292f0d/Readme.md#L112
+	const imageData = getImageData(img, 100);
+	return encode(imageData.data, imageData.width, imageData.height, 4, 4);
 }

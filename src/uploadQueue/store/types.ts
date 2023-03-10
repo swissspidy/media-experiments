@@ -19,6 +19,8 @@ export type QueueItem = {
 	sourceUrl?: string;
 	sourceAttachmentId?: number; // TODO: implement.
 	mediaSourceTerms?: string[];
+	blurHash?: string;
+	dominantColor?: string;
 };
 
 export interface State {
@@ -85,6 +87,9 @@ export type Attachment = {
 	title: string;
 	mimeType: string;
 	poster?: string;
+	blurHash?: string;
+	dominantColor?: string;
+	posterId?: number;
 };
 
 export type OnChangeHandler = (attachments: Partial<Attachment>[]) => void;
@@ -106,6 +111,7 @@ export enum TranscodingType {
 	Heif = 'HEIF',
 	Gif = 'GIF',
 	Audio = 'AUDIO',
+	MuteVideo = 'MUTE_VIDEO',
 	Default = 'DEFAULT',
 }
 

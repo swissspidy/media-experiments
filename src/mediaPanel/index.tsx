@@ -1,16 +1,21 @@
+import { Blurhash } from 'react-blurhash';
 import { Fragment, useState, useEffect } from '@wordpress/element';
 import { addFilter } from '@wordpress/hooks';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { createHigherOrderComponent } from '@wordpress/compose';
+import { InspectorControls } from '@wordpress/block-editor';
 import {
-	InspectorControls,
-	store as blockEditorStore,
-} from '@wordpress/block-editor';
-import { createBlock } from '@wordpress/blocks';
-import { PanelBody, Notice, Button, BaseControl, useBaseControlProps } from '@wordpress/components';
+	PanelBody,
+	Notice,
+	Button,
+	BaseControl,
+	useBaseControlProps,
+	ColorIndicator,
+} from '@wordpress/components';
 import { isBlobURL } from '@wordpress/blob';
 import { store as coreStore } from '@wordpress/core-data';
+import { store as editorStore } from '@wordpress/editor';
 
 import { store as uploadStore } from '../uploadQueue/store';
 import type { RestAttachment } from '../uploadQueue/store/types';
@@ -86,62 +91,63 @@ function UploadIndicator({ attachment }) {
 function MuteVideo({ attributes, setAttributes }) {
 	const post = useAttachment(attributes.id);
 
-	// const { replaceBlock } = useDispatch( blockEditorStore );
-	//
-	// const recoverBlock = ( { name, attributes, innerBlocks } ) =>
-	// 	createBlock( name, attributes, innerBlocks );
-	//
-	// const attemptBlockRecovery = () => {
-	// 	replaceBlock( clientId, recoverBlock( block ) );
-	// };
-	//
-	// const onSuccess = () => {
-	// 	replaceBlock
-	// }
+	const url = attributes.src;
+	const isUploading = useIsUploadingByUrl(url) || isBlobURL(url);
 
-	const onChange = ([media]) => {
-		setAttributes({
-			id: media.id,
-			src: media.src,
-			poster: attributes.poster || media.image?.src,
+	const { muteExistingVideo } = useDispatch(uploadStore);
+	const currentPostId = useSelect(
+		(select) => select(editorStore).getCurrentPostId(),
+		[]
+	);
+
+	const onClick = () => {
+		console.log('onClick', muteExistingVideo);
+		muteExistingVideo({
+			id: attributes.id,
+			url: attributes.src,
+			poster: attributes.poster,
+			onChange: ([media]) =>
+				setAttributes({
+					src: media.url,
+					muted: true,
+				}),
+			onSuccess: ([media]) =>
+				setAttributes({
+					id: media.id,
+				}),
+			blurHash: post.meta.mexp_blurhash,
+			dominantColor: post.meta.mexp_dominant_color,
+			additionalData: {
+				post: currentPostId,
+			},
 		});
 	};
 
-	const onClick = () => {
-		// TODO: Fetch file, add to upload queue with ask to mute video.
-	};
-
-	if (!post) {
+	if (!post || post.meta.mexp_is_muted) {
 		return null;
 	}
-
-	if (post.meta.mexp_is_muted) {
-		return null;
-	}
-
-	// TODO: Check whether video actually has audio or not.
-
-	console.log(post);
 
 	return (
-		<Button variant="primary" onClick={onClick}>
+		<Button variant="primary" onClick={onClick} disabled={isUploading}>
 			{__('Remove audio channel', 'media-experiments')}
 		</Button>
 	);
 }
 
 function ImportMedia({ attributes, onChange }) {
-	const { baseControlProps, controlProps } = useBaseControlProps( {} );
+	const { baseControlProps, controlProps } = useBaseControlProps({});
 
 	// Video and image blocks use different attribute names for the URL.
 	const url = attributes.url || attributes.src;
 
 	const { addItemFromUrl } = useDispatch(uploadStore);
-	const isUploading = useIsUploadingByUrl(url) || isBlobURL(url);
+	const isUploading = useIsUploadingByUrl(url);
+	const currentPostId = useSelect(
+		(select) => select(editorStore).getCurrentPostId(),
+		[]
+	);
 
-	console.log('isUploading', url, isUploading);
-
-	if (attributes.id || !url) {
+	if (attributes.id || !url || isBlobURL(url)) {
 		return null;
 	}
 
@@ -149,6 +155,9 @@ function ImportMedia({ attributes, onChange }) {
 		addItemFromUrl({
 			url,
 			onChange: ([media]) => onChange(media),
+			additionalData: {
+				post: currentPostId,
+			},
 		});
 	};
 
@@ -163,7 +172,12 @@ function ImportMedia({ attributes, onChange }) {
 					'media-experiments'
 				)}
 			</p>
-			<Button variant="primary" onClick={onClick} disabled={isUploading} { ...controlProps }>
+			<Button
+				variant="primary"
+				onClick={onClick}
+				disabled={isUploading}
+				{...controlProps}
+			>
 				{__('Import', 'media-experiments')}
 			</Button>
 		</BaseControl>
@@ -171,7 +185,7 @@ function ImportMedia({ attributes, onChange }) {
 }
 
 function RestorePoster({ attributes, setAttributes }) {
-	const { baseControlProps, controlProps } = useBaseControlProps( {} );
+	const { baseControlProps, controlProps } = useBaseControlProps({});
 
 	const [posterId, setPosterId] = useState(null);
 
@@ -179,16 +193,17 @@ function RestorePoster({ attributes, setAttributes }) {
 	const poster = useAttachment(posterId);
 
 	useEffect(() => {
-		if ( !attachment ) {
+		if (!attachment) {
 			return;
 		}
-		setPosterId(attachment.featured_media || attachment.meta.mexp_generated_poster_id);
-	}, [attachment])
+		setPosterId(
+			attachment.featured_media ||
+				attachment.meta.mexp_generated_poster_id
+		);
+	}, [attachment]);
 
 	const url = attributes.src;
 	const isUploading = useIsUploadingByUrl(url) || isBlobURL(url);
-
-	console.log('RestorePoster', posterId, attachment, poster);
 
 	if (attributes.poster || isUploading || !poster) {
 		return null;
@@ -211,13 +226,64 @@ function RestorePoster({ attributes, setAttributes }) {
 					'media-experiments'
 				)}
 			</p>
-			<Button variant="primary" onClick={onClick} { ...controlProps }>
+			<Button variant="primary" onClick={onClick} {...controlProps}>
 				{__('Restore Poster', 'media-experiments')}
 			</Button>
 		</BaseControl>
 	);
 }
 
+function ShowBlurHash({ attributes }) {
+	const { baseControlProps, controlProps } = useBaseControlProps({});
+
+	const attachment = useAttachment(attributes.id);
+
+	if (!attachment || !attachment.meta.mexp_blurhash) {
+		return null;
+	}
+
+	const aspectRatio =
+		((attachment.media_details.width as number) ?? 1) /
+		((attachment.media_details.height as number) ?? 1);
+
+	return (
+		<BaseControl {...baseControlProps}>
+			<BaseControl.VisualLabel>
+				{__('BlurHash', 'media-experiments')}
+			</BaseControl.VisualLabel>
+			<div {...controlProps}>
+				<Blurhash
+					hash={attachment.meta.mexp_blurhash}
+					width={200}
+					height={200 / aspectRatio}
+				/>
+			</div>
+		</BaseControl>
+	);
+}
+
+function ShowDominantColor({ attributes }) {
+	const { baseControlProps, controlProps } = useBaseControlProps({});
+
+	const attachment = useAttachment(attributes.id);
+
+	if (!attachment || !attachment.meta.mexp_dominant_color) {
+		return null;
+	}
+
+	return (
+		<BaseControl {...baseControlProps}>
+			<BaseControl.VisualLabel>
+				{__('Dominant color', 'media-experiments')}
+			</BaseControl.VisualLabel>
+			<div {...controlProps}>
+				<ColorIndicator
+					colorValue={attachment.meta.mexp_dominant_color}
+				/>
+			</div>
+		</BaseControl>
+	);
+}
 
 function VideoControls(props) {
 	function onChange(media) {
@@ -239,6 +305,8 @@ function VideoControls(props) {
 			<ImportMedia {...props} onChange={onChange} />
 			<MuteVideo {...props} />
 			<RestorePoster {...props} />
+			<ShowBlurHash {...props} />
+			<ShowDominantColor {...props} />
 		</Fragment>
 	);
 }

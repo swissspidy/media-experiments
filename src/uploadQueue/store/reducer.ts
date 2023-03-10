@@ -128,6 +128,11 @@ function reducer(state = DEFAULT_STATE, action: Action) {
 			};
 
 		case Type.UploadFinish:
+			console.log(
+				'UploadFinish',
+				action,
+				state.queue.find((item) => item.id === action.id)
+			);
 			return {
 				...state,
 				queue: state.queue.map((item) =>
@@ -139,6 +144,8 @@ function reducer(state = DEFAULT_STATE, action: Action) {
 									...item.attachment,
 									...action.attachment,
 								},
+								blurHash: action.attachment.blurHash,
+								dominantColor: action.attachment.dominantColor,
 						  }
 						: item
 				),

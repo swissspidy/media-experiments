@@ -21,6 +21,9 @@ export async function uploadToServer(
 		title: savedMedia.title.raw,
 		url: savedMedia.source_url,
 		mimeType: savedMedia.mime_type,
+		blurHash: savedMedia.meta.mexp_blurhash,
+		dominantColor: savedMedia.meta.mexp_dominant_color,
+		posterId: savedMedia.featured_media,
 	} as Attachment;
 }
 
@@ -64,7 +67,7 @@ function flattenFormData(formData, key, data) {
 				flattenFormData(formData, `${key}[${name}]`, data[name]);
 			}
 		}
-	} else {
+	} else if (data !== undefined) {
 		formData.append(key, data);
 	}
 }

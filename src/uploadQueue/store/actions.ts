@@ -16,12 +16,19 @@ import {
 	TranscodingType,
 	Type,
 } from './types';
-import { convertGifToVideo, transcodeAudio, transcodeVideo } from '../ffmpeg';
+import {
+	convertGifToVideo,
+	muteVideo,
+	transcodeAudio,
+	transcodeVideo,
+} from '../ffmpeg';
 import UploadError from '../uploadError';
 import {
 	blobToFile,
 	canTranscodeFile,
 	fetchRemoteFile,
+	getBlurHash,
+	getDominantColor,
 	getFileBasename,
 	getFileNameFromUrl,
 	getPosterFromVideo,
@@ -43,6 +50,8 @@ interface AddItemArgs {
 	sourceUrl?: string;
 	sourceAttachmentId?: number;
 	mediaSourceTerms?: string[];
+	blurHash?: string;
+	dominantColor?: string;
 }
 
 export function addItem({
@@ -55,6 +64,8 @@ export function addItem({
 	sourceUrl,
 	sourceAttachmentId,
 	mediaSourceTerms = [],
+	blurHash,
+	dominantColor,
 }: AddItemArgs) {
 	return {
 		type: Type.Add,
@@ -73,6 +84,8 @@ export function addItem({
 			sourceUrl,
 			sourceAttachmentId,
 			mediaSourceTerms,
+			blurHash,
+			dominantColor,
 		},
 	};
 }
@@ -107,6 +120,63 @@ export function addItemFromUrl({
 	};
 }
 
+interface MuteExistingVideoArgs {
+	id: number;
+	url: string;
+	poster?: string;
+	onChange?: OnChangeHandler;
+	onSuccess?: OnSuccessHandler;
+	onError?: OnErrorHandler;
+	additionalData?: AdditionalData;
+	blurHash?: string;
+	dominantColor?: string;
+}
+
+export function muteExistingVideo({
+	id,
+	url,
+	poster,
+	onChange,
+	onSuccess,
+	onError,
+	additionalData,
+	blurHash,
+	dominantColor,
+}: MuteExistingVideoArgs) {
+	return async ({ dispatch }) => {
+		// TODO: Change file name to add "-muted" suffix.
+		// TODO: Somehow add relation between original and muted video in db.
+		const file = await fetchRemoteFile(url);
+
+		// TODO: Check canTranscodeFile(file) here to bail early? Or ideally already in the UI.
+
+		// TODO: Copy over the auto-generated poster image.
+
+		dispatch({
+			type: Type.Add,
+			item: {
+				id: uuidv4(),
+				status: ItemStatus.Pending,
+				file,
+				attachment: {
+					url,
+					poster,
+				},
+				additionalData,
+				onChange,
+				onSuccess,
+				onError,
+				sourceUrl: url,
+				sourceAttachmentId: id,
+				mediaSourceTerms: [],
+				blurHash,
+				dominantColor,
+				transcode: TranscodingType.MuteVideo,
+			},
+		});
+	};
+}
+
 export function prepareItem(id: QueueItemId) {
 	return async ({ select, dispatch }) => {
 		const item: QueueItem = select.getItem(id);
@@ -123,6 +193,13 @@ export function prepareItem(id: QueueItemId) {
 		const canTranscode = canTranscodeFile(file);
 
 		console.log('Pending item', item, mediaType, canTranscode);
+
+		// Transcoding type has already been set, e.g. via muteExistingVideo().
+		// TODO: Check canTransocde either here, in muteExistingVideo, or in the UI.
+		if (item.transcode) {
+			dispatch.prepareForTranscoding(id, item.transcode);
+			return;
+		}
 
 		switch (mediaType) {
 			case 'image':
@@ -254,7 +331,6 @@ export function completeItem(id: QueueItemId) {
 		dispatch.removeItem(id);
 
 		if ('video' === mediaType) {
-			console.log('before uploadPosterForItem', id, item);
 			void dispatch.uploadPosterForItem(item);
 		}
 	};
@@ -307,6 +383,14 @@ export function maybeTranscodeItem(id: QueueItemId) {
 				void dispatch.optimizeAudioItem(item.id);
 				break;
 
+			case TranscodingType.MuteVideo:
+				if (isTranscoding) {
+					return;
+				}
+
+				void dispatch.muteVideoItem(item.id);
+				break;
+
 			default:
 				if (isTranscoding) {
 					return;
@@ -336,6 +420,32 @@ export function optimizeVideoItem(id: QueueItemId) {
 					? error
 					: new UploadError({
 							code: 'VIDEO_TRANSCODING_ERROR',
+							message: 'File could not be uploaded',
+							file: item.file,
+					  })
+			);
+		}
+	};
+}
+
+export function muteVideoItem(id: QueueItemId) {
+	return async ({ select, dispatch }) => {
+		const item: QueueItem = select.getItem(id);
+
+		dispatch.startTranscoding(id);
+
+		try {
+			const file = await muteVideo(item.file);
+			console.log('finish transcoding', file);
+			dispatch.finishTranscoding(id, file);
+		} catch (error) {
+			console.log('muteVideoItem failed', error);
+			dispatch.cancelItem(
+				id,
+				error instanceof Error
+					? error
+					: new UploadError({
+							code: 'VIDEO_MUTING_ERROR',
 							message: 'File could not be uploaded',
 							file: item.file,
 					  })
@@ -428,8 +538,10 @@ export function uploadPosterForItem(item: QueueItem) {
 
 		const { attachment: videoAttachment } = item;
 
-		// In the unlikely (impossible?) event that the uploaded video already has a poster,
-		// do not upload another one.
+		// In the event that the uploaded video already has a poster, do not upload another one.
+		// Can happen when using muteExistingVideo() or when a poster is generated server-side.
+		// TODO: Make the latter scenario actually work.
+		//       Use getEntityRecord to actually get poster URL from posterID returned by uploadToServer()
 		if (videoAttachment.poster && !isBlobURL(videoAttachment.poster)) {
 			return;
 		}
@@ -483,18 +595,36 @@ export function uploadPosterForItem(item: QueueItem) {
 
 					// Similarly, update the original video in the DB to have the
 					// poster as the featured image.
-					await registry.dispatch(coreStore).editEntityRecord( 'postType', 'attachment', videoAttachment.id, {
-						featured_media: posterAttachment.id,
-						meta: {
-							mexp_generated_poster_id: posterAttachment.id,
-						},
-					} )
-					await registry.dispatch(coreStore).saveEditedEntityRecord( 'postType', 'attachment', videoAttachment.id );
+					await registry
+						.dispatch(coreStore)
+						.editEntityRecord(
+							'postType',
+							'attachment',
+							videoAttachment.id,
+							{
+								featured_media: posterAttachment.id,
+								meta: {
+									mexp_generated_poster_id:
+										posterAttachment.id,
+								},
+							}
+						);
+					await registry
+						.dispatch(coreStore)
+						.saveEditedEntityRecord(
+							'postType',
+							'attachment',
+							videoAttachment.id
+						);
 				},
 				additionalData: {
+					// Reminder: Parent post ID might not be set, depending on context,
+					// but should be carried over if it does.
 					post: item.additionalData.post,
 				},
 				mediaSourceTerms: ['poster-generation'],
+				blurHash: item.blurHash,
+				dominantColor: item.dominantColor,
 			});
 		} catch (err) {
 			console.log('completion error', err);
@@ -517,16 +647,53 @@ export function uploadItem(id: QueueItemId) {
 					select.getMediaSourceTermId(slug)
 				)
 				.filter(Boolean),
-			meta: {},
+			meta: {
+				mexp_blurhash: item.blurHash,
+				mexp_dominant_color: item.dominantColor,
+			},
 		};
 
 		const mediaType = getMediaTypeFromMimeType(item.file.type);
 
+		// TODO: Make this async after upload?
+		// Could be made reusable to enable backfilling of existing blocks.
 		if ('video' === mediaType) {
 			try {
 				const hasAudio = await videoHasAudio(item.attachment.url);
 				additionalData.meta.mexp_is_muted = !hasAudio;
 			} catch {
+				// No big deal if this fails, we can still continue uploading.
+			}
+		}
+
+		console.log('Uploading item, maybe reusing blurHash?', additionalData);
+
+		if (!additionalData.meta.mexp_dominant_color) {
+			// TODO: Make this async after upload?
+			// Could be made reusable to enable backfilling of existing blocks.
+			// TODO: Create a scaled-down version of the image first for performance reasons.
+			try {
+				additionalData.meta.mexp_dominant_color =
+					await getDominantColor(
+						item.attachment?.poster || item.attachment.url
+					);
+			} catch (err) {
+				console.log('Getting dominant color failed', err);
+				// No big deal if this fails, we can still continue uploading.
+			}
+		}
+
+		if (!additionalData.meta?.mexp_blurhash) {
+			// TODO: Make this async after upload?
+			// Could be made reusable to enable backfilling of existing blocks.
+			// TODO: Move to web worker for performance reasons?
+			// TODO: Create a scaled-down version of the image first for performance reasons.
+			try {
+				additionalData.meta.mexp_blurhash = await getBlurHash(
+					item.attachment?.poster || item.attachment.url
+				);
+			} catch (err) {
+				console.log('Getting BlurHash failed', err);
 				// No big deal if this fails, we can still continue uploading.
 			}
 		}
