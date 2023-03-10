@@ -1,4 +1,4 @@
-import { Fragment } from '@wordpress/element';
+import { Fragment, useState, useEffect } from '@wordpress/element';
 import { addFilter } from '@wordpress/hooks';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
@@ -8,15 +8,16 @@ import {
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
 import { createBlock } from '@wordpress/blocks';
-import { PanelBody, Notice, Button, BaseControl } from '@wordpress/components';
+import { PanelBody, Notice, Button, BaseControl, useBaseControlProps } from '@wordpress/components';
 import { isBlobURL } from '@wordpress/blob';
 import { store as coreStore } from '@wordpress/core-data';
 
 import { store as uploadStore } from '../uploadQueue/store';
+import type { RestAttachment } from '../uploadQueue/store/types';
 
 const SUPPORTED_BLOCKS = ['core/image', 'core/audio', 'core/video'];
 
-function useAttachment(id: number) {
+function useAttachment(id: number): RestAttachment | null {
 	return useSelect(
 		(select) => {
 			const { getEntityRecord } = select(coreStore);
@@ -130,6 +131,9 @@ function MuteVideo({ attributes, setAttributes }) {
 }
 
 function ImportMedia({ attributes, onChange }) {
+	const { baseControlProps, controlProps } = useBaseControlProps( {} );
+
+	// Video and image blocks use different attribute names for the URL.
 	const url = attributes.url || attributes.src;
 
 	const { addItemFromUrl } = useDispatch(uploadStore);
@@ -149,7 +153,7 @@ function ImportMedia({ attributes, onChange }) {
 	};
 
 	return (
-		<BaseControl>
+		<BaseControl {...baseControlProps}>
 			<BaseControl.VisualLabel>
 				{__('Import external media', 'media-experiments')}
 			</BaseControl.VisualLabel>
@@ -159,12 +163,61 @@ function ImportMedia({ attributes, onChange }) {
 					'media-experiments'
 				)}
 			</p>
-			<Button variant="primary" onClick={onClick} disabled={isUploading}>
+			<Button variant="primary" onClick={onClick} disabled={isUploading} { ...controlProps }>
 				{__('Import', 'media-experiments')}
 			</Button>
 		</BaseControl>
 	);
 }
+
+function RestorePoster({ attributes, setAttributes }) {
+	const { baseControlProps, controlProps } = useBaseControlProps( {} );
+
+	const [posterId, setPosterId] = useState(null);
+
+	const attachment = useAttachment(attributes.id);
+	const poster = useAttachment(posterId);
+
+	useEffect(() => {
+		if ( !attachment ) {
+			return;
+		}
+		setPosterId(attachment.featured_media || attachment.meta.mexp_generated_poster_id);
+	}, [attachment])
+
+	const url = attributes.src;
+	const isUploading = useIsUploadingByUrl(url) || isBlobURL(url);
+
+	console.log('RestorePoster', posterId, attachment, poster);
+
+	if (attributes.poster || isUploading || !poster) {
+		return null;
+	}
+
+	const onClick = () => {
+		setAttributes({
+			poster: poster.source_url,
+		});
+	};
+
+	return (
+		<BaseControl {...baseControlProps}>
+			<BaseControl.VisualLabel>
+				{__('Missing poster', 'media-experiments')}
+			</BaseControl.VisualLabel>
+			<p>
+				{__(
+					'Adding a poster image to videos is recommended, but your video is currently lacking one. However, you can restore the default auto-generated poster.',
+					'media-experiments'
+				)}
+			</p>
+			<Button variant="primary" onClick={onClick} { ...controlProps }>
+				{__('Restore Poster', 'media-experiments')}
+			</Button>
+		</BaseControl>
+	);
+}
+
 
 function VideoControls(props) {
 	function onChange(media) {
@@ -185,6 +238,7 @@ function VideoControls(props) {
 		<Fragment>
 			<ImportMedia {...props} onChange={onChange} />
 			<MuteVideo {...props} />
+			<RestorePoster {...props} />
 		</Fragment>
 	);
 }

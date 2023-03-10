@@ -111,6 +111,7 @@ export enum TranscodingType {
 
 // Work around https://github.com/johnbillion/wp-json-schemas/issues/52
 export interface RestAttachment extends WP_REST_API_Attachment {
+	featured_media: number;
 	mime_type: string;
 	media_type: 'image' | 'file';
 	mexp_media_source: number[];

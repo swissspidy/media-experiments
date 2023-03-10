@@ -6,23 +6,22 @@ import type {
 	RestAttachment,
 } from './store/types';
 
-/**
- * Recursively flatten data passed to form data, to allow using multi-level objects.
- *
- * @param {FormData} formData Form data object.
- * @param {string} key Key to amend to form data object
- * @param {string|Object} data Data to be amended to form data.
- */
-function flattenFormData(formData, key, data) {
-	if (typeof data === 'object') {
-		for (const name in data) {
-			if (Object.prototype.hasOwnProperty.call(data, name)) {
-				flattenFormData(formData, `${key}[${name}]`, data[name]);
-			}
-		}
-	} else {
-		formData.append(key, data);
-	}
+export async function uploadToServer(
+	file: File,
+	additionalData: CreateRestAttachment = {}
+) {
+	const savedMedia = await createMediaFromFile(file, additionalData);
+
+	// TODO: Check if a poster happened to be uploaded on the server side already (check featured_media !== 0).
+	// In that case there is no need for client-side generation.
+	return {
+		id: savedMedia.id,
+		alt: savedMedia.alt_text,
+		caption: savedMedia.caption?.raw ?? '',
+		title: savedMedia.title.raw,
+		url: savedMedia.source_url,
+		mimeType: savedMedia.mime_type,
+	} as Attachment;
 }
 
 /**
@@ -52,38 +51,20 @@ function createMediaFromFile(
 }
 
 /**
- * Update an existing attachment on the server.
+ * Recursively flatten data passed to form data, to allow using multi-level objects.
  *
- * @param id Attachment ID.
- * @param data Additional data to include in the request.
- *
- * @return Updated attachment
+ * @param {FormData} formData Form data object.
+ * @param {string} key Key to amend to form data object
+ * @param {string|Object} data Data to be amended to form data.
  */
-export function updateMediaItem(
-	id: RestAttachment['id'],
-	data: CreateRestAttachment
-) {
-	return apiFetch<RestAttachment>({
-		path: `/wp/v2/media/${id}`,
-		data,
-		method: 'POST',
-	});
-}
-
-export async function uploadToServer(
-	file: File,
-	additionalData: CreateRestAttachment = {}
-) {
-	const savedMedia = await createMediaFromFile(file, additionalData);
-
-	// TODO: Check if a poster happened to be uploaded on the server side already (check featured_media !== 0).
-	// In that case there is no need for client-side generation.
-	return {
-		id: savedMedia.id,
-		alt: savedMedia.alt_text,
-		caption: savedMedia.caption?.raw ?? '',
-		title: savedMedia.title.raw,
-		url: savedMedia.source_url,
-		mimeType: savedMedia.mime_type,
-	} as Attachment;
+function flattenFormData(formData, key, data) {
+	if (typeof data === 'object') {
+		for (const name in data) {
+			if (Object.prototype.hasOwnProperty.call(data, name)) {
+				flattenFormData(formData, `${key}[${name}]`, data[name]);
+			}
+		}
+	} else {
+		formData.append(key, data);
+	}
 }

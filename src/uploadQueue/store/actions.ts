@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { createBlobURL, isBlobURL } from '@wordpress/blob';
+import { store as coreStore } from '@wordpress/core-data';
 
 import {
 	AdditionalData,
@@ -29,9 +30,8 @@ import {
 	videoHasAudio,
 } from '../utils';
 import { transcodeHeifImage } from '../heif';
-import { updateMediaItem, uploadToServer } from '../api';
+import { uploadToServer } from '../api';
 import { getMediaTypeFromMimeType } from '../../utils';
-import { getMediaSourceTermId } from './selectors';
 
 interface AddItemArgs {
 	file: File;
@@ -423,7 +423,7 @@ export function convertHeifItem(id: QueueItemId) {
 }
 
 export function uploadPosterForItem(item: QueueItem) {
-	return async ({ dispatch }) => {
+	return async ({ dispatch, registry }) => {
 		console.log('inside uploadPosterForItem', item);
 
 		const { attachment: videoAttachment } = item;
@@ -474,7 +474,7 @@ export function uploadPosterForItem(item: QueueItem) {
 					// video item in the editor with the newly uploaded poster.
 					item.onChange?.([updatedVideoAttachment]);
 				},
-				onSuccess: ([posterAttachment]) => {
+				onSuccess: async ([posterAttachment]) => {
 					console.log(
 						'onSuccess uploadPosterForItem',
 						posterAttachment,
@@ -483,12 +483,13 @@ export function uploadPosterForItem(item: QueueItem) {
 
 					// Similarly, update the original video in the DB to have the
 					// poster as the featured image.
-					updateMediaItem(videoAttachment.id, {
+					await registry.dispatch(coreStore).editEntityRecord( 'postType', 'attachment', videoAttachment.id, {
 						featured_media: posterAttachment.id,
 						meta: {
 							mexp_generated_poster_id: posterAttachment.id,
 						},
-					});
+					} )
+					await registry.dispatch(coreStore).saveEditedEntityRecord( 'postType', 'attachment', videoAttachment.id );
 				},
 				additionalData: {
 					post: item.additionalData.post,
