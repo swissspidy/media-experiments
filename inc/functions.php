@@ -10,6 +10,7 @@ declare(strict_types = 1);
 
 namespace MediaExperiments;
 
+use WP_Error;
 use WP_Post;
 use WP_Query;
 use WP_REST_Request;
@@ -89,8 +90,35 @@ function register_rest_attachment_featured_media(): void {
 				'type'        => 'integer',
 				'context'     => [ 'view', 'edit', 'embed' ],
 			],
+			'update_callback' => __NAMESPACE__ . '\rest_create_attachment_handle_featured_media',
 		]
 	);
+}
+
+/**
+ * Sets the featured image when uploading a new attachment via the REST API
+ *
+ * @see \WP_REST_Posts_Controller::handle_featured_media
+ *
+ * @param int $value
+ * @param WP_Post $post
+ * @return void|WP_Error
+ */
+function rest_create_attachment_handle_featured_media( int $value, WP_Post $post ) {
+	if ( $value ) {
+		$result = set_post_thumbnail( $post->ID, $value );
+		if ( $result ) {
+			return;
+		}
+
+		return new WP_Error(
+			'rest_invalid_featured_media',
+			__( 'Invalid featured media ID.', 'media-experiments' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	delete_post_thumbnail( $post->ID );
 }
 
 function register_attachment_post_meta(): void {
@@ -299,6 +327,8 @@ function get_exclude_tax_query( array $args ): array {
  *
  * This prevents the poster image from becoming an orphan because it is not
  * displayed anywhere in WordPress.
+ *
+ * @todo What if the poster is associated with multiple videos (e.g. when using muting)?
  *
  * @param int $attachment_id ID of the attachment to be deleted.
  */

@@ -21,6 +21,7 @@ export type QueueItem = {
 	mediaSourceTerms?: string[];
 	blurHash?: string;
 	dominantColor?: string;
+	generatedPosterId?: number;
 };
 
 export interface State {

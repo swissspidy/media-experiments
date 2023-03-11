@@ -88,13 +88,13 @@ export function getFileNameFromUrl(url: string): string {
 	return tail.split(/[#?]/).at(0) ?? tail;
 }
 
-export async function fetchRemoteFile(url: string) {
+export async function fetchRemoteFile(url: string, nameOverride?: string) {
 	const response = await fetch(url);
 	if (!response.ok) {
 		throw new Error(`Could not fetch remote file: ${response.status}`);
 	}
 
-	const name = getFileNameFromUrl(url);
+	const name = nameOverride || getFileNameFromUrl(url);
 	const blob = await response.blob();
 	const file = blobToFile(blob, name, blob.type);
 

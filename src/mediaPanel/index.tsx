@@ -109,14 +109,15 @@ function MuteVideo({ attributes, setAttributes }) {
 			onChange: ([media]) =>
 				setAttributes({
 					src: media.url,
-					muted: true,
 				}),
 			onSuccess: ([media]) =>
 				setAttributes({
 					id: media.id,
+					muted: true,
 				}),
 			blurHash: post.meta.mexp_blurhash,
 			dominantColor: post.meta.mexp_dominant_color,
+			generatedPosterId: post.meta.mexp_generated_poster_id,
 			additionalData: {
 				post: currentPostId,
 			},

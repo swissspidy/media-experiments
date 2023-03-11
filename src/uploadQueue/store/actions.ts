@@ -130,6 +130,7 @@ interface MuteExistingVideoArgs {
 	additionalData?: AdditionalData;
 	blurHash?: string;
 	dominantColor?: string;
+	generatedPosterId?: number;
 }
 
 export function muteExistingVideo({
@@ -142,15 +143,25 @@ export function muteExistingVideo({
 	additionalData,
 	blurHash,
 	dominantColor,
+	generatedPosterId,
 }: MuteExistingVideoArgs) {
 	return async ({ dispatch }) => {
-		// TODO: Change file name to add "-muted" suffix.
+		let fileName = getFileNameFromUrl(url);
+		const baseName = getFileBasename(fileName);
+		const file = await fetchRemoteFile(
+			url,
+			fileName.replace(baseName, `${baseName}-muted`)
+		);
+
 		// TODO: Somehow add relation between original and muted video in db.
-		const file = await fetchRemoteFile(url);
 
 		// TODO: Check canTranscodeFile(file) here to bail early? Or ideally already in the UI.
 
 		// TODO: Copy over the auto-generated poster image.
+		// What if the original attachment gets deleted though?
+		// Maybe better to generate the poster image anew.
+
+		// TODO: Maybe pass on the original as a "sourceAttachment"
 
 		dispatch({
 			type: Type.Add,
@@ -172,6 +183,7 @@ export function muteExistingVideo({
 				blurHash,
 				dominantColor,
 				transcode: TranscodingType.MuteVideo,
+				generatedPosterId,
 			},
 		});
 	};
@@ -532,6 +544,27 @@ export function convertHeifItem(id: QueueItemId) {
 	};
 }
 
+export function setGeneratedPosterAsFeaturedImage(
+	videoId: number,
+	posterId: number
+) {
+	return async ({ registry }) => {
+		// Similarly, update the original video in the DB to have the
+		// poster as the featured image.
+		await registry
+			.dispatch(coreStore)
+			.editEntityRecord('postType', 'attachment', videoId, {
+				featured_media: posterId,
+				meta: {
+					mexp_generated_poster_id: posterId,
+				},
+			});
+		await registry
+			.dispatch(coreStore)
+			.saveEditedEntityRecord('postType', 'attachment', videoId);
+	};
+}
+
 export function uploadPosterForItem(item: QueueItem) {
 	return async ({ dispatch, registry }) => {
 		console.log('inside uploadPosterForItem', item);
@@ -595,27 +628,10 @@ export function uploadPosterForItem(item: QueueItem) {
 
 					// Similarly, update the original video in the DB to have the
 					// poster as the featured image.
-					await registry
-						.dispatch(coreStore)
-						.editEntityRecord(
-							'postType',
-							'attachment',
-							videoAttachment.id,
-							{
-								featured_media: posterAttachment.id,
-								meta: {
-									mexp_generated_poster_id:
-										posterAttachment.id,
-								},
-							}
-						);
-					await registry
-						.dispatch(coreStore)
-						.saveEditedEntityRecord(
-							'postType',
-							'attachment',
-							videoAttachment.id
-						);
+					await dispatch.setGeneratedPosterAsFeaturedImage(
+						videoAttachment.id,
+						posterAttachment.id
+					);
 				},
 				additionalData: {
 					// Reminder: Parent post ID might not be set, depending on context,
@@ -647,10 +663,13 @@ export function uploadItem(id: QueueItemId) {
 					select.getMediaSourceTermId(slug)
 				)
 				.filter(Boolean),
+			// generatedPosterId is set when using muteExistingVideo() for example.
 			meta: {
 				mexp_blurhash: item.blurHash,
 				mexp_dominant_color: item.dominantColor,
+				mexp_generated_poster_id: item.generatedPosterId,
 			},
+			featured_media: item.generatedPosterId,
 		};
 
 		const mediaType = getMediaTypeFromMimeType(item.file.type);
