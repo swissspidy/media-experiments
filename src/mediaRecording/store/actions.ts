@@ -207,6 +207,8 @@ export function startRecording() {
 				});
 
 				mediaRecorder.addEventListener('stop', () => {
+					mediaStream.getTracks().forEach((track) => track.stop());
+
 					const mediaChunks = select.getMediaChunks();
 					const hasVideo = select.hasVideo();
 					const previousUrl = select.getUrl();
@@ -252,6 +254,8 @@ export function startRecording() {
 				});
 
 				mediaRecorder.addEventListener('error', (evt) => {
+					mediaStream.getTracks().forEach((track) => track.stop());
+
 					dispatch({
 						type: Type.SetError,
 						error: evt.error,
@@ -387,6 +391,8 @@ export function captureImage() {
 						type
 					);
 					const url = createBlobURL(file);
+
+					mediaStream.getTracks().forEach((track) => track.stop());
 
 					dispatch({
 						type: Type.FinishRecording,
