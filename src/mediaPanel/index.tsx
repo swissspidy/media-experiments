@@ -17,6 +17,7 @@ import { isBlobURL } from '@wordpress/blob';
 import { store as coreStore } from '@wordpress/core-data';
 import { store as editorStore } from '@wordpress/editor';
 
+import { store as recordingStore } from '../mediaRecording/store';
 import { store as uploadStore } from '../uploadQueue/store';
 import type { RestAttachment } from '../uploadQueue/store/types';
 
@@ -101,7 +102,6 @@ function MuteVideo({ attributes, setAttributes }) {
 	);
 
 	const onClick = () => {
-		console.log('onClick', muteExistingVideo);
 		muteExistingVideo({
 			id: attributes.id,
 			url: attributes.src,
@@ -132,6 +132,52 @@ function MuteVideo({ attributes, setAttributes }) {
 		<Button variant="primary" onClick={onClick} disabled={isUploading}>
 			{__('Remove audio channel', 'media-experiments')}
 		</Button>
+	);
+}
+
+function RecordingControls({ attributes, clientId }) {
+	const { baseControlProps, controlProps } = useBaseControlProps({});
+
+	// Video and image blocks use different attribute names for the URL.
+	const url = attributes.url || attributes.src;
+
+	const { enterRecordingMode, leaveRecordingMode } =
+		useDispatch(recordingStore);
+
+	const isInRecordingMode = useSelect(
+		(select) => select(recordingStore).isInRecordingMode(),
+		[]
+	);
+
+	if (url) {
+		return null;
+	}
+
+	const onClick = () => {
+		if (isInRecordingMode) {
+			leaveRecordingMode();
+		} else {
+			enterRecordingMode(clientId);
+		}
+	};
+
+	return (
+		<BaseControl {...baseControlProps}>
+			<BaseControl.VisualLabel>
+				{__('Camera', 'media-experiments')}
+			</BaseControl.VisualLabel>
+			<p>
+				{__(
+					"Use your device's camera to record video, audio, or take a still picture",
+					'media-experiments'
+				)}
+			</p>
+			<Button variant="primary" onClick={onClick} {...controlProps}>
+				{isInRecordingMode
+					? __('Stop', 'media-experiments')
+					: __('Start', 'media-experiments')}
+			</Button>
+		</BaseControl>
 	);
 }
 
@@ -303,6 +349,7 @@ function VideoControls(props) {
 
 	return (
 		<Fragment>
+			<RecordingControls {...props} />
 			<ImportMedia {...props} onChange={onChange} />
 			<MuteVideo {...props} />
 			<RestorePoster {...props} />

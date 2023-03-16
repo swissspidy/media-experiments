@@ -128,11 +128,6 @@ function reducer(state = DEFAULT_STATE, action: Action) {
 			};
 
 		case Type.UploadFinish:
-			console.log(
-				'UploadFinish',
-				action,
-				state.queue.find((item) => item.id === action.id)
-			);
 			return {
 				...state,
 				queue: state.queue.map((item) =>

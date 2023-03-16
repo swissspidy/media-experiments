@@ -23,12 +23,12 @@ import type { DecodeResult } from 'libheif-js';
  * Internal dependencies
  */
 import {
-	blobToFile,
 	bufferToBlob,
 	getExtensionFromMimeType,
 	getFileBasename,
 	isHeifImage,
 } from './utils';
+import { blobToFile } from '../utils';
 
 function getDimensions(image: DecodeResult) {
 	const width = image.get_width();
@@ -73,18 +73,10 @@ export async function transcodeHeifImage(
 
 	const decoder = new window.libheif.HeifDecoder();
 
-	console.log(
-		'transcodeHeifImage',
-		inputBuffer,
-		inputBuffer instanceof ArrayBuffer
-	);
-
 	// Image can have multiple frames, thus it's an array.
 	// For now, only decode the first frame.
 
 	const imagesArr = decoder.decode(new Uint8Array(inputBuffer));
-
-	console.log('after decoding', imagesArr);
 
 	if (!imagesArr.length) {
 		throw new TypeError('Not a valid HEIF image');

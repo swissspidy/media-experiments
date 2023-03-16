@@ -251,7 +251,6 @@ subscribe(() => {
 	const items: QueueItem[] = select(uploadStore).getInProgressItems();
 	for (const item of items) {
 		const { attachment, onChange } = item;
-		console.log('Item in progress', item, attachment);
 
 		const { poster, ...media } = attachment;
 		// Video block expects such a structure for the poster.
@@ -261,8 +260,6 @@ subscribe(() => {
 				src: poster,
 			};
 		}
-
-		console.log('onChange', media);
 
 		onChange?.([media]);
 	}
@@ -280,7 +277,6 @@ subscribe(() => {
 
 	for (const item of items) {
 		const { id, onChange, onSuccess, attachment } = item;
-		console.log('Complete item', item, onSuccess, attachment);
 		onChange?.([attachment]);
 		onSuccess?.([attachment]);
 		void dispatch(uploadStore).completeItem(id);

@@ -24,7 +24,6 @@ import {
 } from '../ffmpeg';
 import UploadError from '../uploadError';
 import {
-	blobToFile,
 	canTranscodeFile,
 	fetchRemoteFile,
 	getBlurHash,
@@ -38,7 +37,7 @@ import {
 } from '../utils';
 import { transcodeHeifImage } from '../heif';
 import { uploadToServer } from '../api';
-import { getMediaTypeFromMimeType } from '../../utils';
+import { getMediaTypeFromMimeType, blobToFile } from '../../utils';
 
 interface AddItemArgs {
 	file: File;
@@ -204,8 +203,6 @@ export function prepareItem(id: QueueItemId) {
 
 		const canTranscode = canTranscodeFile(file);
 
-		console.log('Pending item', item, mediaType, canTranscode);
-
 		// Transcoding type has already been set, e.g. via muteExistingVideo().
 		// TODO: Check canTransocde either here, in muteExistingVideo, or in the UI.
 		if (item.transcode) {
@@ -249,8 +246,6 @@ export function prepareItem(id: QueueItemId) {
 					`${getFileBasename(item.file.name)}-poster`
 				);
 				dispatch.addPoster(id, poster);
-
-				console.log('before upload add poster for video', item, poster);
 
 				// TODO: First check if video already meets criteria, e.g. with mediainfo.js.
 				// No need to compress a video that's already quite small.
@@ -372,8 +367,6 @@ export function maybeTranscodeItem(id: QueueItemId) {
 		// Prevent simultaneous ffmpeg processes to reduce resource usage.
 		const isTranscoding = select.isTranscoding();
 
-		console.log('pending transcoding for', item, isTranscoding);
-
 		switch (transcode) {
 			case TranscodingType.Heif:
 				void dispatch.convertHeifItem(item.id);
@@ -422,10 +415,8 @@ export function optimizeVideoItem(id: QueueItemId) {
 
 		try {
 			const file = await transcodeVideo(item.file);
-			console.log('finish transcoding', file);
 			dispatch.finishTranscoding(id, file);
 		} catch (error) {
-			console.log('optimizeVideoItem failed', error);
 			dispatch.cancelItem(
 				id,
 				error instanceof Error
@@ -448,10 +439,8 @@ export function muteVideoItem(id: QueueItemId) {
 
 		try {
 			const file = await muteVideo(item.file);
-			console.log('finish transcoding', file);
 			dispatch.finishTranscoding(id, file);
 		} catch (error) {
-			console.log('muteVideoItem failed', error);
 			dispatch.cancelItem(
 				id,
 				error instanceof Error
@@ -474,10 +463,8 @@ export function optimizeAudioItem(id: QueueItemId) {
 
 		try {
 			const file = await transcodeAudio(item.file);
-			console.log('finish transcoding', file);
 			dispatch.finishTranscoding(id, file);
 		} catch (error) {
-			console.log('optimizeAudioItem failed', error);
 			dispatch.cancelItem(
 				id,
 				error instanceof Error
@@ -500,10 +487,8 @@ export function convertGifItem(id: QueueItemId) {
 
 		try {
 			const file = await convertGifToVideo(item.file);
-			console.log('finish transcoding', file);
 			dispatch.finishTranscoding(id, file);
 		} catch (error) {
-			console.log('convertGifItem failed', error);
 			dispatch.cancelItem(
 				id,
 				error instanceof Error
@@ -526,10 +511,8 @@ export function convertHeifItem(id: QueueItemId) {
 
 		try {
 			const file = await transcodeHeifImage(item.file);
-			console.log('finish transcoding', file);
 			dispatch.finishTranscoding(id, file);
 		} catch (error) {
-			console.log('convertHeifItem failed', error);
 			dispatch.cancelItem(
 				id,
 				error instanceof Error
@@ -567,8 +550,6 @@ export function setGeneratedPosterAsFeaturedImage(
 
 export function uploadPosterForItem(item: QueueItem) {
 	return async ({ dispatch, registry }) => {
-		console.log('inside uploadPosterForItem', item);
-
 		const { attachment: videoAttachment } = item;
 
 		// In the event that the uploaded video already has a poster, do not upload another one.
@@ -591,17 +572,10 @@ export function uploadPosterForItem(item: QueueItem) {
 					)}}-poster`
 				));
 
-			console.log('uploadPosterForItem', item, poster);
-
 			// Adding the poster to the queue on its own allows for it to be optimized, etc.
 			dispatch.addItem({
 				file: poster,
 				onChange: ([posterAttachment]) => {
-					console.log(
-						'onChange uploadPosterForItem',
-						posterAttachment,
-						videoAttachment
-					);
 					if (isBlobURL(posterAttachment.url)) {
 						return;
 					}
@@ -620,12 +594,6 @@ export function uploadPosterForItem(item: QueueItem) {
 					item.onChange?.([updatedVideoAttachment]);
 				},
 				onSuccess: async ([posterAttachment]) => {
-					console.log(
-						'onSuccess uploadPosterForItem',
-						posterAttachment,
-						videoAttachment
-					);
-
 					// Similarly, update the original video in the DB to have the
 					// poster as the featured image.
 					await dispatch.setGeneratedPosterAsFeaturedImage(
@@ -685,8 +653,6 @@ export function uploadItem(id: QueueItemId) {
 			}
 		}
 
-		console.log('Uploading item, maybe reusing blurHash?', additionalData);
-
 		if (!additionalData.meta.mexp_dominant_color) {
 			// TODO: Make this async after upload?
 			// Could be made reusable to enable backfilling of existing blocks.
@@ -718,7 +684,6 @@ export function uploadItem(id: QueueItemId) {
 		}
 
 		try {
-			console.log('startUploading', id, additionalData);
 			const attachment = await uploadToServer(item.file, additionalData);
 
 			if ('video' === mediaType) {
@@ -731,8 +696,6 @@ export function uploadItem(id: QueueItemId) {
 					attachment.poster = createBlobURL(poster);
 				}
 			}
-
-			console.log('finishUploading', id);
 
 			dispatch.finishUploading(id, attachment);
 		} catch (err) {

@@ -1,7 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { MAX_VIDEO_RESOLUTION } from './constants';
-import { blobToFile, getFileBasename } from './utils';
+import { getFileBasename } from './utils';
+import { blobToFile } from '../utils';
 import type { FFmpeg } from '@ffmpeg/ffmpeg';
 
 const FFMPEG_CONFIG = {
@@ -126,13 +127,6 @@ export async function runFFmpegWithConfig(
 		const tempFileName = `tmp-${uuidv4()}-${fileName}`;
 
 		await ffmpeg.run(
-			...config,
-			// Output filename. MUST be different from input filename.
-			tempFileName
-		);
-
-		console.log(
-			'runFFmpegWithConfig', // Input filename.
 			...config,
 			// Output filename. MUST be different from input filename.
 			tempFileName

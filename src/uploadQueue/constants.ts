@@ -1,5 +1,3 @@
-export const STORE_NAME = 'media-experiments/upload';
-
 const GB_IN_BYTES = 1024 * 1024 * 1024;
 export const MEDIA_TRANSCODING_MAX_FILE_SIZE = 2 * GB_IN_BYTES;
 

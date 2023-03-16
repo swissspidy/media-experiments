@@ -1,0 +1,436 @@
+import { createHigherOrderComponent } from '@wordpress/compose';
+import { BlockControls, useBlockProps, Warning } from '@wordpress/block-editor';
+import { addFilter } from '@wordpress/hooks';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { ToolbarButton, ToolbarDropdownMenu } from '@wordpress/components';
+import {
+	audio,
+	brush,
+	check,
+	capturePhoto,
+	captureVideo,
+	cancelCircleFilled,
+} from '@wordpress/icons';
+import { Fragment, useEffect, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+
+import { store as recordingStore } from './store';
+import { getMediaTypeFromMimeType } from '../utils';
+
+const SUPPORTED_BLOCKS = ['core/image', 'core/audio', 'core/video'];
+
+function InputControls() {
+	const { setVideoInput, setAudioInput } = useDispatch(recordingStore);
+
+	const {
+		videoInput,
+		audioInput,
+		hasVideo,
+		hasAudio,
+		videoDevices,
+		audioDevices,
+	} = useSelect((select) => {
+		const mediaDevices = select(recordingStore).getDevices();
+		return {
+			videoInput: select(recordingStore).getVideoInput(),
+			audioInput: select(recordingStore).getAudioInput(),
+			hasVideo: select(recordingStore).hasVideo(),
+			hasAudio: select(recordingStore).hasAudio(),
+			videoDevices: mediaDevices.filter(
+				({ kind }) => kind === 'videoinput'
+			),
+			audioDevices: mediaDevices.filter(
+				({ kind }) => kind === 'audioinput'
+			),
+		};
+	}, []);
+
+	return (
+		<Fragment>
+			<ToolbarDropdownMenu
+				label={__('Select Camera', 'media-experiments')}
+				icon="camera"
+				controls={videoDevices.map((device) => ({
+					title: device.label,
+					onClick: () => setVideoInput(device.deviceId),
+					isActive: videoInput === device.deviceId,
+					role: 'menuitemradio',
+					icon: videoInput === device.deviceId && check,
+				}))}
+				toggleProps={{
+					disabled: !hasVideo,
+				}}
+			/>
+			<ToolbarDropdownMenu
+				label={__('Select Microphone', 'media-experiments')}
+				icon="microphone"
+				controls={audioDevices.map((device) => ({
+					title: device.label,
+					onClick: () => setAudioInput(device.deviceId),
+					isActive: audioInput === device.deviceId,
+					role: 'menuitemradio',
+					icon: audioInput === device.deviceId && check,
+				}))}
+				toggleProps={{
+					disabled: !hasAudio,
+				}}
+			/>
+		</Fragment>
+	);
+}
+
+function ErrorDialog() {
+	const { hasVideo, error } = useSelect(
+		(select) => ({
+			hasVideo: select(recordingStore).hasVideo(),
+			error: select(recordingStore).getError(),
+		}),
+		[]
+	);
+
+	let errorMessage = error?.message;
+
+	// Use some more human-readable error messages for most common scenarios.
+	// See https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia#exceptions
+	if (!window.isSecureContext) {
+		errorMessage = __(
+			'Requires a secure browsing context (HTTPS)',
+			'web-stories'
+		);
+	} else if (error?.name === 'NotAllowedError') {
+		errorMessage = __('Permission denied', 'web-stories');
+	} else if (
+		!hasVideo ||
+		error?.name === 'NotFoundError' ||
+		error?.name === 'OverConstrainedError'
+	) {
+		errorMessage = __('No camera found', 'web-stories');
+	}
+
+	return <Warning>{errorMessage}</Warning>;
+}
+
+function PermissionsDialog() {
+	return (
+		<Warning>
+			{__(
+				'To get started, you need to allow access to your camera and microphone.',
+				'web-stories'
+			)}
+		</Warning>
+	);
+}
+
+function Countdown() {
+	const { countdown, isCounting } = useSelect(
+		(select) => ({
+			countdown: select(recordingStore).getCountdown(),
+			isCounting:
+				'countdown' === select(recordingStore).getRecordingStatus(),
+		}),
+		[]
+	);
+
+	if (isCounting) {
+		return <Fragment>{`Countdown: ${countdown}`}</Fragment>;
+	}
+
+	return null;
+}
+
+function Duration() {
+	const { duration, isRecording } = useSelect(
+		(select) => ({
+			duration: select(recordingStore).getDuration(),
+			isRecording: ['recording', 'paused'].includes(
+				select(recordingStore).getRecordingStatus()
+			),
+		}),
+		[]
+	);
+
+	if (isRecording && duration >= 0) {
+		return <Fragment>{`Duration: ${duration}`}</Fragment>;
+	}
+
+	return null;
+}
+
+function Recorder() {
+	const [streamNode, setStreamNode] = useState<HTMLVideoElement | null>();
+	const {
+		videoInput,
+		status,
+		error,
+		liveStream,
+		url,
+		mediaType,
+		dimensions,
+		isGifMode,
+		isMuted,
+	} = useSelect((select) => {
+		const file = select(recordingStore).getFile();
+		const isGifMode = select(recordingStore).isGifMode();
+
+		return {
+			videoInput: select(recordingStore).getVideoInput(),
+			status: select(recordingStore).getRecordingStatus(),
+			error: select(recordingStore).getError(),
+			liveStream: select(recordingStore).getMediaStream(),
+			mediaType: file ? getMediaTypeFromMimeType(file.type) : null,
+			url: select(recordingStore).getUrl(),
+			dimensions: select(recordingStore).getDimensions(),
+			isGifMode,
+			isMuted: !select(recordingStore).hasAudio || isGifMode,
+		};
+	}, []);
+
+	useEffect(() => {
+		// Checking for srcObject avoids flickering due to the stream changing constantly.
+		if (streamNode && !streamNode.srcObject && liveStream) {
+			streamNode.srcObject = liveStream;
+		}
+
+		if (streamNode && !liveStream) {
+			streamNode.srcObject = null;
+		}
+	}, [streamNode, liveStream]);
+
+	const isFailed = 'failed' === status || Boolean(error);
+	const needsPermissions =
+		('idle' === status || 'acquiringMedia' === status) && !videoInput;
+
+	if (isFailed) {
+		return <ErrorDialog />;
+	}
+
+	if (needsPermissions) {
+		return <PermissionsDialog />;
+	}
+
+	// TODO: show recorded video / picture if available.
+
+	if (url) {
+		switch (mediaType) {
+			case 'image':
+				return (
+					<img
+						src={url}
+						decoding="async"
+						alt={__('Image capture', 'web-stories')}
+						width={dimensions.width}
+						height={dimensions.height}
+					/>
+				);
+
+			case 'video':
+				return (
+					<video
+						controls
+						muted={isMuted}
+						loop={isGifMode}
+						src={url}
+					/>
+				);
+
+			case 'audio':
+				return <audio controls src={url} />;
+
+			default:
+			// This should never happen.
+		}
+	}
+
+	if (liveStream) {
+		return (
+			<Fragment>
+				<Countdown />
+				<Duration />
+				<video
+					autoPlay
+					disablePictureInPicture
+					ref={setStreamNode}
+					muted
+				/>
+			</Fragment>
+		);
+	}
+
+	// TODO: Maybe show fallback loading state or something.
+	return (
+		<Fragment>
+			<Countdown />
+			<Duration />
+			{'Loading...'}
+		</Fragment>
+	);
+}
+
+function RecordingBlockControls() {
+	const {
+		toggleBlurEffect,
+		toggleHasAudio,
+		startRecording,
+		stopRecording,
+		pauseRecording,
+		resumeRecording,
+		retryRecording,
+		captureImage,
+	} = useDispatch(recordingStore);
+	const { hasAudio, videoEffect, status } = useSelect(
+		(select) => ({
+			hasAudio: select(recordingStore).hasAudio(),
+			videoEffect: select(recordingStore).getVideoEffect(),
+			status: select(recordingStore).getRecordingStatus(),
+		}),
+		[]
+	);
+
+	const isReady = 'ready' === status;
+	const isStopped = 'stopped' === status;
+	const isPaused = 'paused' === status;
+	const isRecordingOrCountdown = ['countdown', 'recording'].includes(status);
+	const isRecording = 'recording' === status;
+
+	return (
+		<Fragment>
+			<BlockControls group="block">
+				<InputControls />
+			</BlockControls>
+			<BlockControls group="inline">
+				<ToolbarButton
+					onClick={() => {
+						toggleHasAudio();
+					}}
+					isPressed={!hasAudio}
+					icon={audio}
+					label={__('Disable Audio', 'media-experiments')}
+				/>
+				<ToolbarButton
+					onClick={() => {
+						toggleBlurEffect();
+					}}
+					isPressed={'blur' === videoEffect}
+					icon={brush}
+					label={__('Enable Background Blur', 'media-experiments')}
+					disabled={!isReady}
+				/>
+			</BlockControls>
+			<BlockControls group="other">
+				{(isReady || isRecordingOrCountdown) && (
+					<ToolbarButton
+						onClick={() => {
+							isRecordingOrCountdown
+								? stopRecording()
+								: startRecording();
+						}}
+					>
+						{!isRecordingOrCountdown
+							? __('Start', 'media-experiments')
+							: __('Stop', 'media-experiments')}
+					</ToolbarButton>
+				)}
+				{isRecording && (
+					<ToolbarButton
+						onClick={() => {
+							pauseRecording();
+						}}
+					>
+						{__('Pause', 'media-experiments')}
+					</ToolbarButton>
+				)}
+				{isPaused && (
+					<ToolbarButton
+						onClick={() => {
+							resumeRecording();
+						}}
+					>
+						{__('Resume', 'media-experiments')}
+					</ToolbarButton>
+				)}
+				{isStopped && (
+					<ToolbarButton
+						onClick={() => {
+							retryRecording();
+						}}
+					>
+						{__('Retry', 'media-experiments')}
+					</ToolbarButton>
+				)}
+				{isReady && (
+					<ToolbarButton
+						onClick={() => {
+							captureImage();
+						}}
+						icon={capturePhoto}
+						label={__('Capture Photo', 'media-experiments')}
+						disabled={!isReady}
+					/>
+				)}
+			</BlockControls>
+		</Fragment>
+	);
+}
+
+const addMediaRecording = createHigherOrderComponent(
+	(BlockEdit) => (props) => {
+		const { updateMediaDevices } = useDispatch(recordingStore);
+		const isInRecordingMode = useSelect(
+			(select) => {
+				return select(recordingStore).isBlockInRecordingMode(
+					props.clientId
+				);
+			},
+			[props.clientId]
+		);
+
+		const blockProps = useBlockProps({
+			className: props.className,
+		});
+
+		useEffect(() => {
+			// navigator.mediaDevices is undefined in insecure browsing contexts.
+			if (!navigator.mediaDevices) {
+				return undefined;
+			}
+
+			// Note: Safari will fire the devicechange event right after granting permissions,
+			// and then calling enumerateDevices() will trigger another permission prompt.
+			// TODO: Figure out a good way to work around that.
+			navigator.mediaDevices.addEventListener(
+				'devicechange',
+				updateMediaDevices
+			);
+
+			return () => {
+				navigator.mediaDevices.removeEventListener(
+					'devicechange',
+					updateMediaDevices
+				);
+			};
+		}, [updateMediaDevices]);
+
+		if (!SUPPORTED_BLOCKS.includes(props.name)) {
+			return <BlockEdit {...props} />;
+		}
+
+		if (!isInRecordingMode) {
+			return <BlockEdit {...props} />;
+		}
+
+		return (
+			<div {...blockProps}>
+				<RecordingBlockControls />
+				<Recorder />
+			</div>
+		);
+	},
+	'withMediaRecording'
+);
+
+addFilter(
+	'editor.BlockEdit',
+	'media-experiments/add-media-recording',
+	addMediaRecording,
+	5
+);

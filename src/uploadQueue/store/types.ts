@@ -43,7 +43,7 @@ export enum Type {
 	SetMediaSourceTerms = 'ADD_MEDIA_SOURCE_TERMS',
 }
 
-export type Action<T = Type, Payload = {}> = {
+type Action<T = Type, Payload = {}> = {
 	type: T;
 } & Payload;
 

@@ -126,10 +126,6 @@ export function getCanvasBlob(
 	});
 }
 
-export function blobToFile(blob: Blob, filename: string, type: string): File {
-	return new File([blob], filename, { type });
-}
-
 export async function bufferToBlob(
 	buffer: ArrayBuffer,
 	width: number,
