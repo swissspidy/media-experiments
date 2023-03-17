@@ -3,11 +3,12 @@
 // See https://github.com/GoogleChromeLabs/imagecapture-polyfill
 import { ImageCapture } from 'image-capture';
 
+import { store as blockEditorStore } from '@wordpress/block-editor';
 import { createBlobURL, revokeBlobURL } from '@wordpress/blob';
 import { dateI18n } from '@wordpress/date';
 
 import { Type, VideoEffect } from './types';
-import { blobToFile } from '../../utils';
+import { blobToFile, getMediaTypeFromBlockName } from '../../utils';
 import {
 	COUNTDOWN_TIME_IN_SECONDS,
 	MAX_RECORDING_DURATION_IN_SECONDS,
@@ -77,6 +78,13 @@ export function toggleHasAudio() {
 	};
 }
 
+export function toggleHasVideo() {
+	return async ({ select, dispatch }) => {
+		const value = select.hasVideo();
+		dispatch.setHasVideo(!value);
+	};
+}
+
 export function resetVideoInput() {
 	return {
 		type: Type.ResetVideoInput,
@@ -84,10 +92,16 @@ export function resetVideoInput() {
 }
 
 export function enterRecordingMode(clientId: string) {
-	return async ({ dispatch }) => {
+	return async ({ registry, dispatch }) => {
+		const { getBlockName } = registry.select(blockEditorStore);
+
+		const blockName = getBlockName(clientId);
+		const recordingType = getMediaTypeFromBlockName(blockName);
+
 		dispatch({
 			type: Type.EnterRecordingMode,
 			clientId,
+			recordingType: recordingType || 'video',
 		});
 
 		dispatch.invalidateResolutionForStoreSelector('getMediaStream');
@@ -392,6 +406,7 @@ export function captureImage() {
 					);
 					const url = createBlobURL(file);
 
+					// TODO: Maybe do that a bit earlier, right after StartCapturing dispatch?
 					mediaStream.getTracks().forEach((track) => track.stop());
 
 					dispatch({

@@ -9,6 +9,7 @@ import {
 	TRANSCODABLE_MIME_TYPES,
 } from './constants';
 import UploadError from './uploadError';
+import { blobToFile } from '../utils';
 
 // TODO: Make work for HEIF, GIF and audio as well.
 export function canTranscodeFile(file: File) {
@@ -73,7 +74,7 @@ export function getExtensionFromMimeType(mimeType: string) {
 	}
 }
 
-export function getFileBasename(name: string): string {
+export function getFileBasename(name: string) {
 	return name.includes('.') ? name.split('.').slice(0, -1).join('.') : name;
 }
 
@@ -83,8 +84,11 @@ export function getFileBasename(name: string): string {
  * @param url File URL.
  * @return File name.
  */
-export function getFileNameFromUrl(url: string): string {
+export function getFileNameFromUrl(url: string) {
 	const tail = url.split('/').at(-1);
+	if (!tail) {
+		return 'unnamed'; // TODO: Better fallback needed?
+	}
 	return tail.split(/[#?]/).at(0) ?? tail;
 }
 
@@ -113,8 +117,8 @@ export function getCanvasBlob(
 	canvasEl: HTMLCanvasElement,
 	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/jpeg',
 	quality = 0.82
-): Promise<Blob | null> {
-	return new Promise((resolve, reject) => {
+) {
+	return new Promise<Blob>((resolve, reject) => {
 		canvasEl.toBlob(
 			(blob) =>
 				blob
@@ -154,13 +158,13 @@ export async function bufferToBlob(
 	return getCanvasBlob(canvas, type, quality);
 }
 
-function preloadVideoMetadata(src: string): Promise<HTMLVideoElement> {
+function preloadVideoMetadata(src: string) {
 	const video = document.createElement('video');
 	video.muted = true;
 	video.crossOrigin = 'anonymous';
 	video.preload = 'metadata';
 
-	return new Promise((resolve, reject) => {
+	return new Promise<HTMLVideoElement>((resolve, reject) => {
 		video.addEventListener('loadedmetadata', () => resolve(video));
 		video.addEventListener('error', reject);
 
@@ -197,12 +201,12 @@ function preloadImage(src: string, width?: number, height?: number) {
 	});
 }
 
-function seekVideo(video: HTMLVideoElement, offset = 0.99): Promise<void> {
+function seekVideo(video: HTMLVideoElement, offset = 0.99) {
 	if (video.currentTime === offset) {
 		return Promise.resolve();
 	}
 
-	return new Promise((resolve, reject) => {
+	return new Promise<void>((resolve, reject) => {
 		// If the seek takes longer 3 seconds, guess it timed out and error out.
 		video.addEventListener('seeking', (evt) => {
 			const wait = setTimeout(() => {
@@ -312,7 +316,7 @@ export function isHeifImage(buffer: ArrayBuffer) {
  * @param buffer The GIF ArrayBuffer instance.
  * @return Whether this is an animated GIF or not.
  */
-export function isAnimatedGif(buffer: ArrayBuffer): boolean {
+export function isAnimatedGif(buffer: ArrayBuffer) {
 	// See http://www.matthewflickinger.com/lab/whatsinagif/bits_and_bytes.asp.
 	const BLOCK_TERMINATOR = 0x00;
 	const EXTENSION_INTRODUCER = 0x21;

@@ -1,3 +1,5 @@
+import AudioMotionAnalyzer from 'audiomotion-analyzer';
+
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { BlockControls, useBlockProps, Warning } from '@wordpress/block-editor';
 import { addFilter } from '@wordpress/hooks';
@@ -20,7 +22,8 @@ import { getMediaTypeFromMimeType } from '../utils';
 const SUPPORTED_BLOCKS = ['core/image', 'core/audio', 'core/video'];
 
 function InputControls() {
-	const { setVideoInput, setAudioInput } = useDispatch(recordingStore);
+	const { setVideoInput, setAudioInput, toggleHasAudio, toggleHasVideo } =
+		useDispatch(recordingStore);
 
 	const {
 		videoInput,
@@ -29,9 +32,11 @@ function InputControls() {
 		hasAudio,
 		videoDevices,
 		audioDevices,
+		recordingType,
 	} = useSelect((select) => {
 		const mediaDevices = select(recordingStore).getDevices();
 		return {
+			recordingType: select(recordingStore).getRecordingType(),
 			videoInput: select(recordingStore).getVideoInput(),
 			audioInput: select(recordingStore).getAudioInput(),
 			hasVideo: select(recordingStore).hasVideo(),
@@ -45,36 +50,54 @@ function InputControls() {
 		};
 	}, []);
 
+	const videoControls = videoDevices.map((device) => ({
+		title: device.label,
+		onClick: () => setVideoInput(device.deviceId),
+		isActive: videoInput === device.deviceId,
+		role: 'menuitemradio',
+		icon: hasVideo && videoInput === device.deviceId && check,
+	}));
+
+	// Videos can be recorded with or without audio.
+	const audioControls = [
+		'video' === recordingType && {
+			title: __('No Microphone', 'media-experiments'),
+			onClick: () => toggleHasAudio(),
+			isActive: !hasAudio,
+			role: 'menuitemradio',
+			icon: !hasAudio && check,
+		},
+		...audioDevices.map((device) => ({
+			title: device.label,
+			onClick: () => setAudioInput(device.deviceId),
+			isActive: audioInput === device.deviceId,
+			role: 'menuitemradio',
+			icon: hasVideo && audioInput === device.deviceId && check,
+		})),
+	].filter(Boolean);
+
 	return (
 		<Fragment>
-			<ToolbarDropdownMenu
-				label={__('Select Camera', 'media-experiments')}
-				icon="camera"
-				controls={videoDevices.map((device) => ({
-					title: device.label,
-					onClick: () => setVideoInput(device.deviceId),
-					isActive: videoInput === device.deviceId,
-					role: 'menuitemradio',
-					icon: videoInput === device.deviceId && check,
-				}))}
-				toggleProps={{
-					disabled: !hasVideo,
-				}}
-			/>
-			<ToolbarDropdownMenu
-				label={__('Select Microphone', 'media-experiments')}
-				icon="microphone"
-				controls={audioDevices.map((device) => ({
-					title: device.label,
-					onClick: () => setAudioInput(device.deviceId),
-					isActive: audioInput === device.deviceId,
-					role: 'menuitemradio',
-					icon: audioInput === device.deviceId && check,
-				}))}
-				toggleProps={{
-					disabled: !hasAudio,
-				}}
-			/>
+			{'audio' !== recordingType && (
+				<ToolbarDropdownMenu
+					label={__('Select Camera', 'media-experiments')}
+					icon="camera"
+					controls={videoControls}
+					toggleProps={{
+						disabled: videoDevices.length === 0,
+					}}
+				/>
+			)}
+			{'image' !== recordingType && (
+				<ToolbarDropdownMenu
+					label={__('Select Microphone', 'media-experiments')}
+					icon="microphone"
+					controls={audioControls}
+					toggleProps={{
+						disabled: !hasAudio,
+					}}
+				/>
+			)}
 		</Fragment>
 	);
 }
@@ -164,6 +187,7 @@ function Recorder() {
 		error,
 		liveStream,
 		url,
+		recordingType,
 		mediaType,
 		dimensions,
 		isGifMode,
@@ -177,6 +201,7 @@ function Recorder() {
 			status: select(recordingStore).getRecordingStatus(),
 			error: select(recordingStore).getError(),
 			liveStream: select(recordingStore).getMediaStream(),
+			recordingType: select(recordingStore).getRecordingType(),
 			mediaType: file ? getMediaTypeFromMimeType(file.type) : null,
 			url: select(recordingStore).getUrl(),
 			dimensions: select(recordingStore).getDimensions(),
@@ -196,6 +221,23 @@ function Recorder() {
 		}
 	}, [streamNode, liveStream]);
 
+	function setAudioAnalyzer(instance: HTMLElement | undefined) {
+		if (!instance) {
+			return;
+		}
+
+		const audioCtx = new window.AudioContext();
+		const analyzer = audioCtx.createAnalyser();
+		const audioNode = audioCtx.createMediaStreamSource(liveStream);
+		audioNode.connect(analyzer);
+
+		const audioMotion = new AudioMotionAnalyzer(instance, {
+			source: audioNode,
+		});
+
+		console.log(instance, audioMotion, audioCtx, analyzer);
+	}
+
 	const isFailed = 'failed' === status || Boolean(error);
 	const needsPermissions =
 		('idle' === status || 'acquiringMedia' === status) && !videoInput;
@@ -207,8 +249,6 @@ function Recorder() {
 	if (needsPermissions) {
 		return <PermissionsDialog />;
 	}
-
-	// TODO: show recorded video / picture if available.
 
 	if (url) {
 		switch (mediaType) {
@@ -241,17 +281,24 @@ function Recorder() {
 		}
 	}
 
+	// TODO: Don't show livestream if we're still capturing the image.
+	// "capturingImage" or "stopping" state.
+
 	if (liveStream) {
 		return (
 			<Fragment>
 				<Countdown />
 				<Duration />
-				<video
-					autoPlay
-					disablePictureInPicture
-					ref={setStreamNode}
-					muted
-				/>
+				{'audio' === recordingType ? (
+					<div ref={setAudioAnalyzer} />
+				) : (
+					<video
+						autoPlay
+						disablePictureInPicture
+						ref={setStreamNode}
+						muted
+					/>
+				)}
 			</Fragment>
 		);
 	}
@@ -266,22 +313,23 @@ function Recorder() {
 	);
 }
 
-function RecordingBlockControls() {
+function RecordingBlockControls({ setAttributes }) {
 	const {
 		toggleBlurEffect,
-		toggleHasAudio,
 		startRecording,
 		stopRecording,
 		pauseRecording,
 		resumeRecording,
 		retryRecording,
 		captureImage,
+		leaveRecordingMode,
 	} = useDispatch(recordingStore);
-	const { hasAudio, videoEffect, status } = useSelect(
+	const { videoEffect, status, recordingType, url } = useSelect(
 		(select) => ({
-			hasAudio: select(recordingStore).hasAudio(),
 			videoEffect: select(recordingStore).getVideoEffect(),
 			status: select(recordingStore).getRecordingStatus(),
+			recordingType: select(recordingStore).getRecordingType(),
+			url: select(recordingStore).getUrl(),
 		}),
 		[]
 	);
@@ -292,80 +340,118 @@ function RecordingBlockControls() {
 	const isRecordingOrCountdown = ['countdown', 'recording'].includes(status);
 	const isRecording = 'recording' === status;
 
+	console.log('recordingType', recordingType);
+
 	return (
 		<Fragment>
 			<BlockControls group="block">
 				<InputControls />
 			</BlockControls>
-			<BlockControls group="inline">
-				<ToolbarButton
-					onClick={() => {
-						toggleHasAudio();
-					}}
-					isPressed={!hasAudio}
-					icon={audio}
-					label={__('Disable Audio', 'media-experiments')}
-				/>
-				<ToolbarButton
-					onClick={() => {
-						toggleBlurEffect();
-					}}
-					isPressed={'blur' === videoEffect}
-					icon={brush}
-					label={__('Enable Background Blur', 'media-experiments')}
-					disabled={!isReady}
-				/>
-			</BlockControls>
+			{'audio' !== recordingType && (
+				<BlockControls group="inline">
+					<ToolbarButton
+						onClick={() => {
+							toggleBlurEffect();
+						}}
+						isPressed={'blur' === videoEffect}
+						icon={brush}
+						label={__(
+							'Enable Background Blur',
+							'media-experiments'
+						)}
+						extraProps={{
+							disabled: !isReady,
+						}}
+					/>
+				</BlockControls>
+			)}
 			<BlockControls group="other">
-				{(isReady || isRecordingOrCountdown) && (
-					<ToolbarButton
-						onClick={() => {
-							isRecordingOrCountdown
-								? stopRecording()
-								: startRecording();
-						}}
-					>
-						{!isRecordingOrCountdown
-							? __('Start', 'media-experiments')
-							: __('Stop', 'media-experiments')}
-					</ToolbarButton>
+				{'image' !== recordingType && (
+					<Fragment>
+						{!isStopped && (
+							<ToolbarButton
+								onClick={() => {
+									isRecordingOrCountdown
+										? stopRecording()
+										: startRecording();
+								}}
+								extraProps={{
+									disabled:
+										!isReady && !isRecordingOrCountdown,
+								}}
+							>
+								{!isRecordingOrCountdown
+									? __('Start', 'media-experiments')
+									: __('Stop', 'media-experiments')}
+							</ToolbarButton>
+						)}
+						{isRecording && (
+							<ToolbarButton
+								onClick={() => {
+									pauseRecording();
+								}}
+							>
+								{__('Pause', 'media-experiments')}
+							</ToolbarButton>
+						)}
+						{isPaused && (
+							<ToolbarButton
+								onClick={() => {
+									resumeRecording();
+								}}
+							>
+								{__('Resume', 'media-experiments')}
+							</ToolbarButton>
+						)}
+					</Fragment>
 				)}
-				{isRecording && (
-					<ToolbarButton
-						onClick={() => {
-							pauseRecording();
-						}}
-					>
-						{__('Pause', 'media-experiments')}
-					</ToolbarButton>
-				)}
-				{isPaused && (
-					<ToolbarButton
-						onClick={() => {
-							resumeRecording();
-						}}
-					>
-						{__('Resume', 'media-experiments')}
-					</ToolbarButton>
-				)}
-				{isStopped && (
-					<ToolbarButton
-						onClick={() => {
-							retryRecording();
-						}}
-					>
-						{__('Retry', 'media-experiments')}
-					</ToolbarButton>
-				)}
-				{isReady && (
+				{'image' === recordingType && !isStopped && (
 					<ToolbarButton
 						onClick={() => {
 							captureImage();
 						}}
 						icon={capturePhoto}
 						label={__('Capture Photo', 'media-experiments')}
-						disabled={!isReady}
+						extraProps={{
+							disabled: !isReady,
+						}}
 					/>
+				)}
+				{isStopped && (
+					<Fragment>
+						<ToolbarButton
+							onClick={() => {
+								// Upload the file and leave recording mode.
+
+								// TODO: Implement
+								// Either the block itself implements the uploading part
+								// and we just use setAttributes, or we have to
+								// use mediaUpload ourselves and do it manually.
+								// TODO: How to set media source 'media-recording'? Or not needed?
+								switch (recordingType) {
+									case 'audio':
+									case 'image':
+										setAttributes({ url });
+										break;
+
+									case 'video':
+										setAttributes({ src: url });
+										break;
+								}
+
+								leaveRecordingMode();
+							}}
+						>
+							{__('Insert', 'media-experiments')}
+						</ToolbarButton>
+						<ToolbarButton
+							onClick={() => {
+								retryRecording();
+							}}
+						>
+							{__('Retry', 'media-experiments')}
+						</ToolbarButton>
+					</Fragment>
 				)}
 			</BlockControls>
 		</Fragment>
@@ -420,7 +506,7 @@ const addMediaRecording = createHigherOrderComponent(
 
 		return (
 			<div {...blockProps}>
-				<RecordingBlockControls />
+				<RecordingBlockControls {...props} />
 				<Recorder />
 			</div>
 		);

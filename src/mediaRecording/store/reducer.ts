@@ -34,6 +34,7 @@ const DEFAULT_STATE: State = {
 	audioInput: undefined,
 	videoEffect: 'none',
 	blockClientId: undefined,
+	recordingType: 'video',
 	devices: [],
 	hasVideo: true,
 	hasAudio: true,
@@ -79,6 +80,7 @@ function reducer(state = DEFAULT_STATE, action: Action) {
 			return {
 				...state,
 				blockClientId: action.clientId,
+				recordingType: action.recordingType,
 			};
 
 		case Type.LeaveRecordingMode:

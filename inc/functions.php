@@ -106,7 +106,12 @@ function register_rest_attachment_featured_media(): void {
  */
 function rest_create_attachment_handle_featured_media( int $value, WP_Post $post ) {
 	if ( $value ) {
+		if ( $value === get_post_thumbnail_id( $post->ID ) ) {
+			return;
+		}
+
 		$result = set_post_thumbnail( $post->ID, $value );
+
 		if ( $result ) {
 			return;
 		}

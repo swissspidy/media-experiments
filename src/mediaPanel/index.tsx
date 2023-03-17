@@ -135,7 +135,7 @@ function MuteVideo({ attributes, setAttributes }) {
 	);
 }
 
-function RecordingControls({ attributes, clientId }) {
+function RecordingControls({ name, attributes, clientId }) {
 	const { baseControlProps, controlProps } = useBaseControlProps({});
 
 	// Video and image blocks use different attribute names for the URL.
@@ -359,26 +359,87 @@ function VideoControls(props) {
 	);
 }
 
-function BlockControls({ blockType, ...rest }) {
-	switch (blockType) {
+function ImageControls(props) {
+	function onChange(media) {
+		if (!media || !media.url) {
+			return;
+		}
+
+		props.setAttributes({
+			url: media.url,
+			id: media.id,
+		});
+	}
+
+	return (
+		<Fragment>
+			<RecordingControls {...props} />
+			<ImportMedia {...props} onChange={onChange} />
+			<ShowBlurHash {...props} />
+			<ShowDominantColor {...props} />
+		</Fragment>
+	);
+}
+function AudioControls(props) {
+	function onChange(media) {
+		if (!media || !media.url) {
+			return;
+		}
+
+		props.setAttributes({
+			url: media.url,
+			id: media.id,
+		});
+	}
+
+	return (
+		<Fragment>
+			<RecordingControls {...props} />
+			<ImportMedia {...props} onChange={onChange} />
+		</Fragment>
+	);
+}
+
+function BlockControls(props) {
+	switch (props.name) {
 		case 'core/video':
 			return (
 				<>
-					<VideoControls {...rest} />
+					<VideoControls {...props} />
 				</>
 			);
 		case 'core/image':
-			return null;
+			return (
+				<>
+					<ImageControls {...props} />
+				</>
+			);
 
 		case 'core/audio':
-			return null;
+			return (
+				<>
+					<AudioControls {...props} />
+				</>
+			);
 
 		default:
 			return null;
 	}
 }
 
-function MediaPanel({ name, clientId, attributes, setAttributes }) {
+interface MediaPanelProps {
+	name: string;
+	clientId: string;
+	attributes: Record<string, unknown>;
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}
+
+function MediaPanel({
+	name,
+	clientId,
+	attributes,
+	setAttributes,
+}: MediaPanelProps) {
 	const attachment = {
 		id: attributes.id,
 		url: attributes.src || attributes.url,
@@ -389,7 +450,7 @@ function MediaPanel({ name, clientId, attributes, setAttributes }) {
 		<Fragment>
 			<UploadIndicator attachment={attachment} />
 			<BlockControls
-				blockType={name}
+				name={name}
 				clientId={clientId}
 				attributes={attributes}
 				setAttributes={setAttributes}

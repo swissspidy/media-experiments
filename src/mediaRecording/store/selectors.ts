@@ -8,6 +8,10 @@ export function isBlockInRecordingMode(state: State, clientId: string) {
 	return state.blockClientId === clientId;
 }
 
+export function getRecordingType(state: State) {
+	return state.recordingType;
+}
+
 export function getDevices(state: State) {
 	return state.devices;
 }
