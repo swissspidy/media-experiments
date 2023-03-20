@@ -36,7 +36,7 @@ import {
 	videoHasAudio,
 } from '../utils';
 import { transcodeHeifImage } from '../heif';
-import { uploadToServer } from '../api';
+import { updateMediaItem, uploadToServer } from '../api';
 import { getMediaTypeFromMimeType, blobToFile } from '../../utils';
 
 interface AddItemArgs {
@@ -527,29 +527,8 @@ export function convertHeifItem(id: QueueItemId) {
 	};
 }
 
-export function setGeneratedPosterAsFeaturedImage(
-	videoId: number,
-	posterId: number
-) {
-	return async ({ registry }) => {
-		// Similarly, update the original video in the DB to have the
-		// poster as the featured image.
-		await registry
-			.dispatch(coreStore)
-			.editEntityRecord('postType', 'attachment', videoId, {
-				featured_media: posterId,
-				meta: {
-					mexp_generated_poster_id: posterId,
-				},
-			});
-		await registry
-			.dispatch(coreStore)
-			.saveEditedEntityRecord('postType', 'attachment', videoId);
-	};
-}
-
 export function uploadPosterForItem(item: QueueItem) {
-	return async ({ dispatch, registry }) => {
+	return async ({ dispatch }) => {
 		const { attachment: videoAttachment } = item;
 
 		// In the event that the uploaded video already has a poster, do not upload another one.
@@ -596,10 +575,12 @@ export function uploadPosterForItem(item: QueueItem) {
 				onSuccess: async ([posterAttachment]) => {
 					// Similarly, update the original video in the DB to have the
 					// poster as the featured image.
-					await dispatch.setGeneratedPosterAsFeaturedImage(
-						videoAttachment.id,
-						posterAttachment.id
-					);
+					updateMediaItem(videoAttachment.id, {
+						featured_media: posterAttachment.id,
+						meta: {
+							mexp_generated_poster_id: posterAttachment.id,
+						},
+					});
 				},
 				additionalData: {
 					// Reminder: Parent post ID might not be set, depending on context,

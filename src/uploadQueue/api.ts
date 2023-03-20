@@ -54,6 +54,23 @@ function createMediaFromFile(
 }
 
 /**
+ * Update an existing attachment in the database.
+ *
+ * @param id Attachment ID.
+ * @param data Attachment data.
+ */
+export function updateMediaItem(
+	id: RestAttachment['id'],
+	data: Partial<RestAttachment>
+) {
+	return apiFetch<RestAttachment>({
+		path: `/wp/v2/media/${id}`,
+		data,
+		method: 'POST',
+	});
+}
+
+/**
  * Recursively flatten data passed to form data, to allow using multi-level objects.
  *
  * @param {FormData} formData Form data object.
