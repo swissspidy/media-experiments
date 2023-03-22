@@ -20,6 +20,10 @@ export function getTranscodedItems(state: State) {
 	return getItems(state, ItemStatus.Transcoded);
 }
 
+export function getApprovedItems(state: State) {
+	return getItems(state, ItemStatus.Approved);
+}
+
 export function getUploadedItems(state: State) {
 	return getItems(state, ItemStatus.Uploaded);
 }
@@ -47,6 +51,40 @@ export function getItem(state: State, id: QueueItemId) {
 
 export function isTranscoding(state: State) {
 	return state.queue.some(({ status }) => status == ItemStatus.Transcoding);
+}
+
+export function getItemByAttachmentId(state: State, id: number) {
+	return state.queue.find(
+		(item) => item.attachment?.id === id || item.sourceAttachmentId === id
+	);
+}
+
+export function isPendingApprovalByAttachmentId(state: State, id: number) {
+	return state.queue.some(
+		(item) =>
+			(item.attachment?.id === id || item.sourceAttachmentId === id) &&
+			item.status === ItemStatus.PendingApproval
+	);
+}
+
+export function getComparisonDataForApproval(state: State, id: number) {
+	const item = state.queue.find(
+		(item) =>
+			(item.attachment?.id === id || item.sourceAttachmentId === id) &&
+			item.status === ItemStatus.PendingApproval
+	);
+
+	if (!item) {
+		return null;
+	}
+
+	return {
+		oldUrl: item.sourceUrl,
+		oldSize: item.sourceFile.size,
+		newSize: item.file.size,
+		newUrl: item.attachment?.url,
+		sizeDiff: (1 - item.file.size / item.sourceFile.size) * 100,
+	};
 }
 
 // Todo: change forceIsSaving in GB depending on this selector.

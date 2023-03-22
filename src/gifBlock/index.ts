@@ -1,10 +1,7 @@
 import { addFilter } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 
-function isGifVariation(blockAttributes) {
-	const { controls, loop, autoplay, muted, playsInline } = blockAttributes;
-	return !controls && loop && autoplay && muted && playsInline;
-}
+import { isGifVariation } from './utils';
 
 function addGifBlockVariationToVideoBlock(settings, name: string) {
 	if (name !== 'core/video') {
@@ -28,7 +25,7 @@ function addGifBlockVariationToVideoBlock(settings, name: string) {
 			muted: true,
 			playsInline: true,
 		},
-		isActive(blockAttributes) {
+		isActive(blockAttributes: Record<string, unknown>) {
 			return isGifVariation(blockAttributes);
 		},
 	});

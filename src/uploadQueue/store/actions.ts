@@ -20,6 +20,7 @@ import {
 	convertGifToVideo,
 	muteVideo,
 	transcodeAudio,
+	transcodeImage,
 	transcodeVideo,
 } from '../ffmpeg';
 import UploadError from '../uploadError';
@@ -38,6 +39,7 @@ import {
 import { transcodeHeifImage } from '../heif';
 import { updateMediaItem, uploadToServer } from '../api';
 import { getMediaTypeFromMimeType, blobToFile } from '../../utils';
+import { getItemByAttachmentId } from './selectors';
 
 interface AddItemArgs {
 	file: File;
@@ -72,6 +74,7 @@ export function addItem({
 			id: uuidv4(),
 			batchId,
 			status: ItemStatus.Pending,
+			sourceFile: new File([file], file.name, { type: file.type }),
 			file,
 			attachment: {
 				url: createBlobURL(file),
@@ -147,9 +150,11 @@ export function muteExistingVideo({
 	return async ({ dispatch }) => {
 		let fileName = getFileNameFromUrl(url);
 		const baseName = getFileBasename(fileName);
-		const file = await fetchRemoteFile(
-			url,
-			fileName.replace(baseName, `${baseName}-muted`)
+		const sourceFile = await fetchRemoteFile(url, fileName);
+		const file = new File(
+			[sourceFile],
+			sourceFile.name.replace(baseName, `${baseName}-muted`),
+			{ type: sourceFile.type }
 		);
 
 		// TODO: Somehow add relation between original and muted video in db.
@@ -167,6 +172,7 @@ export function muteExistingVideo({
 			item: {
 				id: uuidv4(),
 				status: ItemStatus.Pending,
+				sourceFile,
 				file,
 				attachment: {
 					url,
@@ -185,6 +191,81 @@ export function muteExistingVideo({
 				generatedPosterId,
 			},
 		});
+	};
+}
+
+interface OptimizexistingItemArgs {
+	id: number;
+	url: string;
+	poster?: string;
+	onChange?: OnChangeHandler;
+	onSuccess?: OnSuccessHandler;
+	onError?: OnErrorHandler;
+	additionalData?: AdditionalData;
+	blurHash?: string;
+	dominantColor?: string;
+	generatedPosterId?: number;
+}
+
+export function optimizeExistingItem({
+	id,
+	url,
+	poster,
+	onChange,
+	onSuccess,
+	onError,
+	additionalData,
+	blurHash,
+	dominantColor,
+	generatedPosterId,
+}: OptimizexistingItemArgs) {
+	return async ({ dispatch }) => {
+		let fileName = getFileNameFromUrl(url);
+		const baseName = getFileBasename(fileName);
+		const sourceFile = await fetchRemoteFile(url, fileName);
+		const file = new File(
+			[sourceFile],
+			sourceFile.name.replace(baseName, `${baseName}-optimized`),
+			{ type: sourceFile.type }
+		);
+		console.log('sourceFile', sourceFile, file);
+
+		// TODO: Same considerations apply as for muteExistingVideo.
+
+		dispatch({
+			type: Type.Add,
+			item: {
+				id: uuidv4(),
+				status: ItemStatus.Pending,
+				sourceFile,
+				file,
+				attachment: {
+					url,
+					poster,
+				},
+				additionalData,
+				onChange,
+				onSuccess,
+				onError,
+				sourceUrl: url,
+				sourceAttachmentId: id,
+				mediaSourceTerms: [],
+				blurHash,
+				dominantColor,
+				transcode: TranscodingType.OptimizeExisting,
+				generatedPosterId,
+				needsApproval: true,
+			},
+		});
+	};
+}
+
+export function requestApproval(id: QueueItemId, file: File) {
+	return {
+		type: Type.RequestApproval,
+		id,
+		file,
+		url: createBlobURL(file),
 	};
 }
 
@@ -350,6 +431,30 @@ export function removeItem(id: QueueItemId) {
 	};
 }
 
+export function rejectApproval(id: number) {
+	return async ({ select, dispatch }) => {
+		const item: QueueItem = select.getItemByAttachmentId(id);
+		dispatch.cancelItem(
+			item.id,
+			new UploadError({
+				code: 'UPLOAD_CANCELLED',
+				message: 'File upload was cancelled',
+				file: item.file,
+			})
+		);
+	};
+}
+
+export function grantApproval(id: QueueItemId) {
+	return async ({ select, dispatch }) => {
+		const item: QueueItem = select.getItemByAttachmentId(id);
+		dispatch({
+			type: Type.ApproveUpload,
+			id: item.id,
+		});
+	};
+}
+
 export function cancelItem(id: QueueItemId, error: Error) {
 	return {
 		type: Type.Cancel,
@@ -396,6 +501,14 @@ export function maybeTranscodeItem(id: QueueItemId) {
 				void dispatch.muteVideoItem(item.id);
 				break;
 
+			case TranscodingType.OptimizeExisting:
+				if (isTranscoding) {
+					return;
+				}
+
+				void dispatch.optimizeItemWithApproval(item.id);
+				break;
+
 			default:
 				if (isTranscoding) {
 					return;
@@ -403,6 +516,30 @@ export function maybeTranscodeItem(id: QueueItemId) {
 
 				void dispatch.optimizeVideoItem(item.id);
 				break;
+		}
+	};
+}
+
+export function optimizeItemWithApproval(id: QueueItemId) {
+	return async ({ select, dispatch }) => {
+		const item: QueueItem = select.getItem(id);
+
+		dispatch.startTranscoding(id);
+
+		try {
+			const file = await transcodeImage(item.file);
+			dispatch.requestApproval(id, file);
+		} catch (error) {
+			dispatch.cancelItem(
+				id,
+				error instanceof Error
+					? error
+					: new UploadError({
+							code: 'MEDIA_TRANSCODING_ERROR',
+							message: 'File could not be uploaded',
+							file: item.file,
+					  })
+			);
 		}
 	};
 }
@@ -634,6 +771,8 @@ export function uploadItem(id: QueueItemId) {
 			}
 		}
 
+		// TODO: item.attachment.url might be the (blob) URL of a video, which might not work.
+		// Should use getFirstFrameOfVideo() in that case.
 		if (!additionalData.meta.mexp_dominant_color) {
 			// TODO: Make this async after upload?
 			// Could be made reusable to enable backfilling of existing blocks.

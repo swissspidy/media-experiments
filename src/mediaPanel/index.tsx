@@ -2,7 +2,7 @@ import { Blurhash } from 'react-blurhash';
 import { Fragment, useState, useEffect } from '@wordpress/element';
 import { addFilter } from '@wordpress/hooks';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { InspectorControls } from '@wordpress/block-editor';
 import {
@@ -12,6 +12,7 @@ import {
 	BaseControl,
 	useBaseControlProps,
 	ColorIndicator,
+	Modal,
 } from '@wordpress/components';
 import { isBlobURL } from '@wordpress/blob';
 import { store as coreStore } from '@wordpress/core-data';
@@ -20,10 +21,20 @@ import { store as editorStore } from '@wordpress/editor';
 import { store as recordingStore } from '../mediaRecording/store';
 import { store as uploadStore } from '../uploadQueue/store';
 import type { RestAttachment } from '../uploadQueue/store/types';
+import {
+	getComparisonDataForApproval,
+	getPendingImageByAttachmentId,
+	isPendingApprovalByAttachmentId,
+} from '../uploadQueue/store/selectors';
+import { grantApproval } from '../uploadQueue/store/actions';
+import {
+	ReactCompareSlider,
+	ReactCompareSliderImage,
+} from 'react-compare-slider';
 
 const SUPPORTED_BLOCKS = ['core/image', 'core/audio', 'core/video'];
 
-function useAttachment(id: number): RestAttachment | null {
+function useAttachment(id?: number): RestAttachment | null {
 	return useSelect(
 		(select) => {
 			const { getEntityRecord } = select(coreStore);
@@ -102,6 +113,7 @@ function MuteVideo({ attributes, setAttributes }) {
 	);
 
 	const onClick = () => {
+		// TODO: Figure out why poster is not
 		muteExistingVideo({
 			id: attributes.id,
 			url: attributes.src,
@@ -231,10 +243,173 @@ function ImportMedia({ attributes, onChange }) {
 	);
 }
 
+const numberFormatter = Intl.NumberFormat('en', {
+	notation: 'compact',
+	style: 'unit',
+	unit: 'byte',
+	unitDisplay: 'narrow',
+});
+
+function OptimizeMedia({ attributes, setAttributes }) {
+	const { baseControlProps, controlProps } = useBaseControlProps({});
+
+	const [isOpen, setOpen] = useState(false);
+	const openModal = () => setOpen(true);
+	const closeModal = () => setOpen(false);
+
+	const post = useAttachment(attributes.id);
+	const { optimizeExistingItem, rejectApproval, grantApproval } =
+		useDispatch(uploadStore);
+	const isUploading = useIsUploadingById(attributes.id);
+	const currentPostId = useSelect(
+		(select) => select(editorStore).getCurrentPostId(),
+		[]
+	);
+	const { isPendingApproval, comparison } = useSelect(
+		(select) => ({
+			isPendingApproval: select(
+				uploadStore
+			).isPendingApprovalByAttachmentId(attributes.id),
+			comparison: select(uploadStore).getComparisonDataForApproval(
+				attributes.id
+			),
+		}),
+		[attributes.id]
+	);
+
+	console.log(post, isPendingApproval, comparison);
+
+	// Video and image blocks use different attribute names for the URL.
+	const url = attributes.url || attributes.src;
+
+	if (!attributes.id || !url || isBlobURL(url)) {
+		return null;
+	}
+
+	const onClick = () => {
+		optimizeExistingItem({
+			id: attributes.id,
+			url: post?.source_url || url,
+			poster: attributes.poster,
+			onSuccess: ([media]) =>
+				setAttributes({
+					id: media.id,
+					src: media.url,
+				}),
+			blurHash: post.meta.mexp_blurhash,
+			dominantColor: post.meta.mexp_dominant_color,
+			generatedPosterId: post.meta.mexp_generated_poster_id,
+			additionalData: {
+				post: currentPostId,
+			},
+		});
+	};
+
+	const onApprove = () => {
+		closeModal();
+		grantApproval(post.id);
+	};
+
+	const onReject = () => {
+		closeModal();
+		rejectApproval(post.id);
+	};
+
+	// TODO: This needs some (async) checks first to see whether optimization is needed.
+
+	// TODO: Show comparison inline in the editor, or perhaps in a modal?
+
+	return (
+		<>
+			<BaseControl {...baseControlProps}>
+				<BaseControl.VisualLabel>
+					{__('Optimize media', 'media-experiments')}
+				</BaseControl.VisualLabel>
+				<p>
+					{__(
+						'Maybe you can make the file a bit smaller?',
+						'media-experiments'
+					)}
+				</p>
+				<Button
+					variant="primary"
+					onClick={onClick}
+					disabled={isUploading}
+					{...controlProps}
+				>
+					{__('Optimize', 'media-experiments')}
+				</Button>
+			</BaseControl>
+			{isPendingApproval && comparison && (
+				<Modal
+					title={__('Compare media quality', 'media-experiments')}
+					onRequestClose={onReject}
+				>
+					<p>
+						{sprintf(
+							__('Left: old version (%s)', 'media-experiments'),
+							numberFormatter.format(comparison.oldSize)
+						)}
+					</p>
+					<p>
+						{sprintf(
+							__('Right: new version (%s)', 'media-experiments'),
+							numberFormatter.format(comparison.newSize)
+						)}
+					</p>
+					<p>
+						{comparison.sizeDiff > 0
+							? sprintf(
+									__(
+										'The new version is %s%% smaller!',
+										'media-experiments'
+									),
+									comparison.sizeDiff
+							  )
+							: sprintf(
+									__(
+										'The new version is %s%% bigger :(',
+										'media-experiments'
+									),
+									comparison.sizeDiff
+							  )}
+					</p>
+					<ReactCompareSlider
+						itemOne={
+							<ReactCompareSliderImage
+								src={comparison.oldUrl}
+								alt={__(
+									'Original version',
+									'media-experiments'
+								)}
+							/>
+						}
+						itemTwo={
+							<ReactCompareSliderImage
+								src={comparison.newUrl}
+								alt={__(
+									'Optimized version',
+									'media-experiments'
+								)}
+							/>
+						}
+					/>
+					<Button variant="primary" onClick={onApprove}>
+						{__('Use optimized version', 'media-experiments')}
+					</Button>
+					<Button variant="secondary" onClick={onReject}>
+						{__('Cancel', 'media-experiments')}
+					</Button>
+				</Modal>
+			)}
+		</>
+	);
+}
+
 function RestorePoster({ attributes, setAttributes }) {
 	const { baseControlProps, controlProps } = useBaseControlProps({});
 
-	const [posterId, setPosterId] = useState(null);
+	const [posterId, setPosterId] = useState<number | undefined>();
 
 	const attachment = useAttachment(attributes.id);
 	const poster = useAttachment(posterId);
@@ -375,6 +550,7 @@ function ImageControls(props) {
 		<Fragment>
 			<RecordingControls {...props} />
 			<ImportMedia {...props} onChange={onChange} />
+			<OptimizeMedia {...props} onChange={onChange} />
 			<ShowBlurHash {...props} />
 			<ShowDominantColor {...props} />
 		</Fragment>

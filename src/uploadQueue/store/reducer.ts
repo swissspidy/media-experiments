@@ -1,18 +1,20 @@
 import {
-	State,
 	AddAction,
 	AddPosterAction,
+	ApproveUploadAction,
 	CancelAction,
 	ItemStatus,
 	PrepareAction,
 	RemoveAction,
+	RequestApprovalAction,
+	SetMediaSourceTermsAction,
+	State,
 	TranscodingFinishAction,
 	TranscodingPrepareAction,
 	TranscodingStartAction,
 	Type,
 	UploadFinishAction,
 	UploadStartAction,
-	SetMediaSourceTermsAction,
 } from './types';
 
 const DEFAULT_STATE: State = {
@@ -31,7 +33,9 @@ type Action =
 	| CancelAction
 	| RemoveAction
 	| AddPosterAction
-	| SetMediaSourceTermsAction;
+	| SetMediaSourceTermsAction
+	| RequestApprovalAction
+	| ApproveUploadAction;
 
 function reducer(state = DEFAULT_STATE, action: Action) {
 	console.log('reducer', state.queue, action);
@@ -167,6 +171,38 @@ function reducer(state = DEFAULT_STATE, action: Action) {
 			return {
 				...state,
 				queue: state.queue.filter((item) => item.id !== action.id),
+			};
+
+		case Type.RequestApproval:
+			return {
+				...state,
+				queue: state.queue.map((item) =>
+					item.id === action.id
+						? {
+								...item,
+								status: ItemStatus.PendingApproval,
+								file: action.file,
+								attachment: {
+									...item.attachment,
+									url: action.url,
+									mimeType: action.file.type,
+								},
+						  }
+						: item
+				),
+			};
+
+		case Type.ApproveUpload:
+			return {
+				...state,
+				queue: state.queue.map((item) =>
+					item.id === action.id
+						? {
+								...item,
+								status: ItemStatus.Approved,
+						  }
+						: item
+				),
 			};
 
 		case Type.SetMediaSourceTerms: {

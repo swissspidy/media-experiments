@@ -230,6 +230,13 @@ subscribe(() => {
 	}
 }, uploadStore);
 
+subscribe(() => {
+	const items: QueueItem[] = select(uploadStore).getApprovedItems();
+	for (const { id } of items) {
+		void dispatch(uploadStore).uploadItem(id);
+	}
+}, uploadStore);
+
 // Try to get dimensions and poster for placeholder resources.
 // This way we can show something more meaningful to the user before transcoding has finished.
 // Since this uses ffmpeg, we're going to limit this to one at a time.

@@ -1,4 +1,4 @@
-import { WP_REST_API_Attachment, WP_REST_API_Term } from 'wp-types';
+import type { WP_REST_API_Attachment, WP_REST_API_Term } from 'wp-types';
 
 export type { WP_REST_API_Term };
 
@@ -6,6 +6,7 @@ export type QueueItemId = string;
 
 export type QueueItem = {
 	id: QueueItemId;
+	sourceFile: File;
 	file: File;
 	poster?: File;
 	attachment?: Attachment;
@@ -22,6 +23,7 @@ export type QueueItem = {
 	blurHash?: string;
 	dominantColor?: string;
 	generatedPosterId?: number;
+	needsApproval?: boolean;
 };
 
 export interface State {
@@ -41,6 +43,8 @@ export enum Type {
 	Remove = 'REMOVE_ITEM',
 	AddPoster = 'ADD_POSTER',
 	SetMediaSourceTerms = 'ADD_MEDIA_SOURCE_TERMS',
+	RequestApproval = 'REQUEST_APPROVAL',
+	ApproveUpload = 'APPROVE_UPLOAD',
 }
 
 type Action<T = Type, Payload = {}> = {
@@ -49,6 +53,14 @@ type Action<T = Type, Payload = {}> = {
 
 export type AddAction = Action<Type.Add, { item: QueueItem }>;
 export type PrepareAction = Action<Type.Prepare, { id: QueueItemId }>;
+export type RequestApprovalAction = Action<
+	Type.RequestApproval,
+	{ id: QueueItemId; file: File; url: string }
+>;
+export type ApproveUploadAction = Action<
+	Type.ApproveUpload,
+	{ id: QueueItemId }
+>;
 export type TranscodingPrepareAction = Action<
 	Type.TranscodingPrepare,
 	{ id: QueueItemId; transcode: TranscodingType }
@@ -103,6 +115,8 @@ export enum ItemStatus {
 	PendingTranscoding = 'PENDING_TRANSCODING',
 	Transcoding = 'TRANSCODING',
 	Transcoded = 'TRANSCODED',
+	PendingApproval = 'PENDING_APPROVAL',
+	Approved = 'APPROVED',
 	Uploading = 'UPLOADING',
 	Uploaded = 'UPLOADED',
 	Cancelled = 'CANCELLED',
@@ -113,6 +127,7 @@ export enum TranscodingType {
 	Gif = 'GIF',
 	Audio = 'AUDIO',
 	MuteVideo = 'MUTE_VIDEO',
+	OptimizeExisting = 'OPTIMIZE_EXISTING',
 	Default = 'DEFAULT',
 }
 
