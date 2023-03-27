@@ -15,18 +15,12 @@ import {
 	Modal,
 } from '@wordpress/components';
 import { isBlobURL } from '@wordpress/blob';
-import { store as coreStore } from '@wordpress/core-data';
+import { useEntityRecord } from '@wordpress/core-data';
 import { store as editorStore } from '@wordpress/editor';
 
 import { store as recordingStore } from '../mediaRecording/store';
 import { store as uploadStore } from '../uploadQueue/store';
-import type { RestAttachment } from '../uploadQueue/store/types';
-import {
-	getComparisonDataForApproval,
-	getPendingImageByAttachmentId,
-	isPendingApprovalByAttachmentId,
-} from '../uploadQueue/store/selectors';
-import { grantApproval } from '../uploadQueue/store/actions';
+import type { Attachment, RestAttachment } from '../uploadQueue/store/types';
 import {
 	ReactCompareSlider,
 	ReactCompareSliderImage,
@@ -34,21 +28,16 @@ import {
 
 const SUPPORTED_BLOCKS = ['core/image', 'core/audio', 'core/video'];
 
-function useAttachment(id?: number): RestAttachment | null {
-	return useSelect(
-		(select) => {
-			const { getEntityRecord } = select(coreStore);
-			return id ? getEntityRecord('postType', 'attachment', id) : null;
-		},
-		[id]
-	);
+function useAttachment(id?: number) {
+	const { record } = useEntityRecord('postType', 'attachment', id || 0);
+	return record as RestAttachment | null;
 }
 
-function useIsUploadingById(id) {
+function useIsUploadingById(id: number) {
 	return useSelect((select) => select(uploadStore).isUploadingById(id), [id]);
 }
 
-function useIsUploadingByUrl(url) {
+function useIsUploadingByUrl(url: string) {
 	return useSelect(
 		(select) => {
 			if (!url) {
@@ -100,7 +89,16 @@ function UploadIndicator({ attachment }) {
 	);
 }
 
-function MuteVideo({ attributes, setAttributes }) {
+interface MuteVideoProps {
+	attributes: {
+		id?: number;
+		src: string;
+		poster: string;
+	};
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}
+
+function MuteVideo({ attributes, setAttributes }: MuteVideoProps) {
 	const post = useAttachment(attributes.id);
 
 	const url = attributes.src;
@@ -127,9 +125,9 @@ function MuteVideo({ attributes, setAttributes }) {
 					id: media.id,
 					muted: true,
 				}),
-			blurHash: post.meta.mexp_blurhash,
-			dominantColor: post.meta.mexp_dominant_color,
-			generatedPosterId: post.meta.mexp_generated_poster_id,
+			blurHash: post?.meta.mexp_blurhash,
+			dominantColor: post?.meta.mexp_dominant_color,
+			generatedPosterId: post?.meta.mexp_generated_poster_id,
 			additionalData: {
 				post: currentPostId,
 			},
@@ -147,7 +145,15 @@ function MuteVideo({ attributes, setAttributes }) {
 	);
 }
 
-function RecordingControls({ name, attributes, clientId }) {
+interface RecordingControlsProps {
+	attributes: {
+		url?: string;
+		src?: string;
+	};
+	clientId: string;
+}
+
+function RecordingControls({ attributes, clientId }: RecordingControlsProps) {
 	const { baseControlProps, controlProps } = useBaseControlProps({});
 
 	// Video and image blocks use different attribute names for the URL.
@@ -193,7 +199,16 @@ function RecordingControls({ name, attributes, clientId }) {
 	);
 }
 
-function ImportMedia({ attributes, onChange }) {
+interface ImportMediaProps {
+	attributes: {
+		id?: number;
+		url?: string;
+		src?: string;
+	};
+	onChange: (attachment: Partial<Attachment>) => void;
+}
+
+function ImportMedia({ attributes, onChange }: ImportMediaProps) {
 	const { baseControlProps, controlProps } = useBaseControlProps({});
 
 	// Video and image blocks use different attribute names for the URL.
@@ -250,7 +265,17 @@ const numberFormatter = Intl.NumberFormat('en', {
 	unitDisplay: 'narrow',
 });
 
-function OptimizeMedia({ attributes, setAttributes }) {
+interface OptimizeMediaProps {
+	attributes: {
+		id?: number;
+		poster?: string;
+		src?: string;
+		url?: string;
+	};
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}
+
+function OptimizeMedia({ attributes, setAttributes }: OptimizeMediaProps) {
 	const { baseControlProps, controlProps } = useBaseControlProps({});
 
 	const [isOpen, setOpen] = useState(false);
@@ -277,8 +302,6 @@ function OptimizeMedia({ attributes, setAttributes }) {
 		[attributes.id]
 	);
 
-	console.log(post, isPendingApproval, comparison);
-
 	// Video and image blocks use different attribute names for the URL.
 	const url = attributes.url || attributes.src;
 
@@ -296,9 +319,9 @@ function OptimizeMedia({ attributes, setAttributes }) {
 					id: media.id,
 					src: media.url,
 				}),
-			blurHash: post.meta.mexp_blurhash,
-			dominantColor: post.meta.mexp_dominant_color,
-			generatedPosterId: post.meta.mexp_generated_poster_id,
+			blurHash: post?.meta.mexp_blurhash,
+			dominantColor: post?.meta.mexp_dominant_color,
+			generatedPosterId: post?.meta.mexp_generated_poster_id,
 			additionalData: {
 				post: currentPostId,
 			},
@@ -406,7 +429,16 @@ function OptimizeMedia({ attributes, setAttributes }) {
 	);
 }
 
-function RestorePoster({ attributes, setAttributes }) {
+interface RestorePosterProps {
+	attributes: {
+		id?: number;
+		poster?: string;
+		src: string;
+	};
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}
+
+function RestorePoster({ attributes, setAttributes }: RestorePosterProps) {
 	const { baseControlProps, controlProps } = useBaseControlProps({});
 
 	const [posterId, setPosterId] = useState<number | undefined>();
@@ -455,7 +487,13 @@ function RestorePoster({ attributes, setAttributes }) {
 	);
 }
 
-function ShowBlurHash({ attributes }) {
+interface ShowBlurHashProps {
+	attributes: {
+		id?: number;
+	};
+}
+
+function ShowBlurHash({ attributes }: ShowBlurHashProps) {
 	const { baseControlProps, controlProps } = useBaseControlProps({});
 
 	const attachment = useAttachment(attributes.id);
@@ -484,7 +522,13 @@ function ShowBlurHash({ attributes }) {
 	);
 }
 
-function ShowDominantColor({ attributes }) {
+interface ShowDominantColorProps {
+	attributes: {
+		id?: number;
+	};
+}
+
+function ShowDominantColor({ attributes }: ShowDominantColorProps) {
 	const { baseControlProps, controlProps } = useBaseControlProps({});
 
 	const attachment = useAttachment(attributes.id);
@@ -507,7 +551,11 @@ function ShowDominantColor({ attributes }) {
 	);
 }
 
-function VideoControls(props) {
+interface VideoControlsProps {
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}
+
+function VideoControls(props: VideoControlsProps) {
 	function onChange(media) {
 		if (!media || !media.url) {
 			return;
@@ -534,7 +582,11 @@ function VideoControls(props) {
 	);
 }
 
-function ImageControls(props) {
+interface ImageControlsProps {
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}
+
+function ImageControls(props: ImageControlsProps) {
 	function onChange(media) {
 		if (!media || !media.url) {
 			return;
@@ -556,7 +608,12 @@ function ImageControls(props) {
 		</Fragment>
 	);
 }
-function AudioControls(props) {
+
+interface AudioControlsProps {
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}
+
+function AudioControls(props: AudioControlsProps) {
 	function onChange(media) {
 		if (!media || !media.url) {
 			return;
@@ -576,7 +633,12 @@ function AudioControls(props) {
 	);
 }
 
-function BlockControls(props) {
+interface BlockControlsProps {
+	name: string;
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}
+
+function BlockControls(props: BlockControlsProps) {
 	switch (props.name) {
 		case 'core/video':
 			return (

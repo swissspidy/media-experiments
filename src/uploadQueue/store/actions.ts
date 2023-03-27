@@ -1,7 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { createBlobURL, isBlobURL } from '@wordpress/blob';
-import { store as coreStore } from '@wordpress/core-data';
 
 import {
 	AdditionalData,
@@ -39,7 +38,6 @@ import {
 import { transcodeHeifImage } from '../heif';
 import { updateMediaItem, uploadToServer } from '../api';
 import { getMediaTypeFromMimeType, blobToFile } from '../../utils';
-import { getItemByAttachmentId } from './selectors';
 
 interface AddItemArgs {
 	file: File;

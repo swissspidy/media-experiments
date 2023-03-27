@@ -78,13 +78,6 @@ export function toggleHasAudio() {
 	};
 }
 
-export function toggleHasVideo() {
-	return async ({ select, dispatch }) => {
-		const value = select.hasVideo();
-		dispatch.setHasVideo(!value);
-	};
-}
-
 export function resetVideoInput() {
 	return {
 		type: Type.ResetVideoInput,

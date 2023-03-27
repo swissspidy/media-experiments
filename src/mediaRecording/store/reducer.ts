@@ -1,4 +1,4 @@
-import {
+import type {
 	AddMediaChunkAction,
 	ChangeAudioInputAction,
 	ChangeVideoEffectAction,
@@ -23,11 +23,11 @@ import {
 	State,
 	StopRecordingAction,
 	AcquireMediaAction,
-	Type,
 	PauseRecordingAction,
 	ResumeRecordingAction,
 	StartCapturingAction,
 } from './types';
+import { Type } from './types';
 
 const DEFAULT_STATE: State = {
 	videoInput: undefined,

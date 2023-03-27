@@ -1,28 +1,20 @@
-import AudioMotionAnalyzer from 'audiomotion-analyzer';
-
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { BlockControls, useBlockProps, Warning } from '@wordpress/block-editor';
 import { addFilter } from '@wordpress/hooks';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { ToolbarButton, ToolbarDropdownMenu } from '@wordpress/components';
-import {
-	audio,
-	brush,
-	check,
-	capturePhoto,
-	captureVideo,
-	cancelCircleFilled,
-} from '@wordpress/icons';
+import { audio, brush, check, capturePhoto } from '@wordpress/icons';
 import { Fragment, useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 import { store as recordingStore } from './store';
 import { getMediaTypeFromMimeType } from '../utils';
+import AudioAnalyzer from './audioAnalyzer';
 
 const SUPPORTED_BLOCKS = ['core/image', 'core/audio', 'core/video'];
 
 function InputControls() {
-	const { setVideoInput, setAudioInput, toggleHasAudio, toggleHasVideo } =
+	const { setVideoInput, setAudioInput, toggleHasAudio } =
 		useDispatch(recordingStore);
 
 	const {
@@ -221,23 +213,6 @@ function Recorder() {
 		}
 	}, [streamNode, liveStream]);
 
-	function setAudioAnalyzer(instance: HTMLElement | undefined) {
-		if (!instance) {
-			return;
-		}
-
-		const audioCtx = new window.AudioContext();
-		const analyzer = audioCtx.createAnalyser();
-		const audioNode = audioCtx.createMediaStreamSource(liveStream);
-		audioNode.connect(analyzer);
-
-		const audioMotion = new AudioMotionAnalyzer(instance, {
-			source: audioNode,
-		});
-
-		console.log(instance, audioMotion, audioCtx, analyzer);
-	}
-
 	const isFailed = 'failed' === status || Boolean(error);
 	const needsPermissions =
 		('idle' === status || 'acquiringMedia' === status) && !videoInput;
@@ -290,7 +265,7 @@ function Recorder() {
 				<Countdown />
 				<Duration />
 				{'audio' === recordingType ? (
-					<div ref={setAudioAnalyzer} />
+					<AudioAnalyzer source={liveStream} />
 				) : (
 					<video
 						autoPlay
@@ -313,7 +288,13 @@ function Recorder() {
 	);
 }
 
-function RecordingBlockControls({ setAttributes }) {
+interface RecordingBlockControlsProps {
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}
+
+function RecordingBlockControls({
+	setAttributes,
+}: RecordingBlockControlsProps) {
 	const {
 		toggleBlurEffect,
 		startRecording,
@@ -339,8 +320,6 @@ function RecordingBlockControls({ setAttributes }) {
 	const isPaused = 'paused' === status;
 	const isRecordingOrCountdown = ['countdown', 'recording'].includes(status);
 	const isRecording = 'recording' === status;
-
-	console.log('recordingType', recordingType);
 
 	return (
 		<Fragment>

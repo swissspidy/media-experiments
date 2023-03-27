@@ -18,6 +18,7 @@ import type {
 import UploadError from './uploadError';
 import { canTranscodeFile, getMimeTypesArray } from './utils';
 
+// TODO: Maybe create snackbar notices? Perhaps just for debugging.
 const { createInfoNotice, createSuccessNotice, createErrorNotice } =
 	dispatch(noticesStore);
 
