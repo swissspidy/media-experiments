@@ -16,7 +16,6 @@ import type {
 	SetFileAction,
 	SetGifModeAction,
 	SetHasAudioAction,
-	SetHasVideoAction,
 	SetMediaDevicesAction,
 	SetMediaStreamAction,
 	StartRecordingAction,
@@ -36,7 +35,6 @@ const DEFAULT_STATE: State = {
 	blockClientId: undefined,
 	recordingType: 'video',
 	devices: [],
-	hasVideo: true,
 	hasAudio: true,
 	isGifMode: false,
 	countdown: 0,
@@ -60,7 +58,6 @@ type Action =
 	| FinishRecordingAction
 	| StartCapturingAction
 	| SetGifModeAction
-	| SetHasVideoAction
 	| SetHasAudioAction
 	| SetFileAction
 	| ResetStateAction
@@ -201,12 +198,6 @@ function reducer(state = DEFAULT_STATE, action: Action) {
 				isGifMode: action.value,
 			};
 
-		case Type.SetHasVideo:
-			return {
-				...state,
-				hasVideo: action.value,
-			};
-
 		case Type.SetHasAudio:
 			return {
 				...state,
@@ -216,7 +207,6 @@ function reducer(state = DEFAULT_STATE, action: Action) {
 		case Type.ResetVideoInput:
 			return {
 				...state,
-				hasVideo: false,
 				videoInput: undefined,
 			};
 

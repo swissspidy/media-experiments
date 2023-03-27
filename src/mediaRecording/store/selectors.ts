@@ -21,7 +21,7 @@ export function isGifMode(state: State) {
 }
 
 export function hasVideo(state: State) {
-	return state.hasVideo;
+	return state.recordingType !== 'audio';
 }
 
 export function hasAudio(state: State) {

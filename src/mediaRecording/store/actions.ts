@@ -57,13 +57,6 @@ export function toggleGifMode() {
 	};
 }
 
-export function setHasVideo(value: boolean) {
-	return {
-		type: Type.SetHasVideo,
-		value,
-	};
-}
-
 export function setHasAudio(value: boolean) {
 	return {
 		type: Type.SetHasAudio,
@@ -90,6 +83,8 @@ export function enterRecordingMode(clientId: string) {
 
 		const blockName = getBlockName(clientId);
 		const recordingType = getMediaTypeFromBlockName(blockName);
+
+		console.log('enterRecordingMode', recordingType);
 
 		dispatch({
 			type: Type.EnterRecordingMode,

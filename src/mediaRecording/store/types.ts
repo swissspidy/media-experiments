@@ -9,7 +9,6 @@ export interface State {
 	blockClientId?: string;
 	recordingType: RecordingType;
 	devices: MediaDeviceInfo[];
-	hasVideo: boolean;
 	hasAudio: boolean;
 	isGifMode: boolean;
 	file?: File;
@@ -57,7 +56,6 @@ export enum Type {
 	FinishRecording = 'FINISH_RECORDING',
 	StartCapturing = 'START_CAPTURING',
 	SetGifMode = 'SET_GIF_MODE',
-	SetHasVideo = 'SET_HAS_VIDEO',
 	SetHasAudio = 'SET_HAS_AUDIO',
 	SetMediaDevices = 'SET_MEDIA_DEVICES',
 	SetFile = 'SET_FILE',
@@ -107,7 +105,6 @@ export type FinishRecordingAction = Action<
 >;
 export type StartCapturingAction = Action<Type.StartCapturing>;
 export type SetGifModeAction = Action<Type.SetGifMode, { value: boolean }>;
-export type SetHasVideoAction = Action<Type.SetHasVideo, { value: boolean }>;
 export type SetHasAudioAction = Action<Type.SetHasAudio, { value: boolean }>;
 export type SetFileAction = Action<Type.SetFile, { file: File; url: string }>;
 export type ResetStateAction = Action<Type.ResetState>;
