@@ -42,6 +42,8 @@ function InputControls() {
 		};
 	}, []);
 
+	// TODO: The default camera and microphone should be retrieved from preferences.
+
 	const videoControls = videoDevices.map((device) => ({
 		title: device.label,
 		onClick: () => setVideoInput(device.deviceId),
@@ -64,7 +66,7 @@ function InputControls() {
 			onClick: () => setAudioInput(device.deviceId),
 			isActive: audioInput === device.deviceId,
 			role: 'menuitemradio',
-			icon: hasVideo && audioInput === device.deviceId && check,
+			icon: hasAudio && audioInput === device.deviceId && check,
 		})),
 	].filter(Boolean);
 

@@ -526,6 +526,7 @@ export function optimizeItemWithApproval(id: QueueItemId) {
 
 		try {
 			const file = await transcodeImage(item.file);
+			// TODO: Depending on preferences, do not request for approval.
 			dispatch.requestApproval(id, file);
 		} catch (error) {
 			dispatch.cancelItem(
