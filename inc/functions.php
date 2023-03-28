@@ -94,7 +94,7 @@ function register_rest_attachment_featured_media(): void {
 		'attachment',
 		'featured_media',
 		[
-			'schema' => [
+			'schema'          => [
 				'description' => __( 'The ID of the featured media for the object.', 'media-experiments' ),
 				'type'        => 'integer',
 				'context'     => [ 'view', 'edit', 'embed' ],
@@ -109,7 +109,7 @@ function register_rest_attachment_featured_media(): void {
  *
  * @see \WP_REST_Posts_Controller::handle_featured_media
  *
- * @param int $value
+ * @param int     $value
  * @param WP_Post $post
  * @return void|WP_Error
  */
@@ -140,14 +140,14 @@ function register_attachment_post_meta(): void {
 		'attachment',
 		'mexp_blurhash',
 		[
-			'type'           => 'string',
-			'description'    => __( 'BlurHash of the object.', 'media-experiments' ),
-			'show_in_rest'   => [
+			'type'         => 'string',
+			'description'  => __( 'BlurHash of the object.', 'media-experiments' ),
+			'show_in_rest' => [
 				'schema' => [
 					'type' => 'string',
 				],
 			],
-			'single'         => true,
+			'single'       => true,
 		]
 	);
 
@@ -155,14 +155,14 @@ function register_attachment_post_meta(): void {
 		'attachment',
 		'mexp_dominant_color',
 		[
-			'type'           => 'string',
-			'description'    => __( 'Dominant color of the object.', 'media-experiments' ),
-			'show_in_rest'   => [
+			'type'         => 'string',
+			'description'  => __( 'Dominant color of the object.', 'media-experiments' ),
+			'show_in_rest' => [
 				'schema' => [
 					'type' => 'string',
 				],
 			],
-			'single'         => true,
+			'single'       => true,
 		]
 	);
 
@@ -170,12 +170,12 @@ function register_attachment_post_meta(): void {
 		'attachment',
 		'mexp_generated_poster_id',
 		[
-			'type'               => 'integer',
-			'description'        => __( 'The ID of the generated poster image for the object.', 'media-experiments' ),
-			'show_in_rest'       => true,
-			'single'             => true,
-			'default'            => 0,
-			'sanitize_callback'  => 'absint',
+			'type'              => 'integer',
+			'description'       => __( 'The ID of the generated poster image for the object.', 'media-experiments' ),
+			'show_in_rest'      => true,
+			'single'            => true,
+			'default'           => 0,
+			'sanitize_callback' => 'absint',
 		]
 	);
 
@@ -183,12 +183,12 @@ function register_attachment_post_meta(): void {
 		'attachment',
 		'mexp_is_muted',
 		[
-			'type'               => 'boolean',
-			'description'        => __( 'Whether the video is muted.', 'media-experiments' ),
-			'show_in_rest'       => true,
-			'single'             => true,
-			'default'            => false,
-			'sanitize_callback'  => 'rest_sanitize_boolean',
+			'type'              => 'boolean',
+			'description'       => __( 'Whether the video is muted.', 'media-experiments' ),
+			'show_in_rest'      => true,
+			'single'            => true,
+			'default'           => false,
+			'sanitize_callback' => 'rest_sanitize_boolean',
 		]
 	);
 }
@@ -326,7 +326,7 @@ function get_exclude_tax_query( array $args ): array {
 				'taxonomy' => 'mexp_media_source',
 				'field'    => 'slug',
 				'terms'    => [
-					'poster-generation'
+					'poster-generation',
 				],
 				'operator' => 'NOT IN',
 			],
