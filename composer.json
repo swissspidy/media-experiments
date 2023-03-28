@@ -26,6 +26,9 @@
 	},
 	"minimum-stability": "dev",
 	"config": {
+		"platform": {
+			"php": "8.0.28"
+		},
 		"allow-plugins": {
 			"dealerdirect/phpcodesniffer-composer-installer": true
 		}
