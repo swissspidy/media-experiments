@@ -146,7 +146,7 @@ export function muteExistingVideo({
 	generatedPosterId,
 }: MuteExistingVideoArgs) {
 	return async ({ dispatch }) => {
-		let fileName = getFileNameFromUrl(url);
+		const fileName = getFileNameFromUrl(url);
 		const baseName = getFileBasename(fileName);
 		const sourceFile = await fetchRemoteFile(url, fileName);
 		const file = new File(
@@ -218,7 +218,7 @@ export function optimizeExistingItem({
 	generatedPosterId,
 }: OptimizexistingItemArgs) {
 	return async ({ dispatch }) => {
-		let fileName = getFileNameFromUrl(url);
+		const fileName = getFileNameFromUrl(url);
 		const baseName = getFileBasename(fileName);
 		const sourceFile = await fetchRemoteFile(url, fileName);
 		const file = new File(
@@ -277,17 +277,17 @@ export function prepareItem(id: QueueItemId) {
 			id,
 		});
 
-		const mediaType = getMediaTypeFromMimeType(file.type);
-		const blobUrl = createBlobURL(file);
-
-		const canTranscode = canTranscodeFile(file);
-
 		// Transcoding type has already been set, e.g. via muteExistingVideo().
 		// TODO: Check canTransocde either here, in muteExistingVideo, or in the UI.
 		if (item.transcode) {
 			dispatch.prepareForTranscoding(id, item.transcode);
 			return;
 		}
+
+		const mediaType = getMediaTypeFromMimeType(file.type);
+		const blobUrl = createBlobURL(file);
+
+		const canTranscode = canTranscodeFile(file);
 
 		switch (mediaType) {
 			case 'image':
@@ -443,7 +443,7 @@ export function rejectApproval(id: number) {
 	};
 }
 
-export function grantApproval(id: QueueItemId) {
+export function grantApproval(id: number) {
 	return async ({ select, dispatch }) => {
 		const item: QueueItem = select.getItemByAttachmentId(id);
 		dispatch({
@@ -737,7 +737,7 @@ export function uploadItem(id: QueueItemId) {
 	return async ({ select, dispatch }) => {
 		const item: QueueItem = select.getItem(id);
 
-		let { poster } = item;
+		const { poster } = item;
 
 		dispatch.startUploading(id);
 

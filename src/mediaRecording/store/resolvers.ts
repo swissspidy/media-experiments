@@ -1,5 +1,4 @@
 import { Type } from './types';
-import { isInRecordingMode } from './selectors';
 
 export function getDevices() {
 	return async ({ dispatch }) => {

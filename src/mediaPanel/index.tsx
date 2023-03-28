@@ -55,20 +55,12 @@ function useIsUploadingByUrl(url: string) {
 function UploadIndicator({ attachment }) {
 	const isUploadingById = useIsUploadingById(attachment.id);
 	const isUploadingByUrl = useIsUploadingByUrl(attachment.url);
+	const isPosterUploadingByUrl = useIsUploadingByUrl(attachment.poster);
 	const isUploading = isUploadingById || isUploadingByUrl;
 
-	const isPosterUploading = useSelect(
-		(select) => {
-			const isUploadingByUrl = select(uploadStore).isUploadingByUrl(
-				attachment.poster
-			);
-
-			return Boolean(
-				isUploadingByUrl ||
-					(attachment.poster && isBlobURL(attachment.poster))
-			);
-		},
-		[attachment]
+	const isPosterUploading = Boolean(
+		isPosterUploadingByUrl ||
+			(attachment.poster && isBlobURL(attachment.poster))
 	);
 
 	return (
@@ -370,12 +362,14 @@ function OptimizeMedia({ attributes, setAttributes }: OptimizeMediaProps) {
 				>
 					<p>
 						{sprintf(
+							/* translators: %s: file size. */
 							__('Left: old version (%s)', 'media-experiments'),
 							numberFormatter.format(comparison.oldSize)
 						)}
 					</p>
 					<p>
 						{sprintf(
+							/* translators: %s: file size. */
 							__('Right: new version (%s)', 'media-experiments'),
 							numberFormatter.format(comparison.newSize)
 						)}
@@ -383,15 +377,17 @@ function OptimizeMedia({ attributes, setAttributes }: OptimizeMediaProps) {
 					<p>
 						{comparison.sizeDiff > 0
 							? sprintf(
+									/* translators: %s: file size savings in percent. */
 									__(
-										'The new version is %s%% smaller!',
+										'The new version is %1$s%% smaller!',
 										'media-experiments'
 									),
 									comparison.sizeDiff
 							  )
 							: sprintf(
+									/* translators: %s: file size increase in percent. */
 									__(
-										'The new version is %s%% bigger :(',
+										'The new version is %1$s%% bigger :(',
 										'media-experiments'
 									),
 									comparison.sizeDiff
@@ -635,6 +631,7 @@ function AudioControls(props: AudioControlsProps) {
 
 interface BlockControlsProps {
 	name: string;
+	clientId: string;
 	setAttributes: (attributes: Record<string, unknown>) => void;
 }
 

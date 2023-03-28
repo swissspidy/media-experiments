@@ -112,16 +112,16 @@ function ErrorDialog() {
 	if (!window.isSecureContext) {
 		errorMessage = __(
 			'Requires a secure browsing context (HTTPS)',
-			'web-stories'
+			'media-experiments'
 		);
 	} else if (error?.name === 'NotAllowedError') {
-		errorMessage = __('Permission denied', 'web-stories');
+		errorMessage = __('Permission denied', 'media-experiments');
 	} else if (
 		!hasVideo ||
 		error?.name === 'NotFoundError' ||
 		error?.name === 'OverConstrainedError'
 	) {
-		errorMessage = __('No camera found', 'web-stories');
+		errorMessage = __('No camera found', 'media-experiments');
 	}
 
 	return <Warning>{errorMessage}</Warning>;
@@ -132,7 +132,7 @@ function PermissionsDialog() {
 		<Warning>
 			{__(
 				'To get started, you need to allow access to your camera and microphone.',
-				'web-stories'
+				'media-experiments'
 			)}
 		</Warning>
 	);
@@ -188,7 +188,7 @@ function Recorder() {
 		isMuted,
 	} = useSelect((select) => {
 		const file = select(recordingStore).getFile();
-		const isGifMode = select(recordingStore).isGifMode();
+		const isGif = select(recordingStore).isGifMode();
 
 		return {
 			videoInput: select(recordingStore).getVideoInput(),
@@ -199,8 +199,8 @@ function Recorder() {
 			mediaType: file ? getMediaTypeFromMimeType(file.type) : null,
 			url: select(recordingStore).getUrl(),
 			dimensions: select(recordingStore).getDimensions(),
-			isGifMode,
-			isMuted: !select(recordingStore).hasAudio || isGifMode,
+			isGifMode: isGif,
+			isMuted: !select(recordingStore).hasAudio || isGif,
 		};
 	}, []);
 
@@ -234,7 +234,7 @@ function Recorder() {
 					<img
 						src={url}
 						decoding="async"
-						alt={__('Image capture', 'web-stories')}
+						alt={__('Image capture', 'media-experiments')}
 						width={dimensions.width}
 						height={dimensions.height}
 					/>
@@ -352,9 +352,11 @@ function RecordingBlockControls({
 						{!isStopped && (
 							<ToolbarButton
 								onClick={() => {
-									isRecordingOrCountdown
-										? stopRecording()
-										: startRecording();
+									if (isRecordingOrCountdown) {
+										stopRecording();
+									} else {
+										startRecording();
+									}
 								}}
 								extraProps={{
 									disabled:

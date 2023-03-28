@@ -11,7 +11,7 @@ import {
 	useSelect,
 	withSelect,
 	withDispatch,
-	dispatch,
+	dispatch as globalDispatch,
 } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 import {
@@ -22,6 +22,11 @@ import {
 } from '@wordpress/interface';
 import { store as preferencesStore } from '@wordpress/preferences';
 import { SelectControl } from '@wordpress/components';
+import type {
+	ComponentProps,
+	FunctionComponent,
+	PropsWithChildren,
+} from 'react';
 
 import './styles.css';
 import { store as recordingStore } from '../mediaRecording/store';
@@ -42,9 +47,28 @@ const EnableFeature = compose(
 			dispatch(preferencesStore).toggle(PREFERENCES_NAME, featureName);
 		},
 	}))
-)(BaseOption);
+)(BaseOption) as FunctionComponent<
+	PropsWithChildren<
+		Omit<
+			ComponentProps<typeof BaseOption>,
+			'isChecked' | 'onChange' | 'children'
+		> & { featureName: string }
+	>
+>;
 
-function BaseSelectOption({ help, label, value, options, onChange, children }) {
+function BaseSelectOption({
+	help,
+	label,
+	value,
+	options,
+	onChange,
+	children,
+}: PropsWithChildren<
+	Pick<
+		ComponentProps<typeof SelectControl>,
+		'help' | 'label' | 'value' | 'options' | 'onChange'
+	>
+>) {
 	return (
 		<div className="interface-preferences-modal__option interface-preferences-modal__option--select">
 			<SelectControl
@@ -77,7 +101,14 @@ const SelectFeature = compose(
 			);
 		},
 	}))
-)(BaseSelectOption);
+)(BaseSelectOption) as FunctionComponent<
+	PropsWithChildren<
+		Omit<
+			ComponentProps<typeof BaseSelectOption>,
+			'value' | 'onChange' | 'children'
+		> & { featureName: string }
+	>
+>;
 
 function Modal() {
 	const { closeModal } = useDispatch(editPostStore);
@@ -101,28 +132,31 @@ function Modal() {
 		() => [
 			{
 				name: 'general',
-				tabLabel: __('General'),
+				tabLabel: __('General', 'media-experiments'),
 				content: (
 					<>
 						<PreferencesModalSection
-							title={__('General')}
+							title={__('General', 'media-experiments')}
 							description={__(
-								'Customize options related to the media optimization flow.'
+								'Customize options related to the media optimization flow.',
+								'media-experiments'
 							)}
 						>
 							<EnableFeature
 								featureName="requireApproval"
 								help={__(
-									'Require approval step when optimizing existing videos or images.'
+									'Require approval step when optimizing existing videos or images.',
+									'media-experiments'
 								)}
-								label={__('Approval')}
+								label={__('Approval', 'media-experiments')}
 							/>
 							<SelectFeature
 								featureName="imageFormat"
 								help={__(
-									'Preferred file format when converting images.'
+									'Preferred file format when converting images.',
+									'media-experiments'
 								)}
-								label={__('Image Format')}
+								label={__('Image Format', 'media-experiments')}
 								options={[
 									{
 										label: __(
@@ -150,21 +184,23 @@ function Modal() {
 			},
 			{
 				name: 'recording',
-				tabLabel: __('Recording'),
+				tabLabel: __('Recording', 'media-experiments'),
 				content: (
 					<>
 						<PreferencesModalSection
-							title={__('Recording')}
+							title={__('Recording', 'media-experiments')}
 							description={__(
-								'Customize options related to the media recording functionality.'
+								'Customize options related to the media recording functionality.',
+								'media-experiments'
 							)}
 						>
 							<SelectFeature
 								featureName="videoInput"
 								help={__(
-									'Default camera to use when recording video or taking pictures.'
+									'Default camera to use when recording video or taking pictures.',
+									'media-experiments'
 								)}
-								label={__('Camera')}
+								label={__('Camera', 'media-experiments')}
 								options={videoDevices.map((device) => ({
 									label: device.label,
 									value: device.deviceId,
@@ -173,9 +209,10 @@ function Modal() {
 							<SelectFeature
 								featureName="audioInput"
 								help={__(
-									'Default microphone to use when recording video / audio.'
+									'Default microphone to use when recording video / audio.',
+									'media-experiments'
 								)}
-								label={__('Microphone')}
+								label={__('Microphone', 'media-experiments')}
 								options={audioDevices.map((device) => ({
 									label: device.label,
 									value: device.deviceId,
@@ -222,7 +259,7 @@ registerPlugin('media-experiments-preferences', {
 	render: PreferencesMenuItem,
 });
 
-dispatch(preferencesStore).setDefaults(PREFERENCES_NAME, {
+globalDispatch(preferencesStore).setDefaults(PREFERENCES_NAME, {
 	videoInput: undefined,
 	audioInput: undefined,
 	videoEffect: 'none',

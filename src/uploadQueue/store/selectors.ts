@@ -50,7 +50,7 @@ export function getItem(state: State, id: QueueItemId) {
 }
 
 export function isTranscoding(state: State) {
-	return state.queue.some(({ status }) => status == ItemStatus.Transcoding);
+	return state.queue.some(({ status }) => status === ItemStatus.Transcoding);
 }
 
 export function getItemByAttachmentId(state: State, id: number) {
@@ -68,22 +68,22 @@ export function isPendingApprovalByAttachmentId(state: State, id: number) {
 }
 
 export function getComparisonDataForApproval(state: State, id: number) {
-	const item = state.queue.find(
+	const foundItem = state.queue.find(
 		(item) =>
 			(item.attachment?.id === id || item.sourceAttachmentId === id) &&
 			item.status === ItemStatus.PendingApproval
 	);
 
-	if (!item) {
+	if (!foundItem) {
 		return null;
 	}
 
 	return {
-		oldUrl: item.sourceUrl,
-		oldSize: item.sourceFile.size,
-		newSize: item.file.size,
-		newUrl: item.attachment?.url,
-		sizeDiff: (1 - item.file.size / item.sourceFile.size) * 100,
+		oldUrl: foundItem.sourceUrl,
+		oldSize: foundItem.sourceFile.size,
+		newSize: foundItem.file.size,
+		newUrl: foundItem.attachment?.url,
+		sizeDiff: (1 - foundItem.file.size / foundItem.sourceFile.size) * 100,
 	};
 }
 

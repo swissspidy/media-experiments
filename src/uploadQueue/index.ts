@@ -49,6 +49,14 @@ interface UploadMediaArgs {
  * Similar to the mediaUpload() function from @wordpress/editor,
  * this is a wrapper around uploadMedia() from @wordpress/media-utils
  * that injects the current post ID.
+ *
+ * @param args
+ * @param args.allowedTypes
+ * @param args.additionalData
+ * @param args.filesList
+ * @param args.maxUploadFileSize
+ * @param args.onError
+ * @param args.onFileChange
  */
 export default function uploadMedia({
 	allowedTypes,

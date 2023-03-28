@@ -133,7 +133,7 @@ export function countDuration() {
 			value: 0,
 		});
 
-		let timer: number | undefined = undefined;
+		let timer: number | undefined;
 
 		clearInterval(timer);
 
@@ -177,7 +177,7 @@ export function startRecording() {
 			value: COUNTDOWN_TIME_IN_SECONDS,
 		});
 
-		let timer: number | undefined = undefined;
+		let timer: number | undefined;
 
 		clearInterval(timer);
 
@@ -319,7 +319,7 @@ export function resumeRecording() {
 			type: Type.ResumeRecording,
 		});
 
-		let timer: number | undefined = undefined;
+		let timer: number | undefined;
 
 		clearInterval(timer);
 
@@ -352,7 +352,7 @@ export function captureImage() {
 			value: COUNTDOWN_TIME_IN_SECONDS,
 		});
 
-		let timer: number | undefined = undefined;
+		let timer: number | undefined;
 
 		clearInterval(timer);
 

@@ -56,7 +56,7 @@ function createMediaFromFile(
 /**
  * Update an existing attachment in the database.
  *
- * @param id Attachment ID.
+ * @param id   Attachment ID.
  * @param data Attachment data.
  */
 export function updateMediaItem(
@@ -73,9 +73,9 @@ export function updateMediaItem(
 /**
  * Recursively flatten data passed to form data, to allow using multi-level objects.
  *
- * @param {FormData} formData Form data object.
- * @param {string} key Key to amend to form data object
- * @param {string|Object} data Data to be amended to form data.
+ * @param {FormData}      formData Form data object.
+ * @param {string}        key      Key to amend to form data object
+ * @param {string|Object} data     Data to be amended to form data.
  */
 function flattenFormData(formData, key, data) {
 	if (typeof data === 'object') {

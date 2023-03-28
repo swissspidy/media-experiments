@@ -107,8 +107,8 @@ async function loadFFmpeg(file: File) {
 /**
  * Run FFmpeg with a given config.
  *
- * @param file Input file object.
- * @param config FFmpeg config arguments.
+ * @param file     Input file object.
+ * @param config   FFmpeg config arguments.
  * @param mimeType Output mime type.
  * @param fileName Output file name.
  * @return Output file object.
