@@ -27,7 +27,7 @@
 		"pretty": true,
 		"sourceMap": true,
 		"typeRoots": ["typings", "./node_modules/@types"],
-		"types": []
+		"types": ["jest", "node"]
 	},
 	"include": ["src/**/*"]
 }

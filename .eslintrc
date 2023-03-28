@@ -26,5 +26,11 @@
 				"allow": ["WP_REST_API_.*", "featured_media", "mexp_.*"]
 			}
 		]
-	}
+	},
+	"overrides": [
+		{
+			"files": ["tests/e2e/specs/**/*.js"],
+			"extends": ["plugin:@wordpress/eslint-plugin/test-e2e"]
+		}
+	]
 }

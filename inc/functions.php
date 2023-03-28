@@ -41,6 +41,14 @@ function register_assets(): void {
 		'1.14.0',
 		true
 	);
+
+	wp_register_script(
+		'media-experiments-vips',
+		'https://storage.googleapis.com/web-stories-wp-cdn-assets/19/js/wasm-vips@0.0.4/vips.js',
+		[],
+		'0.0.4',
+		true
+	);
 }
 
 function enqueue_block_editor_assets(): void {
@@ -51,6 +59,7 @@ function enqueue_block_editor_assets(): void {
 	$asset['version']      = $asset['version'] ?? '';
 
 	$asset['dependencies'][] = 'media-experiments-libheif';
+	$asset['dependencies'][] = 'media-experiments-vips';
 
 	wp_enqueue_script(
 		'media-experiments',

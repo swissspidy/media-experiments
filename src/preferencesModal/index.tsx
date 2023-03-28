@@ -33,28 +33,36 @@ import { store as recordingStore } from '../mediaRecording/store';
 
 const PREFERENCES_NAME = 'media-experiments/preferences';
 
+type EnableFeatureProps = PropsWithChildren<
+	Omit<
+		ComponentProps<typeof BaseOption>,
+		'isChecked' | 'onChange' | 'children'
+	> & { featureName: string }
+>;
+
 const EnableFeature = compose(
-	withSelect((select, { featureName }) => {
+	withSelect((select, { featureName }: EnableFeatureProps) => {
 		return {
 			isChecked: Boolean(
 				select(preferencesStore).get(PREFERENCES_NAME, featureName)
 			),
 		};
 	}),
-	withDispatch((dispatch, { featureName, onToggle = () => {} }) => ({
-		onChange: () => {
-			onToggle();
-			dispatch(preferencesStore).toggle(PREFERENCES_NAME, featureName);
-		},
-	}))
-)(BaseOption) as FunctionComponent<
-	PropsWithChildren<
-		Omit<
-			ComponentProps<typeof BaseOption>,
-			'isChecked' | 'onChange' | 'children'
-		> & { featureName: string }
-	>
->;
+	withDispatch(
+		(
+			dispatch,
+			{ featureName, onToggle = () => {} }: EnableFeatureProps
+		) => ({
+			onChange: () => {
+				onToggle();
+				dispatch(preferencesStore).toggle(
+					PREFERENCES_NAME,
+					featureName
+				);
+			},
+		})
+	)
+)(BaseOption) as FunctionComponent<EnableFeatureProps>;
 
 function BaseSelectOption({
 	help,
@@ -84,16 +92,23 @@ function BaseSelectOption({
 	);
 }
 
+type SelectFeatureProps = PropsWithChildren<
+	Omit<
+		ComponentProps<typeof BaseSelectOption>,
+		'value' | 'onChange' | 'children'
+	> & { featureName: string }
+>;
+
 const SelectFeature = compose(
-	withSelect((select, { featureName }) => {
+	withSelect((select, { featureName }: SelectFeatureProps) => {
 		return {
 			value:
 				select(preferencesStore).get(PREFERENCES_NAME, featureName) ||
 				undefined,
 		};
 	}),
-	withDispatch((dispatch, { featureName }) => ({
-		onChange: (value) => {
+	withDispatch((dispatch, { featureName }: SelectFeatureProps) => ({
+		onChange: (value: string | number) => {
 			dispatch(preferencesStore).set(
 				PREFERENCES_NAME,
 				featureName,
@@ -101,14 +116,7 @@ const SelectFeature = compose(
 			);
 		},
 	}))
-)(BaseSelectOption) as FunctionComponent<
-	PropsWithChildren<
-		Omit<
-			ComponentProps<typeof BaseSelectOption>,
-			'value' | 'onChange' | 'children'
-		> & { featureName: string }
-	>
->;
+)(BaseSelectOption) as FunctionComponent<SelectFeatureProps>;
 
 function Modal() {
 	const { closeModal } = useDispatch(editPostStore);
