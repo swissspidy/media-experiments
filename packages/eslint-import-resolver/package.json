@@ -5,10 +5,10 @@
 	"author": "",
 	"license": "Apache-2.0",
 	"main": "src/index.js",
-	"source": "src/index.ts",
+	"source": "src/index.js",
 	"exports": {
 		".": {
-			"default": "./src/index.ts"
+			"default": "./src/index.js"
 		}
 	},
 	"dependencies": {
