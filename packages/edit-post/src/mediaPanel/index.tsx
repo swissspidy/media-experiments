@@ -174,11 +174,11 @@ function RecordingControls({ attributes, clientId }: RecordingControlsProps) {
 	return (
 		<BaseControl {...baseControlProps}>
 			<BaseControl.VisualLabel>
-				{__('Camera', 'media-experiments')}
+				{__('Self Recording', 'media-experiments')}
 			</BaseControl.VisualLabel>
 			<p>
 				{__(
-					"Use your device's camera to record video, audio, or take a still picture",
+					"Use your device's camera and microphone to record video, audio, or take a still picture",
 					'media-experiments'
 				)}
 			</p>

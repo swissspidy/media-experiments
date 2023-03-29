@@ -13,6 +13,7 @@
 		}
 	},
 	"dependencies": {
+		"@mediapipe/selfie_segmentation": "^0.1.1675465747",
 		"@mexp/ffmpeg": "*",
 		"@mexp/heif": "*",
 		"@mexp/media-utils": "*",

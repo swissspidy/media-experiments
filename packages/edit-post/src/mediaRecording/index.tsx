@@ -3,7 +3,7 @@ import { BlockControls, useBlockProps, Warning } from '@wordpress/block-editor';
 import { addFilter } from '@wordpress/hooks';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { ToolbarButton, ToolbarDropdownMenu } from '@wordpress/components';
-import { audio, brush, check, capturePhoto } from '@wordpress/icons';
+import { audio, check, capturePhoto } from '@wordpress/icons';
 import { Fragment, useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
@@ -11,6 +11,9 @@ import { getMediaTypeFromMimeType } from '@mexp/media-utils';
 
 import { store as recordingStore } from './store';
 import AudioAnalyzer from './audioAnalyzer';
+
+import { ReactComponent as BlurOn } from './icons/blurOn.svg';
+import { ReactComponent as BlurOff } from './icons/blurOff.svg';
 
 const SUPPORTED_BLOCKS = ['core/image', 'core/audio', 'core/video'];
 
@@ -88,9 +91,6 @@ function InputControls() {
 					label={__('Select Microphone', 'media-experiments')}
 					icon="microphone"
 					controls={audioControls}
-					toggleProps={{
-						disabled: !hasAudio,
-					}}
 				/>
 			)}
 		</Fragment>
@@ -206,12 +206,15 @@ function Recorder() {
 	}, []);
 
 	useEffect(() => {
-		// Checking for srcObject avoids flickering due to the stream changing constantly.
-		if (streamNode && !streamNode.srcObject && liveStream) {
+		if (!streamNode) {
+			return;
+		}
+
+		if (liveStream) {
 			streamNode.srcObject = liveStream;
 		}
 
-		if (streamNode && !liveStream) {
+		if (!liveStream) {
 			streamNode.srcObject = null;
 		}
 	}, [streamNode, liveStream]);
@@ -271,9 +274,9 @@ function Recorder() {
 					<AudioAnalyzer source={liveStream} />
 				) : (
 					<video
-						autoPlay
-						disablePictureInPicture
 						ref={setStreamNode}
+						disablePictureInPicture
+						autoPlay
 						muted
 					/>
 				)}
@@ -336,11 +339,24 @@ function RecordingBlockControls({
 							toggleBlurEffect();
 						}}
 						isPressed={'blur' === videoEffect}
-						icon={brush}
-						label={__(
-							'Enable Background Blur',
-							'media-experiments'
-						)}
+						icon={
+							'blur' === videoEffect ? (
+								<BlurOff width={32} height={32} />
+							) : (
+								<BlurOn width={32} height={32} />
+							)
+						}
+						label={
+							'blur' === videoEffect
+								? __(
+										'Disable Background Blur',
+										'media-experiments'
+								  )
+								: __(
+										'Enable Background Blur',
+										'media-experiments'
+								  )
+						}
 						extraProps={{
 							disabled: !isReady,
 						}}

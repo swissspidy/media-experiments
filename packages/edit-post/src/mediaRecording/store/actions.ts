@@ -31,9 +31,13 @@ export function setAudioInput(deviceId: string) {
 }
 
 export function setVideoEffect(videoEffect: VideoEffect) {
-	return {
-		type: Type.ChangeVideoEffect,
-		videoEffect,
+	return async ({ dispatch }) => {
+		dispatch({
+			type: Type.ChangeVideoEffect,
+			videoEffect,
+		});
+
+		dispatch.invalidateResolutionForStoreSelector('getMediaStream');
 	};
 }
 
@@ -85,8 +89,6 @@ export function enterRecordingMode(clientId: string) {
 		const blockName = getBlockName(clientId);
 		const recordingType = getMediaTypeFromBlockName(blockName);
 
-		console.log('enterRecordingMode', recordingType);
-
 		dispatch({
 			type: Type.EnterRecordingMode,
 			clientId,
@@ -104,8 +106,6 @@ export function leaveRecordingMode() {
 		dispatch({
 			type: Type.LeaveRecordingMode,
 		});
-
-		mediaStream?.getTracks().forEach((track) => track.stop());
 	};
 }
 
@@ -159,7 +159,7 @@ export function countDuration() {
 }
 
 export function retryRecording() {
-	return async ({ select, dispatch }) => {
+	return async ({ dispatch }) => {
 		// retry means getting a new stream (if missing)
 		// and resetting any state (countdown, duration, files, etc.) if set
 
@@ -210,8 +210,6 @@ export function startRecording() {
 				});
 
 				mediaRecorder.addEventListener('stop', () => {
-					mediaStream.getTracks().forEach((track) => track.stop());
-
 					const mediaChunks = select.getMediaChunks();
 					const hasVideo = select.hasVideo();
 					const previousUrl = select.getUrl();
@@ -257,8 +255,6 @@ export function startRecording() {
 				});
 
 				mediaRecorder.addEventListener('error', (evt) => {
-					mediaStream.getTracks().forEach((track) => track.stop());
-
 					dispatch({
 						type: Type.SetError,
 						error: evt.error,
@@ -285,11 +281,8 @@ export function startRecording() {
 export function stopRecording() {
 	return async ({ select, dispatch }) => {
 		const mediaRecorder = select.getMediaRecorder();
-		const mediaStream = select.getMediaStream();
 
 		mediaRecorder.stop();
-
-		mediaStream?.getTracks().forEach((track) => track.stop());
 
 		dispatch({
 			type: Type.StopRecording,
@@ -394,9 +387,6 @@ export function captureImage() {
 						type
 					);
 					const url = createBlobURL(file);
-
-					// TODO: Maybe do that a bit earlier, right after StartCapturing dispatch?
-					mediaStream.getTracks().forEach((track) => track.stop());
 
 					dispatch({
 						type: Type.FinishRecording,
