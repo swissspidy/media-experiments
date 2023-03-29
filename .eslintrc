@@ -7,6 +7,9 @@
 			"presets": ["@wordpress/babel-preset-default"]
 		}
 	},
+	"settings": {
+		"import/resolver": "@mexp/eslint-import-resolver"
+	},
 	"rules": {
 		"@wordpress/no-unused-vars-before-return": [
 			"error",

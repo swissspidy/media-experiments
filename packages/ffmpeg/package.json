@@ -1,0 +1,21 @@
+{
+	"name": "@mexp/ffmpeg",
+	"description": "FFmpeg utils",
+	"private": true,
+	"author": "",
+	"license": "Apache-2.0",
+	"types": "dist-types/index.d.ts",
+	"main": "dist/index.js",
+	"source": "src/index.ts",
+	"exports": {
+		".": {
+			"default": "./src/index.ts"
+		}
+	},
+	"dependencies": {
+		"@ffmpeg/core": "^0.11.0",
+		"@ffmpeg/ffmpeg": "^0.11.6",
+		"@mexp/media-utils": "*",
+		"uuid": "^9.0.0"
+	}
+}

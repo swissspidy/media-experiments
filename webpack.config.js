@@ -5,9 +5,12 @@ const defaultConfig = require('@wordpress/scripts/config/webpack.config');
 
 module.exports = {
 	...defaultConfig,
+	entry: {
+		index: resolve(__dirname, 'packages/edit-post/src/index.ts'),
+	},
 	output: {
 		filename: 'media-experiments.js',
-		path: resolve(process.cwd(), 'build'),
+		path: resolve(__dirname, 'build'),
 	},
 	resolve: {
 		extensions: ['.jsx', '.ts', '.tsx', '...'],
