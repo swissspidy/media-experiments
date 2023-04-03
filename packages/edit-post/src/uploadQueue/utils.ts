@@ -4,7 +4,11 @@ import {
 	type FastAverageColorResource,
 } from 'fast-average-color';
 
-import { blobToFile } from '@mexp/media-utils';
+import {
+	blobToFile,
+	getCanvasBlob,
+	getExtensionFromMimeType,
+} from '@mexp/media-utils';
 
 import {
 	MEDIA_TRANSCODING_MAX_FILE_SIZE,
@@ -117,7 +121,7 @@ function preloadImage(src: string, width?: number, height?: number) {
 		// If no width or height are provided, set them to undefined
 		// so that is preloaded with its full dimensions.
 		// Avoids creating an image with 0x0 dimensions.
-		const image = new window.Image(
+		const image = new Image(
 			width ? Number(width) : undefined,
 			height ? Number(height) : undefined
 		);

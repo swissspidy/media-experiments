@@ -8,3 +8,4 @@ phpunit.xml
 phpunit-multisite.xml
 .phpunit.result.cache
 tsconfig.tsbuildinfo
+dist-types
