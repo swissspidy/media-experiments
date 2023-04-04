@@ -1,0 +1,19 @@
+.mexp-comparison-modal__labels {
+	display: flex;
+	justify-content: space-around;
+	margin: 0 0 1em;
+}
+
+.mexp-comparison-modal__labels p {
+	margin: 0;
+}
+
+.mexp-comparison-modal__slider {
+	margin: 0 0 1em;
+}
+
+.mexp-comparison-modal__buttons {
+	display: flex;
+	justify-content: flex-end;
+	gap: 1em;
+}

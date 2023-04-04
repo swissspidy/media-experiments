@@ -17,6 +17,7 @@
 		"@mexp/ffmpeg": "*",
 		"@mexp/heif": "*",
 		"@mexp/media-utils": "*",
+		"@mexp/vips": "*",
 		"@wordpress/blob": "^3.27.0",
 		"@wordpress/block-editor": "^11.4.0",
 		"@wordpress/data": "^8.4.0",

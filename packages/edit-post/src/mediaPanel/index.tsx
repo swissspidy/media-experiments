@@ -1,5 +1,15 @@
 import { Blurhash } from 'react-blurhash';
-import { Fragment, useState, useEffect } from '@wordpress/element';
+import {
+	ReactCompareSlider,
+	ReactCompareSliderImage,
+} from 'react-compare-slider';
+
+import {
+	Fragment,
+	useState,
+	useEffect,
+	createInterpolateElement,
+} from '@wordpress/element';
 import { addFilter } from '@wordpress/hooks';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __, sprintf } from '@wordpress/i18n';
@@ -21,10 +31,7 @@ import { store as editorStore } from '@wordpress/editor';
 import { store as recordingStore } from '../mediaRecording/store';
 import { store as uploadStore } from '../uploadQueue/store';
 import type { Attachment, RestAttachment } from '../uploadQueue/store/types';
-import {
-	ReactCompareSlider,
-	ReactCompareSliderImage,
-} from 'react-compare-slider';
+import './styles.css';
 
 const SUPPORTED_BLOCKS = ['core/image', 'core/audio', 'core/video'];
 
@@ -255,6 +262,9 @@ const numberFormatter = Intl.NumberFormat('en', {
 	style: 'unit',
 	unit: 'byte',
 	unitDisplay: 'narrow',
+	roundingPriority: 'lessPrecision',
+	maximumSignificantDigits: 2,
+	maximumFractionDigits: 2,
 });
 
 interface OptimizeMediaProps {
@@ -332,8 +342,6 @@ function OptimizeMedia({ attributes, setAttributes }: OptimizeMediaProps) {
 
 	// TODO: This needs some (async) checks first to see whether optimization is needed.
 
-	// TODO: Show comparison inline in the editor, or perhaps in a modal?
-
 	return (
 		<>
 			<BaseControl {...baseControlProps}>
@@ -360,65 +368,79 @@ function OptimizeMedia({ attributes, setAttributes }: OptimizeMediaProps) {
 					title={__('Compare media quality', 'media-experiments')}
 					onRequestClose={onReject}
 				>
+					<div className="mexp-comparison-modal__labels">
+						<p>
+							{sprintf(
+								/* translators: %s: file size. */
+								__('Old version: %s', 'media-experiments'),
+								numberFormatter.format(comparison.oldSize)
+							)}
+						</p>
+						<p>
+							{sprintf(
+								/* translators: %s: file size. */
+								__('New version: %s', 'media-experiments'),
+								numberFormatter.format(comparison.newSize)
+							)}
+						</p>
+					</div>
 					<p>
-						{sprintf(
-							/* translators: %s: file size. */
-							__('Left: old version (%s)', 'media-experiments'),
-							numberFormatter.format(comparison.oldSize)
+						{createInterpolateElement(
+							comparison.sizeDiff > 0
+								? sprintf(
+										/* translators: %s: file size savings in percent. */
+										__(
+											'The new version is <b>%1$s%% smaller</b>!',
+											'media-experiments'
+										),
+										comparison.sizeDiff
+								  )
+								: sprintf(
+										/* translators: %s: file size increase in percent. */
+										__(
+											'The new version is <b>%1$s%% bigger</b> :(',
+											'media-experiments'
+										),
+										comparison.sizeDiff
+								  ),
+							{
+								b: <b />,
+							}
 						)}
 					</p>
-					<p>
-						{sprintf(
-							/* translators: %s: file size. */
-							__('Right: new version (%s)', 'media-experiments'),
-							numberFormatter.format(comparison.newSize)
-						)}
-					</p>
-					<p>
-						{comparison.sizeDiff > 0
-							? sprintf(
-									/* translators: %s: file size savings in percent. */
-									__(
-										'The new version is %1$s%% smaller!',
+					<div className="mexp-comparison-modal__slider">
+						<ReactCompareSlider
+							style={{
+								maxHeight: '400px',
+							}}
+							itemOne={
+								<ReactCompareSliderImage
+									src={comparison.oldUrl}
+									alt={__(
+										'Original version',
 										'media-experiments'
-									),
-									comparison.sizeDiff
-							  )
-							: sprintf(
-									/* translators: %s: file size increase in percent. */
-									__(
-										'The new version is %1$s%% bigger :(',
+									)}
+								/>
+							}
+							itemTwo={
+								<ReactCompareSliderImage
+									src={comparison.newUrl}
+									alt={__(
+										'Optimized version',
 										'media-experiments'
-									),
-									comparison.sizeDiff
-							  )}
-					</p>
-					<ReactCompareSlider
-						itemOne={
-							<ReactCompareSliderImage
-								src={comparison.oldUrl}
-								alt={__(
-									'Original version',
-									'media-experiments'
-								)}
-							/>
-						}
-						itemTwo={
-							<ReactCompareSliderImage
-								src={comparison.newUrl}
-								alt={__(
-									'Optimized version',
-									'media-experiments'
-								)}
-							/>
-						}
-					/>
-					<Button variant="primary" onClick={onApprove}>
-						{__('Use optimized version', 'media-experiments')}
-					</Button>
-					<Button variant="secondary" onClick={onReject}>
-						{__('Cancel', 'media-experiments')}
-					</Button>
+									)}
+								/>
+							}
+						/>
+					</div>
+					<div className="mexp-comparison-modal__buttons">
+						<Button variant="primary" onClick={onApprove}>
+							{__('Use optimized version', 'media-experiments')}
+						</Button>
+						<Button variant="secondary" onClick={onReject}>
+							{__('Cancel', 'media-experiments')}
+						</Button>
+					</div>
 				</Modal>
 			)}
 		</>

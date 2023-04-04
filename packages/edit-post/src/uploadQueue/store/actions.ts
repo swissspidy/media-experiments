@@ -1,14 +1,16 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { createBlobURL, isBlobURL } from '@wordpress/blob';
+import { store as preferencesStore } from '@wordpress/preferences';
 
 import {
 	convertGifToVideo,
 	muteVideo,
 	transcodeAudio,
-	transcodeImage,
+	convertImageToWebP,
 	transcodeVideo,
 } from '@mexp/ffmpeg';
+import { convertImageToJpeg } from '@mexp/vips';
 import { isHeifImage, transcodeHeifImage } from '@mexp/heif';
 import {
 	getFileBasename,
@@ -522,15 +524,33 @@ export function maybeTranscodeItem(id: QueueItemId) {
 }
 
 export function optimizeItemWithApproval(id: QueueItemId) {
-	return async ({ select, dispatch }) => {
+	return async ({ select, dispatch, registry }) => {
 		const item: QueueItem = select.getItem(id);
 
 		dispatch.startTranscoding(id);
 
+		const imageFormat = registry
+			.select(preferencesStore)
+			.get('media-experiments/preferences', 'imageFormat');
+		console.log('imageFormat', imageFormat);
+
 		try {
-			const file = await transcodeImage(item.file);
-			// TODO: Depending on preferences, do not request for approval.
-			dispatch.requestApproval(id, file);
+			const file =
+				imageFormat === 'webp'
+					? await convertImageToWebP(item.file)
+					: await convertImageToJpeg(item.file);
+
+			const requireApproval = registry
+				.select(preferencesStore)
+				.get('media-experiments/preferences', 'requireApproval');
+
+			console.log('requireApproval', requireApproval);
+
+			if (requireApproval) {
+				dispatch.requestApproval(id, file);
+			} else {
+				dispatch.finishTranscoding(id, file);
+			}
 		} catch (error) {
 			dispatch.cancelItem(
 				id,

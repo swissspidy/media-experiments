@@ -61,9 +61,8 @@ const FFMPEG_SHARED_CONFIG = [
 	...FFMPEG_CONFIG.PRESET,
 ];
 
-// TODO: Load from elsewhere.
 const ffmpegCoreUrl =
-	'https://wp.stories.google/static/main/js/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js';
+	'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js';
 
 const isDevelopment =
 	typeof process !== 'undefined' &&
@@ -183,10 +182,10 @@ export async function transcodeVideo(file: File) {
 /**
  * Transcode an image using FFmpeg.
  *
- * @param file Original video file object.
- * @return Processed video file object.
+ * @param file Original file object.
+ * @return Processed file object.
  */
-export async function transcodeImage(file: File) {
+export async function convertImageToWebP(file: File) {
 	const outputFileName = `${getFileBasename(file.name)}.webp`;
 	return runFFmpegWithConfig(
 		file,

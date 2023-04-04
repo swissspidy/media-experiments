@@ -1,0 +1,19 @@
+{
+	"name": "@mexp/vips",
+	"description": "libvips utils",
+	"private": true,
+	"author": "",
+	"license": "Apache-2.0",
+	"types": "dist-types/index.d.ts",
+	"main": "dist/index.js",
+	"source": "src/index.ts",
+	"exports": {
+		".": {
+			"default": "./src/index.ts"
+		}
+	},
+	"dependencies": {
+		"@mexp/media-utils": "*",
+		"wasm-vips": "^0.0.4"
+	}
+}

@@ -8,6 +8,9 @@
 		},
 		{
 			"path": "packages/heif"
+		},
+		{
+			"path": "packages/vips"
 		}
 	]
 }

@@ -36,15 +36,15 @@ function set_up_cross_origin_isolation( WP_Screen $screen ): void {
 function register_assets(): void {
 	wp_register_script(
 		'media-experiments-libheif',
-		'https://wp.stories.google/static/main/js/libheif-js@1.14.0/libheif.js',
+		'https://cdn.jsdelivr.net/npm/libheif-js@1.15.1/libheif/libheif.min.js',
 		[],
-		'1.14.0',
+		'1.15.1',
 		true
 	);
 
 	wp_register_script(
 		'media-experiments-vips',
-		'https://storage.googleapis.com/web-stories-wp-cdn-assets/19/js/wasm-vips@0.0.4/vips.js',
+		'https://cdn.jsdelivr.net/npm/wasm-vips@0.0.4/lib/vips.min.js',
 		[],
 		'0.0.4',
 		true
