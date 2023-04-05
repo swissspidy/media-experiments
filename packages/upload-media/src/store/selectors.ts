@@ -1,4 +1,4 @@
-import { ItemStatus, QueueItemId, State } from './types';
+import { ItemStatus, type QueueItemId, type State } from './types';
 
 export function getItems(state: State, status?: ItemStatus) {
 	if (status) {

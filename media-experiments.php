@@ -11,6 +11,8 @@
  * Text Domain: media-experiments
  * Requires at least: 6.1
  * Requires PHP: 5.6
+ *
+ * @package MediaExperiments
  */
 
 /**

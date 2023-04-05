@@ -40,7 +40,7 @@ function createMediaFromFile(
 	additionalData: CreateRestAttachment = {}
 ) {
 	// Create upload payload.
-	const data = new window.FormData();
+	const data = new FormData();
 	data.append('file', file, file.name || file.type.replace('/', '.'));
 	Object.entries(additionalData).forEach(([key, value]) =>
 		flattenFormData(data, key, value)
@@ -77,7 +77,11 @@ export function updateMediaItem(
  * @param {string}        key      Key to amend to form data object
  * @param {string|Object} data     Data to be amended to form data.
  */
-function flattenFormData(formData, key, data) {
+function flattenFormData(
+	formData: FormData,
+	key: string,
+	data: string | undefined | Record<string, string>
+) {
 	if (typeof data === 'object') {
 		for (const name in data) {
 			if (Object.prototype.hasOwnProperty.call(data, name)) {

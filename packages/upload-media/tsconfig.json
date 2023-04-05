@@ -4,6 +4,11 @@
 		"rootDir": "src",
 		"declarationDir": "dist-types"
 	},
-	"references": [{ "path": "../media-utils" }, { "path": "../upload-media" }],
+	"references": [
+		{ "path": "../ffmpeg" },
+		{ "path": "../heif" },
+		{ "path": "../media-utils" },
+		{ "path": "../vips" }
+	],
 	"include": ["src/**/*"]
 }

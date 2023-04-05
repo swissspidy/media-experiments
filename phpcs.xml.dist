@@ -19,7 +19,7 @@
 	<!-- Make sure we prefix everything in the global namespace. -->
 	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
 		<properties>
-			<property name="prefixes" type="array" value="mexp" />
+			<property name="prefixes" type="array" value="mexp,MediaExperiments,media_experiments" />
 		</properties>
 	</rule>
 

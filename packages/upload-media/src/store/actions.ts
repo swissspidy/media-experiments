@@ -19,15 +19,15 @@ import {
 } from '@mexp/media-utils';
 
 import {
-	AdditionalData,
-	Attachment,
-	CreateRestAttachment,
+	type AdditionalData,
+	type Attachment,
+	type CreateRestAttachment,
 	ItemStatus,
-	OnChangeHandler,
-	OnErrorHandler,
-	OnSuccessHandler,
-	QueueItem,
-	QueueItemId,
+	type OnChangeHandler,
+	type OnErrorHandler,
+	type OnSuccessHandler,
+	type QueueItem,
+	type QueueItemId,
 	TranscodingType,
 	Type,
 } from './types';
@@ -231,7 +231,6 @@ export function optimizeExistingItem({
 			sourceFile.name.replace(baseName, `${baseName}-optimized`),
 			{ type: sourceFile.type }
 		);
-		console.log('sourceFile', sourceFile, file);
 
 		// TODO: Same considerations apply as for muteExistingVideo.
 
@@ -290,8 +289,6 @@ export function prepareItem(id: QueueItemId) {
 		}
 
 		const mediaType = getMediaTypeFromMimeType(file.type);
-		const blobUrl = createBlobURL(file);
-
 		const canTranscode = canTranscodeFile(file);
 
 		switch (mediaType) {
@@ -326,7 +323,7 @@ export function prepareItem(id: QueueItemId) {
 				// TODO: is this the right place?
 				// Note: Causes another state update.
 				const poster = await getPosterFromVideo(
-					blobUrl,
+					createBlobURL(file),
 					`${getFileBasename(item.file.name)}-poster`
 				);
 				dispatch.addPoster(id, poster);
@@ -532,7 +529,6 @@ export function optimizeItemWithApproval(id: QueueItemId) {
 		const imageFormat = registry
 			.select(preferencesStore)
 			.get('media-experiments/preferences', 'imageFormat');
-		console.log('imageFormat', imageFormat);
 
 		try {
 			const file =
@@ -543,8 +539,6 @@ export function optimizeItemWithApproval(id: QueueItemId) {
 			const requireApproval = registry
 				.select(preferencesStore)
 				.get('media-experiments/preferences', 'requireApproval');
-
-			console.log('requireApproval', requireApproval);
 
 			if (requireApproval) {
 				dispatch.requestApproval(id, file);

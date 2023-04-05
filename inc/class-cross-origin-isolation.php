@@ -4,6 +4,8 @@
  *
  * @copyright 2023 Google LLC
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
+ *
+ * @package MediaExperiments
  */
 
 declare(strict_types = 1);
@@ -75,19 +77,19 @@ class Cross_Origin_Isolation {
 	 *
 	 * @since 1.6.0
 	 *
-	 * @param string|mixed        $avatar      HTML for the user's avatar.
-	 * @param mixed               $id_or_email The avatar to retrieve. Accepts a user_id, Gravatar MD5 hash,
-	 *                                         user email, WP_User object, WP_Post object, or WP_Comment object.
-	 * @param int                 $size        Square avatar width and height in pixels to retrieve.
-	 * @param string              $default     URL for the default image or a default type. Accepts '404', 'retro', 'monsterid',
-	 *                                         'wavatar', 'indenticon', 'mystery', 'mm', 'mysteryman', 'blank', or
-	 *                                         'gravatar_default'. Default is the value of the 'avatar_default' option, with a
-	 *                                         fallback of 'mystery'.
-	 * @param string              $alt         Alternative text to use in the avatar image tag. Default empty.
-	 * @param array<string,mixed> $args        Arguments passed to get_avatar_data(), after processing.
+	 * @param string|mixed        $avatar         HTML for the user's avatar.
+	 * @param mixed               $id_or_email    The avatar to retrieve. Accepts a user_id, Gravatar MD5 hash,
+	 *                                            user email, WP_User object, WP_Post object, or WP_Comment object.
+	 * @param int                 $size           Square avatar width and height in pixels to retrieve.
+	 * @param string              $default_avatar URL for the default image or a default type. Accepts '404', 'retro', 'monsterid',
+	 *                                            'wavatar', 'indenticon', 'mystery', 'mm', 'mysteryman', 'blank', or
+	 *                                            'gravatar_default'. Default is the value of the 'avatar_default' option, with a
+	 *                                            fallback of 'mystery'.
+	 * @param string              $alt            Alternative text to use in the avatar image tag. Default empty.
+	 * @param array<string,mixed> $args           Arguments passed to get_avatar_data(), after processing.
 	 * @return string|mixed Filtered avatar tag.
 	 */
-	public function get_avatar( $avatar, $id_or_email, int $size, string $default, string $alt, array $args ) {
+	public function get_avatar( $avatar, $id_or_email, int $size, string $default_avatar, string $alt, array $args ) {
 		return $this->add_attribute( $avatar, 'src', $args['url'] );
 	}
 

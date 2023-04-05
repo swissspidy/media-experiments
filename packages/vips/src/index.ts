@@ -9,6 +9,7 @@ async function getVips() {
 		dynamicLibraries: [],
 		// https://github.com/kleisauke/wasm-vips/issues/12#issuecomment-1067001784
 		// https://github.com/kleisauke/wasm-vips/blob/789363e5b54d677b109bcdaf8353d283d81a8ee3/src/locatefile-cors-pre.js#L4
+		// @ts-ignore
 		workaroundCors: true,
 	});
 }
@@ -21,7 +22,7 @@ async function getVips() {
  */
 export async function convertImageToJpeg(file: File) {
 	const vips = await getVips();
-	let image = vips.Image.newFromBuffer(await file.arrayBuffer());
+	const image = vips.Image.newFromBuffer(await file.arrayBuffer());
 	const outBuffer = image.writeToBuffer('.jpeg', { Q: 75 });
 
 	const fileName = `${getFileBasename(file.name)}.jpeg`;

@@ -1,4 +1,6 @@
+// Source: https://github.com/Quasimondo/QuasimondoJS/blob/ce7ffb317f7435940046d5ff46a7503f92efd328/blur/FastBlur.js
 export function blur(context: CanvasRenderingContext2D, amount: number) {
+	/* eslint-disable no-bitwise */
 	if (amount <= 0) {
 		return context;
 	}
@@ -7,7 +9,6 @@ export function blur(context: CanvasRenderingContext2D, amount: number) {
 	const imageData = context.getImageData(0, 0, width, height);
 	const { data } = imageData;
 
-	// http://www.quasimondo.com/BoxBlurForCanvas/FastBlur.js
 	const wm = width - 1;
 	const hm = height - 1;
 	const rad1 = amount + 1;
@@ -154,4 +155,5 @@ export function blur(context: CanvasRenderingContext2D, amount: number) {
 
 	context.putImageData(imageData, 0, 0);
 	return context;
+	/* eslint-enable no-bitwise */
 }

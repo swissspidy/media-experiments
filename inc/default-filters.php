@@ -4,6 +4,8 @@
  *
  * @copyright 2023 Google LLC
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
+ *
+ * @package MediaExperiments
  */
 
 declare(strict_types = 1);

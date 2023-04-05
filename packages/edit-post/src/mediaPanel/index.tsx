@@ -5,6 +5,12 @@ import {
 } from 'react-compare-slider';
 
 import {
+	store as uploadStore,
+	type Attachment,
+	type RestAttachment,
+} from '@mexp/upload-media';
+
+import {
 	Fragment,
 	useState,
 	useEffect,
@@ -29,8 +35,6 @@ import { useEntityRecord } from '@wordpress/core-data';
 import { store as editorStore } from '@wordpress/editor';
 
 import { store as recordingStore } from '../mediaRecording/store';
-import { store as uploadStore } from '../uploadQueue/store';
-import type { Attachment, RestAttachment } from '../uploadQueue/store/types';
 import './styles.css';
 
 const SUPPORTED_BLOCKS = ['core/image', 'core/audio', 'core/video'];

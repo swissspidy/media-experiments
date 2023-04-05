@@ -4,6 +4,8 @@
  *
  * @copyright 2023 Google LLC
  * @license   https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
+ *
+ * @package MediaExperiments
  */
 
 declare(strict_types = 1);
@@ -28,11 +30,16 @@ function set_up_cross_origin_isolation( WP_Screen $screen ): void {
 		return;
 	}
 
-	require_once plugin_dir_path( __FILE__ ) . '/Cross_Origin_Isolation.php';
+	require_once plugin_dir_path( __FILE__ ) . '/class-cross-origin-isolation.php';
 	$instance = new Cross_Origin_Isolation();
 	$instance->register();
 }
 
+/**
+ * Register assets used by editor integration and others.
+ *
+ * @return void
+ */
 function register_assets(): void {
 	wp_register_script(
 		'media-experiments-libheif',
@@ -51,6 +58,11 @@ function register_assets(): void {
 	);
 }
 
+/**
+ * Enqueues scripts for the block editor.
+ *
+ * @return void
+ */
 function enqueue_block_editor_assets(): void {
 	$asset_file = dirname( __DIR__ ) . '/build/media-experiments.asset.php';
 	$asset      = is_readable( $asset_file ) ? require $asset_file : [];
@@ -109,13 +121,13 @@ function register_rest_attachment_featured_media(): void {
  *
  * @see \WP_REST_Posts_Controller::handle_featured_media
  *
- * @param int     $value
- * @param WP_Post $post
- * @return void|WP_Error
+ * @param int     $value Value to set.
+ * @param WP_Post $post  Post instance.
+ * @return void|WP_Error Nothing or error instance on failure.
  */
 function rest_create_attachment_handle_featured_media( int $value, WP_Post $post ) {
 	if ( $value ) {
-		if ( $value === get_post_thumbnail_id( $post->ID ) ) {
+		if ( get_post_thumbnail_id( $post->ID ) === $value ) {
 			return;
 		}
 
@@ -135,6 +147,11 @@ function rest_create_attachment_handle_featured_media( int $value, WP_Post $post
 	delete_post_thumbnail( $post->ID );
 }
 
+/**
+ * Registers additional post meta for the attachment post type.
+ *
+ * @return void
+ */
 function register_attachment_post_meta(): void {
 	register_post_meta(
 		'attachment',
@@ -193,6 +210,11 @@ function register_attachment_post_meta(): void {
 	);
 }
 
+/**
+ * Registers a new media-source taxonomy for the attachment post type.
+ *
+ * @return void
+ */
 function register_media_source_taxonomy(): void {
 	register_taxonomy(
 		'mexp_media_source',
