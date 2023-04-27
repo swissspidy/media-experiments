@@ -91,7 +91,6 @@ function readFile(file: File): Promise<Uint8Array> {
 async function loadFFmpeg(file: File) {
 	const { createFFmpeg } = await import(
 		/* webpackChunkName: "chunk-ffmpeg" */
-		/* webpackExports: ["createFFmpeg"] */
 		'@ffmpeg/ffmpeg'
 	);
 

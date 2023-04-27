@@ -1,4 +1,5 @@
 import {
+	type UnknownAction,
 	type AddAction,
 	type AddPosterAction,
 	type ApproveUploadAction,
@@ -23,6 +24,7 @@ const DEFAULT_STATE: State = {
 };
 
 type Action =
+	| UnknownAction
 	| AddAction
 	| PrepareAction
 	| TranscodingPrepareAction

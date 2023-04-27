@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { createBlobURL, isBlobURL } from '@wordpress/blob';
+import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as preferencesStore } from '@wordpress/preferences';
 
 import {
@@ -21,7 +22,6 @@ import {
 import {
 	type AdditionalData,
 	type Attachment,
-	type CreateRestAttachment,
 	ItemStatus,
 	type OnChangeHandler,
 	type OnErrorHandler,
@@ -44,9 +44,41 @@ import {
 } from '../utils';
 import { updateMediaItem, uploadToServer } from '../api';
 
+type ActionCreators = {
+	uploadItem: typeof uploadItem;
+	addItem: typeof addItem;
+	removeItem: typeof removeItem;
+	muteVideoItem: typeof muteVideoItem;
+	convertHeifItem: typeof convertHeifItem;
+	convertGifItem: typeof convertGifItem;
+	optimizeVideoItem: typeof optimizeVideoItem;
+	optimizeAudioItem: typeof optimizeAudioItem;
+	optimizeItemWithApproval: typeof optimizeItemWithApproval;
+	requestApproval: typeof requestApproval;
+	rejectApproval: typeof rejectApproval;
+	grantApproval: typeof grantApproval;
+	prepareForTranscoding: typeof prepareForTranscoding;
+	startTranscoding: typeof startTranscoding;
+	finishTranscoding: typeof finishTranscoding;
+	startUploading: typeof startUploading;
+	finishUploading: typeof finishUploading;
+	cancelItem: typeof cancelItem;
+	uploadPosterForItem: typeof uploadPosterForItem;
+	addPoster: typeof addPoster;
+	(args: Record<string, unknown>): void;
+};
+
+type AllSelectors = typeof import('./selectors');
+type CurriedState<F> = F extends (state: any, ...args: infer P) => infer R
+	? (...args: P) => R
+	: F;
+type Selectors = {
+	[key in keyof AllSelectors]: CurriedState<AllSelectors[key]>;
+};
+
 interface AddItemArgs {
 	file: File;
-	batchId: string;
+	batchId?: string;
 	onChange?: OnChangeHandler;
 	onSuccess?: OnSuccessHandler;
 	onError?: OnErrorHandler;
@@ -110,7 +142,7 @@ export function addItemFromUrl({
 	onError,
 	additionalData,
 }: AddItemFromUrlArgs) {
-	return async ({ dispatch }) => {
+	return async ({ dispatch }: { dispatch: ActionCreators }) => {
 		const file = await fetchRemoteFile(url);
 
 		dispatch.addItem({
@@ -150,7 +182,7 @@ export function muteExistingVideo({
 	dominantColor,
 	generatedPosterId,
 }: MuteExistingVideoArgs) {
-	return async ({ dispatch }) => {
+	return async ({ dispatch }: { dispatch: ActionCreators }) => {
 		const fileName = getFileNameFromUrl(url);
 		const baseName = getFileBasename(fileName);
 		const sourceFile = await fetchRemoteFile(url, fileName);
@@ -222,7 +254,7 @@ export function optimizeExistingItem({
 	dominantColor,
 	generatedPosterId,
 }: OptimizexistingItemArgs) {
-	return async ({ dispatch }) => {
+	return async ({ dispatch }: { dispatch: ActionCreators }) => {
 		const fileName = getFileNameFromUrl(url);
 		const baseName = getFileBasename(fileName);
 		const sourceFile = await fetchRemoteFile(url, fileName);
@@ -272,8 +304,18 @@ export function requestApproval(id: QueueItemId, file: File) {
 }
 
 export function prepareItem(id: QueueItemId) {
-	return async ({ select, dispatch }) => {
-		const item: QueueItem = select.getItem(id);
+	return async ({
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	}) => {
+		const item = select.getItem(id);
+		if (!item) {
+			return;
+		}
+
 		const { file } = item;
 
 		dispatch({
@@ -409,17 +451,27 @@ export function finishUploading(id: QueueItemId, attachment: Attachment) {
 }
 
 export function completeItem(id: QueueItemId) {
-	return async ({ select, dispatch }) => {
-		const item: QueueItem = select.getItem(id);
-
-		const { attachment } = item;
-
-		const mediaType = getMediaTypeFromMimeType(attachment.mimeType);
+	return async ({
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	}) => {
+		const item = select.getItem(id);
+		if (!item) {
+			return;
+		}
 
 		dispatch.removeItem(id);
 
-		if ('video' === mediaType) {
-			void dispatch.uploadPosterForItem(item);
+		if (item.attachment) {
+			const mediaType = getMediaTypeFromMimeType(
+				item.attachment.mimeType
+			);
+			if ('video' === mediaType) {
+				void dispatch.uploadPosterForItem(item);
+			}
 		}
 	};
 }
@@ -432,8 +484,18 @@ export function removeItem(id: QueueItemId) {
 }
 
 export function rejectApproval(id: number) {
-	return async ({ select, dispatch }) => {
-		const item: QueueItem = select.getItemByAttachmentId(id);
+	return async ({
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	}) => {
+		const item = select.getItemByAttachmentId(id);
+		if (!item) {
+			return;
+		}
+
 		dispatch.cancelItem(
 			item.id,
 			new UploadError({
@@ -446,8 +508,18 @@ export function rejectApproval(id: number) {
 }
 
 export function grantApproval(id: number) {
-	return async ({ select, dispatch }) => {
-		const item: QueueItem = select.getItemByAttachmentId(id);
+	return async ({
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	}) => {
+		const item = select.getItemByAttachmentId(id);
+		if (!item) {
+			return;
+		}
+
 		dispatch({
 			type: Type.ApproveUpload,
 			id: item.id,
@@ -464,8 +536,17 @@ export function cancelItem(id: QueueItemId, error: Error) {
 }
 
 export function maybeTranscodeItem(id: QueueItemId) {
-	return async ({ select, dispatch }) => {
-		const item: QueueItem = select.getItem(id);
+	return async ({
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	}) => {
+		const item = select.getItem(id);
+		if (!item) {
+			return;
+		}
 
 		const { transcode } = item;
 
@@ -521,8 +602,19 @@ export function maybeTranscodeItem(id: QueueItemId) {
 }
 
 export function optimizeItemWithApproval(id: QueueItemId) {
-	return async ({ select, dispatch, registry }) => {
-		const item: QueueItem = select.getItem(id);
+	return async ({
+		select,
+		dispatch,
+		registry,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+		registry: WPDataRegistry;
+	}) => {
+		const item = select.getItem(id);
+		if (!item) {
+			return;
+		}
 
 		dispatch.startTranscoding(id);
 
@@ -561,8 +653,17 @@ export function optimizeItemWithApproval(id: QueueItemId) {
 }
 
 export function optimizeVideoItem(id: QueueItemId) {
-	return async ({ select, dispatch }) => {
-		const item: QueueItem = select.getItem(id);
+	return async ({
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	}) => {
+		const item = select.getItem(id);
+		if (!item) {
+			return;
+		}
 
 		dispatch.startTranscoding(id);
 
@@ -585,8 +686,17 @@ export function optimizeVideoItem(id: QueueItemId) {
 }
 
 export function muteVideoItem(id: QueueItemId) {
-	return async ({ select, dispatch }) => {
-		const item: QueueItem = select.getItem(id);
+	return async ({
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	}) => {
+		const item = select.getItem(id);
+		if (!item) {
+			return;
+		}
 
 		dispatch.startTranscoding(id);
 
@@ -609,8 +719,17 @@ export function muteVideoItem(id: QueueItemId) {
 }
 
 export function optimizeAudioItem(id: QueueItemId) {
-	return async ({ select, dispatch }) => {
-		const item: QueueItem = select.getItem(id);
+	return async ({
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	}) => {
+		const item = select.getItem(id);
+		if (!item) {
+			return;
+		}
 
 		dispatch.startTranscoding(id);
 
@@ -633,8 +752,17 @@ export function optimizeAudioItem(id: QueueItemId) {
 }
 
 export function convertGifItem(id: QueueItemId) {
-	return async ({ select, dispatch }) => {
-		const item: QueueItem = select.getItem(id);
+	return async ({
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	}) => {
+		const item = select.getItem(id);
+		if (!item) {
+			return;
+		}
 
 		dispatch.startTranscoding(id);
 
@@ -657,8 +785,17 @@ export function convertGifItem(id: QueueItemId) {
 }
 
 export function convertHeifItem(id: QueueItemId) {
-	return async ({ select, dispatch }) => {
-		const item: QueueItem = select.getItem(id);
+	return async ({
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	}) => {
+		const item = select.getItem(id);
+		if (!item) {
+			return;
+		}
 
 		dispatch.startTranscoding(id);
 
@@ -681,8 +818,12 @@ export function convertHeifItem(id: QueueItemId) {
 }
 
 export function uploadPosterForItem(item: QueueItem) {
-	return async ({ dispatch }) => {
+	return async ({ dispatch }: { dispatch: ActionCreators }) => {
 		const { attachment: videoAttachment } = item;
+
+		if (!videoAttachment) {
+			return;
+		}
 
 		// In the event that the uploaded video already has a poster, do not upload another one.
 		// Can happen when using muteExistingVideo() or when a poster is generated server-side.
@@ -708,7 +849,10 @@ export function uploadPosterForItem(item: QueueItem) {
 			dispatch.addItem({
 				file: poster,
 				onChange: ([posterAttachment]) => {
-					if (isBlobURL(posterAttachment.url)) {
+					if (
+						!posterAttachment.url ||
+						isBlobURL(posterAttachment.url)
+					) {
 						return;
 					}
 
@@ -751,25 +895,33 @@ export function uploadPosterForItem(item: QueueItem) {
 }
 
 export function uploadItem(id: QueueItemId) {
-	return async ({ select, dispatch }) => {
-		const item: QueueItem = select.getItem(id);
+	return async ({
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	}) => {
+		const item = select.getItem(id);
+		if (!item) {
+			return;
+		}
 
 		const { poster } = item;
 
 		dispatch.startUploading(id);
 
-		const additionalData: CreateRestAttachment = {
+		const additionalData = {
 			...item.additionalData,
 			mexp_media_source: item.mediaSourceTerms
-				.map<number | undefined>((slug) =>
-					select.getMediaSourceTermId(slug)
-				)
+				?.map((slug) => select.getMediaSourceTermId(slug))
 				.filter(Boolean),
 			// generatedPosterId is set when using muteExistingVideo() for example.
 			meta: {
 				mexp_blurhash: item.blurHash,
 				mexp_dominant_color: item.dominantColor,
 				mexp_generated_poster_id: item.generatedPosterId,
+				mexp_is_muted: false,
 			},
 			featured_media: item.generatedPosterId,
 		};
@@ -780,7 +932,9 @@ export function uploadItem(id: QueueItemId) {
 		// Could be made reusable to enable backfilling of existing blocks.
 		if ('video' === mediaType) {
 			try {
-				const hasAudio = await videoHasAudio(item.attachment.url);
+				const hasAudio =
+					item.attachment?.url &&
+					(await videoHasAudio(item.attachment.url));
 				additionalData.meta.mexp_is_muted = !hasAudio;
 			} catch {
 				// No big deal if this fails, we can still continue uploading.
@@ -794,10 +948,11 @@ export function uploadItem(id: QueueItemId) {
 			// Could be made reusable to enable backfilling of existing blocks.
 			// TODO: Create a scaled-down version of the image first for performance reasons.
 			try {
-				additionalData.meta.mexp_dominant_color =
-					await getDominantColor(
-						item.attachment?.poster || item.attachment.url
-					);
+				const url = item.attachment?.poster || item.attachment?.url;
+				if (url) {
+					additionalData.meta.mexp_dominant_color =
+						await getDominantColor(url);
+				}
 			} catch (err) {
 				console.log('Getting dominant color failed', err);
 				// No big deal if this fails, we can still continue uploading.
@@ -810,9 +965,10 @@ export function uploadItem(id: QueueItemId) {
 			// TODO: Move to web worker for performance reasons?
 			// TODO: Create a scaled-down version of the image first for performance reasons.
 			try {
-				additionalData.meta.mexp_blurhash = await getBlurHash(
-					item.attachment?.poster || item.attachment.url
-				);
+				const url = item.attachment?.poster || item.attachment?.url;
+				if (url) {
+					additionalData.meta.mexp_blurhash = await getBlurHash(url);
+				}
 			} catch (err) {
 				console.log('Getting BlurHash failed', err);
 				// No big deal if this fails, we can still continue uploading.
@@ -826,7 +982,7 @@ export function uploadItem(id: QueueItemId) {
 				// The newly uploaded file won't have a poster yet.
 				// However, we'll likely still have one on file.
 				// Add it back so we're never without one.
-				if (item.attachment.poster) {
+				if (item.attachment?.poster) {
 					attachment.poster = item.attachment.poster;
 				} else if (poster) {
 					attachment.poster = createBlobURL(poster);
@@ -837,7 +993,16 @@ export function uploadItem(id: QueueItemId) {
 		} catch (err) {
 			console.log(err);
 
-			dispatch.cancelItem(id, err);
+			const error =
+				err instanceof Error
+					? err
+					: new UploadError({
+							code: 'UNKNOWN_UPLOAD_ERROR',
+							message: 'File could not be uploaded',
+							file: item.file,
+					  });
+
+			dispatch.cancelItem(id, error);
 		}
 	};
 }

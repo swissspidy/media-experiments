@@ -16,6 +16,24 @@ import {
 } from '../constants';
 import { Type, VideoEffect } from './types';
 
+type AllSelectors = typeof import('./selectors');
+type CurriedState<F> = F extends (state: any, ...args: infer P) => infer R
+	? (...args: P) => R
+	: F;
+type Selectors = {
+	[key in keyof AllSelectors]: CurriedState<AllSelectors[key]>;
+};
+
+type ActionCreators = {
+	invalidateResolutionForStoreSelector: (selector: keyof Selectors) => void;
+	setVideoEffect: typeof setVideoEffect;
+	setGifMode: typeof setGifMode;
+	setHasAudio: typeof setHasAudio;
+	stopRecording: typeof stopRecording;
+	countDuration: typeof countDuration;
+	(args: Record<string, unknown>): void;
+};
+
 export function setVideoInput(deviceId: string) {
 	return {
 		type: Type.ChangeVideoInput,
@@ -31,7 +49,7 @@ export function setAudioInput(deviceId: string) {
 }
 
 export function setVideoEffect(videoEffect: VideoEffect) {
-	return async ({ dispatch }) => {
+	return async ({ dispatch }: { dispatch: ActionCreators }) => {
 		dispatch({
 			type: Type.ChangeVideoEffect,
 			videoEffect,
@@ -42,7 +60,13 @@ export function setVideoEffect(videoEffect: VideoEffect) {
 }
 
 export function toggleBlurEffect() {
-	return async ({ select, dispatch }) => {
+	return async ({
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	}) => {
 		const value = select.getVideoEffect();
 		dispatch.setVideoEffect(value === 'none' ? 'blur' : 'none');
 	};
@@ -56,7 +80,13 @@ export function setGifMode(value: boolean) {
 }
 
 export function toggleGifMode() {
-	return async ({ select, dispatch }) => {
+	return async ({
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	}) => {
 		const value = select.isGifMode();
 		dispatch.setGifMode(!value);
 	};
@@ -70,7 +100,13 @@ export function setHasAudio(value: boolean) {
 }
 
 export function toggleHasAudio() {
-	return async ({ select, dispatch }) => {
+	return async ({
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	}) => {
 		const value = select.hasAudio();
 		dispatch.setHasAudio(!value);
 	};
@@ -100,9 +136,13 @@ export function enterRecordingMode(clientId: string) {
 }
 
 export function leaveRecordingMode() {
-	return async ({ select, dispatch }) => {
-		const mediaStream = select.getMediaStream();
-
+	return async ({
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	}) => {
 		dispatch({
 			type: Type.LeaveRecordingMode,
 		});
@@ -110,7 +150,7 @@ export function leaveRecordingMode() {
 }
 
 export function updateMediaDevices() {
-	return async ({ dispatch }) => {
+	return async ({ dispatch }: { dispatch: ActionCreators }) => {
 		try {
 			const devices = await navigator.mediaDevices.enumerateDevices();
 			dispatch({
@@ -128,7 +168,13 @@ export function updateMediaDevices() {
 }
 
 export function countDuration() {
-	return async ({ select, dispatch }) => {
+	return async ({
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	}) => {
 		dispatch({
 			type: Type.SetDuration,
 			value: 0,
@@ -155,7 +201,7 @@ export function countDuration() {
 }
 
 export function retryRecording() {
-	return async ({ dispatch }) => {
+	return async ({ dispatch }: { dispatch: ActionCreators }) => {
 		// retry means getting a new stream (if missing)
 		// and resetting any state (countdown, duration, files, etc.) if set
 
@@ -167,7 +213,13 @@ export function retryRecording() {
 }
 
 export function startRecording() {
-	return async ({ select, dispatch }) => {
+	return async ({
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	}) => {
 		// TODO: Only do this once there is a stream and we're in "ready" state.
 		dispatch({
 			type: Type.SetCountdown,
@@ -241,8 +293,12 @@ export function startRecording() {
 							height,
 						});
 
-						revokeBlobURL(previousUrl);
-						revokeBlobURL(previousUrlOriginalUrl);
+						if (previousUrl) {
+							revokeBlobURL(previousUrl);
+						}
+						if (previousUrlOriginalUrl) {
+							revokeBlobURL(previousUrlOriginalUrl);
+						}
 					}
 				});
 
@@ -271,10 +327,18 @@ export function startRecording() {
 }
 
 export function stopRecording() {
-	return async ({ select, dispatch }) => {
+	return async ({
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	}) => {
 		const mediaRecorder = select.getMediaRecorder();
 
-		mediaRecorder.stop();
+		if (mediaRecorder) {
+			mediaRecorder.stop();
+		}
 
 		dispatch({
 			type: Type.StopRecording,
@@ -283,10 +347,18 @@ export function stopRecording() {
 }
 
 export function pauseRecording() {
-	return async ({ select, dispatch }) => {
+	return async ({
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	}) => {
 		const mediaRecorder = select.getMediaRecorder();
 
-		mediaRecorder.pause();
+		if (mediaRecorder) {
+			mediaRecorder.pause();
+		}
 
 		dispatch({
 			type: Type.PauseRecording,
@@ -296,10 +368,18 @@ export function pauseRecording() {
 
 // TODO: Deduplicate setInterval logic with startRecording.
 export function resumeRecording() {
-	return async ({ select, dispatch }) => {
+	return async ({
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	}) => {
 		const mediaRecorder = select.getMediaRecorder();
 
-		mediaRecorder.resume();
+		if (mediaRecorder) {
+			mediaRecorder.resume();
+		}
 
 		dispatch({
 			type: Type.ResumeRecording,
@@ -327,7 +407,13 @@ export function resumeRecording() {
 
 // TODO: Deduplicate setInterval logic with startRecording.
 export function captureImage() {
-	return async ({ select, dispatch }) => {
+	return async ({
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	}) => {
 		// TODO: Only do this once there is a stream and we're in "ready" state.
 		dispatch({
 			type: Type.SetCountdown,

@@ -43,7 +43,11 @@ function createMediaFromFile(
 	const data = new FormData();
 	data.append('file', file, file.name || file.type.replace('/', '.'));
 	Object.entries(additionalData).forEach(([key, value]) =>
-		flattenFormData(data, key, value)
+		flattenFormData(
+			data,
+			key,
+			value as string | Record<string, string> | undefined
+		)
 	);
 
 	return apiFetch<RestAttachment>({

@@ -13,9 +13,7 @@
 	],
 	"require": {
 		"php": ">=8.0",
-		"ext-json": "*",
-		"google/cloud-videointelligence": "dev-main",
-		"google/cloud-storage": "dev-main"
+		"ext-json": "*"
 	},
 	"require-dev": {
 		"dealerdirect/phpcodesniffer-composer-installer": "^1.0.0",

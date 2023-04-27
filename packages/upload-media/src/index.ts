@@ -246,6 +246,10 @@ subscribe(() => {
 	for (const item of items) {
 		const { attachment, onChange } = item;
 
+		if (!attachment) {
+			continue;
+		}
+
 		const { poster, ...media } = attachment;
 		// Video block expects such a structure for the poster.
 		// https://github.com/WordPress/gutenberg/blob/e0a413d213a2a829ece52c6728515b10b0154d8d/packages/block-library/src/video/edit.js#L154
@@ -271,8 +275,10 @@ subscribe(() => {
 
 	for (const item of items) {
 		const { id, onChange, onSuccess, attachment } = item;
-		onChange?.([attachment]);
-		onSuccess?.([attachment]);
+		if (attachment) {
+			onChange?.([attachment]);
+			onSuccess?.([attachment]);
+		}
 		void dispatch(uploadStore).completeItem(id);
 	}
 }, uploadStore);
@@ -281,7 +287,7 @@ subscribe(() => {
 	const items: QueueItem[] = select(uploadStore).getCancelledItems();
 	for (const item of items) {
 		const { id, error, onError } = item;
-		onError?.(error);
+		onError?.(error ?? new Error('Upload cancelled'));
 		dispatch(uploadStore).removeItem(id);
 	}
 }, uploadStore);

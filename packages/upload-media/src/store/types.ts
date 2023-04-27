@@ -32,6 +32,7 @@ export interface State {
 }
 
 export enum Type {
+	Unknown = 'REDUX_UNKNOWN',
 	Add = 'ADD_ITEM',
 	Prepare = 'PREPARE_ITEM',
 	TranscodingPrepare = 'TRANSCODING_PREPARE',
@@ -51,6 +52,7 @@ type Action<T = Type, Payload = {}> = {
 	type: T;
 } & Payload;
 
+export type UnknownAction = Action<Type.Unknown>;
 export type AddAction = Action<Type.Add, { item: QueueItem }>;
 export type PrepareAction = Action<Type.Prepare, { id: QueueItemId }>;
 export type RequestApprovalAction = Action<
@@ -103,6 +105,11 @@ export type Attachment = {
 	blurHash?: string;
 	dominantColor?: string;
 	posterId?: number;
+	// Video block expects such a structure for the poster.
+	// https://github.com/WordPress/gutenberg/blob/e0a413d213a2a829ece52c6728515b10b0154d8d/packages/block-library/src/video/edit.js#L154
+	image?: {
+		src: string;
+	};
 };
 
 export type OnChangeHandler = (attachments: Partial<Attachment>[]) => void;
@@ -131,11 +138,8 @@ export enum TranscodingType {
 	Default = 'DEFAULT',
 }
 
-// Work around https://github.com/johnbillion/wp-json-schemas/issues/52
 export interface RestAttachment extends WP_REST_API_Attachment {
 	featured_media: number;
-	mime_type: string;
-	media_type: 'image' | 'file';
 	mexp_media_source: number[];
 	meta: {
 		mexp_blurhash?: string;
