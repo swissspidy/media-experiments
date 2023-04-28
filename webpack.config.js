@@ -6,10 +6,13 @@ const defaultConfig = require('@wordpress/scripts/config/webpack.config');
 module.exports = {
 	...defaultConfig,
 	entry: {
-		index: resolve(__dirname, 'packages/edit-post/src/index.ts'),
+		'media-experiments': resolve(
+			__dirname,
+			'packages/edit-post/src/index.ts'
+		),
 	},
 	output: {
-		filename: 'media-experiments.js',
+		filename: '[name].js',
 		path: resolve(__dirname, 'build'),
 	},
 	resolve: {

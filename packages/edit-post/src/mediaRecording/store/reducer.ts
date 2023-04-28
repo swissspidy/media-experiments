@@ -71,7 +71,6 @@ type Action =
 	| AcquireMediaAction;
 
 function reducer(state = DEFAULT_STATE, action: Action) {
-	console.log('reducer', state, action);
 	switch (action.type) {
 		case Type.EnterRecordingMode:
 			return {

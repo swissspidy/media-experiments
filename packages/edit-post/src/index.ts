@@ -5,3 +5,4 @@ import './crossOriginIsolation';
 import './mediaPanel';
 import './mediaRecording';
 import './preferencesModal';
+import './uploadStatus';

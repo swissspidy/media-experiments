@@ -27,3 +27,4 @@ add_filter( 'web_stories_rest_attachment_query', __NAMESPACE__ . 'filter_rest_ge
 add_action( 'delete_attachment', __NAMESPACE__ . '\delete_generated_poster_image' );
 
 add_action( 'rest_after_insert_attachment', __NAMESPACE__ . '\rest_after_insert_attachment_handle_terms', 10, 3 );
+add_action( 'rest_after_insert_attachment', __NAMESPACE__ . '\rest_after_insert_attachment_handle_pdf_poster', 10, 2 );

@@ -416,3 +416,41 @@ function rest_after_insert_attachment_handle_terms( WP_Post $attachment, WP_REST
 		}
 	}
 }
+
+/**
+ * Fires after a single attachment is completely created or updated via the REST API.
+ *
+ * Adds image sub sizes for PDFs in the format WordPress core expects
+ *
+ * @link https://github.com/WordPress/wordpress-develop/blob/8a5daa6b446e8c70ba22d64820f6963f18d36e92/src/wp-admin/includes/image.php#L609-L634
+ *
+ * @param WP_Post         $attachment Inserted or updated attachment object.
+ * @param WP_REST_Request $request    Request object.
+ */
+function rest_after_insert_attachment_handle_pdf_poster( WP_Post $attachment, WP_REST_Request $request ): void {
+	if ( empty( $request['featured_media'] ) || empty( $request['meta']['mexp_generated_poster_id'] ) ) {
+		return;
+	}
+
+	$poster_id = $request['meta']['mexp_generated_poster_id'];
+
+	$poster = get_post( $poster_id );
+
+	if ( ! $poster ) {
+		return;
+	}
+
+	$poster_metadata = wp_get_attachment_metadata( $poster_id );
+	$pdf_metadata    = wp_get_attachment_metadata( $attachment->ID );
+
+	$pdf_metadata['sizes']         = $poster_metadata['sizes'];
+	$pdf_metadata['sizes']['full'] = [
+		'file'      => basename( $poster_metadata['file'] ),
+		'width'     => $poster_metadata['width'],
+		'height'    => $poster_metadata['height'],
+		'mime-type' => $poster->post_mime_type,
+		'filesize'  => $poster_metadata['filesize'],
+	];
+
+	wp_update_attachment_metadata( $attachment->ID, $pdf_metadata );
+}

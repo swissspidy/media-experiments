@@ -3,6 +3,7 @@
 	"private": true,
 	"scripts": {
 		"build": "wp-scripts build",
+		"build:package-types": "tsc --build",
 		"format": "wp-scripts format",
 		"lint:css": "wp-scripts lint-style",
 		"lint:js": "wp-scripts lint-js",
@@ -40,9 +41,9 @@
 		"@types/wordpress__blocks": "^12.0.3",
 		"@types/wordpress__components": "^23.0.1",
 		"@types/wordpress__editor": "^13.0.0",
-		"@types/wordpress__notices": "^3.5.1",
 		"@wordpress/dependency-extraction-webpack-plugin": "^4.9.0",
 		"@wordpress/e2e-test-utils": "^10.0.0",
+		"@wordpress/env": "^6.0.0",
 		"@wordpress/eslint-plugin": "^14.1.0",
 		"@wordpress/scripts": "^26.0.0",
 		"eslint": "^8.33.0",

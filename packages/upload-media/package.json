@@ -16,6 +16,7 @@
 		"@mexp/ffmpeg": "*",
 		"@mexp/heif": "*",
 		"@mexp/media-utils": "*",
+		"@mexp/pdf": "*",
 		"@mexp/vips": "*",
 		"@wordpress/api-fetch": "^6.28.0",
 		"@wordpress/blob": "^3.27.0",

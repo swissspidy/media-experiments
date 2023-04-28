@@ -1,4 +1,7 @@
 export function getMediaTypeFromMimeType(mimeType: string) {
+	if (mimeType === 'application/pdf') {
+		return 'pdf';
+	}
 	return mimeType.split('/')[0];
 }
 

@@ -8,6 +8,7 @@
 		{ "path": "../ffmpeg" },
 		{ "path": "../heif" },
 		{ "path": "../media-utils" },
+		{ "path": "../pdf" },
 		{ "path": "../vips" }
 	],
 	"include": ["src/**/*"]

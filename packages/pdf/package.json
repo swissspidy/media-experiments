@@ -1,6 +1,6 @@
 {
-	"name": "@mexp/vips",
-	"description": "libvips utils",
+	"name": "@mexp/pdf",
+	"description": "PDF utils",
 	"private": true,
 	"author": "",
 	"license": "Apache-2.0",
@@ -14,6 +14,6 @@
 	},
 	"dependencies": {
 		"@mexp/media-utils": "*",
-		"wasm-vips": "^0.0.5"
+		"pdfjs-dist": "^3.5.141"
 	}
 }

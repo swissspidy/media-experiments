@@ -13,11 +13,8 @@ import {
 } from '@mexp/ffmpeg';
 import { convertImageToJpeg } from '@mexp/vips';
 import { isHeifImage, transcodeHeifImage } from '@mexp/heif';
-import {
-	getFileBasename,
-	blobToFile,
-	getMediaTypeFromMimeType,
-} from '@mexp/media-utils';
+import { getImageFromPdf } from '@mexp/pdf';
+import { getFileBasename, getMediaTypeFromMimeType } from '@mexp/media-utils';
 
 import {
 	type AdditionalData,
@@ -331,6 +328,7 @@ export function prepareItem(id: QueueItemId) {
 		}
 
 		const mediaType = getMediaTypeFromMimeType(file.type);
+		// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 		const canTranscode = canTranscodeFile(file);
 
 		switch (mediaType) {
@@ -387,6 +385,16 @@ export function prepareItem(id: QueueItemId) {
 				}
 
 				break;
+
+			case 'pdf':
+				// TODO: is this the right place?
+				// Note: Causes another state update.
+				const pdfThumbnail = await getImageFromPdf(
+					createBlobURL(file),
+					// Same suffix as WP core uses, see https://github.com/WordPress/wordpress-develop/blob/8a5daa6b446e8c70ba22d64820f6963f18d36e92/src/wp-admin/includes/image.php#L609-L634
+					`${getFileBasename(item.file.name)}-pdf`
+				);
+				dispatch.addPoster(id, pdfThumbnail);
 		}
 
 		dispatch.uploadItem(id);
@@ -398,13 +406,7 @@ export function addPoster(id: QueueItemId, file: File) {
 		type: Type.AddPoster,
 		id,
 		file,
-		url: createBlobURL(
-			blobToFile(
-				file,
-				`${getFileBasename(file.name)}-poster.jpeg`,
-				'image/jpeg'
-			)
-		),
+		url: createBlobURL(file),
 	};
 }
 
@@ -469,7 +471,7 @@ export function completeItem(id: QueueItemId) {
 			const mediaType = getMediaTypeFromMimeType(
 				item.attachment.mimeType
 			);
-			if ('video' === mediaType) {
+			if (['video', 'pdf'].includes(mediaType)) {
 				void dispatch.uploadPosterForItem(item);
 			}
 		}
@@ -819,9 +821,9 @@ export function convertHeifItem(id: QueueItemId) {
 
 export function uploadPosterForItem(item: QueueItem) {
 	return async ({ dispatch }: { dispatch: ActionCreators }) => {
-		const { attachment: videoAttachment } = item;
+		const { attachment: uploadedAttachment } = item;
 
-		if (!videoAttachment) {
+		if (!uploadedAttachment) {
 			return;
 		}
 
@@ -829,21 +831,33 @@ export function uploadPosterForItem(item: QueueItem) {
 		// Can happen when using muteExistingVideo() or when a poster is generated server-side.
 		// TODO: Make the latter scenario actually work.
 		//       Use getEntityRecord to actually get poster URL from posterID returned by uploadToServer()
-		if (videoAttachment.poster && !isBlobURL(videoAttachment.poster)) {
+		if (
+			uploadedAttachment.poster &&
+			!isBlobURL(uploadedAttachment.poster)
+		) {
 			return;
 		}
 
 		try {
-			// Derive the basename from the uploaded video's file name
-			// for more accuracy.
-			const poster =
-				item.poster ||
-				(await getPosterFromVideo(
-					videoAttachment.url,
+			let poster = item.poster;
+
+			if (
+				!poster &&
+				'video' === getMediaTypeFromMimeType(item.file.type)
+			) {
+				// Derive the basename from the uploaded video's file name
+				// (instead of the original file name) for more accuracy.
+				poster = await getPosterFromVideo(
+					uploadedAttachment.url,
 					`${getFileBasename(
-						getFileNameFromUrl(videoAttachment.url)
+						getFileNameFromUrl(uploadedAttachment.url)
 					)}}-poster`
-				));
+				);
+			}
+
+			if (!poster) {
+				return;
+			}
 
 			// Adding the poster to the queue on its own allows for it to be optimized, etc.
 			dispatch.addItem({
@@ -858,8 +872,8 @@ export function uploadPosterForItem(item: QueueItem) {
 
 					// Video block expects such a structure for the poster.
 					// https://github.com/WordPress/gutenberg/blob/e0a413d213a2a829ece52c6728515b10b0154d8d/packages/block-library/src/video/edit.js#L154
-					const updatedVideoAttachment = {
-						...videoAttachment,
+					const updatedAttachment = {
+						...uploadedAttachment,
 						image: {
 							src: posterAttachment.url,
 						},
@@ -867,12 +881,12 @@ export function uploadPosterForItem(item: QueueItem) {
 
 					// This might be confusing, but the idea is to update the original
 					// video item in the editor with the newly uploaded poster.
-					item.onChange?.([updatedVideoAttachment]);
+					item.onChange?.([updatedAttachment]);
 				},
 				onSuccess: async ([posterAttachment]) => {
 					// Similarly, update the original video in the DB to have the
 					// poster as the featured image.
-					updateMediaItem(videoAttachment.id, {
+					updateMediaItem(uploadedAttachment.id, {
 						featured_media: posterAttachment.id,
 						meta: {
 							mexp_generated_poster_id: posterAttachment.id,
@@ -889,7 +903,7 @@ export function uploadPosterForItem(item: QueueItem) {
 				dominantColor: item.dominantColor,
 			});
 		} catch (err) {
-			console.log('completion error', err);
+			// TODO: Debug & catch & throw.
 		}
 	};
 }
@@ -954,8 +968,8 @@ export function uploadItem(id: QueueItemId) {
 						await getDominantColor(url);
 				}
 			} catch (err) {
-				console.log('Getting dominant color failed', err);
 				// No big deal if this fails, we can still continue uploading.
+				// TODO: Debug & catch & throw.
 			}
 		}
 
@@ -970,8 +984,8 @@ export function uploadItem(id: QueueItemId) {
 					additionalData.meta.mexp_blurhash = await getBlurHash(url);
 				}
 			} catch (err) {
-				console.log('Getting BlurHash failed', err);
 				// No big deal if this fails, we can still continue uploading.
+				// TODO: Debug & catch & throw.
 			}
 		}
 
@@ -991,8 +1005,6 @@ export function uploadItem(id: QueueItemId) {
 
 			dispatch.finishUploading(id, attachment);
 		} catch (err) {
-			console.log(err);
-
 			const error =
 				err instanceof Error
 					? err

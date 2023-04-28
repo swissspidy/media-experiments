@@ -217,7 +217,6 @@ export function getMediaStream() {
 						].includes(select.getRecordingStatus())
 					) {
 						stream.getTracks().forEach((track) => track.stop());
-						console.log('sendFrame stop');
 						return;
 					}
 

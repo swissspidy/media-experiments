@@ -40,7 +40,6 @@ type Action =
 	| ApproveUploadAction;
 
 function reducer(state = DEFAULT_STATE, action: Action) {
-	console.log('reducer', state.queue, action);
 	switch (action.type) {
 		case Type.Add:
 			return {
