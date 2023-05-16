@@ -1,11 +1,29 @@
 {
 	"name": "@mexp/heif",
+	"version": "0.0.1",
 	"description": "libheif utils",
 	"private": true,
 	"author": "",
 	"license": "Apache-2.0",
-	"types": "dist-types/index.d.ts",
+	"keywords": [
+		"wordpress",
+		"media",
+		"libheif"
+	],
+	"homepage": "https://github.com/swissspidy/media-experiments/tree/HEAD/packages/heif/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/swissspidy/media-experiments.git",
+		"directory": "packages/heif"
+	},
+	"bugs": {
+		"url": "https://github.com/swissspidy/media-experiments/issues"
+	},
+	"engines": {
+		"node": ">=18"
+	},
 	"main": "dist/index.js",
+	"types": "dist-types/index.d.ts",
 	"source": "src/index.ts",
 	"exports": {
 		".": {
@@ -14,6 +32,6 @@
 	},
 	"dependencies": {
 		"@mexp/media-utils": "*",
-		"libheif-js": "^1.14.0"
+		"libheif-js": "^1.15.1"
 	}
 }

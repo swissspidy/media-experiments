@@ -1,11 +1,29 @@
 {
 	"name": "@mexp/ffmpeg",
+	"version": "0.0.1",
 	"description": "FFmpeg utils",
 	"private": true,
 	"author": "",
 	"license": "Apache-2.0",
-	"types": "dist-types/index.d.ts",
+	"keywords": [
+		"wordpress",
+		"media",
+		"ffmpeg"
+	],
+	"homepage": "https://github.com/swissspidy/media-experiments/tree/HEAD/packages/ffmpeg/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/swissspidy/media-experiments.git",
+		"directory": "packages/ffmpeg"
+	},
+	"bugs": {
+		"url": "https://github.com/swissspidy/media-experiments/issues"
+	},
+	"engines": {
+		"node": ">=18"
+	},
 	"main": "dist/index.js",
+	"types": "dist-types/index.d.ts",
 	"source": "src/index.ts",
 	"exports": {
 		".": {

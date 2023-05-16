@@ -108,11 +108,14 @@ export function getMediaStream() {
 						return;
 					}
 
+					// See https://github.com/riju/backgroundBlur/blob/main/explainer.md
+					// See https://bugs.webkit.org/show_bug.cgi?id=198416
 					const canvasBlur =
 						'filter' in CanvasRenderingContext2D.prototype;
 
 					context.save();
 
+					// TODO: Remove fallback due to questionable license.
 					// Fallback for Safari
 					// See https://bugs.webkit.org/show_bug.cgi?id=198416
 					if (!canvasBlur) {

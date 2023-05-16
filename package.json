@@ -1,6 +1,58 @@
 {
 	"name": "media-experiments",
+	"version": "0.0.1",
 	"private": true,
+	"description": "WordPress media experiments",
+	"author": "",
+	"license": "Apache-2.0",
+	"keywords": [
+		"wordpress",
+		"gutenberg",
+		"media"
+	],
+	"homepage": "https://github.com/swissspidy/media-experiments",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/swissspidy/media-experiments.git"
+	},
+	"bugs": {
+		"url": "https://github.com/swissspidy/media-experiments/issues"
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"workspaces": {
+		"packages": [
+			"packages/*"
+		]
+	},
+	"dependencies": {
+		"@mexp/edit-post": "*"
+	},
+	"devDependencies": {
+		"@mexp/eslint-import-resolver": "*",
+		"@testing-library/jest-dom": "^5.16.5",
+		"@testing-library/react": "^14.0.0",
+		"@types/jest": "^29.5.1",
+		"@types/node": "^20.1.5",
+		"@types/uuid": "^9.0.1",
+		"@types/wordpress__block-editor": "^11.5.1",
+		"@types/wordpress__blocks": "^12.5.0",
+		"@types/wordpress__components": "^23.0.1",
+		"@types/wordpress__editor": "^13.6.0",
+		"@wordpress/dependency-extraction-webpack-plugin": "^4.16.0",
+		"@wordpress/e2e-test-utils": "^10.4.0",
+		"@wordpress/env": "^7.0.0",
+		"@wordpress/eslint-plugin": "^14.6.0",
+		"@wordpress/scripts": "^26.4.0",
+		"eslint": "^8.33.0",
+		"mini-css-extract-plugin": "^2.7.2",
+		"prettier": "^2.8.4",
+		"rtlcss-webpack-plugin": "^4.0.7",
+		"typescript": "^5.0.2",
+		"webpack": "^5.75.0",
+		"webpack-cli": "^5.0.1"
+	},
 	"scripts": {
 		"build": "wp-scripts build",
 		"build:package-types": "tsc --build",
@@ -19,39 +71,5 @@
 		"test:unit:watch": "wp-scripts test-unit-js --watch",
 		"test:unit:debug": "wp-scripts --inspect-brk test-unit-js --runInBand --no-cache",
 		"wp-env": "wp-env"
-	},
-	"author": "",
-	"license": "Apache-2.0",
-	"workspaces": {
-		"packages": [
-			"packages/*"
-		]
-	},
-	"dependencies": {
-		"@mexp/edit-post": "*"
-	},
-	"devDependencies": {
-		"@mexp/eslint-import-resolver": "*",
-		"@testing-library/jest-dom": "^5.16.5",
-		"@testing-library/react": "^14.0.0",
-		"@types/jest": "^29.5.0",
-		"@types/node": "^18.14.6",
-		"@types/uuid": "^9.0.1",
-		"@types/wordpress__block-editor": "^11.0.1",
-		"@types/wordpress__blocks": "^12.0.3",
-		"@types/wordpress__components": "^23.0.1",
-		"@types/wordpress__editor": "^13.0.0",
-		"@wordpress/dependency-extraction-webpack-plugin": "^4.9.0",
-		"@wordpress/e2e-test-utils": "^10.0.0",
-		"@wordpress/env": "^6.0.0",
-		"@wordpress/eslint-plugin": "^14.1.0",
-		"@wordpress/scripts": "^26.0.0",
-		"eslint": "^8.33.0",
-		"mini-css-extract-plugin": "^2.7.2",
-		"prettier": "^2.8.4",
-		"rtlcss-webpack-plugin": "^4.0.7",
-		"typescript": "^5.0.2",
-		"webpack": "^5.75.0",
-		"webpack-cli": "^5.0.1"
 	}
 }

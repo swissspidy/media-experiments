@@ -1,11 +1,29 @@
 {
 	"name": "@mexp/vips",
+	"version": "0.0.1",
 	"description": "libvips utils",
 	"private": true,
 	"author": "",
 	"license": "Apache-2.0",
-	"types": "dist-types/index.d.ts",
+	"keywords": [
+		"wordpress",
+		"media",
+		"libvips"
+	],
+	"homepage": "https://github.com/swissspidy/media-experiments/tree/HEAD/packages/vips/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/swissspidy/media-experiments.git",
+		"directory": "packages/vips"
+	},
+	"bugs": {
+		"url": "https://github.com/swissspidy/media-experiments/issues"
+	},
+	"engines": {
+		"node": ">=18"
+	},
 	"main": "dist/index.js",
+	"types": "dist-types/index.d.ts",
 	"source": "src/index.ts",
 	"exports": {
 		".": {

@@ -1,9 +1,26 @@
 {
 	"name": "@mexp/eslint-import-resolver",
+	"version": "0.0.1",
 	"description": "Custom ESLint resolver for this monorepo",
 	"private": true,
 	"author": "",
 	"license": "Apache-2.0",
+	"keywords": [
+		"eslint",
+		"eslint-plugin-import"
+	],
+	"homepage": "https://github.com/swissspidy/media-experiments/tree/HEAD/packages/eslint-import-resolver/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/swissspidy/media-experiments.git",
+		"directory": "packages/eslint-import-resolver"
+	},
+	"bugs": {
+		"url": "https://github.com/swissspidy/media-experiments/issues"
+	},
+	"engines": {
+		"node": ">=18"
+	},
 	"main": "src/index.js",
 	"source": "src/index.js",
 	"exports": {
