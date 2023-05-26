@@ -12,7 +12,6 @@ declare(strict_types = 1);
 
 namespace MediaExperiments;
 
-
 /**
  * Class Cross_Origin_Isolation
  */

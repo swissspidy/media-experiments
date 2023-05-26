@@ -38,25 +38,28 @@ function getItemForMimeType(mimeType) {
 
 function UploadStatusIndicator() {
 	const { cancelItem } = useDispatch(uploadStore);
-	const { isUploading, items } = useSelect((select) => {
-		return {
-			isUploading: select(uploadStore).isUploading(),
-			items:
-				select(uploadStore)
-					.getItems()
-					.map((item) => {
-						return {
-							icon: getItemForMimeType(
-								item.file.type || 'unknown'
-							),
-							title:
-								item.file.name ||
-								__('(Untitled file)', 'media-experiments'),
-							onClick: () => cancelItem(item.id),
-						};
-					}) || EMPTY_ARRAY,
-		};
-	}, []);
+	const { isUploading, items } = useSelect(
+		(select) => {
+			return {
+				isUploading: select(uploadStore).isUploading(),
+				items:
+					select(uploadStore)
+						.getItems()
+						.map((item) => {
+							return {
+								icon: getItemForMimeType(
+									item.file.type || 'unknown'
+								),
+								title:
+									item.file.name ||
+									__('(Untitled file)', 'media-experiments'),
+								onClick: () => cancelItem(item.id),
+							};
+						}) || EMPTY_ARRAY,
+			};
+		},
+		[cancelItem]
+	);
 
 	if (!isUploading) {
 		return (
