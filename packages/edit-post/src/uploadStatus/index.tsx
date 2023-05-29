@@ -1,4 +1,4 @@
-import { store as uploadStore } from '@mexp/upload-media';
+import { store as uploadStore, UploadError } from '@mexp/upload-media';
 import { getMediaTypeFromMimeType } from '@mexp/media-utils';
 
 import { createPortal, useLayoutEffect, useRef } from '@wordpress/element';
@@ -53,7 +53,16 @@ function UploadStatusIndicator() {
 								title:
 									item.file.name ||
 									__('(Untitled file)', 'media-experiments'),
-								onClick: () => cancelItem(item.id),
+								onClick: () =>
+									cancelItem(
+										item.id,
+										new UploadError({
+											code: 'UPLOAD_CANCELLED_MANUALLY',
+											message:
+												'File upload was cancelled',
+											file: item.file,
+										})
+									),
 							};
 						}) || EMPTY_ARRAY,
 			};

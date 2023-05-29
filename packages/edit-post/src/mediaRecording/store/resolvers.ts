@@ -1,11 +1,23 @@
-import { Type } from './types';
-import { Results } from '@mediapipe/selfie_segmentation';
+import { type Results } from '@mediapipe/selfie_segmentation';
 
 import { blur } from '../utils';
 import { BACKGROUND_BLUR_PX } from '../constants';
+import { Type } from './types';
+
+type AllSelectors = typeof import('./selectors');
+type CurriedState<F> = F extends (state: any, ...args: infer P) => infer R
+	? (...args: P) => R
+	: F;
+type Selectors = {
+	[key in keyof AllSelectors]: CurriedState<AllSelectors[key]>;
+};
+
+type ActionCreators = {
+	(args: Record<string, unknown>): void;
+};
 
 export function getDevices() {
-	return async ({ dispatch }) => {
+	return async ({ dispatch }: { dispatch: ActionCreators }) => {
 		try {
 			const devices = await navigator.mediaDevices.enumerateDevices();
 			dispatch({
@@ -24,7 +36,13 @@ export function getDevices() {
 
 // TODO: Does this really make sense as a resolver or should this just be an action?
 export function getMediaStream() {
-	return async ({ select, dispatch }) => {
+	return async ({
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	}) => {
 		if (!select.isInRecordingMode()) {
 			return;
 		}
@@ -85,6 +103,9 @@ export function getMediaStream() {
 			const context = canvas.getContext('2d');
 
 			const videoEffect = select.getVideoEffect();
+
+			// TODO: Check for native support first.
+			// See https://googlechrome.github.io/samples/image-capture/background-blur.html
 
 			if (videoEffect === 'blur') {
 				const { SelfieSegmentation } = await import(

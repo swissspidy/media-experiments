@@ -304,9 +304,11 @@ export function prepareItem(id: QueueItemId) {
 	return async ({
 		select,
 		dispatch,
+		registry,
 	}: {
 		select: Selectors;
 		dispatch: ActionCreators;
+		registry: WPDataRegistry;
 	}) => {
 		const item = select.getItem(id);
 		if (!item) {
@@ -331,11 +333,19 @@ export function prepareItem(id: QueueItemId) {
 		// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 		const canTranscode = canTranscodeFile(file);
 
+		// eslint-disable-next-line @wordpress/no-unused-vars-before-return
+		const imageQuality = registry
+			.select(preferencesStore)
+			.get('media-experiments/preferences', 'imageQuality');
+
 		switch (mediaType) {
 			case 'image':
 				const fileBuffer = await file.arrayBuffer();
 
 				// TODO: Here we could convert all images to WebP/AVIF/xyz by default.
+
+				// TODO: Enforce big image size threshold.
+				// Probably need to use e.g. mediainfo.js to get dimensions early on.
 
 				const isHeif = isHeifImage(fileBuffer);
 				const isGif = isAnimatedGif(fileBuffer);
@@ -364,7 +374,8 @@ export function prepareItem(id: QueueItemId) {
 				// Note: Causes another state update.
 				const poster = await getPosterFromVideo(
 					createBlobURL(file),
-					`${getFileBasename(item.file.name)}-poster`
+					`${getFileBasename(item.file.name)}-poster`,
+					imageQuality
 				);
 				dispatch.addPoster(id, poster);
 
@@ -392,7 +403,8 @@ export function prepareItem(id: QueueItemId) {
 				const pdfThumbnail = await getImageFromPdf(
 					createBlobURL(file),
 					// Same suffix as WP core uses, see https://github.com/WordPress/wordpress-develop/blob/8a5daa6b446e8c70ba22d64820f6963f18d36e92/src/wp-admin/includes/image.php#L609-L634
-					`${getFileBasename(item.file.name)}-pdf`
+					`${getFileBasename(item.file.name)}-pdf`,
+					imageQuality
 				);
 				dispatch.addPoster(id, pdfThumbnail);
 		}
@@ -468,6 +480,8 @@ export function completeItem(id: QueueItemId) {
 		dispatch.removeItem(id);
 
 		if (item.attachment) {
+			// TODO: Trigger client-side thumbnail generation here?
+
 			const mediaType = getMediaTypeFromMimeType(
 				item.attachment.mimeType
 			);
@@ -820,7 +834,13 @@ export function convertHeifItem(id: QueueItemId) {
 }
 
 export function uploadPosterForItem(item: QueueItem) {
-	return async ({ dispatch }: { dispatch: ActionCreators }) => {
+	return async ({
+		dispatch,
+		registry,
+	}: {
+		dispatch: ActionCreators;
+		registry: WPDataRegistry;
+	}) => {
 		const { attachment: uploadedAttachment } = item;
 
 		if (!uploadedAttachment) {
@@ -845,13 +865,18 @@ export function uploadPosterForItem(item: QueueItem) {
 				!poster &&
 				'video' === getMediaTypeFromMimeType(item.file.type)
 			) {
+				const imageQuality = registry
+					.select(preferencesStore)
+					.get('media-experiments/preferences', 'imageQuality');
+
 				// Derive the basename from the uploaded video's file name
 				// (instead of the original file name) for more accuracy.
 				poster = await getPosterFromVideo(
 					uploadedAttachment.url,
 					`${getFileBasename(
 						getFileNameFromUrl(uploadedAttachment.url)
-					)}}-poster`
+					)}}-poster`,
+					imageQuality
 				);
 			}
 
@@ -990,6 +1015,7 @@ export function uploadItem(id: QueueItemId) {
 		}
 
 		try {
+			// TODO: Save `missing_image_sizes` information for later.
 			const attachment = await uploadToServer(item.file, additionalData);
 
 			if ('video' === mediaType) {

@@ -6,6 +6,7 @@ import { ImageCapture } from 'image-capture';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { createBlobURL, revokeBlobURL } from '@wordpress/blob';
 import { dateI18n } from '@wordpress/date';
+import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 
 import { getExtensionFromMimeType, blobToFile } from '@mexp/media-utils';
 
@@ -14,7 +15,7 @@ import {
 	COUNTDOWN_TIME_IN_SECONDS,
 	MAX_RECORDING_DURATION_IN_SECONDS,
 } from '../constants';
-import { Type, VideoEffect } from './types';
+import { Type, type VideoEffect } from './types';
 
 type AllSelectors = typeof import('./selectors');
 type CurriedState<F> = F extends (state: any, ...args: infer P) => infer R
@@ -119,7 +120,13 @@ export function resetVideoInput() {
 }
 
 export function enterRecordingMode(clientId: string) {
-	return async ({ registry, dispatch }) => {
+	return async ({
+		registry,
+		dispatch,
+	}: {
+		dispatch: ActionCreators;
+		registry: WPDataRegistry;
+	}) => {
 		const { getBlockName } = registry.select(blockEditorStore);
 
 		const blockName = getBlockName(clientId);
@@ -302,12 +309,15 @@ export function startRecording() {
 					}
 				});
 
-				mediaRecorder.addEventListener('error', (evt) => {
-					dispatch({
-						type: Type.SetError,
-						error: evt.error,
-					});
-				});
+				mediaRecorder.addEventListener(
+					'error',
+					(evt: MediaRecorderErrorEvent) => {
+						dispatch({
+							type: Type.SetError,
+							error: evt.error,
+						});
+					}
+				);
 
 				try {
 					mediaRecorder.start();

@@ -118,6 +118,7 @@ To address this, the thumbnail generation is done entirely client-side as well.
 Less server stress, less failed uploads, and thumbnails with the same traits as the original.
 
 ### Saliency Detection
+
 Detect the most relevant part of an image to improve thumbnail cropping. For example using [MediaPipe’s object detection solution](https://developers.google.com/mediapipe/solutions/vision/object_detector/).
 
 ### MozJPEG Support

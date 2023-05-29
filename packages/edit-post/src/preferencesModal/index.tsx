@@ -21,7 +21,11 @@ import {
 	___unstablePreferencesModalBaseOption as BaseOption,
 } from '@wordpress/interface';
 import { store as preferencesStore } from '@wordpress/preferences';
-import { SelectControl } from '@wordpress/components';
+import {
+	SelectControl,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis -- Why is this still experimental?
+	__experimentalNumberControl as NumberControl,
+} from '@wordpress/components';
 import type {
 	ComponentProps,
 	FunctionComponent,
@@ -118,6 +122,32 @@ const SelectFeature = compose(
 	}))
 )(BaseSelectOption) as FunctionComponent<SelectFeatureProps>;
 
+type FeatureNumberControlProps = PropsWithChildren<
+	Omit<
+		ComponentProps<typeof NumberControl>,
+		'value' | 'onChange' | 'children'
+	> & { featureName: string }
+>;
+
+const FeatureNumberControl = compose(
+	withSelect((select, { featureName }: FeatureNumberControlProps) => {
+		return {
+			value:
+				select(preferencesStore).get(PREFERENCES_NAME, featureName) ||
+				undefined,
+		};
+	}),
+	withDispatch((dispatch, { featureName }: SelectFeatureProps) => ({
+		onChange: (value: string | number) => {
+			dispatch(preferencesStore).set(
+				PREFERENCES_NAME,
+				featureName,
+				value
+			);
+		},
+	}))
+)(NumberControl) as FunctionComponent<FeatureNumberControlProps>;
+
 function Modal() {
 	const { closeModal } = useDispatch(editPostStore);
 	const isModalActive = useSelect((select) => {
@@ -185,6 +215,14 @@ function Modal() {
 										value: 'mozjpeg',
 									},
 								]}
+							/>
+							{/* default for jpeg: 82, for webp: 86 */}
+							<FeatureNumberControl
+								className="interface-preferences-modal__option interface-preferences-modal__option--number"
+								label={__('Image Quality', 'media-experiments')}
+								isShiftStepEnabled={true}
+								featureName="imageQuality"
+								shiftStep={5}
 							/>
 						</PreferencesModalSection>
 					</>
@@ -273,4 +311,5 @@ globalDispatch(preferencesStore).setDefaults(PREFERENCES_NAME, {
 	videoEffect: 'none',
 	requireApproval: true,
 	imageFormat: 'webp',
+	imageQuality: 82,
 });

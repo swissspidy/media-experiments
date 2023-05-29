@@ -25,7 +25,7 @@ export type {
 	RestAttachment,
 };
 
-export { uploadStore as store };
+export { uploadStore as store, UploadError };
 
 const noop = () => {};
 
