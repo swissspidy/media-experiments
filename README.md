@@ -31,8 +31,6 @@ A non-exclusive list of things that have been implemented so far:
 
 These features can be tested either by dropping media files into the editor or by editing existing media blocks in the editor.
 
-## Features
-
 **Note:** not all of these have been fully implemented yet.
 
 ### Automatic Poster Generation
@@ -77,6 +75,7 @@ While the image block in Gutenberg already supports importing external images in
 This project changes this, while also hooking the import into the same upload logic so that imported files automatically get compressed and transcoded if needed.
 
 ### Self Recording
+
 Adds self recording capabilities to the video/image/audio blocks in Gutenberg so that one can record videos,
 GIFs (which are basically muted looped videos), audio transcripts, or simply take a still picture using your camera and/or microphone.
 
