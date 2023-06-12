@@ -20,7 +20,7 @@
 		"phpcompatibility/phpcompatibility-wp": "^2.0",
 		"roave/security-advisories": "dev-latest",
 		"wp-coding-standards/wpcs": "dev-develop",
-		"yoast/phpunit-polyfills": "^1.0.1"
+		"yoast/phpunit-polyfills": "^2.0.0"
 	},
 	"minimum-stability": "dev",
 	"config": {
