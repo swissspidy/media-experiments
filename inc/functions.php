@@ -51,9 +51,9 @@ function register_assets(): void {
 
 	wp_register_script(
 		'media-experiments-vips',
-		'https://cdn.jsdelivr.net/npm/wasm-vips@0.0.4/lib/vips.min.js',
+		'https://cdn.jsdelivr.net/npm/wasm-vips@0.0.5/lib/vips.min.js',
 		[],
-		'0.0.4',
+		'0.0.5',
 		true
 	);
 }

@@ -624,7 +624,7 @@ function ImageControls(props: ImageControlsProps) {
 		<Fragment>
 			<RecordingControls {...props} />
 			<ImportMedia {...props} onChange={onChange} />
-			<OptimizeMedia {...props} onChange={onChange} />
+			<OptimizeMedia {...props} />
 			<ShowBlurHash {...props} />
 			<ShowDominantColor {...props} />
 		</Fragment>
@@ -658,6 +658,7 @@ function AudioControls(props: AudioControlsProps) {
 interface BlockControlsProps {
 	name: string;
 	clientId: string;
+	attributes: Record<string, unknown>;
 	setAttributes: (attributes: Record<string, unknown>) => void;
 }
 
