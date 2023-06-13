@@ -44,7 +44,7 @@
 		"@wordpress/e2e-test-utils": "^10.4.0",
 		"@wordpress/env": "^8.0.0",
 		"@wordpress/eslint-plugin": "^14.6.0",
-		"@wordpress/scripts": "^26.5.0",
+		"@wordpress/scripts": "^26.6.0",
 		"eslint": "^8.42.0",
 		"mini-css-extract-plugin": "^2.7.6",
 		"prettier": "^2.8.4",
