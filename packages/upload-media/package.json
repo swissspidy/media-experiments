@@ -37,7 +37,7 @@
 		"@mexp/vips": "*",
 		"@wordpress/api-fetch": "^6.28.0",
 		"@wordpress/blob": "^3.35.0",
-		"@wordpress/core-data": "^6.8.0",
+		"@wordpress/core-data": "^6.12.0",
 		"@wordpress/data": "^9.5.0",
 		"@wordpress/i18n": "^4.27.0",
 		"@wordpress/preferences": "^3.5.0",
