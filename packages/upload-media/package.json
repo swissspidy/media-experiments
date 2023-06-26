@@ -39,7 +39,7 @@
 		"@wordpress/blob": "^3.36.0",
 		"@wordpress/core-data": "^6.12.0",
 		"@wordpress/data": "^9.5.0",
-		"@wordpress/i18n": "^4.27.0",
+		"@wordpress/i18n": "^4.36.0",
 		"@wordpress/preferences": "^3.5.0",
 		"blurhash": "^2.0.5",
 		"fast-average-color": "^9.3.0",
