@@ -53,7 +53,7 @@
 		"@wordpress/interface": "^5.13.0",
 		"@wordpress/media-utils": "^4.26.0",
 		"@wordpress/notices": "^4.1.0",
-		"@wordpress/plugins": "^6.3.0",
+		"@wordpress/plugins": "^6.4.0",
 		"@wordpress/preferences": "^3.10.0",
 		"image-capture": "^0.4.0",
 		"react-blurhash": "^0.3.0",
