@@ -43,7 +43,7 @@
 		"@wordpress/dependency-extraction-webpack-plugin": "^4.19.0",
 		"@wordpress/e2e-test-utils": "^10.7.0",
 		"@wordpress/env": "^8.2.0",
-		"@wordpress/eslint-plugin": "^14.6.0",
+		"@wordpress/eslint-plugin": "^14.9.0",
 		"@wordpress/scripts": "^26.6.0",
 		"eslint": "^8.44.0",
 		"mini-css-extract-plugin": "^2.7.6",
