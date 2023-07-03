@@ -49,7 +49,7 @@
 		"@wordpress/element": "^5.13.0",
 		"@wordpress/hooks": "^3.36.0",
 		"@wordpress/i18n": "^4.33.0",
-		"@wordpress/icons": "^9.24.0",
+		"@wordpress/icons": "^9.27.0",
 		"@wordpress/interface": "^5.12.0",
 		"@wordpress/media-utils": "^4.26.0",
 		"@wordpress/notices": "^4.1.0",
