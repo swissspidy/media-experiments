@@ -40,7 +40,7 @@
 		"@wordpress/core-data": "^6.12.0",
 		"@wordpress/data": "^9.6.0",
 		"@wordpress/i18n": "^4.27.0",
-		"@wordpress/preferences": "^3.5.0",
+		"@wordpress/preferences": "^3.17.0",
 		"blurhash": "^2.0.5",
 		"fast-average-color": "^9.3.0",
 		"uuid": "^9.0.0",
