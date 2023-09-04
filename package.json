@@ -39,7 +39,7 @@
 		"@types/wordpress__block-editor": "^11.5.1",
 		"@types/wordpress__blocks": "^12.5.0",
 		"@types/wordpress__components": "^23.0.1",
-		"@types/wordpress__editor": "^13.6.2",
+		"@types/wordpress__editor": "^13.6.3",
 		"@wordpress/dependency-extraction-webpack-plugin": "^4.20.0",
 		"@wordpress/e2e-test-utils": "^10.7.0",
 		"@wordpress/env": "^8.2.0",
