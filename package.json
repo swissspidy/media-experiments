@@ -34,7 +34,7 @@
 		"@testing-library/jest-dom": "^5.16.5",
 		"@testing-library/react": "^14.0.0",
 		"@types/jest": "^29.5.2",
-		"@types/node": "^20.3.3",
+		"@types/node": "^20.8.0",
 		"@types/uuid": "^9.0.2",
 		"@types/wordpress__block-editor": "^11.5.1",
 		"@types/wordpress__blocks": "^12.5.0",
