@@ -54,7 +54,7 @@
 		"@wordpress/media-utils": "^4.28.0",
 		"@wordpress/notices": "^4.1.0",
 		"@wordpress/plugins": "^6.4.0",
-		"@wordpress/preferences": "^3.10.0",
+		"@wordpress/preferences": "^3.20.1",
 		"image-capture": "^0.4.0",
 		"react-blurhash": "^0.3.0",
 		"react-compare-slider": "^2.2.0"
