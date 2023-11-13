@@ -45,7 +45,7 @@
 		"@wordpress/env": "^8.11.0",
 		"@wordpress/eslint-plugin": "^17.0.0",
 		"@wordpress/scripts": "^26.16.0",
-		"eslint": "^8.45.0",
+		"eslint": "^8.53.0",
 		"mini-css-extract-plugin": "^2.7.6",
 		"prettier": "npm:wp-prettier@^3.0.3",
 		"rtlcss-webpack-plugin": "^4.0.7",
