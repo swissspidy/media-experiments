@@ -241,6 +241,25 @@ describe( 'actions', () => {
 				} )
 			);
 		} );
+
+		it( 'should do nothing for an invalid attachment ID', async () => {
+			registry.dispatch( uploadStore ).addItem( {
+				file: jpegFile,
+				sourceAttachmentId: 1234,
+			} );
+
+			expect( registry.select( uploadStore ).getItems() ).toHaveLength(
+				1
+			);
+
+			const item = registry.select( uploadStore ).getItems()[ 0 ];
+
+			registry.dispatch( uploadStore ).grantApproval( 5678 );
+
+			expect( registry.select( uploadStore ).getItems()[ 0 ] ).toBe(
+				item
+			);
+		} );
 	} );
 
 	describe( 'rejectApproval', () => {
@@ -262,6 +281,25 @@ describe( 'actions', () => {
 					status: ItemStatus.Cancelled,
 					error: expect.any( UploadError ),
 				} )
+			);
+		} );
+
+		it( 'should do nothing for an invalid attachment ID', async () => {
+			registry.dispatch( uploadStore ).addItem( {
+				file: jpegFile,
+				sourceAttachmentId: 1234,
+			} );
+
+			expect( registry.select( uploadStore ).getItems() ).toHaveLength(
+				1
+			);
+
+			const item = registry.select( uploadStore ).getItems()[ 0 ];
+
+			registry.dispatch( uploadStore ).rejectApproval( 5678 );
+
+			expect( registry.select( uploadStore ).getItems()[ 0 ] ).toBe(
+				item
 			);
 		} );
 	} );
