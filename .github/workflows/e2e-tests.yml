@@ -62,7 +62,7 @@ jobs:
                   cd -
 
             - name: Run tests
-              run: npm run test:e2e -- --runInBand
+              run: npm run test:e2e
 
             - name: Archive debug artifacts (screenshots, HTML snapshots)
               uses: actions/upload-artifact@v3
