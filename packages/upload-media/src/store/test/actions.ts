@@ -10,6 +10,7 @@ import { store as preferencesStore } from '@wordpress/preferences';
  */
 import { store as uploadStore } from '..';
 import { ItemStatus, type QueueItem, TranscodingType, Type } from '../types';
+import UploadError from '../../uploadError';
 
 const mockImageFromPdf = new File( [], 'example.jpg', {
 	lastModified: 1234567891,
@@ -99,6 +100,28 @@ describe( 'actions', () => {
 					},
 					mediaSourceTerms: [ 'media-import' ],
 				} )
+			);
+		} );
+	} );
+
+	describe( 'removeItem', () => {
+		it( 'removes an item from the queue', () => {
+			registry.dispatch( uploadStore ).addItem( {
+				file: jpegFile,
+			} );
+
+			expect( registry.select( uploadStore ).getItems() ).toHaveLength(
+				1
+			);
+
+			const item: QueueItem = registry
+				.select( uploadStore )
+				.getItems()[ 0 ];
+
+			registry.dispatch( uploadStore ).removeItem( item.id );
+
+			expect( registry.select( uploadStore ).getItems() ).toHaveLength(
+				0
 			);
 		} );
 	} );
@@ -194,6 +217,143 @@ describe( 'actions', () => {
 				id: 'abc123',
 				file: jpegFile,
 				url: expect.stringMatching( /^blob:/ ),
+			} );
+		} );
+	} );
+
+	describe( 'grantApproval', () => {
+		it( 'should approve upload by attachment ID', async () => {
+			registry.dispatch( uploadStore ).addItem( {
+				file: jpegFile,
+				sourceAttachmentId: 1234,
+			} );
+
+			registry.dispatch( uploadStore ).grantApproval( 1234 );
+
+			expect( registry.select( uploadStore ).getItems() ).toHaveLength(
+				1
+			);
+			expect(
+				registry.select( uploadStore ).getItems()[ 0 ]
+			).toStrictEqual(
+				expect.objectContaining( {
+					status: ItemStatus.Approved,
+				} )
+			);
+		} );
+	} );
+
+	describe( 'rejectApproval', () => {
+		it( 'should cancel upload by attachment ID', async () => {
+			registry.dispatch( uploadStore ).addItem( {
+				file: jpegFile,
+				sourceAttachmentId: 1234,
+			} );
+
+			registry.dispatch( uploadStore ).rejectApproval( 1234 );
+
+			expect( registry.select( uploadStore ).getItems() ).toHaveLength(
+				1
+			);
+			expect(
+				registry.select( uploadStore ).getItems()[ 0 ]
+			).toStrictEqual(
+				expect.objectContaining( {
+					status: ItemStatus.Cancelled,
+					error: expect.any( UploadError ),
+				} )
+			);
+		} );
+	} );
+
+	describe( 'addPoster', () => {
+		it( `should return the ${ Type.AddPoster } action`, () => {
+			const result = registry
+				.dispatch( uploadStore )
+				.addPoster( 'abc123', jpegFile );
+
+			expect( result ).resolves.toStrictEqual( {
+				type: Type.AddPoster,
+				id: 'abc123',
+				file: jpegFile,
+				url: expect.stringMatching( /^blob:/ ),
+			} );
+		} );
+	} );
+
+	describe( 'prepareForTranscoding', () => {
+		it( `should return the ${ Type.TranscodingPrepare } action`, async () => {
+			const result = registry
+				.dispatch( uploadStore )
+				.prepareForTranscoding( 'abc123' );
+
+			expect( result ).resolves.toStrictEqual( {
+				type: Type.TranscodingPrepare,
+				id: 'abc123',
+				transcode: TranscodingType.Default,
+			} );
+		} );
+	} );
+
+	describe( 'startTranscoding', () => {
+		it( `should return the ${ Type.TranscodingStart } action`, () => {
+			const result = registry
+				.dispatch( uploadStore )
+				.startTranscoding( 'abc123' );
+
+			expect( result ).resolves.toStrictEqual( {
+				type: Type.TranscodingStart,
+				id: 'abc123',
+			} );
+		} );
+	} );
+
+	describe( 'finishTranscoding', () => {
+		it( `should return the ${ Type.TranscodingFinish } action`, () => {
+			const result = registry
+				.dispatch( uploadStore )
+				.finishTranscoding( 'abc123', mp4File );
+
+			expect( result ).resolves.toStrictEqual( {
+				type: Type.TranscodingFinish,
+				id: 'abc123',
+				file: mp4File,
+				url: expect.stringMatching( /^blob:/ ),
+			} );
+		} );
+	} );
+
+	describe( 'startUploading', () => {
+		it( `should return the ${ Type.UploadStart } action`, () => {
+			const result = registry
+				.dispatch( uploadStore )
+				.startUploading( 'abc123' );
+
+			expect( result ).resolves.toStrictEqual( {
+				type: Type.UploadStart,
+				id: 'abc123',
+			} );
+		} );
+	} );
+
+	describe( 'finishUploading', () => {
+		it( `should return the ${ Type.UploadFinish } action`, () => {
+			const attachment = {
+				id: 123,
+				url: 'https://example.com/attachment.jpg',
+				alt: '',
+				title: '',
+				mimeType: 'image/jpeg',
+			};
+
+			const result = registry
+				.dispatch( uploadStore )
+				.finishUploading( 'abc123', attachment );
+
+			expect( result ).resolves.toStrictEqual( {
+				type: Type.UploadFinish,
+				id: 'abc123',
+				attachment,
 			} );
 		} );
 	} );
