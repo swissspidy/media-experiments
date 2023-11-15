@@ -38,13 +38,13 @@ These features can be tested either by dropping media files into the editor or b
 Poster images are important for UX as they are shown before a video is fully loaded and started playing.
 During upload, a poster image (thumbnail) of the video is automatically taken and added to the video in both the editor and the media library.
 
-https://github.com/swissspidy/media-experiments/assets/841956/ba082f49-145e-441e-89c5-a63acdd039bd
+<img src="https://github.com/swissspidy/media-experiments/assets/841956/ba082f49-145e-441e-89c5-a63acdd039bd" alt="" />
 
 #### Preview image generation for PDFs
 
 In addition to that, poster images are automatically generated for PDFs as well (powered by [`PDF.js`](https://github.com/mozilla/pdf.js).
 
-https://github.com/swissspidy/media-experiments/assets/841956/f26b4f7d-f60b-4177-b8d0-b79d12c8863b
+<img src="https://github.com/swissspidy/media-experiments/assets/841956/f26b4f7d-f60b-4177-b8d0-b79d12c8863b" alt="" />
 
 ### Converting GIFs to Videos
 
@@ -53,7 +53,7 @@ https://github.com/swissspidy/media-experiments/assets/841956/f26b4f7d-f60b-4177
 This project automatically converts animated GIFs to an actual video file during upload. The image block, upon receiving the updated media item, transforms into a video block.
 **Note:** Right now, that last part (block transformation) is achieved by patching Gutenberg.
 
-https://github.com/swissspidy/media-experiments/assets/841956/df3343e5-6e49-44da-bb45-9f6f43f92665
+<img src="https://github.com/swissspidy/media-experiments/assets/841956/df3343e5-6e49-44da-bb45-9f6f43f92665" alt="" />
 
 ### HEIF Image Transcoding
 
@@ -76,7 +76,7 @@ This allows completely removing the audio channel from a video, so it’s actual
 
 During upload, it’s automatically detected whether the video actually has any audio channels. If not, it’s marked as muted.
 
-https://github.com/swissspidy/media-experiments/assets/841956/2a9b566f-58ec-4256-b820-c7443fc53301
+<img src="https://github.com/swissspidy/media-experiments/assets/841956/2a9b566f-58ec-4256-b820-c7443fc53301" alt="" />
 
 ### (Improved) Import of External Media
 
@@ -90,7 +90,7 @@ GIFs (which are basically muted looped videos), audio transcripts, or simply tak
 
 This also supports automatically blurring backgrounds.
 
-https://github.com/swissspidy/media-experiments/assets/841956/dd4ad5ed-8374-48f2-8223-9ed856b590b4
+<img src="https://github.com/swissspidy/media-experiments/assets/841956/dd4ad5ed-8374-48f2-8223-9ed856b590b4" alt="" />
 
 ### Improved Media Placeholders
 
@@ -104,14 +104,14 @@ Caveat: no placeholder is displayed if the image has alpha transparency, as that
 This is more advanced than the [Dominant Color Images](https://github.com/WordPress/performance/tree/86a7776df8927c01f886647bbdd0e166731fa9c9/modules/images/dominant-color-images) feature plugin,
 which does not generate blurred placeholders.
 
-<img width="436" alt="Block sidebar controls showing BlurHash and dominant color of a video" src="https://github.com/swissspidy/media-experiments/assets/841956/65f4d211-a2ed-4f0c-b600-965782de8188">
+<img width="436" alt="Block sidebar controls showing BlurHash and dominant color of a video" src="https://github.com/swissspidy/media-experiments/assets/841956/65f4d211-a2ed-4f0c-b600-965782de8188" />
 
 ### Optimize Existing Media
 
 Allows optimizing existing media items in a post by converting them to a more modern format. Either individually or in bulk.
 After conversion, the old and new versions can optionally be compared with a slider. The file size savings in % are shown next to it.
 
-https://github.com/swissspidy/media-experiments/assets/841956/af783b3d-e7f4-425f-8de7-23a63dc2b9f9
+<img src="https://github.com/swissspidy/media-experiments/assets/841956/af783b3d-e7f4-425f-8de7-23a63dc2b9f9" alt="" />
 
 ### Client-Side Image Downsizing
 
