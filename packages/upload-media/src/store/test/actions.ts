@@ -9,7 +9,7 @@ import { store as preferencesStore } from '@wordpress/preferences';
  * Internal dependencies
  */
 import { store as uploadStore } from '..';
-import { ItemStatus, type QueueItem, TranscodingType } from '../types';
+import { ItemStatus, type QueueItem, TranscodingType, Type } from '../types';
 
 const mockImageFromPdf = new File( [], 'example.jpg', {
 	lastModified: 1234567891,
@@ -140,6 +140,61 @@ describe( 'actions', () => {
 				} )
 			);
 			expect( item.file.name ).toBe( 'awesome-video-muted.mp4' );
+		} );
+	} );
+
+	describe( 'optimizeExistingItem', () => {
+		it( 'downloads video file and adds it to the queue for transcoding', async () => {
+			window.fetch = jest.fn( () =>
+				Promise.resolve( {
+					ok: true,
+					blob: jest.fn( () => Promise.resolve( mp4File ) ),
+				} )
+			) as jest.Mock;
+
+			await registry.dispatch( uploadStore ).optimizeExistingItem( {
+				id: 1234,
+				url: 'https://example.com/awesome-video.mp4',
+			} );
+
+			expect( registry.select( uploadStore ).getItems() ).toHaveLength(
+				1
+			);
+
+			const item: QueueItem = registry
+				.select( uploadStore )
+				.getItems()[ 0 ];
+
+			expect( item ).toStrictEqual(
+				expect.objectContaining( {
+					id: expect.any( String ),
+					sourceUrl: 'https://example.com/awesome-video.mp4',
+					file: expect.any( File ),
+					sourceFile: expect.any( File ),
+					sourceAttachmentId: 1234,
+					status: ItemStatus.Pending,
+					attachment: {
+						url: 'https://example.com/awesome-video.mp4',
+					},
+					transcode: TranscodingType.OptimizeExisting,
+				} )
+			);
+			expect( item.file.name ).toBe( 'awesome-video-optimized.mp4' );
+		} );
+	} );
+
+	describe( 'requestApproval', () => {
+		it( `should return the ${ Type.RequestApproval } action`, async () => {
+			const result = registry
+				.dispatch( uploadStore )
+				.requestApproval( 'abc123', jpegFile );
+
+			expect( result ).resolves.toStrictEqual( {
+				type: Type.RequestApproval,
+				id: 'abc123',
+				file: jpegFile,
+				url: expect.stringMatching( /^blob:/ ),
+			} );
 		} );
 	} );
 
