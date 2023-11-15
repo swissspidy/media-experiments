@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { blobToFile, getFileBasename } from '@mexp/media-utils';
 import type { FFmpeg } from '@ffmpeg/ffmpeg';
 
-import { MAX_VIDEO_RESOLUTION } from './constants';
+// import { MAX_VIDEO_RESOLUTION } from './constants';
 
 const FFMPEG_CONFIG = {
 	CODEC: [
@@ -11,12 +11,13 @@ const FFMPEG_CONFIG = {
 		'libx264',
 	],
 	SCALE: [
-		// TODO: Make configurable by user?
+		// TODO: Make configurable by user? Still need to retain original.
+		// See https://github.com/swissspidy/media-experiments/issues/3
 		// Scale down to 1080p to keep file size small.
 		// See https://trac.ffmpeg.org/wiki/Scaling
 		// Adds 1px pad to width/height if they're not divisible by 2, which FFmpeg will complain about.
-		'-vf',
-		`scale='min(${ MAX_VIDEO_RESOLUTION[ 0 ] },iw)':'min(${ MAX_VIDEO_RESOLUTION[ 1 ] },ih)':'force_original_aspect_ratio=decrease',pad='width=ceil(iw/2)*2:height=ceil(ih/2)*2'`,
+		// '-vf',
+		// `scale='min(${ MAX_VIDEO_RESOLUTION[ 0 ] },iw)':'min(${ MAX_VIDEO_RESOLUTION[ 1 ] },ih)':'force_original_aspect_ratio=decrease',pad='width=ceil(iw/2)*2:height=ceil(ih/2)*2'`,
 	],
 	FPS: [
 		// Reduce to 24fps.
