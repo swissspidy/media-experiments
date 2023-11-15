@@ -11,15 +11,13 @@ import { store as preferencesStore } from '@wordpress/preferences';
 import { store as uploadStore } from '..';
 import { ItemStatus } from '../types';
 
-// Mock packa
+const mockImageFromPdf = new File( [], 'example.jpg', {
+	lastModified: 1234567891,
+	type: 'image/jpeg',
+} );
+
 jest.mock( '@mexp/pdf', () => ( {
-	getImageFromPdf: jest.fn(
-		() =>
-			new File( [], 'example.jpg', {
-				lastModified: 1234567891,
-				type: 'image/jpeg',
-			} )
-	),
+	getImageFromPdf: jest.fn( () => mockImageFromPdf ),
 } ) );
 
 function createRegistryWithStores() {
