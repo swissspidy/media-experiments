@@ -9,7 +9,7 @@ import { store as preferencesStore } from '@wordpress/preferences';
  * Internal dependencies
  */
 import { store as uploadStore } from '..';
-import { ItemStatus } from '../types';
+import { ItemStatus, type QueueItem, TranscodingType } from '../types';
 
 const mockImageFromPdf = new File( [], 'example.jpg', {
 	lastModified: 1234567891,
@@ -31,6 +31,11 @@ function createRegistryWithStores() {
 const jpegFile = new File( [], 'example.jpg', {
 	lastModified: 1234567891,
 	type: 'image/jpeg',
+} );
+
+const mp4File = new File( [], 'amazing-video.mp4', {
+	lastModified: 1234567891,
+	type: 'video/mp4',
 } );
 
 describe( 'actions', () => {
@@ -61,6 +66,103 @@ describe( 'actions', () => {
 					},
 				} )
 			);
+		} );
+	} );
+
+	describe( 'addItemFromUrl', () => {
+		it( 'downloads file and adds it to the queue', async () => {
+			window.fetch = jest.fn( () =>
+				Promise.resolve( {
+					ok: true,
+					blob: jest.fn( () => Promise.resolve( jpegFile ) ),
+				} )
+			) as jest.Mock;
+
+			await registry.dispatch( uploadStore ).addItemFromUrl( {
+				url: 'https://example.com/example.jpg',
+			} );
+
+			expect( registry.select( uploadStore ).getItems() ).toHaveLength(
+				1
+			);
+			expect(
+				registry.select( uploadStore ).getItems()[ 0 ]
+			).toStrictEqual(
+				expect.objectContaining( {
+					id: expect.any( String ),
+					sourceUrl: 'https://example.com/example.jpg',
+					file: jpegFile,
+					sourceFile: jpegFile,
+					status: ItemStatus.Pending,
+					attachment: {
+						url: expect.stringMatching( /^blob:/ ),
+					},
+					mediaSourceTerms: [ 'media-import' ],
+				} )
+			);
+		} );
+	} );
+
+	describe( 'muteExistingVideo', () => {
+		it( 'downloads file and adds it to the queue for transcoding', async () => {
+			window.fetch = jest.fn( () =>
+				Promise.resolve( {
+					ok: true,
+					blob: jest.fn( () => Promise.resolve( mp4File ) ),
+				} )
+			) as jest.Mock;
+
+			await registry.dispatch( uploadStore ).muteExistingVideo( {
+				id: 1234,
+				url: 'https://example.com/awesome-video.mp4',
+			} );
+
+			expect( registry.select( uploadStore ).getItems() ).toHaveLength(
+				1
+			);
+
+			const item: QueueItem = registry
+				.select( uploadStore )
+				.getItems()[ 0 ];
+
+			expect( item ).toStrictEqual(
+				expect.objectContaining( {
+					id: expect.any( String ),
+					sourceUrl: 'https://example.com/awesome-video.mp4',
+					file: expect.any( File ),
+					sourceFile: expect.any( File ),
+					sourceAttachmentId: 1234,
+					status: ItemStatus.Pending,
+					attachment: {
+						url: 'https://example.com/awesome-video.mp4',
+					},
+					transcode: TranscodingType.MuteVideo,
+				} )
+			);
+			expect( item.file.name ).toBe( 'awesome-video-muted.mp4' );
+		} );
+	} );
+
+	describe( 'setMediaSourceTerms', () => {
+		it( 'adds media source terms to state', () => {
+			registry.dispatch( uploadStore ).setMediaSourceTerms( {
+				foo: 1,
+				bar: 2,
+				baz: 3,
+			} );
+
+			expect(
+				registry.select( uploadStore ).getMediaSourceTermId( 'foo' )
+			).toBe( 1 );
+			expect(
+				registry.select( uploadStore ).getMediaSourceTermId( 'bar' )
+			).toBe( 2 );
+			expect(
+				registry.select( uploadStore ).getMediaSourceTermId( 'baz' )
+			).toBe( 3 );
+			expect(
+				registry.select( uploadStore ).getMediaSourceTermId( 'unknown' )
+			).toBe( undefined );
 		} );
 	} );
 } );
