@@ -420,9 +420,6 @@ function OptimizeMedia( { attributes, setAttributes }: OptimizeMediaProps ) {
 					</p>
 					<div className="mexp-comparison-modal__slider">
 						<ReactCompareSlider
-							style={ {
-								maxHeight: '400px',
-							} }
 							itemOne={
 								<ReactCompareSliderImage
 									src={ comparison.oldUrl }

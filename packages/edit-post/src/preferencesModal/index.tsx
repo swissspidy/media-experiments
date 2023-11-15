@@ -1,8 +1,5 @@
 import { registerPlugin } from '@wordpress/plugins';
-import {
-	PluginMoreMenuItem,
-	store as editPostStore,
-} from '@wordpress/edit-post';
+import { PluginMoreMenuItem } from '@wordpress/edit-post';
 import { media } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
@@ -19,6 +16,7 @@ import {
 	PreferencesModalTabs,
 	PreferencesModalSection,
 	___unstablePreferencesModalBaseOption as BaseOption,
+	store as interfaceStore,
 } from '@wordpress/interface';
 import { store as preferencesStore } from '@wordpress/preferences';
 import {
@@ -153,9 +151,9 @@ const FeatureNumberControl = compose(
 )( NumberControl ) as FunctionComponent< FeatureNumberControlProps >;
 
 function Modal() {
-	const { closeModal } = useDispatch( editPostStore );
+	const { closeModal } = useDispatch( interfaceStore );
 	const isModalActive = useSelect( ( select ) => {
-		return select( editPostStore ).isModalActive( PREFERENCES_NAME );
+		return select( interfaceStore ).isModalActive( PREFERENCES_NAME );
 	}, [] );
 
 	const { videoDevices, audioDevices } = useSelect( ( select ) => {
@@ -300,7 +298,7 @@ function Modal() {
 }
 
 function PreferencesMenuItem() {
-	const { openModal } = useDispatch( editPostStore );
+	const { openModal } = useDispatch( interfaceStore );
 
 	return (
 		<>
