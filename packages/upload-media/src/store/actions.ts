@@ -106,7 +106,10 @@ export function addItem( {
 			id: uuidv4(),
 			batchId,
 			status: ItemStatus.Pending,
-			sourceFile: new File( [ file ], file.name, { type: file.type } ),
+			sourceFile: new File( [ file ], file.name, {
+				type: file.type,
+				lastModified: file.lastModified,
+			} ),
 			file,
 			attachment: {
 				url: createBlobURL( file ),
