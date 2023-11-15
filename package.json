@@ -32,7 +32,7 @@
 	"devDependencies": {
 		"@mexp/eslint-import-resolver": "*",
 		"@testing-library/jest-dom": "^6.1.4",
-		"@testing-library/react": "^14.0.0",
+		"@testing-library/react": "^14.1.0",
 		"@types/jest": "^29.5.2",
 		"@types/node": "^20.8.6",
 		"@types/uuid": "^9.0.5",
