@@ -32,6 +32,6 @@
 	},
 	"dependencies": {
 		"@mexp/media-utils": "*",
-		"libheif-js": "^1.15.1"
+		"libheif-js": "^1.17.1"
 	}
 }
