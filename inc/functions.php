@@ -40,17 +40,17 @@ function set_up_cross_origin_isolation( WP_Screen $screen ): void {
 function register_assets(): void {
 	wp_register_script(
 		'media-experiments-libheif',
-		'https://cdn.jsdelivr.net/npm/libheif-js@1.15.1/libheif/libheif.min.js',
+		'https://cdn.jsdelivr.net/npm/libheif-js@1.17.1/libheif/libheif.min.js',
 		[],
-		'1.15.1',
+		'1.17.1',
 		true
 	);
 
 	wp_register_script(
 		'media-experiments-vips',
-		'https://cdn.jsdelivr.net/npm/wasm-vips@0.0.5/lib/vips.min.js',
+		'https://cdn.jsdelivr.net/npm/wasm-vips@0.0.7/lib/vips.min.js',
 		[],
-		'0.0.5',
+		'0.0.7',
 		true
 	);
 }
@@ -80,6 +80,14 @@ function enqueue_block_editor_assets(): void {
 
 	wp_set_script_translations( 'media-experiments', 'media-experiments' );
 
+	wp_add_inline_script(
+		'media-experiments',
+		sprintf( 'const mediaExperiments = %s;', wp_json_encode( [
+			'availableImageSizes' => get_all_image_sizes(),
+		] ) ),
+		'before'
+	);
+
 	wp_enqueue_style(
 		'media-experiments',
 		plugins_url( 'build/media-experiments.css', __DIR__ ),
@@ -88,6 +96,32 @@ function enqueue_block_editor_assets(): void {
 	);
 
 	wp_style_add_data( 'media-experiments', 'rtl', 'replace' );
+}
+
+function get_all_image_sizes(): array {
+	$sizes = wp_get_additional_image_sizes();
+
+	$sizes['thumb'] = [
+		'width' => get_option( 'thumbnail_size_w' ),
+		'height' => get_option( 'thumbnail_size_h' ),
+	];
+
+	$sizes['medium'] = [
+		'width' => get_option( 'medium_size_w' ),
+		'height' => get_option( 'medium_size_h' ),
+	];
+
+	$sizes['medium_large'] = [
+		'width' => get_option( 'medium_large_size_w' ),
+		'height' => get_option( 'medium_large_size_h' ),
+	];
+
+	$sizes['large'] = [
+		'width' => get_option( 'large_size_w' ),
+		'height' => get_option( 'large_size_h' ),
+	];
+
+	return $sizes;
 }
 
 /**
