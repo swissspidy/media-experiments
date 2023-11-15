@@ -285,7 +285,7 @@ export async function getDominantColor(
 	image: string | FastAverageColorResource
 ) {
 	const fac = new FastAverageColor();
-	const { hex, error } = await fac.getColorAsync( image, {
+	const { hex, error } = await fac.getColorAsync( image as string, {
 		defaultColor: [ 255, 255, 255, 255 ],
 		// Errors that come up don't reject the promise, so error
 		// logging has to be silenced with this option.
