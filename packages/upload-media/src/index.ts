@@ -111,7 +111,7 @@ subscribe( () => {
 	for ( const item of items ) {
 		const { id, error, onError } = item;
 		onError?.( error ?? new Error( 'Upload cancelled' ) );
-		dispatch( uploadStore ).removeItem( id );
+		void dispatch( uploadStore ).removeItem( id );
 	}
 }, uploadStore );
 
@@ -133,6 +133,6 @@ const unsubscribeCoreStore = subscribe( () => {
 		terms[ termObject.slug ] = termObject.id;
 	}
 
-	dispatch( uploadStore ).setMediaSourceTerms( terms );
+	void dispatch( uploadStore ).setMediaSourceTerms( terms );
 	unsubscribeCoreStore();
 }, coreStore );

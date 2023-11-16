@@ -82,9 +82,14 @@ function enqueue_block_editor_assets(): void {
 
 	wp_add_inline_script(
 		'media-experiments',
-		sprintf( 'const mediaExperiments = %s;', wp_json_encode( [
-			'availableImageSizes' => get_all_image_sizes(),
-		] ) ),
+		sprintf(
+			'const mediaExperiments = %s;',
+			wp_json_encode(
+				[
+					'availableImageSizes' => get_all_image_sizes(),
+				]
+			)
+		),
 		'before'
 	);
 
@@ -98,26 +103,31 @@ function enqueue_block_editor_assets(): void {
 	wp_style_add_data( 'media-experiments', 'rtl', 'replace' );
 }
 
+/**
+ * Returns a list of all available image sizes.
+ *
+ * @return array Existing image sizes.
+ */
 function get_all_image_sizes(): array {
 	$sizes = wp_get_additional_image_sizes();
 
 	$sizes['thumb'] = [
-		'width' => get_option( 'thumbnail_size_w' ),
+		'width'  => get_option( 'thumbnail_size_w' ),
 		'height' => get_option( 'thumbnail_size_h' ),
 	];
 
 	$sizes['medium'] = [
-		'width' => get_option( 'medium_size_w' ),
+		'width'  => get_option( 'medium_size_w' ),
 		'height' => get_option( 'medium_size_h' ),
 	];
 
 	$sizes['medium_large'] = [
-		'width' => get_option( 'medium_large_size_w' ),
+		'width'  => get_option( 'medium_large_size_w' ),
 		'height' => get_option( 'medium_large_size_h' ),
 	];
 
 	$sizes['large'] = [
-		'width' => get_option( 'large_size_w' ),
+		'width'  => get_option( 'large_size_w' ),
 		'height' => get_option( 'large_size_h' ),
 	];
 

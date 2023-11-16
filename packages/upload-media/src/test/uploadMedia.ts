@@ -152,7 +152,7 @@ describe( 'uploadMedia', () => {
 				file: xmlFile,
 			} )
 		);
-		expect( mockAddItem ).toHaveBeenCalledTimes(1);
+		expect( mockAddItem ).toHaveBeenCalledTimes( 1 );
 	} );
 
 	it( 'should error if the file size is greater than the maximum', async () => {
