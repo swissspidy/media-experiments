@@ -5,6 +5,7 @@ import UploadError from '../uploadError';
 
 const mockAddItem = jest.fn();
 
+jest.mock( '@mexp/jsquash', () => ( {} ) );
 jest.mock( '@wordpress/data' );
 
 ( dispatch as jest.Mock ).mockImplementation( () => ( {

@@ -17,6 +17,8 @@ const mockImageFromPdf = new File( [], 'example.jpg', {
 	type: 'image/jpeg',
 } );
 
+jest.mock( '@mexp/jsquash', () => ( {} ) );
+
 jest.mock( '@mexp/pdf', () => ( {
 	getImageFromPdf: jest.fn( () => mockImageFromPdf ),
 } ) );
