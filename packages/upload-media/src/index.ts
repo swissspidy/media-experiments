@@ -12,6 +12,7 @@ import type {
 	WP_REST_API_Term,
 } from './store/types';
 import UploadError from './uploadError';
+export { uploadMedia } from './uploadMedia';
 
 export type {
 	AdditionalData,
