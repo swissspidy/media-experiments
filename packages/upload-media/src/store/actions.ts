@@ -666,8 +666,6 @@ export function optimizeItemWithApproval( id: QueueItemId ) {
 					break;
 			}
 
-			console.log( 'imageFormat', imageFormat, file );
-
 			const requireApproval = registry
 				.select( preferencesStore )
 				.get( 'media-experiments/preferences', 'requireApproval' );
