@@ -1,20 +1,20 @@
 {
-	"name": "@mexp/vips",
+	"name": "@mexp/jsquash",
 	"version": "0.0.1",
-	"description": "libvips utils",
+	"description": "jSquash utils",
 	"private": true,
 	"author": "",
 	"license": "Apache-2.0",
 	"keywords": [
 		"wordpress",
 		"media",
-		"libvips"
+		"jsquash"
 	],
-	"homepage": "https://github.com/swissspidy/media-experiments/tree/HEAD/packages/vips/README.md",
+	"homepage": "https://github.com/swissspidy/media-experiments/tree/HEAD/packages/jsquash/README.md",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/swissspidy/media-experiments.git",
-		"directory": "packages/vips"
+		"directory": "packages/jsquash"
 	},
 	"bugs": {
 		"url": "https://github.com/swissspidy/media-experiments/issues"
@@ -31,7 +31,8 @@
 		}
 	},
 	"dependencies": {
-		"@mexp/media-utils": "../media-utils",
-		"wasm-vips": "^0.0.7"
+		"@jsquash/avif": "^1.1.2",
+		"@jsquash/jpeg": "^1.2.0",
+		"@mexp/media-utils": "../media-utils"
 	}
 }

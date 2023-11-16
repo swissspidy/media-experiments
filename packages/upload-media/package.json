@@ -30,11 +30,12 @@
 		}
 	},
 	"dependencies": {
-		"@mexp/ffmpeg": "*",
-		"@mexp/heif": "*",
-		"@mexp/media-utils": "*",
-		"@mexp/pdf": "*",
-		"@mexp/vips": "*",
+		"@mexp/ffmpeg": "../ffmpeg",
+		"@mexp/heif": "../heif",
+		"@mexp/jsquash": "../jsquash",
+		"@mexp/media-utils": "../media-utils",
+		"@mexp/pdf": "../pdf",
+		"@mexp/vips": "../vips",
 		"@wordpress/api-fetch": "^6.33.0",
 		"@wordpress/blob": "^3.36.0",
 		"@wordpress/core-data": "^6.22.0",

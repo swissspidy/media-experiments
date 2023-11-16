@@ -1,0 +1,49 @@
+diff --git a/node_modules/@jsquash/jpeg/encode.d.ts b/node_modules/@jsquash/jpeg/encode.d.ts
+index 740244c..7d78f20 100644
+--- a/node_modules/@jsquash/jpeg/encode.d.ts
++++ b/node_modules/@jsquash/jpeg/encode.d.ts
+@@ -16,6 +16,6 @@
+  * The jpeg options are defaulted to defaults from the meta.ts file.
+  */
+ import type { EncodeOptions } from './meta';
+-export declare function init(module?: WebAssembly.Module): Promise<void>;
++export declare function init(module?: WebAssembly.Module, args?: Record<string, unknown>): Promise<void>;
+ export default function encode(data: ImageData, options?: Partial<EncodeOptions>): Promise<ArrayBuffer>;
+ //# sourceMappingURL=encode.d.ts.map
+diff --git a/node_modules/@jsquash/jpeg/encode.js b/node_modules/@jsquash/jpeg/encode.js
+index a6c65e8..3f90d3e 100644
+--- a/node_modules/@jsquash/jpeg/encode.js
++++ b/node_modules/@jsquash/jpeg/encode.js
+@@ -14,8 +14,8 @@ import mozjpeg_enc from './codec/enc/mozjpeg_enc';
+ import { defaultOptions } from './meta';
+ import { initEmscriptenModule } from './utils';
+ let emscriptenModule;
+-export async function init(module) {
+-    emscriptenModule = initEmscriptenModule(mozjpeg_enc, module);
++export async function init(module, args) {
++    emscriptenModule = initEmscriptenModule(mozjpeg_enc, module, args);
+ }
+ export default async function encode(data, options = {}) {
+     if (!emscriptenModule)
+diff --git a/node_modules/@jsquash/jpeg/utils.js b/node_modules/@jsquash/jpeg/utils.js
+index a00acf2..fd9927f 100644
+--- a/node_modules/@jsquash/jpeg/utils.js
++++ b/node_modules/@jsquash/jpeg/utils.js
+@@ -13,7 +13,7 @@
+ /**
+  * Notice: I (Jamie Sinclair) have modified this file to allow manual instantiation of the Wasm Module.
+  */
+-export function initEmscriptenModule(moduleFactory, wasmModule) {
++export function initEmscriptenModule(moduleFactory, wasmModule, args) {
+     let instantiateWasm;
+     if (wasmModule) {
+         instantiateWasm = (imports, callback) => {
+@@ -25,6 +25,7 @@ export function initEmscriptenModule(moduleFactory, wasmModule) {
+     return moduleFactory({
+         // Just to be safe, don't automatically invoke any wasm functions
+         noInitialRun: true,
+-        instantiateWasm
++        instantiateWasm,
++		...args,
+     });
+ }

@@ -8,6 +8,8 @@ import {
 	blobToFile,
 	getCanvasBlob,
 	getExtensionFromMimeType,
+	getImageData,
+	preloadImage,
 } from '@mexp/media-utils';
 
 import {
@@ -117,24 +119,6 @@ async function preloadVideo( src: string ) {
 		video.addEventListener( 'error', reject );
 
 		video.preload = 'auto';
-	} );
-}
-
-function preloadImage( src: string, width?: number, height?: number ) {
-	return new Promise< HTMLImageElement >( ( resolve, reject ) => {
-		// If no width or height are provided, set them to undefined
-		// so that is preloaded with its full dimensions.
-		// Avoids creating an image with 0x0 dimensions.
-		const image = new Image(
-			width ? Number( width ) : undefined,
-			height ? Number( height ) : undefined
-		);
-		image.addEventListener( 'load', () => resolve( image ) );
-		image.addEventListener( 'error', ( error ) => reject( error ) );
-		image.decoding = 'async';
-		image.crossOrigin = 'anonymous';
-
-		image.src = src;
 	} );
 }
 
@@ -298,26 +282,6 @@ export async function getDominantColor(
 	}
 
 	return hex;
-}
-
-function getImageData( image: HTMLImageElement, width?: number ) {
-	const canvas = document.createElement( 'canvas' );
-	const desiredWidth = width || image.naturalWidth;
-	const desiredHeight =
-		( image.naturalHeight / image.naturalWidth ) * desiredWidth;
-	canvas.width = desiredWidth;
-	canvas.height = desiredHeight;
-
-	const ctx = canvas.getContext( '2d' );
-
-	// If the contextType doesn't match a possible drawing context,
-	// or differs from the first contextType requested, null is returned.
-	if ( ! ctx ) {
-		throw new Error( 'Could not get context' );
-	}
-
-	ctx.drawImage( image, 0, 0, canvas.width, canvas.height );
-	return ctx.getImageData( 0, 0, desiredWidth, desiredHeight );
 }
 
 export async function getBlurHash( image: string ) {

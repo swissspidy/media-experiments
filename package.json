@@ -47,6 +47,7 @@
 		"@wordpress/scripts": "^26.16.0",
 		"eslint": "^8.53.0",
 		"mini-css-extract-plugin": "^2.7.6",
+		"patch-package": "^8.0.0",
 		"prettier": "npm:wp-prettier@^3.0.3",
 		"rtlcss-webpack-plugin": "^4.0.7",
 		"typescript": "^5.2.2",
@@ -54,6 +55,7 @@
 		"webpack-cli": "^5.1.4"
 	},
 	"scripts": {
+		"postinstall": "patch-package",
 		"build": "wp-scripts build",
 		"build:package-types": "tsc --build",
 		"format": "wp-scripts format",

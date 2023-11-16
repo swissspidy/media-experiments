@@ -33,7 +33,7 @@
 	"dependencies": {
 		"@ffmpeg/core": "^0.11.0",
 		"@ffmpeg/ffmpeg": "^0.11.6",
-		"@mexp/media-utils": "*",
+		"@mexp/media-utils": "../media-utils",
 		"uuid": "^9.0.0"
 	}
 }

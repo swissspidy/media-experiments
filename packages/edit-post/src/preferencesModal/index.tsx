@@ -203,14 +203,14 @@ function Modal() {
 								options={ [
 									{
 										label: __(
-											'WebP (Default)',
+											'WebP (FFmpeg)',
 											'media-experiments'
 										),
 										value: 'webp',
 									},
 									{
 										label: __(
-											'JPEG',
+											'JPEG (libvips)',
 											'media-experiments'
 										),
 										value: 'jpeg',
@@ -221,6 +221,13 @@ function Modal() {
 											'media-experiments'
 										),
 										value: 'mozjpeg',
+									},
+									{
+										label: __(
+											'AVIF',
+											'media-experiments'
+										),
+										value: 'avif',
 									},
 								] }
 							/>

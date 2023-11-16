@@ -14,6 +14,10 @@ import {
 import { convertImageToJpeg } from '@mexp/vips';
 import { isHeifImage, transcodeHeifImage } from '@mexp/heif';
 import { getImageFromPdf } from '@mexp/pdf';
+import {
+	convertImageToJpeg as convertImageToMozJpeg,
+	convertImageToAvif,
+} from '@mexp/jsquash';
 import { getFileBasename, getMediaTypeFromMimeType } from '@mexp/media-utils';
 
 import {
@@ -642,10 +646,27 @@ export function optimizeItemWithApproval( id: QueueItemId ) {
 			.get( 'media-experiments/preferences', 'imageFormat' );
 
 		try {
-			const file =
-				imageFormat === 'webp'
-					? await convertImageToWebP( item.file )
-					: await convertImageToJpeg( item.file );
+			let file: File;
+
+			switch ( imageFormat ) {
+				case 'jpeg':
+					file = await convertImageToJpeg( item.file );
+					break;
+				case 'mozjpeg':
+					file = await convertImageToMozJpeg( item.file );
+					break;
+				case 'avif':
+					file = await convertImageToAvif( item.file );
+					break;
+				case 'webp':
+					file = await convertImageToWebP( item.file );
+					break;
+				default:
+					file = await convertImageToWebP( item.file );
+					break;
+			}
+
+			console.log( 'imageFormat', imageFormat, file );
 
 			const requireApproval = registry
 				.select( preferencesStore )
