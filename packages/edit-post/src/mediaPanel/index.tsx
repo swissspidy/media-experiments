@@ -33,6 +33,7 @@ import {
 import { isBlobURL } from '@wordpress/blob';
 import { useEntityRecord } from '@wordpress/core-data';
 import { store as editorStore } from '@wordpress/editor';
+import { store as noticesStore } from '@wordpress/notices';
 
 import { store as recordingStore } from '../mediaRecording/store';
 import './styles.css';
@@ -313,6 +314,8 @@ function OptimizeMedia( { attributes, setAttributes }: OptimizeMediaProps ) {
 		} ),
 		[ attributes.id ]
 	);
+	const { createSuccessNotice, createErrorNotice } =
+		useDispatch( noticesStore );
 
 	// Video and image blocks use different attribute names for the URL.
 	const url = attributes.url || attributes.src;
@@ -326,11 +329,33 @@ function OptimizeMedia( { attributes, setAttributes }: OptimizeMediaProps ) {
 			id: attributes.id,
 			url: post?.source_url || url,
 			poster: attributes.poster,
-			onSuccess: ( [ media ] ) =>
+			onSuccess: ( [ media ] ) => {
 				setAttributes( {
 					id: media.id,
 					src: media.url,
-				} ),
+				} );
+				void createSuccessNotice(
+					__( 'File successfully optimized.', 'media-experiments' ),
+					{
+						type: 'snackbar',
+					}
+				);
+			},
+			onError: ( err: Error ) => {
+				void createErrorNotice(
+					sprintf(
+						/* translators: %s: error message */
+						__(
+							'There was an error optimizing the file: %s',
+							'media-experiments'
+						),
+						err.message
+					),
+					{
+						type: 'snackbar',
+					}
+				);
+			},
 			blurHash: post?.meta.mexp_blurhash,
 			dominantColor: post?.meta.mexp_dominant_color,
 			generatedPosterId: post?.meta.mexp_generated_poster_id,
