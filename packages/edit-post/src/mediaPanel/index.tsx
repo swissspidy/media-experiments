@@ -325,14 +325,14 @@ function OptimizeMedia( { attributes, setAttributes }: OptimizeMediaProps ) {
 	}
 
 	const onClick = () => {
-		optimizeExistingItem( {
+		void optimizeExistingItem( {
 			id: attributes.id,
 			url: post?.source_url || url,
 			poster: attributes.poster,
 			onSuccess: ( [ media ] ) => {
 				setAttributes( {
 					id: media.id,
-					src: media.url,
+					url: media.url,
 				} );
 				void createSuccessNotice(
 					__( 'File successfully optimized.', 'media-experiments' ),
