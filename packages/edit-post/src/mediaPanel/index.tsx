@@ -122,7 +122,7 @@ function MuteVideo( { attributes, setAttributes }: MuteVideoProps ) {
 
 	const onClick = () => {
 		// TODO: Figure out why poster is not
-		muteExistingVideo( {
+		void muteExistingVideo( {
 			id: attributes.id,
 			url: attributes.src,
 			poster: attributes.poster,
@@ -156,11 +156,12 @@ function MuteVideo( { attributes, setAttributes }: MuteVideoProps ) {
 }
 
 interface RecordingControlsProps {
+	name: string;
+	clientId: string;
 	attributes: {
 		url?: string;
 		src?: string;
 	};
-	clientId: string;
 }
 
 function RecordingControls( { attributes, clientId }: RecordingControlsProps ) {
@@ -183,9 +184,9 @@ function RecordingControls( { attributes, clientId }: RecordingControlsProps ) {
 
 	const onClick = () => {
 		if ( isInRecordingMode ) {
-			leaveRecordingMode();
+			void leaveRecordingMode();
 		} else {
-			enterRecordingMode( clientId );
+			void enterRecordingMode( clientId );
 		}
 	};
 
@@ -236,7 +237,7 @@ function ImportMedia( { attributes, onChange }: ImportMediaProps ) {
 	}
 
 	const onClick = () => {
-		addItemFromUrl( {
+		void addItemFromUrl( {
 			url,
 			onChange: ( [ media ] ) => onChange( media ),
 			additionalData: {
@@ -367,12 +368,12 @@ function OptimizeMedia( { attributes, setAttributes }: OptimizeMediaProps ) {
 
 	const onApprove = () => {
 		closeModal();
-		grantApproval( post.id );
+		void grantApproval( post.id );
 	};
 
 	const onReject = () => {
 		closeModal();
-		rejectApproval( post.id );
+		void rejectApproval( post.id );
 	};
 
 	// TODO: This needs some (async) checks first to see whether optimization is needed.
@@ -605,6 +606,13 @@ function ShowDominantColor( { attributes }: ShowDominantColorProps ) {
 }
 
 interface VideoControlsProps {
+	name: string;
+	clientId: string;
+	attributes: {
+		id?: number;
+		src: string;
+		poster: string;
+	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 }
 
@@ -636,6 +644,12 @@ function VideoControls( props: VideoControlsProps ) {
 }
 
 interface ImageControlsProps {
+	name: string;
+	clientId: string;
+	attributes: {
+		id?: number;
+		url?: string;
+	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 }
 
@@ -663,6 +677,13 @@ function ImageControls( props: ImageControlsProps ) {
 }
 
 interface AudioControlsProps {
+	name: string;
+	clientId: string;
+	attributes: {
+		id?: number;
+		src: string;
+		poster: string;
+	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 }
 
