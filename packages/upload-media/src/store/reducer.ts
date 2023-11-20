@@ -15,12 +15,15 @@ import {
 	type TranscodingStartAction,
 	Type,
 	type UploadFinishAction,
+	type SideloadFinishAction,
 	type UploadStartAction,
+	type SetImageSizesAction,
 } from './types';
 
 const DEFAULT_STATE: State = {
 	queue: [],
 	mediaSourceTerms: {},
+	imageSizes: {},
 };
 
 type Action =
@@ -32,10 +35,12 @@ type Action =
 	| TranscodingFinishAction
 	| UploadStartAction
 	| UploadFinishAction
+	| SideloadFinishAction
 	| CancelAction
 	| RemoveAction
 	| AddPosterAction
 	| SetMediaSourceTermsAction
+	| SetImageSizesAction
 	| RequestApprovalAction
 	| ApproveUploadAction;
 
@@ -151,6 +156,19 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 				),
 			};
 
+		case Type.SideloadFinish:
+			return {
+				...state,
+				queue: state.queue.map( ( item ) =>
+					item.id === action.id
+						? {
+								...item,
+								status: ItemStatus.Uploaded,
+						  }
+						: item
+				),
+			};
+
 		case Type.AddPoster:
 			return {
 				...state,
@@ -210,6 +228,13 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 			return {
 				...state,
 				mediaSourceTerms: action.terms,
+			};
+		}
+
+		case Type.SetImageSizes: {
+			return {
+				...state,
+				imageSizes: action.imageSizes,
 			};
 		}
 	}

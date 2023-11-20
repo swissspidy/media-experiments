@@ -143,13 +143,7 @@ export function enterRecordingMode( clientId: string ) {
 }
 
 export function leaveRecordingMode() {
-	return async ( {
-		select,
-		dispatch,
-	}: {
-		select: Selectors;
-		dispatch: ActionCreators;
-	} ) => {
+	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
 		dispatch( {
 			type: Type.LeaveRecordingMode,
 		} );

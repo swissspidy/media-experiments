@@ -10,6 +10,7 @@ describe( 'selectors', () => {
 			const state = {
 				queue: [],
 				mediaSourceTerms: {},
+				imageSizes: {},
 			};
 
 			expect( getItems( state ) ).toHaveLength( 0 );
@@ -35,6 +36,7 @@ describe( 'selectors', () => {
 					},
 				] as QueueItem[],
 				mediaSourceTerms: {},
+				imageSizes: {},
 			};
 
 			expect( getItems( state, ItemStatus.Uploading ) ).toHaveLength( 2 );

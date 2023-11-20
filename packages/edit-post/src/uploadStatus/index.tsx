@@ -17,9 +17,9 @@ import { DropdownMenu } from '@wordpress/components';
 import { file, image, video, upload } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 
-const EMPTY_ARRAY = [];
+const EMPTY_ARRAY: never[] = [];
 
-function getItemForMimeType( mimeType ) {
+function getItemForMimeType( mimeType: string ) {
 	let icon;
 	const mediaType = getMediaTypeFromMimeType( mimeType );
 	switch ( mediaType ) {

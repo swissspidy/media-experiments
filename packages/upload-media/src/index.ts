@@ -1,5 +1,6 @@
 import { dispatch, select, subscribe } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
+import { store as preferencesStore } from '@wordpress/preferences';
 
 import { store as uploadStore } from './store';
 import type {
@@ -12,6 +13,7 @@ import type {
 	WP_REST_API_Term,
 } from './store/types';
 import UploadError from './uploadError';
+
 export { uploadMedia } from './uploadMedia';
 
 export type {
@@ -35,8 +37,12 @@ subscribe( () => {
 
 subscribe( () => {
 	const items: QueueItem[] = select( uploadStore ).getTranscodedItems();
-	for ( const { id } of items ) {
-		void dispatch( uploadStore ).uploadItem( id );
+	for ( const { id, isSideload } of items ) {
+		if ( isSideload ) {
+			void dispatch( uploadStore ).sideloadItem( id );
+		} else {
+			void dispatch( uploadStore ).uploadItem( id );
+		}
 	}
 }, uploadStore );
 
@@ -137,3 +143,13 @@ const unsubscribeCoreStore = subscribe( () => {
 	void dispatch( uploadStore ).setMediaSourceTerms( terms );
 	unsubscribeCoreStore();
 }, coreStore );
+
+void dispatch( uploadStore ).setImageSizes(
+	window.mediaExperiments.availableImageSizes
+);
+
+void dispatch( preferencesStore ).set(
+	'media-experiments/preferences',
+	'bigImageSizeThreshold',
+	window.mediaExperiments.bigImageSizeThreshold
+);

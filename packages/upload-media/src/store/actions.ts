@@ -6,31 +6,32 @@ import { store as preferencesStore } from '@wordpress/preferences';
 
 import {
 	convertGifToVideo,
+	convertImageToWebP,
 	muteVideo,
 	transcodeAudio,
-	convertImageToWebP,
 	transcodeVideo,
 } from '@mexp/ffmpeg';
-import { convertImageToJpeg } from '@mexp/vips';
+import { convertImageToJpeg, resizeImage } from '@mexp/vips';
 import { isHeifImage, transcodeHeifImage } from '@mexp/heif';
 import { getImageFromPdf } from '@mexp/pdf';
 import {
-	convertImageToJpeg as convertImageToMozJpeg,
 	convertImageToAvif,
+	convertImageToJpeg as convertImageToMozJpeg,
 } from '@mexp/jsquash';
 import { getFileBasename, getMediaTypeFromMimeType } from '@mexp/media-utils';
 
 import {
+	ItemStatus,
+	TranscodingType,
+	Type,
 	type AdditionalData,
 	type Attachment,
-	ItemStatus,
+	type ImageSizeCrop,
 	type OnChangeHandler,
 	type OnErrorHandler,
 	type OnSuccessHandler,
 	type QueueItem,
 	type QueueItemId,
-	TranscodingType,
-	Type,
 } from './types';
 import UploadError from '../uploadError';
 import {
@@ -43,14 +44,17 @@ import {
 	isAnimatedGif,
 	videoHasAudio,
 } from '../utils';
-import { updateMediaItem, uploadToServer } from '../api';
+import { sideloadFile, updateMediaItem, uploadToServer } from '../api';
 
 type ActionCreators = {
 	uploadItem: typeof uploadItem;
+	sideloadItem: typeof sideloadItem;
 	addItem: typeof addItem;
+	addSideloadItem: typeof addSideloadItem;
 	removeItem: typeof removeItem;
 	muteVideoItem: typeof muteVideoItem;
 	convertHeifItem: typeof convertHeifItem;
+	resizeCropItem: typeof resizeCropItem;
 	convertGifItem: typeof convertGifItem;
 	optimizeVideoItem: typeof optimizeVideoItem;
 	optimizeAudioItem: typeof optimizeAudioItem;
@@ -63,6 +67,7 @@ type ActionCreators = {
 	finishTranscoding: typeof finishTranscoding;
 	startUploading: typeof startUploading;
 	finishUploading: typeof finishUploading;
+	finishSideloading: typeof finishSideloading;
 	cancelItem: typeof cancelItem;
 	uploadPosterForItem: typeof uploadPosterForItem;
 	addPoster: typeof addPoster;
@@ -89,6 +94,8 @@ interface AddItemArgs {
 	mediaSourceTerms?: string[];
 	blurHash?: string;
 	dominantColor?: string;
+	isSideload?: boolean;
+	resize?: ImageSizeCrop;
 }
 
 export function addItem( {
@@ -118,7 +125,10 @@ export function addItem( {
 			attachment: {
 				url: createBlobURL( file ),
 			},
-			additionalData,
+			additionalData: {
+				'generate-sub-sizes': false,
+				...additionalData,
+			},
 			onChange,
 			onSuccess,
 			onError,
@@ -157,6 +167,40 @@ export function addItemFromUrl( {
 			additionalData,
 			sourceUrl: url,
 			mediaSourceTerms: [ 'media-import' ],
+		} );
+	};
+}
+
+interface AddSideloadItemArgs {
+	file: File;
+	additionalData?: AdditionalData;
+	resize?: ImageSizeCrop;
+}
+
+export function addSideloadItem( {
+	file,
+	additionalData,
+	resize,
+}: AddSideloadItemArgs ) {
+	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
+		dispatch( {
+			type: Type.Add,
+			item: {
+				id: uuidv4(),
+				status: ItemStatus.Pending,
+				sourceFile: new File( [ file ], file.name, {
+					type: file.type,
+					lastModified: file.lastModified,
+				} ),
+				file,
+				additionalData: {
+					'generate-sub-sizes': false,
+					...additionalData,
+				},
+				isSideload: true,
+				resize,
+				transcode: TranscodingType.ResizeCrop,
+			},
 		} );
 	};
 }
@@ -329,6 +373,11 @@ export function prepareItem( id: QueueItemId ) {
 			id,
 		} );
 
+		if ( item.isSideload ) {
+			dispatch.prepareForTranscoding( id, TranscodingType.ResizeCrop );
+			return;
+		}
+
 		// Transcoding type has already been set, e.g. via muteExistingVideo().
 		// TODO: Check canTransocde either here, in muteExistingVideo, or in the UI.
 		if ( item.transcode ) {
@@ -416,7 +465,11 @@ export function prepareItem( id: QueueItemId ) {
 				dispatch.addPoster( id, pdfThumbnail );
 		}
 
-		dispatch.uploadItem( id );
+		if ( item.isSideload ) {
+			dispatch.sideloadItem( id );
+		} else {
+			dispatch.uploadItem( id );
+		}
 	};
 }
 
@@ -464,10 +517,53 @@ export function startUploading( id: QueueItemId ) {
 }
 
 export function finishUploading( id: QueueItemId, attachment: Attachment ) {
+	return async ( {
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	} ) => {
+		const item = select.getItem( id );
+		if ( item ) {
+			if (
+				'missingImageSizes' in attachment &&
+				attachment.missingImageSizes
+			) {
+				const file = attachment.fileName
+					? new File( [ item.sourceFile ], attachment.fileName, {
+							type: item.sourceFile.type,
+					  } )
+					: item.sourceFile;
+				for ( const name of attachment.missingImageSizes ) {
+					const imageSize = select.getImageSize( name );
+					if ( imageSize ) {
+						dispatch.addSideloadItem( {
+							file,
+							additionalData: {
+								// Sideloading does not use the parent post ID but the
+								// attachment ID as the image sizes need to be added to it.
+								post: attachment.id,
+							},
+							resize: imageSize,
+						} );
+					}
+				}
+			}
+		}
+
+		dispatch( {
+			type: Type.UploadFinish,
+			id,
+			attachment,
+		} );
+	};
+}
+
+export function finishSideloading( id: QueueItemId ) {
 	return {
-		type: Type.UploadFinish,
+		type: Type.SideloadFinish,
 		id,
-		attachment,
 	};
 }
 
@@ -577,6 +673,10 @@ export function maybeTranscodeItem( id: QueueItemId ) {
 		const isTranscoding = select.isTranscoding();
 
 		switch ( transcode ) {
+			case TranscodingType.ResizeCrop:
+				void dispatch.resizeCropItem( item.id );
+				break;
+
 			case TranscodingType.Heif:
 				void dispatch.convertHeifItem( item.id );
 				break;
@@ -855,6 +955,39 @@ export function convertHeifItem( id: QueueItemId ) {
 	};
 }
 
+export function resizeCropItem( id: QueueItemId ) {
+	return async ( {
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	} ) => {
+		const item = select.getItem( id );
+		if ( ! item || ! item.resize ) {
+			return;
+		}
+
+		dispatch.startTranscoding( id );
+
+		try {
+			const file = await resizeImage( item.file, item.resize );
+			dispatch.finishTranscoding( id, file );
+		} catch ( error ) {
+			dispatch.cancelItem(
+				id,
+				error instanceof Error
+					? error
+					: new UploadError( {
+							code: 'IMAGE_TRANSCODING_ERROR',
+							message: 'File could not be uploaded',
+							file: item.file,
+					  } )
+			);
+		}
+	};
+}
+
 export function uploadPosterForItem( item: QueueItem ) {
 	return async ( {
 		dispatch,
@@ -1044,6 +1177,9 @@ export function uploadItem( id: QueueItemId ) {
 				additionalData
 			);
 
+			// TODO: Check if a poster happened to be generated on the server side already (check attachment.posterId !== 0).
+			// In that case there is no need for client-side generation.
+			// Instead, get the poster URL from the ID. Maybe async within the finishUploading() action?
 			if ( 'video' === mediaType ) {
 				// The newly uploaded file won't have a poster yet.
 				// However, we'll likely still have one on file.
@@ -1071,9 +1207,54 @@ export function uploadItem( id: QueueItemId ) {
 	};
 }
 
+export function sideloadItem( id: QueueItemId ) {
+	return async ( {
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	} ) => {
+		const item = select.getItem( id );
+		if ( ! item ) {
+			return;
+		}
+
+		dispatch.startUploading( id );
+
+		try {
+			// TODO: Do something with result.
+			await sideloadFile( item.file, {
+				...item.additionalData,
+				image_size: item.resize?.name,
+			} );
+
+			dispatch.finishSideloading( id );
+		} catch ( err ) {
+			const error =
+				err instanceof Error
+					? err
+					: new UploadError( {
+							code: 'UNKNOWN_UPLOAD_ERROR',
+							message: 'File could not be uploaded',
+							file: item.file,
+					  } );
+
+			dispatch.cancelItem( id, error );
+		}
+	};
+}
+
 export function setMediaSourceTerms( terms: Record< string, number > ) {
 	return {
 		type: Type.SetMediaSourceTerms,
 		terms,
+	};
+}
+
+export function setImageSizes( imageSizes: Record< string, ImageSizeCrop > ) {
+	return {
+		type: Type.SetImageSizes,
+		imageSizes,
 	};
 }

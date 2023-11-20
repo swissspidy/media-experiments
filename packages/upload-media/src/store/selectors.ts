@@ -113,3 +113,7 @@ export function isUploadingById( state: State, id: number ) {
 export function getMediaSourceTermId( state: State, slug: string ) {
 	return state.mediaSourceTerms[ slug ];
 }
+
+export function getImageSize( state: State, name: string ) {
+	return state.imageSizes[ name ];
+}

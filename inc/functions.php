@@ -75,18 +75,24 @@ function enqueue_block_editor_assets(): void {
 		plugins_url( 'build/media-experiments.js', __DIR__ ),
 		$asset['dependencies'],
 		$asset['version'],
-		true
+		array(
+			'strategy' => 'defer',
+		)
 	);
 
 	wp_set_script_translations( 'media-experiments', 'media-experiments' );
 
+	/** This filter is documented in wp-admin/includes/images.php */
+	$threshold = (int) apply_filters( 'big_image_size_threshold', 2560, array( 0, 0 ), '', 0 ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFoun
+
 	wp_add_inline_script(
 		'media-experiments',
 		sprintf(
-			'const mediaExperiments = %s;',
+			'window.mediaExperiments = %s;',
 			wp_json_encode(
 				[
-					'availableImageSizes' => get_all_image_sizes(),
+					'availableImageSizes'   => get_all_image_sizes(),
+					'bigImageSizeThreshold' => $threshold,
 				]
 			)
 		),
@@ -111,25 +117,30 @@ function enqueue_block_editor_assets(): void {
 function get_all_image_sizes(): array {
 	$sizes = wp_get_additional_image_sizes();
 
-	$sizes['thumb'] = [
-		'width'  => get_option( 'thumbnail_size_w' ),
-		'height' => get_option( 'thumbnail_size_h' ),
+	$sizes['thumbnail'] = [
+		'width'  => (int) get_option( 'thumbnail_size_w' ),
+		'height' => (int) get_option( 'thumbnail_size_h' ),
 	];
 
 	$sizes['medium'] = [
-		'width'  => get_option( 'medium_size_w' ),
-		'height' => get_option( 'medium_size_h' ),
+		'width'  => (int) get_option( 'medium_size_w' ),
+		'height' => (int) get_option( 'medium_size_h' ),
 	];
 
 	$sizes['medium_large'] = [
-		'width'  => get_option( 'medium_large_size_w' ),
-		'height' => get_option( 'medium_large_size_h' ),
+		'width'  => (int) get_option( 'medium_large_size_w' ),
+		'height' => (int) get_option( 'medium_large_size_h' ),
 	];
 
 	$sizes['large'] = [
-		'width'  => get_option( 'large_size_w' ),
-		'height' => get_option( 'large_size_h' ),
+		'width'  => (int) get_option( 'large_size_w' ),
+		'height' => (int) get_option( 'large_size_h' ),
 	];
+
+	foreach ( $sizes as $name => $size ) {
+		$size['name']   = $name;
+		$sizes[ $name ] = $size;
+	}
 
 	return $sizes;
 }
@@ -141,6 +152,9 @@ function get_all_image_sizes(): array {
  * can be set via the REST API.
  *
  * @link https://core.trac.wordpress.org/ticket/41692
+ *
+ * @uses rest_create_attachment_handle_featured_media
+ * @uses rest_get_attachment_filename
  */
 function register_rest_attachment_featured_media(): void {
 	register_rest_field(
@@ -155,6 +169,35 @@ function register_rest_attachment_featured_media(): void {
 			'update_callback' => __NAMESPACE__ . '\rest_create_attachment_handle_featured_media',
 		]
 	);
+
+	register_rest_field(
+		'attachment',
+		'mexp_filename',
+		[
+			'schema'       => [
+				'description' => __( 'Original attachment file name', 'media-experiments' ),
+				'type'        => 'string',
+				'context'     => [ 'edit' ],
+			],
+			'get_callback' => __NAMESPACE__ . '\rest_get_attachment_filename',
+		]
+	);
+}
+
+/**
+ * Returns the attachment's original file name.
+ *
+ * @param array $post Post data.
+ * @return string|null Attachment file name.
+ */
+function rest_get_attachment_filename( array $post ): ?string {
+	$path = wp_get_original_image_path( $post['id'] );
+
+	if ( ! $path ) {
+		return null;
+	}
+
+	return basename( $path );
 }
 
 /**
@@ -494,4 +537,21 @@ function rest_after_insert_attachment_handle_pdf_poster( WP_Post $attachment, WP
 	];
 
 	wp_update_attachment_metadata( $attachment->ID, $pdf_metadata );
+}
+
+/**
+ * Filters the arguments for registering a post type.
+ *
+ * @since 4.4.0
+ *
+ * @param array  $args      Array of arguments for registering a post type.
+ *                          See the register_post_type() function for accepted arguments.
+ * @param string $post_type Post type key.
+ */
+function filter_attachment_post_type_args( array $args, string $post_type ) {
+	if ( 'attachment' === $post_type ) {
+		$args['rest_controller_class'] = REST_Attachments_Controller::class;
+	}
+
+	return $args;
 }

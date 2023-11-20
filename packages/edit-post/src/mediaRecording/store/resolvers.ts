@@ -104,6 +104,16 @@ export function getMediaStream() {
 
 			const context = canvas.getContext( '2d' );
 
+			// TODO: Check whether that makes sense or if throwing error is better.
+			if ( ! context ) {
+				dispatch( {
+					type: Type.SetMediaStream,
+					stream,
+					recordingStatus: 'ready',
+				} );
+				return;
+			}
+
 			const videoEffect = select.getVideoEffect();
 
 			// TODO: Check for native support first.

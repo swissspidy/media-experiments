@@ -1,0 +1,25 @@
+diff --git a/node_modules/@jsquash/avif/encode.js b/node_modules/@jsquash/avif/encode.js
+index adee21a..3005d0f 100644
+--- a/node_modules/@jsquash/avif/encode.js
++++ b/node_modules/@jsquash/avif/encode.js
+@@ -19,13 +19,13 @@ const isRunningInNode = () => typeof process !== 'undefined' &&
+     process.release.name === 'node';
+ const isRunningInCloudflareWorker = () => { var _a; return ((_a = globalThis.caches) === null || _a === void 0 ? void 0 : _a.default) !== undefined; };
+ export async function init(module, moduleOptionOverrides) {
+-    if (!isRunningInNode() &&
+-        !isRunningInCloudflareWorker() &&
+-        (await threads())) {
+-        const avifEncoder = await import('./codec/enc/avif_enc_mt.js');
+-        emscriptenModule = initEmscriptenModule(avifEncoder.default, module, moduleOptionOverrides);
+-        return emscriptenModule;
+-    }
++    // if (!isRunningInNode() &&
++    //     !isRunningInCloudflareWorker() &&
++    //     (await threads())) {
++    //     const avifEncoder = await import('./codec/enc/avif_enc_mt.js');
++    //     emscriptenModule = initEmscriptenModule(avifEncoder.default, module, moduleOptionOverrides);
++    //     return emscriptenModule;
++    // }
+     const avifEncoder = await import('./codec/enc/avif_enc.js');
+     emscriptenModule = initEmscriptenModule(avifEncoder.default, module, moduleOptionOverrides);
+     return emscriptenModule;

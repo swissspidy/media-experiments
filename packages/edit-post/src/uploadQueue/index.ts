@@ -7,7 +7,6 @@ import {
 import { dispatch, select, subscribe } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as editorStore } from '@wordpress/editor';
-import { store as noticesStore } from '@wordpress/notices';
 
 type OnErrorHandler = ( message: string ) => void;
 
@@ -27,10 +26,6 @@ interface UploadMediaArgs {
 }
 
 const noop = () => {};
-
-// TODO: Maybe create snackbar notices? Perhaps just for debugging.
-const { createInfoNotice, createSuccessNotice, createErrorNotice } =
-	dispatch( noticesStore );
 
 /**
  * Upload a media file when the file upload button is activated

@@ -326,7 +326,7 @@ registerPlugin( 'media-experiments-preferences', {
 	render: PreferencesMenuItem,
 } );
 
-globalDispatch( preferencesStore ).setDefaults( PREFERENCES_NAME, {
+void globalDispatch( preferencesStore ).setDefaults( PREFERENCES_NAME, {
 	videoInput: undefined,
 	audioInput: undefined,
 	videoEffect: 'none',

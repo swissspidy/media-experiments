@@ -20,6 +20,7 @@ import { addFilter } from '@wordpress/hooks';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __, sprintf } from '@wordpress/i18n';
 import { createHigherOrderComponent } from '@wordpress/compose';
+import type { Block, BlockEditProps } from '@wordpress/blocks';
 import { InspectorControls } from '@wordpress/block-editor';
 import {
 	PanelBody,
@@ -67,7 +68,11 @@ function useIsUploadingByUrl( url: string ) {
 	);
 }
 
-function UploadIndicator( { attachment } ) {
+interface UploadIndicatorProps {
+	attachment: Partial< Attachment >;
+}
+
+function UploadIndicator( { attachment }: UploadIndicatorProps ) {
 	const isUploadingById = useIsUploadingById( attachment.id );
 	const isUploadingByUrl = useIsUploadingByUrl( attachment.url );
 	const isPosterUploadingByUrl = useIsUploadingByUrl( attachment.poster );
@@ -292,8 +297,7 @@ interface OptimizeMediaProps {
 function OptimizeMedia( { attributes, setAttributes }: OptimizeMediaProps ) {
 	const { baseControlProps, controlProps } = useBaseControlProps( {} );
 
-	const [ isOpen, setOpen ] = useState( false );
-	const openModal = () => setOpen( true );
+	const [ _, setOpen ] = useState( false );
 	const closeModal = () => setOpen( false );
 
 	const post = useAttachment( attributes.id );
@@ -741,12 +745,30 @@ function BlockControls( props: BlockControlsProps ) {
 	}
 }
 
-interface MediaPanelProps {
-	name: string;
-	clientId: string;
-	attributes: Record< string, unknown >;
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-}
+type ImageBlock = Block< {
+	id: number;
+	url: string;
+} >;
+
+type AudioBlock = Block< {
+	id: number;
+	url: string;
+} >;
+
+type VideoBlock = Block< {
+	id: number;
+	source: string;
+	poster: string;
+	muted: boolean;
+} >;
+
+type MediaPanelProps = {
+	name: Block[ 'name' ];
+} & BlockEditProps<
+	| ImageBlock[ 'attributes' ]
+	| VideoBlock[ 'attributes' ]
+	| AudioBlock[ 'attributes' ]
+>;
 
 function MediaPanel( {
 	name,
@@ -788,12 +810,7 @@ const addMediaPanel = createHigherOrderComponent(
 						icon="admin-media"
 						title={ __( 'Media Experiments', 'media-experiments' ) }
 					>
-						<MediaPanel
-							name={ props.name }
-							clientId={ props.clientId }
-							attributes={ props.attributes }
-							setAttributes={ props.setAttributes }
-						/>
+						<MediaPanel { ...props } />
 					</PanelBody>
 				</InspectorControls>
 			</Fragment>

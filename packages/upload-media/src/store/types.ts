@@ -24,11 +24,14 @@ export type QueueItem = {
 	dominantColor?: string;
 	generatedPosterId?: number;
 	needsApproval?: boolean;
+	isSideload?: boolean;
+	resize?: ImageSizeCrop;
 };
 
 export interface State {
 	queue: QueueItem[];
 	mediaSourceTerms: Record< string, number >;
+	imageSizes: Record< string, ImageSizeCrop >;
 }
 
 export enum Type {
@@ -40,10 +43,12 @@ export enum Type {
 	TranscodingFinish = 'TRANSCODING_FINISH',
 	UploadStart = 'UPLOAD_START',
 	UploadFinish = 'UPLOAD_FINISH',
+	SideloadFinish = 'SIDELOAD_FINISH',
 	Cancel = 'CANCEL_ITEM',
 	Remove = 'REMOVE_ITEM',
 	AddPoster = 'ADD_POSTER',
 	SetMediaSourceTerms = 'ADD_MEDIA_SOURCE_TERMS',
+	SetImageSizes = 'ADD_IMAGE_SIZES',
 	RequestApproval = 'REQUEST_APPROVAL',
 	ApproveUpload = 'APPROVE_UPLOAD',
 }
@@ -80,6 +85,10 @@ export type UploadFinishAction = Action<
 	Type.UploadFinish,
 	{ id: QueueItemId; attachment: Attachment }
 >;
+export type SideloadFinishAction = Action<
+	Type.SideloadFinish,
+	{ id: QueueItemId }
+>;
 export type CancelAction = Action<
 	Type.Cancel,
 	{ id: QueueItemId; error: Error }
@@ -92,6 +101,10 @@ export type AddPosterAction = Action<
 export type SetMediaSourceTermsAction = Action<
 	Type.SetMediaSourceTerms,
 	{ terms: Record< string, number > }
+>;
+export type SetImageSizesAction = Action<
+	Type.SetImageSizes,
+	{ imageSizes: Record< string, ImageSizeCrop > }
 >;
 
 export type Attachment = {
@@ -110,6 +123,8 @@ export type Attachment = {
 	image?: {
 		src: string;
 	};
+	missingImageSizes?: string[];
+	fileName?: string;
 };
 
 export type OnChangeHandler = ( attachments: Partial< Attachment >[] ) => void;
@@ -130,6 +145,7 @@ export enum ItemStatus {
 }
 
 export enum TranscodingType {
+	ResizeCrop = 'RESIZE_CROP',
 	Heif = 'HEIF',
 	Gif = 'GIF',
 	Audio = 'AUDIO',
@@ -140,6 +156,7 @@ export enum TranscodingType {
 
 export interface RestAttachment extends WP_REST_API_Attachment {
 	featured_media: number;
+	mexp_filename: string;
 	mexp_media_source: number[];
 	meta: {
 		mexp_blurhash?: string;
@@ -155,3 +172,25 @@ export type AdditionalData = Omit<
 	CreateRestAttachment,
 	'meta' | 'mexp_media_source'
 >;
+
+export type SideloadAdditionalData = Partial< {
+	post: RestAttachment[ 'id' ];
+	image_size: string;
+} >;
+
+// If false, the image will be scaled (default).
+// If true, image will be cropped to the specified dimensions using center positions.
+// If an array, the image will be cropped using the array to specify the crop location:
+//
+// $0 The x crop position. Accepts 'left' 'center', or 'right'.
+// $1 The y crop position. Accepts 'top', 'center', or 'bottom'.
+//
+// See add_image_size() in core.
+export type ImageSizeCrop = {
+	name: string;
+	width: number;
+	height: number;
+	crop?:
+		| boolean
+		| [ 'left' | 'center' | 'right', 'top' | 'center' | 'bottom' ];
+};

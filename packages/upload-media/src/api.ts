@@ -4,6 +4,7 @@ import type {
 	Attachment,
 	CreateRestAttachment,
 	RestAttachment,
+	SideloadAdditionalData,
 } from './store/types';
 
 export async function uploadToServer(
@@ -24,6 +25,8 @@ export async function uploadToServer(
 		blurHash: savedMedia.meta.mexp_blurhash,
 		dominantColor: savedMedia.meta.mexp_dominant_color,
 		posterId: savedMedia.featured_media,
+		missingImageSizes: savedMedia.missing_image_sizes,
+		fileName: savedMedia.mexp_filename,
 	} as Attachment;
 }
 
@@ -35,7 +38,7 @@ export async function uploadToServer(
  *
  * @return The saved attachment.
  */
-function createMediaFromFile(
+async function createMediaFromFile(
 	file: File,
 	additionalData: CreateRestAttachment = {}
 ) {
@@ -52,6 +55,36 @@ function createMediaFromFile(
 
 	return apiFetch< RestAttachment >( {
 		path: '/wp/v2/media',
+		body: data,
+		method: 'POST',
+	} );
+}
+
+/**
+ * Uploads a file to the server without creating an attachment.
+ *
+ * @param file           Media File to Save.
+ * @param additionalData Additional data to include in the request.
+ *
+ * @return The saved attachment.
+ */
+export async function sideloadFile(
+	file: File,
+	additionalData: SideloadAdditionalData = {}
+) {
+	// Create upload payload.
+	const data = new FormData();
+	data.append( 'file', file, file.name || file.type.replace( '/', '.' ) );
+	Object.entries( additionalData ).forEach( ( [ key, value ] ) =>
+		flattenFormData(
+			data,
+			key,
+			value as string | Record< string, string > | undefined
+		)
+	);
+
+	return apiFetch< unknown >( {
+		path: '/wp/v2/media/sideload',
 		body: data,
 		method: 'POST',
 	} );

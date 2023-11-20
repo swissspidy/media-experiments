@@ -16,6 +16,11 @@
  */
 
 /**
+ * REST attachments controller.
+ */
+require_once __DIR__ . '/inc/class-rest-attachments-controller.php';
+
+/**
  * Plugin functions.
  */
 require_once __DIR__ . '/inc/functions.php';

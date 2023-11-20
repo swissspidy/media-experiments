@@ -1,4 +1,8 @@
-import { blobToFile, getFileBasename } from '@mexp/media-utils';
+import {
+	blobToFile,
+	getExtensionFromMimeType,
+	getFileBasename,
+} from '@mexp/media-utils';
 
 async function getVips() {
 	// Ignore reason: Types in the published package haven't been updated yet.
@@ -15,7 +19,7 @@ async function getVips() {
 }
 
 /**
- * Transcode an image using vips.
+ * Transcodes an image using vips.
  *
  * @param file Original file object.
  * @return Processed file object.
@@ -30,5 +34,75 @@ export async function convertImageToJpeg( file: File ) {
 		new Blob( [ outBuffer ], { type: 'image/jpeg' } ),
 		fileName,
 		'image/jpeg'
+	);
+}
+
+// Same type as in @mextp/upload-media
+// TODO: Move to shared package?
+type ImageSizeCrop = {
+	name: string;
+	width: number;
+	height: number;
+	crop?:
+		| boolean
+		| [ 'left' | 'center' | 'right', 'top' | 'center' | 'bottom' ];
+};
+
+/**
+ * Resizes an image using vips.
+ *
+ * @param file   Original file object.
+ * @param resize
+ * @return Processed file object.
+ */
+export async function resizeImage( file: File, resize: ImageSizeCrop ) {
+	const vips = await getVips();
+	let image = vips.Image.newFromBuffer( await file.arrayBuffer() );
+
+	const { width, height } = image;
+
+	console.log( 'resizeImage', resize, resize.width, {
+		height: resize.height || undefined,
+	} );
+
+	const options: Record< string, unknown > = {};
+	if ( resize.height ) {
+		options.height = resize.height;
+	}
+
+	if ( ! resize.crop ) {
+		image = image.thumbnailImage( resize.width, options );
+	} else if ( true === resize.crop ) {
+		options.crop = 'centre';
+		image = image.thumbnailImage( resize.width, options );
+	} else {
+		let left = 0;
+		if ( 'center' === resize.crop[ 0 ] ) {
+			left = width / 2;
+		} else if ( 'right' === resize.crop[ 0 ] ) {
+			left = width - resize.width;
+		}
+
+		let top = 0;
+		if ( 'center' === resize.crop[ 1 ] ) {
+			top = height / 2;
+		} else if ( 'bottom' === resize.crop[ 1 ] ) {
+			top = height - resize.height;
+		}
+
+		image = image.crop( left, top, resize.width, resize.height );
+	}
+
+	const ext = getExtensionFromMimeType( file.type );
+	const outBuffer = image.writeToBuffer( `.${ ext }` );
+
+	const fileName = `${ getFileBasename( file.name ) }-${ image.width }x${
+		image.height
+	}.${ ext }`;
+
+	return blobToFile(
+		new Blob( [ outBuffer ], { type: file.type } ),
+		fileName,
+		file.type
 	);
 }

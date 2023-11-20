@@ -12,6 +12,9 @@
 		"src/mediaRecording/@types/**/*",
 		"src/mediaRecording/crossOriginIsolation/**/*",
 		"src/mediaRecording/icons/**/*",
+		"src/mediaRecording/store/resolvers.ts",
+		"src/mediaRecording/store/selectors.ts",
+		"src/mediaRecording/store/types.ts",
 		"src/mediaRecording/constants.ts",
 		"src/mediaRecording/utils.ts",
 		"src/utils/**/*"

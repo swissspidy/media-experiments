@@ -31,8 +31,8 @@
 		}
 	},
 	"dependencies": {
-		"@jsquash/avif": "^1.1.2",
-		"@jsquash/jpeg": "^1.2.0",
+		"@jsquash/avif": "^1.3.0",
+		"@jsquash/jpeg": "^1.4.0",
 		"@mexp/media-utils": "../media-utils"
 	}
 }

@@ -256,7 +256,7 @@ describe( 'actions', () => {
 
 			const item = registry.select( uploadStore ).getItems()[ 0 ];
 
-			registry.dispatch( uploadStore ).grantApproval( 5678 );
+			await registry.dispatch( uploadStore ).grantApproval( 5678 );
 
 			expect( registry.select( uploadStore ).getItems()[ 0 ] ).toBe(
 				item
@@ -271,7 +271,7 @@ describe( 'actions', () => {
 				sourceAttachmentId: 1234,
 			} );
 
-			registry.dispatch( uploadStore ).rejectApproval( 1234 );
+			await registry.dispatch( uploadStore ).rejectApproval( 1234 );
 
 			expect( registry.select( uploadStore ).getItems() ).toHaveLength(
 				1
@@ -298,7 +298,7 @@ describe( 'actions', () => {
 
 			const item = registry.select( uploadStore ).getItems()[ 0 ];
 
-			registry.dispatch( uploadStore ).rejectApproval( 5678 );
+			await registry.dispatch( uploadStore ).rejectApproval( 5678 );
 
 			expect( registry.select( uploadStore ).getItems()[ 0 ] ).toBe(
 				item
@@ -377,7 +377,7 @@ describe( 'actions', () => {
 	} );
 
 	describe( 'finishUploading', () => {
-		it( `should return the ${ Type.UploadFinish } action`, () => {
+		it( 'should mark the item as uploaded', async () => {
 			const attachment = {
 				id: 123,
 				url: 'https://example.com/attachment.jpg',
@@ -386,15 +386,30 @@ describe( 'actions', () => {
 				mimeType: 'image/jpeg',
 			};
 
-			const result = registry
-				.dispatch( uploadStore )
-				.finishUploading( 'abc123', attachment );
-
-			expect( result ).resolves.toStrictEqual( {
-				type: Type.UploadFinish,
-				id: 'abc123',
-				attachment,
+			registry.dispatch( uploadStore ).addItem( {
+				file: jpegFile,
+				sourceAttachmentId: 1234,
 			} );
+
+			expect( registry.select( uploadStore ).getItems() ).toHaveLength(
+				1
+			);
+
+			const item: QueueItem = registry
+				.select( uploadStore )
+				.getItems()[ 0 ];
+
+			await registry
+				.dispatch( uploadStore )
+				.finishUploading( item.id, attachment );
+
+			expect(
+				registry.select( uploadStore ).getItems()[ 0 ]
+			).toStrictEqual(
+				expect.objectContaining( {
+					status: ItemStatus.Uploaded,
+				} )
+			);
 		} );
 	} );
 
