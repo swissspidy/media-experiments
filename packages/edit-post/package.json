@@ -47,7 +47,7 @@
 		"@wordpress/edit-post": "^7.22.0",
 		"@wordpress/editor": "^13.13.0",
 		"@wordpress/element": "^5.22.0",
-		"@wordpress/hooks": "^3.36.0",
+		"@wordpress/hooks": "^3.46.0",
 		"@wordpress/i18n": "^4.33.0",
 		"@wordpress/icons": "^9.24.0",
 		"@wordpress/interface": "^5.13.0",
