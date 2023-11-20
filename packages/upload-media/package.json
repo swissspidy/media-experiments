@@ -36,7 +36,7 @@
 		"@mexp/media-utils": "../media-utils",
 		"@mexp/pdf": "../pdf",
 		"@mexp/vips": "../vips",
-		"@wordpress/api-fetch": "^6.33.0",
+		"@wordpress/api-fetch": "^6.43.0",
 		"@wordpress/blob": "^3.36.0",
 		"@wordpress/core-data": "^6.22.0",
 		"@wordpress/data": "^9.6.0",
