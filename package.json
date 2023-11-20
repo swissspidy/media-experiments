@@ -40,7 +40,7 @@
 		"@types/wordpress__blocks": "^12.5.9",
 		"@types/wordpress__components": "^23.0.7",
 		"@wordpress/dependency-extraction-webpack-plugin": "^4.26.0",
-		"@wordpress/e2e-test-utils": "^10.16.0",
+		"@wordpress/e2e-test-utils": "^10.17.0",
 		"@wordpress/env": "^8.11.0",
 		"@wordpress/eslint-plugin": "^17.0.0",
 		"@wordpress/scripts": "^26.16.0",
