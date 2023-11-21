@@ -20,19 +20,33 @@ import {
 } from '@mexp/jsquash';
 import { getFileBasename, getMediaTypeFromMimeType } from '@mexp/media-utils';
 
-import {
-	ItemStatus,
-	TranscodingType,
-	Type,
-	type AdditionalData,
-	type Attachment,
-	type ImageSizeCrop,
-	type OnChangeHandler,
-	type OnErrorHandler,
-	type OnSuccessHandler,
-	type QueueItem,
-	type QueueItemId,
+import type {
+	AddAction,
+	AdditionalData,
+	AddPosterAction,
+	ApproveUploadAction,
+	Attachment,
+	CancelAction,
+	ImageSizeCrop,
+	OnChangeHandler,
+	OnErrorHandler,
+	OnSuccessHandler,
+	PrepareAction,
+	QueueItem,
+	QueueItemId,
+	RemoveAction,
+	RequestApprovalAction,
+	SetImageSizesAction,
+	SetMediaSourceTermsAction,
+	SideloadFinishAction,
+	TranscodingFinishAction,
+	TranscodingPrepareAction,
+	TranscodingStartAction,
+	UploadStartAction,
+	UploadFinishAction,
 } from './types';
+
+import { ItemStatus, Type, TranscodingType } from './types';
 import UploadError from '../uploadError';
 import {
 	canTranscodeFile,
@@ -71,7 +85,7 @@ type ActionCreators = {
 	cancelItem: typeof cancelItem;
 	uploadPosterForItem: typeof uploadPosterForItem;
 	addPoster: typeof addPoster;
-	( args: Record< string, unknown > ): void;
+	< T = Record< string, unknown > >( args: T ): void;
 };
 
 type AllSelectors = typeof import('./selectors');
@@ -111,33 +125,54 @@ export function addItem( {
 	blurHash,
 	dominantColor,
 }: AddItemArgs ) {
-	return {
-		type: Type.Add,
-		item: {
-			id: uuidv4(),
-			batchId,
-			status: ItemStatus.Pending,
-			sourceFile: new File( [ file ], file.name, {
-				type: file.type,
-				lastModified: file.lastModified,
-			} ),
-			file,
-			attachment: {
-				url: createBlobURL( file ),
+	return async ( {
+		dispatch,
+		registry,
+	}: {
+		dispatch: ActionCreators;
+		registry: WPDataRegistry;
+	} ) => {
+		const imageSizeThreshold = registry
+			.select( preferencesStore )
+			.get( 'media-experiments/preferences', 'bigImageSizeThreshold' );
+
+		const resize = imageSizeThreshold
+			? {
+					width: imageSizeThreshold,
+					height: 0,
+			  }
+			: undefined;
+
+		dispatch< AddAction >( {
+			type: Type.Add,
+			item: {
+				id: uuidv4(),
+				batchId,
+				status: ItemStatus.Pending,
+				sourceFile: new File( [ file ], file.name, {
+					type: file.type,
+					lastModified: file.lastModified,
+				} ),
+				file,
+				attachment: {
+					url: createBlobURL( file ),
+				},
+				additionalData: {
+					// TODO: Make configurable via preferences?
+					'generate-sub-sizes': false,
+					...additionalData,
+				},
+				onChange,
+				onSuccess,
+				onError,
+				sourceUrl,
+				sourceAttachmentId,
+				mediaSourceTerms,
+				blurHash,
+				dominantColor,
+				resize,
 			},
-			additionalData: {
-				'generate-sub-sizes': false,
-				...additionalData,
-			},
-			onChange,
-			onSuccess,
-			onError,
-			sourceUrl,
-			sourceAttachmentId,
-			mediaSourceTerms,
-			blurHash,
-			dominantColor,
-		},
+		} );
 	};
 }
 
@@ -175,15 +210,17 @@ interface AddSideloadItemArgs {
 	file: File;
 	additionalData?: AdditionalData;
 	resize?: ImageSizeCrop;
+	transcode?: TranscodingType[];
 }
 
 export function addSideloadItem( {
 	file,
 	additionalData,
 	resize,
+	transcode,
 }: AddSideloadItemArgs ) {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
-		dispatch( {
+		dispatch< AddAction >( {
 			type: Type.Add,
 			item: {
 				id: uuidv4(),
@@ -199,7 +236,7 @@ export function addSideloadItem( {
 				},
 				isSideload: true,
 				resize,
-				transcode: TranscodingType.ResizeCrop,
+				transcode,
 			},
 		} );
 	};
@@ -225,7 +262,7 @@ export function muteExistingVideo( {
 	onChange,
 	onSuccess,
 	onError,
-	additionalData,
+	additionalData = {},
 	blurHash,
 	dominantColor,
 	generatedPosterId,
@@ -250,7 +287,7 @@ export function muteExistingVideo( {
 
 		// TODO: Maybe pass on the original as a "sourceAttachment"
 
-		dispatch( {
+		dispatch< AddAction >( {
 			type: Type.Add,
 			item: {
 				id: uuidv4(),
@@ -270,7 +307,7 @@ export function muteExistingVideo( {
 				mediaSourceTerms: [],
 				blurHash,
 				dominantColor,
-				transcode: TranscodingType.MuteVideo,
+				transcode: [ TranscodingType.MuteVideo ],
 				generatedPosterId,
 			},
 		} );
@@ -297,7 +334,7 @@ export function optimizeExistingItem( {
 	onChange,
 	onSuccess,
 	onError,
-	additionalData,
+	additionalData = {},
 	blurHash,
 	dominantColor,
 	generatedPosterId,
@@ -314,7 +351,7 @@ export function optimizeExistingItem( {
 
 		// TODO: Same considerations apply as for muteExistingVideo.
 
-		dispatch( {
+		dispatch< AddAction >( {
 			type: Type.Add,
 			item: {
 				id: uuidv4(),
@@ -334,7 +371,7 @@ export function optimizeExistingItem( {
 				mediaSourceTerms: [],
 				blurHash,
 				dominantColor,
-				transcode: TranscodingType.OptimizeExisting,
+				transcode: [ TranscodingType.OptimizeExisting ],
 				generatedPosterId,
 				needsApproval: true,
 			},
@@ -342,7 +379,10 @@ export function optimizeExistingItem( {
 	};
 }
 
-export function requestApproval( id: QueueItemId, file: File ) {
+export function requestApproval(
+	id: QueueItemId,
+	file: File
+): RequestApprovalAction {
 	return {
 		type: Type.RequestApproval,
 		id,
@@ -368,20 +408,15 @@ export function prepareItem( id: QueueItemId ) {
 
 		const { file } = item;
 
-		dispatch( {
+		dispatch< PrepareAction >( {
 			type: Type.Prepare,
 			id,
 		} );
 
-		if ( item.isSideload ) {
-			dispatch.prepareForTranscoding( id, TranscodingType.ResizeCrop );
-			return;
-		}
-
-		// Transcoding type has already been set, e.g. via muteExistingVideo().
-		// TODO: Check canTransocde either here, in muteExistingVideo, or in the UI.
+		// Transcoding type has already been set, e.g. via muteExistingVideo() or addSideloadItem().
+		// TODO: Check canTranscode either here, in muteExistingVideo, or in the UI.
 		if ( item.transcode ) {
-			dispatch.prepareForTranscoding( id, item.transcode );
+			dispatch.prepareForTranscoding( id );
 			return;
 		}
 
@@ -399,9 +434,10 @@ export function prepareItem( id: QueueItemId ) {
 				const fileBuffer = await file.arrayBuffer();
 
 				// TODO: Here we could convert all images to WebP/AVIF/xyz by default.
+				// Depends on the user settings of course.
 
 				// TODO: Enforce big image size threshold.
-				// Probably need to use e.g. mediainfo.js to get dimensions early on.
+				// Might need to get dimensions first?
 
 				const isHeif = isHeifImage( fileBuffer );
 				const isGif = isAnimatedGif( fileBuffer );
@@ -439,7 +475,10 @@ export function prepareItem( id: QueueItemId ) {
 				// No need to compress a video that's already quite small.
 
 				if ( canTranscode ) {
-					dispatch.prepareForTranscoding( id );
+					dispatch.prepareForTranscoding(
+						id,
+						TranscodingType.Default
+					);
 					return;
 				}
 
@@ -473,7 +512,7 @@ export function prepareItem( id: QueueItemId ) {
 	};
 }
 
-export function addPoster( id: QueueItemId, file: File ) {
+export function addPoster( id: QueueItemId, file: File ): AddPosterAction {
 	return {
 		type: Type.AddPoster,
 		id,
@@ -484,8 +523,8 @@ export function addPoster( id: QueueItemId, file: File ) {
 
 export function prepareForTranscoding(
 	id: QueueItemId,
-	transcode: TranscodingType = TranscodingType.Default
-) {
+	transcode?: TranscodingType
+): TranscodingPrepareAction {
 	return {
 		type: Type.TranscodingPrepare,
 		id,
@@ -493,14 +532,17 @@ export function prepareForTranscoding(
 	};
 }
 
-export function startTranscoding( id: QueueItemId ) {
+export function startTranscoding( id: QueueItemId ): TranscodingStartAction {
 	return {
 		type: Type.TranscodingStart,
 		id,
 	};
 }
 
-export function finishTranscoding( id: QueueItemId, file: File ) {
+export function finishTranscoding(
+	id: QueueItemId,
+	file: File
+): TranscodingFinishAction {
 	return {
 		type: Type.TranscodingFinish,
 		id,
@@ -509,7 +551,7 @@ export function finishTranscoding( id: QueueItemId, file: File ) {
 	};
 }
 
-export function startUploading( id: QueueItemId ) {
+export function startUploading( id: QueueItemId ): UploadStartAction {
 	return {
 		type: Type.UploadStart,
 		id,
@@ -546,13 +588,14 @@ export function finishUploading( id: QueueItemId, attachment: Attachment ) {
 								post: attachment.id,
 							},
 							resize: imageSize,
+							transcode: [ TranscodingType.ResizeCrop ],
 						} );
 					}
 				}
 			}
 		}
 
-		dispatch( {
+		dispatch< UploadFinishAction >( {
 			type: Type.UploadFinish,
 			id,
 			attachment,
@@ -560,7 +603,7 @@ export function finishUploading( id: QueueItemId, attachment: Attachment ) {
 	};
 }
 
-export function finishSideloading( id: QueueItemId ) {
+export function finishSideloading( id: QueueItemId ): SideloadFinishAction {
 	return {
 		type: Type.SideloadFinish,
 		id,
@@ -582,7 +625,7 @@ export function completeItem( id: QueueItemId ) {
 
 		dispatch.removeItem( id );
 
-		if ( item.attachment ) {
+		if ( item.attachment && item.attachment.mimeType ) {
 			// TODO: Trigger client-side thumbnail generation here?
 
 			const mediaType = getMediaTypeFromMimeType(
@@ -595,7 +638,7 @@ export function completeItem( id: QueueItemId ) {
 	};
 }
 
-export function removeItem( id: QueueItemId ) {
+export function removeItem( id: QueueItemId ): RemoveAction {
 	return {
 		type: Type.Remove,
 		id,
@@ -639,14 +682,14 @@ export function grantApproval( id: number ) {
 			return;
 		}
 
-		dispatch( {
+		dispatch< ApproveUploadAction >( {
 			type: Type.ApproveUpload,
 			id: item.id,
 		} );
 	};
 }
 
-export function cancelItem( id: QueueItemId, error: Error ) {
+export function cancelItem( id: QueueItemId, error: Error ): CancelAction {
 	return {
 		type: Type.Cancel,
 		id,
@@ -667,9 +710,9 @@ export function maybeTranscodeItem( id: QueueItemId ) {
 			return;
 		}
 
-		const { transcode } = item;
+		const transcode = item.transcode ? item.transcode[ 0 ] : undefined;
 
-		// Prevent simultaneous ffmpeg processes to reduce resource usage.
+		// Prevent simultaneous FFmpeg processes to reduce resource usage.
 		const isTranscoding = select.isTranscoding();
 
 		switch ( transcode ) {
@@ -996,7 +1039,9 @@ export function uploadPosterForItem( item: QueueItem ) {
 		dispatch: ActionCreators;
 		registry: WPDataRegistry;
 	} ) => {
-		const { attachment: uploadedAttachment } = item;
+		const { attachment: uploadedAttachment } = item as QueueItem & {
+			attachment: Attachment;
+		};
 
 		if ( ! uploadedAttachment ) {
 			return;
@@ -1123,7 +1168,7 @@ export function uploadItem( id: QueueItemId ) {
 		const mediaType = getMediaTypeFromMimeType( item.file.type );
 
 		// TODO: Make this async after upload?
-		// Could be made reusable to enable backfilling of existing blocks.
+		// Could be made reusable to enable back-filling of existing blocks.
 		if ( 'video' === mediaType ) {
 			try {
 				const hasAudio =
@@ -1245,14 +1290,18 @@ export function sideloadItem( id: QueueItemId ) {
 	};
 }
 
-export function setMediaSourceTerms( terms: Record< string, number > ) {
+export function setMediaSourceTerms(
+	terms: Record< string, number >
+): SetMediaSourceTermsAction {
 	return {
 		type: Type.SetMediaSourceTerms,
 		terms,
 	};
 }
 
-export function setImageSizes( imageSizes: Record< string, ImageSizeCrop > ) {
+export function setImageSizes(
+	imageSizes: Record< string, ImageSizeCrop >
+): SetImageSizesAction {
 	return {
 		type: Type.SetImageSizes,
 		imageSizes,

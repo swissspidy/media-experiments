@@ -161,7 +161,7 @@ describe( 'actions', () => {
 					attachment: {
 						url: 'https://example.com/awesome-video.mp4',
 					},
-					transcode: TranscodingType.MuteVideo,
+					transcode: [ TranscodingType.MuteVideo ],
 				} )
 			);
 			expect( item.file.name ).toBe( 'awesome-video-muted.mp4' );
@@ -201,7 +201,7 @@ describe( 'actions', () => {
 					attachment: {
 						url: 'https://example.com/awesome-video.mp4',
 					},
-					transcode: TranscodingType.OptimizeExisting,
+					transcode: [ TranscodingType.OptimizeExisting ],
 				} )
 			);
 			expect( item.file.name ).toBe( 'awesome-video-optimized.mp4' );
@@ -210,11 +210,11 @@ describe( 'actions', () => {
 
 	describe( 'requestApproval', () => {
 		it( `should return the ${ Type.RequestApproval } action`, async () => {
-			const result = registry
+			const result = await registry
 				.dispatch( uploadStore )
 				.requestApproval( 'abc123', jpegFile );
 
-			expect( result ).resolves.toStrictEqual( {
+			await expect( result ).toStrictEqual( {
 				type: Type.RequestApproval,
 				id: 'abc123',
 				file: jpegFile,
@@ -307,12 +307,12 @@ describe( 'actions', () => {
 	} );
 
 	describe( 'addPoster', () => {
-		it( `should return the ${ Type.AddPoster } action`, () => {
-			const result = registry
+		it( `should return the ${ Type.AddPoster } action`, async () => {
+			const result = await registry
 				.dispatch( uploadStore )
 				.addPoster( 'abc123', jpegFile );
 
-			expect( result ).resolves.toStrictEqual( {
+			expect( result ).toStrictEqual( {
 				type: Type.AddPoster,
 				id: 'abc123',
 				file: jpegFile,
@@ -323,11 +323,11 @@ describe( 'actions', () => {
 
 	describe( 'prepareForTranscoding', () => {
 		it( `should return the ${ Type.TranscodingPrepare } action`, async () => {
-			const result = registry
+			const result = await registry
 				.dispatch( uploadStore )
-				.prepareForTranscoding( 'abc123' );
+				.prepareForTranscoding( 'abc123', TranscodingType.Default );
 
-			expect( result ).resolves.toStrictEqual( {
+			await expect( result ).toStrictEqual( {
 				type: Type.TranscodingPrepare,
 				id: 'abc123',
 				transcode: TranscodingType.Default,
@@ -336,12 +336,12 @@ describe( 'actions', () => {
 	} );
 
 	describe( 'startTranscoding', () => {
-		it( `should return the ${ Type.TranscodingStart } action`, () => {
-			const result = registry
+		it( `should return the ${ Type.TranscodingStart } action`, async () => {
+			const result = await registry
 				.dispatch( uploadStore )
 				.startTranscoding( 'abc123' );
 
-			expect( result ).resolves.toStrictEqual( {
+			expect( result ).toStrictEqual( {
 				type: Type.TranscodingStart,
 				id: 'abc123',
 			} );
@@ -349,12 +349,12 @@ describe( 'actions', () => {
 	} );
 
 	describe( 'finishTranscoding', () => {
-		it( `should return the ${ Type.TranscodingFinish } action`, () => {
-			const result = registry
+		it( `should return the ${ Type.TranscodingFinish } action`, async () => {
+			const result = await registry
 				.dispatch( uploadStore )
 				.finishTranscoding( 'abc123', mp4File );
 
-			expect( result ).resolves.toStrictEqual( {
+			await expect( result ).toStrictEqual( {
 				type: Type.TranscodingFinish,
 				id: 'abc123',
 				file: mp4File,
@@ -364,12 +364,12 @@ describe( 'actions', () => {
 	} );
 
 	describe( 'startUploading', () => {
-		it( `should return the ${ Type.UploadStart } action`, () => {
-			const result = registry
+		it( `should return the ${ Type.UploadStart } action`, async () => {
+			const result = await registry
 				.dispatch( uploadStore )
 				.startUploading( 'abc123' );
 
-			expect( result ).resolves.toStrictEqual( {
+			expect( result ).toStrictEqual( {
 				type: Type.UploadStart,
 				id: 'abc123',
 			} );

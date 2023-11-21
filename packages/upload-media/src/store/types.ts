@@ -9,14 +9,15 @@ export type QueueItem = {
 	sourceFile: File;
 	file: File;
 	poster?: File;
-	attachment?: Attachment;
+	attachment?: Partial< Attachment >;
 	status: ItemStatus;
 	additionalData: AdditionalData;
 	onChange?: OnChangeHandler;
 	onSuccess?: OnSuccessHandler;
 	onError?: OnErrorHandler;
-	transcode?: TranscodingType;
+	transcode?: TranscodingType[];
 	error?: Error;
+	batchId?: string;
 	sourceUrl?: string;
 	sourceAttachmentId?: number; // TODO: implement.
 	mediaSourceTerms?: string[];
@@ -70,7 +71,7 @@ export type ApproveUploadAction = Action<
 >;
 export type TranscodingPrepareAction = Action<
 	Type.TranscodingPrepare,
-	{ id: QueueItemId; transcode: TranscodingType }
+	{ id: QueueItemId; transcode?: TranscodingType }
 >;
 export type TranscodingStartAction = Action<
 	Type.TranscodingStart,
@@ -178,16 +179,8 @@ export type SideloadAdditionalData = Partial< {
 	image_size: string;
 } >;
 
-// If false, the image will be scaled (default).
-// If true, image will be cropped to the specified dimensions using center positions.
-// If an array, the image will be cropped using the array to specify the crop location:
-//
-// $0 The x crop position. Accepts 'left' 'center', or 'right'.
-// $1 The y crop position. Accepts 'top', 'center', or 'bottom'.
-//
-// See add_image_size() in core.
 export type ImageSizeCrop = {
-	name: string;
+	name?: string; // Only set if dealing with sub-sizes, not for general cropping.
 	width: number;
 	height: number;
 	crop?:

@@ -1,5 +1,4 @@
 import {
-	type UnknownAction,
 	type AddAction,
 	type AddPosterAction,
 	type ApproveUploadAction,
@@ -8,16 +7,17 @@ import {
 	type PrepareAction,
 	type RemoveAction,
 	type RequestApprovalAction,
+	type SetImageSizesAction,
 	type SetMediaSourceTermsAction,
+	type SideloadFinishAction,
 	type State,
 	type TranscodingFinishAction,
 	type TranscodingPrepareAction,
 	type TranscodingStartAction,
 	Type,
+	type UnknownAction,
 	type UploadFinishAction,
-	type SideloadFinishAction,
 	type UploadStartAction,
-	type SetImageSizesAction,
 } from './types';
 
 const DEFAULT_STATE: State = {
@@ -72,7 +72,9 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 						? {
 								...item,
 								status: ItemStatus.PendingTranscoding,
-								transcode: action.transcode,
+								transcode: item.transcode
+									? [ ...item.transcode, action.transcode ]
+									: [ action.transcode ],
 						  }
 						: item
 				),
@@ -94,11 +96,22 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 		case Type.TranscodingFinish:
 			return {
 				...state,
-				queue: state.queue.map( ( item ) =>
-					item.id === action.id
+				queue: state.queue.map( ( item ) => {
+					if ( item.id !== action.id ) {
+						return item;
+					}
+
+					const transcode = item.transcode
+						? item.transcode.slice( 1 )
+						: undefined;
+
+					return item.id === action.id
 						? {
 								...item,
-								status: ItemStatus.Transcoded,
+								status: transcode
+									? ItemStatus.PendingTranscoding
+									: ItemStatus.Transcoded,
+								transcode,
 								file: action.file,
 								attachment: {
 									...item.attachment,
@@ -106,8 +119,8 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 									mimeType: action.file.type,
 								},
 						  }
-						: item
-				),
+						: item;
+				} ),
 			};
 
 		case Type.Cancel:

@@ -40,7 +40,6 @@ export async function convertImageToJpeg( file: File ) {
 // Same type as in @mextp/upload-media
 // TODO: Move to shared package?
 type ImageSizeCrop = {
-	name: string;
 	width: number;
 	height: number;
 	crop?:
@@ -60,10 +59,6 @@ export async function resizeImage( file: File, resize: ImageSizeCrop ) {
 	let image = vips.Image.newFromBuffer( await file.arrayBuffer() );
 
 	const { width, height } = image;
-
-	console.log( 'resizeImage', resize, resize.width, {
-		height: resize.height || undefined,
-	} );
 
 	const options: Record< string, unknown > = {};
 	if ( resize.height ) {
