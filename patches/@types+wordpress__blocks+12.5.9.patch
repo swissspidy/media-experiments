@@ -1,0 +1,41 @@
+diff --git a/node_modules/@types/wordpress__blocks/api/categories.d.ts b/node_modules/@types/wordpress__blocks/api/categories.d.ts
+index dcbc218..8fb99a0 100644
+--- a/node_modules/@types/wordpress__blocks/api/categories.d.ts
++++ b/node_modules/@types/wordpress__blocks/api/categories.d.ts
+@@ -1,9 +1,7 @@
+-import { Dashicon } from "@wordpress/components";
+-
+ export interface Category {
+     slug: string;
+     title: string;
+-    icon?: JSX.Element | Dashicon.Icon | null | undefined;
++    icon?: JSX.Element | string | null | undefined;
+ }
+ 
+ /**
+diff --git a/node_modules/@types/wordpress__blocks/index.d.ts b/node_modules/@types/wordpress__blocks/index.d.ts
+index bb95b44..47f31ba 100644
+--- a/node_modules/@types/wordpress__blocks/index.d.ts
++++ b/node_modules/@types/wordpress__blocks/index.d.ts
+@@ -1,4 +1,3 @@
+-import { Dashicon } from "@wordpress/components";
+ import { StoreDescriptor } from "@wordpress/data";
+ import { ShortcodeMatch } from "@wordpress/shortcode";
+ import { ComponentType, ReactElement } from "react";
+@@ -37,7 +36,7 @@ export interface BlockIconNormalized {
+     background?: string | undefined;
+     foreground?: string | undefined;
+     shadowColor?: string | undefined;
+-    src: Dashicon.Icon | ReactElement | ComponentType;
++    src: string | ReactElement | ComponentType;
+ }
+ 
+ export type BlockIcon = BlockIconNormalized["src"] | BlockIconNormalized;
+@@ -287,6 +286,7 @@ export interface Block<T extends Record<string, any> = {}> {
+             readonly to?: readonly Transform[] | undefined;
+         }
+         | undefined;
++	readonly variations?: BlockVariation<T>[];
+     /**
+      * Array of the names of context values to inherit from an ancestor
+      * provider.
