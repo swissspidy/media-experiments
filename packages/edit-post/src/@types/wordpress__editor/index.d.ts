@@ -1,9 +1,9 @@
-import {
-	ReduxStoreConfig,
-	StoreDescriptor,
-} from '@wordpress/data/build-types/types';
-
 declare module '@wordpress/editor' {
+	import {
+		ReduxStoreConfig,
+		StoreDescriptor,
+	} from '@wordpress/data/build-types/types';
+
 	const store: {
 		name: 'core/editor';
 	} & StoreDescriptor<

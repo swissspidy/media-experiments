@@ -89,7 +89,9 @@ subscribe( () => {
 		return;
 	}
 
-	dispatch( blockEditorStore ).updateSettings( { mediaUpload: uploadMedia } );
+	void dispatch( blockEditorStore ).updateSettings( {
+		mediaUpload: uploadMedia,
+	} );
 
 	// addFilter(
 	// 	'editor.MediaUpload',

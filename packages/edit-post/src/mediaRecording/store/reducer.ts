@@ -25,6 +25,7 @@ import type {
 	PauseRecordingAction,
 	ResumeRecordingAction,
 	StartCapturingAction,
+	UnknownAction,
 } from './types';
 import { Type } from './types';
 
@@ -44,6 +45,7 @@ const DEFAULT_STATE: State = {
 };
 
 type Action =
+	| UnknownAction
 	| EnterRecordingModeAction
 	| LeaveRecordingModeAction
 	| SetMediaDevicesAction

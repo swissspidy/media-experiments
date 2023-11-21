@@ -1,39 +1,4 @@
-import { EditorSettings } from '@wordpress/block-editor';
 import { BlockInstance, TemplateArray } from '@wordpress/blocks';
-
-export {
-	clearSelectedBlock,
-	enterFormattedText,
-	exitFormattedText,
-	hideInsertionPoint,
-	insertBlock,
-	insertBlocks,
-	insertDefaultBlock,
-	mergeBlocks,
-	moveBlocksDown,
-	moveBlocksUp,
-	moveBlockToPosition,
-	multiSelect,
-	receiveBlocks,
-	removeBlock,
-	removeBlocks,
-	replaceBlock,
-	replaceBlocks,
-	resetBlocks,
-	selectBlock,
-	setTemplateValidity,
-	showInsertionPoint,
-	startMultiSelect,
-	startTyping,
-	stopMultiSelect,
-	stopTyping,
-	synchronizeTemplate,
-	toggleBlockMode,
-	toggleSelection,
-	updateBlock,
-	updateBlockAttributes,
-	updateBlockListSettings,
-} from '@wordpress/block-editor/store/actions';
 
 /**
  * Action generator used in signalling that the post should autosave.
@@ -74,6 +39,20 @@ export function enablePublishSidebar(): void;
  * @param lockName - The lock name.
  */
 export function lockPostSaving( lockName: string ): void;
+
+/**
+ * Signals that post autosaving is locked.
+ *
+ * @param lockName - The lock name.
+ */
+export function lockPostAutosaving( lockName: string ): void;
+
+/**
+ * Signals that post autosaving is unlocked.
+ *
+ * @param lockName - The lock name.
+ */
+export function unlockPostAutosaving( lockName: string ): void;
 
 /**
  * Signals that undo history should restore last popped state.
@@ -155,7 +134,7 @@ export function unlockPostSaving( lockName: string ): void;
  * @param settings - Updated settings
  */
 export function updateEditorSettings(
-	settings: Partial< EditorSettings >
+	settings: Record< string, unknown >
 ): void;
 
 /**
@@ -170,4 +149,7 @@ export function updatePost( edits: Record< string, any > ): void;
  *
  * @param lock - Details about the post lock status, user, and nonce.
  */
-export function updatePostLock( lock: EditorSettings[ 'postLock' ] ): void;
+export function updatePostLock( lock: {
+	isLocked: boolean;
+	user: null | string;
+} ): void;

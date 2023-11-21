@@ -187,3 +187,11 @@ export type ImageSizeCrop = {
 		| boolean
 		| [ 'left' | 'center' | 'right', 'top' | 'center' | 'bottom' ];
 };
+
+export type ImageFormat =
+	| 'jpeg-browser'
+	| 'webp-browser'
+	| 'webp-ffmpeg'
+	| 'jpeg-vips'
+	| 'jpeg-mozjpeg'
+	| 'avif';

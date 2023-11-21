@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from '@wordpress/element';
 
-function AudioVisualiser( { data } ) {
-	const canvasRef = useRef< HTMLCanvasElement >();
+function AudioVisualiser( { data }: { data: Uint8Array } ) {
+	const canvasRef = useRef< HTMLCanvasElement | null >( null );
 	const canvas = canvasRef.current;
 
 	if ( canvas ) {

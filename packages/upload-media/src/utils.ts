@@ -17,6 +17,7 @@ import {
 	TRANSCODABLE_MIME_TYPES,
 } from './constants';
 import UploadError from './uploadError';
+import { revokeBlobURL } from '@wordpress/blob';
 
 // TODO: Make work for HEIF, GIF and audio as well.
 export function canTranscodeFile( file: File ) {
@@ -290,4 +291,44 @@ export async function getBlurHash( image: string ) {
 	// See https://github.com/woltapp/blurhash/blob/cb151cab5b7d9cd3eef624e12e30381c6d292f0d/Readme.md#L112
 	const imageData = getImageData( img, 100 );
 	return encode( imageData.data, imageData.width, imageData.height, 4, 4 );
+}
+
+export async function convertImageFormat(
+	file: File,
+	basename: string,
+	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/webp',
+	quality = 0.82
+) {
+	const url = URL.createObjectURL( file );
+
+	try {
+		const img = await preloadImage( url );
+
+		const canvas = document.createElement( 'canvas' );
+		canvas.width = img.naturalWidth;
+		canvas.height = img.naturalHeight;
+
+		const ctx = canvas.getContext( '2d' );
+
+		// If the contextType doesn't match a possible drawing context,
+		// or differs from the first contextType requested, null is returned.
+		if ( ! ctx ) {
+			throw new Error( 'Could not get context' );
+		}
+
+		ctx.drawImage( img, 0, 0, canvas.width, canvas.height );
+
+		const blob = await getCanvasBlob( canvas, type, quality );
+
+		return blobToFile(
+			blob,
+			`${ basename }.${ getExtensionFromMimeType( blob.type ) }`,
+			blob.type
+		);
+
+		// No catch, as error handling should be done in prepareItem()
+		// or wherever this is called from.
+	} finally {
+		revokeBlobURL( url );
+	}
 }

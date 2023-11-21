@@ -43,6 +43,7 @@ export type RecordingStatus =
 export type VideoEffect = 'none' | 'blur';
 
 export enum Type {
+	Unknown = 'REDUX_UNKNOWN',
 	EnterRecordingMode = 'ENTER_RECORDING_MODE',
 	LeaveRecordingMode = 'LEAVE_RECORDING_MODE',
 	ChangeVideoInput = 'CHANGE_VIDEO_INPUT',
@@ -70,6 +71,7 @@ export enum Type {
 	AddMediaChunk = 'ADD_MEDIA_CHUNK',
 }
 
+export type UnknownAction = Action< Type.Unknown >;
 export type EnterRecordingModeAction = Action<
 	Type.EnterRecordingMode,
 	{ clientId: string; recordingType: string }

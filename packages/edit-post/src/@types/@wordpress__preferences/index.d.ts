@@ -15,7 +15,10 @@ declare module '@wordpress/preferences' {
 					name: string,
 					value: unknown
 				) => Record< string, unknown >;
-				setDefaults: ( scope: string ) => Record< string, unknown >;
+				setDefaults: (
+					scope: string,
+					defaults: Record< string, unknown >
+				) => void;
 				setPersistenceLayer: (
 					persistenceLayer: unknown
 				) => Record< string, unknown >;

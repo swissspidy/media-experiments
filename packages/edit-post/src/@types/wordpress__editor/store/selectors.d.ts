@@ -1,60 +1,5 @@
-import { EditorSettings } from '@wordpress/block-editor';
 import { BlockInstance } from '@wordpress/blocks';
 import { EntityRecord, Page, Post, User } from '@wordpress/core-data';
-
-export {
-	canInsertBlockType,
-	getAdjacentBlockClientId,
-	getBlock,
-	getBlockAttributes,
-	getBlockCount,
-	getBlockHierarchyRootClientId,
-	getBlockIndex,
-	getBlockInsertionPoint,
-	getBlockListSettings,
-	getBlockMode,
-	getBlockName,
-	getBlockOrder,
-	getBlockRootClientId,
-	getBlocks,
-	getBlocksByClientId,
-	getBlockSelectionEnd,
-	getBlockSelectionStart,
-	getClientIdsOfDescendants,
-	getClientIdsWithDescendants,
-	getFirstMultiSelectedBlockClientId,
-	getGlobalBlockCount,
-	getInserterItems,
-	getLastMultiSelectedBlockClientId,
-	getMultiSelectedBlockClientIds,
-	getMultiSelectedBlocks,
-	getMultiSelectedBlocksEndClientId,
-	getMultiSelectedBlocksStartClientId,
-	getNextBlockClientId,
-	getPreviousBlockClientId,
-	getSelectedBlock,
-	getSelectedBlockClientId,
-	getSelectedBlockCount,
-	getSelectedBlocksInitialCaretPosition,
-	getTemplate,
-	getTemplateLock,
-	hasInserterItems,
-	hasMultiSelection,
-	hasSelectedBlock,
-	hasSelectedInnerBlock,
-	isAncestorMultiSelected,
-	isBlockInsertionPointVisible,
-	isBlockMultiSelected,
-	isBlockSelected,
-	isBlockValid,
-	isBlockWithinSelection,
-	isCaretWithinFormattedText,
-	isFirstMultiSelectedBlock,
-	isMultiSelecting,
-	isSelectionEnabled,
-	isTyping,
-	isValidTemplate,
-} from '@wordpress/block-editor/store/selectors';
 
 /**
  * Returns whether or not the user has the unfiltered_html capability.
@@ -164,6 +109,135 @@ export function getEditedPostVisibility(): 'password' | 'private' | 'public';
  * Return the current block list.
  */
 export function getEditorBlocks(): BlockInstance[];
+
+interface EditorBaseSetting {
+	name: string;
+	slug: string;
+}
+
+interface EditorColor extends EditorBaseSetting {
+	color: string;
+}
+
+interface EditorFontSize extends EditorBaseSetting {
+	size: number;
+}
+
+type EditorImageSize = EditorBaseSetting;
+
+interface EditorStyle {
+	css: string;
+	baseURL?: string | undefined;
+}
+
+interface EditorSettings {
+	/**
+	 * Enable/Disable Wide/Full Alignments
+	 * @defaultValue `false`
+	 */
+	alignWide: boolean;
+	/**
+	 * Array of allowed block types, `true` for all blocks, or `false` for no blocks.
+	 * @defaultValue `true`
+	 */
+	allowedBlockTypes: string[] | boolean;
+	/**
+	 * Mapping of extension:mimetype
+	 * @example
+	 * ```js
+	 * {
+	 *   "jpg|jpeg|jpe": "image/jpeg",
+	 * }
+	 * ```
+	 */
+	allowedMimeTypes: Record< string, string > | null;
+	autosaveInterval: number;
+	/**
+	 * Array of objects representing the legacy widgets available.
+	 */
+	availableLegacyWidgets: Array< {
+		description: string;
+		isCallbackWidget: boolean;
+		isHidden: boolean;
+		name: string;
+	} >;
+	// FIXME: it is unclear what this value should be.
+	availableTemplates: any[];
+	/**
+	 * Empty post placeholder.
+	 * @defaultValue `"Start writing or type / to choose a block"`
+	 */
+	bodyPlaceholder: string;
+	/**
+	 * Whether or not the user can switch to the code editor.
+	 */
+	codeEditingEnabled: boolean;
+	/**
+	 * Palette colors.
+	 */
+	colors: EditorColor[];
+	/**
+	 * Whether or not the custom colors are disabled.
+	 */
+	disableCustomColors: boolean;
+	/**
+	 * Whether or not the custom font sizes are disabled.
+	 */
+	disableCustomEditorFontSizes: boolean;
+	/**
+	 * Whether or not the custom post formats are disabled.
+	 */
+	disablePostFormats: boolean;
+	/**
+	 * Whether or not the custom fields are enabled.
+	 */
+	enableCustomFields: boolean;
+	/**
+	 * Whether the focus mode is enabled or not.
+	 */
+	focusMode: boolean;
+	/**
+	 * Array of available font sizes.
+	 */
+	fontSizes: EditorFontSize[];
+	/**
+	 * Whether or not the editor toolbar is fixed.
+	 */
+	hasFixedToolbar: boolean;
+	/**
+	 * Whether or not the user is able to manage widgets.
+	 */
+	hasPermissionsToManageWidgets: boolean;
+	/**
+	 * Available image sizes.
+	 */
+	imageSizes: EditorImageSize[];
+	/**
+	 * Whether the editor is in RTL mode.
+	 */
+	isRTL: boolean;
+	maxUploadFileSize: number;
+	/**
+	 * Max width to constraint resizing.
+	 */
+	maxWidth: number;
+	postLock: {
+		isLocked: boolean;
+		user: null | string;
+	};
+	postLockUtils: {
+		nonce: string;
+		unlockNonce: string;
+		ajaxUrl: string;
+	};
+	richEditingEnabled: boolean;
+	styles: EditorStyle[];
+	/**
+	 * Empty title placeholder.
+	 * @defaultValue `"Add title"`
+	 */
+	titlePlaceholder: string;
+}
 
 /**
  * Returns the post editor settings.

@@ -238,8 +238,14 @@ export function startRecording() {
 
 				dispatch.countDuration();
 
-				// TODO: mediaStream can be undefined if resolution hasn't finished yet.
 				const mediaStream = select.getMediaStream();
+
+				// mediaStream can be undefined if resolution hasn't finished yet.
+				// TODO: Throw error?
+				if ( ! mediaStream ) {
+					return;
+				}
+
 				const mediaRecorder = new MediaRecorder( mediaStream );
 
 				const track = mediaStream.getVideoTracks()[ 0 ];
@@ -305,6 +311,8 @@ export function startRecording() {
 
 				mediaRecorder.addEventListener(
 					'error',
+					// @ts-ignore -- TODO: Fix type declaration.
+
 					( evt: MediaRecorderErrorEvent ) => {
 						dispatch( {
 							type: Type.SetError,
@@ -433,8 +441,13 @@ export function captureImage() {
 			if ( countdown === 0 ) {
 				clearInterval( timer );
 
-				// TODO: mediaStream can be undefined if resolution hasn't finished yet.
 				const mediaStream = select.getMediaStream();
+
+				// mediaStream can be undefined if resolution hasn't finished yet.
+				// TODO: Throw error?
+				if ( ! mediaStream ) {
+					return;
+				}
 
 				const track = mediaStream.getVideoTracks()[ 0 ];
 				const captureDevice = new ImageCapture( track );

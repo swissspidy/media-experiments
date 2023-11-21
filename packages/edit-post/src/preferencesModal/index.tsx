@@ -150,23 +150,32 @@ const FeatureNumberControl = compose(
 	} ) )
 )( NumberControl ) as FunctionComponent< FeatureNumberControlProps >;
 
+const EMPTY_ARRAY: never[] = [];
+
 function Modal() {
 	const { closeModal } = useDispatch( interfaceStore );
-	const isModalActive = useSelect( ( select ) => {
-		return select( interfaceStore ).isModalActive( PREFERENCES_NAME );
-	}, [] );
 
+	// TODO: Address warning that this hook returns different values when called with the same state and parameters.
 	const { videoDevices, audioDevices } = useSelect( ( select ) => {
 		const mediaDevices = select( recordingStore ).getDevices();
 		return {
-			videoDevices: mediaDevices.filter(
-				( { kind } ) => kind === 'videoinput'
-			),
-			audioDevices: mediaDevices.filter(
-				( { kind } ) => kind === 'audioinput'
-			),
+			videoDevices: mediaDevices.length
+				? mediaDevices.filter( ( { kind } ) => kind === 'videoinput' )
+				: EMPTY_ARRAY,
+			audioDevices: mediaDevices.length
+				? mediaDevices.filter( ( { kind } ) => kind === 'audioinput' )
+				: EMPTY_ARRAY,
 		};
 	}, [] );
+
+	// Safari does not currently support WebP in HTMLCanvasElement.toBlob()
+	// See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
+	const isSafari = Boolean(
+		window?.navigator.userAgent &&
+			window.navigator.userAgent.includes( 'Safari' ) &&
+			! window.navigator.userAgent.includes( 'Chrome' ) &&
+			! window.navigator.userAgent.includes( 'Chromium' )
+	);
 
 	const sections = useMemo(
 		() => [
@@ -203,28 +212,43 @@ function Modal() {
 								options={ [
 									{
 										label: __(
+											'JPEG (Browser)',
+											'media-experiments'
+										),
+										value: 'jpeg-browser',
+									},
+									{
+										label: __(
+											'WebP (Browser)',
+											'media-experiments'
+										),
+										value: 'webp-browser',
+										disabled: isSafari,
+									},
+									{
+										label: __(
 											'WebP (FFmpeg)',
 											'media-experiments'
 										),
-										value: 'webp',
+										value: 'webp-ffmpeg',
 									},
 									{
 										label: __(
 											'JPEG (libvips)',
 											'media-experiments'
 										),
-										value: 'jpeg',
+										value: 'jpeg-vips',
 									},
 									{
 										label: __(
 											'JPEG (MozJPEG)',
 											'media-experiments'
 										),
-										value: 'mozjpeg',
+										value: 'jpeg-mozjpeg',
 									},
 									{
 										label: __(
-											'AVIF',
+											'AVIF (libavif)',
 											'media-experiments'
 										),
 										value: 'avif',
@@ -241,6 +265,8 @@ function Modal() {
 								isShiftStepEnabled={ true }
 								featureName="imageQuality"
 								shiftStep={ 5 }
+								max={ 100 }
+								min={ 1 }
 							/>
 						</PreferencesModalSection>
 					</>
@@ -290,12 +316,8 @@ function Modal() {
 				),
 			},
 		],
-		[ videoDevices, audioDevices ]
+		[ videoDevices, audioDevices, isSafari ]
 	);
-
-	if ( ! isModalActive ) {
-		return null;
-	}
 
 	return (
 		<PreferencesModal closeModal={ closeModal }>
@@ -306,6 +328,9 @@ function Modal() {
 
 function PreferencesMenuItem() {
 	const { openModal } = useDispatch( interfaceStore );
+	const isModalActive = useSelect( ( select ) => {
+		return select( interfaceStore ).isModalActive( PREFERENCES_NAME );
+	}, [] );
 
 	return (
 		<>
@@ -317,7 +342,7 @@ function PreferencesMenuItem() {
 			>
 				{ __( 'Media Preferences', 'media-experiments' ) }
 			</PluginMoreMenuItem>
-			<Modal />
+			{ isModalActive && <Modal /> }
 		</>
 	);
 }

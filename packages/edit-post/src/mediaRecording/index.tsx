@@ -3,7 +3,7 @@ import { BlockControls, useBlockProps, Warning } from '@wordpress/block-editor';
 import { addFilter } from '@wordpress/hooks';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { ToolbarButton, ToolbarDropdownMenu } from '@wordpress/components';
-import { audio, check, capturePhoto } from '@wordpress/icons';
+import { check, capturePhoto } from '@wordpress/icons';
 import { Fragment, useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
@@ -50,29 +50,39 @@ function InputControls() {
 
 	const videoControls = videoDevices.map( ( device ) => ( {
 		title: device.label,
-		onClick: () => setVideoInput( device.deviceId ),
+		onClick: () => {
+			void setVideoInput( device.deviceId );
+		},
 		isActive: videoInput === device.deviceId,
 		role: 'menuitemradio',
-		icon: hasVideo && videoInput === device.deviceId && check,
+		icon: hasVideo && videoInput === device.deviceId ? check : undefined,
 	} ) );
 
 	// Videos can be recorded with or without audio.
 	const audioControls = [
-		'video' === recordingType && {
-			title: __( 'No Microphone', 'media-experiments' ),
-			onClick: () => toggleHasAudio(),
-			isActive: ! hasAudio,
-			role: 'menuitemradio',
-			icon: ! hasAudio && check,
-		},
 		...audioDevices.map( ( device ) => ( {
 			title: device.label,
-			onClick: () => setAudioInput( device.deviceId ),
+			onClick: () => {
+				void setAudioInput( device.deviceId );
+			},
 			isActive: audioInput === device.deviceId,
 			role: 'menuitemradio',
-			icon: hasAudio && audioInput === device.deviceId && check,
+			icon:
+				hasAudio && audioInput === device.deviceId ? check : undefined,
 		} ) ),
-	].filter( Boolean );
+	];
+
+	if ( 'video' === recordingType ) {
+		audioControls.unshift( {
+			title: __( 'No Microphone', 'media-experiments' ),
+			onClick: () => {
+				void toggleHasAudio();
+			},
+			isActive: ! hasAudio,
+			role: 'menuitemradio',
+			icon: ! hasAudio ? check : undefined,
+		} );
+	}
 
 	return (
 		<Fragment>
@@ -338,7 +348,7 @@ function RecordingBlockControls( {
 				<BlockControls group="inline">
 					<ToolbarButton
 						onClick={ () => {
-							toggleBlurEffect();
+							void toggleBlurEffect();
 						} }
 						isPressed={ 'blur' === videoEffect }
 						icon={
@@ -372,9 +382,9 @@ function RecordingBlockControls( {
 							<ToolbarButton
 								onClick={ () => {
 									if ( isRecordingOrCountdown ) {
-										stopRecording();
+										void stopRecording();
 									} else {
-										startRecording();
+										void startRecording();
 									}
 								} }
 								extraProps={ {
@@ -390,7 +400,7 @@ function RecordingBlockControls( {
 						{ isRecording && (
 							<ToolbarButton
 								onClick={ () => {
-									pauseRecording();
+									void pauseRecording();
 								} }
 							>
 								{ __( 'Pause', 'media-experiments' ) }
@@ -399,7 +409,7 @@ function RecordingBlockControls( {
 						{ isPaused && (
 							<ToolbarButton
 								onClick={ () => {
-									resumeRecording();
+									void resumeRecording();
 								} }
 							>
 								{ __( 'Resume', 'media-experiments' ) }
@@ -410,7 +420,7 @@ function RecordingBlockControls( {
 				{ 'image' === recordingType && ! isStopped && (
 					<ToolbarButton
 						onClick={ () => {
-							captureImage();
+							void captureImage();
 						} }
 						icon={ capturePhoto }
 						label={ __( 'Capture Photo', 'media-experiments' ) }
@@ -441,14 +451,14 @@ function RecordingBlockControls( {
 										break;
 								}
 
-								leaveRecordingMode();
+								void leaveRecordingMode();
 							} }
 						>
 							{ __( 'Insert', 'media-experiments' ) }
 						</ToolbarButton>
 						<ToolbarButton
 							onClick={ () => {
-								retryRecording();
+								void retryRecording();
 							} }
 						>
 							{ __( 'Retry', 'media-experiments' ) }

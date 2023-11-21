@@ -44,12 +44,14 @@ import type {
 	TranscodingStartAction,
 	UploadStartAction,
 	UploadFinishAction,
+	ImageFormat,
 } from './types';
 
 import { ItemStatus, Type, TranscodingType } from './types';
 import UploadError from '../uploadError';
 import {
 	canTranscodeFile,
+	convertImageFormat,
 	fetchRemoteFile,
 	getBlurHash,
 	getDominantColor,
@@ -784,24 +786,45 @@ export function optimizeItemWithApproval( id: QueueItemId ) {
 
 		dispatch.startTranscoding( id );
 
-		const imageFormat = registry
+		const imageFormat: ImageFormat = registry
 			.select( preferencesStore )
 			.get( 'media-experiments/preferences', 'imageFormat' );
+
+		// TODO: Pass quality to all the different encoders.
+		const imageQuality: number = registry
+			.select( preferencesStore )
+			.get( 'media-experiments/preferences', 'imageQuality' );
 
 		try {
 			let file: File;
 
 			switch ( imageFormat ) {
-				case 'jpeg':
+				case 'webp-browser':
+					file = await convertImageFormat(
+						item.file,
+						getFileBasename( item.file.name ),
+						'image/webp',
+						imageQuality / 100
+					);
+					break;
+				case 'jpeg-browser':
+					file = await convertImageFormat(
+						item.file,
+						getFileBasename( item.file.name ),
+						'image/jpeg',
+						imageQuality / 100
+					);
+					break;
+				case 'jpeg-vips':
 					file = await convertImageToJpeg( item.file );
 					break;
-				case 'mozjpeg':
+				case 'jpeg-mozjpeg':
 					file = await convertImageToMozJpeg( item.file );
 					break;
 				case 'avif':
 					file = await convertImageToAvif( item.file );
 					break;
-				case 'webp':
+				case 'webp-ffmpeg':
 					file = await convertImageToWebP( item.file );
 					break;
 				default:
@@ -1032,13 +1055,7 @@ export function resizeCropItem( id: QueueItemId ) {
 }
 
 export function uploadPosterForItem( item: QueueItem ) {
-	return async ( {
-		dispatch,
-		registry,
-	}: {
-		dispatch: ActionCreators;
-		registry: WPDataRegistry;
-	} ) => {
+	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
 		const { attachment: uploadedAttachment } = item as QueueItem & {
 			attachment: Attachment;
 		};
@@ -1065,18 +1082,14 @@ export function uploadPosterForItem( item: QueueItem ) {
 				! poster &&
 				'video' === getMediaTypeFromMimeType( item.file.type )
 			) {
-				const imageQuality = registry
-					.select( preferencesStore )
-					.get( 'media-experiments/preferences', 'imageQuality' );
-
 				// Derive the basename from the uploaded video's file name
-				// (instead of the original file name) for more accuracy.
+				// if available for more accuracy.
 				poster = await getPosterFromVideo(
 					uploadedAttachment.url,
 					`${ getFileBasename(
-						getFileNameFromUrl( uploadedAttachment.url )
-					) }}-poster`,
-					imageQuality
+						uploadedAttachment.fileName ??
+							getFileNameFromUrl( uploadedAttachment.url )
+					) }}-poster`
 				);
 			}
 

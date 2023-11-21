@@ -1,15 +1,25 @@
 import { addFilter } from '@wordpress/hooks';
 import { createBlobURL } from '@wordpress/blob';
-import { createBlock } from '@wordpress/blocks';
+import { createBlock, type Block, type BlockInstance } from '@wordpress/blocks';
 
 import { getMediaTypeFromMimeType } from '@mexp/media-utils';
 
+type Writable< T > = { -readonly [ P in keyof T ]: Writable< T[ P ] > };
+
+type FilterableBlock = Writable< Block >;
+
 // TODO: Prevent incorrect 'If uploading to a gallery all files need to be image formats' snackbar from image block.
-function addMultiFileTransformToBlock( settings, name: string ) {
+function addMultiFileTransformToBlock(
+	settings: FilterableBlock,
+	name: string
+) {
 	switch ( name ) {
 		case 'core/video':
 		case 'core/image':
 		case 'core/audio':
+			if ( ! settings.transforms || ! settings.transforms.from ) {
+				return;
+			}
 			settings.transforms.from.unshift( {
 				type: 'files',
 				// Higher than the default priority of 10, so that this is picked up
@@ -28,7 +38,7 @@ function addMultiFileTransformToBlock( settings, name: string ) {
 					);
 				},
 				transform( files: File[] ) {
-					const blocks = [];
+					const blocks: BlockInstance< {} >[] = [];
 
 					files.forEach( ( file ) => {
 						const mediaType = getMediaTypeFromMimeType( file.type );

@@ -46,14 +46,15 @@ function useAttachment( id?: number ) {
 	return record as RestAttachment | null;
 }
 
-function useIsUploadingById( id: number ) {
+function useIsUploadingById( id?: number ) {
 	return useSelect(
-		( select ) => select( uploadStore ).isUploadingById( id ),
+		( select ) =>
+			id ? select( uploadStore ).isUploadingById( id ) : false,
 		[ id ]
 	);
 }
 
-function useIsUploadingByUrl( url: string ) {
+function useIsUploadingByUrl( url?: string ) {
 	return useSelect(
 		( select ) => {
 			if ( ! url ) {
@@ -310,12 +311,16 @@ function OptimizeMedia( { attributes, setAttributes }: OptimizeMediaProps ) {
 	);
 	const { isPendingApproval, comparison } = useSelect(
 		( select ) => ( {
-			isPendingApproval: select(
-				uploadStore
-			).isPendingApprovalByAttachmentId( attributes.id ),
-			comparison: select( uploadStore ).getComparisonDataForApproval(
-				attributes.id
-			),
+			isPendingApproval: attributes.id
+				? select( uploadStore ).isPendingApprovalByAttachmentId(
+						attributes.id
+				  )
+				: false,
+			comparison: attributes.id
+				? select( uploadStore ).getComparisonDataForApproval(
+						attributes.id
+				  )
+				: null,
 		} ),
 		[ attributes.id ]
 	);
@@ -776,7 +781,7 @@ function MediaPanel( {
 	attributes,
 	setAttributes,
 }: MediaPanelProps ) {
-	const attachment = {
+	const attachment: Partial< Attachment > = {
 		id: attributes.id,
 		url: attributes.src || attributes.url,
 		poster: attributes.poster,

@@ -40,12 +40,11 @@ function UploadStatusIndicator() {
 	const { cancelItem } = useDispatch( uploadStore );
 	const { isUploading, items } = useSelect(
 		( select ) => {
+			const queueItems = select( uploadStore ).getItems();
 			return {
 				isUploading: select( uploadStore ).isUploading(),
-				items:
-					select( uploadStore )
-						.getItems()
-						.map( ( item ) => {
+				items: queueItems.length
+					? queueItems.map( ( item ) => {
 							return {
 								icon: getItemForMimeType(
 									item.file.type || 'unknown'
@@ -67,7 +66,8 @@ function UploadStatusIndicator() {
 										} )
 									),
 							};
-						} ) || EMPTY_ARRAY,
+					  } )
+					: EMPTY_ARRAY,
 			};
 		},
 		[ cancelItem ]
@@ -98,18 +98,19 @@ function UploadStatusIndicator() {
 }
 
 function WrappedUploadStatusIndicator() {
-	const root = useRef< HTMLDivElement >( null );
-	const referenceNode = useRef< HTMLDivElement >( null );
+	const root = useRef< HTMLDivElement | null >( null );
+	const referenceNode = useRef< HTMLDivElement | null >( null );
 
-	const { isEditedPostSaveable, isViewable } = useSelect(
-		( select ) => ( {
+	const { isEditedPostSaveable, isViewable } = useSelect( ( select ) => {
+		return {
 			isEditedPostSaveable: select( editorStore ).isEditedPostSaveable(),
-			isViewable: select( coreStore ).getPostType(
-				select( editorStore ).getEditedPostAttribute( 'type' )
-			)?.viewable,
-		} ),
-		[]
-	);
+			isViewable: Boolean(
+				select( coreStore ).getPostType(
+					select( editorStore ).getCurrentPostType()
+				)?.viewable
+			),
+		};
+	}, [] );
 
 	useLayoutEffect( () => {
 		// The upload status indicator should always be inserted right before any other buttons.
@@ -155,15 +156,21 @@ registerPlugin( 'media-experiments-upload-status', {
 subscribe( () => {
 	const isUploading = globalSelect( uploadStore ).isUploading();
 
-	// Requires patched Gutenberg version.
-	globalDispatch( editPostStore ).setIsUploading?.( isUploading );
+	// ATTENTION: Requires a patched Gutenberg version.
+	void globalDispatch( editPostStore ).setIsUploading?.( isUploading );
 
 	if ( isUploading ) {
-		globalDispatch( editorStore ).lockPostSaving( 'media-experiments' );
-		globalDispatch( editorStore ).lockPostAutosaving( 'media-experiments' );
+		void globalDispatch( editorStore ).lockPostSaving(
+			'media-experiments'
+		);
+		void globalDispatch( editorStore ).lockPostAutosaving(
+			'media-experiments'
+		);
 	} else {
-		globalDispatch( editorStore ).unlockPostSaving( 'media-experiments' );
-		globalDispatch( editorStore ).unlockPostAutosaving(
+		void globalDispatch( editorStore ).unlockPostSaving(
+			'media-experiments'
+		);
+		void globalDispatch( editorStore ).unlockPostAutosaving(
 			'media-experiments'
 		);
 	}

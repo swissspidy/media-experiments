@@ -1,14 +1,21 @@
 import { addFilter } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
+import { type Block, type BlockAttributes } from '@wordpress/blocks';
 
 import { isGifVariation } from './utils';
 
-function addGifBlockVariationToVideoBlock( settings, name: string ) {
+type Writable< T > = { -readonly [ P in keyof T ]: Writable< T[ P ] > };
+type FilterableBlock = Writable< Block >;
+
+function addGifBlockVariationToVideoBlock(
+	settings: FilterableBlock,
+	name: string
+) {
 	if ( name !== 'core/video' ) {
 		return settings;
 	}
 
-	settings.variations = settings.variations || {};
+	settings.variations = settings.variations || [];
 	settings.variations.unshift( {
 		name: 'gif',
 		title: 'GIF',
@@ -25,7 +32,7 @@ function addGifBlockVariationToVideoBlock( settings, name: string ) {
 			muted: true,
 			playsInline: true,
 		},
-		isActive( blockAttributes: Record< string, unknown > ) {
+		isActive( blockAttributes: BlockAttributes ) {
 			return isGifVariation( blockAttributes );
 		},
 	} );
@@ -41,7 +48,7 @@ function addGifBlockVariationToVideoBlock( settings, name: string ) {
 		attributes: {
 			controls: true,
 		},
-		isActive( blockAttributes ) {
+		isActive( blockAttributes: BlockAttributes ) {
 			return ! isGifVariation( blockAttributes );
 		},
 	} );
