@@ -1,0 +1,122 @@
+diff --git a/node_modules/@wordpress/core-data/build-types/entity-types/index.d.ts b/node_modules/@wordpress/core-data/build-types/entity-types/index.d.ts
+index d2b2e41..650aaf3 100644
+--- a/node_modules/@wordpress/core-data/build-types/entity-types/index.d.ts
++++ b/node_modules/@wordpress/core-data/build-types/entity-types/index.d.ts
+@@ -10,6 +10,7 @@ import type { NavMenuItem } from './nav-menu-item';
+ import type { Page } from './page';
+ import type { Plugin } from './plugin';
+ import type { Post } from './post';
++import type { PostType } from './post-type';
+ import type { Settings } from './settings';
+ import type { Sidebar } from './sidebar';
+ import type { Taxonomy } from './taxonomy';
+@@ -21,7 +22,7 @@ import type { WidgetType } from './widget-type';
+ import type { WpTemplate } from './wp-template';
+ import type { WpTemplatePart } from './wp-template-part';
+ export type { BaseEntityRecords } from './base-entity-records';
+-export type { Attachment, Comment, Context, MenuLocation, NavMenu, NavMenuItem, Page, Plugin, Post, Settings, Sidebar, Taxonomy, Theme, Updatable, User, Type, Widget, WidgetType, WpTemplate, WpTemplatePart, };
++export type { Attachment, Comment, Context, MenuLocation, NavMenu, NavMenuItem, Page, Plugin, Post, PostType, Settings, Sidebar, Taxonomy, Theme, Updatable, User, Type, Widget, WidgetType, WpTemplate, WpTemplatePart, };
+ /**
+  * An interface that may be extended to add types for new entities. Each entry
+  * must be a union of entity definitions adhering to the EntityInterface type.
+@@ -55,7 +56,7 @@ export type { Attachment, Comment, Context, MenuLocation, NavMenu, NavMenuItem,
+  * ```
+  */
+ export interface PerPackageEntityRecords<C extends Context> {
+-    core: Attachment<C> | Comment<C> | MenuLocation<C> | NavMenu<C> | NavMenuItem<C> | Page<C> | Plugin<C> | Post<C> | Settings<C> | Sidebar<C> | Taxonomy<C> | Theme<C> | User<C> | Type<C> | Widget<C> | WidgetType<C> | WpTemplate<C> | WpTemplatePart<C>;
++    core: Attachment<C> | Comment<C> | MenuLocation<C> | NavMenu<C> | NavMenuItem<C> | Page<C> | Plugin<C> | Post<C> | PostType<C> | Settings<C> | Sidebar<C> | Taxonomy<C> | Theme<C> | User<C> | Type<C> | Widget<C> | WidgetType<C> | WpTemplate<C> | WpTemplatePart<C>;
+ }
+ /**
+  * A union of all known record types.
+diff --git a/node_modules/@wordpress/core-data/build-types/entity-types/post-type.d.ts b/node_modules/@wordpress/core-data/build-types/entity-types/post-type.d.ts
+new file mode 100644
+index 0000000..75178b6
+--- /dev/null
++++ b/node_modules/@wordpress/core-data/build-types/entity-types/post-type.d.ts
+@@ -0,0 +1,16 @@
++/**
++ * Internal dependencies
++ */
++import type { Context, OmitNevers } from './helpers';
++import type { BaseEntityRecords as _BaseEntityRecords } from './base-entity-records';
++declare module './base-entity-records' {
++    namespace BaseEntityRecords {
++        interface PostType<C extends Context> {
++            /**
++             * Whether the post type is viewable.
++             */
++            viewable: boolean;
++        }
++    }
++}
++export type PostType<C extends Context = 'edit'> = OmitNevers<_BaseEntityRecords.PostType<C>>;
+diff --git a/node_modules/@wordpress/core-data/build-types/index.d.ts b/node_modules/@wordpress/core-data/build-types/index.d.ts
+index af3c259..77e2249 100644
+--- a/node_modules/@wordpress/core-data/build-types/index.d.ts
++++ b/node_modules/@wordpress/core-data/build-types/index.d.ts
+@@ -62,6 +62,7 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
+         dispatch: any;
+     }) => Promise<any>;
+ }, {
++	getPostType(state: selectors.State, slug: string): import("./entity-types").PostType | null;
+     getAuthors(state: selectors.State, query?: {
+         [x: string]: any;
+     } | undefined): import("./entity-types").User[];
+diff --git a/node_modules/@wordpress/core-data/src/entity-types/index.ts b/node_modules/@wordpress/core-data/src/entity-types/index.ts
+index 19d10a2..01fdbd3 100644
+--- a/node_modules/@wordpress/core-data/src/entity-types/index.ts
++++ b/node_modules/@wordpress/core-data/src/entity-types/index.ts
+@@ -10,6 +10,7 @@ import type { NavMenuItem } from './nav-menu-item';
+ import type { Page } from './page';
+ import type { Plugin } from './plugin';
+ import type { Post } from './post';
++import type { PostType } from './post-type';
+ import type { Settings } from './settings';
+ import type { Sidebar } from './sidebar';
+ import type { Taxonomy } from './taxonomy';
+@@ -33,6 +34,7 @@ export type {
+ 	Page,
+ 	Plugin,
+ 	Post,
++	PostType,
+ 	Settings,
+ 	Sidebar,
+ 	Taxonomy,
+@@ -88,6 +90,7 @@ export interface PerPackageEntityRecords< C extends Context > {
+ 		| Page< C >
+ 		| Plugin< C >
+ 		| Post< C >
++		| PostType< C >
+ 		| Settings< C >
+ 		| Sidebar< C >
+ 		| Taxonomy< C >
+diff --git a/node_modules/@wordpress/core-data/src/entity-types/post-type.ts b/node_modules/@wordpress/core-data/src/entity-types/post-type.ts
+new file mode 100644
+index 0000000..f2584ed
+--- /dev/null
++++ b/node_modules/@wordpress/core-data/src/entity-types/post-type.ts
+@@ -0,0 +1,24 @@
++/**
++ * Internal dependencies
++ */
++import type {
++	Context,
++	OmitNevers,
++} from './helpers';
++
++import type { BaseEntityRecords as _BaseEntityRecords } from './base-entity-records';
++
++declare module './base-entity-records' {
++	export namespace BaseEntityRecords {
++		export interface PostType< C extends Context > {
++			/**
++			 * Whether the post type is viewable.
++			 */
++			viewable: boolean;
++		}
++	}
++}
++
++export type PostType< C extends Context = 'edit' > = OmitNevers<
++	_BaseEntityRecords.PostType< C >
++>;
