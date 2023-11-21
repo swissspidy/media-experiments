@@ -83,7 +83,7 @@ function enqueue_block_editor_assets(): void {
 	wp_set_script_translations( 'media-experiments', 'media-experiments' );
 
 	/** This filter is documented in wp-admin/includes/images.php */
-	$threshold = (int) apply_filters( 'big_image_size_threshold', 2560, array( 0, 0 ), '', 0 ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFoun
+	$threshold = (int) apply_filters( 'big_image_size_threshold', 2560, array( 0, 0 ), '', 0 ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 
 	wp_add_inline_script(
 		'media-experiments',
