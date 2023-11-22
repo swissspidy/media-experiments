@@ -85,7 +85,7 @@ export function getComparisonDataForApproval( state: State, id: number ) {
 		oldSize: foundItem.sourceFile.size,
 		newSize: foundItem.file.size,
 		newUrl: foundItem.attachment?.url,
-		sizeDiff: ( 1 - foundItem.file.size / foundItem.sourceFile.size ) * 100,
+		sizeDiff: foundItem.file.size / foundItem.sourceFile.size - 1,
 	};
 }
 

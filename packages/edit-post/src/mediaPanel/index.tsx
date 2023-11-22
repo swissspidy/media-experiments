@@ -285,6 +285,12 @@ const numberFormatter = Intl.NumberFormat( 'en', {
 	maximumFractionDigits: 2,
 } );
 
+const diffFormatter = Intl.NumberFormat( 'en', {
+	notation: 'compact',
+	style: 'percent',
+	maximumFractionDigits: 2,
+} );
+
 interface OptimizeMediaProps {
 	attributes: {
 		id?: number;
@@ -431,22 +437,26 @@ function OptimizeMedia( { attributes, setAttributes }: OptimizeMediaProps ) {
 					</div>
 					<p>
 						{ createInterpolateElement(
-							comparison.sizeDiff > 0
+							comparison.sizeDiff < 0
 								? sprintf(
-										/* translators: %s: file size savings in percent. */
+										/* translators: %s: file size decrease in percent. */
 										__(
-											'The new version is <b>%1$s%% smaller</b>!',
+											'The new version is <b>%s smaller</b>!',
 											'media-experiments'
 										),
-										comparison.sizeDiff
+										diffFormatter.format(
+											comparison.sizeDiff
+										)
 								  )
 								: sprintf(
 										/* translators: %s: file size increase in percent. */
 										__(
-											'The new version is <b>%1$s%% bigger</b> :(',
+											'The new version is <b>%s bigger</b> :(',
 											'media-experiments'
 										),
-										comparison.sizeDiff
+										diffFormatter.format(
+											comparison.sizeDiff
+										)
 								  ),
 							{
 								b: <b />,
