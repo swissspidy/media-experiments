@@ -1,3 +1,4 @@
+import type { ComponentProps, PropsWithChildren } from 'react';
 import { registerPlugin } from '@wordpress/plugins';
 import { PluginMoreMenuItem } from '@wordpress/edit-post';
 import { media } from '@wordpress/icons';
@@ -6,11 +7,8 @@ import { useMemo } from '@wordpress/element';
 import {
 	useDispatch,
 	useSelect,
-	withSelect,
-	withDispatch,
 	dispatch as globalDispatch,
 } from '@wordpress/data';
-import { compose } from '@wordpress/compose';
 import {
 	PreferencesModal,
 	PreferencesModalTabs,
@@ -24,11 +22,6 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis -- Why is this still experimental?
 	__experimentalNumberControl as NumberControl,
 } from '@wordpress/components';
-import type {
-	ComponentProps,
-	FunctionComponent,
-	PropsWithChildren,
-} from 'react';
 
 import './styles.css';
 import { store as recordingStore } from '../mediaRecording/store';
@@ -42,29 +35,27 @@ type EnableFeatureProps = PropsWithChildren<
 	> & { featureName: string }
 >;
 
-const EnableFeature = compose(
-	withSelect( ( select, { featureName }: EnableFeatureProps ) => {
-		return {
-			isChecked: Boolean(
+function EnableFeature( props: EnableFeatureProps ) {
+	const { featureName, ...remainingProps } = props;
+	const isChecked = useSelect(
+		( select ) =>
+			Boolean(
 				select( preferencesStore ).get( PREFERENCES_NAME, featureName )
 			),
-		};
-	} ),
-	withDispatch(
-		(
-			dispatch,
-			{ featureName, onToggle = () => {} }: EnableFeatureProps
-		) => ( {
-			onChange: () => {
-				onToggle();
-				dispatch( preferencesStore ).toggle(
-					PREFERENCES_NAME,
-					featureName
-				);
-			},
-		} )
-	)
-)( BaseOption ) as FunctionComponent< EnableFeatureProps >;
+		[ featureName ]
+	);
+	const { toggle } = useDispatch( preferencesStore );
+	const onChange = () => {
+		void toggle( PREFERENCES_NAME, featureName );
+	};
+	return (
+		<BaseOption
+			onChange={ onChange }
+			isChecked={ isChecked }
+			{ ...remainingProps }
+		/>
+	);
+}
 
 function BaseSelectOption( {
 	help,
@@ -81,6 +72,7 @@ function BaseSelectOption( {
 > ) {
 	return (
 		<div className="interface-preferences-modal__option interface-preferences-modal__option--select">
+			{ /* @ts-ignore -- TODO: Fix type */ }
 			<SelectControl
 				__nextHasNoMarginBottom
 				help={ help }
@@ -101,26 +93,28 @@ type SelectFeatureProps = PropsWithChildren<
 	> & { featureName: string }
 >;
 
-const SelectFeature = compose(
-	withSelect( ( select, { featureName }: SelectFeatureProps ) => {
-		return {
-			value:
-				select( preferencesStore ).get(
-					PREFERENCES_NAME,
-					featureName
-				) || undefined,
-		};
-	} ),
-	withDispatch( ( dispatch, { featureName }: SelectFeatureProps ) => ( {
-		onChange: ( value: string | number ) => {
-			dispatch( preferencesStore ).set(
+function SelectFeature( props: SelectFeatureProps ) {
+	const { featureName, ...remainingProps } = props;
+	const value = useSelect(
+		( select ) =>
+			( select( preferencesStore ).get(
 				PREFERENCES_NAME,
-				featureName,
-				value
-			);
-		},
-	} ) )
-)( BaseSelectOption ) as FunctionComponent< SelectFeatureProps >;
+				featureName
+			) as string ) || undefined,
+		[ featureName ]
+	);
+	const { set } = useDispatch( preferencesStore );
+	const onChange = () => {
+		void set( PREFERENCES_NAME, featureName, value );
+	};
+	return (
+		<BaseSelectOption
+			onChange={ onChange }
+			value={ value }
+			{ ...remainingProps }
+		/>
+	);
+}
 
 type FeatureNumberControlProps = PropsWithChildren<
 	Omit<
@@ -129,26 +123,28 @@ type FeatureNumberControlProps = PropsWithChildren<
 	> & { featureName: string }
 >;
 
-const FeatureNumberControl = compose(
-	withSelect( ( select, { featureName }: FeatureNumberControlProps ) => {
-		return {
-			value:
-				select( preferencesStore ).get(
-					PREFERENCES_NAME,
-					featureName
-				) || undefined,
-		};
-	} ),
-	withDispatch( ( dispatch, { featureName }: SelectFeatureProps ) => ( {
-		onChange: ( value: string | number ) => {
-			dispatch( preferencesStore ).set(
+function FeatureNumberControl( props: FeatureNumberControlProps ) {
+	const { featureName, ...remainingProps } = props;
+	const value = useSelect(
+		( select ) =>
+			( select( preferencesStore ).get(
 				PREFERENCES_NAME,
-				featureName,
-				value
-			);
-		},
-	} ) )
-)( NumberControl ) as FunctionComponent< FeatureNumberControlProps >;
+				featureName
+			) as string ) || undefined,
+		[ featureName ]
+	);
+	const { set } = useDispatch( preferencesStore );
+	const onChange = () => {
+		void set( PREFERENCES_NAME, featureName, value );
+	};
+	return (
+		<NumberControl
+			onChange={ onChange }
+			value={ value }
+			{ ...remainingProps }
+		/>
+	);
+}
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -337,7 +333,7 @@ function PreferencesMenuItem() {
 			<PluginMoreMenuItem
 				icon={ media }
 				onClick={ () => {
-					openModal( PREFERENCES_NAME );
+					void openModal( PREFERENCES_NAME );
 				} }
 			>
 				{ __( 'Media Preferences', 'media-experiments' ) }

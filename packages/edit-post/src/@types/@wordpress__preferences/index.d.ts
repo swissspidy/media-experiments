@@ -28,7 +28,11 @@ declare module '@wordpress/preferences' {
 				) => Record< string, unknown >;
 			},
 			{
-				get: ( scope: string, name: string ) => boolean;
+				get: (
+					state: Record< string, unknown >,
+					scope: string,
+					name: string
+				) => unknown;
 			}
 		>
 	>;

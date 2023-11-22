@@ -13,6 +13,7 @@
 		"src/crossOriginIsolation/**/*",
 		"src/gifBlock/**/*",
 		"src/mediaRecording/**/*",
+		"src/preferencesModal/**/*",
 		"src/transforms/**/*",
 		"src/uploadQueue/**/*",
 		"src/uploadStatus/**/*",
