@@ -64,8 +64,9 @@ export async function convertImageToAvif( file: File ) {
 		// See https://web.dev/articles/compress-images-avif
 		// and https://github.com/jamsinclair/jSquash/blob/60a959a056d14ac18907fd186c572bf4400ff247/packages/avif/meta.ts#L20-L31
 		const buffer = await encodeAvif( imageData, {
-			cqLevel: 2,
+			cqLevel: 18,
 			tune: 2, // ssim
+			speed: 6,
 		} );
 
 		return blobToFile(
