@@ -18,7 +18,7 @@ export async function convertImageToJpeg( file: File ) {
 
 	try {
 		const img = await preloadImage( url );
-		const imageData = getImageData( img, 100 );
+		const imageData = getImageData( img );
 
 		const fileName = `${ getFileBasename( file.name ) }.jpeg`;
 
@@ -52,7 +52,7 @@ export async function convertImageToAvif( file: File ) {
 
 	try {
 		const img = await preloadImage( url );
-		const imageData = getImageData( img, 100 );
+		const imageData = getImageData( img );
 
 		const fileName = `${ getFileBasename( file.name ) }.jpeg`;
 
