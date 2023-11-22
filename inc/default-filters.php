@@ -27,3 +27,8 @@ add_action( 'rest_after_insert_attachment', __NAMESPACE__ . '\rest_after_insert_
 add_action( 'rest_after_insert_attachment', __NAMESPACE__ . '\rest_after_insert_attachment_handle_pdf_poster', 10, 2 );
 
 add_filter( 'register_post_type_args', __NAMESPACE__ . '\filter_attachment_post_type_args', 10, 2 );
+
+// AVIF support, see https://github.com/swissspidy/media-experiments/issues/6.
+add_filter( 'getimagesize_mimes_to_exts', __NAMESPACE__ . '\filter_mimes_to_exts' );
+add_filter( 'mime_types', __NAMESPACE__ . '\filter_mime_types' );
+add_filter( 'ext2type', __NAMESPACE__ . '\filter_ext_types' );

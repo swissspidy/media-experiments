@@ -17,6 +17,43 @@ use WP_Screen;
 use function register_post_meta;
 
 /**
+ * Filters the list mapping image mime types to their respective extensions.
+ *
+ * @see wp_check_filetype_and_ext()
+ *
+ * @param array $mime_to_ext Array of image mime types and their matching extensions.
+ */
+function filter_mimes_to_exts( array $mime_to_ext ): array {
+	$mime_to_ext['image/avif'] = 'avif';
+	return $mime_to_ext;
+}
+
+/**
+ * Filters the list of mime types and file extensions.
+ *
+ * @see wp_get_mime_types()
+ *
+ * @param string[] $mime_types Mime types keyed by the file extension regex
+ *                             corresponding to those types.
+ */
+function filter_mime_types( array $mime_types ): array {
+	$mime_types['avif'] = 'image/avif';
+	return $mime_types;
+}
+
+/**
+ * Filters file type based on the extension name.
+ *
+ * @see wp_get_ext_types()
+ *
+ * @param array[] $ext2type Multi-dimensional array of file extensions types keyed by the type of file.
+ */
+function filter_ext_types( array $ext2type ): array {
+	$ext2type['image'] = array_unique( [ ...$ext2type['image'], 'avif' ] );
+	return $ext2type;
+}
+
+/**
  * Sets up cross-origin isolation in the block editor.
  *
  * @param WP_Screen $screen Current WP_Screen object.
