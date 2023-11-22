@@ -14,7 +14,7 @@ index dcbc218..8fb99a0 100644
  
  /**
 diff --git a/node_modules/@types/wordpress__blocks/index.d.ts b/node_modules/@types/wordpress__blocks/index.d.ts
-index bb95b44..47f31ba 100644
+index c5771ce..5731cdb 100644
 --- a/node_modules/@types/wordpress__blocks/index.d.ts
 +++ b/node_modules/@types/wordpress__blocks/index.d.ts
 @@ -1,4 +1,3 @@
