@@ -4,6 +4,13 @@ export type { WP_REST_API_Term };
 
 export type QueueItemId = string;
 
+// Keep in sync with PHP.
+export type MediaSourceTerm =
+	| 'media-optimization'
+	| 'poster-generation'
+	| 'media-import'
+	| 'gif-conversion';
+
 export type QueueItem = {
 	id: QueueItemId;
 	sourceFile: File;
@@ -20,7 +27,7 @@ export type QueueItem = {
 	batchId?: string;
 	sourceUrl?: string;
 	sourceAttachmentId?: number; // TODO: implement.
-	mediaSourceTerms?: string[];
+	mediaSourceTerms?: MediaSourceTerm[];
 	blurHash?: string;
 	dominantColor?: string;
 	generatedPosterId?: number;
@@ -31,7 +38,7 @@ export type QueueItem = {
 
 export interface State {
 	queue: QueueItem[];
-	mediaSourceTerms: Record< string, number >;
+	mediaSourceTerms: Partial< Record< MediaSourceTerm, number > >;
 	imageSizes: Record< string, ImageSizeCrop >;
 }
 
@@ -101,7 +108,7 @@ export type AddPosterAction = Action<
 >;
 export type SetMediaSourceTermsAction = Action<
 	Type.SetMediaSourceTerms,
-	{ terms: Record< string, number > }
+	{ terms: Record< MediaSourceTerm, number > }
 >;
 export type SetImageSizesAction = Action<
 	Type.SetImageSizes,

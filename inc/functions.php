@@ -387,6 +387,7 @@ function register_media_source_taxonomy(): void {
 	wp_insert_term( 'poster-generation', 'mexp_media_source' );
 	wp_insert_term( 'gif-conversion', 'mexp_media_source' );
 	wp_insert_term( 'media-import', 'mexp_media_source' );
+	wp_insert_term( 'media-optimization', 'mexp_media_source' );
 }
 
 /**

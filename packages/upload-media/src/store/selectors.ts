@@ -1,4 +1,9 @@
-import { ItemStatus, type QueueItemId, type State } from './types';
+import {
+	ItemStatus,
+	type MediaSourceTerm,
+	type QueueItemId,
+	type State,
+} from './types';
 
 export function getItems( state: State, status?: ItemStatus ) {
 	if ( status ) {
@@ -110,7 +115,7 @@ export function isUploadingById( state: State, id: number ) {
 	);
 }
 
-export function getMediaSourceTermId( state: State, slug: string ) {
+export function getMediaSourceTermId( state: State, slug: MediaSourceTerm ) {
 	return state.mediaSourceTerms[ slug ];
 }
 

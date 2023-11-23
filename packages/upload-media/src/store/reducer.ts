@@ -18,7 +18,9 @@ import {
 	type UnknownAction,
 	type UploadFinishAction,
 	type UploadStartAction,
+	type MediaSourceTerm,
 } from './types';
+import { getMediaTypeFromMimeType } from '@mexp/media-utils/src';
 
 const DEFAULT_STATE: State = {
 	queue: [],
@@ -105,6 +107,15 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 						? item.transcode.slice( 1 )
 						: undefined;
 
+					const mediaType = getMediaTypeFromMimeType(
+						action.file.type
+					);
+					const mediaSourceTerms: MediaSourceTerm[] | undefined =
+						[ 'video', 'image' ].includes( mediaType ) &&
+						! item.mediaSourceTerms
+							? [ 'media-optimization' ]
+							: item.mediaSourceTerms;
+
 					return item.id === action.id
 						? {
 								...item,
@@ -118,6 +129,7 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 									url: action.url,
 									mimeType: action.file.type,
 								},
+								mediaSourceTerms,
 						  }
 						: item;
 				} ),

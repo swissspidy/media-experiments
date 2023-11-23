@@ -45,6 +45,7 @@ import type {
 	UploadStartAction,
 	UploadFinishAction,
 	ImageFormat,
+	MediaSourceTerm,
 } from './types';
 
 import { ItemStatus, Type, TranscodingType } from './types';
@@ -107,7 +108,7 @@ interface AddItemArgs {
 	additionalData?: AdditionalData;
 	sourceUrl?: string;
 	sourceAttachmentId?: number;
-	mediaSourceTerms?: string[];
+	mediaSourceTerms?: MediaSourceTerm[];
 	blurHash?: string;
 	dominantColor?: string;
 	isSideload?: boolean;
@@ -370,7 +371,7 @@ export function optimizeExistingItem( {
 				onError,
 				sourceUrl: url,
 				sourceAttachmentId: id,
-				mediaSourceTerms: [],
+				mediaSourceTerms: [ 'media-optimization' ],
 				blurHash,
 				dominantColor,
 				transcode: [ TranscodingType.OptimizeExisting ],
@@ -1167,7 +1168,7 @@ export function uploadItem( id: QueueItemId ) {
 			...item.additionalData,
 			mexp_media_source: item.mediaSourceTerms
 				?.map( ( slug ) => select.getMediaSourceTermId( slug ) )
-				.filter( Boolean ),
+				.filter( Boolean ) as number[],
 			// generatedPosterId is set when using muteExistingVideo() for example.
 			meta: {
 				mexp_blurhash: item.blurHash,
