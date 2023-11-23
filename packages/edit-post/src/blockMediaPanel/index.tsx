@@ -20,7 +20,7 @@ import { addFilter } from '@wordpress/hooks';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __, sprintf } from '@wordpress/i18n';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import type { Block, BlockEditProps } from '@wordpress/blocks';
+import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
 import { InspectorControls } from '@wordpress/block-editor';
 import {
 	PanelBody,
@@ -126,10 +126,14 @@ function MuteVideo( { attributes, setAttributes }: MuteVideoProps ) {
 		[]
 	);
 
+	if ( ! post || post.meta.mexp_is_muted ) {
+		return null;
+	}
+
 	const onClick = () => {
 		// TODO: Figure out why poster is not
 		void muteExistingVideo( {
-			id: attributes.id,
+			id: post.id,
 			url: attributes.src,
 			poster: attributes.poster,
 			onChange: ( [ media ] ) =>
@@ -150,10 +154,6 @@ function MuteVideo( { attributes, setAttributes }: MuteVideoProps ) {
 		} );
 	};
 
-	if ( ! post || post.meta.mexp_is_muted ) {
-		return null;
-	}
-
 	return (
 		<Button variant="primary" onClick={ onClick } disabled={ isUploading }>
 			{ __( 'Remove audio channel', 'media-experiments' ) }
@@ -161,20 +161,12 @@ function MuteVideo( { attributes, setAttributes }: MuteVideoProps ) {
 	);
 }
 
-interface RecordingControlsProps {
-	name: string;
-	clientId: string;
-	attributes: {
-		url?: string;
-		src?: string;
-	};
-}
+type RecordingControlsProps = MediaPanelProps;
 
 function RecordingControls( { attributes, clientId }: RecordingControlsProps ) {
 	const { baseControlProps, controlProps } = useBaseControlProps( {} );
 
-	// Video and image blocks use different attribute names for the URL.
-	const url = attributes.url || attributes.src;
+	const url = 'url' in attributes ? attributes.url : attributes.src;
 
 	const { enterRecordingMode, leaveRecordingMode } =
 		useDispatch( recordingStore );
@@ -216,20 +208,14 @@ function RecordingControls( { attributes, clientId }: RecordingControlsProps ) {
 	);
 }
 
-interface ImportMediaProps {
-	attributes: {
-		id?: number;
-		url?: string;
-		src?: string;
-	};
+type ImportMediaProps = {
 	onChange: ( attachment: Partial< Attachment > ) => void;
-}
+} & MediaPanelProps;
 
 function ImportMedia( { attributes, onChange }: ImportMediaProps ) {
 	const { baseControlProps, controlProps } = useBaseControlProps( {} );
 
-	// Video and image blocks use different attribute names for the URL.
-	const url = attributes.url || attributes.src;
+	const url = 'url' in attributes ? attributes.url : attributes.src;
 
 	const { addItemFromUrl } = useDispatch( uploadStore );
 	const isUploading = useIsUploadingByUrl( url );
@@ -280,6 +266,7 @@ const numberFormatter = Intl.NumberFormat( 'en', {
 	style: 'unit',
 	unit: 'byte',
 	unitDisplay: 'narrow',
+	// @ts-ignore -- TODO: Update types somehow.
 	roundingPriority: 'lessPrecision',
 	maximumSignificantDigits: 2,
 	maximumFractionDigits: 2,
@@ -292,6 +279,7 @@ const diffFormatter = Intl.NumberFormat( 'en', {
 } );
 
 interface OptimizeMediaProps {
+	name: string;
 	attributes: {
 		id?: number;
 		poster?: string;
@@ -301,7 +289,11 @@ interface OptimizeMediaProps {
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 }
 
-function OptimizeMedia( { attributes, setAttributes }: OptimizeMediaProps ) {
+function OptimizeMedia( {
+	name,
+	attributes,
+	setAttributes,
+}: OptimizeMediaProps ) {
 	const { baseControlProps, controlProps } = useBaseControlProps( {} );
 
 	const [ _, setOpen ] = useState( false );
@@ -333,23 +325,32 @@ function OptimizeMedia( { attributes, setAttributes }: OptimizeMediaProps ) {
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( noticesStore );
 
-	// Video and image blocks use different attribute names for the URL.
-	const url = attributes.url || attributes.src;
+	const url = 'url' in attributes ? attributes.url : attributes.src;
 
+	// TODO: Just bail early if `post` is undefined?
 	if ( ! attributes.id || ! url || isBlobURL( url ) ) {
 		return null;
 	}
 
+	const attachmentId = attributes.id;
+
 	const onClick = () => {
 		void optimizeExistingItem( {
-			id: attributes.id,
+			id: attachmentId,
 			url: post?.source_url || url,
 			poster: attributes.poster,
 			onSuccess: ( [ media ] ) => {
-				setAttributes( {
-					id: media.id,
-					url: media.url,
-				} );
+				if ( 'core/video' === name ) {
+					setAttributes( {
+						id: media.id,
+						src: media.url,
+					} );
+				} else {
+					setAttributes( {
+						id: media.id,
+						url: media.url,
+					} );
+				}
 				void createSuccessNotice(
 					__( 'File successfully optimized.', 'media-experiments' ),
 					{
@@ -383,12 +384,16 @@ function OptimizeMedia( { attributes, setAttributes }: OptimizeMediaProps ) {
 
 	const onApprove = () => {
 		closeModal();
-		void grantApproval( post.id );
+		if ( post ) {
+			void grantApproval( post.id );
+		}
 	};
 
 	const onReject = () => {
 		closeModal();
-		void rejectApproval( post.id );
+		if ( post ) {
+			void rejectApproval( post.id );
+		}
 	};
 
 	// TODO: This needs some (async) checks first to see whether optimization is needed.
@@ -624,19 +629,11 @@ function ShowDominantColor( { attributes }: ShowDominantColorProps ) {
 	);
 }
 
-interface VideoControlsProps {
-	name: string;
-	clientId: string;
-	attributes: {
-		id?: number;
-		src: string;
-		poster: string;
-	};
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-}
+type VideoControlsProps = VideoBlock &
+	Pick< BlockEditProps< VideoBlock[ 'attributes' ] >, 'setAttributes' >;
 
 function VideoControls( props: VideoControlsProps ) {
-	function onChange( media ) {
+	function onChange( media: Partial< Attachment > ) {
 		if ( ! media || ! media.url ) {
 			return;
 		}
@@ -644,8 +641,9 @@ function VideoControls( props: VideoControlsProps ) {
 		props.setAttributes( {
 			src: media.url,
 			id: media.id,
-			poster:
-				media.image?.src !== media.icon ? media.image?.src : undefined,
+			poster: media.image?.src,
+			// TODO: What did I mean with `media.icon` here?
+			// poster: media.image?.src !== media.icon ? media.image?.src : undefined,
 			caption: media.caption,
 		} );
 	}
@@ -662,18 +660,11 @@ function VideoControls( props: VideoControlsProps ) {
 	);
 }
 
-interface ImageControlsProps {
-	name: string;
-	clientId: string;
-	attributes: {
-		id?: number;
-		url?: string;
-	};
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-}
+type ImageControlsProps = ImageBlock &
+	Pick< BlockEditProps< ImageBlock[ 'attributes' ] >, 'setAttributes' >;
 
 function ImageControls( props: ImageControlsProps ) {
-	function onChange( media ) {
+	function onChange( media: Partial< Attachment > ) {
 		if ( ! media || ! media.url ) {
 			return;
 		}
@@ -695,19 +686,11 @@ function ImageControls( props: ImageControlsProps ) {
 	);
 }
 
-interface AudioControlsProps {
-	name: string;
-	clientId: string;
-	attributes: {
-		id?: number;
-		src: string;
-		poster: string;
-	};
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-}
+type AudioControlsProps = AudioBlock &
+	Pick< BlockEditProps< AudioBlock[ 'attributes' ] >, 'setAttributes' >;
 
 function AudioControls( props: AudioControlsProps ) {
-	function onChange( media ) {
+	function onChange( media: Partial< Attachment > ) {
 		if ( ! media || ! media.url ) {
 			return;
 		}
@@ -726,12 +709,7 @@ function AudioControls( props: AudioControlsProps ) {
 	);
 }
 
-interface BlockControlsProps {
-	name: string;
-	clientId: string;
-	attributes: Record< string, unknown >;
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-}
+type BlockControlsProps = MediaPanelProps;
 
 function BlockControls( props: BlockControlsProps ) {
 	switch ( props.name ) {
@@ -760,52 +738,40 @@ function BlockControls( props: BlockControlsProps ) {
 	}
 }
 
-type ImageBlock = Block< {
+type ImageBlock = BlockInstance< {
 	id: number;
 	url: string;
-} >;
+} > & { name: 'core/image' };
 
-type AudioBlock = Block< {
+type AudioBlock = BlockInstance< {
 	id: number;
 	url: string;
-} >;
+} > & { name: 'core/audio' };
 
-type VideoBlock = Block< {
+type VideoBlock = BlockInstance< {
 	id: number;
 	src: string;
 	poster: string;
 	muted: boolean;
-} >;
+	caption: string;
+} > & { name: 'core/video' };
 
-type MediaPanelProps = {
-	name: Block[ 'name' ];
-} & BlockEditProps<
-	| ImageBlock[ 'attributes' ]
-	| VideoBlock[ 'attributes' ]
-	| AudioBlock[ 'attributes' ]
->;
+type MediaPanelProps = ( ImageBlock | VideoBlock | AudioBlock ) &
+	Pick< BlockEditProps< VideoBlock[ 'attributes' ] >, 'setAttributes' >;
 
-function MediaPanel( {
-	name,
-	clientId,
-	attributes,
-	setAttributes,
-}: MediaPanelProps ) {
+function MediaPanel( props: MediaPanelProps ) {
+	const { attributes } = props;
+
 	const attachment: Partial< Attachment > = {
 		id: attributes.id,
-		url: attributes.src || attributes.url,
-		poster: attributes.poster,
+		url: 'url' in attributes ? attributes.url : attributes.src,
+		poster: 'poster' in attributes ? attributes.poster : undefined,
 	};
 
 	return (
 		<Fragment>
 			<UploadIndicator attachment={ attachment } />
-			<BlockControls
-				name={ name }
-				clientId={ clientId }
-				attributes={ attributes }
-				setAttributes={ setAttributes }
-			/>
+			<BlockControls { ...props } />
 		</Fragment>
 	);
 }

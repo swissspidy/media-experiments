@@ -10,6 +10,19 @@ index a5eec2e..5bd0b70 100644
  export { default as TextControl } from "./text-control";
  export { default as TextareaControl } from "./textarea-control";
  export { default as Tip } from "./tip";
+diff --git a/node_modules/@types/wordpress__components/panel/body.d.ts b/node_modules/@types/wordpress__components/panel/body.d.ts
+index 38cb6b6..cf31846 100644
+--- a/node_modules/@types/wordpress__components/panel/body.d.ts
++++ b/node_modules/@types/wordpress__components/panel/body.d.ts
+@@ -24,7 +24,7 @@ declare namespace PanelBody {
+         /**
+          * An icon to be shown next to the `PanelBody` title.
+          */
+-        icon?: Icon.IconType<{}> | undefined;
++        icon?: string | Icon.IconType<{}> | undefined;
+         /**
+          * A function that is called when the user clicks on the `PanelBody`
+          * title after the open state is changed.
 diff --git a/node_modules/@types/wordpress__components/text/index.d.ts b/node_modules/@types/wordpress__components/text/index.d.ts
 new file mode 100644
 index 0000000..de34aed
