@@ -1,3 +1,5 @@
+import { getMediaTypeFromMimeType } from '@mexp/media-utils';
+
 import {
 	type AddAction,
 	type AddPosterAction,
@@ -20,7 +22,6 @@ import {
 	type UploadStartAction,
 	type MediaSourceTerm,
 } from './types';
-import { getMediaTypeFromMimeType } from '@mexp/media-utils/src';
 
 const DEFAULT_STATE: State = {
 	queue: [],
