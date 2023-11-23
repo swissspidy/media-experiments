@@ -327,17 +327,14 @@ function OptimizeMedia( {
 
 	const url = 'url' in attributes ? attributes.url : attributes.src;
 
-	// TODO: Just bail early if `post` is undefined?
-	if ( ! attributes.id || ! url || isBlobURL( url ) ) {
+	if ( ! post || ! url || isBlobURL( url ) ) {
 		return null;
 	}
 
-	const attachmentId = attributes.id;
-
 	const onClick = () => {
 		void optimizeExistingItem( {
-			id: attachmentId,
-			url: post?.source_url || url,
+			id: post.id,
+			url: post.source_url || url,
 			poster: attributes.poster,
 			onSuccess: ( [ media ] ) => {
 				if ( 'core/video' === name ) {
@@ -373,9 +370,9 @@ function OptimizeMedia( {
 					}
 				);
 			},
-			blurHash: post?.meta.mexp_blurhash,
-			dominantColor: post?.meta.mexp_dominant_color,
-			generatedPosterId: post?.meta.mexp_generated_poster_id,
+			blurHash: post.meta.mexp_blurhash,
+			dominantColor: post.meta.mexp_dominant_color,
+			generatedPosterId: post.meta.mexp_generated_poster_id,
 			additionalData: {
 				post: currentPostId,
 			},
@@ -384,16 +381,12 @@ function OptimizeMedia( {
 
 	const onApprove = () => {
 		closeModal();
-		if ( post ) {
-			void grantApproval( post.id );
-		}
+		void grantApproval( post.id );
 	};
 
 	const onReject = () => {
 		closeModal();
-		if ( post ) {
-			void rejectApproval( post.id );
-		}
+		void rejectApproval( post.id );
 	};
 
 	// TODO: This needs some (async) checks first to see whether optimization is needed.
