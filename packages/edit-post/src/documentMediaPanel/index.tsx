@@ -136,7 +136,7 @@ function Row( props: AttachmentData ) {
 			<Button
 				icon={ <CompressIcon width={ 32 } height={ 32 } /> }
 				className="mexp-document-panel-row__button"
-				label={ __( 'Compress', 'media-experiments' ) }
+				label={ __( 'Optimize', 'media-experiments' ) }
 				onClick={ onClick }
 			></Button>
 		</PanelRow>
@@ -155,7 +155,7 @@ function CompressAll( props: { attachments: AttachmentData[] } ) {
 
 	return (
 		<Button variant="primary" onClick={ onClick }>
-			{ __( 'Compress all', 'media-experiments' ) }
+			{ __( 'Optimize all', 'media-experiments' ) }
 		</Button>
 	);
 }
