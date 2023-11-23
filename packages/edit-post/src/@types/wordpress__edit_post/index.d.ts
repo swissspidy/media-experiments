@@ -36,4 +36,14 @@ declare module '@wordpress/edit-post' {
 	}
 
 	const PluginMoreMenuItem: ComponentType< PluginMoreMenuItemProps >;
+
+	interface PluginDocumentSettingPanelProps {
+		children?: ReactNode;
+		name: string;
+		className?: string;
+		title?: string;
+		icon?: string | JSX.Element | undefined;
+	}
+
+	const PluginDocumentSettingPanel: ComponentType< PluginDocumentSettingPanelProps >;
 }

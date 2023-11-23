@@ -11,6 +11,7 @@
 	"include": [
 		"src/@types/**/*",
 		"src/crossOriginIsolation/**/*",
+		"src/documentMediaPanel/**/*",
 		"src/gifBlock/**/*",
 		"src/mediaRecording/**/*",
 		"src/preferencesModal/**/*",

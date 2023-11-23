@@ -192,6 +192,7 @@ function get_all_image_sizes(): array {
  *
  * @uses rest_create_attachment_handle_featured_media
  * @uses rest_get_attachment_filename
+ * @uses rest_get_attachment_filesize
  */
 function register_rest_attachment_featured_media(): void {
 	register_rest_field(
@@ -219,6 +220,19 @@ function register_rest_attachment_featured_media(): void {
 			'get_callback' => __NAMESPACE__ . '\rest_get_attachment_filename',
 		]
 	);
+
+	register_rest_field(
+		'attachment',
+		'mexp_filesize',
+		[
+			'schema'       => [
+				'description' => __( 'Attachment file size', 'media-experiments' ),
+				'type'        => 'number',
+				'context'     => [ 'edit' ],
+			],
+			'get_callback' => __NAMESPACE__ . '\rest_get_attachment_filesize',
+		]
+	);
 }
 
 /**
@@ -235,6 +249,25 @@ function rest_get_attachment_filename( array $post ): ?string {
 	}
 
 	return basename( $path );
+}
+
+/**
+ * Returns the attachment's file size in bytes.
+ *
+ * @param array $post Post data.
+ * @return int|null Attachment file size.
+ */
+function rest_get_attachment_filesize( array $post ): ?int {
+	$original_path = wp_get_original_image_path( $post['id'] );
+	$attached_file = $original_path ?: get_attached_file( $post['id'] );
+
+	if ( isset( $meta['filesize'] ) ) {
+		return $meta['filesize'];
+	} elseif ( file_exists( $attached_file ) ) {
+		return wp_filesize( $attached_file );
+	}
+
+	return null;
 }
 
 /**

@@ -51,10 +51,10 @@ index 0000000..75178b6
 +}
 +export type PostType<C extends Context = 'edit'> = OmitNevers<_BaseEntityRecords.PostType<C>>;
 diff --git a/node_modules/@wordpress/core-data/build-types/index.d.ts b/node_modules/@wordpress/core-data/build-types/index.d.ts
-index af3c259..77e2249 100644
+index af3c259..3806146 100644
 --- a/node_modules/@wordpress/core-data/build-types/index.d.ts
 +++ b/node_modules/@wordpress/core-data/build-types/index.d.ts
-@@ -62,6 +62,7 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
+@@ -62,9 +62,13 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
          dispatch: any;
      }) => Promise<any>;
  }, {
@@ -62,6 +62,12 @@ index af3c259..77e2249 100644
      getAuthors(state: selectors.State, query?: {
          [x: string]: any;
      } | undefined): import("./entity-types").User[];
++	getMedia<U,V,W>(state: selectors.State, id: number, query?: {
++		[x: string]: any;
++	}): import("./entity-types").Attachment;
+     getCurrentUser(state: selectors.State): import("./entity-types").User<"edit">;
+     getEntitiesByKind(state: selectors.State, kind: string): any[];
+     getEntitiesConfig(state: selectors.State, kind: string): any[];
 diff --git a/node_modules/@wordpress/core-data/src/entity-types/index.ts b/node_modules/@wordpress/core-data/src/entity-types/index.ts
 index 19d10a2..01fdbd3 100644
 --- a/node_modules/@wordpress/core-data/src/entity-types/index.ts

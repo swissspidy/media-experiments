@@ -126,6 +126,7 @@ export type Attachment = {
 	};
 	missingImageSizes?: string[];
 	fileName?: string;
+	fileSize?: number;
 };
 
 export type OnChangeHandler = ( attachments: Partial< Attachment >[] ) => void;
@@ -157,7 +158,8 @@ export enum TranscodingType {
 
 export interface RestAttachment extends WP_REST_API_Attachment {
 	featured_media: number;
-	mexp_filename: string;
+	mexp_filename: string | null;
+	mexp_filesize: number | null;
 	mexp_media_source: number[];
 	meta: {
 		mexp_blurhash?: string;

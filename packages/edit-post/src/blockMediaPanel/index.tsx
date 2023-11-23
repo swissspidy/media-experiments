@@ -772,7 +772,7 @@ type AudioBlock = Block< {
 
 type VideoBlock = Block< {
 	id: number;
-	source: string;
+	src: string;
 	poster: string;
 	muted: boolean;
 } >;
