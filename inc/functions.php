@@ -258,12 +258,26 @@ function rest_get_attachment_filename( array $post ): ?string {
  * @return int|null Attachment file size.
  */
 function rest_get_attachment_filesize( array $post ): ?int {
-	$original_path = wp_get_original_image_path( $post['id'] );
-	$attached_file = $original_path ? $original_path : get_attached_file( $post['id'] );
+	return get_attachment_filesize( $post['id'] );
+}
+
+/**
+ * Returns the attachment's file size in bytes.
+ *
+ * @param int $attachment_id Attachment ID.
+ * @return int|null Attachment file size.
+ */
+function get_attachment_filesize( int $attachment_id ): ?int {
+	$meta = wp_get_attachment_metadata( $attachment_id );
 
 	if ( isset( $meta['filesize'] ) ) {
 		return $meta['filesize'];
-	} elseif ( file_exists( $attached_file ) ) {
+	}
+
+	$original_path = wp_get_original_image_path( $attachment_id );
+	$attached_file = $original_path ? $original_path : get_attached_file( $attachment_id );
+
+	if ( file_exists( $attached_file ) ) {
 		return wp_filesize( $attached_file );
 	}
 
@@ -360,6 +374,32 @@ function register_attachment_post_meta(): void {
 			'single'            => true,
 			'default'           => false,
 			'sanitize_callback' => 'rest_sanitize_boolean',
+		]
+	);
+
+	register_post_meta(
+		'attachment',
+		'mexp_optimized_id',
+		[
+			'type'              => 'integer',
+			'description'       => __( 'The ID of the optimized version for the object.', 'media-experiments' ),
+			'show_in_rest'      => true,
+			'single'            => true,
+			'default'           => 0,
+			'sanitize_callback' => 'absint',
+		]
+	);
+
+	register_post_meta(
+		'attachment',
+		'mexp_original_id',
+		[
+			'type'              => 'integer',
+			'description'       => __( 'The ID of the original version for the object.', 'media-experiments' ),
+			'show_in_rest'      => true,
+			'single'            => true,
+			'default'           => 0,
+			'sanitize_callback' => 'absint',
 		]
 	);
 }
@@ -625,4 +665,25 @@ function filter_attachment_post_type_args( array $args, string $post_type ) {
 	}
 
 	return $args;
+}
+
+/**
+ * Filters the attachment data prepared for JavaScript.
+ *
+ * @param array $response Array of prepared attachment data. See {@see wp_prepare_attachment_for_js()}.
+ * @return array Filtered attachment data.
+ */
+function filter_wp_prepare_attachment_for_js( array $response ): array {
+	/**
+	 * Post ID.
+	 *
+	 * @var int $id
+	 */
+	$id = $response['id'];
+
+	$terms = get_the_terms( $id, 'mexp_media_source' );
+
+	$response['mexp_media_source'] = is_array( $terms ) ? wp_list_pluck( $terms, 'term_id' ) : [];
+
+	return $response;
 }

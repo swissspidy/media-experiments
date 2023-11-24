@@ -410,7 +410,16 @@ export function optimizeExistingItem( {
 				},
 				additionalData,
 				onChange,
-				onSuccess,
+				onSuccess: async ( [ attachment ] ) => {
+					onSuccess?.( [ attachment ] );
+					// Update the original attachment in the DB to have
+					// a reference to the optimized version.
+					void updateMediaItem( id, {
+						meta: {
+							mexp_optimized_id: attachment.id,
+						},
+					} );
+				},
 				onBatchSuccess,
 				onError,
 				sourceUrl: url,
@@ -1221,6 +1230,7 @@ export function uploadItem( id: QueueItemId ) {
 				mexp_blurhash: item.blurHash,
 				mexp_dominant_color: item.dominantColor,
 				mexp_generated_poster_id: item.generatedPosterId,
+				mexp_original_id: item.sourceAttachmentId,
 				mexp_is_muted: false,
 			},
 			featured_media: item.generatedPosterId,
