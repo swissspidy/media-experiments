@@ -252,6 +252,7 @@ interface AddSideloadItemArgs {
 	additionalData?: AdditionalData;
 	resize?: ImageSizeCrop;
 	transcode?: TranscodingType[];
+	batchId?: BatchId;
 }
 
 export function addSideloadItem( {
@@ -259,12 +260,14 @@ export function addSideloadItem( {
 	additionalData,
 	resize,
 	transcode,
+	batchId,
 }: AddSideloadItemArgs ) {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
 		dispatch< AddAction >( {
 			type: Type.Add,
 			item: {
 				id: uuidv4(),
+				batchId,
 				status: ItemStatus.Pending,
 				sourceFile: new File( [ file ], file.name, {
 					type: file.type,
@@ -630,12 +633,13 @@ export function finishUploading( id: QueueItemId, attachment: Attachment ) {
 							type: item.sourceFile.type,
 					  } )
 					: item.sourceFile;
-				// TODO: Should side-loaded items all have the same batchId so you know when the batch has finished?
+				const batchId = uuidv4();
 				for ( const name of attachment.missingImageSizes ) {
 					const imageSize = select.getImageSize( name );
 					if ( imageSize ) {
 						dispatch.addSideloadItem( {
 							file,
+							batchId,
 							additionalData: {
 								// Sideloading does not use the parent post ID but the
 								// attachment ID as the image sizes need to be added to it.
@@ -1284,7 +1288,6 @@ export function uploadItem( id: QueueItemId ) {
 		}
 
 		try {
-			// TODO: Save `missing_image_sizes` information for later.
 			const attachment = await uploadToServer(
 				item.file,
 				additionalData

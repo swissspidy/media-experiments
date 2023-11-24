@@ -125,7 +125,6 @@ export function getMediaStream() {
 				);
 
 				const selfieSegmentation = new SelfieSegmentation( {
-					// TODO: Consider fetching from wp.stories.google instead.
 					locateFile: ( file ) =>
 						`https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${ file }`,
 				} );
