@@ -176,7 +176,7 @@ function RecordingControls( { attributes, clientId }: RecordingControlsProps ) {
 			</p>
 			<Button variant="primary" onClick={ onClick } { ...controlProps }>
 				{ isInRecordingMode
-					? __( 'Stop', 'media-experiments' )
+					? __( 'Exit', 'media-experiments' )
 					: __( 'Start', 'media-experiments' ) }
 			</Button>
 		</BaseControl>

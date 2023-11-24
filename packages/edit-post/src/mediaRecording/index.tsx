@@ -15,6 +15,9 @@ import AudioAnalyzer from './audioAnalyzer';
 import { ReactComponent as BlurOn } from './icons/blurOn.svg';
 import { ReactComponent as BlurOff } from './icons/blurOff.svg';
 
+import './blocks.css';
+import { formatMsToHMS } from './utils';
+
 const SUPPORTED_BLOCKS = [ 'core/image', 'core/audio', 'core/video' ];
 
 function InputControls() {
@@ -160,13 +163,13 @@ function Countdown() {
 	);
 
 	if ( isCounting ) {
-		return <Fragment>{ `Countdown: ${ countdown }` }</Fragment>;
+		return <div className="mexp-recording__countdown">{ countdown }</div>;
 	}
 
 	return null;
 }
 
-function Duration() {
+function OverlayText() {
 	const { duration, isRecording } = useSelect(
 		( select ) => ( {
 			duration: select( recordingStore ).getDuration(),
@@ -178,7 +181,14 @@ function Duration() {
 	);
 
 	if ( isRecording && duration >= 0 ) {
-		return <Fragment>{ `Duration: ${ duration }` }</Fragment>;
+		return (
+			<>
+				<div className="mexp-recording__duration">
+					{ formatMsToHMS( duration ) }
+				</div>
+				<div className="mexp-recording__rec">{ 'REC' }</div>
+			</>
+		);
 	}
 
 	return null;
@@ -277,9 +287,9 @@ function Recorder() {
 
 	if ( liveStream ) {
 		return (
-			<Fragment>
+			<div className="mexp-recording__wrapper">
 				<Countdown />
-				<Duration />
+				<OverlayText />
 				{ 'audio' === recordingType ? (
 					<AudioAnalyzer source={ liveStream } />
 				) : (
@@ -290,17 +300,17 @@ function Recorder() {
 						muted
 					/>
 				) }
-			</Fragment>
+			</div>
 		);
 	}
 
 	// TODO: Maybe show fallback loading state or something.
 	return (
-		<Fragment>
+		<div className="mexp-recording__wrapper">
 			<Countdown />
-			<Duration />
-			{ 'Loading...' }
-		</Fragment>
+			<OverlayText />
+			{ __( 'Loading…', 'media-experiments' ) }
+		</div>
 	);
 }
 

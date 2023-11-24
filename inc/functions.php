@@ -137,13 +137,39 @@ function enqueue_block_editor_assets(): void {
 	);
 
 	wp_enqueue_style(
-		'media-experiments',
-		plugins_url( 'build/media-experiments.css', __DIR__ ),
+		'media-experiments-editor',
+		plugins_url( 'build/media-experiments-editor.css', __DIR__ ),
 		array( 'wp-components' ),
 		$asset['version']
 	);
 
-	wp_style_add_data( 'media-experiments', 'rtl', 'replace' );
+	wp_style_add_data( 'media-experiments-editor', 'rtl', 'replace' );
+}
+
+/**
+ * Enqueues scripts for the block editor, iframed.
+ *
+ * @return void
+ */
+function enqueue_block_assets() {
+	if ( ! is_admin() ) {
+		return;
+	}
+
+	$asset_file = dirname( __DIR__ ) . '/build/media-experiments.asset.php';
+	$asset      = is_readable( $asset_file ) ? require $asset_file : [];
+
+	$asset['dependencies'] = $asset['dependencies'] ?? [];
+	$asset['version']      = $asset['version'] ?? '';
+
+	wp_enqueue_style(
+		'media-experiments-blocks',
+		plugins_url( 'build/media-experiments-blocks.css', __DIR__ ),
+		array(),
+		$asset['version']
+	);
+
+	wp_style_add_data( 'media-experiments-blocks', 'rtl', 'replace' );
 }
 
 /**
