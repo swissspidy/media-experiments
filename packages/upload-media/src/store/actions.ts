@@ -531,10 +531,7 @@ export function prepareItem( id: QueueItemId ) {
 				// No need to compress a video that's already quite small.
 
 				if ( canTranscode ) {
-					dispatch.prepareForTranscoding(
-						id,
-						TranscodingType.Default
-					);
+					dispatch.prepareForTranscoding( id, TranscodingType.Video );
 					return;
 				}
 

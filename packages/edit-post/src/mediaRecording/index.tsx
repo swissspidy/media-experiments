@@ -445,10 +445,10 @@ function RecordingBlockControls( {
 							onClick={ () => {
 								// Upload the file and leave recording mode.
 
-								// TODO: Implement
-								// Either the block itself implements the uploading part
-								// and we just use setAttributes, or we have to
-								// use mediaUpload ourselves and do it manually.
+								// TODO: Revisit implementation.
+
+								// Right now, the video block itself already handles uploading
+								// when it sees a blob URL, so just calling `setAttributes` is enough.
 								// TODO: How to set media source 'media-recording'? Or not needed?
 								switch ( recordingType ) {
 									case 'audio':
