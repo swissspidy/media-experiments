@@ -259,7 +259,7 @@ function rest_get_attachment_filename( array $post ): ?string {
  */
 function rest_get_attachment_filesize( array $post ): ?int {
 	$original_path = wp_get_original_image_path( $post['id'] );
-	$attached_file = $original_path ?: get_attached_file( $post['id'] );
+	$attached_file = $original_path ? $original_path : get_attached_file( $post['id'] );
 
 	if ( isset( $meta['filesize'] ) ) {
 		return $meta['filesize'];
