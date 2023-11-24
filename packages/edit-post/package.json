@@ -57,6 +57,7 @@
 		"@wordpress/preferences": "^3.10.0",
 		"image-capture": "^0.4.0",
 		"react-blurhash": "^0.3.0",
-		"react-compare-slider": "^3.0.1"
+		"react-compare-slider": "^3.0.1",
+		"uuid": "^9.0.0"
 	}
 }

@@ -1,21 +1,6 @@
 import { Blurhash } from 'react-blurhash';
-import {
-	ReactCompareSlider,
-	ReactCompareSliderImage,
-} from 'react-compare-slider';
 
-import {
-	store as uploadStore,
-	type Attachment,
-	type RestAttachment,
-} from '@mexp/upload-media';
-
-import {
-	Fragment,
-	useState,
-	useEffect,
-	createInterpolateElement,
-} from '@wordpress/element';
+import { Fragment, useState, useEffect } from '@wordpress/element';
 import { addFilter } from '@wordpress/hooks';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __, sprintf } from '@wordpress/i18n';
@@ -29,30 +14,20 @@ import {
 	BaseControl,
 	useBaseControlProps,
 	ColorIndicator,
-	Modal,
 } from '@wordpress/components';
 import { isBlobURL } from '@wordpress/blob';
-import { useEntityRecord } from '@wordpress/core-data';
 import { store as editorStore } from '@wordpress/editor';
 import { store as noticesStore } from '@wordpress/notices';
 
+import { store as uploadStore, type Attachment } from '@mexp/upload-media';
+
 import { store as recordingStore } from '../mediaRecording/store';
+import { useAttachment, useIsUploadingById } from '../utils/hooks';
+
 import './styles.css';
+import { ApprovalDialog } from '../components/approvalDialog';
 
 const SUPPORTED_BLOCKS = [ 'core/image', 'core/audio', 'core/video' ];
-
-function useAttachment( id?: number ) {
-	const { record } = useEntityRecord( 'postType', 'attachment', id || 0 );
-	return record as RestAttachment | null;
-}
-
-function useIsUploadingById( id?: number ) {
-	return useSelect(
-		( select ) =>
-			id ? select( uploadStore ).isUploadingById( id ) : false,
-		[ id ]
-	);
-}
 
 function useIsUploadingByUrl( url?: string ) {
 	return useSelect(
@@ -261,23 +236,6 @@ function ImportMedia( { attributes, onChange }: ImportMediaProps ) {
 	);
 }
 
-const numberFormatter = Intl.NumberFormat( 'en', {
-	notation: 'compact',
-	style: 'unit',
-	unit: 'byte',
-	unitDisplay: 'narrow',
-	// @ts-ignore -- TODO: Update types somehow.
-	roundingPriority: 'lessPrecision',
-	maximumSignificantDigits: 2,
-	maximumFractionDigits: 2,
-} );
-
-const diffFormatter = Intl.NumberFormat( 'en', {
-	notation: 'compact',
-	style: 'percent',
-	maximumFractionDigits: 2,
-} );
-
 interface OptimizeMediaProps {
 	name: string;
 	attributes: {
@@ -296,38 +254,24 @@ function OptimizeMedia( {
 }: OptimizeMediaProps ) {
 	const { baseControlProps, controlProps } = useBaseControlProps( {} );
 
-	const [ _, setOpen ] = useState( false );
-	const closeModal = () => setOpen( false );
-
 	const post = useAttachment( attributes.id );
-	const { optimizeExistingItem, rejectApproval, grantApproval } =
-		useDispatch( uploadStore );
+	const { optimizeExistingItem } = useDispatch( uploadStore );
 	const isUploading = useIsUploadingById( attributes.id );
 	const currentPostId = useSelect(
 		( select ) => select( editorStore ).getCurrentPostId(),
 		[]
-	);
-	const { isPendingApproval, comparison } = useSelect(
-		( select ) => ( {
-			isPendingApproval: attributes.id
-				? select( uploadStore ).isPendingApprovalByAttachmentId(
-						attributes.id
-				  )
-				: false,
-			comparison: attributes.id
-				? select( uploadStore ).getComparisonDataForApproval(
-						attributes.id
-				  )
-				: null,
-		} ),
-		[ attributes.id ]
 	);
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( noticesStore );
 
 	const url = 'url' in attributes ? attributes.url : attributes.src;
 
-	if ( ! post || ! url || isBlobURL( url ) ) {
+	if (
+		! post ||
+		! url ||
+		isBlobURL( url ) ||
+		post.mexp_media_source.length > 0
+	) {
 		return null;
 	}
 
@@ -379,16 +323,6 @@ function OptimizeMedia( {
 		} );
 	};
 
-	const onApprove = () => {
-		closeModal();
-		void grantApproval( post.id );
-	};
-
-	const onReject = () => {
-		closeModal();
-		void rejectApproval( post.id );
-	};
-
 	// TODO: This needs some (async) checks first to see whether optimization is needed.
 
 	return (
@@ -412,90 +346,7 @@ function OptimizeMedia( {
 					{ __( 'Optimize', 'media-experiments' ) }
 				</Button>
 			</BaseControl>
-			{ isPendingApproval && comparison && (
-				<Modal
-					title={ __( 'Compare media quality', 'media-experiments' ) }
-					onRequestClose={ onReject }
-				>
-					<div className="mexp-comparison-modal__labels">
-						<p>
-							{ sprintf(
-								/* translators: %s: file size. */
-								__( 'Old version: %s', 'media-experiments' ),
-								numberFormatter.format( comparison.oldSize )
-							) }
-						</p>
-						<p>
-							{ sprintf(
-								/* translators: %s: file size. */
-								__( 'New version: %s', 'media-experiments' ),
-								numberFormatter.format( comparison.newSize )
-							) }
-						</p>
-					</div>
-					<p>
-						{ createInterpolateElement(
-							comparison.sizeDiff < 0
-								? sprintf(
-										/* translators: %s: file size decrease in percent. */
-										__(
-											'The new version is <b>%s smaller</b>!',
-											'media-experiments'
-										),
-										diffFormatter.format(
-											comparison.sizeDiff
-										)
-								  )
-								: sprintf(
-										/* translators: %s: file size increase in percent. */
-										__(
-											'The new version is <b>%s bigger</b> :(',
-											'media-experiments'
-										),
-										diffFormatter.format(
-											comparison.sizeDiff
-										)
-								  ),
-							{
-								b: <b />,
-							}
-						) }
-					</p>
-					<div className="mexp-comparison-modal__slider">
-						<ReactCompareSlider
-							itemOne={
-								<ReactCompareSliderImage
-									src={ comparison.oldUrl }
-									alt={ __(
-										'Original version',
-										'media-experiments'
-									) }
-								/>
-							}
-							itemTwo={
-								<ReactCompareSliderImage
-									src={ comparison.newUrl }
-									alt={ __(
-										'Optimized version',
-										'media-experiments'
-									) }
-								/>
-							}
-						/>
-					</div>
-					<div className="mexp-comparison-modal__buttons">
-						<Button variant="primary" onClick={ onApprove }>
-							{ __(
-								'Use optimized version',
-								'media-experiments'
-							) }
-						</Button>
-						<Button variant="secondary" onClick={ onReject }>
-							{ __( 'Cancel', 'media-experiments' ) }
-						</Button>
-					</div>
-				</Modal>
-			) }
+			<ApprovalDialog id={ post.id } />
 		</>
 	);
 }

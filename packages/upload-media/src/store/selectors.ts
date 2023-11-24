@@ -2,6 +2,7 @@ import {
 	ItemStatus,
 	type MediaSourceTerm,
 	type QueueItemId,
+	type BatchId,
 	type State,
 } from './types';
 
@@ -74,6 +75,21 @@ export function isPendingApprovalByAttachmentId( state: State, id: number ) {
 	);
 }
 
+export function isFirstPendingApprovalByAttachmentId(
+	state: State,
+	id: number
+) {
+	const foundItem = state.queue.find(
+		( item ) => item.status === ItemStatus.PendingApproval
+	);
+
+	return (
+		foundItem &&
+		( foundItem.attachment?.id === id ||
+			foundItem.sourceAttachmentId === id )
+	);
+}
+
 export function getComparisonDataForApproval( state: State, id: number ) {
 	const foundItem = state.queue.find(
 		( item ) =>
@@ -92,6 +108,17 @@ export function getComparisonDataForApproval( state: State, id: number ) {
 		newUrl: foundItem.attachment?.url,
 		sizeDiff: foundItem.file.size / foundItem.sourceFile.size - 1,
 	};
+}
+
+export function isBatchUploaded( state: State, batchId: BatchId ) {
+	const batchItems = state.queue.filter(
+		( item ) => batchId === item.batchId
+	);
+	return (
+		batchItems.every( ( { status } ) =>
+			[ ItemStatus.Uploaded, ItemStatus.Cancelled ].includes( status )
+		) && batchItems.length <= 1
+	);
 }
 
 // Todo: change forceIsSaving in GB depending on this selector.

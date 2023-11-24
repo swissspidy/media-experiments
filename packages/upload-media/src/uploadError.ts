@@ -4,7 +4,7 @@ interface UploadErrorArgs {
 	file: File;
 }
 
-class UploadError extends Error {
+export class UploadError extends Error {
 	code: string;
 	file: File;
 
@@ -14,5 +14,3 @@ class UploadError extends Error {
 		this.file = file;
 	}
 }
-
-export default UploadError;

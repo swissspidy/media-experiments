@@ -194,7 +194,7 @@ function get_all_image_sizes(): array {
  * @uses rest_get_attachment_filename
  * @uses rest_get_attachment_filesize
  */
-function register_rest_attachment_featured_media(): void {
+function register_rest_fields(): void {
 	register_rest_field(
 		'attachment',
 		'featured_media',

@@ -14,7 +14,7 @@ use function add_action;
 add_action( 'init', __NAMESPACE__ . '\register_assets' );
 add_action( 'current_screen', __NAMESPACE__ . '\set_up_cross_origin_isolation' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_block_editor_assets' );
-add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_attachment_featured_media' );
+add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_fields' );
 add_action( 'init', __NAMESPACE__ . '\register_attachment_post_meta' );
 add_action( 'init', __NAMESPACE__ . '\register_media_source_taxonomy' );
 

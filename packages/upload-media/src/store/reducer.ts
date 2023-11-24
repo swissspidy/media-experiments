@@ -70,17 +70,26 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 		case Type.TranscodingPrepare:
 			return {
 				...state,
-				queue: state.queue.map( ( item ) =>
-					item.id === action.id
-						? {
-								...item,
-								status: ItemStatus.PendingTranscoding,
-								transcode: item.transcode
-									? [ ...item.transcode, action.transcode ]
-									: [ action.transcode ],
-						  }
-						: item
-				),
+				queue: state.queue.map( ( item ) => {
+					if ( item.id !== action.id ) {
+						return item;
+					}
+
+					if ( ! action.transcode ) {
+						return {
+							...item,
+							status: ItemStatus.PendingTranscoding,
+						};
+					}
+
+					return {
+						...item,
+						status: ItemStatus.PendingTranscoding,
+						transcode: item.transcode
+							? [ ...item.transcode, action.transcode ]
+							: [ action.transcode ],
+					};
+				} ),
 			};
 
 		case Type.TranscodingStart:
@@ -106,7 +115,7 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 
 					const transcode = item.transcode
 						? item.transcode.slice( 1 )
-						: undefined;
+						: [];
 
 					const mediaType = getMediaTypeFromMimeType(
 						action.file.type
@@ -117,22 +126,21 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 							? [ 'media-optimization' ]
 							: item.mediaSourceTerms;
 
-					return item.id === action.id
-						? {
-								...item,
-								status: transcode
-									? ItemStatus.PendingTranscoding
-									: ItemStatus.Transcoded,
-								transcode,
-								file: action.file,
-								attachment: {
-									...item.attachment,
-									url: action.url,
-									mimeType: action.file.type,
-								},
-								mediaSourceTerms,
-						  }
-						: item;
+					return {
+						...item,
+						status:
+							transcode.length > 0
+								? ItemStatus.PendingTranscoding
+								: ItemStatus.Transcoded,
+						transcode,
+						file: action.file,
+						attachment: {
+							...item.attachment,
+							url: action.url,
+							mimeType: action.file.type,
+						},
+						mediaSourceTerms,
+					};
 				} ),
 			};
 

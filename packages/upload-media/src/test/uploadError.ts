@@ -1,4 +1,4 @@
-import UploadError from '../uploadError';
+import { UploadError } from '../uploadError';
 
 describe( 'UploadError', () => {
 	it( 'holds error code and file name', () => {

@@ -12,7 +12,7 @@ import type {
 	RestAttachment,
 	WP_REST_API_Term,
 } from './store/types';
-import UploadError from './uploadError';
+import { UploadError } from './uploadError';
 
 export { uploadMedia } from './uploadMedia';
 
@@ -104,10 +104,14 @@ subscribe( () => {
 	const items: QueueItem[] = select( uploadStore ).getUploadedItems();
 
 	for ( const item of items ) {
-		const { id, onChange, onSuccess, attachment } = item;
+		const { id, onChange, onSuccess, onBatchSuccess, attachment, batchId } =
+			item;
 		if ( attachment ) {
 			onChange?.( [ attachment ] );
 			onSuccess?.( [ attachment ] );
+		}
+		if ( batchId && select( uploadStore ).isBatchUploaded( batchId ) ) {
+			onBatchSuccess?.();
 		}
 		void dispatch( uploadStore ).completeItem( id );
 	}

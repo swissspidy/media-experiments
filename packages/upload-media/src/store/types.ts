@@ -4,6 +4,8 @@ export type { WP_REST_API_Term };
 
 export type QueueItemId = string;
 
+export type BatchId = string;
+
 // Keep in sync with PHP.
 export type MediaSourceTerm =
 	| 'media-optimization'
@@ -22,6 +24,7 @@ export type QueueItem = {
 	onChange?: OnChangeHandler;
 	onSuccess?: OnSuccessHandler;
 	onError?: OnErrorHandler;
+	onBatchSuccess?: OnBatchSuccessHandler;
 	transcode?: TranscodingType[];
 	error?: Error;
 	batchId?: string;
@@ -139,6 +142,7 @@ export type Attachment = {
 export type OnChangeHandler = ( attachments: Partial< Attachment >[] ) => void;
 export type OnSuccessHandler = ( attachments: Partial< Attachment >[] ) => void;
 export type OnErrorHandler = ( error: Error ) => void;
+export type OnBatchSuccessHandler = () => void;
 
 export enum ItemStatus {
 	Pending = 'PENDING',
@@ -158,6 +162,7 @@ export enum TranscodingType {
 	Heif = 'HEIF',
 	Gif = 'GIF',
 	Audio = 'AUDIO',
+	Video = 'VIDEO',
 	MuteVideo = 'MUTE_VIDEO',
 	OptimizeExisting = 'OPTIMIZE_EXISTING',
 	Default = 'DEFAULT',

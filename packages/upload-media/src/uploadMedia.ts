@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import { __, sprintf } from '@wordpress/i18n';
 import { dispatch } from '@wordpress/data';
 
@@ -8,7 +7,7 @@ import type {
 	OnChangeHandler,
 	OnErrorHandler,
 } from './store/types';
-import UploadError from './uploadError';
+import { UploadError } from './uploadError';
 import { canTranscodeFile, getMimeTypesArray } from './utils';
 
 const noop = () => {};
@@ -168,14 +167,11 @@ export function uploadMedia( {
 		validFiles.push( mediaFile );
 	}
 
-	const batchId = uuidv4();
-
 	// TODO: why exactly is HEIF slipping through here?
 
-	for ( const file of validFiles ) {
-		void dispatch( uploadStore ).addItem( {
-			file,
-			batchId,
+	if ( validFiles.length > 0 ) {
+		void dispatch( uploadStore ).addItems( {
+			files: validFiles,
 			onChange: onFileChange,
 			onError,
 			additionalData: {

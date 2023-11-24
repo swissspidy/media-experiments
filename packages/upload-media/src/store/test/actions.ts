@@ -10,7 +10,7 @@ import { store as preferencesStore } from '@wordpress/preferences';
  */
 import { store as uploadStore } from '..';
 import { ItemStatus, type QueueItem, TranscodingType, Type } from '../types';
-import UploadError from '../../uploadError';
+import { UploadError } from '../../uploadError';
 
 const mockImageFromPdf = new File( [], 'example.jpg', {
 	lastModified: 1234567891,

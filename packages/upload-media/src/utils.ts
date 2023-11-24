@@ -4,6 +4,8 @@ import {
 	type FastAverageColorResource,
 } from 'fast-average-color';
 
+import { revokeBlobURL } from '@wordpress/blob';
+
 import {
 	blobToFile,
 	getCanvasBlob,
@@ -16,8 +18,7 @@ import {
 	MEDIA_TRANSCODING_MAX_FILE_SIZE,
 	TRANSCODABLE_MIME_TYPES,
 } from './constants';
-import UploadError from './uploadError';
-import { revokeBlobURL } from '@wordpress/blob';
+import { UploadError } from './uploadError';
 
 // TODO: Make work for HEIF, GIF and audio as well.
 export function canTranscodeFile( file: File ) {

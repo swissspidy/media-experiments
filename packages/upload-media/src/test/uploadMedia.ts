@@ -1,15 +1,15 @@
 import { dispatch } from '@wordpress/data';
 
 import { uploadMedia } from '../uploadMedia';
-import UploadError from '../uploadError';
+import { UploadError } from '../uploadError';
 
-const mockAddItem = jest.fn();
+const mockAddItems = jest.fn();
 
 jest.mock( '@mexp/jsquash', () => ( {} ) );
 jest.mock( '@wordpress/data' );
 
 ( dispatch as jest.Mock ).mockImplementation( () => ( {
-	addItem: mockAddItem,
+	addItems: mockAddItems,
 } ) );
 
 jest.mock( '@mexp/pdf', () => ( {
@@ -38,7 +38,7 @@ describe( 'uploadMedia', () => {
 		} );
 
 		expect( onError ).not.toHaveBeenCalled();
-		// expect( mockAddItem ).not.toHaveBeenCalled();
+		// expect( mockAddItems ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should error if allowedTypes contains a partial mime type and the validation fails', async () => {
@@ -59,7 +59,7 @@ describe( 'uploadMedia', () => {
 				file: xmlFile,
 			} )
 		);
-		expect( mockAddItem ).not.toHaveBeenCalled();
+		expect( mockAddItems ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should error if allowedTypes contains a complete mime type and the validation fails', async () => {
@@ -80,7 +80,7 @@ describe( 'uploadMedia', () => {
 				file: xmlFile,
 			} )
 		);
-		expect( mockAddItem ).not.toHaveBeenCalled();
+		expect( mockAddItems ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should work if allowedTypes contains a complete mime type and the validation succeeds', async () => {
@@ -95,7 +95,7 @@ describe( 'uploadMedia', () => {
 		} );
 
 		expect( onError ).not.toHaveBeenCalled();
-		expect( mockAddItem ).toHaveBeenCalled();
+		expect( mockAddItems ).toHaveBeenCalled();
 	} );
 
 	it( 'should error if allowedTypes contains multiple types and the validation fails', async () => {
@@ -116,7 +116,7 @@ describe( 'uploadMedia', () => {
 				file: xmlFile,
 			} )
 		);
-		expect( mockAddItem ).not.toHaveBeenCalled();
+		expect( mockAddItems ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should work if allowedTypes contains multiple types and the validation succeeds', async () => {
@@ -131,7 +131,7 @@ describe( 'uploadMedia', () => {
 		} );
 
 		expect( onError ).not.toHaveBeenCalled();
-		expect( mockAddItem ).toHaveBeenCalled();
+		expect( mockAddItems ).toHaveBeenCalled();
 	} );
 
 	it( 'should only fail the invalid file and still allow others to succeed when uploading multiple files', async () => {
@@ -153,7 +153,7 @@ describe( 'uploadMedia', () => {
 				file: xmlFile,
 			} )
 		);
-		expect( mockAddItem ).toHaveBeenCalledTimes( 1 );
+		expect( mockAddItems ).toHaveBeenCalledTimes( 1 );
 	} );
 
 	it( 'should error if the file size is greater than the maximum', async () => {
@@ -176,7 +176,7 @@ describe( 'uploadMedia', () => {
 				file: imageFile,
 			} )
 		);
-		expect( mockAddItem ).not.toHaveBeenCalled();
+		expect( mockAddItems ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should call error handler with the correct error object if file type is not allowed for user', async () => {
@@ -196,6 +196,6 @@ describe( 'uploadMedia', () => {
 				file: imageFile,
 			} )
 		);
-		expect( mockAddItem ).not.toHaveBeenCalled();
+		expect( mockAddItems ).not.toHaveBeenCalled();
 	} );
 } );

@@ -26,11 +26,15 @@ import type {
 	AddPosterAction,
 	ApproveUploadAction,
 	Attachment,
+	BatchId,
 	CancelAction,
+	ImageFormat,
 	ImageSizeCrop,
+	MediaSourceTerm,
 	OnChangeHandler,
 	OnErrorHandler,
 	OnSuccessHandler,
+	OnBatchSuccessHandler,
 	PrepareAction,
 	QueueItem,
 	QueueItemId,
@@ -42,14 +46,11 @@ import type {
 	TranscodingFinishAction,
 	TranscodingPrepareAction,
 	TranscodingStartAction,
-	UploadStartAction,
 	UploadFinishAction,
-	ImageFormat,
-	MediaSourceTerm,
+	UploadStartAction,
 } from './types';
-
-import { ItemStatus, Type, TranscodingType } from './types';
-import UploadError from '../uploadError';
+import { ItemStatus, TranscodingType, Type } from './types';
+import { UploadError } from '../uploadError';
 import {
 	canTranscodeFile,
 	convertImageFormat,
@@ -73,6 +74,7 @@ type ActionCreators = {
 	convertHeifItem: typeof convertHeifItem;
 	resizeCropItem: typeof resizeCropItem;
 	convertGifItem: typeof convertGifItem;
+	optimizeExistingItem: typeof optimizeExistingItem;
 	optimizeVideoItem: typeof optimizeVideoItem;
 	optimizeAudioItem: typeof optimizeAudioItem;
 	optimizeItemWithApproval: typeof optimizeItemWithApproval;
@@ -101,10 +103,11 @@ type Selectors = {
 
 interface AddItemArgs {
 	file: File;
-	batchId?: string;
+	batchId?: BatchId;
 	onChange?: OnChangeHandler;
 	onSuccess?: OnSuccessHandler;
 	onError?: OnErrorHandler;
+	onBatchSuccess?: OnBatchSuccessHandler;
 	additionalData?: AdditionalData;
 	sourceUrl?: string;
 	sourceAttachmentId?: number;
@@ -120,6 +123,7 @@ export function addItem( {
 	batchId,
 	onChange,
 	onSuccess,
+	onBatchSuccess,
 	onError,
 	additionalData = {},
 	sourceUrl,
@@ -167,6 +171,7 @@ export function addItem( {
 				},
 				onChange,
 				onSuccess,
+				onBatchSuccess,
 				onError,
 				sourceUrl,
 				sourceAttachmentId,
@@ -176,6 +181,39 @@ export function addItem( {
 				resize,
 			},
 		} );
+	};
+}
+
+interface AddItemsArgs {
+	files: File[];
+	onChange?: OnChangeHandler;
+	onSuccess?: OnSuccessHandler;
+	onBatchSuccess?: OnBatchSuccessHandler;
+	onError?: OnErrorHandler;
+	additionalData?: AdditionalData;
+}
+
+export function addItems( {
+	files,
+	onChange,
+	onSuccess,
+	onError,
+	onBatchSuccess,
+	additionalData,
+}: AddItemsArgs ) {
+	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
+		const batchId = uuidv4();
+		for ( const file of files ) {
+			void dispatch.addItem( {
+				file,
+				batchId,
+				onChange,
+				onSuccess,
+				onBatchSuccess,
+				onError,
+				additionalData,
+			} );
+		}
 	};
 }
 
@@ -321,8 +359,10 @@ interface OptimizexistingItemArgs {
 	id: number;
 	url: string;
 	poster?: string;
+	batchId?: BatchId;
 	onChange?: OnChangeHandler;
 	onSuccess?: OnSuccessHandler;
+	onBatchSuccess?: OnBatchSuccessHandler;
 	onError?: OnErrorHandler;
 	additionalData?: AdditionalData;
 	blurHash?: string;
@@ -334,8 +374,10 @@ export function optimizeExistingItem( {
 	id,
 	url,
 	poster,
+	batchId,
 	onChange,
 	onSuccess,
+	onBatchSuccess,
 	onError,
 	additionalData = {},
 	blurHash,
@@ -358,6 +400,7 @@ export function optimizeExistingItem( {
 			type: Type.Add,
 			item: {
 				id: uuidv4(),
+				batchId,
 				status: ItemStatus.Pending,
 				sourceFile,
 				file,
@@ -368,6 +411,7 @@ export function optimizeExistingItem( {
 				additionalData,
 				onChange,
 				onSuccess,
+				onBatchSuccess,
 				onError,
 				sourceUrl: url,
 				sourceAttachmentId: id,
@@ -580,6 +624,7 @@ export function finishUploading( id: QueueItemId, attachment: Attachment ) {
 							type: item.sourceFile.type,
 					  } )
 					: item.sourceFile;
+				// TODO: Should side-loaded items all have the same batchId so you know when the batch has finished?
 				for ( const name of attachment.missingImageSizes ) {
 					const imageSize = select.getImageSize( name );
 					if ( imageSize ) {
@@ -759,13 +804,15 @@ export function maybeTranscodeItem( id: QueueItemId ) {
 				void dispatch.optimizeItemWithApproval( item.id );
 				break;
 
-			default:
+			case TranscodingType.Video:
 				if ( isTranscoding ) {
 					return;
 				}
 
 				void dispatch.optimizeVideoItem( item.id );
 				break;
+			default:
+			// This shouldn't happen. Only happens with too many state updates.
 		}
 	};
 }

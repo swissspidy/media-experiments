@@ -1,22 +1,33 @@
+import { v4 as uuidv4 } from 'uuid';
+
 import { registerPlugin } from '@wordpress/plugins';
 import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
-import { __ } from '@wordpress/i18n';
-import { useSelect } from '@wordpress/data';
+import { __, sprintf } from '@wordpress/i18n';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { type BlockInstance } from '@wordpress/blocks';
 import { filterURLForDisplay } from '@wordpress/url';
+import { store as noticesStore } from '@wordpress/notices';
+import { Fragment } from '@wordpress/element';
 import {
 	PanelRow,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis -- Psst.
 	__experimentalText as Text,
 	Button,
+	Tooltip,
 } from '@wordpress/components';
 
-import { type Attachment, type RestAttachment } from '@mexp/upload-media';
+import {
+	store as uploadStore,
+	type Attachment,
+	type RestAttachment,
+} from '@mexp/upload-media';
 
 import './styles.css';
 import { ReactComponent as CompressIcon } from './icons/compress.svg';
+import { store as editorStore } from '@wordpress/editor';
+import { ApprovalDialog } from '../components/approvalDialog';
 
 const SUPPORTED_BLOCKS = [ 'core/image', 'core/video' ];
 
@@ -36,6 +47,9 @@ type AttachmentData = Pick< Attachment, 'id' | 'url' | 'fileSize' > & {
 	posterUrl: Attachment[ 'url' ];
 	clientId: BlockInstance[ 'clientId' ];
 	blockName: BlockInstance[ 'name' ];
+	isUploading: boolean;
+	isOptimized: boolean;
+	isFetched: boolean;
 };
 
 function isSupportedBlock(
@@ -86,6 +100,11 @@ function useMediaBlockAttachments() {
 								: block.attributes.poster ||
 								  block.attributes.src,
 						fileSize: 0,
+						isUploading: select( uploadStore ).isUploadingById(
+							block.attributes.id
+						),
+						isOptimized: false,
+						isFetched: false,
 					};
 
 					// @ts-ignore -- TODO: Fix this without casting.
@@ -95,13 +114,21 @@ function useMediaBlockAttachments() {
 						context: 'edit',
 					} );
 
-					// TODO: Use fetchRemoteFile() as fallback.
-					if ( media && media.mexp_filesize ) {
-						attachment.fileSize = media.mexp_filesize;
+					if ( media ) {
+						attachment.isFetched = true;
+
+						attachment.isOptimized =
+							media.mexp_media_source.length > 0;
+
+						// TODO: Use fetchRemoteFile() as fallback.
+						if ( media.mexp_filesize ) {
+							attachment.fileSize = media.mexp_filesize;
+						}
 					}
 
 					return attachment;
-				} ),
+				} )
+				.filter( ( data ) => data.isFetched && ! data.isOptimized ),
 		[]
 	);
 }
@@ -117,44 +144,149 @@ const numberFormatter = Intl.NumberFormat( 'en', {
 } );
 
 function Row( props: AttachmentData ) {
+	const { optimizeExistingItem } = useDispatch( uploadStore );
+	const { createSuccessNotice, createErrorNotice } =
+		useDispatch( noticesStore );
+	const { updateBlockAttributes } = useDispatch( blockEditorStore );
+	const currentPostId = useSelect(
+		( select ) => select( editorStore ).getCurrentPostId(),
+		[]
+	);
+
 	const onClick = () => {
-		// eslint-disable-next-line no-console -- WIP.
-		console.log( 'Compress single', props );
+		void optimizeExistingItem( {
+			id: props.id,
+			url: props.url,
+			onSuccess: ( [ media ] ) => {
+				void updateBlockAttributes( props.clientId, {
+					id: media.id,
+					url: media.url,
+				} );
+				void createSuccessNotice(
+					__( 'File successfully optimized.', 'media-experiments' ),
+					{
+						type: 'snackbar',
+					}
+				);
+			},
+			onError: ( err: Error ) => {
+				void createErrorNotice(
+					sprintf(
+						/* translators: %s: error message */
+						__(
+							'There was an error optimizing the file: %s',
+							'media-experiments'
+						),
+						err.message
+					),
+					{
+						type: 'snackbar',
+					}
+				);
+			},
+			additionalData: {
+				post: currentPostId,
+			},
+		} );
 	};
 
 	return (
 		<PanelRow>
 			<img src={ props.posterUrl } width={ 32 } height={ 32 } alt="" />
-			<Text aria-label={ props.url }>
-				{ filterURLForDisplay( props.url, 15 ) }
-			</Text>
+			<Tooltip text={ props.url }>
+				<Text aria-label={ props.url }>
+					{ filterURLForDisplay( props.url, 15 ) }
+				</Text>
+			</Tooltip>
 			<Text variant="muted">
 				{ props.fileSize
 					? numberFormatter.format( props.fileSize )
-					: '? KB' }
+					: /* translators: unknown file size */
+					  __( '? KB', 'media-experiments' ) }
 			</Text>
 			<Button
 				icon={ <CompressIcon width={ 32 } height={ 32 } /> }
 				className="mexp-document-panel-row__button"
 				label={ __( 'Optimize', 'media-experiments' ) }
 				onClick={ onClick }
+				disabled={ props.isUploading }
 			></Button>
 		</PanelRow>
 	);
 }
 
 function CompressAll( props: { attachments: AttachmentData[] } ) {
+	const currentPostId = useSelect(
+		( select ) => select( editorStore ).getCurrentPostId(),
+		[]
+	);
+
+	const { updateBlockAttributes } = useDispatch( blockEditorStore );
+	const { createSuccessNotice, createErrorNotice } =
+		useDispatch( noticesStore );
+	const { optimizeExistingItem } = useDispatch( uploadStore );
+
 	const onClick = () => {
-		// Do the magic.
+		const batchId = uuidv4();
+
 		for ( const attachment of props.attachments ) {
-			// Add each one individually, but with the same batchId.
-			// eslint-disable-next-line no-console -- WIP.
-			console.log( 'Compress all', attachment );
+			if ( attachment.isUploading ) {
+				continue;
+			}
+
+			void optimizeExistingItem( {
+				batchId,
+				id: attachment.id,
+				url: attachment.url,
+				onSuccess: ( [ media ] ) => {
+					void updateBlockAttributes( attachment.clientId, {
+						id: media.id,
+						url: media.url,
+					} );
+				},
+				onError: ( err: Error ) => {
+					void createErrorNotice(
+						sprintf(
+							/* translators: %s: error message */
+							__(
+								'There was an error optimizing the file: %s',
+								'media-experiments'
+							),
+							err.message
+						),
+						{
+							type: 'snackbar',
+						}
+					);
+				},
+				onBatchSuccess: () => {
+					void createSuccessNotice(
+						__(
+							'All files successfully optimized.',
+							'media-experiments'
+						),
+						{
+							type: 'snackbar',
+						}
+					);
+				},
+				additionalData: {
+					post: currentPostId,
+				},
+			} );
 		}
 	};
 
+	const areAllUploading = props.attachments.every(
+		( { isUploading } ) => isUploading
+	);
+
 	return (
-		<Button variant="primary" onClick={ onClick }>
+		<Button
+			variant="primary"
+			onClick={ onClick }
+			disabled={ areAllUploading }
+		>
 			{ __( 'Optimize all', 'media-experiments' ) }
 		</Button>
 	);
@@ -172,7 +304,10 @@ function DocumentMediaPanel() {
 			title={ __( 'Media Experiments', 'media-experiments' ) }
 		>
 			{ attachments.map( ( data ) => (
-				<Row key={ data.id } { ...data } />
+				<Fragment key={ data.id }>
+					<Row { ...data } />
+					<ApprovalDialog id={ data.id } />
+				</Fragment>
 			) ) }
 			{ attachments.length > 0 ? (
 				<PanelRow>
