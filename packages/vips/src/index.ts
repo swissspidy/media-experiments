@@ -4,9 +4,9 @@ import {
 	getFileBasename,
 } from '@mexp/media-utils';
 
+import type { ImageSizeCrop } from './types';
+
 async function getVips() {
-	// Ignore reason: Types in the published package haven't been updated yet.
-	// @ts-ignore
 	return window.Vips( {
 		// Disable dynamic modules, it doesn't work when wasm-vips is served from a CDN
 		// https://github.com/kleisauke/wasm-vips/issues/35
@@ -36,16 +36,6 @@ export async function convertImageToJpeg( file: File ) {
 		'image/jpeg'
 	);
 }
-
-// Same type as in @mextp/upload-media
-// TODO: Move to shared package?
-type ImageSizeCrop = {
-	width: number;
-	height: number;
-	crop?:
-		| boolean
-		| [ 'left' | 'center' | 'right', 'top' | 'center' | 'bottom' ];
-};
 
 /**
  * Resizes an image using vips.
