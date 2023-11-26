@@ -713,3 +713,78 @@ function filter_wp_prepare_attachment_for_js( array $response ): array {
 
 	return $response;
 }
+
+/**
+ * Filter image tags in content to add more beautiful placeholders.
+ *
+ * Uses BlurHash-powered CSS gradients with a fallback
+ * to a solid background color.
+ *
+ * @param string $filtered_image The image tag.
+ * @param string $context        The context of the image.
+ * @param int    $attachment_id  The attachment ID.
+ * @return string The filtered image tag.
+ */
+function filter_wp_content_img_tag_add_placeholders( string $filtered_image, string $context, int $attachment_id ): string {
+	if ( ! str_contains( $filtered_image, ' src="' ) ) {
+		return $filtered_image;
+	}
+
+	$class_name = 'mexp-placeholder-' . $attachment_id;
+
+	// Ensure to not run the logic below in case relevant attributes are already present.
+	if ( str_contains( $filtered_image, $class_name ) ) {
+		return $filtered_image;
+	}
+
+	$dominant_color = get_post_meta( $attachment_id, 'mexp_dominant_color', true );
+	$blurhash       = get_post_meta( $attachment_id, 'mexp_blurhash', true );
+
+	if ( ! $dominant_color && ! $blurhash ) {
+		return $filtered_image;
+	}
+
+	if ( $dominant_color ) {
+		wp_register_style( 'mexp-placeholder', false );
+		wp_enqueue_style( 'mexp-placeholder' );
+		wp_add_inline_style( 'mexp-placeholder', sprintf( '.mexp-placeholder-%1$s { background-color: %2$s; }', $attachment_id, $dominant_color ) );
+	}
+
+	// BlurHash conversion is completely untested. Probably contains faulty logic.
+	if ( $blurhash ) {
+		$pixels = BlurHash::decode( $blurhash, 4, 3 );
+
+		$gradients = [];
+
+		$rows    = count( $pixels );
+		$columns = count( $pixels[0] );
+
+		foreach ( $pixels as $row => $r ) {
+			foreach ( $r as $column => $pixel ) {
+				$c = $column % $columns;
+				$r = $row % $rows;
+
+				$percent_x = round( ( $c / ( $columns - 1 ) ) * 100 );
+				$percent_y = round( ( $r / ( $rows - 1 ) ) * 100 );
+
+				[ $r, $g, $b ] = $pixel;
+				$rgb           = sprintf( '#%02x%02x%02x', $r, $g, $b );
+
+				$gradients[] = sprintf(
+					'radial-gradient(at %1$s%% %2$s%%, %3$s, #00000000 50%%)',
+					$percent_x,
+					$percent_y,
+					$rgb
+				);
+			}
+		}
+
+		wp_register_style( 'mexp-placeholder', false );
+		wp_enqueue_style( 'mexp-placeholder' );
+
+		wp_add_inline_style( 'mexp-placeholder', sprintf( '.mexp-placeholder-%1$s { background-image: %2$s; }', $attachment_id, join( ',', $gradients ) ) );
+	}
+
+	return str_replace( ' class="', ' class="' . $class_name . ' ', $filtered_image );
+}
+

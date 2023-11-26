@@ -31,6 +31,8 @@ add_filter( 'register_post_type_args', __NAMESPACE__ . '\filter_attachment_post_
 
 add_filter( 'wp_prepare_attachment_for_js', __NAMESPACE__ . '\filter_wp_prepare_attachment_for_js' );
 
+add_filter( 'wp_content_img_tag', __NAMESPACE__ . '\filter_wp_content_img_tag_add_placeholders', 100, 3 );
+
 // AVIF support, see https://github.com/swissspidy/media-experiments/issues/6.
 add_filter( 'getimagesize_mimes_to_exts', __NAMESPACE__ . '\filter_mimes_to_exts' );
 add_filter( 'mime_types', __NAMESPACE__ . '\filter_mime_types' );

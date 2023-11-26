@@ -21,6 +21,11 @@
 require_once __DIR__ . '/inc/class-rest-attachments-controller.php';
 
 /**
+ * BlurHash decoder.
+ */
+require_once __DIR__ . '/inc/class-blurhash.php';
+
+/**
  * Plugin functions.
  */
 require_once __DIR__ . '/inc/functions.php';
