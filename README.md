@@ -38,11 +38,11 @@ These features can be tested either by dropping media files into the editor or b
 Poster images are important for UX as they are shown before a video is fully loaded and started playing.
 During upload, a poster image (thumbnail) of the video is automatically taken and added to the video in both the editor and the media library.
 
-<img src="https://github.com/swissspidy/media-experiments/assets/841956/ba082f49-145e-441e-89c5-a63acdd039bd" alt="" />
+https://github.com/swissspidy/media-experiments/assets/841956/ba082f49-145e-441e-89c5-a63acdd039bd
 
 #### Preview image generation for PDFs
 
-In addition to that, poster images are automatically generated for PDFs as well (powered by [`PDF.js`](https://github.com/mozilla/pdf.js).
+In addition to that, poster images are automatically generated for PDFs as well (powered by [`PDF.js`](https://github.com/mozilla/pdf.js)).
 
 <img src="https://github.com/swissspidy/media-experiments/assets/841956/f26b4f7d-f60b-4177-b8d0-b79d12c8863b" alt="" />
 
@@ -61,7 +61,7 @@ Uses [`libheif-js`](https://www.npmjs.com/package/libheif-js) to automatically c
 
 ### Media Optimization and Transcoding using FFmpeg
 
-This project uses [`ffmpeg.wasm`](https://ffmpegwasm.netlify.app/)) to unlock video/image/audio transcoding and compression during upload.
+This project uses [`ffmpeg.wasm`](https://ffmpegwasm.netlify.app/) to unlock video/image/audio transcoding and compression during upload.
 For example from MOV to MP4, HEIF to WebP, or OGG to MP3.
 
 ### Video Audio Channel Detection
@@ -76,7 +76,7 @@ This allows completely removing the audio channel from a video, so it’s actual
 
 During upload, it’s automatically detected whether the video actually has any audio channels. If not, it’s marked as muted.
 
-<img src="https://github.com/swissspidy/media-experiments/assets/841956/2a9b566f-58ec-4256-b820-c7443fc53301" alt="" />
+https://github.com/swissspidy/media-experiments/assets/841956/2a9b566f-58ec-4256-b820-c7443fc53301
 
 ### (Improved) Import of External Media
 
@@ -90,7 +90,7 @@ GIFs (which are basically muted looped videos), audio transcripts, or simply tak
 
 This also supports automatically blurring backgrounds.
 
-<img src="https://github.com/swissspidy/media-experiments/assets/841956/dd4ad5ed-8374-48f2-8223-9ed856b590b4" alt="" />
+https://github.com/swissspidy/media-experiments/assets/841956/dd4ad5ed-8374-48f2-8223-9ed856b590b4
 
 ### Improved Media Placeholders
 
@@ -106,12 +106,14 @@ which does not generate blurred placeholders.
 
 <img width="436" alt="Block sidebar controls showing BlurHash and dominant color of a video" src="https://github.com/swissspidy/media-experiments/assets/841956/65f4d211-a2ed-4f0c-b600-965782de8188" />
 
+<img width="1420" alt="Blurred placeholder vs actual image" src="https://github.com/swissspidy/media-experiments/assets/841956/4f0b8820-e191-41e0-8371-cc769ea91665" />
+
 ### Optimize Existing Media
 
 Allows optimizing existing media items in a post by converting them to a more modern format. Either individually or in bulk.
 After conversion, the old and new versions can optionally be compared with a slider. The file size savings in % are shown next to it.
 
-<img src="https://github.com/swissspidy/media-experiments/assets/841956/af783b3d-e7f4-425f-8de7-23a63dc2b9f9" alt="" />
+https://github.com/swissspidy/media-experiments/assets/841956/af783b3d-e7f4-425f-8de7-23a63dc2b9f9
 
 ### Client-Side Image Downsizing
 
