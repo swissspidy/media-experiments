@@ -44,7 +44,7 @@ https://github.com/swissspidy/media-experiments/assets/841956/ba082f49-145e-441e
 
 In addition to that, poster images are automatically generated for PDFs as well (powered by [`PDF.js`](https://github.com/mozilla/pdf.js)).
 
-<img src="https://github.com/swissspidy/media-experiments/assets/841956/f26b4f7d-f60b-4177-b8d0-b79d12c8863b" alt="" />
+https://github.com/swissspidy/media-experiments/assets/841956/f26b4f7d-f60b-4177-b8d0-b79d12c8863b
 
 ### Converting GIFs to Videos
 
@@ -53,7 +53,7 @@ In addition to that, poster images are automatically generated for PDFs as well 
 This project automatically converts animated GIFs to an actual video file during upload. The image block, upon receiving the updated media item, transforms into a video block.
 **Note:** Right now, that last part (block transformation) is achieved by patching Gutenberg.
 
-<img src="https://github.com/swissspidy/media-experiments/assets/841956/df3343e5-6e49-44da-bb45-9f6f43f92665" alt="" />
+https://github.com/swissspidy/media-experiments/assets/841956/df3343e5-6e49-44da-bb45-9f6f43f92665
 
 ### HEIF Image Transcoding
 
