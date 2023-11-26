@@ -1,5 +1,5 @@
 {
 	"extends": "node_modules/@wordpress/scripts/config/.markdownlint.json",
-	"MD033":false,
-	"MD034":false
+	"MD033": false,
+	"MD034": false
 }
