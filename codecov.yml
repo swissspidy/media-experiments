@@ -31,4 +31,4 @@ comment: false
 
 # See https://docs.codecov.com/docs/ignoring-paths
 ignore:
-    - packages/eslint-import-resolver
+    - media-experiments.php

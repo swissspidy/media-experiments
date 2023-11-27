@@ -72,6 +72,44 @@ describe( 'actions', () => {
 		} );
 	} );
 
+	describe( 'addItems', () => {
+		it( 'adds multiple items to the queue', () => {
+			registry.dispatch( uploadStore ).addItems( {
+				files: [ jpegFile, mp4File ],
+			} );
+
+			expect( registry.select( uploadStore ).getItems() ).toHaveLength(
+				2
+			);
+			expect(
+				registry.select( uploadStore ).getItems()[ 0 ]
+			).toStrictEqual(
+				expect.objectContaining( {
+					id: expect.any( String ),
+					file: jpegFile,
+					sourceFile: jpegFile,
+					status: ItemStatus.Pending,
+					attachment: {
+						url: expect.stringMatching( /^blob:/ ),
+					},
+				} )
+			);
+			expect(
+				registry.select( uploadStore ).getItems()[ 1 ]
+			).toStrictEqual(
+				expect.objectContaining( {
+					id: expect.any( String ),
+					file: mp4File,
+					sourceFile: mp4File,
+					status: ItemStatus.Pending,
+					attachment: {
+						url: expect.stringMatching( /^blob:/ ),
+					},
+				} )
+			);
+		} );
+	} );
+
 	describe( 'addItemFromUrl', () => {
 		it( 'downloads file and adds it to the queue', async () => {
 			window.fetch = jest.fn( () =>
@@ -102,6 +140,28 @@ describe( 'actions', () => {
 					},
 					mediaSourceTerms: [ 'media-import' ],
 				} )
+			);
+		} );
+	} );
+
+	describe( 'completeItem', () => {
+		it( 'removes an item from the queue', () => {
+			registry.dispatch( uploadStore ).addItem( {
+				file: jpegFile,
+			} );
+
+			expect( registry.select( uploadStore ).getItems() ).toHaveLength(
+				1
+			);
+
+			const item: QueueItem = registry
+				.select( uploadStore )
+				.getItems()[ 0 ];
+
+			registry.dispatch( uploadStore ).completeItem( item.id );
+
+			expect( registry.select( uploadStore ).getItems() ).toHaveLength(
+				0
 			);
 		} );
 	} );
@@ -432,6 +492,25 @@ describe( 'actions', () => {
 			).toBe( 3 );
 			expect(
 				registry.select( uploadStore ).getMediaSourceTermId( 'unknown' )
+			).toBe( undefined );
+		} );
+	} );
+
+	describe( 'setImageSizes', () => {
+		it( 'adds image sizes to state', () => {
+			registry.dispatch( uploadStore ).setImageSizes( {
+				thumbnail: { width: 150, height: 150, crop: true },
+				large: { width: 1000, height: 0, crop: false },
+			} );
+
+			expect(
+				registry.select( uploadStore ).getImageSize( 'thumbnail' )
+			).toStrictEqual( { width: 150, height: 150, crop: true } );
+			expect(
+				registry.select( uploadStore ).getImageSize( 'large' )
+			).toStrictEqual( { width: 1000, height: 0, crop: false } );
+			expect(
+				registry.select( uploadStore ).getImageSize( 'unknown' )
 			).toBe( undefined );
 		} );
 	} );

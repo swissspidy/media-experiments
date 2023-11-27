@@ -8,7 +8,20 @@ const PACKAGES_DIR = path.resolve( __dirname, '../..' );
 
 exports.interfaceVersion = 2;
 
-exports.resolve = function ( source, file, config ) {
+/**
+ * @typedef Config
+ * @property {string[]} extensions File extensions.
+ */
+
+/**
+ * Resolve a file.
+ *
+ * @param {string}  source
+ * @param {string}  file
+ * @param {?Config} config
+ * @return {{path: null, found: boolean}|{path: *, found: boolean}|{found: boolean}} Resolver result.
+ */
+exports.resolve = function ( source, file, config = {} ) {
 	const resolve = ( sourcePath ) =>
 		nodeResolver.resolve( sourcePath, file, {
 			...config,
