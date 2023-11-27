@@ -8,7 +8,7 @@ import {
 
 // Setting worker path to worker bundle.
 GlobalWorkerOptions.workerSrc =
-	'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.189/build/pdf.worker.js';
+	'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.269/build/pdf.worker.js';
 
 export async function getImageFromPdf(
 	url: string,

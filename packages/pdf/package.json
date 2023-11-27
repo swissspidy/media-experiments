@@ -33,6 +33,6 @@
 	},
 	"dependencies": {
 		"@mexp/media-utils": "../media-utils",
-		"pdfjs-dist": "^4.0.189"
+		"pdfjs-dist": "^4.0.269"
 	}
 }
