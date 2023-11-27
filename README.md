@@ -113,7 +113,13 @@ which does not generate blurred placeholders.
 Allows optimizing existing media items in a post by converting them to a more modern format. Either individually or in bulk.
 After conversion, the old and new versions can optionally be compared with a slider. The file size savings in % are shown next to it.
 
+Single optimization with approval/comparison step:
+
 https://github.com/swissspidy/media-experiments/assets/841956/af783b3d-e7f4-425f-8de7-23a63dc2b9f9
+
+Bulk optimization without the approval step:
+
+https://github.com/swissspidy/media-experiments/assets/841956/2e83f932-5888-4eaf-b247-373620991115
 
 ### Client-Side Image Downsizing
 
