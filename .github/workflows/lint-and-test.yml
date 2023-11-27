@@ -52,24 +52,13 @@ jobs:
                   coverage: none
                   tools: composer, cs2pr
 
-            - name: Get Composer cache directory
-              id: composer-cache
-              run: echo "::set-output name=dir::$(composer config cache-files-dir)"
-
-            - name: Setup Composer cache
-              uses: pat-s/always-upload-cache@v3.0.11
+            - name: Install PHP dependencies
+              uses: ramsey/composer-install@83af392bf5f031813d25e6fe4cd626cdba9a2df6
               with:
-                  path: ${{ steps.composer-cache.outputs.dir }}
-                  key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-composer-
-                      ${{ runner.os }}-
+                composer-options: '--prefer-dist --no-scripts'
 
             - name: Validate composer.json
               run: composer validate --no-check-all --strict
-
-            - name: Install dependencies
-              run: composer install
 
             - name: Lint PHP
               run: composer lint
@@ -133,19 +122,6 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v3
-
-            - name: Get Composer cache directory
-              id: composer-cache
-              run: echo "::set-output name=dir::$(composer config cache-files-dir)"
-
-            - name: Setup Composer cache
-              uses: pat-s/always-upload-cache@v3.0.11
-              with:
-                  path: ${{ steps.composer-cache.outputs.dir }}
-                  key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-composer-
-                      ${{ runner.os }}-
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
