@@ -26,18 +26,17 @@ jobs:
             - name: package.json Lint
               run: npm run lint:pkg-json
 
+            - name: Type checking
+              run: npm run build:package-types
+
             - name: Lint JS
               run: npm run lint:js
 
             - name: Lint CSS
               run: npm run lint:css
 
-            # For some reason always failing on CI but not locally.
-            #            - name: Lint Markdown
-            #              run: npm run lint:md:docs
-
-            - name: Type checking
-              run: npm run build:package-types
+            - name: Lint Markdown
+              run: npm run lint:md:docs
 
     lint-php:
         name: PHP Lints
@@ -81,6 +80,12 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v3
+
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                node-version-file: '.nvmrc'
+                cache: npm
 
             - name: Install dependencies
               run: npm ci
