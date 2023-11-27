@@ -787,4 +787,3 @@ function filter_wp_content_img_tag_add_placeholders( string $filtered_image, str
 
 	return str_replace( ' class="', ' class="' . $class_name . ' ', $filtered_image );
 }
-
