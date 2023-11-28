@@ -1,6 +1,11 @@
 import { Blurhash } from 'react-blurhash';
 
-import { Fragment, useState, useEffect } from '@wordpress/element';
+import {
+	Fragment,
+	useState,
+	useEffect,
+	createInterpolateElement,
+} from '@wordpress/element';
 import { addFilter } from '@wordpress/hooks';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __, sprintf } from '@wordpress/i18n';
@@ -14,6 +19,7 @@ import {
 	BaseControl,
 	useBaseControlProps,
 	ColorIndicator,
+	PanelRow,
 } from '@wordpress/components';
 import { isBlobURL } from '@wordpress/blob';
 import { store as editorStore } from '@wordpress/editor';
@@ -409,18 +415,29 @@ function RestorePoster( { attributes, setAttributes }: RestorePosterProps ) {
 	);
 }
 
-interface ShowBlurHashProps {
+interface DebugInfoProps {
 	attributes: {
 		id?: number;
 	};
 }
 
-function ShowBlurHash( { attributes }: ShowBlurHashProps ) {
+const numberFormatter = Intl.NumberFormat( 'en', {
+	notation: 'compact',
+	style: 'unit',
+	unit: 'byte',
+	unitDisplay: 'narrow',
+	// @ts-ignore -- TODO: Update types somehow.
+	roundingPriority: 'lessPrecision',
+	maximumSignificantDigits: 2,
+	maximumFractionDigits: 2,
+} );
+
+function DebugInfo( { attributes }: DebugInfoProps ) {
 	const { baseControlProps, controlProps } = useBaseControlProps( {} );
 
 	const attachment = useAttachment( attributes.id );
 
-	if ( ! attachment || ! attachment.meta.mexp_blurhash ) {
+	if ( ! attachment ) {
 		return null;
 	}
 
@@ -431,43 +448,86 @@ function ShowBlurHash( { attributes }: ShowBlurHashProps ) {
 	return (
 		<BaseControl { ...baseControlProps }>
 			<BaseControl.VisualLabel>
-				{ __( 'BlurHash', 'media-experiments' ) }
+				{ __( 'Debug Information', 'media-experiments' ) }
 			</BaseControl.VisualLabel>
 			<div { ...controlProps }>
-				<Blurhash
-					hash={ attachment.meta.mexp_blurhash }
-					width={ 200 }
-					height={ 200 / aspectRatio }
-				/>
-			</div>
-		</BaseControl>
-	);
-}
-
-interface ShowDominantColorProps {
-	attributes: {
-		id?: number;
-	};
-}
-
-function ShowDominantColor( { attributes }: ShowDominantColorProps ) {
-	const { baseControlProps, controlProps } = useBaseControlProps( {} );
-
-	const attachment = useAttachment( attributes.id );
-
-	if ( ! attachment || ! attachment.meta.mexp_dominant_color ) {
-		return null;
-	}
-
-	return (
-		<BaseControl { ...baseControlProps }>
-			<BaseControl.VisualLabel>
-				{ __( 'Dominant color', 'media-experiments' ) }
-			</BaseControl.VisualLabel>
-			<div { ...controlProps }>
-				<ColorIndicator
-					colorValue={ attachment.meta.mexp_dominant_color }
-				/>
+				<PanelRow>
+					{ createInterpolateElement(
+						sprintf(
+							/* translators: %s: File type. */
+							__( '<b>Mime type:</b> %s', 'media-experiments' ),
+							attachment.mime_type
+						),
+						{
+							b: <b />,
+						}
+					) }
+				</PanelRow>
+				{ attachment.mexp_filesize ? (
+					<PanelRow>
+						{ createInterpolateElement(
+							sprintf(
+								/* translators: %s: File size. */
+								__(
+									'<b>File size:</b> %s',
+									'media-experiments'
+								),
+								numberFormatter.format(
+									attachment.mexp_filesize
+								)
+							),
+							{
+								b: <b />,
+							}
+						) }
+					</PanelRow>
+				) : null }
+				<PanelRow>
+					{ createInterpolateElement(
+						sprintf(
+							/* translators: %s: Color indicator. */
+							__(
+								'<b>Dominant color:</b> %s',
+								'media-experiments'
+							),
+							'<ColorIndicator />'
+						),
+						{
+							b: <b />,
+							ColorIndicator: (
+								<ColorIndicator
+									colorValue={
+										attachment.meta.mexp_dominant_color
+									}
+								/>
+							),
+						}
+					) }
+				</PanelRow>
+				{ attachment.meta.mexp_blurhash ? (
+					<PanelRow>
+						{ createInterpolateElement(
+							sprintf(
+								/* translators: %s: BlurHash. */
+								__(
+									'<b>BlurHash:</b> %s',
+									'media-experiments'
+								),
+								'<Blurhash />'
+							),
+							{
+								b: <b />,
+								Blurhash: (
+									<Blurhash
+										hash={ attachment.meta.mexp_blurhash }
+										width={ 100 }
+										height={ 100 / aspectRatio }
+									/>
+								),
+							}
+						) }
+					</PanelRow>
+				) : null }
 			</div>
 		</BaseControl>
 	);
@@ -498,8 +558,7 @@ function VideoControls( props: VideoControlsProps ) {
 			<ImportMedia { ...props } onChange={ onChange } />
 			<MuteVideo { ...props } />
 			<RestorePoster { ...props } />
-			<ShowBlurHash { ...props } />
-			<ShowDominantColor { ...props } />
+			<DebugInfo { ...props } />
 		</Fragment>
 	);
 }
@@ -524,8 +583,7 @@ function ImageControls( props: ImageControlsProps ) {
 			<RecordingControls { ...props } />
 			<ImportMedia { ...props } onChange={ onChange } />
 			<OptimizeMedia { ...props } />
-			<ShowBlurHash { ...props } />
-			<ShowDominantColor { ...props } />
+			<DebugInfo { ...props } />
 		</Fragment>
 	);
 }
