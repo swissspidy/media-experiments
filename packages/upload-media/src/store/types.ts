@@ -11,7 +11,8 @@ export type MediaSourceTerm =
 	| 'media-optimization'
 	| 'poster-generation'
 	| 'media-import'
-	| 'gif-conversion';
+	| 'gif-conversion'
+	| 'subtitles-generation';
 
 export type QueueItem = {
 	id: QueueItemId;

@@ -8,7 +8,7 @@ import {
 } from '@wordpress/element';
 import { addFilter } from '@wordpress/hooks';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _x, sprintf } from '@wordpress/i18n';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
 import { InspectorControls } from '@wordpress/block-editor';
@@ -136,9 +136,87 @@ function MuteVideo( { attributes, setAttributes }: MuteVideoProps ) {
 	};
 
 	return (
-		<Button variant="primary" onClick={ onClick } disabled={ isUploading }>
-			{ __( 'Remove audio channel', 'media-experiments' ) }
-		</Button>
+		<PanelRow>
+			<Button
+				variant="primary"
+				onClick={ onClick }
+				disabled={ isUploading }
+			>
+				{ __( 'Remove audio channel', 'media-experiments' ) }
+			</Button>
+		</PanelRow>
+	);
+}
+
+interface GenerateSubtitlesProps {
+	attributes: {
+		id?: number;
+		src: string;
+		poster: string;
+		tracks: Array< {
+			src: string;
+			label?: string;
+			srcLang?: string;
+			kind: 'subtitles' | 'captions';
+		} >;
+	};
+	setAttributes: ( attributes: Record< string, unknown > ) => void;
+}
+
+function GenerateSubtitles( {
+	attributes,
+	setAttributes,
+}: GenerateSubtitlesProps ) {
+	const post = useAttachment( attributes.id );
+
+	const url = attributes.src;
+	const isUploading = useIsUploadingByUrl( url ) || isBlobURL( url );
+
+	const { addSubtitlesForExistingVideo } = useDispatch( uploadStore );
+	const currentPostId = useSelect(
+		( select ) => select( editorStore ).getCurrentPostId(),
+		[]
+	);
+
+	if ( ! post || post.meta.mexp_is_muted || attributes.tracks.length > 0 ) {
+		return null;
+	}
+
+	const onClick = () => {
+		void addSubtitlesForExistingVideo( {
+			id: post.id,
+			url: attributes.src,
+			onChange: ( [ media ] ) =>
+				setAttributes( {
+					tracks: [
+						{
+							src: media.url,
+							label: _x(
+								'Captions',
+								'Text track label',
+								'media-experiments'
+							),
+							srcLang: 'en', // TODO: Make customizable.
+							kind: 'subtitles',
+						},
+					],
+				} ),
+			additionalData: {
+				post: currentPostId,
+			},
+		} );
+	};
+
+	return (
+		<PanelRow>
+			<Button
+				variant="primary"
+				onClick={ onClick }
+				disabled={ isUploading }
+			>
+				{ __( 'Generate subtitles', 'media-experiments' ) }
+			</Button>
+		</PanelRow>
 	);
 }
 
@@ -557,6 +635,7 @@ function VideoControls( props: VideoControlsProps ) {
 			<RecordingControls { ...props } />
 			<ImportMedia { ...props } onChange={ onChange } />
 			<MuteVideo { ...props } />
+			<GenerateSubtitles { ...props } />
 			<RestorePoster { ...props } />
 			<DebugInfo { ...props } />
 		</Fragment>
@@ -656,6 +735,12 @@ type VideoBlock = BlockInstance< {
 	poster: string;
 	muted: boolean;
 	caption: string;
+	tracks: Array< {
+		src: string;
+		label?: string;
+		srcLang?: string;
+		kind: 'subtitles' | 'captions';
+	} >;
 } > & { name: 'core/video' };
 
 type MediaPanelProps = ( ImageBlock | VideoBlock | AudioBlock ) &

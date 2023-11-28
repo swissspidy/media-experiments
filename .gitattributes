@@ -1,6 +1,7 @@
 .github export-ignore
 bin export-ignore
 tests export-ignore
+vosk export-ignore
 .* export-ignore
 codecov.yml export-ignore
 package.json export-ignore

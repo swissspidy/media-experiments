@@ -35,6 +35,7 @@
 		"@mexp/jsquash": "../jsquash",
 		"@mexp/media-utils": "../media-utils",
 		"@mexp/pdf": "../pdf",
+		"@mexp/subtitles": "../subtitles",
 		"@mexp/vips": "../vips",
 		"@wordpress/api-fetch": "^6.33.0",
 		"@wordpress/blob": "^3.36.0",

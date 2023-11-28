@@ -10,6 +10,7 @@
 		{ "path": "../jsquash" },
 		{ "path": "../media-utils" },
 		{ "path": "../pdf" },
+		{ "path": "../subtitles" },
 		{ "path": "../vips" }
 	],
 	"include": [ "src/**/*" ]

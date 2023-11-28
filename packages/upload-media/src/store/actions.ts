@@ -14,6 +14,7 @@ import {
 import { convertImageToJpeg, resizeImage } from '@mexp/vips';
 import { isHeifImage, transcodeHeifImage } from '@mexp/heif';
 import { getImageFromPdf } from '@mexp/pdf';
+import { generateSubtitles } from '@mexp/subtitles';
 import {
 	convertImageToAvif,
 	convertImageToJpeg as convertImageToMozJpeg,
@@ -71,6 +72,8 @@ type ActionCreators = {
 	addSideloadItem: typeof addSideloadItem;
 	removeItem: typeof removeItem;
 	muteVideoItem: typeof muteVideoItem;
+	muteExistingVideo: typeof muteExistingVideo;
+	addSubtitlesForExistingVideo: typeof addSubtitlesForExistingVideo;
 	convertHeifItem: typeof convertHeifItem;
 	resizeCropItem: typeof resizeCropItem;
 	convertGifItem: typeof convertGifItem;
@@ -353,6 +356,54 @@ export function muteExistingVideo( {
 				dominantColor,
 				transcode: [ TranscodingType.MuteVideo ],
 				generatedPosterId,
+			},
+		} );
+	};
+}
+
+interface AddSubtitlesForExistingVideoArgs {
+	id: number;
+	url: string;
+	onChange?: OnChangeHandler;
+	onSuccess?: OnSuccessHandler;
+	onError?: OnErrorHandler;
+	additionalData: AdditionalData;
+}
+
+export function addSubtitlesForExistingVideo( {
+	id,
+	url,
+	onChange,
+	onSuccess,
+	onError,
+	additionalData,
+}: AddSubtitlesForExistingVideoArgs ) {
+	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
+		const fileName = getFileNameFromUrl( url );
+		const baseName = getFileBasename( fileName );
+		const sourceFile = await fetchRemoteFile( url, fileName );
+		const videoFile = new File(
+			[ sourceFile ],
+			sourceFile.name.replace( baseName, `${ baseName }-muted` ),
+			{ type: sourceFile.type }
+		);
+
+		const vttFile = await generateSubtitles( videoFile );
+
+		dispatch< AddAction >( {
+			type: Type.Add,
+			item: {
+				id: uuidv4(),
+				status: ItemStatus.Pending,
+				sourceFile: vttFile,
+				file: vttFile,
+				onChange,
+				onSuccess,
+				onError,
+				sourceUrl: url,
+				sourceAttachmentId: id,
+				mediaSourceTerms: [ 'subtitles-generation' ],
+				additionalData,
 			},
 		} );
 	};
