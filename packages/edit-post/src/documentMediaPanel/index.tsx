@@ -95,10 +95,9 @@ function useMediaBlockAttachments() {
 								? block.attributes.url
 								: block.attributes.src,
 						posterUrl:
-							'url' in block.attributes
-								? block.attributes.url
-								: block.attributes.poster ||
-								  block.attributes.src,
+							'src' in block.attributes
+								? block.attributes.poster
+								: block.attributes.url,
 						fileSize: 0,
 						isUploading: select( uploadStore ).isUploadingById(
 							block.attributes.id
@@ -190,9 +189,17 @@ function Row( props: AttachmentData ) {
 		} );
 	};
 
+	// TODO: Add placeholder if there's no poster.
 	return (
 		<PanelRow>
-			<img src={ props.posterUrl } width={ 32 } height={ 32 } alt="" />
+			{ props.posterUrl ? (
+				<img
+					src={ props.posterUrl }
+					width={ 32 }
+					height={ 32 }
+					alt=""
+				/>
+			) : null }
 			<Tooltip text={ props.url }>
 				<Text aria-label={ props.url }>
 					{ filterURLForDisplay( props.url, 15 ) }
