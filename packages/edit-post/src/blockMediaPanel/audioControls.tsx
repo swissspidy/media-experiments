@@ -23,6 +23,14 @@ export function AudioControls( props: AudioControlsProps ) {
 		} );
 	}
 
+	function onInsertRecording( url?: string ) {
+		if ( url ) {
+			props.setAttributes( {
+				url,
+			} );
+		}
+	}
+
 	return (
 		<Fragment>
 			<UploadIndicator
@@ -32,6 +40,7 @@ export function AudioControls( props: AudioControlsProps ) {
 			<RecordingControls
 				clientId={ props.clientId }
 				url={ props.attributes.url }
+				onInsert={ onInsertRecording }
 			/>
 			{ ! props.attributes.id ? (
 				<ImportMedia

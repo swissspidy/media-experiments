@@ -25,6 +25,14 @@ export function CoverControls( props: CoverControlsProps ) {
 		} );
 	}
 
+	function onInsertRecording( url?: string ) {
+		if ( url ) {
+			props.setAttributes( {
+				url,
+			} );
+		}
+	}
+
 	return (
 		<Fragment>
 			<UploadIndicator
@@ -34,6 +42,7 @@ export function CoverControls( props: CoverControlsProps ) {
 			<RecordingControls
 				clientId={ props.clientId }
 				url={ props.attributes.url }
+				onInsert={ onInsertRecording }
 			/>
 			<OptimizeMedia
 				id={ props.attributes.id }

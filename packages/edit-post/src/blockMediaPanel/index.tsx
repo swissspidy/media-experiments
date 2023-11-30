@@ -38,9 +38,9 @@ const SUPPORTED_BLOCKS = [
 	'core/site-logo',
 ];
 
-type BlockControlsProps = MediaPanelProps;
+type PerBlockControlsProps = MediaPanelProps;
 
-function BlockControls( props: BlockControlsProps ) {
+function PerBlockControls( props: PerBlockControlsProps ) {
 	switch ( props.name ) {
 		case 'core/video':
 			return (
@@ -159,7 +159,7 @@ const addMediaPanel = createHigherOrderComponent(
 						icon="admin-media"
 						title={ __( 'Media Experiments', 'media-experiments' ) }
 					>
-						<BlockControls { ...props } />
+						<PerBlockControls { ...props } />
 					</PanelBody>
 				</InspectorControls>
 			</Fragment>

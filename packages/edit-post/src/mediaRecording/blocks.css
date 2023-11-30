@@ -1,3 +1,7 @@
+.wp-block-media-text.mexp-block-is-recording {
+	grid-template-columns: none;
+}
+
 .mexp-recording__wrapper {
 	position: relative;
 }

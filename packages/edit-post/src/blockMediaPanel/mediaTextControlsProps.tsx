@@ -24,6 +24,14 @@ export function MediaTextControls( props: MediaTextControlsProps ) {
 		} );
 	}
 
+	function onInsertRecording( url?: string ) {
+		if ( url ) {
+			props.setAttributes( {
+				mediaUrl: url,
+			} );
+		}
+	}
+
 	return (
 		<Fragment>
 			<UploadIndicator
@@ -33,6 +41,7 @@ export function MediaTextControls( props: MediaTextControlsProps ) {
 			<RecordingControls
 				clientId={ props.clientId }
 				url={ props.attributes.mediaUrl }
+				onInsert={ onInsertRecording }
 			/>
 			<OptimizeMedia
 				id={ props.attributes.mediaId }

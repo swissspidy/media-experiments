@@ -35,6 +35,14 @@ export function ImageControls( props: ImageControlsProps ) {
 		} );
 	}
 
+	function onInsertRecording( url?: string ) {
+		if ( url ) {
+			props.setAttributes( {
+				url,
+			} );
+		}
+	}
+
 	return (
 		<Fragment>
 			<UploadIndicator
@@ -44,6 +52,7 @@ export function ImageControls( props: ImageControlsProps ) {
 			<RecordingControls
 				clientId={ props.clientId }
 				url={ props.attributes.url }
+				onInsert={ onInsertRecording }
 			/>
 			{ ! props.attributes.id ? (
 				<ImportMedia
