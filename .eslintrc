@@ -26,7 +26,14 @@
 		"camelcase": [
 			"error",
 			{
-				"allow": ["WP_REST_API_.*", "featured_media", "mexp_.*", "image_size"]
+				"allow": [
+					"WP_REST_API_.*",
+					"featured_media",
+					"mexp_.*",
+					"image_size",
+					"site_icon",
+					"site_logo"
+				]
 			}
 		]
 	},

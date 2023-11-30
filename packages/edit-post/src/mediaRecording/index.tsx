@@ -18,7 +18,13 @@ import { ReactComponent as BlurOff } from './icons/blurOff.svg';
 import './blocks.css';
 import { formatMsToHMS } from './utils';
 
-const SUPPORTED_BLOCKS = [ 'core/image', 'core/audio', 'core/video' ];
+const SUPPORTED_BLOCKS = [
+	'core/image',
+	'core/audio',
+	'core/video',
+	'core/cover',
+	'core/media-text',
+];
 
 function InputControls() {
 	const { setVideoInput, setAudioInput, toggleHasAudio } =
