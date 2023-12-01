@@ -5,6 +5,7 @@ import {
 	ColorIndicator,
 	PanelRow,
 	useBaseControlProps,
+	Tooltip,
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { createInterpolateElement } from '@wordpress/element';
@@ -89,11 +90,15 @@ export function DebugInfo( { id }: DebugInfoProps ) {
 						{
 							b: <b />,
 							ColorIndicator: (
-								<ColorIndicator
-									colorValue={
-										attachment.meta.mexp_dominant_color
-									}
-								/>
+								<Tooltip
+									text={ attachment.meta.mexp_dominant_color.toString() }
+								>
+									<ColorIndicator
+										colorValue={
+											attachment.meta.mexp_dominant_color
+										}
+									/>
+								</Tooltip>
 							),
 						}
 					) }
