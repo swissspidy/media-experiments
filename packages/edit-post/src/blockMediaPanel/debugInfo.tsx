@@ -77,32 +77,37 @@ export function DebugInfo( { id }: DebugInfoProps ) {
 						) }
 					</PanelRow>
 				) : null }
-				<PanelRow>
-					{ createInterpolateElement(
-						sprintf(
-							/* translators: %s: Color indicator. */
-							__(
-								'<b>Dominant color:</b> %s',
-								'media-experiments'
+				{ attachment.meta.mexp_dominant_color ? (
+					<PanelRow>
+						{ createInterpolateElement(
+							sprintf(
+								/* translators: %s: Color indicator. */
+								__(
+									'<b>Dominant color:</b> %s',
+									'media-experiments'
+								),
+								'<ColorIndicator />'
 							),
-							'<ColorIndicator />'
-						),
-						{
-							b: <b />,
-							ColorIndicator: (
-								<Tooltip
-									text={ attachment.meta.mexp_dominant_color.toString() }
-								>
-									<ColorIndicator
-										colorValue={
+							{
+								b: <b />,
+								ColorIndicator: (
+									<Tooltip
+										text={
 											attachment.meta.mexp_dominant_color
 										}
-									/>
-								</Tooltip>
-							),
-						}
-					) }
-				</PanelRow>
+									>
+										<ColorIndicator
+											colorValue={
+												attachment.meta
+													.mexp_dominant_color
+											}
+										/>
+									</Tooltip>
+								),
+							}
+						) }
+					</PanelRow>
+				) : null }
 				{ attachment.meta.mexp_blurhash ? (
 					<PanelRow>
 						{ createInterpolateElement(
