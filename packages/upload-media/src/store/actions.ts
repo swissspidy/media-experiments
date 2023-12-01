@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { createWorkerFactory } from '@shopify/web-worker';
 
 import { createBlobURL, isBlobURL } from '@wordpress/blob';
 import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
@@ -56,7 +57,6 @@ import {
 	canTranscodeFile,
 	convertImageFormat,
 	fetchRemoteFile,
-	getBlurHash,
 	getDominantColor,
 	getFileNameFromUrl,
 	getPosterFromVideo,
@@ -64,6 +64,14 @@ import {
 	videoHasAudio,
 } from '../utils';
 import { sideloadFile, updateMediaItem, uploadToServer } from '../api';
+
+const createBlurhashWorker = createWorkerFactory(
+	() =>
+		import(
+			/* webpackChunkName: 'blurhash-worker' */ '../workers/blurhash.worker'
+		)
+);
+const blurhashWorker = createBlurhashWorker();
 
 type ActionCreators = {
 	uploadItem: typeof uploadItem;
@@ -1330,7 +1338,7 @@ export function uploadItem( id: QueueItemId ) {
 				const url = item.attachment?.poster || item.attachment?.url;
 				if ( url ) {
 					additionalData.meta.mexp_blurhash =
-						await getBlurHash( url );
+						await blurhashWorker.getBlurHash( url );
 				}
 			} catch ( err ) {
 				// No big deal if this fails, we can still continue uploading.

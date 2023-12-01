@@ -30,6 +30,7 @@
 		}
 	},
 	"dependencies": {
+		"@shopify/web-worker": "^6.0.5",
 		"@mexp/ffmpeg": "../ffmpeg",
 		"@mexp/heif": "../heif",
 		"@mexp/jsquash": "../jsquash",
