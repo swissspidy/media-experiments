@@ -1,16 +1,9 @@
-import { encode } from 'blurhash';
-import {
-	FastAverageColor,
-	type FastAverageColorResource,
-} from 'fast-average-color';
-
 import { revokeBlobURL } from '@wordpress/blob';
 
 import {
 	blobToFile,
 	getCanvasBlob,
 	getExtensionFromMimeType,
-	getImageData,
 	preloadImage,
 } from '@mexp/media-utils';
 
@@ -254,44 +247,6 @@ export function isAnimatedGif( buffer: ArrayBuffer ) {
 	}
 
 	return frames > 1;
-}
-
-const isDevelopment =
-	typeof process !== 'undefined' &&
-	process.env &&
-	process.env.NODE_ENV !== 'production';
-
-/**
- * Get dominant color from an image or video.
- *
- * @param image Image URL or video/img/canvas element.
- * @return Hex string (e.g. #ff0000)
- */
-export async function getDominantColor(
-	image: string | FastAverageColorResource
-) {
-	const fac = new FastAverageColor();
-	const { hex, error } = await fac.getColorAsync( image as string, {
-		defaultColor: [ 255, 255, 255, 255 ],
-		// Errors that come up don't reject the promise, so error
-		// logging has to be silenced with this option.
-		silent: ! isDevelopment,
-		crossOrigin: 'anonymous',
-	} );
-
-	if ( error ) {
-		throw error;
-	}
-
-	return hex;
-}
-
-export async function getBlurHash( image: string ) {
-	const img = await preloadImage( image );
-	/// Scale down for performance reasons.
-	// See https://github.com/woltapp/blurhash/blob/cb151cab5b7d9cd3eef624e12e30381c6d292f0d/Readme.md#L112
-	const imageData = getImageData( img, 100 );
-	return encode( imageData.data, imageData.width, imageData.height, 4, 4 );
 }
 
 export async function convertImageFormat(
