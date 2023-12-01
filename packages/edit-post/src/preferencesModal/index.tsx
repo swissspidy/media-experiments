@@ -104,8 +104,8 @@ function SelectFeature( props: SelectFeatureProps ) {
 		[ featureName ]
 	);
 	const { set } = useDispatch( preferencesStore );
-	const onChange = () => {
-		void set( PREFERENCES_NAME, featureName, value );
+	const onChange = ( newValue: string ) => {
+		void set( PREFERENCES_NAME, featureName, newValue );
 	};
 	return (
 		<BaseSelectOption
@@ -134,8 +134,8 @@ function FeatureNumberControl( props: FeatureNumberControlProps ) {
 		[ featureName ]
 	);
 	const { set } = useDispatch( preferencesStore );
-	const onChange = () => {
-		void set( PREFERENCES_NAME, featureName, value );
+	const onChange = ( newValue?: string ) => {
+		void set( PREFERENCES_NAME, featureName, newValue );
 	};
 	return (
 		<NumberControl
