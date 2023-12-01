@@ -57,13 +57,20 @@ import {
 	canTranscodeFile,
 	convertImageFormat,
 	fetchRemoteFile,
-	getDominantColor,
 	getFileNameFromUrl,
 	getPosterFromVideo,
 	isAnimatedGif,
 	videoHasAudio,
 } from '../utils';
 import { sideloadFile, updateMediaItem, uploadToServer } from '../api';
+
+const createDominantColorWorker = createWorkerFactory(
+	() =>
+		import(
+			/* webpackChunkName: 'dominant-color-worker' */ '../workers/dominantColor.worker'
+		)
+);
+const dominantColorWorker = createDominantColorWorker();
 
 const createBlurhashWorker = createWorkerFactory(
 	() =>
@@ -1321,7 +1328,7 @@ export function uploadItem( id: QueueItemId ) {
 				const url = item.attachment?.poster || item.attachment?.url;
 				if ( url ) {
 					additionalData.meta.mexp_dominant_color =
-						await getDominantColor( url );
+						await dominantColorWorker.getDominantColor( url );
 				}
 			} catch ( err ) {
 				// No big deal if this fails, we can still continue uploading.
