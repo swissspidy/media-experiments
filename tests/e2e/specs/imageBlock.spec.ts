@@ -77,6 +77,13 @@ test.describe( 'Image block', () => {
 					.getByRole( 'button', { name: 'Use optimized version' } )
 					.click();
 
+				await page.waitForFunction(
+					() =>
+						window.wp.data
+							.select( 'media-experiments/upload' )
+							.getItems().length === 0
+				);
+
 				await expect( settingsPanel ).toHaveText(
 					new RegExp( `Mime type: ${ expectedMimeType }` )
 				);
