@@ -31,6 +31,7 @@
 	},
 	"devDependencies": {
 		"@mexp/eslint-import-resolver": "*",
+		"@playwright/test": "^1.40.1",
 		"@shopify/web-worker": "^6.0.5",
 		"@testing-library/jest-dom": "^6.1.4",
 		"@testing-library/react": "^14.1.0",
@@ -43,6 +44,7 @@
 		"@wordpress/env": "^8.11.0",
 		"@wordpress/eslint-plugin": "^17.0.0",
 		"@wordpress/scripts": "^26.16.0",
+		"@wp-now/wp-now": "^0.1.63",
 		"blob-polyfill": "^7.0.20220408",
 		"eslint": "^8.55.0",
 		"mini-css-extract-plugin": "^2.7.6",
@@ -50,6 +52,7 @@
 		"prettier": "npm:wp-prettier@^3.0.3",
 		"rtlcss-webpack-plugin": "^4.0.7",
 		"typescript": "^5.2.2",
+		"uuid": "^9.0.1",
 		"webpack": "^5.89.0",
 		"webpack-cli": "^5.1.4",
 		"webpack-virtual-modules": "^0.5.0"
@@ -70,6 +73,7 @@
 		"test:unit:help": "wp-scripts test-unit-js --help",
 		"test:unit:watch": "wp-scripts test-unit-js --watch",
 		"test:unit:debug": "wp-scripts --inspect-brk test-unit-js --runInBand --no-cache",
-		"wp-env": "wp-env"
+		"wp-env": "wp-env",
+		"wp-now": "wp-now start --port=8889"
 	}
 }

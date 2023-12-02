@@ -6,6 +6,8 @@ import {
 	PanelRow,
 	useBaseControlProps,
 	Tooltip,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalText as Text,
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { createInterpolateElement } from '@wordpress/element';
@@ -96,12 +98,19 @@ export function DebugInfo( { id }: DebugInfoProps ) {
 											attachment.meta.mexp_dominant_color
 										}
 									>
-										<ColorIndicator
-											colorValue={
+										<Text
+											aria-label={
 												attachment.meta
 													.mexp_dominant_color
 											}
-										/>
+										>
+											<ColorIndicator
+												colorValue={
+													attachment.meta
+														.mexp_dominant_color
+												}
+											/>
+										</Text>
 									</Tooltip>
 								),
 							}
