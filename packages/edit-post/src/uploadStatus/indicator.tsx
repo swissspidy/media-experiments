@@ -4,7 +4,7 @@ import { __ } from '@wordpress/i18n';
 import { DropdownMenu } from '@wordpress/components';
 
 import { getMediaTypeFromMimeType } from '@mexp/media-utils';
-import { store as uploadStore, UploadError } from '@mexp/upload-media/src';
+import { store as uploadStore, UploadError } from '@mexp/upload-media';
 
 const EMPTY_ARRAY: never[] = [];
 
