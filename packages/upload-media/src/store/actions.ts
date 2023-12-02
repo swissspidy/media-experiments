@@ -22,6 +22,18 @@ import {
 } from '@mexp/jsquash';
 import { getFileBasename, getMediaTypeFromMimeType } from '@mexp/media-utils';
 
+import { UploadError } from '../uploadError';
+import {
+	canTranscodeFile,
+	convertImageFormat,
+	fetchRemoteFile,
+	getFileNameFromUrl,
+	getPosterFromVideo,
+	isAnimatedGif,
+	videoHasAudio,
+} from '../utils';
+import { sideloadFile, updateMediaItem, uploadToServer } from '../api';
+import { PREFERENCES_NAME } from '../constants';
 import type {
 	AddAction,
 	AdditionalData,
@@ -52,17 +64,6 @@ import type {
 	UploadStartAction,
 } from './types';
 import { ItemStatus, TranscodingType, Type } from './types';
-import { UploadError } from '../uploadError';
-import {
-	canTranscodeFile,
-	convertImageFormat,
-	fetchRemoteFile,
-	getFileNameFromUrl,
-	getPosterFromVideo,
-	isAnimatedGif,
-	videoHasAudio,
-} from '../utils';
-import { sideloadFile, updateMediaItem, uploadToServer } from '../api';
 
 const createDominantColorWorker = createWorkerFactory(
 	() =>
@@ -159,7 +160,7 @@ export function addItem( {
 	} ) => {
 		const imageSizeThreshold = registry
 			.select( preferencesStore )
-			.get( 'media-experiments/preferences', 'bigImageSizeThreshold' );
+			.get( PREFERENCES_NAME, 'bigImageSizeThreshold' );
 
 		const resize = imageSizeThreshold
 			? {
@@ -552,7 +553,7 @@ export function prepareItem( id: QueueItemId ) {
 		// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 		const imageQuality = registry
 			.select( preferencesStore )
-			.get( 'media-experiments/preferences', 'imageQuality' );
+			.get( PREFERENCES_NAME, 'imageQuality' );
 
 		switch ( mediaType ) {
 			case 'image':
@@ -912,12 +913,12 @@ export function optimizeItemWithApproval( id: QueueItemId ) {
 
 		const imageFormat: ImageFormat = registry
 			.select( preferencesStore )
-			.get( 'media-experiments/preferences', 'imageFormat' );
+			.get( PREFERENCES_NAME, 'imageFormat' );
 
 		// TODO: Pass quality to all the different encoders.
 		const imageQuality: number = registry
 			.select( preferencesStore )
-			.get( 'media-experiments/preferences', 'imageQuality' );
+			.get( PREFERENCES_NAME, 'imageQuality' );
 
 		try {
 			let file: File;
@@ -958,7 +959,7 @@ export function optimizeItemWithApproval( id: QueueItemId ) {
 
 			const requireApproval = registry
 				.select( preferencesStore )
-				.get( 'media-experiments/preferences', 'requireApproval' );
+				.get( PREFERENCES_NAME, 'requireApproval' );
 
 			if ( requireApproval ) {
 				dispatch.requestApproval( id, file );

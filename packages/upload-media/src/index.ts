@@ -13,6 +13,7 @@ import type {
 	WP_REST_API_Term,
 } from './store/types';
 import { UploadError } from './uploadError';
+import { PREFERENCES_NAME } from './constants';
 
 export { uploadMedia } from './uploadMedia';
 export { fetchRemoteFile } from './utils';
@@ -154,7 +155,7 @@ void dispatch( uploadStore ).setImageSizes(
 );
 
 void dispatch( preferencesStore ).set(
-	'media-experiments/preferences',
+	PREFERENCES_NAME,
 	'bigImageSizeThreshold',
 	window.mediaExperiments.bigImageSizeThreshold
 );

@@ -35,3 +35,5 @@ export const TRANSCODABLE_MIME_TYPES = [
 	'video/msvideo',
 	'video/x-nut',
 ];
+
+export const PREFERENCES_NAME = 'media-experiments/preferences';
