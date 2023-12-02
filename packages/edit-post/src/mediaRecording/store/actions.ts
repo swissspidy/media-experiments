@@ -92,10 +92,9 @@ export function setHasAudio( value: boolean ) {
 	};
 }
 
-export function toggleHasAudio( value: boolean ) {
+export function toggleHasAudio() {
 	return {
 		type: Type.ToggleHasAudio,
-		value,
 	};
 }
 
