@@ -59,7 +59,7 @@ test.describe( 'Image block', () => {
 					} );
 
 				await expect( settingsPanel ).toHaveText(
-					new RegExp( `Mime type: ${ expectedMimeType }` )
+					/Mime type: image\/png/
 				);
 				await expect(
 					settingsPanel.getByLabel( '#696969' )
@@ -78,7 +78,7 @@ test.describe( 'Image block', () => {
 					.click();
 
 				await expect( settingsPanel ).toHaveText(
-					/Mime type: image\/jpeg/
+					new RegExp( `Mime type: ${ expectedMimeType }` )
 				);
 				await expect(
 					settingsPanel.getByLabel( '#696969' )
