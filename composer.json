@@ -1,7 +1,7 @@
 {
 	"name": "swissspidy/media-experiments",
 	"description": "WordPress media experiments",
-	"license": "Apache-2.0",
+	"license": "GPL-2.0-or-later",
 	"type": "wordpress-plugin",
 	"authors": [
 		{

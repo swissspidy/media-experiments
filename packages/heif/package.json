@@ -4,7 +4,7 @@
 	"description": "libheif utils",
 	"private": true,
 	"author": "",
-	"license": "Apache-2.0",
+	"license": "GPL-2.0-or-later",
 	"keywords": [
 		"wordpress",
 		"media",
