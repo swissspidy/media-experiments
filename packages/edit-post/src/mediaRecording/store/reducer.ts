@@ -15,7 +15,9 @@ import type {
 	SetErrorAction,
 	SetFileAction,
 	SetGifModeAction,
+	ToggleGifModeAction,
 	SetHasAudioAction,
+	ToggleHasAudioAction,
 	SetMediaDevicesAction,
 	SetMediaStreamAction,
 	StartRecordingAction,
@@ -60,7 +62,9 @@ type Action =
 	| FinishRecordingAction
 	| StartCapturingAction
 	| SetGifModeAction
+	| ToggleGifModeAction
 	| SetHasAudioAction
+	| ToggleHasAudioAction
 	| SetFileAction
 	| ResetStateAction
 	| SetDurationAction
@@ -199,10 +203,22 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 				isGifMode: action.value,
 			};
 
+		case Type.ToggleGifMode:
+			return {
+				...state,
+				isGifMode: ! state.isGifMode,
+			};
+
 		case Type.SetHasAudio:
 			return {
 				...state,
 				hasAudio: action.value,
+			};
+
+		case Type.ToggleHasAudio:
+			return {
+				...state,
+				hasAudio: ! state.hasAudio,
 			};
 
 		case Type.ResetVideoInput:

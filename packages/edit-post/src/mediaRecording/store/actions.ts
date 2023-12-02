@@ -79,17 +79,9 @@ export function setGifMode( value: boolean ) {
 		value,
 	};
 }
-
 export function toggleGifMode() {
-	return async ( {
-		select,
-		dispatch,
-	}: {
-		select: Selectors;
-		dispatch: ActionCreators;
-	} ) => {
-		const value = select.isGifMode();
-		dispatch.setGifMode( ! value );
+	return {
+		type: Type.ToggleGifMode,
 	};
 }
 
@@ -100,16 +92,10 @@ export function setHasAudio( value: boolean ) {
 	};
 }
 
-export function toggleHasAudio() {
-	return async ( {
-		select,
-		dispatch,
-	}: {
-		select: Selectors;
-		dispatch: ActionCreators;
-	} ) => {
-		const value = select.hasAudio();
-		dispatch.setHasAudio( ! value );
+export function toggleHasAudio( value: boolean ) {
+	return {
+		type: Type.ToggleHasAudio,
+		value,
 	};
 }
 
