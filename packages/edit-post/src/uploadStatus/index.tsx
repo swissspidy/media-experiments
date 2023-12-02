@@ -1,101 +1,18 @@
-import { store as uploadStore, UploadError } from '@mexp/upload-media';
-import { getMediaTypeFromMimeType } from '@mexp/media-utils';
-
 import { createPortal, useLayoutEffect, useRef } from '@wordpress/element';
 import {
-	subscribe,
 	dispatch as globalDispatch,
 	select as globalSelect,
-	useDispatch,
+	subscribe,
 	useSelect,
 } from '@wordpress/data';
 import { registerPlugin } from '@wordpress/plugins';
 import { store as coreStore } from '@wordpress/core-data';
 import { store as editorStore } from '@wordpress/editor';
 import { store as editPostStore } from '@wordpress/edit-post';
-import { DropdownMenu } from '@wordpress/components';
-import { file, image, video, upload } from '@wordpress/icons';
-import { __ } from '@wordpress/i18n';
 
-const EMPTY_ARRAY: never[] = [];
+import { store as uploadStore } from '@mexp/upload-media';
 
-function getItemForMimeType( mimeType: string ) {
-	let icon;
-	const mediaType = getMediaTypeFromMimeType( mimeType );
-	switch ( mediaType ) {
-		case 'image':
-			icon = image;
-			break;
-		case 'video':
-			icon = video;
-			break;
-		default:
-			icon = file;
-	}
-
-	return icon;
-}
-
-function UploadStatusIndicator() {
-	const { cancelItem } = useDispatch( uploadStore );
-	const { isUploading, items } = useSelect(
-		( select ) => {
-			const queueItems = select( uploadStore ).getItems();
-			return {
-				isUploading: select( uploadStore ).isUploading(),
-				items: queueItems.length
-					? queueItems.map( ( item ) => {
-							return {
-								icon: getItemForMimeType(
-									item.file.type || 'unknown'
-								),
-								title:
-									item.file.name ||
-									__(
-										'(Untitled file)',
-										'media-experiments'
-									),
-								onClick: () =>
-									cancelItem(
-										item.id,
-										new UploadError( {
-											code: 'UPLOAD_CANCELLED_MANUALLY',
-											message:
-												'File upload was cancelled',
-											file: item.file,
-										} )
-									),
-							};
-					  } )
-					: EMPTY_ARRAY,
-			};
-		},
-		[ cancelItem ]
-	);
-
-	if ( ! isUploading ) {
-		return (
-			<DropdownMenu
-				controls={ [
-					{
-						title: 'No uploads in progress',
-						isDisabled: true,
-					},
-				] }
-				icon={ upload }
-				label={ __( 'Uploads', 'media-experiments' ) }
-			/>
-		);
-	}
-
-	return (
-		<DropdownMenu
-			controls={ items }
-			icon={ upload }
-			label={ __( 'Uploads', 'media-experiments' ) }
-		/>
-	);
-}
+import { UploadStatusIndicator } from './indicator';
 
 function WrappedUploadStatusIndicator() {
 	const root = useRef< HTMLDivElement | null >( null );
