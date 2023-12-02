@@ -11,7 +11,7 @@ import { store as recordingStore } from './store';
 import AudioAnalyzer from './audioAnalyzer';
 
 import './blocks.css';
-import { formatMsToHMS } from './utils';
+import { formatSecondsToMinutesSeconds } from './utils';
 
 const SUPPORTED_BLOCKS = [
 	'core/image',
@@ -95,7 +95,7 @@ function OverlayText() {
 		return (
 			<>
 				<div className="mexp-recording__duration">
-					{ formatMsToHMS( duration ) }
+					{ formatSecondsToMinutesSeconds( duration ) }
 				</div>
 				<div className="mexp-recording__rec">{ 'REC' }</div>
 			</>
