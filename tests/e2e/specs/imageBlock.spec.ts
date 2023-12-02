@@ -59,7 +59,7 @@ test.describe( 'Image block', () => {
 					} );
 
 				await expect( settingsPanel ).toHaveText(
-					new RegExp( `/Mime type: ${ expectedMimeType }/` )
+					new RegExp( `Mime type: ${ expectedMimeType }` )
 				);
 				await expect(
 					settingsPanel.getByLabel( '#696969' )
