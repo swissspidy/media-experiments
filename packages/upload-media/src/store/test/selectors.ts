@@ -13,12 +13,12 @@ import {
 	isTranscoding,
 	isUploading,
 } from '../selectors';
-import { ItemStatus, type QueueItem } from '../types';
+import { ItemStatus, type QueueItem, type State } from '../types';
 
 describe( 'selectors', () => {
 	describe( 'getItems', () => {
 		it( 'should return empty array by default', () => {
-			const state = {
+			const state: State = {
 				queue: [],
 				mediaSourceTerms: {},
 				imageSizes: {},
@@ -28,7 +28,7 @@ describe( 'selectors', () => {
 		} );
 
 		it( 'should return items with the given status', () => {
-			const state = {
+			const state: State = {
 				queue: [
 					{
 						status: ItemStatus.Pending,
@@ -56,7 +56,7 @@ describe( 'selectors', () => {
 
 	describe( 'getPendingItems', () => {
 		it( 'should return items with the given status', () => {
-			const state = {
+			const state: State = {
 				queue: [
 					{
 						status: ItemStatus.Pending,
@@ -83,7 +83,7 @@ describe( 'selectors', () => {
 	} );
 	describe( 'getPendingTranscodingItems', () => {
 		it( 'should return items with the given status', () => {
-			const state = {
+			const state: State = {
 				queue: [
 					{
 						status: ItemStatus.Pending,
@@ -111,7 +111,7 @@ describe( 'selectors', () => {
 
 	describe( 'getTranscodedItems', () => {
 		it( 'should return items with the given status', () => {
-			const state = {
+			const state: State = {
 				queue: [
 					{
 						status: ItemStatus.Pending,
@@ -138,7 +138,7 @@ describe( 'selectors', () => {
 	} );
 	describe( 'getApprovedItems', () => {
 		it( 'should return items with the given status', () => {
-			const state = {
+			const state: State = {
 				queue: [
 					{
 						status: ItemStatus.Pending,
@@ -165,7 +165,7 @@ describe( 'selectors', () => {
 	} );
 	describe( 'getUploadedItems', () => {
 		it( 'should return items with the given status', () => {
-			const state = {
+			const state: State = {
 				queue: [
 					{
 						status: ItemStatus.Pending,
@@ -192,7 +192,7 @@ describe( 'selectors', () => {
 	} );
 	describe( 'getCancelledItems', () => {
 		it( 'should return items with the given status', () => {
-			const state = {
+			const state: State = {
 				queue: [
 					{
 						status: ItemStatus.Pending,
@@ -223,7 +223,7 @@ describe( 'selectors', () => {
 
 	describe( 'getInProgressItems', () => {
 		it( 'should return items with the given status', () => {
-			const state = {
+			const state: State = {
 				queue: [
 					{
 						status: ItemStatus.Pending,
@@ -266,7 +266,7 @@ describe( 'selectors', () => {
 
 	describe( 'isTranscoding', () => {
 		it( 'should return true if there are items being transcoded', () => {
-			const state = {
+			const state: State = {
 				queue: [
 					{
 						status: ItemStatus.Pending,
@@ -308,7 +308,7 @@ describe( 'selectors', () => {
 	} );
 	describe( 'isUploading', () => {
 		it( 'should return true if there are items in the pipeline', () => {
-			const state = {
+			const state: State = {
 				queue: [
 					{
 						status: ItemStatus.Pending,
