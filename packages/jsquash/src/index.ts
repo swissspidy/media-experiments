@@ -54,7 +54,7 @@ export async function convertImageToAvif( file: File ) {
 		const img = await preloadImage( url );
 		const imageData = getImageData( img );
 
-		const fileName = `${ getFileBasename( file.name ) }.jpeg`;
+		const fileName = `${ getFileBasename( file.name ) }.avif`;
 
 		await initAvif( undefined, {
 			locateFile: () =>
@@ -70,9 +70,9 @@ export async function convertImageToAvif( file: File ) {
 		} );
 
 		return blobToFile(
-			new Blob( [ buffer ], { type: 'image/jpeg' } ),
+			new Blob( [ buffer ], { type: 'image/avif' } ),
 			fileName,
-			'image/jpeg'
+			'image/avif'
 		);
 	} catch ( err ) {
 		throw err;
