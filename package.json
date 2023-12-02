@@ -57,6 +57,9 @@
 		"webpack-cli": "^5.1.4",
 		"webpack-virtual-modules": "^0.5.0"
 	},
+	"overrides": {
+		"@playwright/test": "$@playwright/test"
+	},
 	"scripts": {
 		"postinstall": "patch-package",
 		"build": "wp-scripts build",
