@@ -932,14 +932,6 @@ export function optimizeItemWithApproval( id: QueueItemId ) {
 						imageQuality / 100
 					);
 					break;
-				case 'jpeg-browser':
-					file = await convertImageFormat(
-						item.file,
-						getFileBasename( item.file.name ),
-						'image/jpeg',
-						imageQuality / 100
-					);
-					break;
 				case 'jpeg-vips':
 					file = await convertImageToJpeg( item.file );
 					break;
@@ -952,8 +944,14 @@ export function optimizeItemWithApproval( id: QueueItemId ) {
 				case 'webp-ffmpeg':
 					file = await convertImageToWebP( item.file );
 					break;
+				case 'jpeg-browser':
 				default:
-					file = await convertImageToWebP( item.file );
+					file = await convertImageFormat(
+						item.file,
+						getFileBasename( item.file.name ),
+						'image/jpeg',
+						imageQuality / 100
+					);
 					break;
 			}
 

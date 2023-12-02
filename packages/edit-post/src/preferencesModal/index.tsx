@@ -10,6 +10,8 @@ import {
 import { store as interfaceStore } from '@wordpress/interface';
 import { store as preferencesStore } from '@wordpress/preferences';
 
+import type { ImageFormat } from '@mexp/upload-media';
+
 import './styles.css';
 import { Modal } from './modal';
 import { PREFERENCES_NAME } from './constants';
@@ -39,11 +41,23 @@ registerPlugin( 'media-experiments-preferences', {
 	render: PreferencesMenuItem,
 } );
 
-void globalDispatch( preferencesStore ).setDefaults( PREFERENCES_NAME, {
+const defaultPreferences: {
+	videoInput?: string;
+	audioInput?: string;
+	videoEffect: 'none' | 'blur';
+	requireApproval: boolean;
+	imageFormat: ImageFormat;
+	imageQuality: number;
+} = {
 	videoInput: undefined,
 	audioInput: undefined,
 	videoEffect: 'none',
 	requireApproval: true,
-	imageFormat: 'webp',
+	imageFormat: 'jpeg-browser',
 	imageQuality: 82,
-} );
+};
+
+void globalDispatch( preferencesStore ).setDefaults(
+	PREFERENCES_NAME,
+	defaultPreferences
+);

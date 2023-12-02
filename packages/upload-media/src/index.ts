@@ -11,6 +11,7 @@ import type {
 	QueueItem,
 	RestAttachment,
 	WP_REST_API_Term,
+	ImageFormat,
 } from './store/types';
 import { UploadError } from './uploadError';
 import { PREFERENCES_NAME } from './constants';
@@ -24,6 +25,7 @@ export type {
 	OnErrorHandler,
 	Attachment,
 	RestAttachment,
+	ImageFormat,
 };
 
 export { uploadStore as store, UploadError };
