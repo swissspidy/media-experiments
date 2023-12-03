@@ -3,11 +3,9 @@ import type { ImageSizeCrop } from '../types';
 
 let windowSpy: any;
 const mockImage: any = {
-	thumbnailImage: jest.fn( () => mockImage ),
-	crop: jest.fn( () => mockImage ),
 	writeToBuffer: jest.fn(),
 };
-const mockThumbnailImage = jest.fn( () => mockImage );
+const mockThumbnailBuffer = jest.fn( () => mockImage );
 const mockCrop = jest.fn( () => mockImage );
 
 describe( 'resizeImage', () => {
@@ -17,12 +15,12 @@ describe( 'resizeImage', () => {
 			Vips: jest.fn( () => ( {
 				Image: {
 					newFromBuffer: jest.fn( () => ( {
-						thumbnailImage: mockThumbnailImage,
 						crop: mockCrop,
 						writeToBuffer: jest.fn(),
 						width: 100,
 						height: 100,
 					} ) ),
+					thumbnailBuffer: mockThumbnailBuffer,
 				},
 			} ) ),
 		} ) );
@@ -34,17 +32,18 @@ describe( 'resizeImage', () => {
 	} );
 
 	it( 'resizes without crop', async () => {
-		const jpegFile = new File( [], 'example.jpg', {
+		const jpegFile = new File( [ '<BLOB>' ], 'example.jpg', {
 			lastModified: 1234567891,
 			type: 'image/jpeg',
 		} );
+		const buffer = await jpegFile.arrayBuffer();
 
 		await resizeImage( jpegFile, {
 			width: 100,
 			height: 100,
 		} );
 
-		expect( mockThumbnailImage ).toHaveBeenCalledWith( 100, {
+		expect( mockThumbnailBuffer ).toHaveBeenCalledWith( buffer, 100, {
 			height: 100,
 		} );
 		expect( mockCrop ).not.toHaveBeenCalled();
@@ -55,21 +54,23 @@ describe( 'resizeImage', () => {
 			lastModified: 1234567891,
 			type: 'image/jpeg',
 		} );
+		const buffer = await jpegFile.arrayBuffer();
 
 		await resizeImage( jpegFile, {
 			width: 100,
 			height: 0,
 		} );
 
-		expect( mockThumbnailImage ).toHaveBeenCalledWith( 100, {} );
+		expect( mockThumbnailBuffer ).toHaveBeenCalledWith( buffer, 100, {} );
 		expect( mockCrop ).not.toHaveBeenCalled();
 	} );
 
 	it( 'resizes with center crop', async () => {
-		const jpegFile = new File( [], 'example.jpg', {
+		const jpegFile = new File( [ '<BLOB>' ], 'example.jpg', {
 			lastModified: 1234567891,
 			type: 'image/jpeg',
 		} );
+		const buffer = await jpegFile.arrayBuffer();
 
 		await resizeImage( jpegFile, {
 			width: 100,
@@ -77,17 +78,18 @@ describe( 'resizeImage', () => {
 			crop: true,
 		} );
 
-		expect( mockThumbnailImage ).toHaveBeenCalledWith( 100, {
+		expect( mockThumbnailBuffer ).toHaveBeenCalledWith( buffer, 100, {
 			height: 100,
 			crop: 'centre',
 		} );
 		expect( mockCrop ).not.toHaveBeenCalled();
 	} );
 	it( 'resizes with center crop and zero height', async () => {
-		const jpegFile = new File( [], 'example.jpg', {
+		const jpegFile = new File( [ '<BLOB>' ], 'example.jpg', {
 			lastModified: 1234567891,
 			type: 'image/jpeg',
 		} );
+		const buffer = await jpegFile.arrayBuffer();
 
 		await resizeImage( jpegFile, {
 			width: 100,
@@ -95,7 +97,7 @@ describe( 'resizeImage', () => {
 			crop: true,
 		} );
 
-		expect( mockThumbnailImage ).toHaveBeenCalledWith( 100, {
+		expect( mockThumbnailBuffer ).toHaveBeenCalledWith( buffer, 100, {
 			crop: 'centre',
 		} );
 		expect( mockCrop ).not.toHaveBeenCalled();
@@ -141,7 +143,7 @@ describe( 'resizeImage', () => {
 			],
 		]
 	)( 'resizes with %s param and crops %s', async ( crop, expected ) => {
-		const jpegFile = new File( [], 'example.jpg', {
+		const jpegFile = new File( [ '<BLOB>' ], 'example.jpg', {
 			lastModified: 1234567891,
 			type: 'image/jpeg',
 		} );

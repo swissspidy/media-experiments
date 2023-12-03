@@ -46,21 +46,24 @@ export async function convertImageToJpeg( file: File ) {
  */
 export async function resizeImage( file: File, resize: ImageSizeCrop ) {
 	const vips = await getVips();
-	let image = vips.Image.newFromBuffer( await file.arrayBuffer() );
-
-	const { width, height } = image;
-
 	const options: Record< string, unknown > = {};
 	if ( resize.height ) {
 		options.height = resize.height;
 	}
-
-	if ( ! resize.crop ) {
-		image = image.thumbnailImage( resize.width, options );
-	} else if ( true === resize.crop ) {
+	if ( true === resize.crop ) {
 		options.crop = 'centre';
-		image = image.thumbnailImage( resize.width, options );
+	}
+
+	let image;
+
+	if ( ! resize.crop || true === resize.crop ) {
+		image = vips.Image.thumbnailBuffer( await file.arrayBuffer(),
+			resize.width, options );
 	} else {
+		image = vips.Image.newFromBuffer( await file.arrayBuffer() );
+
+		const { width, height } = image;
+
 		let left = 0;
 		if ( 'center' === resize.crop[ 0 ] ) {
 			left = width / 2;
