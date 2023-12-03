@@ -6,7 +6,7 @@ import {
 
 import type { ImageSizeCrop } from './types';
 
-let cleanup = () => void 0;
+let cleanup: () => void;
 
 async function getVips() {
 	return window.Vips( {
@@ -35,7 +35,7 @@ export async function convertImageToJpeg( file: File ) {
 	const vips = await getVips();
 	const image = vips.Image.newFromBuffer( await file.arrayBuffer() );
 	const outBuffer = image.writeToBuffer( '.jpeg', { Q: 75 } );
-	cleanup();
+	cleanup?.();
 
 	const fileName = `${ getFileBasename( file.name ) }.jpeg`;
 	return blobToFile(
@@ -91,7 +91,7 @@ export async function resizeImage( file: File, resize: ImageSizeCrop ) {
 
 	const ext = getExtensionFromMimeType( file.type );
 	const outBuffer = image.writeToBuffer( `.${ ext }` );
-	cleanup();
+	cleanup?.();
 
 	const fileName = `${ getFileBasename( file.name ) }-${ image.width }x${
 		image.height
