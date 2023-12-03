@@ -17,11 +17,11 @@ async function getVips() {
 		// https://github.com/kleisauke/wasm-vips/blob/789363e5b54d677b109bcdaf8353d283d81a8ee3/src/locatefile-cors-pre.js#L4
 		// @ts-ignore
 		workaroundCors: true,
-		preRun: (module) => {
+		preRun: ( module ) => {
 			// https://github.com/kleisauke/wasm-vips/issues/13#issuecomment-1073246828
 			module.setAutoDeleteLater( true );
-			module.setDelayFunction( (fn: () => void) => cleanup = fn );
-		}
+			module.setDelayFunction( ( fn: () => void ) => ( cleanup = fn ) );
+		},
 	} );
 }
 
@@ -65,8 +65,11 @@ export async function resizeImage( file: File, resize: ImageSizeCrop ) {
 	let image;
 
 	if ( ! resize.crop || true === resize.crop ) {
-		image = vips.Image.thumbnailBuffer( await file.arrayBuffer(),
-			resize.width, options );
+		image = vips.Image.thumbnailBuffer(
+			await file.arrayBuffer(),
+			resize.width,
+			options
+		);
 	} else {
 		image = vips.Image.newFromBuffer( await file.arrayBuffer() );
 
