@@ -1,6 +1,9 @@
 import {
+	getAudioInput,
 	getDevices,
 	getRecordingType,
+	getVideoEffect,
+	getVideoInput,
 	hasAudio,
 	hasVideo,
 	isBlockInRecordingMode,
@@ -9,151 +12,110 @@ import {
 } from '../selectors';
 import type { State } from '../types';
 
+const defaultState: State = {
+	videoInput: undefined,
+	audioInput: undefined,
+	videoEffect: 'none',
+	blockClientId: undefined,
+	recordingType: 'video',
+	devices: [],
+	hasAudio: true,
+	isGifMode: false,
+	countdown: 0,
+	duration: 0,
+	recordingStatus: 'idle',
+	mediaChunks: [],
+};
+
 describe( 'selectors', () => {
 	describe( 'isInRecordingMode', () => {
 		it( 'should return false by default', () => {
-			const state: State = {
-				videoInput: undefined,
-				audioInput: undefined,
-				videoEffect: 'none',
-				blockClientId: undefined,
-				recordingType: 'video',
-				devices: [],
-				hasAudio: true,
-				isGifMode: false,
-				countdown: 0,
-				duration: 0,
-				recordingStatus: 'idle',
-				mediaChunks: [],
-			};
-
-			expect( isInRecordingMode( state ) ).toBe( false );
+			expect( isInRecordingMode( defaultState ) ).toBe( false );
 		} );
 	} );
 
 	describe( 'isBlockInRecordingMode', () => {
-		it( 'should return false by default', () => {
+		it( 'should return false if wrong clientId', () => {
 			const state: State = {
-				videoInput: undefined,
-				audioInput: undefined,
-				videoEffect: 'none',
+				...defaultState,
 				blockClientId: 'foo',
-				recordingType: 'video',
-				devices: [],
-				hasAudio: true,
-				isGifMode: false,
-				countdown: 0,
-				duration: 0,
-				recordingStatus: 'idle',
-				mediaChunks: [],
 			};
 
 			expect( isBlockInRecordingMode( state, 'bar' ) ).toBe( false );
+		} );
+
+		it( 'should return true if right clientId', () => {
+			const state: State = {
+				...defaultState,
+				blockClientId: 'foo',
+			};
+
+			expect( isBlockInRecordingMode( state, 'foo' ) ).toBe( true );
 		} );
 	} );
 
 	describe( 'getRecordingType', () => {
 		it( 'should return video by default', () => {
-			const state: State = {
-				videoInput: undefined,
-				audioInput: undefined,
-				videoEffect: 'none',
-				blockClientId: undefined,
-				recordingType: 'video',
-				devices: [],
-				hasAudio: true,
-				isGifMode: false,
-				countdown: 0,
-				duration: 0,
-				recordingStatus: 'idle',
-				mediaChunks: [],
-			};
-
-			expect( getRecordingType( state ) ).toBe( 'video' );
+			expect( getRecordingType( defaultState ) ).toBe( 'video' );
 		} );
 	} );
 
 	describe( 'getDevices', () => {
 		it( 'should return empty array by default', () => {
-			const state: State = {
-				videoInput: undefined,
-				audioInput: undefined,
-				videoEffect: 'none',
-				blockClientId: undefined,
-				recordingType: 'video',
-				devices: [],
-				hasAudio: true,
-				isGifMode: false,
-				countdown: 0,
-				duration: 0,
-				recordingStatus: 'idle',
-				mediaChunks: [],
-			};
-
-			expect( getDevices( state ) ).toStrictEqual( [] );
+			expect( getDevices( defaultState ) ).toStrictEqual( [] );
 		} );
 	} );
 
 	describe( 'isGifMode', () => {
 		it( 'should return false by default', () => {
-			const state: State = {
-				videoInput: undefined,
-				audioInput: undefined,
-				videoEffect: 'none',
-				blockClientId: undefined,
-				recordingType: 'video',
-				devices: [],
-				hasAudio: true,
-				isGifMode: false,
-				countdown: 0,
-				duration: 0,
-				recordingStatus: 'idle',
-				mediaChunks: [],
-			};
-
-			expect( isGifMode( state ) ).toBe( false );
+			expect( isGifMode( defaultState ) ).toBe( false );
 		} );
 	} );
 
 	describe( 'hasVideo', () => {
 		it( 'should return true by default', () => {
-			const state: State = {
-				videoInput: undefined,
-				audioInput: undefined,
-				videoEffect: 'none',
-				blockClientId: undefined,
-				recordingType: 'video',
-				devices: [],
-				hasAudio: true,
-				isGifMode: false,
-				countdown: 0,
-				duration: 0,
-				recordingStatus: 'idle',
-				mediaChunks: [],
-			};
-
-			expect( hasVideo( state ) ).toBe( true );
+			expect( hasVideo( defaultState ) ).toBe( true );
 		} );
 	} );
 
 	describe( 'hasAudio', () => {
 		it( 'should return true by default', () => {
+			expect( hasAudio( defaultState ) ).toBe( true );
+		} );
+	} );
+
+	describe( 'getVideoInput', () => {
+		it( 'should return video input', () => {
 			const state: State = {
-				videoInput: undefined,
-				audioInput: undefined,
-				videoEffect: 'none',
-				blockClientId: undefined,
-				recordingType: 'video',
-				devices: [],
-				hasAudio: true,
-				isGifMode: false,
-				countdown: 0,
-				duration: 0,
-				recordingStatus: 'idle',
-				mediaChunks: [],
+				...defaultState,
+				videoInput: 'foo',
 			};
 
-			expect( hasAudio( state ) ).toBe( true );
+			expect( getVideoInput( state ) ).toBe( 'foo' );
+		} );
+	} );
+	describe( 'getAudioInput', () => {
+		it( 'should return video input', () => {
+			const state: State = {
+				...defaultState,
+				audioInput: 'foo',
+			};
+
+			expect( getAudioInput( state ) ).toBe( 'foo' );
+		} );
+	} );
+	describe( 'getVideoEffect', () => {
+		it( 'should return none by default', () => {
+			expect( getVideoEffect( defaultState ) ).toBe( 'none' );
+		} );
+
+		it( 'should return blur', () => {
+			const state: State = {
+				...defaultState,
+				videoEffect: 'blur',
+			};
+
+			expect( getVideoEffect( state ) ).toBe( 'blur' );
 		} );
 	} );
 } );

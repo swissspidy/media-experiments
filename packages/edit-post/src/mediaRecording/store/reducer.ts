@@ -2,6 +2,7 @@ import type {
 	AddMediaChunkAction,
 	ChangeAudioInputAction,
 	ChangeVideoEffectAction,
+	ToggleBlurVideoEffectAction,
 	ChangeVideoInputAction,
 	CountdownTickAction,
 	DurationTickAction,
@@ -55,6 +56,7 @@ type Action =
 	| ChangeAudioInputAction
 	| ResetVideoInputAction
 	| ChangeVideoEffectAction
+	| ToggleBlurVideoEffectAction
 	| StartRecordingAction
 	| StopRecordingAction
 	| PauseRecordingAction
@@ -195,6 +197,12 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 			return {
 				...state,
 				videoEffect: action.videoEffect,
+			};
+
+		case Type.ToggleBlurVideoEffect:
+			return {
+				...state,
+				videoEffect: state.videoEffect === 'none' ? 'blur' : 'none',
 			};
 
 		case Type.SetGifMode:

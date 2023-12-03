@@ -61,15 +61,8 @@ export function setVideoEffect( videoEffect: VideoEffect ) {
 }
 
 export function toggleBlurEffect() {
-	return async ( {
-		select,
-		dispatch,
-	}: {
-		select: Selectors;
-		dispatch: ActionCreators;
-	} ) => {
-		const value = select.getVideoEffect();
-		dispatch.setVideoEffect( value === 'none' ? 'blur' : 'none' );
+	return {
+		type: Type.ToggleBlurVideoEffect,
 	};
 }
 

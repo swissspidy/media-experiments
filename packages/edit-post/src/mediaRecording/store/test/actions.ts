@@ -45,4 +45,39 @@ describe( 'actions', () => {
 			} );
 		} );
 	} );
+
+	describe( 'toggleBlurEffect', () => {
+		it( `should return the ${ Type.ToggleBlurVideoEffect } action`, async () => {
+			const result = await registry
+				.dispatch( recordingStore )
+				.toggleBlurEffect();
+
+			expect( result ).toStrictEqual( {
+				type: Type.ToggleBlurVideoEffect,
+			} );
+		} );
+	} );
+
+	describe( 'toggleGifMode', () => {
+		it( `should return the ${ Type.ToggleGifMode } action`, async () => {
+			const result = await registry
+				.dispatch( recordingStore )
+				.toggleGifMode();
+
+			expect( result ).toStrictEqual( {
+				type: Type.ToggleGifMode,
+			} );
+		} );
+	} );
+	describe( 'toggleHasAudio', () => {
+		it( `should return the ${ Type.ToggleHasAudio } action`, async () => {
+			const result = await registry
+				.dispatch( recordingStore )
+				.toggleHasAudio();
+
+			expect( result ).toStrictEqual( {
+				type: Type.ToggleHasAudio,
+			} );
+		} );
+	} );
 } );

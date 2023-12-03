@@ -50,6 +50,7 @@ export enum Type {
 	ChangeAudioInput = 'CHANGE_AUDIO_INPUT',
 	ResetVideoInput = 'RESET_VIDEO_INPUT',
 	ChangeVideoEffect = 'CHANGE_VIDEO_EFFECT',
+	ToggleBlurVideoEffect = 'TOGGLE_BLUR_VIDEO_EFFECT',
 	StartRecording = 'START_RECORDING',
 	StopRecording = 'STOP_RECORDING',
 	PauseRecording = 'PAUSE_RECORDING',
@@ -96,6 +97,7 @@ export type ChangeVideoEffectAction = Action<
 	Type.ChangeVideoEffect,
 	{ videoEffect: VideoEffect }
 >;
+export type ToggleBlurVideoEffectAction = Action< Type.ToggleBlurVideoEffect >;
 export type StartRecordingAction = Action<
 	Type.StartRecording,
 	{ mediaRecorder: MediaRecorder }
