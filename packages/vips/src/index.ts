@@ -6,6 +6,8 @@ import {
 
 import type { ImageSizeCrop } from './types';
 
+let cleanup: () => void;
+
 async function getVips() {
 	return window.Vips( {
 		// Disable dynamic modules, it doesn't work when wasm-vips is served from a CDN
@@ -15,6 +17,11 @@ async function getVips() {
 		// https://github.com/kleisauke/wasm-vips/blob/789363e5b54d677b109bcdaf8353d283d81a8ee3/src/locatefile-cors-pre.js#L4
 		// @ts-ignore
 		workaroundCors: true,
+		preRun: (module) => {
+			// https://github.com/kleisauke/wasm-vips/issues/13#issuecomment-1073246828
+			module.setAutoDeleteLater( true );
+			module.setDelayFunction( (fn: () => void) => cleanup = fn );
+		}
 	} );
 }
 
@@ -28,6 +35,7 @@ export async function convertImageToJpeg( file: File ) {
 	const vips = await getVips();
 	const image = vips.Image.newFromBuffer( await file.arrayBuffer() );
 	const outBuffer = image.writeToBuffer( '.jpeg', { Q: 75 } );
+	cleanup?.();
 
 	const fileName = `${ getFileBasename( file.name ) }.jpeg`;
 	return blobToFile(
@@ -46,21 +54,24 @@ export async function convertImageToJpeg( file: File ) {
  */
 export async function resizeImage( file: File, resize: ImageSizeCrop ) {
 	const vips = await getVips();
-	let image = vips.Image.newFromBuffer( await file.arrayBuffer() );
-
-	const { width, height } = image;
-
 	const options: Record< string, unknown > = {};
 	if ( resize.height ) {
 		options.height = resize.height;
 	}
-
-	if ( ! resize.crop ) {
-		image = image.thumbnailImage( resize.width, options );
-	} else if ( true === resize.crop ) {
+	if ( true === resize.crop ) {
 		options.crop = 'centre';
-		image = image.thumbnailImage( resize.width, options );
+	}
+
+	let image;
+
+	if ( ! resize.crop || true === resize.crop ) {
+		image = vips.Image.thumbnailBuffer( await file.arrayBuffer(),
+			resize.width, options );
 	} else {
+		image = vips.Image.newFromBuffer( await file.arrayBuffer() );
+
+		const { width, height } = image;
+
 		let left = 0;
 		if ( 'center' === resize.crop[ 0 ] ) {
 			left = width / 2;
@@ -80,6 +91,7 @@ export async function resizeImage( file: File, resize: ImageSizeCrop ) {
 
 	const ext = getExtensionFromMimeType( file.type );
 	const outBuffer = image.writeToBuffer( `.${ ext }` );
+	cleanup?.();
 
 	const fileName = `${ getFileBasename( file.name ) }-${ image.width }x${
 		image.height
