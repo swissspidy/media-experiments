@@ -43,6 +43,8 @@ jobs:
 
             - name: Build plugin
               run: npm run build
+              env:
+                  WP_DEVTOOL: source-map
 
             - name: Configure WordPress version
               run: |
@@ -72,6 +74,14 @@ jobs:
 
             - name: Run tests
               run: npm run test:e2e
+              env:
+                  COLLECT_COVERAGE: ${{ matrix.wp == 'latest' }}
+
+            - name: Upload code coverage report
+              uses: codecov/codecov-action@v3.1.4
+              with:
+                  file: artifacts/e2e-coverage/coverage/lcov.info
+                  flags: e2e
 
             - name: Archive debug artifacts (screenshots, HTML snapshots)
               uses: actions/upload-artifact@v3
