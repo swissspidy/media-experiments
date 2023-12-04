@@ -64,6 +64,7 @@ jobs:
               run: |
                   git config --local user.email "swissspidy@users.noreply.github.com"
                   git config --local user.name "swissspidy-bot"
+                  git push origin :refs/tags/nightly
                   git tag -f nightly
                   git push origin --tags
 
