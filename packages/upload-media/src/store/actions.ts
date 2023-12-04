@@ -499,7 +499,6 @@ export function optimizeExistingItem( {
 				dominantColor,
 				transcode: [ TranscodingType.OptimizeExisting ],
 				generatedPosterId,
-				needsApproval: true,
 			},
 		} );
 	};
