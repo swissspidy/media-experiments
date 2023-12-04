@@ -30,6 +30,7 @@
 		"@mexp/edit-post": "*"
 	},
 	"devDependencies": {
+		"@bgotink/playwright-coverage": "^0.2.2",
 		"@mexp/eslint-import-resolver": "*",
 		"@playwright/test": "^1.40.1",
 		"@shopify/web-worker": "^6.0.5",
