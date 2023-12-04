@@ -1,5 +1,7 @@
 import { join, resolve } from 'node:path';
 
+import type { CoverageReportOptions } from 'monocart-reporter';
+
 import { defineConfig, devices } from '@playwright/test';
 
 import baseConfig from '@wordpress/scripts/config/playwright.config';
@@ -9,38 +11,27 @@ const config = defineConfig( {
 	reporter: [
 		...baseConfig.reporter,
 		process.env.COLLECT_COVERAGE === 'true' && [
-			'@bgotink/playwright-coverage',
-			/** @type {import('@bgotink/playwright-coverage').CoverageReporterOptions} */ {
-				sourceRoot: process.cwd(),
-				exclude: [
-					'**/**.svg',
-					'**/webpack/**',
-					'**/external window**',
-				],
-				resultDir: join( process.cwd(), 'artifacts/e2e-coverage' ),
-				rewritePath: ( { relativePath }: { relativePath: string } ) => {
-					return resolve(
-						process.cwd(),
-						relativePath.replace( 'media-experiments/', './' )
-					);
+			'monocart-reporter',
+			/** @type {CoverageReportOptions} **/
+			{
+				outputFile: './artifacts/e2e-coverage/report.html',
+				logging: 'off',
+				foo: 'bar',
+				coverage: {
+					entryFilter: ( entry: any ) => {
+						return (
+							entry.url.startsWith( 'blob:' ) ||
+							entry.url.includes(
+								'media-experiments/build/media-experiments.js'
+							)
+						);
+					},
+					sourcePath: ( sourcePath: string ) => {
+						return sourcePath.replace( 'media-experiments/', '' );
+					},
+					toIstanbul: true,
+					lcov: true,
 				},
-				reports: [
-					[ 'html' ],
-					[
-						'lcovonly',
-						{
-							file: 'coverage.lcov',
-						},
-					],
-					[
-						'text-summary',
-						{
-							file: null,
-						},
-					],
-				],
-				// See https://github.com/istanbuljs/nyc#high-and-low-watermarks
-				// watermarks: {},
 			},
 		],
 	].filter( Boolean ),
