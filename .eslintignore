@@ -1,7 +1,8 @@
+artifacts
+build
 dist
 dist-types
 node_modules
-build
 /vendor
 composer.lock
 package-lock.json
