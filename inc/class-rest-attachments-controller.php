@@ -131,12 +131,6 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			return $file;
 		}
 
-		// TODO: pass correct file name on the client.
-
-		$name       = wp_basename( $file['file'] );
-		$name_parts = pathinfo( $name );
-		$name       = trim( substr( $name, 0, -( 1 + strlen( $name_parts['extension'] ) ) ) );
-
 		$url  = $file['url'];
 		$type = $file['type'];
 		$path = $file['file'];
