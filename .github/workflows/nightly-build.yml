@@ -69,18 +69,18 @@ jobs:
                   git push origin --tags
 
             - name: Delete existing release
-              uses: actions/github-script@v2
+              uses: actions/github-script@v7
               if: ${{ env.CURRENT_TAG != 'nightly' }}
               with:
                   github-token: ${{secrets.GITHUB_TOKEN}}
                   script: |
-                      const response = await github.repos.getReleaseByTag({
+                      const response = await github.rest.repos.getReleaseByTag({
                         owner: context.repo.owner,
                         repo: context.repo.repo,
                         tag: "nightly"
                       });
 
-                      github.repos.deleteRelease({
+                      github.rest.repos.deleteRelease({
                         owner: context.repo.owner,
                         repo: context.repo.repo,
                         release_id: response.data.id,
