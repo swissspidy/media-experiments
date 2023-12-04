@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Media Experiments
- * Plugin URI:  https://github.com/swissspidy/media-experiments/
+ * Plugin URI:  https://github.com/swissspidy/media-experiments
  * Description: Media Experiments
  * Version:     0.0.1
  * Author:      Pascal Birchler
@@ -11,6 +11,7 @@
  * Text Domain: media-experiments
  * Requires at least: 6.1
  * Requires PHP: 5.6
+ * GitHub Plugin URI: https://github.com/swissspidy/media-experiments
  *
  * @package MediaExperiments
  */
