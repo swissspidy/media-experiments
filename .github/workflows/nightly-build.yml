@@ -8,9 +8,9 @@ on:
 
 # Cancels all previous workflow runs for the same branch that have not yet completed.
 concurrency:
-  # The concurrency group contains the workflow name and the branch name.
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    # The concurrency group contains the workflow name and the branch name.
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
 
 permissions:
     contents: write
@@ -67,6 +67,24 @@ jobs:
                   git push origin :refs/tags/nightly
                   git tag -f nightly
                   git push origin --tags
+
+            - name: Delete existing release
+              uses: actions/github-script@v2
+              if: ${{ env.CURRENT_TAG != 'nightly' }}
+              with:
+                  github-token: ${{secrets.GITHUB_TOKEN}}
+                  script: |
+                      const response = await github.repos.getReleaseByTag({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        tag: "nightly"
+                      });
+
+                      github.repos.deleteRelease({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        release_id: response.data.id,
+                      });
 
             - name: Publish Release
               uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844
