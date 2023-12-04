@@ -94,11 +94,13 @@ export async function resizeImage( file: File, resize: ImageSizeCrop ) {
 
 	const ext = getExtensionFromMimeType( file.type );
 	const outBuffer = image.writeToBuffer( `.${ ext }` );
-	cleanup?.();
 
 	const fileName = `${ getFileBasename( file.name ) }-${ image.width }x${
 		image.height
 	}.${ ext }`;
+
+	// Only call after `image` is no longer being used.
+	cleanup?.();
 
 	return blobToFile(
 		new Blob( [ outBuffer ], { type: file.type } ),
