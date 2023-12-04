@@ -47,4 +47,4 @@ jobs:
                   prerelease: true
                   title: 'Nightly Build'
                   files: |
-                    media-experiments.zip
+                      media-experiments.zip
