@@ -693,7 +693,6 @@ export function finishUploading( id: QueueItemId, attachment: Attachment ) {
 	} ) => {
 		const item = select.getItem( id );
 		if ( item ) {
-			console.log('finishuploading', attachment.missingImageSizes);
 			if (
 				'missingImageSizes' in attachment &&
 				attachment.missingImageSizes

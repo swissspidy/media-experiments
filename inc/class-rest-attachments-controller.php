@@ -95,6 +95,37 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		remove_filter( 'intermediate_image_sizes_advanced', '__return_empty_array', 100 );
 
+		$data = $response->get_data();
+
+		$original_id = get_post_meta( $data['id'], 'mexp_original_id', true );
+
+		// Copy metadata from original if needed, e.g. if converting to AVIF
+		// and the server does not natively support the format.
+		// See https://github.com/swissspidy/media-experiments/issues/237.
+		if ( $original_id && get_post( $original_id ) ) {
+
+			$original_metadata = wp_get_attachment_metadata( $original_id );
+			$new_metadata      = wp_get_attachment_metadata( $data['id'] );
+
+			$keys = [ 'width', 'height' ];
+			foreach ( $keys as $key ) {
+				if ( ! isset( $new_metadata[ $key ] ) && isset( $original_metadata[ $key ] ) ) {
+					$new_metadata[ $key ] = $original_metadata[ $key ];
+				}
+			}
+
+			wp_update_attachment_metadata( $data['id'], $new_metadata );
+
+			$fields = $this->get_fields_for_response( $request );
+
+			if ( in_array( 'missing_image_sizes', $fields, true ) ) {
+				require_once ABSPATH . 'wp-admin/includes/image.php';
+				$data['missing_image_sizes'] = array_keys( wp_get_missing_image_subsizes( $data['id'] ) );
+			}
+
+			$response->set_data( $data );
+		}
+
 		return $response;
 	}
 

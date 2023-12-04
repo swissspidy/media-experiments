@@ -642,7 +642,7 @@ function rest_after_insert_attachment_handle_terms( WP_Post $attachment, WP_REST
 /**
  * Fires after a single attachment is completely created or updated via the REST API.
  *
- * Adds image sub sizes for PDFs in the format WordPress core expects
+ * Adds image sub sizes metadata for PDFs in the format WordPress core expects.
  *
  * @link https://github.com/WordPress/wordpress-develop/blob/8a5daa6b446e8c70ba22d64820f6963f18d36e92/src/wp-admin/includes/image.php#L609-L634
  *
