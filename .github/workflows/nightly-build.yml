@@ -15,36 +15,56 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4
 
+            - name: Get current tag for HEAD
+              run: |
+                  echo "CURRENT_TAG=$(git tag --points-at HEAD)" >> $GITHUB_ENV
+
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
+              if: ${{ env.CURRENT_TAG != 'nightly' }}
               with:
                   php-version: latest
                   coverage: none
                   tools: wp-cli
 
             - name: Install latest version of dist-archive-command
+              if: ${{ env.CURRENT_TAG != 'nightly' }}
               run: wp package install wp-cli/dist-archive-command:dev-main
 
             - name: Setup Node
               uses: actions/setup-node@v4
+              if: ${{ env.CURRENT_TAG != 'nightly' }}
               with:
                   node-version-file: '.nvmrc'
                   cache: npm
 
             - name: Install dependencies
+              if: ${{ env.CURRENT_TAG != 'nightly' }}
               run: npm ci
 
             - name: Build plugin
+              if: ${{ env.CURRENT_TAG != 'nightly' }}
               run: npm run build
 
             - name: Create ZIP file
+              if: ${{ env.CURRENT_TAG != 'nightly' }}
               run: wp dist-archive . ./media-experiments.zip
 
-            - uses: marvinpinto/action-automatic-releases@latest
+            - name: Tag current commit
+              if: ${{ env.CURRENT_TAG != 'nightly' }}
+              run: |
+                  git tag -fa nightly
+                  git push origin --tags
+
+            - name: Publish Release
+              uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844
+              if: ${{ env.CURRENT_TAG != 'nightly' }}
               with:
-                  repo_token: ${{ secrets.GITHUB_TOKEN }}
-                  automatic_release_tag: nightly
+                  tag_name: nightly
+                  name: Nightly Build
+                  target_commitish: ${{ github.ref }}
                   prerelease: true
-                  title: 'Nightly Build'
+                  generate_release_notes: true
                   files: |
                       media-experiments.zip
+                  fail_on_unmatched_files: true
