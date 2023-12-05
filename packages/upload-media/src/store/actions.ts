@@ -396,22 +396,18 @@ export function addSubtitlesForExistingVideo( {
 }: AddSubtitlesForExistingVideoArgs ) {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
 		const fileName = getFileNameFromUrl( url );
-		const baseName = getFileBasename( fileName );
 		const sourceFile = await fetchRemoteFile( url, fileName );
-		const videoFile = new File(
-			[ sourceFile ],
-			sourceFile.name.replace( baseName, `${ baseName }-muted` ),
-			{ type: sourceFile.type }
-		);
 
-		const vttFile = await generateSubtitles( videoFile );
+
+		// TODO: Do this *after* adding to the queue so that we can disable the button quickly.
+		const vttFile = await generateSubtitles( sourceFile );
 
 		dispatch< AddAction >( {
 			type: Type.Add,
 			item: {
 				id: uuidv4(),
 				status: ItemStatus.Pending,
-				sourceFile: vttFile,
+				sourceFile,
 				file: vttFile,
 				onChange,
 				onSuccess,
