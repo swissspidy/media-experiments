@@ -678,6 +678,67 @@ function rest_after_insert_attachment_handle_pdf_poster( WP_Post $attachment, WP
 }
 
 /**
+ * Fires after a single attachment is completely created or updated via the REST API.
+ *
+ * Copies metadata from the original if missing, e.g. if converting to AVIF
+ * and the server does not natively support the format. In those cases,
+ * {@see wp_create_image_subsizes()} will not return the required metadata.
+ *
+ * @link https://github.com/swissspidy/media-experiments/issues/237
+ *
+ * @param WP_Post         $attachment Inserted or updated attachment object.
+ * @param WP_REST_Request $request    Request object.
+ */
+function rest_after_insert_attachment_copy_metadata( WP_Post $attachment, WP_REST_Request $request ): void {
+	if ( empty( $request['meta']['mexp_original_id'] ) ) {
+		return;
+	}
+
+	$original_id = $request['meta']['mexp_original_id'];
+
+	$original_attachment = get_post( $original_id );
+
+	if ( ! $original_attachment ) {
+		return;
+	}
+
+	/**
+	 * Filters the generated attachment meta data.
+	 *
+	 * @param array  $metadata      An array of attachment meta data.
+	 * @param int    $attachment_id Current attachment ID.
+	 * @return array Filtered meta data.
+	 */
+	$filter_attachment_metadata = static function ( array $metadata, int $attachment_id ) use ( $original_id, $attachment ) {
+		// TODO: Remove filter again here?
+
+		if ( $attachment_id !== $attachment->ID ) {
+			return $metadata;
+		}
+
+		$original_metadata = wp_get_attachment_metadata( $original_id );
+
+		$keys = [ 'width', 'height' ];
+		foreach ( $keys as $key ) {
+			if ( ! isset( $metadata[ $key ] ) && isset( $original_metadata[ $key ] ) ) {
+				$metadata[ $key ] = $original_metadata[ $key ];
+			}
+		}
+
+		if ( ! isset( $metadata['file'] ) ) {
+			$attached_file = get_attached_file( $attachment_id );
+			if ( $attached_file ) {
+				$metadata['file'] = _wp_relative_upload_path( $attached_file );
+			}
+		}
+
+		return $metadata;
+	};
+
+	add_filter( 'wp_generate_attachment_metadata', $filter_attachment_metadata, 10, 2 );
+}
+
+/**
  * Filters the arguments for registering a post type.
  *
  * @since 4.4.0
