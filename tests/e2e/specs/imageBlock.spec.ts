@@ -24,16 +24,27 @@ test.describe( 'Image block', () => {
 		for ( const [ preference, expectedMimeType ] of Object.entries(
 			scenarios
 		) ) {
-			// TODO: Fix this scenario on CI, conversion is failing.
-			if ( 'avif' === preference ) {
-				continue;
-			}
-
 			test( `uses ${ preference } to convert to ${ expectedMimeType }`, async ( {
 				page,
 				editor,
 				mediaUtils,
+				browserName,
 			} ) => {
+				test.skip(
+					preference === 'avif',
+					'Needs fixing on CI, conversion is failing'
+				);
+
+				test.skip(
+					browserName === 'webkit' && preference === 'webp-browser',
+					'Not supported on Webkit'
+				);
+
+				const crossOriginIsolated = await page.evaluate( () => {
+					return Boolean( window.crossOriginIsolated );
+				} );
+				expect( crossOriginIsolated ).toBe( true );
+
 				await page.evaluate( ( pref ) => {
 					window.wp.data
 						.dispatch( 'core/preferences' )
@@ -53,6 +64,13 @@ test.describe( 'Image block', () => {
 
 				await mediaUtils.upload(
 					imageBlock.locator( 'data-testid=form-file-upload-input' )
+				);
+
+				await page.waitForFunction(
+					() =>
+						window.wp.data
+							.select( 'media-experiments/upload' )
+							.getItems().length === 0
 				);
 
 				const settingsPanel = page
