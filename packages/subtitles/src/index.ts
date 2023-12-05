@@ -124,6 +124,12 @@ export async function generateSubtitles( file: File ) {
 
 				resolve( vttFile );
 			} );
+
+			// Force recognizer to emit result event.
+			// See https://github.com/ccoreilly/vosk-browser/issues/54
+			recognizer.on( 'partialresult', () => {
+				recognizer.retrieveFinalResult();
+			} );
 		} catch ( error ) {
 			reject( error );
 		}
