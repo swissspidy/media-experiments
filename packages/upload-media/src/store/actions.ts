@@ -398,7 +398,6 @@ export function addSubtitlesForExistingVideo( {
 		const fileName = getFileNameFromUrl( url );
 		const sourceFile = await fetchRemoteFile( url, fileName );
 
-
 		// TODO: Do this *after* adding to the queue so that we can disable the button quickly.
 		const vttFile = await generateSubtitles( sourceFile );
 
