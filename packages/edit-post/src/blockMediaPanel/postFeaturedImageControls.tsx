@@ -7,7 +7,7 @@ import { type Attachment } from '@mexp/upload-media';
 
 import { useAttachment } from '../utils/hooks';
 import { UploadIndicator } from './uploadIndicator';
-import { OptimizeMedia } from './optimizeMediaProps';
+import { OptimizeMedia } from './optimizeMedia';
 import { DebugInfo } from './debugInfo';
 
 export function PostFeaturedImageControls() {

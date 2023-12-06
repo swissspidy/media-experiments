@@ -4,7 +4,7 @@ import { Fragment } from '@wordpress/element';
 
 import { UploadIndicator } from './uploadIndicator';
 import { RecordingControls } from './recordingControls';
-import { OptimizeMedia } from './optimizeMediaProps';
+import { OptimizeMedia } from './optimizeMedia';
 import { MuteVideo } from './muteVideo';
 import { DebugInfo } from './debugInfo';
 import type { MediaTextBlock } from './types';

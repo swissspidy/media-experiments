@@ -6,10 +6,10 @@ import { type Attachment } from '@mexp/upload-media';
 import { UploadIndicator } from './uploadIndicator';
 import { RecordingControls } from './recordingControls';
 import { ImportMedia } from './importMedia';
-import { OptimizeMedia } from './optimizeMediaProps';
+import { OptimizeMedia } from './optimizeMedia';
 import { MuteVideo } from './muteVideo';
 import { GenerateSubtitles } from './generateSubtitles';
-import { RestorePoster } from './restorePosterProps';
+import { RestorePoster } from './restorePoster';
 import { DebugInfo } from './debugInfo';
 import type { VideoBlock } from './types';
 

@@ -11,9 +11,9 @@ import { AudioControls } from './audioControls';
 import { CoverControls } from './coverControls';
 
 import { GalleryControls } from './galleryControls';
-import { MediaTextControls } from './mediaTextControlsProps';
+import { MediaTextControls } from './mediaTextControls';
 import { PostFeaturedImageControls } from './postFeaturedImageControls';
-import { SiteLogoControls } from './siteLogoControlsProps';
+import { SiteLogoControls } from './siteLogoControls';
 import type {
 	AudioBlock,
 	CoverBlock,

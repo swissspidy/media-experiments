@@ -5,7 +5,7 @@ import { type BlockEditProps } from '@wordpress/blocks';
 
 import { UploadIndicator } from './uploadIndicator';
 import { RecordingControls } from './recordingControls';
-import { OptimizeMedia } from './optimizeMediaProps';
+import { OptimizeMedia } from './optimizeMedia';
 import { MuteVideo } from './muteVideo';
 import { DebugInfo } from './debugInfo';
 import type { CoverBlock } from './types';

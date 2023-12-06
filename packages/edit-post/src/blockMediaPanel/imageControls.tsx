@@ -6,7 +6,7 @@ import { type Attachment } from '@mexp/upload-media';
 import { UploadIndicator } from './uploadIndicator';
 import { RecordingControls } from './recordingControls';
 import { ImportMedia } from './importMedia';
-import { OptimizeMedia } from './optimizeMediaProps';
+import { OptimizeMedia } from './optimizeMedia';
 import { DebugInfo } from './debugInfo';
 import type { ImageBlock } from './types';
 
