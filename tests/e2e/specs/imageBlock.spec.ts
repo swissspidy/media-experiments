@@ -37,13 +37,16 @@ test.describe( 'Image block', () => {
 
 				test.skip(
 					browserName === 'webkit' && preference === 'webp-browser',
-					'Not supported on Webkit'
+					'WebKit does not currently support Canvas.toBlob with WebP'
 				);
 
-				const crossOriginIsolated = await page.evaluate( () => {
-					return Boolean( window.crossOriginIsolated );
-				} );
-				expect( crossOriginIsolated ).toBe( true );
+				test.skip(
+					browserName === 'webkit' &&
+						[ 'webp-ffmpeg', 'jpeg-vips', 'jpeg-mozjpeg' ].includes(
+							preference
+						),
+					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/28513'
+				);
 
 				await page.evaluate( ( pref ) => {
 					window.wp.data
