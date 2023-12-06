@@ -16,15 +16,12 @@ test.describe( 'Image block', () => {
 		await requestUtils.deleteAllMedia();
 	} );
 
-	test.beforeEach( async ( { admin } ) => {
-		await admin.createNewPost();
-	} );
-
 	test.describe( 'uploads a file and allows optimizing it afterwards', () => {
 		for ( const [ preference, expectedMimeType ] of Object.entries(
 			scenarios
 		) ) {
 			test( `uses ${ preference } to convert to ${ expectedMimeType }`, async ( {
+				admin,
 				page,
 				editor,
 				mediaUtils,
@@ -47,6 +44,8 @@ test.describe( 'Image block', () => {
 						),
 					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/28513'
 				);
+
+				await admin.createNewPost();
 
 				await page.evaluate( ( pref ) => {
 					window.wp.data
