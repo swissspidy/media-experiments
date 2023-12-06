@@ -8,6 +8,14 @@
 This experimental WordPress plugin aims to bring improved media capabilities to WordPress and specifically the block editor,
 all powered by new web platform features like [WebAssembly](https://developer.mozilla.org/en-US/docs/WebAssembly).
 
+## Usage
+
+Reminder: this is an experimental WordPress plugin. While you can totally install it on your website, it is recommended to try it on a development environment first.
+
+You can [download the latest nightly build](https://github.com/swissspidy/media-experiments/releases/download/nightly/media-experiments.zip) directly from GitHub.
+Afterwards, you should be able to use a plugin like [Git Updater](https://git-updater.com/) to receive updates.
+Alternatively, simply download the nightly build again every now and then.
+
 ## Development
 
 Run `npm install` and `npm run build` to build all the JavaScript and CSS.
