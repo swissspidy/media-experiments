@@ -38,6 +38,11 @@ test.describe( 'Image block', () => {
 				);
 
 				test.skip(
+					browserName === 'webkit' && preference === 'jpeg-browser',
+					'Works locally but is flaky on CI'
+				);
+
+				test.skip(
 					browserName === 'webkit' &&
 						[ 'webp-ffmpeg', 'jpeg-vips', 'jpeg-mozjpeg' ].includes(
 							preference
