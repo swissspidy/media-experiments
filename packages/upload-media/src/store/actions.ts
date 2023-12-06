@@ -1335,7 +1335,6 @@ export function uploadItem( id: QueueItemId ) {
 		if ( ! additionalData.meta?.mexp_blurhash ) {
 			// TODO: Make this async after upload?
 			// Could be made reusable to enable backfilling of existing blocks.
-			// TODO: Move to web worker for performance reasons?
 			// TODO: Create a scaled-down version of the image first for performance reasons.
 			try {
 				const url = item.attachment?.poster || item.attachment?.url;
