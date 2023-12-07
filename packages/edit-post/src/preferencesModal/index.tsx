@@ -7,13 +7,13 @@ import {
 	useDispatch,
 	useSelect,
 } from '@wordpress/data';
-import { store as interfaceStore } from '@wordpress/interface';
 import { store as preferencesStore } from '@wordpress/preferences';
 
 import type { ImageFormat } from '@mexp/upload-media';
 import { getExtensionFromMimeType } from '@mexp/media-utils';
 
 import type { MediaPreferences } from '../types';
+import { store as interfaceStore } from '../interface/store';
 import { Modal } from './modal';
 import { PREFERENCES_NAME } from './constants';
 
