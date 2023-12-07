@@ -65,7 +65,7 @@ export async function transcodeHeifImage(
 		throw new TypeError( 'Not a valid HEIF image 1' );
 	}
 
-	const decoder = new window.libheif.HeifDecoder();
+	const decoder = new ( window.libheif().HeifDecoder )();
 
 	// Image can have multiple frames, thus it's an array.
 	// For now, only decode the first frame.

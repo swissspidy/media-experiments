@@ -77,7 +77,7 @@ function set_up_cross_origin_isolation( WP_Screen $screen ): void {
 function register_assets(): void {
 	wp_register_script(
 		'media-experiments-libheif',
-		'https://cdn.jsdelivr.net/npm/libheif-js@1.17.1/libheif/libheif.min.js',
+		'https://cdn.jsdelivr.net/npm/libheif-js@1.17.1/libheif-wasm/libheif-bundle.js',
 		[],
 		'1.17.1',
 		true
