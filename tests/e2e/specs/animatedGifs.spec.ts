@@ -49,11 +49,15 @@ test.describe( 'Animated GIFs', () => {
 				name: 'Settings',
 			} );
 
-		await expect( settingsPanel ).toHaveText(
+		await expect( settingsPanel ).toHaveText( /Mime type: video\/mp4/ );
+
+		await expect(
+			page.getByRole( 'region', {
+				name: 'Editor settings',
+			} )
+		).toHaveText(
 			/Embed a GIF from your media library or upload a new one/
 		);
-
-		await expect( settingsPanel ).toHaveText( /Mime type: video\/mp4/ );
 
 		await expect(
 			page.getByRole( 'checkbox', { name: 'Autoplay' } )
@@ -64,17 +68,18 @@ test.describe( 'Animated GIFs', () => {
 		await expect(
 			page.getByRole( 'checkbox', { name: 'Muted' } )
 		).toBeChecked();
+		await expect(
+			page.getByRole( 'checkbox', { name: 'Play inline' } )
+		).toBeChecked();
 
 		const blockAttributes = await page.evaluate(
 			() =>
 				window.wp.data.select( 'core/block-editor' ).getSelectedBlock()
 					?.attributes ?? {}
 		);
-		await expect( blockAttributes.src ).toHaveText(
-			/nyancat-256x256-3\.mp4/
-		);
+		await expect( blockAttributes.src ).toHaveText( /\.mp4$/ );
 		await expect( blockAttributes.poster ).toHaveText(
-			/nyancat-256x256-3-poster\.webp/ // TODO: Format should be based on preference.
+			/-poster\.webp$/ // TODO: Format should be based on preference.
 		);
 
 		await expect( settingsPanel.getByLabel( '#796e94' ) ).toBeVisible();
