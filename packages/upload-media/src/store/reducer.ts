@@ -86,8 +86,8 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 						...item,
 						status: ItemStatus.PendingTranscoding,
 						transcode: item.transcode
-							? [ ...item.transcode, action.transcode ]
-							: [ action.transcode ],
+							? [ ...item.transcode, ...action.transcode ]
+							: [ ...action.transcode ],
 					};
 				} ),
 			};

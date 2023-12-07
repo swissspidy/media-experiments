@@ -2,9 +2,9 @@ import type { HeifDecoder } from 'libheif-js';
 
 declare global {
 	interface Window {
-		libheif: () => ({
+		libheif: () => {
 			HeifDecoder: typeof HeifDecoder;
-		});
+		};
 	}
 }
 

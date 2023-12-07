@@ -81,7 +81,7 @@ export type ApproveUploadAction = Action<
 >;
 export type TranscodingPrepareAction = Action<
 	Type.TranscodingPrepare,
-	{ id: QueueItemId; transcode?: TranscodingType }
+	{ id: QueueItemId; transcode?: TranscodingType[] }
 >;
 export type TranscodingStartAction = Action<
 	Type.TranscodingStart,
@@ -163,9 +163,10 @@ export enum TranscodingType {
 	Gif = 'GIF',
 	Audio = 'AUDIO',
 	Video = 'VIDEO',
+	Image = 'IMAGE',
 	MuteVideo = 'MUTE_VIDEO',
 	OptimizeExisting = 'OPTIMIZE_EXISTING',
-	Default = 'DEFAULT',
+	Default = 'DEFAULT', // TODO: Unused. Remove?
 }
 
 export interface RestAttachment extends WP_REST_API_Attachment {

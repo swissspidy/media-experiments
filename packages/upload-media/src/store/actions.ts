@@ -45,10 +45,10 @@ import type {
 	ImageFormat,
 	ImageSizeCrop,
 	MediaSourceTerm,
+	OnBatchSuccessHandler,
 	OnChangeHandler,
 	OnErrorHandler,
 	OnSuccessHandler,
-	OnBatchSuccessHandler,
 	PrepareAction,
 	QueueItem,
 	QueueItemId,
@@ -96,7 +96,7 @@ type ActionCreators = {
 	optimizeExistingItem: typeof optimizeExistingItem;
 	optimizeVideoItem: typeof optimizeVideoItem;
 	optimizeAudioItem: typeof optimizeAudioItem;
-	optimizeItemWithApproval: typeof optimizeItemWithApproval;
+	optimizeImageItem: typeof optimizeImageItem;
 	requestApproval: typeof requestApproval;
 	rejectApproval: typeof rejectApproval;
 	grantApproval: typeof grantApproval;
@@ -570,12 +570,17 @@ export function prepareItem( id: QueueItemId ) {
 					// Maybe a base64 encoded 1x1 gray PNG?
 					// Use preloadImage() and getImageDimensions() so see if browser can render it.
 					// Image/Video block already have a placeholder state.
-					dispatch.prepareForTranscoding( id, TranscodingType.Heif );
+					dispatch.prepareForTranscoding( id, [
+						TranscodingType.Heif,
+						TranscodingType.Image,
+					] );
 					return;
 				}
 
 				if ( isGif && canTranscode ) {
-					dispatch.prepareForTranscoding( id, TranscodingType.Gif );
+					dispatch.prepareForTranscoding( id, [
+						TranscodingType.Gif,
+					] );
 					return;
 				}
 
@@ -598,7 +603,9 @@ export function prepareItem( id: QueueItemId ) {
 				// No need to compress a video that's already quite small.
 
 				if ( canTranscode ) {
-					dispatch.prepareForTranscoding( id, TranscodingType.Video );
+					dispatch.prepareForTranscoding( id, [
+						TranscodingType.Video,
+					] );
 					return;
 				}
 
@@ -606,7 +613,9 @@ export function prepareItem( id: QueueItemId ) {
 
 			case 'audio':
 				if ( canTranscode ) {
-					dispatch.prepareForTranscoding( id, TranscodingType.Audio );
+					dispatch.prepareForTranscoding( id, [
+						TranscodingType.Audio,
+					] );
 					return;
 				}
 
@@ -643,7 +652,7 @@ export function addPoster( id: QueueItemId, file: File ): AddPosterAction {
 
 export function prepareForTranscoding(
 	id: QueueItemId,
-	transcode?: TranscodingType
+	transcode?: TranscodingType[]
 ): TranscodingPrepareAction {
 	return {
 		type: Type.TranscodingPrepare,
@@ -823,9 +832,11 @@ export function maybeTranscodeItem( id: QueueItemId ) {
 	return async ( {
 		select,
 		dispatch,
+		registry,
 	}: {
 		select: Selectors;
 		dispatch: ActionCreators;
+		registry: WPDataRegistry;
 	} ) => {
 		const item = select.getItem( id );
 		if ( ! item ) {
@@ -862,6 +873,14 @@ export function maybeTranscodeItem( id: QueueItemId ) {
 				void dispatch.optimizeAudioItem( item.id );
 				break;
 
+			case TranscodingType.Video:
+				if ( isTranscoding ) {
+					return;
+				}
+
+				void dispatch.optimizeVideoItem( item.id );
+				break;
+
 			case TranscodingType.MuteVideo:
 				if ( isTranscoding ) {
 					return;
@@ -870,28 +889,37 @@ export function maybeTranscodeItem( id: QueueItemId ) {
 				void dispatch.muteVideoItem( item.id );
 				break;
 
+			case TranscodingType.Image:
+				if ( isTranscoding ) {
+					return;
+				}
+
+				void dispatch.optimizeImageItem( item.id );
+				break;
+
+			// TODO: Right now only handles images.
 			case TranscodingType.OptimizeExisting:
 				if ( isTranscoding ) {
 					return;
 				}
 
-				void dispatch.optimizeItemWithApproval( item.id );
+				const requireApproval = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'requireApproval' );
+
+				void dispatch.optimizeImageItem( item.id, requireApproval );
 				break;
 
-			case TranscodingType.Video:
-				if ( isTranscoding ) {
-					return;
-				}
-
-				void dispatch.optimizeVideoItem( item.id );
-				break;
 			default:
 			// This shouldn't happen. Only happens with too many state updates.
 		}
 	};
 }
 
-export function optimizeItemWithApproval( id: QueueItemId ) {
+export function optimizeImageItem(
+	id: QueueItemId,
+	requireApproval: boolean = false
+) {
 	return async ( {
 		select,
 		dispatch,
@@ -951,10 +979,6 @@ export function optimizeItemWithApproval( id: QueueItemId ) {
 					);
 					break;
 			}
-
-			const requireApproval = registry
-				.select( preferencesStore )
-				.get( PREFERENCES_NAME, 'requireApproval' );
 
 			if ( requireApproval ) {
 				dispatch.requestApproval( id, file );

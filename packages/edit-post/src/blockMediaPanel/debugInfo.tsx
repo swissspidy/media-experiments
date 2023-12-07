@@ -135,6 +135,9 @@ export function DebugInfo( { id }: DebugInfoProps ) {
 										hash={ attachment.meta.mexp_blurhash }
 										width={ 100 }
 										height={ 100 / aspectRatio }
+										data-blurhash={
+											attachment.meta.mexp_blurhash
+										}
 									/>
 								),
 							}

@@ -385,12 +385,12 @@ describe( 'actions', () => {
 		it( `should return the ${ Type.TranscodingPrepare } action`, async () => {
 			const result = await registry
 				.dispatch( uploadStore )
-				.prepareForTranscoding( 'abc123', TranscodingType.Default );
+				.prepareForTranscoding( 'abc123', [ TranscodingType.Image ] );
 
 			await expect( result ).toStrictEqual( {
 				type: Type.TranscodingPrepare,
 				id: 'abc123',
-				transcode: TranscodingType.Default,
+				transcode: [ TranscodingType.Image ],
 			} );
 		} );
 	} );
