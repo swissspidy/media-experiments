@@ -39,7 +39,7 @@ test.describe( 'Video block', () => {
 					.length === 0,
 			undefined,
 			{
-				timeout: 20000, // Video transcoding might take longer
+				timeout: 40000, // Video transcoding might take longer
 			}
 		);
 

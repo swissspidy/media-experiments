@@ -300,7 +300,9 @@ export function RecordingControls( {
 			<BaseControl.VisualLabel>
 				{ __( 'Self Recording', 'media-experiments' ) }
 			</BaseControl.VisualLabel>
-			<ToolbarControls onInsert={ onInsert } />
+			{ isInRecordingMode ? (
+				<ToolbarControls onInsert={ onInsert } />
+			) : null }
 			<p>
 				{ __(
 					"Use your device's camera and microphone to record video, audio, or take a still picture",
