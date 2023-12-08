@@ -156,7 +156,7 @@ export async function videoHasAudio( src: string ) {
 export async function getPosterFromVideo(
 	src: string,
 	basename: string,
-	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/webp',
+	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/jpeg',
 	quality = 0.82
 ) {
 	let blob = await getFirstFrameOfVideo( src, type, quality );
