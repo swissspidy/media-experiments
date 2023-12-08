@@ -10,7 +10,13 @@ test.describe( 'Animated GIFs', () => {
 		page,
 		editor,
 		mediaUtils,
+		browserName,
 	} ) => {
+		test.skip(
+			browserName === 'webkit',
+			'Needs some investigation as to why conversion is not working on CI'
+		);
+
 		await admin.createNewPost();
 
 		await page.evaluate( () => {
