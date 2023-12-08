@@ -84,9 +84,9 @@ test.describe( 'Animated GIFs', () => {
 				window.wp.data.select( 'core/block-editor' ).getSelectedBlock()
 					?.attributes ?? {}
 		);
-		await expect( blockAttributes.src ).toHaveText( /\.mp4$/ );
-		await expect( blockAttributes.poster ).toHaveText(
-			/-poster\.webp$/ // TODO: Format should be based on preference.
+		await expect( blockAttributes.src ).toMatch( /\.mp4$/ );
+		await expect( blockAttributes.poster ).toMatch(
+			/-poster\.jpeg$/ // TODO: Format should be based on preference.
 		);
 
 		await expect( settingsPanel.getByLabel( '#796e94' ) ).toBeVisible();
