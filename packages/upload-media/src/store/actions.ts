@@ -590,14 +590,18 @@ export function prepareItem( id: QueueItemId ) {
 				// Here we are potentially dealing with an unsupported file type (e.g. MOV)
 				// that cannot be *played* by the browser, but could still be used for generating a poster.
 
-				// TODO: is this the right place?
-				// Note: Causes another state update.
-				const poster = await getPosterFromVideo(
-					createBlobURL( file ),
-					`${ getFileBasename( item.file.name ) }-poster`,
-					imageQuality
-				);
-				dispatch.addPoster( id, poster );
+				try {
+					// TODO: is this the right place?
+					// Note: Causes another state update.
+					const poster = await getPosterFromVideo(
+						createBlobURL( file ),
+						`${ getFileBasename( item.file.name ) }-poster`,
+						imageQuality
+					);
+					dispatch.addPoster( id, poster );
+				} catch {
+					// Do nothing for now.
+				}
 
 				// TODO: First check if video already meets criteria, e.g. with mediainfo.js.
 				// No need to compress a video that's already quite small.
