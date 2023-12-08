@@ -1342,14 +1342,14 @@ export function uploadItem( id: QueueItemId ) {
 			}
 		}
 
-		// TODO: item.attachment.url might be the (blob) URL of a video, which might not work.
-		// Should use getFirstFrameOfVideo() in that case.
 		if ( ! additionalData.meta.mexp_dominant_color ) {
 			// TODO: Make this async after upload?
 			// Could be made reusable to enable backfilling of existing blocks.
 			// TODO: Create a scaled-down version of the image first for performance reasons.
 			try {
-				const url = item.attachment?.poster || item.attachment?.url;
+				const url = [ 'video', 'pdf' ].includes( mediaType )
+					? item.attachment?.poster
+					: item.attachment?.url;
 				if ( url ) {
 					additionalData.meta.mexp_dominant_color =
 						await dominantColorWorker.getDominantColor( url );
@@ -1365,7 +1365,9 @@ export function uploadItem( id: QueueItemId ) {
 			// Could be made reusable to enable backfilling of existing blocks.
 			// TODO: Create a scaled-down version of the image first for performance reasons.
 			try {
-				const url = item.attachment?.poster || item.attachment?.url;
+				const url = [ 'video', 'pdf' ].includes( mediaType )
+					? item.attachment?.poster
+					: item.attachment?.url;
 				if ( url ) {
 					additionalData.meta.mexp_blurhash =
 						await blurhashWorker.getBlurHash( url );
