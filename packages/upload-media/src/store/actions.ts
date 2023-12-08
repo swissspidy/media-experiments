@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { createWorkerFactory } from '@shopify/web-worker';
 
-import { createBlobURL, isBlobURL } from '@wordpress/blob';
+import { createBlobURL, isBlobURL, revokeBlobURL } from '@wordpress/blob';
 import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as preferencesStore } from '@wordpress/preferences';
 
@@ -1329,6 +1329,19 @@ export function uploadItem( id: QueueItemId ) {
 
 		const mediaType = getMediaTypeFromMimeType( item.file.type );
 
+		let stillUrl = [ 'video', 'pdf' ].includes( mediaType )
+			? item.attachment?.poster
+			: item.attachment?.url;
+
+		// Freshly converted GIF.
+		if (
+			! stillUrl &&
+			'video' === mediaType &&
+			'image' === getMediaTypeFromMimeType( item.sourceFile.type )
+		) {
+			stillUrl = createBlobURL( item.sourceFile );
+		}
+
 		// TODO: Make this async after upload?
 		// Could be made reusable to enable back-filling of existing blocks.
 		if ( 'video' === mediaType ) {
@@ -1342,40 +1355,35 @@ export function uploadItem( id: QueueItemId ) {
 			}
 		}
 
-		if ( ! additionalData.meta.mexp_dominant_color ) {
+		if ( ! additionalData.meta.mexp_dominant_color && stillUrl ) {
 			// TODO: Make this async after upload?
 			// Could be made reusable to enable backfilling of existing blocks.
 			// TODO: Create a scaled-down version of the image first for performance reasons.
 			try {
-				const url = [ 'video', 'pdf' ].includes( mediaType )
-					? item.attachment?.poster
-					: item.attachment?.url;
-				if ( url ) {
-					additionalData.meta.mexp_dominant_color =
-						await dominantColorWorker.getDominantColor( url );
-				}
+				additionalData.meta.mexp_dominant_color =
+					await dominantColorWorker.getDominantColor( stillUrl );
 			} catch ( err ) {
 				// No big deal if this fails, we can still continue uploading.
 				// TODO: Debug & catch & throw.
 			}
 		}
 
-		if ( ! additionalData.meta?.mexp_blurhash ) {
+		if ( ! additionalData.meta?.mexp_blurhash && stillUrl ) {
 			// TODO: Make this async after upload?
 			// Could be made reusable to enable backfilling of existing blocks.
 			// TODO: Create a scaled-down version of the image first for performance reasons.
 			try {
-				const url = [ 'video', 'pdf' ].includes( mediaType )
-					? item.attachment?.poster
-					: item.attachment?.url;
-				if ( url ) {
-					additionalData.meta.mexp_blurhash =
-						await blurhashWorker.getBlurHash( url );
-				}
+				additionalData.meta.mexp_blurhash =
+					await blurhashWorker.getBlurHash( stillUrl );
 			} catch ( err ) {
 				// No big deal if this fails, we can still continue uploading.
 				// TODO: Debug & catch & throw.
 			}
+		}
+
+		// Revoke blob URL created above.
+		if ( stillUrl && isBlobURL( stillUrl ) ) {
+			revokeBlobURL( stillUrl );
 		}
 
 		try {
