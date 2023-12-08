@@ -49,6 +49,13 @@ test.describe( 'Animated GIFs', () => {
 				name: 'Settings',
 			} );
 
+		// Wait for AnimatedGifConverter switching the block type.
+		await page.waitForFunction(
+			() =>
+				window.wp.data.select( 'core/block-editor' ).getSelectedBlock()
+					?.name === 'core/video'
+		);
+
 		await expect( settingsPanel ).toHaveText( /Mime type: video\/mp4/ );
 
 		await expect(
