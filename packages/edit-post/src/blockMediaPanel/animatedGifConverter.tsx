@@ -21,16 +21,16 @@ export function AnimatedGifConverter( {
 }: AnimatedGifDetectorProps ) {
 	const attachment = useAttachment( id );
 
+	const isVideo = attachment?.mime_type.startsWith( 'video/' );
+
 	const posterId = attachment?.featured_media;
 	const poster = useAttachment( id );
+	const posterUrl = poster?.source_url;
 
 	const { replaceBlocks } = useDispatch( blockEditorStore );
 
 	useEffect( () => {
-		if (
-			! attachment?.mime_type.startsWith( 'video/' ) ||
-			( posterId && ! poster?.source_url )
-		) {
+		if ( ! isVideo || ( posterId && ! posterUrl ) ) {
 			return;
 		}
 
@@ -42,18 +42,20 @@ export function AnimatedGifConverter( {
 				autoplay: true,
 				muted: true,
 				playsInline: true,
+				id,
 				src: url,
-				poster: poster?.source_url,
+				poster: posterUrl,
 				caption,
 			} )
 		);
 	}, [
-		attachment?.mime_type,
+		id,
+		isVideo,
 		clientId,
 		caption,
 		url,
-		poster?.source_url,
 		posterId,
+		posterUrl,
 		replaceBlocks,
 	] );
 
