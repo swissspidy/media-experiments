@@ -1,5 +1,3 @@
-import { join, resolve } from 'node:path';
-
 import type { CoverageReportOptions } from 'monocart-reporter';
 
 import { defineConfig, devices } from '@playwright/test';
