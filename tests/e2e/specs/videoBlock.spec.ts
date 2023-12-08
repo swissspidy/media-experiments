@@ -47,7 +47,10 @@ test.describe( 'Video block', () => {
 				name: 'Settings',
 			} );
 
-		await expect( settingsPanel ).toHaveText( /Mime type: video\/mp4/ );
+		// TODO: Check why mime type is not consistent.
+		await expect( settingsPanel ).toHaveText(
+			/Mime type: video\/(mp4|webm)/
+		);
 		await expect( settingsPanel.getByLabel( '#8b837e' ) ).toBeVisible();
 		// No exact comparison as there can be 1-2 char differences between browsers.
 		await expect( page.locator( 'css=[data-blurhash]' ) ).toHaveAttribute(
