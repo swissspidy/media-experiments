@@ -23,17 +23,15 @@ export function AnimatedGifConverter( {
 
 	const isVideo = attachment?.mime_type.startsWith( 'video/' );
 
-	const posterId = attachment?.featured_media;
-	const poster = useAttachment( id );
-	const posterUrl = poster?.source_url;
-
 	const { replaceBlocks } = useDispatch( blockEditorStore );
 
 	useEffect( () => {
-		if ( ! isVideo || ( posterId && ! posterUrl ) ) {
+		if ( ! isVideo ) {
 			return;
 		}
 
+		// Not adding the poster because it is probably not fully uploaded yet.
+		// TODO: Figure out how to add the poster afterwards.
 		void replaceBlocks(
 			clientId,
 			createBlock( 'core/video', {
@@ -44,20 +42,10 @@ export function AnimatedGifConverter( {
 				playsInline: true,
 				id,
 				src: url,
-				poster: posterUrl,
 				caption,
 			} )
 		);
-	}, [
-		id,
-		isVideo,
-		clientId,
-		caption,
-		url,
-		posterId,
-		posterUrl,
-		replaceBlocks,
-	] );
+	}, [ id, isVideo, clientId, caption, url, replaceBlocks ] );
 
 	return null;
 }
