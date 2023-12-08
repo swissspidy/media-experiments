@@ -37,8 +37,9 @@ test.describe( 'Video block', () => {
 			() =>
 				window.wp.data.select( 'media-experiments/upload' ).getItems()
 					.length === 0,
+			undefined,
 			{
-				timeout: 40000, // Video transcoding might take longer
+				timeout: 20000, // Video transcoding might take longer
 			}
 		);
 
