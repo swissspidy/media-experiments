@@ -1,4 +1,4 @@
-import { join } from 'node:path';
+import { join, extname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { copyFile, mkdtemp } from 'node:fs/promises';
 
@@ -25,10 +25,13 @@ export class MediaUtils {
 			join( tmpdir(), 'gutenberg-test-image-' )
 		);
 		const newFileName = uuidv4();
-		const tmpFileName = join( tmpDirectory, `${ newFileName }.png` );
 		const filepath = fileName
 			? join( this.basePath, fileName )
 			: this.DEFAULT_IMAGE_PATH;
+		const tmpFileName = join(
+			tmpDirectory,
+			`${ newFileName }${ extname( filepath ) }`
+		);
 		await copyFile( filepath, tmpFileName );
 
 		await inputElement.setInputFiles( tmpFileName );
