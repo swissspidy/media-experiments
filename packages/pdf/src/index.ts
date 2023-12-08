@@ -13,7 +13,7 @@ GlobalWorkerOptions.workerSrc =
 export async function getImageFromPdf(
 	url: string,
 	basename: string,
-	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/webp',
+	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/jpeg',
 	quality = 0.82
 ) {
 	const pdf = await getDocument( url ).promise;

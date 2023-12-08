@@ -1,6 +1,4 @@
-import { join, resolve } from 'node:path';
-
-import type { CoverageReportOptions } from 'monocart-reporter';
+import type { CoverageReportOptions } from 'monocart-coverage-reports';
 
 import { defineConfig, devices } from '@playwright/test';
 

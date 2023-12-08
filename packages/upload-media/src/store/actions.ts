@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { createWorkerFactory } from '@shopify/web-worker';
 
-import { createBlobURL, isBlobURL } from '@wordpress/blob';
+import { createBlobURL, isBlobURL, revokeBlobURL } from '@wordpress/blob';
 import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as preferencesStore } from '@wordpress/preferences';
 
@@ -590,14 +590,18 @@ export function prepareItem( id: QueueItemId ) {
 				// Here we are potentially dealing with an unsupported file type (e.g. MOV)
 				// that cannot be *played* by the browser, but could still be used for generating a poster.
 
-				// TODO: is this the right place?
-				// Note: Causes another state update.
-				const poster = await getPosterFromVideo(
-					createBlobURL( file ),
-					`${ getFileBasename( item.file.name ) }-poster`,
-					imageQuality
-				);
-				dispatch.addPoster( id, poster );
+				try {
+					// TODO: is this the right place?
+					// Note: Causes another state update.
+					const poster = await getPosterFromVideo(
+						createBlobURL( file ),
+						`${ getFileBasename( item.file.name ) }-poster`,
+						imageQuality
+					);
+					dispatch.addPoster( id, poster );
+				} catch {
+					// Do nothing for now.
+				}
 
 				// TODO: First check if video already meets criteria, e.g. with mediainfo.js.
 				// No need to compress a video that's already quite small.
@@ -1325,6 +1329,19 @@ export function uploadItem( id: QueueItemId ) {
 
 		const mediaType = getMediaTypeFromMimeType( item.file.type );
 
+		let stillUrl = [ 'video', 'pdf' ].includes( mediaType )
+			? item.attachment?.poster
+			: item.attachment?.url;
+
+		// Freshly converted GIF.
+		if (
+			! stillUrl &&
+			'video' === mediaType &&
+			'image' === getMediaTypeFromMimeType( item.sourceFile.type )
+		) {
+			stillUrl = createBlobURL( item.sourceFile );
+		}
+
 		// TODO: Make this async after upload?
 		// Could be made reusable to enable back-filling of existing blocks.
 		if ( 'video' === mediaType ) {
@@ -1338,38 +1355,35 @@ export function uploadItem( id: QueueItemId ) {
 			}
 		}
 
-		// TODO: item.attachment.url might be the (blob) URL of a video, which might not work.
-		// Should use getFirstFrameOfVideo() in that case.
-		if ( ! additionalData.meta.mexp_dominant_color ) {
+		if ( ! additionalData.meta.mexp_dominant_color && stillUrl ) {
 			// TODO: Make this async after upload?
 			// Could be made reusable to enable backfilling of existing blocks.
 			// TODO: Create a scaled-down version of the image first for performance reasons.
 			try {
-				const url = item.attachment?.poster || item.attachment?.url;
-				if ( url ) {
-					additionalData.meta.mexp_dominant_color =
-						await dominantColorWorker.getDominantColor( url );
-				}
+				additionalData.meta.mexp_dominant_color =
+					await dominantColorWorker.getDominantColor( stillUrl );
 			} catch ( err ) {
 				// No big deal if this fails, we can still continue uploading.
 				// TODO: Debug & catch & throw.
 			}
 		}
 
-		if ( ! additionalData.meta?.mexp_blurhash ) {
+		if ( ! additionalData.meta?.mexp_blurhash && stillUrl ) {
 			// TODO: Make this async after upload?
 			// Could be made reusable to enable backfilling of existing blocks.
 			// TODO: Create a scaled-down version of the image first for performance reasons.
 			try {
-				const url = item.attachment?.poster || item.attachment?.url;
-				if ( url ) {
-					additionalData.meta.mexp_blurhash =
-						await blurhashWorker.getBlurHash( url );
-				}
+				additionalData.meta.mexp_blurhash =
+					await blurhashWorker.getBlurHash( stillUrl );
 			} catch ( err ) {
 				// No big deal if this fails, we can still continue uploading.
 				// TODO: Debug & catch & throw.
 			}
+		}
+
+		// Revoke blob URL created above.
+		if ( stillUrl && isBlobURL( stillUrl ) ) {
+			revokeBlobURL( stillUrl );
 		}
 
 		try {

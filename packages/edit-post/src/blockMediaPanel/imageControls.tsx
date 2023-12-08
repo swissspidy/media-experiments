@@ -9,6 +9,7 @@ import { ImportMedia } from './importMedia';
 import { OptimizeMedia } from './optimizeMedia';
 import { DebugInfo } from './debugInfo';
 import type { ImageBlock } from './types';
+import { AnimatedGifConverter } from './animatedGifConverter';
 
 type ImageControlsProps = ImageBlock &
 	Pick< BlockEditProps< ImageBlock[ 'attributes' ] >, 'setAttributes' >;
@@ -45,6 +46,12 @@ export function ImageControls( props: ImageControlsProps ) {
 
 	return (
 		<Fragment>
+			<AnimatedGifConverter
+				id={ props.attributes.id }
+				url={ props.attributes.url }
+				caption={ props.attributes.caption }
+				clientId={ props.clientId }
+			/>
 			<UploadIndicator
 				id={ props.attributes.id }
 				url={ props.attributes.url }

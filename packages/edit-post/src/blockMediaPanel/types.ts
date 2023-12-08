@@ -3,6 +3,7 @@ import { type BlockInstance } from '@wordpress/blocks';
 export type ImageBlock = BlockInstance< {
 	id: number;
 	url: string;
+	caption: string;
 } > & { name: 'core/image' };
 
 export type AudioBlock = BlockInstance< {

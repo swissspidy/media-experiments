@@ -97,7 +97,7 @@ export async function bufferToBlob(
 	buffer: ArrayBuffer,
 	width: number,
 	height: number,
-	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/webp',
+	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/jpeg',
 	quality = 0.82
 ) {
 	const canvas = document.createElement( 'canvas' );
