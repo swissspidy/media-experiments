@@ -25,12 +25,6 @@ test.describe( 'Video block', () => {
 			'car-desert-600x338.webm'
 		);
 
-		await page.waitForFunction(
-			() =>
-				window.wp.data.select( 'media-experiments/upload' ).getItems()
-					.length === 0
-		);
-
 		await expect(
 			page
 				.getByRole( 'button', { name: 'Dismiss this notice' } )
@@ -38,6 +32,15 @@ test.describe( 'Video block', () => {
 					hasText: 'Sorry, this file type is not supported here',
 				} )
 		).not.toBeVisible();
+
+		await page.waitForFunction(
+			() =>
+				window.wp.data.select( 'media-experiments/upload' ).getItems()
+					.length === 0,
+			{
+				timeout: 40000, // Video transcoding might take longer
+			}
+		);
 
 		const settingsPanel = page
 			.getByRole( 'region', {
