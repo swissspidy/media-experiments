@@ -22,7 +22,7 @@ test.describe( 'Video block', () => {
 
 		await mediaUtils.upload(
 			videoBlock.locator( 'data-testid=form-file-upload-input' ),
-			'car-desert-600x338.mp4'
+			'car-desert-600x338.webm'
 		);
 
 		await page.waitForFunction(
