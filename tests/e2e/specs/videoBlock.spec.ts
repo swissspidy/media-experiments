@@ -31,6 +31,14 @@ test.describe( 'Video block', () => {
 					.length === 0
 		);
 
+		await expect(
+			page
+				.getByRole( 'button', { name: 'Dismiss this notice' } )
+				.filter( {
+					hasText: 'Sorry, this file type is not supported here',
+				} )
+		).not.toBeVisible();
+
 		const settingsPanel = page
 			.getByRole( 'region', {
 				name: 'Editor settings',
