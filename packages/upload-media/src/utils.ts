@@ -176,7 +176,7 @@ export async function getPosterFromVideo(
 
 export async function getFirstFrameOfVideo(
 	src: string,
-	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/webp',
+	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/jpeg',
 	quality = 0.82
 ) {
 	const video = await preloadVideo( src );
@@ -186,7 +186,7 @@ export async function getFirstFrameOfVideo(
 
 export function getImageFromVideo(
 	video: HTMLVideoElement,
-	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/webp',
+	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/jpeg',
 	quality = 0.82
 ) {
 	const canvas = document.createElement( 'canvas' );
@@ -252,7 +252,7 @@ export function isAnimatedGif( buffer: ArrayBuffer ) {
 export async function convertImageFormat(
 	file: File,
 	basename: string,
-	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/webp',
+	type: 'image/jpeg' | 'image/png' | 'image/webp',
 	quality = 0.82
 ) {
 	const url = URL.createObjectURL( file );
