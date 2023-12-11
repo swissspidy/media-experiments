@@ -102,10 +102,10 @@ export function getMediaStream() {
 				.getAudioTracks()
 				.forEach( ( track ) => canvasStream.addTrack( track ) );
 
-			const context = canvas.getContext( '2d' );
+			const ctx = canvas.getContext( '2d' );
 
 			// TODO: Check whether that makes sense or if throwing error is better.
-			if ( ! context ) {
+			if ( ! ctx ) {
 				dispatch( {
 					type: Type.SetMediaStream,
 					stream,
@@ -145,13 +145,13 @@ export function getMediaStream() {
 					const canvasBlur =
 						'filter' in CanvasRenderingContext2D.prototype;
 
-					context.save();
+					ctx.save();
 
 					// TODO: Remove fallback due to questionable license.
 					// Fallback for Safari
 					// See https://bugs.webkit.org/show_bug.cgi?id=198416
 					if ( ! canvasBlur ) {
-						context.drawImage(
+						ctx.drawImage(
 							results.image,
 							0,
 							0,
@@ -159,18 +159,18 @@ export function getMediaStream() {
 							canvas.height
 						);
 
-						blur( context, BACKGROUND_BLUR_PX );
+						blur( ctx, BACKGROUND_BLUR_PX );
 
-						context.globalCompositeOperation = 'destination-out';
-						context.drawImage(
+						ctx.globalCompositeOperation = 'destination-out';
+						ctx.drawImage(
 							results.segmentationMask,
 							0,
 							0,
 							canvas.width,
 							canvas.height
 						);
-						context.globalCompositeOperation = 'destination-over';
-						context.drawImage(
+						ctx.globalCompositeOperation = 'destination-over';
+						ctx.drawImage(
 							results.image,
 							0,
 							0,
@@ -178,9 +178,9 @@ export function getMediaStream() {
 							canvas.height
 						);
 					} else {
-						context.globalCompositeOperation = 'copy';
-						context.filter = `blur(${ BACKGROUND_BLUR_PX }px)`;
-						context.drawImage(
+						ctx.globalCompositeOperation = 'copy';
+						ctx.filter = `blur(${ BACKGROUND_BLUR_PX }px)`;
+						ctx.drawImage(
 							results.segmentationMask,
 							0,
 							0,
@@ -188,9 +188,9 @@ export function getMediaStream() {
 							canvas.height
 						);
 
-						context.globalCompositeOperation = 'source-in';
-						context.filter = 'none';
-						context.drawImage(
+						ctx.globalCompositeOperation = 'source-in';
+						ctx.filter = 'none';
+						ctx.drawImage(
 							results.image,
 							0,
 							0,
@@ -198,9 +198,9 @@ export function getMediaStream() {
 							canvas.height
 						);
 
-						context.globalCompositeOperation = 'destination-over';
-						context.filter = `blur(${ BACKGROUND_BLUR_PX }px)`;
-						context.drawImage(
+						ctx.globalCompositeOperation = 'destination-over';
+						ctx.filter = `blur(${ BACKGROUND_BLUR_PX }px)`;
+						ctx.drawImage(
 							results.image,
 							0,
 							0,
@@ -209,7 +209,7 @@ export function getMediaStream() {
 						);
 					}
 
-					context.restore();
+					ctx.restore();
 				};
 
 				selfieSegmentation.onResults( onSelfieSegmentationResults );
@@ -255,17 +255,11 @@ export function getMediaStream() {
 						return;
 					}
 
-					context.save();
+					ctx.save();
 
-					context.drawImage(
-						video,
-						0,
-						0,
-						canvas.width,
-						canvas.height
-					);
+					ctx.drawImage( video, 0, 0, canvas.width, canvas.height );
 
-					context.restore();
+					ctx.restore();
 
 					requestAnimationFrame( sendFrame );
 				};

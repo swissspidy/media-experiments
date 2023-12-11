@@ -8,7 +8,11 @@ import { createBlobURL, revokeBlobURL } from '@wordpress/blob';
 import { dateI18n } from '@wordpress/date';
 import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 
-import { getExtensionFromMimeType, blobToFile } from '@mexp/media-utils';
+import {
+	getExtensionFromMimeType,
+	blobToFile,
+	getCanvasBlob,
+} from '@mexp/media-utils';
 
 import { getMediaTypeFromBlockName } from '../../utils';
 import {
@@ -437,7 +441,24 @@ export function captureImage() {
 				} );
 
 				try {
-					const blob = await captureDevice.takePhoto();
+					// Not using `captureDevice.takePhoto()` due to error,
+					// see https://github.com/GoogleChromeLabs/imagecapture-polyfill/issues/15
+					// and https://github.com/swissspidy/media-experiments/issues/247.
+					// Downside is we need to get a Blob ourselves.
+					const bitmap = await captureDevice.grabFrame();
+
+					const canvas = document.createElement( 'canvas' );
+					canvas.width = bitmap.width;
+					canvas.height = bitmap.height;
+
+					const ctx = canvas.getContext( '2d' );
+
+					if ( ! ctx ) {
+						throw new Error( 'Could not get context' );
+					}
+
+					ctx.drawImage( bitmap, 0, 0, bitmap.width, bitmap.height );
+					const blob = await getCanvasBlob( canvas, 'image/jpeg' );
 
 					const { type } = blob;
 					const ext = getExtensionFromMimeType( type );
