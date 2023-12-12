@@ -104,7 +104,7 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 				void deleteUploadRequest();
 				void closeModal();
 				void createSuccessNotice(
-					__( 'Upload expired!', 'media-experiments' ),
+					__( 'Media successfully uploaded.', 'media-experiments' ),
 					{
 						type: 'snackbar',
 					}
@@ -137,7 +137,7 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 			void deleteUploadRequest();
 			void closeModal();
 			void createErrorNotice(
-				__( 'Media upload completed!', 'media-experiments' ),
+				__( 'Upload expired.', 'media-experiments' ),
 				{
 					type: 'snackbar',
 				}
