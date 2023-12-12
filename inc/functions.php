@@ -185,7 +185,7 @@ function enqueue_block_editor_assets(): void {
 
 	wp_enqueue_style(
 		'media-experiments-editor',
-		plugins_url( 'build/media-experiments-editor.css', __DIR__ ),
+		plugins_url( 'build/media-experiments.css', __DIR__ ),
 		array( 'wp-components' ),
 		$asset['version']
 	);
@@ -194,7 +194,7 @@ function enqueue_block_editor_assets(): void {
 
 	wp_enqueue_style(
 		'media-experiments-upload-requests',
-		plugins_url( 'build/upload-requests-modal-editor.css', __DIR__ ),
+		plugins_url( 'build/upload-requests-modal.css', __DIR__ ),
 		array( 'wp-components' ),
 		$asset['version']
 	);
