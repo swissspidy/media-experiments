@@ -17,7 +17,8 @@
 <head>
 	<meta http-equiv="Content-Type" content="<?php bloginfo( 'html_type' ); ?>; charset=<?php bloginfo( 'charset' ); ?>" />
 	<title><?php esc_html_e( 'Media Upload Request', 'media-experiments' ); ?></title>
-	<meta name="robots" content="noindex">
+	<meta name="robots" content="noindex" />
+	<meta name="viewport" content="width=device-width" />
 	<?php
 	wp_enqueue_script( 'media-experiments-view-upload-request' );
 	wp_enqueue_style( 'media-experiments-view-upload-request' );
