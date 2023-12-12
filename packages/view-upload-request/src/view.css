@@ -90,6 +90,11 @@ p {
 	text-align: center;
 }
 
+.single-mexp-upload-request .inner-wrap .components-button svg {
+	margin-top: 0;
+	margin-left: 0;
+}
+
 .components-editor-notices__snackbar {
 	position: fixed;
 	right: 0;

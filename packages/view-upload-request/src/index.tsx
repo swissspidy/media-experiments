@@ -4,14 +4,20 @@ import { createRoot, useState } from '@wordpress/element';
 import {
 	Button,
 	FormFileUpload,
-	SnackbarList, // eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	Spinner,
+	SnackbarList,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalText as Text,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 
-import { type Attachment, uploadMedia } from '@mexp/upload-media';
+import {
+	type Attachment,
+	uploadMedia,
+	store as uploadStore,
+} from '@mexp/upload-media';
 
 import './view.css';
 
@@ -21,6 +27,11 @@ const MULTIPLE = false;
 const ACCEPT = [ 'image/*', 'video/*', 'audio/*', '.pdf' ].join( ',' );
 
 function App() {
+	const isUploading = useSelect(
+		( select ) => select( uploadStore ).getItems().length > 0,
+		[]
+	);
+
 	const { createErrorNotice, createSuccessNotice, removeNotice } =
 		useDispatch( noticesStore );
 	const notices = useSelect(
@@ -72,8 +83,19 @@ function App() {
 					accept={ ACCEPT }
 					multiple={ MULTIPLE }
 					render={ ( { openFileDialog } ) => (
-						<Button variant="primary" onClick={ openFileDialog }>
-							{ __( 'Upload media', 'media-experiments' ) }
+						<Button
+							variant="primary"
+							onClick={ openFileDialog }
+							disabled={ isUploading }
+						>
+							{ isUploading ? (
+								<>
+									<Spinner />
+									{ __( 'Uploading…', 'media-experiments' ) }
+								</>
+							) : (
+								__( 'Upload media', 'media-experiments' )
+							) }
 						</Button>
 					) }
 				/>
