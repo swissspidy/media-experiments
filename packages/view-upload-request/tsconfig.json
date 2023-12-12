@@ -6,8 +6,7 @@
 	},
 	"references": [
 		{ "path": "../media-utils" },
-		{ "path": "../upload-media" },
-		{ "path": "../upload-requests" }
+		{ "path": "../upload-media" }
 	],
 	"include": [ "src/**/*" ]
 }

@@ -1,3 +1,16 @@
+diff --git a/node_modules/@wordpress/core-data/build-types/actions.d.ts b/node_modules/@wordpress/core-data/build-types/actions.d.ts
+index eddee87..06062ac 100644
+--- a/node_modules/@wordpress/core-data/build-types/actions.d.ts
++++ b/node_modules/@wordpress/core-data/build-types/actions.d.ts
+@@ -176,7 +176,7 @@ export function receiveNavigationFallbackId(fallbackId: integer): any;
+  * @return {Object} Action object.
+  */
+ export function receiveDefaultTemplateId(query: any, templateId: string): any;
+-export function deleteEntityRecord(kind: string, name: string, recordId: string, query: any | null, { __unstableFetch, throwOnError }?: {
++export function deleteEntityRecord(kind: string, name: string, recordId: string | number, query: any | null, { __unstableFetch, throwOnError }?: {
+     __unstableFetch?: Function | undefined;
+     throwOnError?: boolean | undefined;
+ } | undefined): ({ dispatch }: {
 diff --git a/node_modules/@wordpress/core-data/build-types/entity-provider.d.ts b/node_modules/@wordpress/core-data/build-types/entity-provider.d.ts
 index 2f44457..af6d485 100644
 --- a/node_modules/@wordpress/core-data/build-types/entity-provider.d.ts
@@ -58,10 +71,17 @@ index 0000000..8fc1663
 +}
 +export type PostType<C extends Context = 'edit'> = OmitNevers<_BaseEntityRecords.PostType<C>>;
 diff --git a/node_modules/@wordpress/core-data/build-types/index.d.ts b/node_modules/@wordpress/core-data/build-types/index.d.ts
-index ca5f7e4..1f72e2f 100644
+index ca5f7e4..8c632e1 100644
 --- a/node_modules/@wordpress/core-data/build-types/index.d.ts
 +++ b/node_modules/@wordpress/core-data/build-types/index.d.ts
-@@ -31,7 +31,7 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
+@@ -25,13 +25,13 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
+     receiveAutosaves(postId: number, autosaves: any): any;
+     receiveNavigationFallbackId(fallbackId: integer): any;
+     receiveDefaultTemplateId(query: any, templateId: string): any;
+-    deleteEntityRecord: (kind: string, name: string, recordId: string, query: any, { __unstableFetch, throwOnError }?: {
++    deleteEntityRecord: (kind: string, name: string, recordId: string | number, query: any, { __unstableFetch, throwOnError }?: {
+         __unstableFetch?: Function | undefined;
+         throwOnError?: boolean | undefined;
      } | undefined) => ({ dispatch }: {
          dispatch: any;
      }) => Promise<boolean | undefined>;

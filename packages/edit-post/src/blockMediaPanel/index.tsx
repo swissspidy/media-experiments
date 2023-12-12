@@ -25,7 +25,7 @@ import type {
 	VideoBlock,
 } from './types';
 
-import './styles.css';
+import './editor.css';
 
 const SUPPORTED_BLOCKS = [
 	'core/image',

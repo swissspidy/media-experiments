@@ -185,7 +185,7 @@ export function addItem( {
 				},
 				additionalData: {
 					// TODO: Make configurable via preferences?
-					'generate-sub-sizes': false,
+					generate_sub_sizes: false,
 					...additionalData,
 				},
 				onChange,
@@ -294,7 +294,7 @@ export function addSideloadItem( {
 				} ),
 				file,
 				additionalData: {
-					'generate-sub-sizes': false,
+					generate_sub_sizes: false,
 					...additionalData,
 				},
 				isSideload: true,
@@ -474,7 +474,7 @@ export function optimizeExistingItem( {
 					poster,
 				},
 				additionalData: {
-					'generate-sub-sizes': false,
+					generate_sub_sizes: false,
 					...additionalData,
 				},
 				onChange,
@@ -721,6 +721,9 @@ export function finishUploading( id: QueueItemId, attachment: Attachment ) {
 								// Sideloading does not use the parent post ID but the
 								// attachment ID as the image sizes need to be added to it.
 								post: attachment.id,
+								// Reference the same upload_request if needed.
+								upload_request:
+									item.additionalData.upload_request,
 							},
 							resize: imageSize,
 							transcode: [ TranscodingType.ResizeCrop ],

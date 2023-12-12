@@ -32,7 +32,9 @@
 					"mexp_.*",
 					"image_size",
 					"site_icon",
-					"site_logo"
+					"site_logo",
+					"generate_sub_sizes",
+					"upload_request"
 				]
 			}
 		]

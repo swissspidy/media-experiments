@@ -59,7 +59,7 @@ function filter_ext_types( array $ext2type ): array {
  * @param WP_Screen $screen Current WP_Screen object.
  * @return void
  */
-function set_up_cross_origin_isolation( WP_Screen $screen ): void {
+function set_up_cross_origin_isolation_editor( WP_Screen $screen ): void {
 	if ( ! $screen->is_block_editor() ) {
 		return;
 	}
@@ -90,6 +90,53 @@ function register_assets(): void {
 		'0.0.7',
 		true
 	);
+
+	$asset_file = dirname( __DIR__ ) . '/build/view-upload-request.asset.php';
+	$asset      = is_readable( $asset_file ) ? require $asset_file : [];
+
+	$asset['dependencies'] = $asset['dependencies'] ?? [];
+	$asset['version']      = $asset['version'] ?? '';
+
+	$asset['dependencies'][] = 'media-experiments-libheif';
+	$asset['dependencies'][] = 'media-experiments-vips';
+
+	wp_register_script(
+		'media-experiments-view-upload-request',
+		plugins_url( 'build/view-upload-request.js', __DIR__ ),
+		$asset['dependencies'],
+		$asset['version'],
+		array(
+			'strategy' => 'defer',
+		)
+	);
+
+	wp_set_script_translations( 'media-experiments-view-upload-request', 'media-experiments' );
+
+	/** This filter is documented in wp-admin/includes/images.php */
+	$threshold = (int) apply_filters( 'big_image_size_threshold', 2560, array( 0, 0 ), '', 0 ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+
+	wp_add_inline_script(
+		'media-experiments-view-upload-request',
+		sprintf(
+			'window.mediaExperiments = %s;',
+			wp_json_encode(
+				[
+					'availableImageSizes'   => get_all_image_sizes(),
+					'bigImageSizeThreshold' => $threshold,
+				]
+			)
+		),
+		'before'
+	);
+
+	wp_register_style(
+		'media-experiments-view-upload-request',
+		plugins_url( 'build/view-upload-request-view.css', __DIR__ ),
+		array( 'wp-components' ),
+		$asset['version']
+	);
+
+	wp_style_add_data( 'media-experiments-view-upload-request', 'rtl', 'replace' );
 }
 
 /**
@@ -138,12 +185,21 @@ function enqueue_block_editor_assets(): void {
 
 	wp_enqueue_style(
 		'media-experiments-editor',
-		plugins_url( 'build/media-experiments-editor.css', __DIR__ ),
+		plugins_url( 'build/media-experiments.css', __DIR__ ),
 		array( 'wp-components' ),
 		$asset['version']
 	);
 
 	wp_style_add_data( 'media-experiments-editor', 'rtl', 'replace' );
+
+	wp_enqueue_style(
+		'media-experiments-upload-requests',
+		plugins_url( 'build/upload-requests-modal.css', __DIR__ ),
+		array( 'wp-components' ),
+		$asset['version']
+	);
+
+	wp_style_add_data( 'media-experiments-upload-requests', 'rtl', 'replace' );
 }
 
 /**
@@ -848,4 +904,194 @@ function filter_wp_content_img_tag_add_placeholders( string $filtered_image, str
 	}
 
 	return str_replace( ' class="', ' class="' . $class_name . ' ', $filtered_image );
+}
+
+/**
+ * Registers post type and post meta for upload requests.
+
+ * @return void
+ */
+function register_upload_request_post_type(): void {
+	require_once __DIR__ . '/class-rest-upload-requests-controller.php';
+
+	register_post_type(
+		'mexp-upload-request',
+		[
+			'labels'                => [
+				'name'                     => _x( 'Upload Requests', 'post type general name', 'media-experiments' ),
+				'singular_name'            => _x( 'Upload Request', 'post type singular name', 'media-experiments' ),
+				'add_new'                  => __( 'Add New Upload Request', 'media-experiments' ),
+				'add_new_item'             => __( 'Add New Upload Request', 'media-experiments' ),
+				'edit_item'                => __( 'Edit Upload Request', 'media-experiments' ),
+				'new_item'                 => __( 'New Upload Request', 'media-experiments' ),
+				'view_item'                => __( 'View Upload Request', 'media-experiments' ),
+				'view_items'               => __( 'View Upload Requests', 'media-experiments' ),
+				'search_items'             => __( 'Search Upload Requests', 'media-experiments' ),
+				'not_found'                => __( 'No upload requests found.', 'media-experiments' ),
+				'not_found_in_trash'       => __( 'No upload requests found in Trash.', 'media-experiments' ),
+				'all_items'                => __( 'All Upload Requests', 'media-experiments' ),
+				'archives'                 => __( 'Upload Request Archives', 'media-experiments' ),
+				'attributes'               => __( 'Upload Request Attributes', 'media-experiments' ),
+				'insert_into_item'         => __( 'Insert into upload request', 'media-experiments' ),
+				'uploaded_to_this_item'    => __( 'Uploaded to this upload request', 'media-experiments' ),
+				'featured_image'           => _x( 'Featured Image', 'upload request', 'media-experiments' ),
+				'set_featured_image'       => _x( 'Set featured image', 'upload request', 'media-experiments' ),
+				'remove_featured_image'    => _x( 'Remove featured image', 'upload request', 'media-experiments' ),
+				'use_featured_image'       => _x( 'Use as featured image', 'upload request', 'media-experiments' ),
+				'filter_items_list'        => __( 'Filter upload requests list', 'media-experiments' ),
+				'filter_by_date'           => __( 'Filter by date', 'media-experiments' ),
+				'items_list_navigation'    => __( 'Upload Requests list navigation', 'media-experiments' ),
+				'items_list'               => __( 'Upload Requests list', 'media-experiments' ),
+				'item_published'           => __( 'Upload Request published.', 'media-experiments' ),
+				'item_published_privately' => __( 'Upload Request published privately.', 'media-experiments' ),
+				'item_reverted_to_draft'   => __( 'Upload Request reverted to draft.', 'media-experiments' ),
+				'item_scheduled'           => __( 'Upload Request scheduled', 'media-experiments' ),
+				'item_updated'             => __( 'Upload Request updated.', 'media-experiments' ),
+				'menu_name'                => _x( 'Upload Requests', 'admin menu', 'media-experiments' ),
+				'name_admin_bar'           => _x( 'Upload Request', 'add new on admin bar', 'media-experiments' ),
+				'item_link'                => _x( 'Upload Request Link', 'navigation link block title', 'media-experiments' ),
+				'item_link_description'    => _x( 'A link to a upload request.', 'navigation link block description', 'media-experiments' ),
+				'item_trashed'             => __( 'Upload Request trashed.', 'media-experiments' ),
+			],
+			'supports'              => [
+				'author',
+				'custom-fields',
+			],
+			'map_meta_cap'          => true,
+			'capabilities'          => [
+				// You need to be able to upload media in order to create upload requests.
+				'create_posts'           => 'upload_files',
+				// Anyone can read an upload request to upload files.
+				'read'                   => 'read',
+				// You need to be able to publish posts, in order to create blocks.
+				'edit_posts'             => 'edit_posts',
+				'edit_published_posts'   => 'edit_published_posts',
+				'delete_published_posts' => 'delete_published_posts',
+				// Enables trashing draft posts as well.
+				'delete_posts'           => 'delete_posts',
+				'edit_others_posts'      => 'edit_others_posts',
+				'delete_others_posts'    => 'delete_others_posts',
+			],
+			'rewrite'               => [
+				'slug'       => 'upload',
+				'with_front' => false,
+				'feeds'      => false,
+			],
+			'public'                => false,
+			'has_archive'           => false,
+			'show_ui'               => false,
+			'can_export'            => false,
+			'exclude_from_search'   => true,
+			'publicly_queryable'    => true,
+			'show_in_rest'          => true,
+			'delete_with_user'      => true,
+			'rest_base'             => 'upload-requests',
+			'rest_controller_class' => REST_Upload_Requests_Controller::class,
+		]
+	);
+
+	register_post_meta(
+		'mexp-upload-request',
+		'mexp_attachment_id',
+		[
+			'type'         => 'string',
+			'description'  => __( 'Associated attachment ID.', 'media-experiments' ),
+			'show_in_rest' => [
+				'schema' => [
+					'type' => 'string',
+				],
+			],
+			'single'       => true,
+		]
+	);
+}
+
+/**
+ * Filters the path of the queried template for single upload requests.
+ *
+ * @param string $template Template path.
+ * @return string Filtered template path.
+ */
+function load_upload_request_template( string $template ) {
+	if ( is_singular( 'mexp-upload-request' ) ) {
+		require_once plugin_dir_path( __FILE__ ) . '/class-cross-origin-isolation.php';
+		$instance = new Cross_Origin_Isolation();
+		$instance->register();
+		$instance->send_headers();
+
+		return __DIR__ . '/templates/upload-request.php';
+	}
+
+	return $template;
+}
+
+/**
+ * Adds a new cron schedule for running every 15 minutes.
+ *
+ * @param array $schedules Cron schedules.
+ *
+ * @return array Filtered cron schedules.
+ */
+function add_quarter_hourly_cron_interval( $schedules ) {
+	$schedules['quarter_hourly'] = [
+		'interval' => 15 * MINUTE_IN_SECONDS,
+		'display'  => __( 'Every 15 Minutes', 'media-experiments' ),
+	];
+
+	return $schedules;
+}
+
+/**
+ * Delete unresolved upload requests that are older than 15 minutes.
+ *
+ * @return void
+ */
+function delete_old_upload_requests(): void {
+	$args = [
+		'post_type'        => 'mexp-upload-request',
+		'post_status'      => 'publish',
+		'numberposts'      => -1,
+		'date_query'       => [
+			[
+				'before'    => '15 minutes ago',
+				'inclusive' => true,
+			],
+		],
+		'suppress_filters' => false,
+	];
+
+	$posts = get_posts( $args );
+
+	foreach ( $posts as $post ) {
+		wp_delete_post( $post, true );
+	}
+}
+
+/**
+ * Plugin activation hook.
+ *
+ * @return void
+ */
+function activate_plugin(): void {
+	register_upload_request_post_type();
+
+	flush_rewrite_rules( false );
+
+	if ( ! wp_next_scheduled( 'mexp_upload_requests_cleanup' ) ) {
+		wp_schedule_event( time(), 'quarter_hourly', 'mexp_upload_requests_cleanup' );
+	}
+}
+
+/**
+ * Plugin deactivation hook.
+ *
+ * @return void
+ */
+function deactivate_plugin(): void {
+	unregister_post_type( 'mexp-upload-request' );
+
+	flush_rewrite_rules( false );
+
+	$timestamp = wp_next_scheduled( 'mexp_upload_requests_cleanup' );
+	wp_unschedule_event( $timestamp, 'mexp_upload_requests_cleanup' );
 }

@@ -1,0 +1,41 @@
+{
+	"name": "@mexp/view-upload-request",
+	"version": "0.0.1",
+	"description": "View upload request package",
+	"private": true,
+	"author": "",
+	"license": "GPL-2.0-or-later",
+	"keywords": [
+		"wordpress",
+		"media",
+		"qrcode"
+	],
+	"homepage": "https://github.com/swissspidy/media-experiments/tree/HEAD/packages/view-upload-request/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/swissspidy/media-experiments.git",
+		"directory": "packages/view-upload-request"
+	},
+	"bugs": {
+		"url": "https://github.com/swissspidy/media-experiments/issues"
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"main": "dist/index.js",
+	"types": "dist-types/index.d.ts",
+	"source": "src/index.ts",
+	"exports": {
+		".": {
+			"default": "./src/index.ts"
+		}
+	},
+	"dependencies": {
+		"@mexp/media-utils": "../media-utils",
+		"@mexp/upload-media": "../upload-media",
+		"@wordpress/components": "^25.2.0",
+		"@wordpress/compose": "^6.10.0",
+		"@wordpress/core-data": "^6.22.0",
+		"@wordpress/data": "^9.6.0"
+	}
+}

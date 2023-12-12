@@ -184,3 +184,9 @@ Use AI to automatically generate alt text for images and videos to improve acces
 ### Upload Manager
 
 Show all in-progress items for easier inspection, and allow cancelling individual uploads.
+
+### Upload from another device
+
+Allows uploading media to the current post from an entirely different device, such as a mobile phone, even when not logged in.
+
+https://github.com/swissspidy/media-experiments/assets/841956/b0b63f19-7f78-4a8d-9255-b59ad996368a

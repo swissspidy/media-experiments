@@ -12,6 +12,7 @@ import type {
 	RestAttachment,
 	WP_REST_API_Term,
 	ImageFormat,
+	ImageSizeCrop,
 } from './store/types';
 import { UploadError } from './uploadError';
 import { PREFERENCES_NAME } from './constants';
@@ -26,6 +27,7 @@ export type {
 	Attachment,
 	RestAttachment,
 	ImageFormat,
+	ImageSizeCrop,
 };
 
 export { uploadStore as store, UploadError };
@@ -126,6 +128,11 @@ subscribe( () => {
 	for ( const item of items ) {
 		const { id, error, onError } = item;
 		onError?.( error ?? new Error( 'Upload cancelled' ) );
+		if ( ! onError && error ) {
+			// TODO: Find better way to surface errors with sideloads etc.
+			// eslint-disable-next-line no-console -- Deliberately log errors here.
+			console.error( 'Upload cancelled', error );
+		}
 		void dispatch( uploadStore ).removeItem( id );
 	}
 }, uploadStore );
