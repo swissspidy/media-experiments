@@ -17,11 +17,8 @@ body {
 a {
 	color: #2271b1;
 	transition-property: border, background, color;
-	transition-duration: .05s;
+	transition-duration: 0.05s;
 	transition-timing-function: ease-in-out;
-}
-
-a {
 	outline: 0;
 }
 
@@ -33,8 +30,8 @@ a:active {
 a:focus {
 	color: #043959;
 	box-shadow:
-			0 0 0 1px #4f94d4,
-			0 0 2px 1px rgba(79, 148, 212, 0.8);
+		0 0 0 1px #4f94d4,
+		0 0 2px 1px rgba(79, 148, 212, 0.8);
 }
 
 p {
