@@ -16,6 +16,10 @@ module.exports = {
 			__dirname,
 			'packages/edit-post/src/index.ts'
 		),
+		'view-upload-request': resolve(
+			__dirname,
+			'packages/view-upload-request/src/index.tsx'
+		),
 	},
 	output: {
 		filename: '[name].js',
@@ -95,9 +99,10 @@ module.exports = {
 			cacheGroups: {
 				editor: {
 					type: 'css/mini-extract',
-					test: /[\\/]styles\.css$/,
-					chunks: 'all',
-					enforce: true,
+					test: /[\\/]editor\.css$/,
+					chunks: ( chunk ) => {
+						return chunk.name === 'media-experiments';
+					},
 					name( _, chunks, cacheGroupKey ) {
 						const chunkName = chunks[ 0 ].name;
 						return `${ dirname( chunkName ) }/${ basename(
@@ -108,6 +113,18 @@ module.exports = {
 				blocks: {
 					type: 'css/mini-extract',
 					test: /[\\/]blocks\.css$/,
+					chunks: 'all',
+					enforce: true,
+					name( _, chunks, cacheGroupKey ) {
+						const chunkName = chunks[ 0 ].name;
+						return `${ dirname( chunkName ) }/${ basename(
+							chunkName
+						) }-${ cacheGroupKey }`;
+					},
+				},
+				view: {
+					type: 'css/mini-extract',
+					test: /[\\/]view\.css$/,
 					chunks: 'all',
 					enforce: true,
 					name( _, chunks, cacheGroupKey ) {

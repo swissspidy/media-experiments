@@ -36,6 +36,7 @@
 		"@mediapipe/selfie_segmentation": "^0.1.1675465747",
 		"@mexp/media-utils": "../media-utils",
 		"@mexp/upload-media": "../upload-media",
+		"@mexp/upload-requests": "../upload-requests",
 		"@wordpress/blob": "^3.36.0",
 		"@wordpress/block-editor": "^12.13.0",
 		"@wordpress/blocks": "^12.10.0",

@@ -18,11 +18,11 @@ class Cross_Origin_Isolation {
 	 * Init
 	 */
 	public function register(): void {
-		add_action( 'load-post.php', [ $this, 'admin_header' ] );
-		add_action( 'load-post-new.php', [ $this, 'admin_header' ] );
-		add_filter( 'style_loader_tag', [ $this, 'style_loader_tag' ], 10, 3 );
-		add_filter( 'script_loader_tag', [ $this, 'script_loader_tag' ], 10, 3 );
-		add_filter( 'get_avatar', [ $this, 'get_avatar' ], 10, 6 );
+		add_action( 'load-post.php', [ $this, 'send_headers' ] );
+		add_action( 'load-post-new.php', [ $this, 'send_headers' ] );
+		add_filter( 'style_loader_tag', [ $this, 'filter_style_loader_tag' ], 10, 3 );
+		add_filter( 'script_loader_tag', [ $this, 'filter_script_loader_tag' ], 10, 3 );
+		add_filter( 'get_avatar', [ $this, 'filter_get_avatar' ], 10, 6 );
 		add_action( 'wp_enqueue_media', [ $this, 'override_media_templates' ] );
 	}
 
@@ -31,7 +31,7 @@ class Cross_Origin_Isolation {
 	 *
 	 * @since 1.6.0
 	 */
-	public function admin_header(): void {
+	public function send_headers(): void {
 		if ( $this->needs_isolation() ) {
 			header( 'Cross-Origin-Opener-Policy: same-origin' );
 			header( 'Cross-Origin-Embedder-Policy: require-corp' );
@@ -50,7 +50,7 @@ class Cross_Origin_Isolation {
 	 * @param string $href   The stylesheet's source URL.
 	 * @return string|mixed
 	 */
-	public function style_loader_tag( $tag, string $handle, string $href ) {
+	public function filter_style_loader_tag( $tag, string $handle, string $href ) {
 		return $this->add_attribute( $tag, 'href', $href );
 	}
 
@@ -64,7 +64,7 @@ class Cross_Origin_Isolation {
 	 * @param string $src    The script's source URL.
 	 * @return string|mixed The filtered script tag.
 	 */
-	public function script_loader_tag( $tag, string $handle, string $src ) {
+	public function filter_script_loader_tag( $tag, string $handle, string $src ) {
 		return $this->add_attribute( $tag, 'src', $src );
 	}
 
@@ -85,7 +85,7 @@ class Cross_Origin_Isolation {
 	 * @param array<string,mixed> $args           Arguments passed to get_avatar_data(), after processing.
 	 * @return string|mixed Filtered avatar tag.
 	 */
-	public function get_avatar( $avatar, $id_or_email, int $size, string $default_avatar, string $alt, array $args ) {
+	public function filter_get_avatar( $avatar, $id_or_email, int $size, string $default_avatar, string $alt, array $args ) {
 		return $this->add_attribute( $avatar, 'src', $args['url'] );
 	}
 
@@ -135,6 +135,10 @@ class Cross_Origin_Isolation {
 	 * @return bool Whether the conditional object is needed.
 	 */
 	private function needs_isolation(): bool {
+		if ( is_singular( 'mexp-upload-request' ) ) {
+			return true;
+		}
+
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) {
 			return false;

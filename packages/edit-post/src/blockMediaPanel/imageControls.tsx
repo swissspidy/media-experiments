@@ -10,6 +10,7 @@ import { OptimizeMedia } from './optimizeMedia';
 import { DebugInfo } from './debugInfo';
 import type { ImageBlock } from './types';
 import { AnimatedGifConverter } from './animatedGifConverter';
+import { UploadRequestControls } from './uploadRequestControls';
 
 type ImageControlsProps = ImageBlock &
 	Pick< BlockEditProps< ImageBlock[ 'attributes' ] >, 'setAttributes' >;
@@ -44,6 +45,14 @@ export function ImageControls( props: ImageControlsProps ) {
 		}
 	}
 
+	function onInsertFromUploadRequest( url?: string ) {
+		if ( url ) {
+			props.setAttributes( {
+				url,
+			} );
+		}
+	}
+
 	return (
 		<Fragment>
 			<AnimatedGifConverter
@@ -60,6 +69,10 @@ export function ImageControls( props: ImageControlsProps ) {
 				clientId={ props.clientId }
 				url={ props.attributes.url }
 				onInsert={ onInsertRecording }
+			/>
+			<UploadRequestControls
+				url={ props.attributes.url }
+				onInsert={ onInsertFromUploadRequest }
 			/>
 			{ ! props.attributes.id ? (
 				<ImportMedia

@@ -12,7 +12,7 @@ import { store as preferencesStore } from '@wordpress/preferences';
 
 import type { ImageFormat } from '@mexp/upload-media';
 
-import './styles.css';
+import './editor.css';
 import { Modal } from './modal';
 import { PREFERENCES_NAME } from './constants';
 

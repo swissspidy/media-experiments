@@ -184,7 +184,10 @@ export interface RestAttachment extends WP_REST_API_Attachment {
 	};
 }
 
-export type CreateRestAttachment = Partial< RestAttachment >;
+export type CreateRestAttachment = Partial< RestAttachment > & {
+	generate_sub_sizes?: boolean;
+	upload_request?: string;
+};
 
 export type AdditionalData = Omit<
 	CreateRestAttachment,

@@ -35,3 +35,6 @@ require_once __DIR__ . '/inc/functions.php';
  * Adds all plugin actions and filters.
  */
 require_once __DIR__ . '/inc/default-filters.php';
+
+register_activation_hook( __FILE__, 'MediaExperiments\\activate_plugin' );
+register_deactivation_hook( __FILE__, 'MediaExperiments\\deactivate_plugin' );

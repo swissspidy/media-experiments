@@ -11,7 +11,7 @@ import { store as uploadStore, type RestAttachment } from '@mexp/upload-media';
 import { BulkOptimization } from '../components/bulkOptimization';
 import type { BulkOptimizationAttachmentData } from '../types';
 
-import './styles.css';
+import './editor.css';
 
 const SUPPORTED_BLOCKS = [ 'core/image', 'core/video' ];
 
