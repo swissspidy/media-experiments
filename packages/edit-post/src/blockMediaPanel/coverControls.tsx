@@ -50,13 +50,11 @@ export function CoverControls( props: CoverControlsProps ) {
 				onSuccess={ onChange }
 			/>
 			{ 'video' === props.attributes.backgroundType ? (
-				<>
-					<MuteVideo
-						id={ props.attributes.id }
-						url={ props.attributes.url }
-						onChange={ onChange }
-					/>
-				</>
+				<MuteVideo
+					id={ props.attributes.id }
+					url={ props.attributes.url }
+					onChange={ onChange }
+				/>
 			) : null }
 			<DebugInfo id={ props.attributes.id } />
 		</Fragment>

@@ -43,59 +43,27 @@ type PerBlockControlsProps = MediaPanelProps;
 function PerBlockControls( props: PerBlockControlsProps ) {
 	switch ( props.name ) {
 		case 'core/video':
-			return (
-				<>
-					<VideoControls { ...props } />
-				</>
-			);
+			return <VideoControls { ...props } />;
 		case 'core/image':
-			return (
-				<>
-					<ImageControls { ...props } />
-				</>
-			);
+			return <ImageControls { ...props } />;
 
 		case 'core/audio':
-			return (
-				<>
-					<AudioControls { ...props } />
-				</>
-			);
+			return <AudioControls { ...props } />;
 
 		case 'core/media-text':
-			return (
-				<>
-					<MediaTextControls { ...props } />
-				</>
-			);
+			return <MediaTextControls { ...props } />;
 
 		case 'core/gallery':
-			return (
-				<>
-					<GalleryControls { ...props } />
-				</>
-			);
+			return <GalleryControls { ...props } />;
 
 		case 'core/cover':
-			return (
-				<>
-					<CoverControls { ...props } />
-				</>
-			);
+			return <CoverControls { ...props } />;
 
 		case 'core/post-featured-image':
-			return (
-				<>
-					<PostFeaturedImageControls />
-				</>
-			);
+			return <PostFeaturedImageControls />;
 
 		case 'core/site-logo':
-			return (
-				<>
-					<SiteLogoControls { ...props } />
-				</>
-			);
+			return <SiteLogoControls { ...props } />;
 
 		default:
 			return null;

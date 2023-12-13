@@ -9,6 +9,30 @@ function forceCrossOrigin( imgCrossOrigin: CrossOriginValue, url: string ) {
 	return 'anonymous' as CrossOriginValue;
 }
 
+async function waitForChildren( element: Element ) {
+	return new Promise< void >( ( resolve ) => {
+		if ( ! element ) {
+			return resolve();
+		}
+
+		if ( element.children.length ) {
+			return resolve();
+		}
+
+		const obs = new MutationObserver( () => {
+			if ( element.children.length ) {
+				obs.disconnect();
+				resolve();
+			}
+		} );
+
+		obs.observe( element, {
+			childList: true,
+			subtree: true,
+		} );
+	} );
+}
+
 if ( window.crossOriginIsolated ) {
 	addFilter(
 		'media.crossOrigin',
@@ -65,30 +89,6 @@ if ( window.crossOriginIsolated ) {
 			subtree: true,
 		} );
 	} );
-
-	async function waitForChildren( element: Element ) {
-		return new Promise< void >( ( resolve ) => {
-			if ( ! element ) {
-				return resolve();
-			}
-
-			if ( element.children.length ) {
-				return resolve();
-			}
-
-			const obs = new MutationObserver( () => {
-				if ( element.children.length ) {
-					observer.disconnect();
-					resolve();
-				}
-			} );
-
-			obs.observe( element, {
-				childList: true,
-				subtree: true,
-			} );
-		} );
-	}
 
 	const unsubscribe = subscribe( async () => {
 		const wrapperEl = document.querySelector(

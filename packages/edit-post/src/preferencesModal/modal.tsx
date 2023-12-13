@@ -171,136 +171,123 @@ export function Modal() {
 				name: 'general',
 				tabLabel: __( 'General', 'media-experiments' ),
 				content: (
-					<>
-						<PreferencesModalSection
-							title={ __( 'General', 'media-experiments' ) }
-							description={ __(
-								'Customize options related to the media optimization flow.',
+					<PreferencesModalSection
+						title={ __( 'General', 'media-experiments' ) }
+						description={ __(
+							'Customize options related to the media optimization flow.',
+							'media-experiments'
+						) }
+					>
+						<EnableFeature
+							featureName="requireApproval"
+							help={ __(
+								'Require approval step when optimizing existing videos or images.',
 								'media-experiments'
 							) }
-						>
-							<EnableFeature
-								featureName="requireApproval"
-								help={ __(
-									'Require approval step when optimizing existing videos or images.',
-									'media-experiments'
-								) }
-								label={ __( 'Approval', 'media-experiments' ) }
-							/>
-							<SelectFeature
-								featureName="imageFormat"
-								help={ __(
-									'Preferred file format when converting images.',
-									'media-experiments'
-								) }
-								label={ __(
-									'Image Format',
-									'media-experiments'
-								) }
-								options={ [
-									{
-										label: __(
-											'JPEG (Browser)',
-											'media-experiments'
-										),
-										value: 'jpeg-browser',
-									},
-									{
-										label: __(
-											'WebP (Browser)',
-											'media-experiments'
-										),
-										value: 'webp-browser',
-										disabled: isSafari,
-									},
-									{
-										label: __(
-											'WebP (FFmpeg)',
-											'media-experiments'
-										),
-										value: 'webp-ffmpeg',
-									},
-									{
-										label: __(
-											'JPEG (libvips)',
-											'media-experiments'
-										),
-										value: 'jpeg-vips',
-									},
-									{
-										label: __(
-											'JPEG (MozJPEG)',
-											'media-experiments'
-										),
-										value: 'jpeg-mozjpeg',
-									},
-									{
-										label: __(
-											'AVIF (libavif)',
-											'media-experiments'
-										),
-										value: 'avif',
-									},
-								] }
-							/>
-							{ /* default for jpeg: 82, for webp: 86 */ }
-							<FeatureNumberControl
-								className="interface-preferences-modal__option interface-preferences-modal__option--number"
-								label={ __(
-									'Image Quality',
-									'media-experiments'
-								) }
-								isShiftStepEnabled={ true }
-								featureName="imageQuality"
-								shiftStep={ 5 }
-								max={ 100 }
-								min={ 1 }
-							/>
-						</PreferencesModalSection>
-					</>
+							label={ __( 'Approval', 'media-experiments' ) }
+						/>
+						<SelectFeature
+							featureName="imageFormat"
+							help={ __(
+								'Preferred file format when converting images.',
+								'media-experiments'
+							) }
+							label={ __( 'Image Format', 'media-experiments' ) }
+							options={ [
+								{
+									label: __(
+										'JPEG (Browser)',
+										'media-experiments'
+									),
+									value: 'jpeg-browser',
+								},
+								{
+									label: __(
+										'WebP (Browser)',
+										'media-experiments'
+									),
+									value: 'webp-browser',
+									disabled: isSafari,
+								},
+								{
+									label: __(
+										'WebP (FFmpeg)',
+										'media-experiments'
+									),
+									value: 'webp-ffmpeg',
+								},
+								{
+									label: __(
+										'JPEG (libvips)',
+										'media-experiments'
+									),
+									value: 'jpeg-vips',
+								},
+								{
+									label: __(
+										'JPEG (MozJPEG)',
+										'media-experiments'
+									),
+									value: 'jpeg-mozjpeg',
+								},
+								{
+									label: __(
+										'AVIF (libavif)',
+										'media-experiments'
+									),
+									value: 'avif',
+								},
+							] }
+						/>
+						{ /* default for jpeg: 82, for webp: 86 */ }
+						<FeatureNumberControl
+							className="interface-preferences-modal__option interface-preferences-modal__option--number"
+							label={ __( 'Image Quality', 'media-experiments' ) }
+							isShiftStepEnabled={ true }
+							featureName="imageQuality"
+							shiftStep={ 5 }
+							max={ 100 }
+							min={ 1 }
+						/>
+					</PreferencesModalSection>
 				),
 			},
 			{
 				name: 'recording',
 				tabLabel: __( 'Recording', 'media-experiments' ),
 				content: (
-					<>
-						<PreferencesModalSection
-							title={ __( 'Recording', 'media-experiments' ) }
-							description={ __(
-								'Customize options related to the media recording functionality.',
+					<PreferencesModalSection
+						title={ __( 'Recording', 'media-experiments' ) }
+						description={ __(
+							'Customize options related to the media recording functionality.',
+							'media-experiments'
+						) }
+					>
+						<SelectFeature
+							featureName="videoInput"
+							help={ __(
+								'Default camera to use when recording video or taking pictures.',
 								'media-experiments'
 							) }
-						>
-							<SelectFeature
-								featureName="videoInput"
-								help={ __(
-									'Default camera to use when recording video or taking pictures.',
-									'media-experiments'
-								) }
-								label={ __( 'Camera', 'media-experiments' ) }
-								options={ videoDevices.map( ( device ) => ( {
-									label: device.label,
-									value: device.deviceId,
-								} ) ) }
-							/>
-							<SelectFeature
-								featureName="audioInput"
-								help={ __(
-									'Default microphone to use when recording video / audio.',
-									'media-experiments'
-								) }
-								label={ __(
-									'Microphone',
-									'media-experiments'
-								) }
-								options={ audioDevices.map( ( device ) => ( {
-									label: device.label,
-									value: device.deviceId,
-								} ) ) }
-							/>
-						</PreferencesModalSection>
-					</>
+							label={ __( 'Camera', 'media-experiments' ) }
+							options={ videoDevices.map( ( device ) => ( {
+								label: device.label,
+								value: device.deviceId,
+							} ) ) }
+						/>
+						<SelectFeature
+							featureName="audioInput"
+							help={ __(
+								'Default microphone to use when recording video / audio.',
+								'media-experiments'
+							) }
+							label={ __( 'Microphone', 'media-experiments' ) }
+							options={ audioDevices.map( ( device ) => ( {
+								label: device.label,
+								value: device.deviceId,
+							} ) ) }
+						/>
+					</PreferencesModalSection>
 				),
 			},
 		],

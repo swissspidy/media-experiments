@@ -34,8 +34,6 @@ export async function convertImageToJpeg( file: File ) {
 			fileName,
 			'image/jpeg'
 		);
-	} catch ( err ) {
-		throw err;
 	} finally {
 		URL.revokeObjectURL( url );
 	}
@@ -74,8 +72,6 @@ export async function convertImageToAvif( file: File ) {
 			fileName,
 			'image/avif'
 		);
-	} catch ( err ) {
-		throw err;
 	} finally {
 		URL.revokeObjectURL( url );
 	}

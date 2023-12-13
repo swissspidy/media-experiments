@@ -58,18 +58,15 @@ function InputControls() {
 	} ) );
 
 	// Videos can be recorded with or without audio.
-	const audioControls = [
-		...audioDevices.map( ( device ) => ( {
-			title: device.label,
-			onClick: () => {
-				void setAudioInput( device.deviceId );
-			},
-			isActive: audioInput === device.deviceId,
-			role: 'menuitemradio',
-			icon:
-				hasAudio && audioInput === device.deviceId ? check : undefined,
-		} ) ),
-	];
+	const audioControls = audioDevices.map( ( device ) => ( {
+		title: device.label,
+		onClick: () => {
+			void setAudioInput( device.deviceId );
+		},
+		isActive: audioInput === device.deviceId,
+		role: 'menuitemradio',
+		icon: hasAudio && audioInput === device.deviceId ? check : undefined,
+	} ) );
 
 	if ( 'video' === recordingType ) {
 		audioControls.unshift( {

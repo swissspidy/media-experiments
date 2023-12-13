@@ -49,13 +49,11 @@ export function MediaTextControls( props: MediaTextControlsProps ) {
 				onSuccess={ onChange }
 			/>
 			{ 'video' === props.attributes.mediaType ? (
-				<>
-					<MuteVideo
-						id={ props.attributes.mediaId }
-						url={ props.attributes.mediaUrl }
-						onChange={ onChange }
-					/>
-				</>
+				<MuteVideo
+					id={ props.attributes.mediaId }
+					url={ props.attributes.mediaUrl }
+					onChange={ onChange }
+				/>
 			) : null }
 			<DebugInfo id={ props.attributes.mediaId } />
 		</Fragment>
