@@ -19,6 +19,10 @@ updates:
       open-pull-requests-limit: 10
       labels:
           - Dependencies
+      groups:
+          wp-packages:
+              patterns:
+                  - '@wordpress/*'
 
     - package-ecosystem: composer
       directory: '/'
