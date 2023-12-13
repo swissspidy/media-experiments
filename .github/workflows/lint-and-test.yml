@@ -44,6 +44,29 @@ jobs:
             - name: Lint Markdown
               run: npm run lint:md:docs
 
+    bundle-size:
+        name: Bundle size check
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version-file: '.nvmrc'
+                  cache: npm
+
+            - name: Install dependencies
+              run: npm ci
+            - name: Bundle size check
+              uses: preactjs/compressed-size-action@v2
+              with:
+                  repo-token: ${{ secrets.GITHUB_TOKEN }}
+                  pattern: '{build/*.js,build/*.css}'
+                  build-script: 'build'
+                  minimum-change-threshold: 100
+
     lint-php:
         name: PHP Lints
         runs-on: ubuntu-latest
