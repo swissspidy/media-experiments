@@ -1,5 +1,5 @@
 diff --git a/node_modules/@wordpress/core-data/build-types/actions.d.ts b/node_modules/@wordpress/core-data/build-types/actions.d.ts
-index eddee87..06062ac 100644
+index eddee87..aebde8b 100644
 --- a/node_modules/@wordpress/core-data/build-types/actions.d.ts
 +++ b/node_modules/@wordpress/core-data/build-types/actions.d.ts
 @@ -176,7 +176,7 @@ export function receiveNavigationFallbackId(fallbackId: integer): any;
@@ -12,7 +12,7 @@ index eddee87..06062ac 100644
      throwOnError?: boolean | undefined;
  } | undefined): ({ dispatch }: {
 diff --git a/node_modules/@wordpress/core-data/build-types/entity-provider.d.ts b/node_modules/@wordpress/core-data/build-types/entity-provider.d.ts
-index 2f44457..af6d485 100644
+index 2f44457..886486d 100644
 --- a/node_modules/@wordpress/core-data/build-types/entity-provider.d.ts
 +++ b/node_modules/@wordpress/core-data/build-types/entity-provider.d.ts
 @@ -42,7 +42,7 @@ export function useEntityId(kind: string, name: string): any;
@@ -25,7 +25,7 @@ index 2f44457..af6d485 100644
   * Hook that returns block content getters and setters for
   * the nearest provided entity of the specified type.
 diff --git a/node_modules/@wordpress/core-data/build-types/entity-types/index.d.ts b/node_modules/@wordpress/core-data/build-types/entity-types/index.d.ts
-index ed4d540..c6a257c 100644
+index ed4d540..d4ae61d 100644
 --- a/node_modules/@wordpress/core-data/build-types/entity-types/index.d.ts
 +++ b/node_modules/@wordpress/core-data/build-types/entity-types/index.d.ts
 @@ -23,7 +23,8 @@ import type { WidgetType } from './widget-type';
@@ -71,7 +71,7 @@ index 0000000..8fc1663
 +}
 +export type PostType<C extends Context = 'edit'> = OmitNevers<_BaseEntityRecords.PostType<C>>;
 diff --git a/node_modules/@wordpress/core-data/build-types/index.d.ts b/node_modules/@wordpress/core-data/build-types/index.d.ts
-index ca5f7e4..8c632e1 100644
+index ca5f7e4..3e3a8dd 100644
 --- a/node_modules/@wordpress/core-data/build-types/index.d.ts
 +++ b/node_modules/@wordpress/core-data/build-types/index.d.ts
 @@ -25,13 +25,13 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
@@ -111,7 +111,7 @@ index ca5f7e4..8c632e1 100644
      getRevisions: (state: selectors.State, kind: string, name: string, recordKey: string | number, query?: {
          [x: string]: any;
 diff --git a/node_modules/@wordpress/core-data/build-types/selectors.d.ts b/node_modules/@wordpress/core-data/build-types/selectors.d.ts
-index b9748a8..b6a0b83 100644
+index b9748a8..6b5c995 100644
 --- a/node_modules/@wordpress/core-data/build-types/selectors.d.ts
 +++ b/node_modules/@wordpress/core-data/build-types/selectors.d.ts
 @@ -356,7 +356,7 @@ export declare function hasEditsForEntityRecord(state: State, kind: string, name
