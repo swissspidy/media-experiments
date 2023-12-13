@@ -1,5 +1,5 @@
 diff --git a/node_modules/@wordpress/notices/build-types/store/selectors.d.ts b/node_modules/@wordpress/notices/build-types/store/selectors.d.ts
-index b8623c4..66241c6 100644
+index b8623c4..9c85d72 100644
 --- a/node_modules/@wordpress/notices/build-types/store/selectors.d.ts
 +++ b/node_modules/@wordpress/notices/build-types/store/selectors.d.ts
 @@ -63,7 +63,7 @@ export type WPNotice = {
