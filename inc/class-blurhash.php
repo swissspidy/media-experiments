@@ -112,7 +112,7 @@ class BlurHash {
 	protected static function decode_base83( string $hash ): int {
 		$result = 0;
 		foreach ( str_split( $hash ) as $char ) {
-			$result = $result * static::BASE + (int) array_search( $char, static::ALPHABET, true );
+			$result = $result * self::BASE + (int) array_search( $char, self::ALPHABET, true );
 		}
 		return $result;
 	}
@@ -132,6 +132,10 @@ class BlurHash {
 		return max( 0, min( $result, 255 ) );
 	}
 
+	/**
+	 * @param int $value
+	 * @return float[]
+	 */
 	protected static function decode_dc( int $value ): array {
 		$r = $value >> 16;
 		$g = ( $value >> 8 ) & 255;
@@ -143,15 +147,20 @@ class BlurHash {
 		];
 	}
 
+	/**
+	 * @param int $value
+	 * @param float $max_value
+	 * @return float[]
+	 */
 	protected static function decode_ac( int $value, float $max_value ): array {
 		$quant_r = intdiv( $value, 19 * 19 );
 		$quant_g = intdiv( $value, 19 ) % 19;
 		$quant_b = $value % 19;
 
 		return [
-			static::sign_pow( ( $quant_r - 9 ) / 9, 2 ) * $max_value,
-			static::sign_pow( ( $quant_g - 9 ) / 9, 2 ) * $max_value,
-			static::sign_pow( ( $quant_b - 9 ) / 9, 2 ) * $max_value,
+			self::sign_pow( ( $quant_r - 9 ) / 9, 2 ) * $max_value,
+			self::sign_pow( ( $quant_g - 9 ) / 9, 2 ) * $max_value,
+			self::sign_pow( ( $quant_b - 9 ) / 9, 2 ) * $max_value,
 		];
 	}
 
@@ -166,8 +175,8 @@ class BlurHash {
 	 * @param int $height Height.
 	 * @param float $punch Punch.
 	 * @param bool $linear Linear.
-	 *
 	 * @return array
+	 * @phpstan-return array<int, array<int, array<int, float>>>
 	 */
 	public static function decode( string $blurhash, int $width, int $height, float $punch = 1.0, bool $linear = false ): array {
 		if ( empty( $blurhash ) || strlen( $blurhash ) < 6 ) {

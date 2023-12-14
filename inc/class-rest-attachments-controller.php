@@ -17,7 +17,20 @@ use WP_REST_Response;
 use WP_REST_Server;
 
 /**
- * Class REST_Attachments_Controller
+ * Class REST_Attachments_Controller.
+ *
+ * @phpstan-type UploadRequest array{
+ *   id?: int,
+ *   post: int,
+ *   upload_request?: string,
+ *   author?: int,
+ *   sticky?: bool,
+ *   generate_sub_sizes?: bool,
+ * }
+ * @phpstan-type SideloadRequest array{
+ *   post?: int,
+ *   image_size?: string,
+ * }
  */
 class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	/**
@@ -25,67 +38,67 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 *
 	 * @see register_rest_route()
 	 */
-	public function register_routes() {
+	public function register_routes(): void {
 		parent::register_routes();
 
 		$args                       = $this->get_endpoint_args_for_item_schema();
-		$args['generate_sub_sizes'] = array(
+		$args['generate_sub_sizes'] = [
 			'type'        => 'boolean',
 			'default'     => true,
 			'description' => __( 'Whether to generate image sub sizes.' ),
-		);
-		$args['upload_request']     = array(
+		];
+		$args['upload_request']     = [
 			'description' => __( 'Upload request this file is for.', 'media-experiments' ),
 			'type'        => 'string',
-		);
+		];
 
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
-			array(
-				array(
+			[
+				[
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_items' ),
-					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'callback'            => [ $this, 'get_items' ],
+					'permission_callback' => [ $this, 'get_items_permissions_check' ],
 					'args'                => $this->get_collection_params(),
-				),
-				array(
+				],
+				[
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'create_item' ),
-					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'callback'            => [ $this, 'create_item' ],
+					'permission_callback' => [ $this, 'create_item_permissions_check' ],
 					'args'                => $args,
-				),
+				],
 				'allow_batch' => $this->allow_batch,
-				'schema'      => array( $this, 'get_public_item_schema' ),
-			),
+				'schema'      => [ $this, 'get_public_item_schema' ],
+			],
 			true
 		);
 
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/sideload',
-			array(
-				array(
+			[
+				[
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'sideload_item' ),
-					'permission_callback' => array( $this, 'create_item_permissions_check' ),
-					'args'                => array(
-						'id'             => array(
+					'callback'            => [ $this, 'sideload_item' ],
+					'permission_callback' => [ $this, 'create_item_permissions_check' ],
+					'args'                => [
+						'id'             => [
 							'description' => __( 'Unique identifier for the attachment.', 'media-experiments' ),
 							'type'        => 'integer',
-						),
-						'image_size'     => array(
+						],
+						'image_size'     => [
 							'type' => 'string',
-						),
-						'upload_request' => array(
+						],
+						'upload_request' => [
 							'description' => __( 'Upload request this file is for.', 'media-experiments' ),
 							'type'        => 'string',
-						),
-					),
-				),
+						],
+					],
+				],
 				'allow_batch' => $this->allow_batch,
-				'schema'      => array( $this, 'get_public_item_schema' ),
-			)
+				'schema'      => [ $this, 'get_public_item_schema' ],
+			]
 		);
 	}
 
@@ -93,15 +106,16 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 * Retrieves the query params for collections of attachments.
 	 *
 	 * @return array Query parameters for the attachment collection as an array.
+	 * @phpstan-return array<string, mixed>
 	 */
-	public function get_collection_params() {
+	public function get_collection_params(): array {
 		$params = parent::get_collection_params();
 
-		$params['upload_request'] = array(
+		$params['upload_request'] = [
 			'default'     => null,
 			'description' => __( 'Limit result set to attachments associated with a given attachment request.' ),
 			'type'        => 'string',
-		);
+		];
 
 		return $params;
 	}
@@ -113,8 +127,11 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 * @param array           $prepared_args Optional. Array of prepared arguments. Default empty array.
 	 * @param WP_REST_Request $request       Optional. Request to prepare items for.
 	 * @return array Array of query arguments.
+	 * @phpstan-param array<string, mixed> $prepared_args
+	 * @phpstan-param WP_REST_Request<UploadRequest> $request
+	 * @phpstan-return array<string, mixed>
 	 */
-	protected function prepare_items_query( $prepared_args = array(), $request = null ) {
+	protected function prepare_items_query( $prepared_args = [], $request = null ): array {
 		$query_args = parent::prepare_items_query( $prepared_args, $request );
 
 		if ( ! empty( $request['upload_request'] ) ) {
@@ -149,8 +166,9 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error Response object on success, WP_Error object on failure.
+	 * @phpstan-param WP_REST_Request<UploadRequest> $request
 	 */
-	public function create_item( $request ) {
+	public function create_item( $request ): WP_Error|WP_REST_Response {
 		if ( false === $request['generate_sub_sizes'] ) {
 			add_filter( 'intermediate_image_sizes_advanced', '__return_empty_array', 100 );
 		}
@@ -184,19 +202,20 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		remove_filter( 'intermediate_image_sizes_advanced', '__return_empty_array', 100 );
 		remove_filter( 'map_meta_cap', $grant_meta_update );
 
-		if ( $upload_request ) {
-			$attachment_id = $response->get_data()['id'];
+		if ( $upload_request && $response instanceof WP_REST_Response ) {
+			/**
+			 * Uploaded attachment ID.
+			 *
+			 * @var int $attachment_id
+			 */
+			$attachment_id = $response->get_data()['id']; // TODO: Improve phpstan typing.
 
-			if ( $response instanceof WP_REST_Response ) {
-				add_post_meta(
-					$upload_request->ID,
-					'mexp_attachment_id',
-					$attachment_id,
-					true
-				);
-			}
-
-			// TODO: Schedule for deletion. Here or client-side?
+			add_post_meta(
+				$upload_request->ID,
+				'mexp_attachment_id',
+				$attachment_id,
+				true
+			);
 		}
 
 		return $response;
@@ -207,23 +226,32 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return true|WP_Error Boolean true if the attachment may be created, or a WP_Error if not.
+	 * @phpstan-param WP_REST_Request<UploadRequest> $request
 	 */
-	public function create_item_permissions_check( $request ) {
+	public function create_item_permissions_check( $request ): bool|WP_Error {
 		if ( ! empty( $request['id'] ) ) {
 			return new WP_Error(
 				'rest_post_exists',
 				__( 'Cannot create existing post.' ),
-				array( 'status' => 400 )
+				[ 'status' => 400 ]
 			);
 		}
 
 		$post_type = get_post_type_object( $this->post_type );
 
+		if ( ! $post_type ) {
+			return new WP_Error(
+				'rest_cannot_edit_others',
+				__( 'Sorry, you are not allowed to create posts as this user.' ),
+				[ 'status' => rest_authorization_required_code() ]
+			);
+		}
+
 		if ( ! empty( $request['author'] ) && get_current_user_id() !== $request['author'] && ! current_user_can( $post_type->cap->edit_others_posts ) ) {
 			return new WP_Error(
 				'rest_cannot_edit_others',
 				__( 'Sorry, you are not allowed to create posts as this user.' ),
-				array( 'status' => rest_authorization_required_code() )
+				[ 'status' => rest_authorization_required_code() ]
 			);
 		}
 
@@ -231,7 +259,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			return new WP_Error(
 				'rest_cannot_assign_sticky',
 				__( 'Sorry, you are not allowed to make posts sticky.' ),
-				array( 'status' => rest_authorization_required_code() )
+				[ 'status' => rest_authorization_required_code() ]
 			);
 		}
 
@@ -239,7 +267,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			return new WP_Error(
 				'rest_cannot_create',
 				__( 'Sorry, you are not allowed to create posts as this user.' ),
-				array( 'status' => rest_authorization_required_code() )
+				[ 'status' => rest_authorization_required_code() ]
 			);
 		}
 
@@ -247,7 +275,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			return new WP_Error(
 				'rest_cannot_assign_term',
 				__( 'Sorry, you are not allowed to assign the provided terms.' ),
-				array( 'status' => rest_authorization_required_code() )
+				[ 'status' => rest_authorization_required_code() ]
 			);
 		}
 
@@ -255,7 +283,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			return new WP_Error(
 				'rest_cannot_create',
 				__( 'Sorry, you are not allowed to upload media on this site.' ),
-				array( 'status' => 400 )
+				[ 'status' => 400 ]
 			);
 		}
 
@@ -267,13 +295,12 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		if (
 			! empty( $request['post'] ) &&
 			! current_user_can( 'edit_post', (int) $request['post'] ) &&
-			! $upload_request &&
-			$upload_request->post_parent !== $request['post']
+			( ! $upload_request || $upload_request->post_parent !== $request['post'] )
 		) {
 			return new WP_Error(
 				'rest_cannot_edit',
 				__( 'Sorry, you are not allowed to upload media to this post.' ),
-				array( 'status' => rest_authorization_required_code() )
+				[ 'status' => rest_authorization_required_code() ]
 			);
 		}
 
@@ -284,10 +311,10 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 * Determines whether this request is for a valid media upload request.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 *
 	 * @return bool Whether this request is for a valid media upload request.
+	 * @phpstan-param WP_REST_Request<UploadRequest> $request
 	 */
-	protected function is_valid_upload_request( $request ): bool {
+	protected function is_valid_upload_request( WP_REST_Request $request ): bool {
 		$post = $this->get_upload_request_post( $request );
 
 		// TODO: Bail if there is already an attachment for this upload request.
@@ -301,8 +328,9 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 *
 	 * @return WP_Post|null Media upload request if valid, null otherwise.
+	 * @phpstan-param WP_REST_Request<UploadRequest> $request
 	 */
-	protected function get_upload_request_post( $request ) {
+	protected function get_upload_request_post( WP_REST_Request $request ): ?WP_Post {
 		if ( empty( $request['upload_request'] ) ) {
 			return null;
 		}
@@ -317,7 +345,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		$posts = get_posts( $args );
 
-		if ( empty( $posts ) || ! $posts[0] instanceof WP_Post ) {
+		if ( empty( $posts ) ) {
 			return null;
 		}
 
@@ -329,13 +357,14 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error Response object on success, WP_Error object on failure.
+	 * @phpstan-param WP_REST_Request<SideloadRequest> $request
 	 */
-	public function sideload_item( WP_REST_Request $request ) {
+	public function sideload_item( WP_REST_Request $request ): WP_Error|WP_REST_Response {
 		if ( ! empty( $request['post'] ) && 'attachment' !== get_post_type( $request['post'] ) ) {
 			return new WP_Error(
 				'rest_invalid_param',
 				__( 'Invalid parent type.', 'media-experiments' ),
-				array( 'status' => 400 )
+				[ 'status' => 400 ]
 			);
 		}
 
@@ -389,8 +418,11 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		];
 
 		$response = rest_ensure_response( $data );
-		$response->set_status( 201 );
-		$response->header( 'Location', rest_url( sprintf( '%s/%s/%d', $this->namespace, $this->rest_base, $attachment_id ) ) );
+
+		if ( ! is_wp_error( $response ) ) {
+			$response->set_status( 201 );
+			$response->header( 'Location', rest_url( sprintf( '%s/%s/%d', $this->namespace, $this->rest_base, $attachment_id ) ) );
+		}
 
 		return $response;
 	}

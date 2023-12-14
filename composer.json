@@ -17,23 +17,28 @@
 	},
 	"require-dev": {
 		"dealerdirect/phpcodesniffer-composer-installer": "^1.0.0",
+		"php-stubs/wordpress-tests-stubs": "dev-master",
 		"phpcompatibility/phpcompatibility-wp": "^2.0",
+		"phpstan/extension-installer": "^1.3",
 		"roave/security-advisories": "dev-latest",
-		"wp-coding-standards/wpcs": "dev-develop",
+		"szepeviktor/phpstan-wordpress": "^v1.3.2",
+		"wp-coding-standards/wpcs": "^3.0.1",
 		"yoast/phpunit-polyfills": "^1.0.1"
 	},
 	"minimum-stability": "dev",
 	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true,
+			"phpstan/extension-installer": true
+		},
 		"platform": {
 			"php": "8.0.28"
-		},
-		"allow-plugins": {
-			"dealerdirect/phpcodesniffer-composer-installer": true
 		}
 	},
 	"scripts": {
 		"format": "vendor/bin/phpcbf --report-summary --report-source .",
 		"lint": "vendor/bin/phpcs --report-summary --report-source .",
+		"phpstan": "phpstan analyse --memory-limit=2048M",
 		"test": "vendor/bin/phpunit",
 		"test:multisite": "vendor/bin/phpunit -c phpunit-multisite.xml.dist"
 	}

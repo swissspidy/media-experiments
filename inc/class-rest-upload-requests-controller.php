@@ -11,6 +11,7 @@ namespace MediaExperiments;
 
 use WP_Error;
 use WP_Post;
+use WP_Post_Type;
 use WP_REST_Posts_Controller;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -25,51 +26,50 @@ class REST_Upload_Requests_Controller extends WP_REST_Posts_Controller {
 	 *
 	 * @see register_rest_route()
 	 */
-	public function register_routes() {
-
+	public function register_routes(): void {
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
-			array(
-				array(
+			[
+				[
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'create_item' ),
-					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'callback'            => [ $this, 'create_item' ],
+					'permission_callback' => [ $this, 'create_item_permissions_check' ],
 					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
-				),
+				],
 				'allow_batch' => $this->allow_batch,
-				'schema'      => array( $this, 'get_public_item_schema' ),
-			)
+				'schema'      => [ $this, 'get_public_item_schema' ],
+			]
 		);
 
-		$get_item_args = array(
-			'context' => $this->get_context_param( array( 'default' => 'view' ) ),
-		);
+		$get_item_args = [
+			'context' => $this->get_context_param( [ 'default' => 'view' ] ),
+		];
 
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<slug>[\w]+)',
-			array(
-				'args'        => array(
-					'slug' => array(
+			[
+				'args'        => [
+					'slug' => [
 						'description' => __( 'Unique alphanumeric identifier for the upload request.' ),
 						'type'        => 'string',
-					),
-				),
-				array(
+					],
+				],
+				[
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_item' ),
-					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+					'callback'            => [ $this, 'get_item' ],
+					'permission_callback' => [ $this, 'get_item_permissions_check' ],
 					'args'                => $get_item_args,
-				),
-				array(
+				],
+				[
 					'methods'             => WP_REST_Server::DELETABLE,
-					'callback'            => array( $this, 'delete_item' ),
-					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
-				),
+					'callback'            => [ $this, 'delete_item' ],
+					'permission_callback' => [ $this, 'delete_item_permissions_check' ],
+				],
 				'allow_batch' => $this->allow_batch,
-				'schema'      => array( $this, 'get_public_item_schema' ),
-			)
+				'schema'      => [ $this, 'get_public_item_schema' ],
+			]
 		);
 	}
 
@@ -80,6 +80,7 @@ class REST_Upload_Requests_Controller extends WP_REST_Posts_Controller {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 * @phpstan-param WP_REST_Request<array{slug: string}> $request
 	 */
 	public function get_item( $request ) {
 		$args = [
@@ -92,11 +93,11 @@ class REST_Upload_Requests_Controller extends WP_REST_Posts_Controller {
 
 		$posts = get_posts( $args );
 
-		if ( empty( $posts ) || ! $posts[0] instanceof WP_Post || $this->post_type !== $posts[0]->post_type ) {
+		if ( empty( $posts ) || $this->post_type !== $posts[0]->post_type ) {
 			return new WP_Error(
 				'rest_post_invalid_id',
 				__( 'Invalid post ID.' ),
-				array( 'status' => 404 )
+				[ 'status' => 404 ]
 			);
 		}
 
@@ -105,40 +106,16 @@ class REST_Upload_Requests_Controller extends WP_REST_Posts_Controller {
 		$data     = $this->prepare_item_for_response( $post, $request );
 		$response = rest_ensure_response( $data );
 
-		if ( is_post_type_viewable( get_post_type_object( $post->post_type ) ) ) {
-			$response->link_header( 'alternate', get_permalink( $post->ID ), array( 'type' => 'text/html' ) );
+		$post_type = get_post_type_object( $post->post_type );
+
+		if ( ! is_wp_error( $response ) && $post_type instanceof WP_Post_Type && is_post_type_viewable( $post_type ) ) {
+			$permalink = get_permalink( $post->ID );
+			if ( $permalink ) {
+				$response->link_header( 'alternate', $permalink, [ 'type' => 'text/html' ] );
+			}
 		}
 
 		return $response;
-	}
-
-	/**
-	 * Gets the post, if the ID is valid.
-	 *
-	 * @param string $id Supplied ID.
-	 * @return WP_Post|WP_Error Post object if ID is valid, WP_Error otherwise.
-	 */
-	protected function get_post( $id ) {
-		$error = new WP_Error(
-			'rest_post_invalid_id',
-			__( 'Invalid post ID.' ),
-			array( 'status' => 404 )
-		);
-
-		$args  = [
-			'name'             => $id,
-			'post_type'        => 'mexp-upload-request',
-			'post_status'      => 'publish',
-			'numberposts'      => 1,
-			'suppress_filters' => false,
-		];
-		$posts = get_posts( $args );
-
-		if ( empty( $posts ) || ! $posts[0] instanceof WP_Post || $this->post_type !== $posts[0]->post_type ) {
-			return $error;
-		}
-
-		return $posts[0];
 	}
 
 	/**
@@ -147,66 +124,67 @@ class REST_Upload_Requests_Controller extends WP_REST_Posts_Controller {
 	 * @since 4.7.0
 	 *
 	 * @return array Item schema data.
+	 * @phpstan-return array<string,mixed>
 	 */
-	public function get_item_schema() {
-		if ( $this->schema ) {
+	public function get_item_schema(): array {
+		if ( ! empty( $this->schema ) ) {
 			return $this->add_additional_fields_schema( $this->schema );
 		}
 
-		$schema = array(
+		$schema = [
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => $this->post_type,
 			'type'       => 'object',
-			'properties' => array(
-				'date'     => array(
+			'properties' => [
+				'date'     => [
 					'description' => __( "The date the post was published, in the site's timezone." ),
-					'type'        => array( 'string', 'null' ),
+					'type'        => [ 'string', 'null' ],
 					'format'      => 'date-time',
-					'context'     => array( 'view', 'edit', 'embed' ),
-				),
-				'date_gmt' => array(
+					'context'     => [ 'view', 'edit', 'embed' ],
+				],
+				'date_gmt' => [
 					'description' => __( 'The date the post was published, as GMT.' ),
-					'type'        => array( 'string', 'null' ),
+					'type'        => [ 'string', 'null' ],
 					'format'      => 'date-time',
-					'context'     => array( 'view', 'edit' ),
-				),
-				'link'     => array(
+					'context'     => [ 'view', 'edit' ],
+				],
+				'link'     => [
 					'description' => __( 'URL to the post.' ),
 					'type'        => 'string',
 					'format'      => 'uri',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
-				),
-				'slug'     => array(
+				],
+				'slug'     => [
 					'description' => __( 'Unique alphanumeric identifier for the upload request.' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
-					'arg_options' => array(
-						'sanitize_callback' => array( $this, 'sanitize_slug' ),
-					),
-				),
-				'status'   => array(
+					'context'     => [ 'view', 'edit', 'embed' ],
+					'arg_options' => [
+						'sanitize_callback' => [ $this, 'sanitize_slug' ],
+					],
+				],
+				'status'   => [
 					'description' => __( 'A named status for the post.' ),
 					'type'        => 'string',
-					'enum'        => array_keys( get_post_stati( array( 'internal' => false ) ) ),
-					'context'     => array( 'view', 'edit' ),
-					'arg_options' => array(
-						'validate_callback' => array( $this, 'check_status' ),
-					),
-				),
-				'parent'   => array(
+					'enum'        => array_keys( get_post_stati( [ 'internal' => false ] ) ),
+					'context'     => [ 'view', 'edit' ],
+					'arg_options' => [
+						'validate_callback' => [ $this, 'check_status' ],
+					],
+				],
+				'parent'   => [
 					'description' => __( 'The ID for the parent of the post.' ),
 					'type'        => 'integer',
-					'context'     => array( 'view', 'edit' ),
-				),
-				'author'   => array(
+					'context'     => [ 'view', 'edit' ],
+				],
+				'author'   => [
 					'description' => __( 'The ID for the author of the post.' ),
 					'type'        => 'integer',
-					'context'     => array( 'view', 'edit', 'embed' ),
-				),
+					'context'     => [ 'view', 'edit', 'embed' ],
+				],
 				'meta'     => $this->meta->get_field_schema(),
-			),
-		);
+			],
+		];
 
 		// Take a snapshot of which fields are in the schema pre-filtering.
 		$schema_fields = array_keys( $schema['properties'] );

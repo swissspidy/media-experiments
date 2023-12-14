@@ -7,11 +7,13 @@
 
 	$post = get_post();
 
+if ( $post instanceof WP_Post ) {
 	global $authordata;
-	$authordata = get_userdata( $post->post_author );
+	$authordata = get_userdata( (int) $post->post_author );
+}
 
-	$mexp_request_parent     = $post && $post->post_parent ? get_post( $post->post_parent ) : null;
-	$mexp_request_parent_url = $mexp_request_parent && ( is_post_publicly_viewable( $mexp_request_parent ) || current_user_can( 'read', $mexp_request_parent ) ) ? get_permalink( $mexp_request_parent ) : null;
+	$mexp_request_parent     = $post instanceof WP_Post && $post->post_parent > 0 ? get_post( $post->post_parent ) : null;
+	$mexp_request_parent_url = $mexp_request_parent instanceof WP_Post && ( is_post_publicly_viewable( $mexp_request_parent ) || current_user_can( 'read', $mexp_request_parent ) ) ? get_permalink( $mexp_request_parent ) : null;
 ?><!DOCTYPE html>
 <html <?php language_attributes(); ?>>
 <head>
@@ -29,10 +31,8 @@
 	// preferences from /wp/v2/users/me.
 	if ( ! is_user_logged_in() ) {
 		$dep = $wp_scripts->registered['wp-preferences']; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
-		if ( $dep ) {
-			$wp_scripts->remove( 'wp-preferences' );
-			$wp_scripts->add( 'wp-preferences', $dep->src, $dep->deps, $dep->ver );
-		}
+		$wp_scripts->remove( 'wp-preferences' );
+		$wp_scripts->add( 'wp-preferences', $dep->src, $dep->deps, $dep->ver );
 		unset( $dep );
 	}
 
@@ -69,12 +69,12 @@ wp_print_inline_script_tag( "document.body.className = document.body.className.r
 	<div class="inner-wrap">
 		<p>
 			<?php
-			if ( ! $mexp_request_parent ) {
+			if ( ! $mexp_request_parent instanceof WP_Post ) {
 				printf(
 					'%s would like you to upload a file to their site. Please choose a file below.',
 					get_the_author(),
 				);
-			} elseif ( $mexp_request_parent_url ) {
+			} elseif ( is_string( $mexp_request_parent_url ) ) {
 				printf(
 					'%1$s would like you to upload a file to their post <a href="%2$s">%3$s</a>. Please choose a file below.',
 					get_the_author(),

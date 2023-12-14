@@ -22,6 +22,9 @@ use function register_post_meta;
  * @see wp_check_filetype_and_ext()
  *
  * @param array $mime_to_ext Array of image mime types and their matching extensions.
+ * @return array Filtered array.
+ * @phpstan-param array<string, string> $mime_to_ext
+ * @phpstan-return array<string, string>
  */
 function filter_mimes_to_exts( array $mime_to_ext ): array {
 	$mime_to_ext['image/avif'] = 'avif';
@@ -35,6 +38,9 @@ function filter_mimes_to_exts( array $mime_to_ext ): array {
  *
  * @param string[] $mime_types Mime types keyed by the file extension regex
  *                             corresponding to those types.
+ * @return array Filtered array.
+ * @phpstan-param array<string, string> $mime_types
+ * @phpstan-return array<string, string>
  */
 function filter_mime_types( array $mime_types ): array {
 	$mime_types['avif'] = 'image/avif';
@@ -47,6 +53,9 @@ function filter_mime_types( array $mime_types ): array {
  * @see wp_get_ext_types()
  *
  * @param array[] $ext2type Multi-dimensional array of file extensions types keyed by the type of file.
+ * @return array Filtered array.
+ * @phpstan-param array<string, string[]> $ext2type
+ * @phpstan-return array<string, string[]>
  */
 function filter_ext_types( array $ext2type ): array {
 	$ext2type['image'] = array_unique( [ ...$ext2type['image'], 'avif' ] );
@@ -232,34 +241,37 @@ function enqueue_block_assets() {
  * Returns a list of all available image sizes.
  *
  * @return array Existing image sizes.
+ * @phpstan-return array<string,string|int>
  */
 function get_all_image_sizes(): array {
 	$sizes = wp_get_additional_image_sizes();
 
 	$sizes['thumbnail'] = [
-		'width'  => (int) get_option( 'thumbnail_size_w' ),
-		'height' => (int) get_option( 'thumbnail_size_h' ),
+		'width'  => get_option( 'thumbnail_size_w' ),
+		'height' => get_option( 'thumbnail_size_h' ),
 	];
 
 	$sizes['medium'] = [
-		'width'  => (int) get_option( 'medium_size_w' ),
-		'height' => (int) get_option( 'medium_size_h' ),
+		'width'  => get_option( 'medium_size_w' ),
+		'height' => get_option( 'medium_size_h' ),
 	];
 
 	$sizes['medium_large'] = [
-		'width'  => (int) get_option( 'medium_large_size_w' ),
-		'height' => (int) get_option( 'medium_large_size_h' ),
+		'width'  => get_option( 'medium_large_size_w' ),
+		'height' => get_option( 'medium_large_size_h' ),
 	];
 
 	$sizes['large'] = [
-		'width'  => (int) get_option( 'large_size_w' ),
-		'height' => (int) get_option( 'large_size_h' ),
+		'width'  => get_option( 'large_size_w' ),
+		'height' => get_option( 'large_size_h' ),
 	];
 
-	foreach ( $sizes as $name => $size ) {
+	foreach ( $sizes as $name => &$size ) {
+		$size['height'] = (int) $sizes['height'];
+		$size['width']  = (int) $sizes['width'];
 		$size['name']   = $name;
-		$sizes[ $name ] = $size;
 	}
+	unset( $size );
 
 	return $sizes;
 }
@@ -322,6 +334,7 @@ function register_rest_fields(): void {
  *
  * @param array $post Post data.
  * @return string|null Attachment file name.
+ * @phpstan-param array{id: int} $post
  */
 function rest_get_attachment_filename( array $post ): ?string {
 	$path = wp_get_original_image_path( $post['id'] );
@@ -338,6 +351,7 @@ function rest_get_attachment_filename( array $post ): ?string {
  *
  * @param array $post Post data.
  * @return int|null Attachment file size.
+ * @phpstan-param array{id: int} $post
  */
 function rest_get_attachment_filesize( array $post ): ?int {
 	return get_attachment_filesize( $post['id'] );
@@ -359,7 +373,7 @@ function get_attachment_filesize( int $attachment_id ): ?int {
 	$original_path = wp_get_original_image_path( $attachment_id );
 	$attached_file = $original_path ? $original_path : get_attached_file( $attachment_id );
 
-	if ( file_exists( $attached_file ) ) {
+	if ( is_string( $attached_file ) && file_exists( $attached_file ) ) {
 		return wp_filesize( $attached_file );
 	}
 
@@ -367,24 +381,24 @@ function get_attachment_filesize( int $attachment_id ): ?int {
 }
 
 /**
- * Sets the featured image when uploading a new attachment via the REST API
+ * Sets the featured image when uploading a new attachment via the REST API.
  *
  * @see \WP_REST_Posts_Controller::handle_featured_media
  *
  * @param int     $value Value to set.
  * @param WP_Post $post  Post instance.
- * @return void|WP_Error Nothing or error instance on failure.
+ * @return true|WP_Error True on success, error instance on failure.
  */
-function rest_create_attachment_handle_featured_media( int $value, WP_Post $post ) {
+function rest_create_attachment_handle_featured_media( int $value, WP_Post $post ): bool|WP_Error {
 	if ( $value ) {
 		if ( get_post_thumbnail_id( $post->ID ) === $value ) {
-			return;
+			return true;
 		}
 
 		$result = set_post_thumbnail( $post->ID, $value );
 
 		if ( $result ) {
-			return;
+			return true;
 		}
 
 		return new WP_Error(
@@ -395,6 +409,8 @@ function rest_create_attachment_handle_featured_media( int $value, WP_Post $post
 	}
 
 	delete_post_thumbnail( $post->ID );
+
+	return true;
 }
 
 /**
@@ -566,34 +582,30 @@ function filter_generated_media_attachments( WP_Query $query ): void {
  *
  * Reduces unnecessary noise in media REST API requests.
  *
- * @param array<string, mixed>|mixed $args Query args.
- * @return array<string, mixed>|mixed Filtered query args.
- *
- * @template T
- *
- * @phpstan-return ($args is array<T> ? array<T> : mixed)
+ * @param array $args Query args.
+ * @return array Filtered query args.
+ * @phpstan-param array<string, mixed> $args
+ * @phpstan-return array<string, mixed>
  */
-function filter_rest_generated_media_attachments( mixed $args ): mixed {
-	if ( ! \is_array( $args ) ) {
-		return $args;
-	}
-
+function filter_rest_generated_media_attachments( array $args ): array {
 	$args['tax_query'] = get_exclude_tax_query( $args ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 
 	return $args;
 }
 
 /**
- * Returns the tax query needed to exclude generated video poster images and source videos.
+ * Returns the tax query needed to exclude generated video poster images.
  *
- * @param array<string, mixed> $args Existing WP_Query args.
- * @return array<int|string, mixed> Tax query arg.
+ * @param array $args Existing WP_Query args.
+ * @return array Tax query arg.
+ * @phpstan-param array<mixed> $args
+ * @phpstan-return array<string|int, mixed>
  */
 function get_exclude_tax_query( array $args ): array {
 	/**
 	 * Tax query.
 	 *
-	 * @var array<int|string, mixed> $tax_query
+	 * @var array<string, mixed> $tax_query
 	 */
 	$tax_query = ! empty( $args['tax_query'] ) ? $args['tax_query'] : [];
 
@@ -672,6 +684,8 @@ function delete_generated_poster_image( int $attachment_id ): void {
  * @param WP_Post         $attachment Inserted or updated attachment object.
  * @param WP_REST_Request $request    Request object.
  * @param bool            $creating   True when creating an attachment, false when updating.
+ *
+ * @phpstan-param WP_REST_Request<array<string, string[]>> $request
  */
 function rest_after_insert_attachment_handle_terms( WP_Post $attachment, WP_REST_Request $request, bool $creating ): void {
 	if ( ! $creating ) {
@@ -704,6 +718,7 @@ function rest_after_insert_attachment_handle_terms( WP_Post $attachment, WP_REST
  *
  * @param WP_Post         $attachment Inserted or updated attachment object.
  * @param WP_REST_Request $request    Request object.
+ * @phpstan-param WP_REST_Request<array{featured_media: int, meta: array{mexp_generated_poster_id: int}}> $request
  */
 function rest_after_insert_attachment_handle_pdf_poster( WP_Post $attachment, WP_REST_Request $request ): void {
 	if ( empty( $request['featured_media'] ) || empty( $request['meta']['mexp_generated_poster_id'] ) ) {
@@ -721,16 +736,18 @@ function rest_after_insert_attachment_handle_pdf_poster( WP_Post $attachment, WP
 	$poster_metadata = wp_get_attachment_metadata( $poster_id );
 	$pdf_metadata    = wp_get_attachment_metadata( $attachment->ID );
 
-	$pdf_metadata['sizes']         = $poster_metadata['sizes'];
-	$pdf_metadata['sizes']['full'] = [
-		'file'      => basename( $poster_metadata['file'] ),
-		'width'     => $poster_metadata['width'],
-		'height'    => $poster_metadata['height'],
-		'mime-type' => $poster->post_mime_type,
-		'filesize'  => $poster_metadata['filesize'],
-	];
+	if ( is_array( $pdf_metadata ) && is_array( $poster_metadata ) ) {
+		$pdf_metadata['sizes']         = $poster_metadata['sizes'];
+		$pdf_metadata['sizes']['full'] = [
+			'file'      => basename( $poster_metadata['file'] ),
+			'width'     => $poster_metadata['width'],
+			'height'    => $poster_metadata['height'],
+			'mime-type' => $poster->post_mime_type,
+			'filesize'  => $poster_metadata['filesize'],
+		];
 
-	wp_update_attachment_metadata( $attachment->ID, $pdf_metadata );
+		wp_update_attachment_metadata( $attachment->ID, $pdf_metadata );
+	}
 }
 
 /**
@@ -744,6 +761,7 @@ function rest_after_insert_attachment_handle_pdf_poster( WP_Post $attachment, WP
  *
  * @param WP_Post         $attachment Inserted or updated attachment object.
  * @param WP_REST_Request $request    Request object.
+ * @phpstan-param WP_REST_Request<array{meta: array{mexp_original_id: int}}> $request
  */
 function rest_after_insert_attachment_copy_metadata( WP_Post $attachment, WP_REST_Request $request ): void {
 	if ( empty( $request['meta']['mexp_original_id'] ) ) {
@@ -802,8 +820,10 @@ function rest_after_insert_attachment_copy_metadata( WP_Post $attachment, WP_RES
  * @param array  $args      Array of arguments for registering a post type.
  *                          See the register_post_type() function for accepted arguments.
  * @param string $post_type Post type key.
+ * @phpstan-param array<string, mixed> $args
+ * @phpstan-return array<string, mixed>
  */
-function filter_attachment_post_type_args( array $args, string $post_type ) {
+function filter_attachment_post_type_args( array $args, string $post_type ): array {
 	if ( 'attachment' === $post_type ) {
 		$args['rest_controller_class'] = REST_Attachments_Controller::class;
 	}
@@ -816,6 +836,8 @@ function filter_attachment_post_type_args( array $args, string $post_type ) {
  *
  * @param array $response Array of prepared attachment data. See {@see wp_prepare_attachment_for_js()}.
  * @return array Filtered attachment data.
+ * @phpstan-param array<string, mixed> $response
+ * @phpstan-return array<string, mixed>
  */
 function filter_wp_prepare_attachment_for_js( array $response ): array {
 	/**
@@ -858,18 +880,18 @@ function filter_wp_content_img_tag_add_placeholders( string $filtered_image, str
 	$dominant_color = get_post_meta( $attachment_id, 'mexp_dominant_color', true );
 	$blurhash       = get_post_meta( $attachment_id, 'mexp_blurhash', true );
 
-	if ( ! $dominant_color && ! $blurhash ) {
+	if ( ! is_string( $dominant_color ) && ! is_string( $blurhash ) ) {
 		return $filtered_image;
 	}
 
-	if ( $dominant_color ) {
+	if ( is_string( $dominant_color ) ) {
 		wp_register_style( 'mexp-placeholder', false ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 		wp_enqueue_style( 'mexp-placeholder' );
 		wp_add_inline_style( 'mexp-placeholder', sprintf( '.mexp-placeholder-%1$s { background-color: %2$s; }', $attachment_id, $dominant_color ) );
 	}
 
 	// BlurHash conversion is completely untested. Probably contains faulty logic.
-	if ( $blurhash ) {
+	if ( is_string( $blurhash ) ) {
 		$pixels = BlurHash::decode( $blurhash, 4, 3 );
 
 		$gradients = [];
@@ -1029,10 +1051,11 @@ function load_upload_request_template( string $template ) {
  * Adds a new cron schedule for running every 15 minutes.
  *
  * @param array $schedules Cron schedules.
- *
  * @return array Filtered cron schedules.
+ * @phpstan-param array<string, array{interval: int, display: string}> $schedules
+ * @phpstan-return array<string, array{interval: int, display: string}>
  */
-function add_quarter_hourly_cron_interval( $schedules ) {
+function add_quarter_hourly_cron_interval( array $schedules ): array {
 	$schedules['quarter_hourly'] = [
 		'interval' => 15 * MINUTE_IN_SECONDS,
 		'display'  => __( 'Every 15 Minutes', 'media-experiments' ),
@@ -1063,7 +1086,7 @@ function delete_old_upload_requests(): void {
 	$posts = get_posts( $args );
 
 	foreach ( $posts as $post ) {
-		wp_delete_post( $post, true );
+		wp_delete_post( $post->ID, true );
 	}
 }
 
@@ -1077,7 +1100,7 @@ function activate_plugin(): void {
 
 	flush_rewrite_rules( false );
 
-	if ( ! wp_next_scheduled( 'mexp_upload_requests_cleanup' ) ) {
+	if ( false === wp_next_scheduled( 'mexp_upload_requests_cleanup' ) ) {
 		wp_schedule_event( time(), 'quarter_hourly', 'mexp_upload_requests_cleanup' );
 	}
 }
@@ -1093,5 +1116,7 @@ function deactivate_plugin(): void {
 	flush_rewrite_rules( false );
 
 	$timestamp = wp_next_scheduled( 'mexp_upload_requests_cleanup' );
-	wp_unschedule_event( $timestamp, 'mexp_upload_requests_cleanup' );
+	if ( false !== $timestamp ) {
+		wp_unschedule_event( $timestamp, 'mexp_upload_requests_cleanup' );
+	}
 }

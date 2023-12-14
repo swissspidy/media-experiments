@@ -21,7 +21,7 @@ add_action( 'init', __NAMESPACE__ . '\register_media_source_taxonomy' );
 
 add_filter( 'ajax_query_attachments_args', __NAMESPACE__ . '\filter_ajax_query_attachments_args' );
 add_action( 'pre_get_posts', __NAMESPACE__ . '\filter_generated_media_attachments' );
-add_filter( 'web_stories_rest_attachment_query', __NAMESPACE__ . 'filter_rest_generated_media_attachments' );
+add_filter( 'web_stories_rest_attachment_query', __NAMESPACE__ . '\filter_rest_generated_media_attachments' );
 add_action( 'delete_attachment', __NAMESPACE__ . '\delete_generated_poster_image' );
 
 add_action( 'rest_after_insert_attachment', __NAMESPACE__ . '\rest_after_insert_attachment_handle_terms', 10, 3 );
