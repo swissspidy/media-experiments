@@ -267,8 +267,8 @@ function get_all_image_sizes(): array {
 	];
 
 	foreach ( $sizes as $name => &$size ) {
-		$size['height'] = (int) $sizes['height'];
-		$size['width']  = (int) $sizes['width'];
+		$size['height'] = (int) $size['height'];
+		$size['width']  = (int) $size['width'];
 		$size['name']   = $name;
 	}
 	unset( $size );
