@@ -180,32 +180,6 @@ export async function transcodeVideo( file: File ) {
 }
 
 /**
- * Transcode an image using FFmpeg.
- *
- * @param file Original file object.
- * @return Processed file object.
- */
-export async function convertImageToWebP( file: File ) {
-	const outputFileName = `${ getFileBasename( file.name ) }.webp`;
-	return runFFmpegWithConfig(
-		file,
-		[
-			// Input filename.
-			'-i',
-			file.name,
-			...FFMPEG_CONFIG.SCALE,
-			...FFMPEG_CONFIG.FASTSTART,
-			'-vcodec',
-			'libwebp',
-			'-qscale',
-			'75',
-		],
-		'image/webp',
-		outputFileName
-	);
-}
-
-/**
  * Mute a video using FFmpeg.
  *
  * @param file Original video file object.

@@ -156,7 +156,7 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 	] );
 
 	async function createNewUploadRequest() {
-		const module = await import(
+		const { getUniqueId } = await import(
 			/* webpackChunkName: 'upload-requests-modal' */ '@mexp/upload-requests'
 		);
 
@@ -165,7 +165,7 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 		// Maybe just use apiFetch directly?
 		setUploadRequest(
 			await saveEntityRecord( 'postType', 'mexp-upload-request', {
-				slug: module.getUniqueId(),
+				slug: getUniqueId(),
 				status: 'publish',
 				parent: currentPostId,
 			} )

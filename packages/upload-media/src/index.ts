@@ -1,6 +1,5 @@
 import { dispatch, select, subscribe } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
-import { store as preferencesStore } from '@wordpress/preferences';
 
 import { store as uploadStore } from './store';
 import type {
@@ -12,10 +11,10 @@ import type {
 	RestAttachment,
 	WP_REST_API_Term,
 	ImageFormat,
+	ImageLibrary,
 	ImageSizeCrop,
 } from './store/types';
 import { UploadError } from './uploadError';
-import { PREFERENCES_NAME } from './constants';
 
 export { uploadMedia } from './uploadMedia';
 export { fetchRemoteFile } from './utils';
@@ -27,6 +26,7 @@ export type {
 	Attachment,
 	RestAttachment,
 	ImageFormat,
+	ImageLibrary,
 	ImageSizeCrop,
 };
 
@@ -161,10 +161,4 @@ const unsubscribeCoreStore = subscribe( () => {
 
 void dispatch( uploadStore ).setImageSizes(
 	window.mediaExperiments.availableImageSizes
-);
-
-void dispatch( preferencesStore ).set(
-	PREFERENCES_NAME,
-	'bigImageSizeThreshold',
-	window.mediaExperiments.bigImageSizeThreshold
 );

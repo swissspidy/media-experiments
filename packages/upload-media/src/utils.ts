@@ -4,6 +4,7 @@ import {
 	blobToFile,
 	getCanvasBlob,
 	getExtensionFromMimeType,
+	getFileBasename,
 	preloadImage,
 } from '@mexp/media-utils';
 
@@ -251,7 +252,6 @@ export function isAnimatedGif( buffer: ArrayBuffer ) {
 
 export async function convertImageFormat(
 	file: File,
-	basename: string,
 	type: 'image/jpeg' | 'image/png' | 'image/webp',
 	quality = 0.82
 ) {
@@ -278,7 +278,9 @@ export async function convertImageFormat(
 
 		return blobToFile(
 			blob,
-			`${ basename }.${ getExtensionFromMimeType( blob.type ) }`,
+			`${ getFileBasename( file.name ) }.${ getExtensionFromMimeType(
+				blob.type
+			) }`,
 			blob.type
 		);
 
@@ -287,4 +289,17 @@ export async function convertImageFormat(
 	} finally {
 		revokeBlobURL( url );
 	}
+}
+
+function isFileTypeSupported(
+	type: string
+): type is 'image/jpeg' | 'image/png' | 'image/webp' {
+	return [ 'image/jpeg', 'image/png', 'image/webp' ].includes( type );
+}
+
+export async function compressImage( file: File, quality = 0.82 ) {
+	if ( ! isFileTypeSupported( file.type ) ) {
+		throw new Error( 'Unsupported file type' );
+	}
+	return convertImageFormat( file, file.type, quality );
 }

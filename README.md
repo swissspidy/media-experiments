@@ -165,9 +165,11 @@ Same as above, useful for comparison.
 
 Adds a preferences modal to the block editor where users can choose their preferred image formats (e.g. MozJPEG, WebP) and quality levels.
 
+<img width="806" alt="Media preferences modal in the block editor" src="https://github.com/swissspidy/media-experiments/assets/841956/a8a0fa8a-7e96-4f35-8e10-92b0b1221299">
+
 The default camera and microphone to use for media recording can be set here as well.
 
-<img width="986" alt="Media preferences modal in the block editor" src="https://github.com/swissspidy/media-experiments/assets/841956/ec9b6118-70b9-46d6-911a-24709fdf220f">
+<img width="794" alt="Media recording settings" src="https://github.com/swissspidy/media-experiments/assets/841956/7a967743-ba48-4d98-b7b0-e547e0339b4d">
 
 ### Regenerate Media Library
 
