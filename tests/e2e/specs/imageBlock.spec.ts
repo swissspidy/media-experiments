@@ -1,15 +1,56 @@
-import type { ImageFormat } from '@mexp/upload-media';
+import type { ImageFormat, ImageLibrary } from '@mexp/upload-media';
 
 import { test, expect } from '../fixtures';
 
-const scenarios: Record< ImageFormat, string > = {
-	'jpeg-browser': 'image/jpeg',
-	'webp-browser': 'image/webp',
-	'webp-ffmpeg': 'image/webp',
-	'jpeg-vips': 'image/jpeg',
-	'jpeg-mozjpeg': 'image/jpeg',
-	avif: 'image/avif',
-};
+const scenarios: {
+	imageFormat: ImageFormat;
+	imageLibrary: ImageLibrary;
+	expectedMimeType: string;
+}[] = [
+	{
+		imageFormat: 'jpeg',
+		imageLibrary: 'browser',
+		expectedMimeType: 'image/jpeg',
+	},
+	{
+		imageFormat: 'webp',
+		imageLibrary: 'browser',
+		expectedMimeType: 'image/webp',
+	},
+	// TODO: skip or test behavior.
+	{
+		imageFormat: 'avif',
+		imageLibrary: 'browser',
+		expectedMimeType: 'image/avif',
+	},
+	{
+		imageFormat: 'none',
+		imageLibrary: 'browser',
+		// Default image in tests is a png, so type should be unchanged.
+		expectedMimeType: 'image/png',
+	},
+	{
+		imageFormat: 'jpeg',
+		imageLibrary: 'vips',
+		expectedMimeType: 'image/jpeg',
+	},
+	{
+		imageFormat: 'webp',
+		imageLibrary: 'vips',
+		expectedMimeType: 'image/webp',
+	},
+	{
+		imageFormat: 'avif',
+		imageLibrary: 'vips',
+		expectedMimeType: 'image/avif',
+	},
+	{
+		imageFormat: 'none',
+		imageLibrary: 'vips',
+		// Default image in tests is a png, so type should be unchanged.
+		expectedMimeType: 'image/png',
+	},
+];
 
 test.describe( 'Image block', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
@@ -17,10 +58,12 @@ test.describe( 'Image block', () => {
 	} );
 
 	test.describe( 'uploads a file and allows optimizing it afterwards', () => {
-		for ( const [ preference, expectedMimeType ] of Object.entries(
-			scenarios
-		) ) {
-			test( `uses ${ preference } to convert to ${ expectedMimeType }`, async ( {
+		for ( const {
+			imageFormat,
+			imageLibrary,
+			expectedMimeType,
+		} of scenarios ) {
+			test( `uses ${ imageFormat }@${ imageLibrary } to convert to ${ expectedMimeType }`, async ( {
 				admin,
 				page,
 				editor,
@@ -28,39 +71,52 @@ test.describe( 'Image block', () => {
 				browserName,
 			} ) => {
 				test.skip(
-					preference === 'avif',
+					imageLibrary === 'browser' && imageFormat === 'avif',
 					'Needs fixing on CI, conversion is failing'
 				);
 
 				test.skip(
-					browserName === 'webkit' && preference === 'webp-browser',
+					imageLibrary === 'browser' &&
+						imageFormat === 'webp' &&
+						browserName === 'webkit',
 					'WebKit does not currently support Canvas.toBlob with WebP'
 				);
 
 				test.skip(
-					browserName === 'webkit' && preference === 'jpeg-browser',
+					imageLibrary === 'browser' &&
+						imageFormat === 'jpeg' &&
+						browserName === 'webkit',
 					'Works locally but is flaky on CI'
 				);
 
 				test.skip(
 					browserName === 'webkit' &&
-						[ 'webp-ffmpeg', 'jpeg-vips', 'jpeg-mozjpeg' ].includes(
-							preference
-						),
+						imageLibrary === 'vips' &&
+						imageFormat === 'jpeg',
 					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/28513'
 				);
 
 				await admin.createNewPost();
 
-				await page.evaluate( ( pref ) => {
-					window.wp.data
-						.dispatch( 'core/preferences' )
-						.set(
-							'media-experiments/preferences',
-							'imageFormat',
-							pref
-						);
-				}, preference );
+				await page.evaluate(
+					( [ fmt, lib ] ) => {
+						window.wp.data
+							.dispatch( 'core/preferences' )
+							.set(
+								'media-experiments/preferences',
+								'imageFormat',
+								fmt
+							);
+						window.wp.data
+							.dispatch( 'core/preferences' )
+							.set(
+								'media-experiments/preferences',
+								'imageLibrary',
+								lib
+							);
+					},
+					[ imageFormat, imageLibrary ]
+				);
 
 				await editor.insertBlock( { name: 'core/image' } );
 
