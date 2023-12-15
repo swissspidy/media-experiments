@@ -17,7 +17,7 @@ const scenarios: {
 		imageLibrary: 'browser',
 		expectedMimeType: 'image/webp',
 	},
-	// TODO: skip or test behavior.
+	// TODO: skip or test behavior separately, as it's not a supported scenario.
 	{
 		imageFormat: 'avif',
 		imageLibrary: 'browser',

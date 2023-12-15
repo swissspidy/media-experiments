@@ -1,3 +1,5 @@
+import mime from 'mime/lite';
+
 export function getMediaTypeFromMimeType( mimeType: string ) {
 	if ( mimeType === 'application/pdf' ) {
 		return 'pdf';
@@ -8,24 +10,11 @@ export function getMediaTypeFromMimeType( mimeType: string ) {
 /**
  * Get the file extension for a given mime type.
  *
- * Good enough for the use case here, but ideally this
- * would come from a mime database.
- *
  * @param mimeType Mime type.
  * @return File extension.
  */
-export function getExtensionFromMimeType( mimeType: string ) {
-	// Verbose but readable.
-	switch ( mimeType ) {
-		case 'image/jpeg':
-			return 'jpeg';
-		case 'image/png':
-			return 'png';
-		case 'image/webp':
-			return 'webp';
-		default:
-			return 'unknown';
-	}
+export function getExtensionFromMimeType( mimeType: string ): string | null {
+	return mime.getExtension( mimeType );
 }
 
 export function getFileBasename( name: string ) {
