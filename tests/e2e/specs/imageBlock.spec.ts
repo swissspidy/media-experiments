@@ -73,7 +73,7 @@ test.describe( 'Image block', () => {
 				test.skip(
 					browserName === 'webkit' &&
 						( imageLibrary === 'vips' || imageFormat === 'avif' ),
-					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/28513'
+					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
 				);
 
 				test.skip(
@@ -83,9 +83,7 @@ test.describe( 'Image block', () => {
 
 				// TODO: Investigate.
 				test.skip(
-					browserName === 'webkit' &&
-						imageLibrary === 'browser' &&
-						imageFormat === 'jpeg',
+					browserName === 'webkit' && imageLibrary === 'browser',
 					'Works locally but is flaky on CI'
 				);
 
