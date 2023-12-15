@@ -62,7 +62,6 @@ jobs:
             - name: Bundle size check
               uses: preactjs/compressed-size-action@v2
               with:
-                  repo-token: ${{ secrets.GITHUB_TOKEN }}
                   pattern: '{build/*.js,build/*.css}'
                   build-script: 'build'
                   minimum-change-threshold: 100
