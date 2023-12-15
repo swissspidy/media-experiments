@@ -71,29 +71,22 @@ test.describe( 'Image block', () => {
 				browserName,
 			} ) => {
 				test.skip(
-					imageLibrary === 'browser' && imageFormat === 'avif',
-					'Needs fixing on CI, conversion is failing'
+					browserName === 'webkit' &&
+						( imageLibrary === 'vips' || imageFormat === 'avif' ),
+					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/28513'
 				);
 
 				test.skip(
-					imageLibrary === 'browser' &&
-						imageFormat === 'webp' &&
-						browserName === 'webkit',
+					browserName === 'webkit' && imageFormat === 'webp',
 					'WebKit does not currently support Canvas.toBlob with WebP'
 				);
 
-				test.skip(
-					imageLibrary === 'browser' &&
-						imageFormat === 'jpeg' &&
-						browserName === 'webkit',
-					'Works locally but is flaky on CI'
-				);
-
+				// TODO: Investigate.
 				test.skip(
 					browserName === 'webkit' &&
-						imageLibrary === 'vips' &&
+						imageLibrary === 'browser' &&
 						imageFormat === 'jpeg',
-					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/28513'
+					'Works locally but is flaky on CI'
 				);
 
 				await admin.createNewPost();
