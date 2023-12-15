@@ -12,8 +12,6 @@ import { store as recordingStore } from '../mediaRecording/store';
 import { FeatureNumberControl } from './numberControl';
 import { SelectFeature } from './selectFeature';
 import { EnableFeature } from './enableFeature';
-import { store as preferencesStore } from '@wordpress/preferences';
-import { PREFERENCES_NAME } from './constants';
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -32,28 +30,6 @@ export function Modal() {
 				: EMPTY_ARRAY,
 		};
 	}, [] );
-
-	const isSafari = Boolean(
-		window?.navigator.userAgent &&
-			window.navigator.userAgent.includes( 'Safari' ) &&
-			! window.navigator.userAgent.includes( 'Chrome' ) &&
-			! window.navigator.userAgent.includes( 'Chromium' )
-	);
-
-	// Safari does not currently support WebP in HTMLCanvasElement.toBlob()
-	// See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
-	const isIncompatible = useSelect(
-		( select ) => {
-			const imageLibrary =
-				( select( preferencesStore ).get(
-					PREFERENCES_NAME,
-					'imageLibrary'
-				) as string ) || undefined;
-
-			return isSafari && 'browser' === imageLibrary;
-		},
-		[ isSafari ]
-	);
 
 	const sections = useMemo(
 		() => [
@@ -129,14 +105,8 @@ export function Modal() {
 									value: 'jpeg',
 								},
 								{
-									label: ! isIncompatible
-										? __( 'WebP', 'media-experiments' )
-										: __(
-												'WebP (not supported by your current browser)',
-												'media-experiments'
-										  ),
+									label: __( 'WebP', 'media-experiments' ),
 									value: 'webp',
-									disabled: isIncompatible,
 								},
 								{
 									label: __( 'AVIF', 'media-experiments' ),
@@ -218,7 +188,7 @@ export function Modal() {
 				),
 			},
 		],
-		[ videoDevices, audioDevices, isIncompatible ]
+		[ videoDevices, audioDevices ]
 	);
 
 	return (
