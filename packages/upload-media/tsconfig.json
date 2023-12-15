@@ -7,7 +7,6 @@
 	"references": [
 		{ "path": "../ffmpeg" },
 		{ "path": "../heif" },
-		{ "path": "../jsquash" },
 		{ "path": "../media-utils" },
 		{ "path": "../pdf" },
 		{ "path": "../subtitles" },

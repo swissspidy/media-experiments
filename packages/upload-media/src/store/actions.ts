@@ -5,26 +5,12 @@ import { createBlobURL, isBlobURL, revokeBlobURL } from '@wordpress/blob';
 import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as preferencesStore } from '@wordpress/preferences';
 
-import {
-	convertGifToVideo,
-	convertImageToWebP,
-	muteVideo,
-	transcodeAudio,
-	transcodeVideo,
-} from '@mexp/ffmpeg';
-import { convertImageToJpeg, resizeImage } from '@mexp/vips';
-import { isHeifImage, transcodeHeifImage } from '@mexp/heif';
-import { getImageFromPdf } from '@mexp/pdf';
-import { generateSubtitles } from '@mexp/subtitles';
-import {
-	convertImageToAvif,
-	convertImageToJpeg as convertImageToMozJpeg,
-} from '@mexp/jsquash';
 import { getFileBasename, getMediaTypeFromMimeType } from '@mexp/media-utils';
 
 import { UploadError } from '../uploadError';
 import {
 	canTranscodeFile,
+	compressImage,
 	convertImageFormat,
 	fetchRemoteFile,
 	getFileNameFromUrl,
@@ -43,6 +29,7 @@ import type {
 	BatchId,
 	CancelAction,
 	ImageFormat,
+	ImageLibrary,
 	ImageSizeCrop,
 	MediaSourceTerm,
 	OnBatchSuccessHandler,
@@ -68,7 +55,7 @@ import { ItemStatus, TranscodingType, Type } from './types';
 const createDominantColorWorker = createWorkerFactory(
 	() =>
 		import(
-			/* webpackChunkName: 'dominant-color-worker' */ '../workers/dominantColor.worker'
+			/* webpackChunkName: 'dominant-color' */ '../workers/dominantColor.worker'
 		)
 );
 const dominantColorWorker = createDominantColorWorker();
@@ -76,10 +63,19 @@ const dominantColorWorker = createDominantColorWorker();
 const createBlurhashWorker = createWorkerFactory(
 	() =>
 		import(
-			/* webpackChunkName: 'blurhash-worker' */ '../workers/blurhash.worker'
+			/* webpackChunkName: 'blurhash' */ '../workers/blurhash.worker'
 		)
 );
 const blurhashWorker = createBlurhashWorker();
+
+// Safari does not currently support WebP in HTMLCanvasElement.toBlob()
+// See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
+const isSafari = Boolean(
+	window?.navigator.userAgent &&
+		window.navigator.userAgent.includes( 'Safari' ) &&
+		! window.navigator.userAgent.includes( 'Chrome' ) &&
+		! window.navigator.userAgent.includes( 'Chromium' )
+);
 
 type ActionCreators = {
 	uploadItem: typeof uploadItem;
@@ -399,6 +395,9 @@ export function addSubtitlesForExistingVideo( {
 		const sourceFile = await fetchRemoteFile( url, fileName );
 
 		// TODO: Do this *after* adding to the queue so that we can disable the button quickly.
+		const { generateSubtitles } = await import(
+			/* webpackChunkName: 'subtitles' */ '@mexp/subtitles'
+		);
 		const vttFile = await generateSubtitles( sourceFile );
 
 		dispatch< AddAction >( {
@@ -562,6 +561,10 @@ export function prepareItem( id: QueueItemId ) {
 				// TODO: Enforce big image size threshold.
 				// Might need to get dimensions first?
 
+				const { isHeifImage } = await import(
+					/* webpackChunkName: 'heif' */ '@mexp/heif'
+				);
+
 				const isHeif = isHeifImage( fileBuffer );
 				const isGif = isAnimatedGif( fileBuffer );
 
@@ -626,6 +629,10 @@ export function prepareItem( id: QueueItemId ) {
 				break;
 
 			case 'pdf':
+				const { getImageFromPdf } = await import(
+					/* webpackChunkName: 'pdf' */ '@mexp/pdf'
+				);
+
 				// TODO: is this the right place?
 				// Note: Causes another state update.
 				const pdfThumbnail = await getImageFromPdf(
@@ -943,47 +950,96 @@ export function optimizeImageItem(
 
 		dispatch.startTranscoding( id );
 
-		const imageFormat: ImageFormat = registry
-			.select( preferencesStore )
-			.get( PREFERENCES_NAME, 'imageFormat' );
+		const imageLibrary: ImageLibrary =
+			registry
+				.select( preferencesStore )
+				.get( PREFERENCES_NAME, 'imageLibrary' ) || 'vips';
+
+		const imageFormat: ImageFormat =
+			registry
+				.select( preferencesStore )
+				.get( PREFERENCES_NAME, 'imageFormat' ) || 'jpeg';
 
 		// TODO: Pass quality to all the different encoders.
-		const imageQuality: number = registry
-			.select( preferencesStore )
-			.get( PREFERENCES_NAME, 'imageQuality' );
+		const imageQuality: number =
+			registry
+				.select( preferencesStore )
+				.get( PREFERENCES_NAME, 'imageQuality' ) || 82;
 
 		try {
 			let file: File;
 
 			switch ( imageFormat ) {
-				case 'webp-browser':
-					file = await convertImageFormat(
-						item.file,
-						getFileBasename( item.file.name ),
-						'image/webp',
-						imageQuality / 100
-					);
+				case 'none':
+					if ( 'browser' === imageLibrary ) {
+						file = await compressImage(
+							item.file,
+							imageQuality / 100
+						);
+					} else {
+						const { compressImage: vipsCompressImage } =
+							await import(
+								/* webpackChunkName: 'vips' */ '@mexp/vips'
+							);
+						file = await vipsCompressImage(
+							item.file,
+							imageQuality / 100
+						);
+					}
 					break;
-				case 'jpeg-vips':
-					file = await convertImageToJpeg( item.file );
-					break;
-				case 'jpeg-mozjpeg':
-					file = await convertImageToMozJpeg( item.file );
+				case 'webp':
+					if ( 'browser' === imageLibrary && ! isSafari ) {
+						file = await convertImageFormat(
+							item.file,
+							'image/webp',
+							imageQuality / 100
+						);
+					} else {
+						const { convertImageFormat: vipsConvertImageFormat } =
+							await import(
+								/* webpackChunkName: 'vips' */ '@mexp/vips'
+							);
+						file = await vipsConvertImageFormat(
+							item.file,
+							'image/webp',
+							imageQuality / 100
+						);
+					}
 					break;
 				case 'avif':
-					file = await convertImageToAvif( item.file );
-					break;
-				case 'webp-ffmpeg':
-					file = await convertImageToWebP( item.file );
-					break;
-				case 'jpeg-browser':
-				default:
-					file = await convertImageFormat(
+					const { convertImageFormat: vipsConvertImageFormat } =
+						await import(
+							/* webpackChunkName: 'vips' */ '@mexp/vips'
+						);
+
+					// No browsers support AVIF in HTMLCanvasElement.toBlob() yet.
+					// See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
+					file = await vipsConvertImageFormat(
 						item.file,
-						getFileBasename( item.file.name ),
-						'image/jpeg',
+						'image/avif',
 						imageQuality / 100
 					);
+					break;
+				case 'jpeg':
+				default:
+					if ( 'browser' === imageLibrary ) {
+						file = await convertImageFormat(
+							item.file,
+							'image/jpeg',
+							imageQuality / 100
+						);
+					} else {
+						// eslint-disable-next-line @typescript-eslint/no-shadow
+						const { convertImageFormat: vipsConvertImageFormat } =
+							await import(
+								/* webpackChunkName: 'vips' */ '@mexp/vips'
+							);
+						file = await vipsConvertImageFormat(
+							item.file,
+							'image/jpeg',
+							imageQuality / 100
+						);
+					}
 					break;
 			}
 
@@ -1023,6 +1079,9 @@ export function optimizeVideoItem( id: QueueItemId ) {
 		dispatch.startTranscoding( id );
 
 		try {
+			const { transcodeVideo } = await import(
+				/* webpackChunkName: 'ffmpeg' */ '@mexp/ffmpeg'
+			);
 			const file = await transcodeVideo( item.file );
 			dispatch.finishTranscoding( id, file );
 		} catch ( error ) {
@@ -1056,6 +1115,9 @@ export function muteVideoItem( id: QueueItemId ) {
 		dispatch.startTranscoding( id );
 
 		try {
+			const { muteVideo } = await import(
+				/* webpackChunkName: 'ffmpeg' */ '@mexp/ffmpeg'
+			);
 			const file = await muteVideo( item.file );
 			dispatch.finishTranscoding( id, file );
 		} catch ( error ) {
@@ -1089,6 +1151,9 @@ export function optimizeAudioItem( id: QueueItemId ) {
 		dispatch.startTranscoding( id );
 
 		try {
+			const { transcodeAudio } = await import(
+				/* webpackChunkName: 'ffmpeg' */ '@mexp/ffmpeg'
+			);
 			const file = await transcodeAudio( item.file );
 			dispatch.finishTranscoding( id, file );
 		} catch ( error ) {
@@ -1122,6 +1187,9 @@ export function convertGifItem( id: QueueItemId ) {
 		dispatch.startTranscoding( id );
 
 		try {
+			const { convertGifToVideo } = await import(
+				/* webpackChunkName: 'ffmpeg' */ '@mexp/ffmpeg'
+			);
 			const file = await convertGifToVideo( item.file );
 			dispatch.finishTranscoding( id, file );
 		} catch ( error ) {
@@ -1155,6 +1223,9 @@ export function convertHeifItem( id: QueueItemId ) {
 		dispatch.startTranscoding( id );
 
 		try {
+			const { transcodeHeifImage } = await import(
+				/* webpackChunkName: 'ffmpeg' */ '@mexp/heif'
+			);
 			const file = await transcodeHeifImage( item.file );
 			dispatch.finishTranscoding( id, file );
 		} catch ( error ) {
@@ -1188,7 +1259,10 @@ export function resizeCropItem( id: QueueItemId ) {
 		dispatch.startTranscoding( id );
 
 		try {
-			const file = await resizeImage( item.file, item.resize );
+			const { resizeImage: vipsResizeImage } = await import(
+				/* webpackChunkName: 'vips' */ '@mexp/vips'
+			);
+			const file = await vipsResizeImage( item.file, item.resize );
 			dispatch.finishTranscoding( id, file );
 		} catch ( error ) {
 			dispatch.cancelItem(

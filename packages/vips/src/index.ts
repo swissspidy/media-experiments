@@ -10,13 +10,12 @@ let cleanup: () => void;
 
 async function getVips() {
 	return window.Vips( {
-		// Disable dynamic modules, it doesn't work when wasm-vips is served from a CDN
-		// https://github.com/kleisauke/wasm-vips/issues/35
-		dynamicLibraries: [],
 		// https://github.com/kleisauke/wasm-vips/issues/12#issuecomment-1067001784
 		// https://github.com/kleisauke/wasm-vips/blob/789363e5b54d677b109bcdaf8353d283d81a8ee3/src/locatefile-cors-pre.js#L4
 		// @ts-ignore
 		workaroundCors: true,
+		// locateFile: ( file ) =>
+		// 	`https://cdn.jsdelivr.net/npm/wasm-vips@0.0.7/lib/${ file }`,
 		preRun: ( module ) => {
 			// https://github.com/kleisauke/wasm-vips/issues/13#issuecomment-1073246828
 			module.setAutoDeleteLater( true );
@@ -25,24 +24,48 @@ async function getVips() {
 	} );
 }
 
-/**
- * Transcodes an image using vips.
- *
- * @param file Original file object.
- * @return Processed file object.
- */
-export async function convertImageToJpeg( file: File ) {
+export async function convertImageFormat(
+	file: File,
+	type:
+		| 'image/jpeg'
+		| 'image/png'
+		| 'image/webp'
+		| 'image/avif'
+		| 'image/gif',
+	quality = 0.82
+) {
+	const ext = getExtensionFromMimeType( type );
 	const vips = await getVips();
 	const image = vips.Image.newFromBuffer( await file.arrayBuffer() );
-	const outBuffer = image.writeToBuffer( '.jpeg', { Q: 75 } );
+	const outBuffer = image.writeToBuffer( `.${ ext }`, { Q: quality * 100 } );
 	cleanup?.();
 
-	const fileName = `${ getFileBasename( file.name ) }.jpeg`;
-	return blobToFile(
-		new Blob( [ outBuffer ], { type: 'image/jpeg' } ),
-		fileName,
-		'image/jpeg'
-	);
+	const fileName = `${ getFileBasename( file.name ) }.${ ext }`;
+	return blobToFile( new Blob( [ outBuffer ], { type } ), fileName, type );
+}
+
+function isFileTypeSupported(
+	type: string
+): type is
+	| 'image/jpeg'
+	| 'image/png'
+	| 'image/webp'
+	| 'image/avif'
+	| 'image/gif' {
+	return [
+		'image/jpeg',
+		'image/png',
+		'image/webp',
+		'image/avif',
+		'image/gif',
+	].includes( type );
+}
+
+export async function compressImage( file: File, quality = 0.82 ) {
+	if ( ! isFileTypeSupported( file.type ) ) {
+		throw new Error( 'Unsupported file type' );
+	}
+	return convertImageFormat( file, file.type, quality );
 }
 
 /**

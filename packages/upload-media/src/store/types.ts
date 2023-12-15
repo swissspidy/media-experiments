@@ -208,10 +208,6 @@ export type ImageSizeCrop = {
 		| [ 'left' | 'center' | 'right', 'top' | 'center' | 'bottom' ];
 };
 
-export type ImageFormat =
-	| 'jpeg-browser'
-	| 'webp-browser'
-	| 'webp-ffmpeg'
-	| 'jpeg-vips'
-	| 'jpeg-mozjpeg'
-	| 'avif';
+export type ImageLibrary = 'browser' | 'vips';
+
+export type ImageFormat = 'jpeg' | 'webp' | 'avif' | 'none';

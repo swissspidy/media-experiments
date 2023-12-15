@@ -8,7 +8,7 @@ test.describe( 'Cross-Origin Isolation', () => {
 	} ) => {
 		test.skip(
 			browserName === 'webkit',
-			'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/28513'
+			'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
 		);
 
 		await admin.createNewPost();

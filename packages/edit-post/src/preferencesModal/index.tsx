@@ -10,11 +10,11 @@ import {
 import { store as interfaceStore } from '@wordpress/interface';
 import { store as preferencesStore } from '@wordpress/preferences';
 
-import type { ImageFormat } from '@mexp/upload-media';
-
-import './editor.css';
+import type { MediaPreferences } from '../types';
 import { Modal } from './modal';
 import { PREFERENCES_NAME } from './constants';
+
+import './editor.css';
 
 function PreferencesMenuItem() {
 	const { openModal } = useDispatch( interfaceStore );
@@ -41,20 +41,19 @@ registerPlugin( 'media-experiments-preferences', {
 	render: PreferencesMenuItem,
 } );
 
-const defaultPreferences: {
-	videoInput?: string;
-	audioInput?: string;
-	videoEffect: 'none' | 'blur';
-	requireApproval: boolean;
-	imageFormat: ImageFormat;
-	imageQuality: number;
-} = {
+const defaultPreferences: MediaPreferences = {
+	// General.
+	requireApproval: true,
+	bigImageSizeThreshold: window.mediaExperiments.bigImageSizeThreshold,
+	clientSideThumbnails: true,
+	optimizeOnUpload: true,
+	imageLibrary: 'vips',
+	imageFormat: 'jpeg',
+	imageQuality: 82, // 82 for jpeg, 86 for webp.
+	// Media recording.
 	videoInput: undefined,
 	audioInput: undefined,
 	videoEffect: 'none',
-	requireApproval: true,
-	imageFormat: 'jpeg-browser',
-	imageQuality: 82,
 };
 
 void globalDispatch( preferencesStore ).setDefaults(

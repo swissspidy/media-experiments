@@ -1,14 +1,5 @@
-import type { ComponentProps, PropsWithChildren } from 'react';
-
 import { useDispatch, useSelect } from '@wordpress/data';
-import { store as preferencesStore } from '@wordpress/preferences';
 import {
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis -- Why is this still experimental?
-	__experimentalNumberControl as NumberControl,
-	SelectControl,
-} from '@wordpress/components';
-import {
-	___unstablePreferencesModalBaseOption as BaseOption,
 	PreferencesModal,
 	PreferencesModalSection,
 	PreferencesModalTabs,
@@ -18,125 +9,9 @@ import { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 import { store as recordingStore } from '../mediaRecording/store';
-import { PREFERENCES_NAME } from './constants';
-
-type EnableFeatureProps = PropsWithChildren<
-	Omit<
-		ComponentProps< typeof BaseOption >,
-		'isChecked' | 'onChange' | 'children'
-	> & { featureName: string }
->;
-
-function EnableFeature( props: EnableFeatureProps ) {
-	const { featureName, ...remainingProps } = props;
-	const isChecked = useSelect(
-		( select ) =>
-			Boolean(
-				select( preferencesStore ).get( PREFERENCES_NAME, featureName )
-			),
-		[ featureName ]
-	);
-	const { toggle } = useDispatch( preferencesStore );
-	const onChange = () => {
-		void toggle( PREFERENCES_NAME, featureName );
-	};
-	return (
-		<BaseOption
-			onChange={ onChange }
-			isChecked={ isChecked }
-			{ ...remainingProps }
-		/>
-	);
-}
-
-function BaseSelectOption( {
-	help,
-	label,
-	value,
-	options,
-	onChange,
-	children,
-}: PropsWithChildren<
-	Pick<
-		ComponentProps< typeof SelectControl >,
-		'help' | 'label' | 'value' | 'options' | 'onChange'
-	>
-> ) {
-	return (
-		<div className="interface-preferences-modal__option interface-preferences-modal__option--select">
-			{ /* @ts-ignore -- TODO: Fix type */ }
-			<SelectControl
-				__nextHasNoMarginBottom
-				help={ help }
-				label={ label }
-				value={ value }
-				options={ options }
-				onChange={ onChange }
-			/>
-			{ children }
-		</div>
-	);
-}
-
-type SelectFeatureProps = PropsWithChildren<
-	Omit<
-		ComponentProps< typeof BaseSelectOption >,
-		'value' | 'onChange' | 'children'
-	> & { featureName: string }
->;
-
-function SelectFeature( props: SelectFeatureProps ) {
-	const { featureName, ...remainingProps } = props;
-	const value = useSelect(
-		( select ) =>
-			( select( preferencesStore ).get(
-				PREFERENCES_NAME,
-				featureName
-			) as string ) || undefined,
-		[ featureName ]
-	);
-	const { set } = useDispatch( preferencesStore );
-	const onChange = ( newValue: string ) => {
-		void set( PREFERENCES_NAME, featureName, newValue );
-	};
-	return (
-		<BaseSelectOption
-			onChange={ onChange }
-			value={ value }
-			{ ...remainingProps }
-		/>
-	);
-}
-
-type FeatureNumberControlProps = PropsWithChildren<
-	Omit<
-		ComponentProps< typeof NumberControl >,
-		'value' | 'onChange' | 'children'
-	> & { featureName: string }
->;
-
-function FeatureNumberControl( props: FeatureNumberControlProps ) {
-	const { featureName, ...remainingProps } = props;
-	const value = useSelect(
-		( select ) =>
-			( select( preferencesStore ).get(
-				PREFERENCES_NAME,
-				featureName
-			) as string ) || undefined,
-		[ featureName ]
-	);
-	const { set } = useDispatch( preferencesStore );
-	const onChange = ( newValue?: string ) => {
-		void set( PREFERENCES_NAME, featureName, newValue );
-	};
-	return (
-		<NumberControl
-			onChange={ onChange }
-			value={ value }
-			{ ...remainingProps }
-		/>
-	);
-}
+import { FeatureNumberControl } from './numberControl';
+import { SelectFeature } from './selectFeature';
+import { EnableFeature } from './enableFeature';
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -156,15 +31,6 @@ export function Modal() {
 		};
 	}, [] );
 
-	// Safari does not currently support WebP in HTMLCanvasElement.toBlob()
-	// See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
-	const isSafari = Boolean(
-		window?.navigator.userAgent &&
-			window.navigator.userAgent.includes( 'Safari' ) &&
-			! window.navigator.userAgent.includes( 'Chrome' ) &&
-			! window.navigator.userAgent.includes( 'Chromium' )
-	);
-
 	const sections = useMemo(
 		() => [
 			{
@@ -174,7 +40,7 @@ export function Modal() {
 					<PreferencesModalSection
 						title={ __( 'General', 'media-experiments' ) }
 						description={ __(
-							'Customize options related to the media optimization flow.',
+							'Customize options related to the media upload flow.',
 							'media-experiments'
 						) }
 					>
@@ -184,58 +50,74 @@ export function Modal() {
 								'Require approval step when optimizing existing videos or images.',
 								'media-experiments'
 							) }
-							label={ __( 'Approval', 'media-experiments' ) }
+							label={ __( 'Approval step', 'media-experiments' ) }
+						/>
+						<EnableFeature
+							featureName="clientSideThumbnails"
+							help={ __(
+								'Generate thumbnails on the client instead of the server.',
+								'media-experiments'
+							) }
+							label={ __(
+								'Thumbnail generation',
+								'media-experiments'
+							) }
+						/>
+						<EnableFeature
+							featureName="optimizeOnUpload"
+							help={ __(
+								'Compress and optimize media items during upload. Disabling restores old WordPress behavior.',
+								'media-experiments'
+							) }
+							label={ __(
+								'Pre-upload compression',
+								'media-experiments'
+							) }
+						/>
+						<SelectFeature
+							featureName="imageLibrary"
+							help={ __(
+								'Preferred library to use for image conversion.',
+								'media-experiments'
+							) }
+							label={ __( 'Image Library', 'media-experiments' ) }
+							options={ [
+								{
+									label: __( 'Browser', 'media-experiments' ),
+									value: 'browser',
+								},
+								{
+									label: __( 'libvips', 'media-experiments' ),
+									value: 'vips',
+								},
+							] }
 						/>
 						<SelectFeature
 							featureName="imageFormat"
 							help={ __(
-								'Preferred file format when converting images.',
+								'Preferred file type to convert images to.',
 								'media-experiments'
 							) }
 							label={ __( 'Image Format', 'media-experiments' ) }
 							options={ [
 								{
-									label: __(
-										'JPEG (Browser)',
-										'media-experiments'
-									),
-									value: 'jpeg-browser',
+									label: __( 'JPEG', 'media-experiments' ),
+									value: 'jpeg',
 								},
 								{
-									label: __(
-										'WebP (Browser)',
-										'media-experiments'
-									),
-									value: 'webp-browser',
-									disabled: isSafari,
+									label: __( 'WebP', 'media-experiments' ),
+									value: 'webp',
 								},
 								{
-									label: __(
-										'WebP (FFmpeg)',
-										'media-experiments'
-									),
-									value: 'webp-ffmpeg',
-								},
-								{
-									label: __(
-										'JPEG (libvips)',
-										'media-experiments'
-									),
-									value: 'jpeg-vips',
-								},
-								{
-									label: __(
-										'JPEG (MozJPEG)',
-										'media-experiments'
-									),
-									value: 'jpeg-mozjpeg',
-								},
-								{
-									label: __(
-										'AVIF (libavif)',
-										'media-experiments'
-									),
+									label: __( 'AVIF', 'media-experiments' ),
 									value: 'avif',
+								},
+								{
+									label: __(
+										'None (do not change file type)',
+										'media-experiments'
+									),
+									value: 'none',
 								},
 							] }
 						/>
@@ -248,6 +130,21 @@ export function Modal() {
 							shiftStep={ 5 }
 							max={ 100 }
 							min={ 1 }
+						/>
+						<FeatureNumberControl
+							className="interface-preferences-modal__option interface-preferences-modal__option--number"
+							label={ __(
+								'Big image size threshold',
+								'media-experiments'
+							) }
+							isShiftStepEnabled={ true }
+							featureName="bigImageSizeThreshold"
+							step={ 5 }
+							shiftStep={ 10 }
+							max={ 10000 }
+							min={ 0 }
+							// TODO: Make prefix if RTL?
+							suffix="px"
 						/>
 					</PreferencesModalSection>
 				),
@@ -291,7 +188,7 @@ export function Modal() {
 				),
 			},
 		],
-		[ videoDevices, audioDevices, isSafari ]
+		[ videoDevices, audioDevices ]
 	);
 
 	return (
