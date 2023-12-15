@@ -229,10 +229,13 @@ test.describe( 'Image block', () => {
 		await page.evaluate( () => {
 			window.wp.data
 				.dispatch( 'core/preferences' )
+				.set( 'media-experiments/preferences', 'imageFormat', 'jpeg' );
+			window.wp.data
+				.dispatch( 'core/preferences' )
 				.set(
 					'media-experiments/preferences',
-					'imageFormat',
-					'jpeg-browser'
+					'imageLibrary',
+					'browser'
 				);
 		} );
 
