@@ -10,13 +10,12 @@ let cleanup: () => void;
 
 async function getVips() {
 	return window.Vips( {
-		// Disable dynamic modules, it doesn't work when wasm-vips is served from a CDN
-		// https://github.com/kleisauke/wasm-vips/issues/35
-		dynamicLibraries: [],
 		// https://github.com/kleisauke/wasm-vips/issues/12#issuecomment-1067001784
 		// https://github.com/kleisauke/wasm-vips/blob/789363e5b54d677b109bcdaf8353d283d81a8ee3/src/locatefile-cors-pre.js#L4
 		// @ts-ignore
 		workaroundCors: true,
+		// locateFile: ( file ) =>
+		// 	`https://cdn.jsdelivr.net/npm/wasm-vips@0.0.7/lib/${ file }`,
 		preRun: ( module ) => {
 			// https://github.com/kleisauke/wasm-vips/issues/13#issuecomment-1073246828
 			module.setAutoDeleteLater( true );
