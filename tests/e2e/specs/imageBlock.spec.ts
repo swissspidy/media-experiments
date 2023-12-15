@@ -157,6 +157,20 @@ test.describe( 'Image block', () => {
 
 				await page.getByRole( 'button', { name: 'Optimize' } ).click();
 
+				await expect(
+					page
+						.getByRole( 'button', { name: 'Dismiss this notice' } )
+						.filter( {
+							hasText: 'There was an error optimizing the file',
+						} )
+				).not.toBeVisible();
+
+				await page.waitForFunction( () =>
+					window.wp.data
+						.select( 'media-experiments/upload' )
+						.isPendingApproval()
+				);
+
 				const dialog = page.getByRole( 'dialog', {
 					name: 'Compare media quality',
 				} );

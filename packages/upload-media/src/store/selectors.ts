@@ -61,6 +61,12 @@ export function isTranscoding( state: State ) {
 	);
 }
 
+export function isPendingApproval( state: State ) {
+	return state.queue.some(
+		( item ) => item.status === ItemStatus.PendingApproval
+	);
+}
+
 export function getItemByAttachmentId( state: State, id: number ) {
 	return state.queue.find(
 		( item ) => item.attachment?.id === id || item.sourceAttachmentId === id
