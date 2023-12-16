@@ -89,25 +89,22 @@ test.describe( 'Image block', () => {
 
 				await admin.createNewPost();
 
-				await page.evaluate(
-					( [ fmt, lib ] ) => {
-						window.wp.data
-							.dispatch( 'core/preferences' )
-							.set(
-								'media-experiments/preferences',
-								'imageFormat',
-								fmt
-							);
-						window.wp.data
-							.dispatch( 'core/preferences' )
-							.set(
-								'media-experiments/preferences',
-								'imageLibrary',
-								lib
-							);
-					},
-					[ imageFormat, imageLibrary ]
-				);
+				await page.evaluate( () => {
+					window.wp.data
+						.dispatch( 'core/preferences' )
+						.set(
+							'media-experiments/preferences',
+							'imageFormat',
+							'none'
+						);
+					window.wp.data
+						.dispatch( 'core/preferences' )
+						.set(
+							'media-experiments/preferences',
+							'imageLibrary',
+							'browser'
+						);
+				} );
 
 				await editor.insertBlock( { name: 'core/image' } );
 
@@ -145,6 +142,26 @@ test.describe( 'Image block', () => {
 				await expect(
 					page.locator( 'css=[data-blurhash]' )
 				).toHaveAttribute( 'data-blurhash', /xuj\[M\{WB00ay~qayM\{/ );
+
+				await page.evaluate(
+					( [ fmt, lib ] ) => {
+						window.wp.data
+							.dispatch( 'core/preferences' )
+							.set(
+								'media-experiments/preferences',
+								'imageFormat',
+								fmt
+							);
+						window.wp.data
+							.dispatch( 'core/preferences' )
+							.set(
+								'media-experiments/preferences',
+								'imageLibrary',
+								lib
+							);
+					},
+					[ imageFormat, imageLibrary ]
+				);
 
 				await page.getByRole( 'button', { name: 'Optimize' } ).click();
 
