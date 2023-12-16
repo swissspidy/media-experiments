@@ -6,7 +6,7 @@ import {
 	getFileBasename,
 } from '@mexp/media-utils';
 
-import type { ImageSizeCrop } from './types';
+import type { ImageSizeCrop, ThumbnailOptions } from './types';
 
 let cleanup: () => void;
 
@@ -89,7 +89,9 @@ export async function compressImage( file: File, quality = 0.82 ) {
  */
 export async function resizeImage( file: File, resize: ImageSizeCrop ) {
 	const vips = await getVips();
-	const options: Record< string, unknown > = {};
+	const options: ThumbnailOptions = {
+		size: 'down',
+	};
 	if ( resize.height ) {
 		options.height = resize.height;
 	}
