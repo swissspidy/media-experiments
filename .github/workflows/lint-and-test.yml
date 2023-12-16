@@ -12,6 +12,8 @@ concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
 
+permissions: {}
+
 jobs:
     lint-js:
         name: JS Lints
@@ -47,6 +49,8 @@ jobs:
     bundle-size:
         name: Bundle size check
         runs-on: ubuntu-latest
+        permissions:
+          issues: 'write'
         steps:
             - name: Checkout
               uses: actions/checkout@v4
