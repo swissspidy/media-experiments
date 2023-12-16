@@ -1,3 +1,5 @@
+import type Vips from 'wasm-vips';
+
 import {
 	blobToFile,
 	getExtensionFromMimeType,
@@ -8,8 +10,14 @@ import type { ImageSizeCrop } from './types';
 
 let cleanup: () => void;
 
+let vipsInstance: typeof Vips | undefined;
+
 async function getVips() {
-	return window.Vips( {
+	if ( vipsInstance ) {
+		return vipsInstance;
+	}
+
+	vipsInstance = await window.Vips( {
 		// https://github.com/kleisauke/wasm-vips/issues/12#issuecomment-1067001784
 		// https://github.com/kleisauke/wasm-vips/blob/789363e5b54d677b109bcdaf8353d283d81a8ee3/src/locatefile-cors-pre.js#L4
 		// @ts-ignore
@@ -22,6 +30,8 @@ async function getVips() {
 			module.setDelayFunction( ( fn: () => void ) => ( cleanup = fn ) );
 		},
 	} );
+
+	return vipsInstance;
 }
 
 export async function convertImageFormat(
