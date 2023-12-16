@@ -29,7 +29,7 @@ export function FeatureNumberControl( props: FeatureNumberControlProps ) {
 	);
 	const { set } = useDispatch( preferencesStore );
 	const onChange = ( newValue?: string ) => {
-		void set( PREFERENCES_NAME, featureName, newValue );
+		void set( PREFERENCES_NAME, featureName, Number( newValue ) );
 	};
 	return (
 		<NumberControl
