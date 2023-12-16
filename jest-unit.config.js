@@ -2,6 +2,7 @@ const defaultConfig = require( '@wordpress/scripts/config/jest-unit.config' );
 
 module.exports = {
 	...defaultConfig,
+	testEnvironment: '<rootDir>/tests/js/environment.ts',
 	setupFiles: [ '<rootDir>/tests/js/setup-globals.js' ],
 	testPathIgnorePatterns: [
 		'/.git/',

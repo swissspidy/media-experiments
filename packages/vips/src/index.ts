@@ -128,13 +128,9 @@ export async function resizeImage(
 	let image;
 
 	if ( ! resize.crop || true === resize.crop ) {
-		image = vips.Image.thumbnailBuffer(
-			new Uint8Array( buffer ),
-			resize.width,
-			options
-		);
+		image = vips.Image.thumbnailBuffer( buffer, resize.width, options );
 	} else {
-		image = vips.Image.newFromBuffer( new Uint8Array( buffer ) );
+		image = vips.Image.newFromBuffer( buffer );
 
 		const { width, height } = image;
 
