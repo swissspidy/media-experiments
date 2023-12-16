@@ -575,6 +575,7 @@ export function prepareItem( id: QueueItemId ) {
 					// Image/Video block already have a placeholder state.
 					dispatch.prepareForTranscoding( id, [
 						TranscodingType.Heif,
+						TranscodingType.ResizeCrop,
 						TranscodingType.Image,
 					] );
 					return;
@@ -587,7 +588,10 @@ export function prepareItem( id: QueueItemId ) {
 					return;
 				}
 
-				dispatch.prepareForTranscoding( id, [ TranscodingType.Image ] );
+				dispatch.prepareForTranscoding( id, [
+					TranscodingType.ResizeCrop,
+					TranscodingType.Image,
+				] );
 				return;
 
 			case 'video':
@@ -1253,7 +1257,12 @@ export function resizeCropItem( id: QueueItemId ) {
 		dispatch: ActionCreators;
 	} ) => {
 		const item = select.getItem( id );
-		if ( ! item || ! item.resize ) {
+		if ( ! item ) {
+			return;
+		}
+
+		if ( ! item.resize ) {
+			dispatch.finishTranscoding( id, item.file );
 			return;
 		}
 
