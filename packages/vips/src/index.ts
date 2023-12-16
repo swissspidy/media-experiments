@@ -1,31 +1,54 @@
-import {
-	blobToFile,
-	getExtensionFromMimeType,
-	getFileBasename,
-} from '@mexp/media-utils';
+const Vips = require( 'wasm-vips' );
 
-import type { ImageSizeCrop } from './types';
+import { getExtensionFromMimeType } from '@mexp/media-utils';
+
+import type { ImageSizeCrop, ThumbnailOptions } from './types';
+
+type EmscriptenModule = {
+	setAutoDeleteLater: ( autoDelete: boolean ) => void;
+	setDelayFunction: ( fn: ( fn: () => void ) => void ) => void;
+};
 
 let cleanup: () => void;
 
+let vipsInstance: typeof Vips | undefined;
+
 async function getVips() {
-	return window.Vips( {
-		// https://github.com/kleisauke/wasm-vips/issues/12#issuecomment-1067001784
-		// https://github.com/kleisauke/wasm-vips/blob/789363e5b54d677b109bcdaf8353d283d81a8ee3/src/locatefile-cors-pre.js#L4
-		// @ts-ignore
+	if ( vipsInstance ) {
+		return vipsInstance;
+	}
+
+	const workerBlobUrl = URL.createObjectURL(
+		await (
+			await fetch(
+				`https://cdn.jsdelivr.net/npm/wasm-vips@0.0.7/lib/vips.worker.js`
+			)
+		).blob()
+	);
+
+	vipsInstance = await Vips( {
+		locateFile: ( fileName: string, scriptDirectory: string ) => {
+			const url = scriptDirectory + fileName;
+			if ( url.endsWith( '.worker.js' ) ) {
+				return workerBlobUrl;
+			}
+			return `https://cdn.jsdelivr.net/npm/wasm-vips@0.0.7/lib/${ fileName }`;
+		},
+		mainScriptUrlOrBlob:
+			'https://cdn.jsdelivr.net/npm/wasm-vips@0.0.7/lib/vips.js',
 		workaroundCors: true,
-		// locateFile: ( file ) =>
-		// 	`https://cdn.jsdelivr.net/npm/wasm-vips@0.0.7/lib/${ file }`,
-		preRun: ( module ) => {
+		preRun: ( module: EmscriptenModule ) => {
 			// https://github.com/kleisauke/wasm-vips/issues/13#issuecomment-1073246828
 			module.setAutoDeleteLater( true );
 			module.setDelayFunction( ( fn: () => void ) => ( cleanup = fn ) );
 		},
 	} );
+
+	return vipsInstance;
 }
 
 export async function convertImageFormat(
-	file: File,
+	buffer: ArrayBuffer,
 	type:
 		| 'image/jpeg'
 		| 'image/png'
@@ -35,13 +58,19 @@ export async function convertImageFormat(
 	quality = 0.82
 ) {
 	const ext = getExtensionFromMimeType( type );
+
+	if ( ! ext ) {
+		throw new Error( 'Unsupported file type' );
+	}
+
 	const vips = await getVips();
-	const image = vips.Image.newFromBuffer( await file.arrayBuffer() );
+	const image = vips.Image.newFromBuffer( buffer );
 	const outBuffer = image.writeToBuffer( `.${ ext }`, { Q: quality * 100 } );
+	const result = outBuffer.buffer;
+
 	cleanup?.();
 
-	const fileName = `${ getFileBasename( file.name ) }.${ ext }`;
-	return blobToFile( new Blob( [ outBuffer ], { type } ), fileName, type );
+	return result;
 }
 
 function isFileTypeSupported(
@@ -61,23 +90,34 @@ function isFileTypeSupported(
 	].includes( type );
 }
 
-export async function compressImage( file: File, quality = 0.82 ) {
-	if ( ! isFileTypeSupported( file.type ) ) {
+export async function compressImage(
+	buffer: ArrayBuffer,
+	type: string,
+	quality = 0.82
+) {
+	if ( ! isFileTypeSupported( type ) ) {
 		throw new Error( 'Unsupported file type' );
 	}
-	return convertImageFormat( file, file.type, quality );
+	return convertImageFormat( buffer, type, quality );
 }
 
 /**
  * Resizes an image using vips.
  *
- * @param file   Original file object.
+ * @param buffer Original file object.
+ * @param ext    File extension.
  * @param resize
  * @return Processed file object.
  */
-export async function resizeImage( file: File, resize: ImageSizeCrop ) {
+export async function resizeImage(
+	buffer: ArrayBuffer,
+	ext: string,
+	resize: ImageSizeCrop
+) {
 	const vips = await getVips();
-	const options: Record< string, unknown > = {};
+	const options: ThumbnailOptions = {
+		size: 'down',
+	};
 	if ( resize.height ) {
 		options.height = resize.height;
 	}
@@ -88,13 +128,9 @@ export async function resizeImage( file: File, resize: ImageSizeCrop ) {
 	let image;
 
 	if ( ! resize.crop || true === resize.crop ) {
-		image = vips.Image.thumbnailBuffer(
-			await file.arrayBuffer(),
-			resize.width,
-			options
-		);
+		image = vips.Image.thumbnailBuffer( buffer, resize.width, options );
 	} else {
-		image = vips.Image.newFromBuffer( await file.arrayBuffer() );
+		image = vips.Image.newFromBuffer( buffer );
 
 		const { width, height } = image;
 
@@ -115,19 +151,16 @@ export async function resizeImage( file: File, resize: ImageSizeCrop ) {
 		image = image.crop( left, top, resize.width, resize.height );
 	}
 
-	const ext = getExtensionFromMimeType( file.type );
 	const outBuffer = image.writeToBuffer( `.${ ext }` );
 
-	const fileName = `${ getFileBasename( file.name ) }-${ image.width }x${
-		image.height
-	}.${ ext }`;
+	const result = {
+		buffer: outBuffer.buffer,
+		width: image.width,
+		height: image.height,
+	};
 
 	// Only call after `image` is no longer being used.
 	cleanup?.();
 
-	return blobToFile(
-		new Blob( [ outBuffer ], { type: file.type } ),
-		fileName,
-		file.type
-	);
+	return result;
 }

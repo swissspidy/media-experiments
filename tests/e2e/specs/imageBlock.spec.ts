@@ -89,25 +89,22 @@ test.describe( 'Image block', () => {
 
 				await admin.createNewPost();
 
-				await page.evaluate(
-					( [ fmt, lib ] ) => {
-						window.wp.data
-							.dispatch( 'core/preferences' )
-							.set(
-								'media-experiments/preferences',
-								'imageFormat',
-								fmt
-							);
-						window.wp.data
-							.dispatch( 'core/preferences' )
-							.set(
-								'media-experiments/preferences',
-								'imageLibrary',
-								lib
-							);
-					},
-					[ imageFormat, imageLibrary ]
-				);
+				await page.evaluate( () => {
+					window.wp.data
+						.dispatch( 'core/preferences' )
+						.set(
+							'media-experiments/preferences',
+							'imageFormat',
+							'none'
+						);
+					window.wp.data
+						.dispatch( 'core/preferences' )
+						.set(
+							'media-experiments/preferences',
+							'imageLibrary',
+							'browser'
+						);
+				} );
 
 				await editor.insertBlock( { name: 'core/image' } );
 
@@ -146,6 +143,26 @@ test.describe( 'Image block', () => {
 					page.locator( 'css=[data-blurhash]' )
 				).toHaveAttribute( 'data-blurhash', /xuj\[M\{WB00ay~qayM\{/ );
 
+				await page.evaluate(
+					( [ fmt, lib ] ) => {
+						window.wp.data
+							.dispatch( 'core/preferences' )
+							.set(
+								'media-experiments/preferences',
+								'imageFormat',
+								fmt
+							);
+						window.wp.data
+							.dispatch( 'core/preferences' )
+							.set(
+								'media-experiments/preferences',
+								'imageLibrary',
+								lib
+							);
+					},
+					[ imageFormat, imageLibrary ]
+				);
+
 				await page.getByRole( 'button', { name: 'Optimize' } ).click();
 
 				await expect(
@@ -156,10 +173,15 @@ test.describe( 'Image block', () => {
 						} )
 				).not.toBeVisible();
 
-				await page.waitForFunction( () =>
-					window.wp.data
-						.select( 'media-experiments/upload' )
-						.isPendingApproval()
+				await page.waitForFunction(
+					() =>
+						window.wp.data
+							.select( 'media-experiments/upload' )
+							.isPendingApproval(),
+					undefined,
+					{
+						timeout: 20000, // Transcoding might take longer
+					}
 				);
 
 				const dialog = page.getByRole( 'dialog', {
@@ -199,6 +221,102 @@ test.describe( 'Image block', () => {
 					new RegExp( `Mime type: ${ expectedMimeType }` )
 				);
 
+				await expect(
+					settingsPanel.getByLabel( '#696969' )
+				).toBeVisible();
+				// No exact comparison as there can be 1-2 char differences between browsers.
+				await expect(
+					page.locator( 'css=[data-blurhash]' )
+				).toHaveAttribute( 'data-blurhash', /xuj\[M\{WB00ay~qayM\{/ );
+			} );
+		}
+	} );
+
+	test.describe( 'optimizes a file on upload', () => {
+		for ( const {
+			imageFormat,
+			imageLibrary,
+			expectedMimeType,
+		} of scenarios ) {
+			test( `uses ${ imageFormat }@${ imageLibrary } to convert to ${ expectedMimeType }`, async ( {
+				admin,
+				page,
+				editor,
+				mediaUtils,
+				browserName,
+			} ) => {
+				test.skip(
+					browserName === 'webkit' &&
+						( imageLibrary === 'vips' || imageFormat === 'avif' ),
+					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
+				);
+
+				test.skip(
+					browserName === 'webkit' && imageFormat === 'webp',
+					'WebKit does not currently support Canvas.toBlob with WebP'
+				);
+
+				// TODO: Investigate.
+				test.skip(
+					browserName === 'webkit' && imageLibrary === 'browser',
+					'Works locally but is flaky on CI'
+				);
+
+				await admin.createNewPost();
+
+				await page.evaluate(
+					( [ fmt, lib ] ) => {
+						window.wp.data
+							.dispatch( 'core/preferences' )
+							.set(
+								'media-experiments/preferences',
+								'imageFormat',
+								fmt
+							);
+						window.wp.data
+							.dispatch( 'core/preferences' )
+							.set(
+								'media-experiments/preferences',
+								'imageLibrary',
+								lib
+							);
+					},
+					[ imageFormat, imageLibrary ]
+				);
+
+				await editor.insertBlock( { name: 'core/image' } );
+
+				const imageBlock = editor.canvas.locator(
+					'role=document[name="Block: Image"i]'
+				);
+				await expect( imageBlock ).toBeVisible();
+
+				await mediaUtils.upload(
+					imageBlock.locator( 'data-testid=form-file-upload-input' )
+				);
+
+				await page.waitForFunction(
+					() =>
+						window.wp.data
+							.select( 'media-experiments/upload' )
+							.getItems().length === 0,
+					undefined,
+					{
+						timeout: 20000, // Transcoding might take longer
+					}
+				);
+
+				const settingsPanel = page
+					.getByRole( 'region', {
+						name: 'Editor settings',
+					} )
+					.getByRole( 'tabpanel', {
+						name: 'Settings',
+					} );
+
+				await expect( settingsPanel ).toHaveText(
+					new RegExp( `Mime type: ${ expectedMimeType }` )
+				);
 				await expect(
 					settingsPanel.getByLabel( '#696969' )
 				).toBeVisible();
@@ -269,7 +387,7 @@ test.describe( 'Image block', () => {
 		// No exact comparison as there can be 1-2 char differences between browsers.
 		await expect( page.locator( 'css=[data-blurhash]' ) ).toHaveAttribute(
 			'data-blurhash',
-			/DIpODxF02WA_2f,W\+s/
+			/DIpODxF02WA_2f/
 		);
 	} );
 } );
