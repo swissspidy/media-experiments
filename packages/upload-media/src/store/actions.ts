@@ -1276,7 +1276,7 @@ export function convertHeifItem( id: QueueItemId ) {
 
 		try {
 			const { transcodeHeifImage } = await import(
-				/* webpackChunkName: 'ffmpeg' */ '@mexp/heif'
+				/* webpackChunkName: 'heif' */ '@mexp/heif'
 			);
 			const file = await transcodeHeifImage( item.file );
 			dispatch.finishTranscoding( id, file );
