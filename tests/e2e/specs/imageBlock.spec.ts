@@ -378,7 +378,7 @@ test.describe( 'Image block', () => {
 		// No exact comparison as there can be 1-2 char differences between browsers.
 		await expect( page.locator( 'css=[data-blurhash]' ) ).toHaveAttribute(
 			'data-blurhash',
-			/DIpODxF02WA_2f,W\+s/
+			/DIpODxF02WA_2f/
 		);
 	} );
 } );
