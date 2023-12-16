@@ -294,7 +294,11 @@ test.describe( 'Image block', () => {
 					() =>
 						window.wp.data
 							.select( 'media-experiments/upload' )
-							.getItems().length === 0
+							.getItems().length === 0,
+					undefined,
+					{
+						timeout: 20000, // Transcoding might take longer
+					}
 				);
 
 				const settingsPanel = page
