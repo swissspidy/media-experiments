@@ -587,9 +587,7 @@ export function prepareItem( id: QueueItemId ) {
 					return;
 				}
 
-				dispatch.prepareForTranscoding( id, [
-					TranscodingType.Image,
-				] );
+				dispatch.prepareForTranscoding( id, [ TranscodingType.Image ] );
 				return;
 
 			case 'video':
