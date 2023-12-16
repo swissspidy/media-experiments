@@ -5,7 +5,12 @@ import { createBlobURL, isBlobURL, revokeBlobURL } from '@wordpress/blob';
 import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as preferencesStore } from '@wordpress/preferences';
 
-import { getFileBasename, getMediaTypeFromMimeType } from '@mexp/media-utils';
+import {
+	getFileBasename,
+	getMediaTypeFromMimeType,
+	blobToFile,
+	getExtensionFromMimeType,
+} from '@mexp/media-utils';
 
 import { UploadError } from '../uploadError';
 import {
@@ -67,6 +72,11 @@ const createBlurhashWorker = createWorkerFactory(
 		)
 );
 const blurhashWorker = createBlurhashWorker();
+
+const createVipsWorker = createWorkerFactory(
+	() => import( /* webpackChunkName: 'vips' */ '@mexp/vips' )
+);
+const vipsWorker = createVipsWorker();
 
 // Safari does not currently support WebP in HTMLCanvasElement.toBlob()
 // See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
@@ -935,6 +945,61 @@ export function maybeTranscodeItem( id: QueueItemId ) {
 	};
 }
 
+async function vipsConvertImageFormat(
+	file: File,
+	type:
+		| 'image/jpeg'
+		| 'image/png'
+		| 'image/webp'
+		| 'image/avif'
+		| 'image/gif',
+	quality: number
+) {
+	const buffer = await vipsWorker.convertImageFormat(
+		await file.arrayBuffer(),
+		type,
+		quality
+	);
+	const ext = getExtensionFromMimeType( type );
+	const fileName = `${ getFileBasename( file.name ) }.${ ext }`;
+	return blobToFile( new Blob( [ buffer ], { type } ), fileName, type );
+}
+
+async function vipsCompressImage( file: File, quality: number ) {
+	const buffer = await vipsWorker.compressImage(
+		await file.arrayBuffer(),
+		file.type,
+		quality
+	);
+	return blobToFile(
+		new Blob( [ buffer ], { type: file.type } ),
+		file.name,
+		file.type
+	);
+}
+async function vipsResizeImage( file: File, resize: ImageSizeCrop ) {
+	const ext = getExtensionFromMimeType( file.type );
+
+	if ( ! ext ) {
+		throw new Error( 'Unsupported file type' );
+	}
+
+	const { buffer, width, height } = await vipsWorker.resizeImage(
+		await file.arrayBuffer(),
+		ext,
+		resize
+	);
+	const fileName = `${ getFileBasename(
+		file.name
+	) }-${ width }x${ height }.${ ext }`;
+
+	return blobToFile(
+		new Blob( [ buffer ], { type: file.type } ),
+		fileName,
+		file.type
+	);
+}
+
 export function optimizeImageItem(
 	id: QueueItemId,
 	requireApproval: boolean = false
@@ -982,10 +1047,6 @@ export function optimizeImageItem(
 							imageQuality / 100
 						);
 					} else {
-						const { compressImage: vipsCompressImage } =
-							await import(
-								/* webpackChunkName: 'vips' */ '@mexp/vips'
-							);
 						file = await vipsCompressImage(
 							item.file,
 							imageQuality / 100
@@ -1000,10 +1061,6 @@ export function optimizeImageItem(
 							imageQuality / 100
 						);
 					} else {
-						const { convertImageFormat: vipsConvertImageFormat } =
-							await import(
-								/* webpackChunkName: 'vips' */ '@mexp/vips'
-							);
 						file = await vipsConvertImageFormat(
 							item.file,
 							'image/webp',
@@ -1012,12 +1069,7 @@ export function optimizeImageItem(
 					}
 					break;
 				case 'avif':
-					const { convertImageFormat: vipsConvertImageFormat } =
-						await import(
-							/* webpackChunkName: 'vips' */ '@mexp/vips'
-						);
-
-					// No browsers support AVIF in HTMLCanvasElement.toBlob() yet.
+					// No browsers support AVIF in HTMLCanvasElement.toBlob() yet, so always use vips.
 					// See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
 					file = await vipsConvertImageFormat(
 						item.file,
@@ -1034,11 +1086,6 @@ export function optimizeImageItem(
 							imageQuality / 100
 						);
 					} else {
-						// eslint-disable-next-line @typescript-eslint/no-shadow
-						const { convertImageFormat: vipsConvertImageFormat } =
-							await import(
-								/* webpackChunkName: 'vips' */ '@mexp/vips'
-							);
 						file = await vipsConvertImageFormat(
 							item.file,
 							'image/jpeg',
@@ -1269,12 +1316,10 @@ export function resizeCropItem( id: QueueItemId ) {
 		dispatch.startTranscoding( id );
 
 		try {
-			const { resizeImage: vipsResizeImage } = await import(
-				/* webpackChunkName: 'vips' */ '@mexp/vips'
-			);
 			const file = await vipsResizeImage( item.file, item.resize );
 			dispatch.finishTranscoding( id, file );
 		} catch ( error ) {
+			console.log( error );
 			dispatch.cancelItem(
 				id,
 				error instanceof Error
