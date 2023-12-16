@@ -92,14 +92,6 @@ function register_assets(): void {
 		true
 	);
 
-	wp_register_script(
-		'media-experiments-vips',
-		'https://cdn.jsdelivr.net/npm/wasm-vips@0.0.7/lib/vips.min.js',
-		[],
-		'0.0.7',
-		true
-	);
-
 	$asset_file = dirname( __DIR__ ) . '/build/view-upload-request.asset.php';
 	$asset      = is_readable( $asset_file ) ? require $asset_file : [];
 
@@ -107,7 +99,6 @@ function register_assets(): void {
 	$asset['version']      = $asset['version'] ?? '';
 
 	$asset['dependencies'][] = 'media-experiments-libheif';
-	$asset['dependencies'][] = 'media-experiments-vips';
 
 	wp_register_script(
 		'media-experiments-view-upload-request',
@@ -161,7 +152,6 @@ function enqueue_block_editor_assets(): void {
 	$asset['version']      = $asset['version'] ?? '';
 
 	$asset['dependencies'][] = 'media-experiments-libheif';
-	$asset['dependencies'][] = 'media-experiments-vips';
 
 	wp_enqueue_script(
 		'media-experiments',
