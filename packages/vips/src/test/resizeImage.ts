@@ -36,7 +36,7 @@ describe( 'resizeImage', () => {
 			lastModified: 1234567891,
 			type: 'image/jpeg',
 		} );
-		const buffer = await jpegFile.arrayBuffer();
+		const buffer = new Uint8Array( await jpegFile.arrayBuffer() );
 
 		await resizeImage( jpegFile, {
 			width: 100,
@@ -45,6 +45,7 @@ describe( 'resizeImage', () => {
 
 		expect( mockThumbnailBuffer ).toHaveBeenCalledWith( buffer, 100, {
 			height: 100,
+			size: 'down',
 		} );
 		expect( mockCrop ).not.toHaveBeenCalled();
 	} );
@@ -54,14 +55,16 @@ describe( 'resizeImage', () => {
 			lastModified: 1234567891,
 			type: 'image/jpeg',
 		} );
-		const buffer = await jpegFile.arrayBuffer();
+		const buffer = new Uint8Array( await jpegFile.arrayBuffer() );
 
 		await resizeImage( jpegFile, {
 			width: 100,
 			height: 0,
 		} );
 
-		expect( mockThumbnailBuffer ).toHaveBeenCalledWith( buffer, 100, {} );
+		expect( mockThumbnailBuffer ).toHaveBeenCalledWith( buffer, 100, {
+			size: 'down',
+		} );
 		expect( mockCrop ).not.toHaveBeenCalled();
 	} );
 
@@ -70,7 +73,7 @@ describe( 'resizeImage', () => {
 			lastModified: 1234567891,
 			type: 'image/jpeg',
 		} );
-		const buffer = await jpegFile.arrayBuffer();
+		const buffer = new Uint8Array( await jpegFile.arrayBuffer() );
 
 		await resizeImage( jpegFile, {
 			width: 100,
@@ -81,6 +84,7 @@ describe( 'resizeImage', () => {
 		expect( mockThumbnailBuffer ).toHaveBeenCalledWith( buffer, 100, {
 			height: 100,
 			crop: 'centre',
+			size: 'down',
 		} );
 		expect( mockCrop ).not.toHaveBeenCalled();
 	} );
@@ -89,7 +93,7 @@ describe( 'resizeImage', () => {
 			lastModified: 1234567891,
 			type: 'image/jpeg',
 		} );
-		const buffer = await jpegFile.arrayBuffer();
+		const buffer = new Uint8Array( await jpegFile.arrayBuffer() );
 
 		await resizeImage( jpegFile, {
 			width: 100,
@@ -99,6 +103,7 @@ describe( 'resizeImage', () => {
 
 		expect( mockThumbnailBuffer ).toHaveBeenCalledWith( buffer, 100, {
 			crop: 'centre',
+			size: 'down',
 		} );
 		expect( mockCrop ).not.toHaveBeenCalled();
 	} );
