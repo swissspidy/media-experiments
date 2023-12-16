@@ -173,10 +173,15 @@ test.describe( 'Image block', () => {
 						} )
 				).not.toBeVisible();
 
-				await page.waitForFunction( () =>
-					window.wp.data
-						.select( 'media-experiments/upload' )
-						.isPendingApproval()
+				await page.waitForFunction(
+					() =>
+						window.wp.data
+							.select( 'media-experiments/upload' )
+							.isPendingApproval(),
+					undefined,
+					{
+						timeout: 20000, // Transcoding might take longer
+					}
 				);
 
 				const dialog = page.getByRole( 'dialog', {
