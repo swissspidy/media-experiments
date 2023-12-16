@@ -84,21 +84,11 @@ function set_up_cross_origin_isolation_editor( WP_Screen $screen ): void {
  * @return void
  */
 function register_assets(): void {
-	wp_register_script(
-		'media-experiments-libheif',
-		'https://cdn.jsdelivr.net/npm/libheif-js@1.17.1/libheif-wasm/libheif-bundle.js',
-		[],
-		'1.17.1',
-		true
-	);
-
 	$asset_file = dirname( __DIR__ ) . '/build/view-upload-request.asset.php';
 	$asset      = is_readable( $asset_file ) ? require $asset_file : [];
 
 	$asset['dependencies'] = $asset['dependencies'] ?? [];
 	$asset['version']      = $asset['version'] ?? '';
-
-	$asset['dependencies'][] = 'media-experiments-libheif';
 
 	wp_register_script(
 		'media-experiments-view-upload-request',
@@ -150,8 +140,6 @@ function enqueue_block_editor_assets(): void {
 
 	$asset['dependencies'] = $asset['dependencies'] ?? [];
 	$asset['version']      = $asset['version'] ?? '';
-
-	$asset['dependencies'][] = 'media-experiments-libheif';
 
 	wp_enqueue_script(
 		'media-experiments',

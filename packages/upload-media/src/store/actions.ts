@@ -10,6 +10,7 @@ import {
 	getMediaTypeFromMimeType,
 	blobToFile,
 	getExtensionFromMimeType,
+	bufferToBlob,
 } from '@mexp/media-utils';
 
 import { UploadError } from '../uploadError';
@@ -77,6 +78,11 @@ const createVipsWorker = createWorkerFactory(
 	() => import( /* webpackChunkName: 'vips' */ '@mexp/vips' )
 );
 const vipsWorker = createVipsWorker();
+
+const createHeifWorker = createWorkerFactory(
+	() => import( /* webpackChunkName: 'heif' */ '@mexp/heif' )
+);
+const heifWorker = createHeifWorker();
 
 // Safari does not currently support WebP in HTMLCanvasElement.toBlob()
 // See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
@@ -565,17 +571,7 @@ export function prepareItem( id: QueueItemId ) {
 			case 'image':
 				const fileBuffer = await file.arrayBuffer();
 
-				// TODO: Here we could convert all images to WebP/AVIF/xyz by default.
-				// Depends on the user settings of course.
-
-				// TODO: Enforce big image size threshold.
-				// Might need to get dimensions first?
-
-				const { isHeifImage } = await import(
-					/* webpackChunkName: 'heif' */ '@mexp/heif'
-				);
-
-				const isHeif = isHeifImage( fileBuffer );
+				const isHeif = await heifWorker.isHeifImage( fileBuffer );
 				const isGif = isAnimatedGif( fileBuffer );
 
 				if ( isHeif ) {
@@ -1000,6 +996,26 @@ async function vipsResizeImage( file: File, resize: ImageSizeCrop ) {
 	);
 }
 
+async function transcodeHeifImage(
+	file: File,
+	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/jpeg',
+	quality = 0.82
+) {
+	const { buffer, width, height } = await heifWorker.transcodeHeifImage(
+		await file.arrayBuffer()
+	);
+
+	const blob = await bufferToBlob( buffer, width, height, type, quality );
+
+	return blobToFile(
+		blob,
+		`${ getFileBasename( file.name ) }.${ getExtensionFromMimeType(
+			type
+		) }`,
+		type
+	);
+}
+
 export function optimizeImageItem(
 	id: QueueItemId,
 	requireApproval: boolean = false
@@ -1275,9 +1291,6 @@ export function convertHeifItem( id: QueueItemId ) {
 		dispatch.startTranscoding( id );
 
 		try {
-			const { transcodeHeifImage } = await import(
-				/* webpackChunkName: 'heif' */ '@mexp/heif'
-			);
 			const file = await transcodeHeifImage( item.file );
 			dispatch.finishTranscoding( id, file );
 		} catch ( error ) {

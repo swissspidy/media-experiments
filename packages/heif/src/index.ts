@@ -1,11 +1,5 @@
 import type { DecodeResult } from 'libheif-js';
-
-import {
-	blobToFile,
-	bufferToBlob,
-	getExtensionFromMimeType,
-	getFileBasename,
-} from '@mexp/media-utils';
+const libheif = require( 'libheif-js/wasm-bundle' );
 
 export function isHeifImage( buffer: ArrayBuffer ) {
 	const fourCC = String.fromCharCode(
@@ -54,60 +48,28 @@ async function decodeImage( image: DecodeResult ) {
 	} );
 }
 
-export async function transcodeHeifImage(
-	file: File,
-	type?: 'image/jpeg' | 'image/png' | 'image/webp',
-	quality?: number
-) {
-	const inputBuffer = await file.arrayBuffer();
-
-	if ( ! isHeifImage( inputBuffer ) ) {
-		throw new TypeError( 'Not a valid HEIF image 1' );
+export async function transcodeHeifImage( buffer: ArrayBuffer ) {
+	if ( ! isHeifImage( buffer ) ) {
+		throw new TypeError( 'Not a valid HEIF image' );
 	}
 
-	const decoder = new ( window.libheif().HeifDecoder )();
+	const decoder = new libheif.HeifDecoder();
 
-	// Image can have multiple frames, thus it's an array.
-	// For now, only decode the first frame.
-
-	const imagesArr = decoder.decode( new Uint8Array( inputBuffer ) );
+	const imagesArr = decoder.decode( new Uint8Array( buffer ) );
 
 	if ( ! imagesArr.length ) {
 		throw new TypeError( 'Not a valid HEIF image' );
 	}
 
-	const resultBuffer = await decodeImage( imagesArr[ 0 ] );
-	const dimensions = getDimensions( imagesArr[ 0 ] );
+	// Image can have multiple frames, thus it's an array.
+	// For now, only decode the first frame.
+	const image = imagesArr[ 0 ];
+	const outBuffer = await decodeImage( image );
+	const { width, height } = getDimensions( image );
 
-	let blob = await bufferToBlob(
-		resultBuffer,
-		dimensions.width,
-		dimensions.height,
-		type,
-		quality
-	);
-
-	// Safari does not support WebP and falls back to PNG.
-	// Use JPEG instead of PNG in that case.
-	if ( type === 'image/webp' && blob.type !== 'image/webp' ) {
-		blob = await bufferToBlob(
-			resultBuffer,
-			dimensions.width,
-			dimensions.height,
-			'image/jpeg',
-			quality
-		);
-	}
-
-	if ( ! blob ) {
-		throw new Error( 'HEIF processing error' );
-	}
-
-	return blobToFile(
-		blob,
-		`${ getFileBasename( file.name ) }.${ getExtensionFromMimeType(
-			blob.type
-		) }`,
-		blob.type
-	);
+	return {
+		buffer: outBuffer,
+		width,
+		height,
+	};
 }
