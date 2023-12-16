@@ -227,6 +227,98 @@ test.describe( 'Image block', () => {
 		}
 	} );
 
+	test.describe( 'optimizes a file on upload', () => {
+		for ( const {
+			imageFormat,
+			imageLibrary,
+			expectedMimeType,
+		} of scenarios ) {
+			test( `uses ${ imageFormat }@${ imageLibrary } to convert to ${ expectedMimeType }`, async ( {
+				admin,
+				page,
+				editor,
+				mediaUtils,
+				browserName,
+			} ) => {
+				test.skip(
+					browserName === 'webkit' &&
+						( imageLibrary === 'vips' || imageFormat === 'avif' ),
+					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
+				);
+
+				test.skip(
+					browserName === 'webkit' && imageFormat === 'webp',
+					'WebKit does not currently support Canvas.toBlob with WebP'
+				);
+
+				// TODO: Investigate.
+				test.skip(
+					browserName === 'webkit' && imageLibrary === 'browser',
+					'Works locally but is flaky on CI'
+				);
+
+				await admin.createNewPost();
+
+				await page.evaluate(
+					( [ fmt, lib ] ) => {
+						window.wp.data
+							.dispatch( 'core/preferences' )
+							.set(
+								'media-experiments/preferences',
+								'imageFormat',
+								fmt
+							);
+						window.wp.data
+							.dispatch( 'core/preferences' )
+							.set(
+								'media-experiments/preferences',
+								'imageLibrary',
+								lib
+							);
+					},
+					[ imageFormat, imageLibrary ]
+				);
+
+				await editor.insertBlock( { name: 'core/image' } );
+
+				const imageBlock = editor.canvas.locator(
+					'role=document[name="Block: Image"i]'
+				);
+				await expect( imageBlock ).toBeVisible();
+
+				await mediaUtils.upload(
+					imageBlock.locator( 'data-testid=form-file-upload-input' )
+				);
+
+				await page.waitForFunction(
+					() =>
+						window.wp.data
+							.select( 'media-experiments/upload' )
+							.getItems().length === 0
+				);
+
+				const settingsPanel = page
+					.getByRole( 'region', {
+						name: 'Editor settings',
+					} )
+					.getByRole( 'tabpanel', {
+						name: 'Settings',
+					} );
+
+				await expect( settingsPanel ).toHaveText(
+					new RegExp( `Mime type: ${ expectedMimeType }` )
+				);
+				await expect(
+					settingsPanel.getByLabel( '#696969' )
+				).toBeVisible();
+				// No exact comparison as there can be 1-2 char differences between browsers.
+				await expect(
+					page.locator( 'css=[data-blurhash]' )
+				).toHaveAttribute( 'data-blurhash', /xuj\[M\{WB00ay~qayM\{/ );
+			} );
+		}
+	} );
+
 	test( 'uploads and converts an HEIC image', async ( {
 		browserName,
 		admin,
