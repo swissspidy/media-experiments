@@ -1319,7 +1319,6 @@ export function resizeCropItem( id: QueueItemId ) {
 			const file = await vipsResizeImage( item.file, item.resize );
 			dispatch.finishTranscoding( id, file );
 		} catch ( error ) {
-			console.log( error );
 			dispatch.cancelItem(
 				id,
 				error instanceof Error

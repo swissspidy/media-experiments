@@ -1,5 +1,3 @@
-// const Vips = require( 'wasm-vips' );
-// import type Vips from 'wasm-vips';
 const Vips = require( 'wasm-vips' );
 
 import { getExtensionFromMimeType } from '@mexp/media-utils';
@@ -20,31 +18,25 @@ async function getVips() {
 		return vipsInstance;
 	}
 
-	console.log( globalThis.importScripts );
-
-	globalThis.importScripts(
-		'https://cdn.jsdelivr.net/npm/wasm-vips@0.0.7/lib/vips.js'
+	const workerBlobUrl = URL.createObjectURL(
+		await (
+			await fetch(
+				`https://cdn.jsdelivr.net/npm/wasm-vips@0.0.7/lib/vips.worker.js`
+			)
+		).blob()
 	);
 
-	console.log( globalThis.Vips );
-
 	vipsInstance = await Vips( {
-		// locateFile: ( fileName: string ) =>
-		// 	`https://cdn.jsdelivr.net/npm/wasm-vips@0.0.7/lib/${ fileName }`,
-		locateFile: ( fileName, scriptDirectory ) => {
-			console.log('locateFile', fileName, scriptDirectory);
+		locateFile: ( fileName: string, scriptDirectory: string ) => {
+			const url = scriptDirectory + fileName;
+			if ( url.endsWith( '.worker.js' ) ) {
+				return workerBlobUrl;
+			}
 			return `https://cdn.jsdelivr.net/npm/wasm-vips@0.0.7/lib/${ fileName }`;
-			return scriptDirectory + fileName;
 		},
 		mainScriptUrlOrBlob:
-			'https://cdn.jsdelivr.net/npm/wasm-vips@0.0.7/lib/vips-es6.js',
-		// mainScriptUrlOrBlob: 'https://cdn.jsdelivr.net/npm/wasm-vips@0.0.7/lib/vips.js',
-		// https://github.com/kleisauke/wasm-vips/issues/12#issuecomment-1067001784
-		// https://github.com/kleisauke/wasm-vips/blob/789363e5b54d677b109bcdaf8353d283d81a8ee3/src/locatefile-cors-pre.js#L4
-		// @ts-ignore
+			'https://cdn.jsdelivr.net/npm/wasm-vips@0.0.7/lib/vips.js',
 		workaroundCors: true,
-		// locateFile: ( file ) =>
-		// 	`https://cdn.jsdelivr.net/npm/wasm-vips@0.0.7/lib/${ file }`,
 		preRun: ( module: EmscriptenModule ) => {
 			// https://github.com/kleisauke/wasm-vips/issues/13#issuecomment-1073246828
 			module.setAutoDeleteLater( true );
@@ -72,11 +64,13 @@ export async function convertImageFormat(
 	}
 
 	const vips = await getVips();
-	const image = vips.Image.newFromBuffer( new Uint8Array( buffer ) );
+	const image = vips.Image.newFromBuffer( buffer );
 	const outBuffer = image.writeToBuffer( `.${ ext }`, { Q: quality * 100 } );
+	const result = outBuffer.buffer;
+
 	cleanup?.();
 
-	return outBuffer.buffer;
+	return result;
 }
 
 function isFileTypeSupported(
@@ -164,7 +158,7 @@ export async function resizeImage(
 	const outBuffer = image.writeToBuffer( `.${ ext }` );
 
 	const result = {
-		buffer: outBuffer,
+		buffer: outBuffer.buffer,
 		width: image.width,
 		height: image.height,
 	};
