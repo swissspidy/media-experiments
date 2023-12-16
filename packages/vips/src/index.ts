@@ -36,7 +36,9 @@ export async function convertImageFormat(
 ) {
 	const ext = getExtensionFromMimeType( type );
 	const vips = await getVips();
-	const image = vips.Image.newFromBuffer( await file.arrayBuffer() );
+	const image = vips.Image.newFromBuffer(
+		new Uint8Array( await file.arrayBuffer() )
+	);
 	const outBuffer = image.writeToBuffer( `.${ ext }`, { Q: quality * 100 } );
 	cleanup?.();
 
@@ -89,12 +91,14 @@ export async function resizeImage( file: File, resize: ImageSizeCrop ) {
 
 	if ( ! resize.crop || true === resize.crop ) {
 		image = vips.Image.thumbnailBuffer(
-			await file.arrayBuffer(),
+			new Uint8Array( await file.arrayBuffer() ),
 			resize.width,
 			options
 		);
 	} else {
-		image = vips.Image.newFromBuffer( await file.arrayBuffer() );
+		image = vips.Image.newFromBuffer(
+			new Uint8Array( await file.arrayBuffer() )
+		);
 
 		const { width, height } = image;
 
