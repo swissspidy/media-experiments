@@ -6,11 +6,11 @@ import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as preferencesStore } from '@wordpress/preferences';
 
 import {
+	blobToFile,
+	bufferToBlob,
+	getExtensionFromMimeType,
 	getFileBasename,
 	getMediaTypeFromMimeType,
-	blobToFile,
-	getExtensionFromMimeType,
-	bufferToBlob,
 } from '@mexp/media-utils';
 
 import { UploadError } from '../uploadError';
@@ -558,34 +558,18 @@ export function prepareItem( id: QueueItemId ) {
 			return;
 		}
 
-		const mediaType = getMediaTypeFromMimeType( file.type );
 		// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 		const canTranscode = canTranscodeFile( file );
 
-		// eslint-disable-next-line @wordpress/no-unused-vars-before-return
-		const imageQuality = registry
-			.select( preferencesStore )
-			.get( PREFERENCES_NAME, 'imageQuality' );
+		const mediaType = getMediaTypeFromMimeType( file.type );
 
 		switch ( mediaType ) {
 			case 'image':
+				const operations: TranscodingType[] = [];
+
 				const fileBuffer = await file.arrayBuffer();
 
-				const isHeif = await heifWorker.isHeifImage( fileBuffer );
 				const isGif = isAnimatedGif( fileBuffer );
-
-				if ( isHeif ) {
-					// TODO: Do we need a placeholder for a HEIF image?
-					// Maybe a base64 encoded 1x1 gray PNG?
-					// Use preloadImage() and getImageDimensions() so see if browser can render it.
-					// Image/Video block already have a placeholder state.
-					dispatch.prepareForTranscoding( id, [
-						TranscodingType.Heif,
-						TranscodingType.ResizeCrop,
-						TranscodingType.Image,
-					] );
-					return;
-				}
 
 				if ( isGif && canTranscode ) {
 					dispatch.prepareForTranscoding( id, [
@@ -594,10 +578,26 @@ export function prepareItem( id: QueueItemId ) {
 					return;
 				}
 
-				dispatch.prepareForTranscoding( id, [
-					TranscodingType.ResizeCrop,
-					TranscodingType.Image,
-				] );
+				const isHeif = await heifWorker.isHeifImage( fileBuffer );
+
+				// TODO: Do we need a placeholder for a HEIF image?
+				// Maybe a base64 encoded 1x1 gray PNG?
+				// Use preloadImage() and getImageDimensions() so see if browser can render it.
+				// Image/Video block already have a placeholder state.
+				if ( isHeif ) {
+					operations.push( TranscodingType.Heif );
+					operations.push( TranscodingType.ResizeCrop );
+				}
+
+				const optimizeOnUpload: boolean = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'optimizeOnUpload' );
+
+				if ( optimizeOnUpload ) {
+					operations.push( TranscodingType.Image );
+				}
+
+				dispatch.prepareForTranscoding( id, operations );
 				return;
 
 			case 'video':
@@ -609,8 +609,7 @@ export function prepareItem( id: QueueItemId ) {
 					// Note: Causes another state update.
 					const poster = await getPosterFromVideo(
 						createBlobURL( file ),
-						`${ getFileBasename( item.file.name ) }-poster`,
-						imageQuality
+						`${ getFileBasename( item.file.name ) }-poster`
 					);
 					dispatch.addPoster( id, poster );
 				} catch {
@@ -649,8 +648,7 @@ export function prepareItem( id: QueueItemId ) {
 				const pdfThumbnail = await getImageFromPdf(
 					createBlobURL( file ),
 					// Same suffix as WP core uses, see https://github.com/WordPress/wordpress-develop/blob/8a5daa6b446e8c70ba22d64820f6963f18d36e92/src/wp-admin/includes/image.php#L609-L634
-					`${ getFileBasename( item.file.name ) }-pdf`,
-					imageQuality
+					`${ getFileBasename( item.file.name ) }-pdf`
 				);
 				dispatch.addPoster( id, pdfThumbnail );
 		}
