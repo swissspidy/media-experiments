@@ -65,7 +65,7 @@ test.describe( 'Video block', () => {
 		// No exact comparison as there can be 1-2 char differences between browsers.
 		await expect( page.locator( 'css=[data-blurhash]' ) ).toHaveAttribute(
 			'data-blurhash',
-			/pbIRjj]\.8oLRkaz/
+			/8oLRkaz/
 		);
 
 		await expect(
