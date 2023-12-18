@@ -89,5 +89,5 @@ jobs:
               uses: actions/upload-artifact@v3
               if: always()
               with:
-                  name: failures-artifacts
+                  name: failures-artifacts-${{ matrix.wp }}
                   path: artifacts
