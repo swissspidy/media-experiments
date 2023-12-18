@@ -222,27 +222,7 @@ function enqueue_block_assets() {
  * @phpstan-return array<string,string|int>
  */
 function get_all_image_sizes(): array {
-	$sizes = wp_get_additional_image_sizes();
-
-	$sizes['thumbnail'] = [
-		'width'  => get_option( 'thumbnail_size_w' ),
-		'height' => get_option( 'thumbnail_size_h' ),
-	];
-
-	$sizes['medium'] = [
-		'width'  => get_option( 'medium_size_w' ),
-		'height' => get_option( 'medium_size_h' ),
-	];
-
-	$sizes['medium_large'] = [
-		'width'  => get_option( 'medium_large_size_w' ),
-		'height' => get_option( 'medium_large_size_h' ),
-	];
-
-	$sizes['large'] = [
-		'width'  => get_option( 'large_size_w' ),
-		'height' => get_option( 'large_size_h' ),
-	];
+	$sizes = wp_get_registered_image_subsizes();
 
 	foreach ( $sizes as $name => &$size ) {
 		$size['height'] = (int) $size['height'];
