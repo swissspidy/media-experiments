@@ -170,7 +170,7 @@ export function addItem( {
 		dispatch: ActionCreators;
 		registry: WPDataRegistry;
 	} ) => {
-		const imageSizeThreshold = registry
+		const imageSizeThreshold: number = registry
 			.select( preferencesStore )
 			.get( PREFERENCES_NAME, 'bigImageSizeThreshold' );
 
@@ -180,6 +180,10 @@ export function addItem( {
 					height: 0,
 			  }
 			: undefined;
+
+		const clientSideThumbnails: boolean = registry
+			.select( preferencesStore )
+			.get( PREFERENCES_NAME, 'clientSideThumbnails' );
 
 		dispatch< AddAction >( {
 			type: Type.Add,
@@ -196,8 +200,7 @@ export function addItem( {
 					url: createBlobURL( file ),
 				},
 				additionalData: {
-					// TODO: Make configurable via preferences?
-					generate_sub_sizes: false,
+					generate_sub_sizes: ! clientSideThumbnails,
 					...additionalData,
 				},
 				onChange,
@@ -464,7 +467,13 @@ export function optimizeExistingItem( {
 	dominantColor,
 	generatedPosterId,
 }: OptimizexistingItemArgs ) {
-	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
+	return async ( {
+		dispatch,
+		registry,
+	}: {
+		dispatch: ActionCreators;
+		registry: WPDataRegistry;
+	} ) => {
 		const fileName = getFileNameFromUrl( url );
 		const baseName = getFileBasename( fileName );
 		const sourceFile = await fetchRemoteFile( url, fileName );
@@ -473,6 +482,10 @@ export function optimizeExistingItem( {
 			sourceFile.name.replace( baseName, `${ baseName }-optimized` ),
 			{ type: sourceFile.type }
 		);
+
+		const clientSideThumbnails: boolean = registry
+			.select( preferencesStore )
+			.get( PREFERENCES_NAME, 'clientSideThumbnails' );
 
 		// TODO: Same considerations apply as for muteExistingVideo.
 
@@ -489,7 +502,7 @@ export function optimizeExistingItem( {
 					poster,
 				},
 				additionalData: {
-					generate_sub_sizes: false,
+					generate_sub_sizes: ! clientSideThumbnails,
 					...additionalData,
 				},
 				onChange,
@@ -711,40 +724,54 @@ export function finishUploading( id: QueueItemId, attachment: Attachment ) {
 	return async ( {
 		select,
 		dispatch,
+		registry,
 	}: {
 		select: Selectors;
 		dispatch: ActionCreators;
+		registry: WPDataRegistry;
 	} ) => {
 		const item = select.getItem( id );
-		if ( item ) {
-			if (
-				'missingImageSizes' in attachment &&
-				attachment.missingImageSizes
-			) {
-				const file = attachment.fileName
-					? new File( [ item.sourceFile ], attachment.fileName, {
-							type: item.sourceFile.type,
-					  } )
-					: item.sourceFile;
-				const batchId = uuidv4();
-				for ( const name of attachment.missingImageSizes ) {
-					const imageSize = select.getImageSize( name );
-					if ( imageSize ) {
-						dispatch.addSideloadItem( {
-							file,
-							batchId,
-							additionalData: {
-								// Sideloading does not use the parent post ID but the
-								// attachment ID as the image sizes need to be added to it.
-								post: attachment.id,
-								// Reference the same upload_request if needed.
-								upload_request:
-									item.additionalData.upload_request,
-							},
-							resize: imageSize,
-							transcode: [ TranscodingType.ResizeCrop ],
-						} );
-					}
+
+		if ( ! item ) {
+			dispatch< UploadFinishAction >( {
+				type: Type.UploadFinish,
+				id,
+				attachment,
+			} );
+			return;
+		}
+
+		const clientSideThumbnails: boolean = registry
+			.select( preferencesStore )
+			.get( PREFERENCES_NAME, 'clientSideThumbnails' );
+
+		if (
+			'missingImageSizes' in attachment &&
+			attachment.missingImageSizes &&
+			clientSideThumbnails
+		) {
+			const file = attachment.fileName
+				? new File( [ item.sourceFile ], attachment.fileName, {
+						type: item.sourceFile.type,
+				  } )
+				: item.sourceFile;
+			const batchId = uuidv4();
+			for ( const name of attachment.missingImageSizes ) {
+				const imageSize = select.getImageSize( name );
+				if ( imageSize ) {
+					dispatch.addSideloadItem( {
+						file,
+						batchId,
+						additionalData: {
+							// Sideloading does not use the parent post ID but the
+							// attachment ID as the image sizes need to be added to it.
+							post: attachment.id,
+							// Reference the same upload_request if needed.
+							upload_request: item.additionalData.upload_request,
+						},
+						resize: imageSize,
+						transcode: [ TranscodingType.ResizeCrop ],
+					} );
 				}
 			}
 		}
