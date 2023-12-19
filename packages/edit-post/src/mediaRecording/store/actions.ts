@@ -70,8 +70,12 @@ export function setVideoEffect( videoEffect: VideoEffect ) {
 }
 
 export function toggleBlurEffect() {
-	return {
-		type: Type.ToggleBlurVideoEffect,
+	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
+		dispatch( {
+			type: Type.ToggleBlurVideoEffect,
+		} );
+
+		dispatch.invalidateResolutionForStoreSelector( 'getMediaStream' );
 	};
 }
 
