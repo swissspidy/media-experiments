@@ -69,6 +69,7 @@ export function ImageControls( props: ImageControlsProps ) {
 				clientId={ props.clientId }
 				url={ props.attributes.url }
 				onInsert={ onInsertRecording }
+				recordingType="image"
 			/>
 			<UploadRequestControls
 				url={ props.attributes.url }

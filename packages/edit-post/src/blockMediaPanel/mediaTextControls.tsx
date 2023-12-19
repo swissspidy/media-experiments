@@ -42,6 +42,7 @@ export function MediaTextControls( props: MediaTextControlsProps ) {
 				clientId={ props.clientId }
 				url={ props.attributes.mediaUrl }
 				onInsert={ onInsertRecording }
+				recordingType="image"
 			/>
 			<OptimizeMedia
 				id={ props.attributes.mediaId }

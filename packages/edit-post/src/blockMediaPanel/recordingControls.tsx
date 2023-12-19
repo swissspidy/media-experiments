@@ -263,12 +263,14 @@ interface RecordingControlsProps {
 	url?: string;
 	clientId: string;
 	onInsert: ( url?: string ) => void;
+	recordingType: string;
 }
 
 export function RecordingControls( {
 	url,
 	clientId,
 	onInsert,
+	recordingType,
 }: RecordingControlsProps ) {
 	const { baseControlProps, controlProps } = useBaseControlProps( {} );
 
@@ -284,7 +286,7 @@ export function RecordingControls( {
 		if ( isInRecordingMode ) {
 			void leaveRecordingMode();
 		} else {
-			void enterRecordingMode( clientId );
+			void enterRecordingMode( clientId, recordingType );
 		}
 	};
 

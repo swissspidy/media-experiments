@@ -3,10 +3,8 @@
 // See https://github.com/GoogleChromeLabs/imagecapture-polyfill
 import { ImageCapture } from 'image-capture';
 
-import { store as blockEditorStore } from '@wordpress/block-editor';
 import { createBlobURL, revokeBlobURL } from '@wordpress/blob';
 import { dateI18n } from '@wordpress/date';
-import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 
 import {
 	getExtensionFromMimeType,
@@ -14,7 +12,6 @@ import {
 	getCanvasBlob,
 } from '@mexp/media-utils';
 
-import { getMediaTypeFromBlockName } from '../../utils';
 import {
 	COUNTDOWN_TIME_IN_SECONDS,
 	MAX_RECORDING_DURATION_IN_SECONDS,
@@ -101,23 +98,16 @@ export function resetVideoInput() {
 	};
 }
 
-export function enterRecordingMode( clientId: string ) {
-	return async ( {
-		registry,
-		dispatch,
-	}: {
-		dispatch: ActionCreators;
-		registry: WPDataRegistry;
-	} ) => {
-		const { getBlockName } = registry.select( blockEditorStore );
-
-		const blockName = getBlockName( clientId );
-		const recordingType = getMediaTypeFromBlockName( blockName );
-
+// TODO(#230): Allow passing an array for recordingType.
+export function enterRecordingMode(
+	clientId: string,
+	recordingType: string = 'video'
+) {
+	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
 		dispatch( {
 			type: Type.EnterRecordingMode,
 			clientId,
-			recordingType: recordingType || 'video',
+			recordingType,
 		} );
 
 		dispatch.invalidateResolutionForStoreSelector( 'getMediaStream' );

@@ -41,6 +41,7 @@ export function AudioControls( props: AudioControlsProps ) {
 				clientId={ props.clientId }
 				url={ props.attributes.url }
 				onInsert={ onInsertRecording }
+				recordingType="audio"
 			/>
 			{ ! props.attributes.id ? (
 				<ImportMedia
