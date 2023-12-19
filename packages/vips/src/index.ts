@@ -1,4 +1,5 @@
 const Vips = require( 'wasm-vips' );
+import type VipsInstance from 'wasm-vips';
 
 import { getExtensionFromMimeType } from '@mexp/media-utils';
 
@@ -11,9 +12,9 @@ type EmscriptenModule = {
 
 let cleanup: () => void;
 
-let vipsInstance: typeof Vips | undefined;
+let vipsInstance: typeof VipsInstance;
 
-async function getVips() {
+async function getVips(): Promise< typeof VipsInstance > {
 	if ( vipsInstance ) {
 		return vipsInstance;
 	}
@@ -163,4 +164,20 @@ export async function resizeImage(
 	cleanup?.();
 
 	return result;
+}
+
+/**
+ * Determines whether an image has an alpha channel.
+ *
+ * @param buffer Original file object.
+ * @return Whether the image has an alpha channel.
+ */
+export async function hasTransparency( buffer: ArrayBuffer ) {
+	const vips = await getVips();
+	const image = vips.Image.newFromBuffer( buffer );
+	const hasAlpha = image.hasAlpha();
+
+	cleanup?.();
+
+	return hasAlpha;
 }
