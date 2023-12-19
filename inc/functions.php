@@ -63,6 +63,25 @@ function filter_ext_types( array $ext2type ): array {
 }
 
 /**
+ * Filters whether the current image is displayable in the browser.
+ *
+ * @param bool   $result Whether the image can be displayed. Default true.
+ * @param string $path   Path to the image.
+ * @return bool Whether the image can be displayed.
+ */
+function filter_file_is_displayable_image( bool $result, string $path ): bool {
+	if ( $result ) {
+		return true;
+	}
+
+	// All other types are already handled by file_is_displayable_image().
+	$displayable_image_types = [ IMAGETYPE_AVIF ];
+
+	$info = wp_getimagesize( $path );
+	return is_array( $info ) && in_array( $info[2], $displayable_image_types, true );
+}
+
+/**
  * Sets up cross-origin isolation in the block editor.
  *
  * @param WP_Screen $screen Current WP_Screen object.

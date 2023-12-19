@@ -38,6 +38,7 @@ add_filter( 'wp_content_img_tag', __NAMESPACE__ . '\filter_wp_content_img_tag_ad
 add_filter( 'getimagesize_mimes_to_exts', __NAMESPACE__ . '\filter_mimes_to_exts' );
 add_filter( 'mime_types', __NAMESPACE__ . '\filter_mime_types' );
 add_filter( 'ext2type', __NAMESPACE__ . '\filter_ext_types' );
+add_filter( 'file_is_displayable_image', __NAMESPACE__ . '\filter_file_is_displayable_image', 10, 2 );
 
 // Upload requests, see https://github.com/swissspidy/media-experiments/issues/246.
 
