@@ -1,16 +1,8 @@
 import { createPortal, useLayoutEffect, useRef } from '@wordpress/element';
-import {
-	dispatch as globalDispatch,
-	select as globalSelect,
-	subscribe,
-	useSelect,
-} from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 import { registerPlugin } from '@wordpress/plugins';
 import { store as coreStore } from '@wordpress/core-data';
 import { store as editorStore } from '@wordpress/editor';
-import { store as editPostStore } from '@wordpress/edit-post';
-
-import { store as uploadStore } from '@mexp/upload-media';
 
 import { UploadStatusIndicator } from './indicator';
 
@@ -65,30 +57,3 @@ function WrappedUploadStatusIndicator() {
 registerPlugin( 'media-experiments-upload-status', {
 	render: WrappedUploadStatusIndicator,
 } );
-
-// See https://github.com/WordPress/gutenberg/pull/41120#issuecomment-1246914529
-// TODO: What happens to image block when deleting it during uploading?
-// TODO: Disable "Save Draft" as well.
-// TODO: Add unload handler.
-subscribe( () => {
-	const isUploading = globalSelect( uploadStore ).isUploading();
-
-	// ATTENTION: Requires a patched Gutenberg version.
-	void globalDispatch( editPostStore ).setIsUploading?.( isUploading );
-
-	if ( isUploading ) {
-		void globalDispatch( editorStore ).lockPostSaving(
-			'media-experiments'
-		);
-		void globalDispatch( editorStore ).lockPostAutosaving(
-			'media-experiments'
-		);
-	} else {
-		void globalDispatch( editorStore ).unlockPostSaving(
-			'media-experiments'
-		);
-		void globalDispatch( editorStore ).unlockPostAutosaving(
-			'media-experiments'
-		);
-	}
-}, uploadStore );
