@@ -74,6 +74,11 @@ function filter_file_is_displayable_image( bool $result, string $path ): bool {
 		return true;
 	}
 
+	// IMAGETYPE_AVIF constant is only defined in PHP 8.x or later.
+	if ( ! defined( 'IMAGETYPE_AVIF' ) ) {
+		define( 'IMAGETYPE_AVIF', 19 );
+	}
+
 	// All other types are already handled by file_is_displayable_image().
 	$displayable_image_types = [ IMAGETYPE_AVIF ];
 

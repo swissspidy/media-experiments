@@ -36,15 +36,5 @@ require_once __DIR__ . '/inc/functions.php';
  */
 require_once __DIR__ . '/inc/default-filters.php';
 
-// IMAGETYPE_AVIF constant is only defined in PHP 8.x or later.
-if ( ! defined( 'IMAGETYPE_AVIF' ) ) {
-	define( 'IMAGETYPE_AVIF', 19 );
-}
-
-// IMG_AVIF constant is only defined in PHP 8.x or later.
-if ( ! defined( 'IMG_AVIF' ) ) {
-	define( 'IMG_AVIF', IMAGETYPE_AVIF );
-}
-
 register_activation_hook( __FILE__, 'MediaExperiments\\activate_plugin' );
 register_deactivation_hook( __FILE__, 'MediaExperiments\\deactivate_plugin' );
