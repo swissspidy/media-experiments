@@ -21,40 +21,44 @@ describe( 'actions', () => {
 	} );
 
 	describe( 'setVideoInput', () => {
-		it( `should return the ${ Type.ChangeVideoInput } action`, async () => {
-			const result = await registry
-				.dispatch( recordingStore )
-				.setVideoInput( 'foobar' );
+		it( 'changes the video input', async () => {
+			await registry.dispatch( recordingStore ).setVideoInput( 'foobar' );
 
-			expect( result ).toStrictEqual( {
-				type: Type.ChangeVideoInput,
-				deviceId: 'foobar',
-			} );
+			expect(
+				registry.select( recordingStore ).getVideoInput()
+			).toStrictEqual( 'foobar' );
 		} );
 	} );
 
 	describe( 'setAudioInput', () => {
-		it( `should return the ${ Type.ChangeAudioInput } action`, async () => {
-			const result = await registry
-				.dispatch( recordingStore )
-				.setAudioInput( 'foobar' );
+		it( 'changes the audio input', async () => {
+			await registry.dispatch( recordingStore ).setAudioInput( 'foobar' );
 
-			expect( result ).toStrictEqual( {
-				type: Type.ChangeAudioInput,
-				deviceId: 'foobar',
-			} );
+			expect(
+				registry.select( recordingStore ).getAudioInput()
+			).toStrictEqual( 'foobar' );
 		} );
 	} );
 
 	describe( 'toggleBlurEffect', () => {
-		it( `should return the ${ Type.ToggleBlurVideoEffect } action`, async () => {
-			const result = await registry
-				.dispatch( recordingStore )
-				.toggleBlurEffect();
+		it( 'toggles the blur effect', async () => {
+			await registry.dispatch( recordingStore ).toggleBlurEffect();
 
-			expect( result ).toStrictEqual( {
-				type: Type.ToggleBlurVideoEffect,
-			} );
+			expect(
+				registry.select( recordingStore ).getVideoEffect()
+			).toStrictEqual( 'blur' );
+
+			await registry.dispatch( recordingStore ).toggleBlurEffect();
+
+			expect(
+				registry.select( recordingStore ).getVideoEffect()
+			).toStrictEqual( 'none' );
+
+			await registry.dispatch( recordingStore ).toggleBlurEffect();
+
+			expect(
+				registry.select( recordingStore ).getVideoEffect()
+			).toStrictEqual( 'blur' );
 		} );
 	} );
 
