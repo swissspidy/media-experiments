@@ -278,8 +278,9 @@ export function RecordingControls( {
 		useDispatch( recordingStore );
 
 	const isInRecordingMode = useSelect(
-		( select ) => select( recordingStore ).isInRecordingMode(),
-		[]
+		( select ) =>
+			select( recordingStore ).isBlockInRecordingMode( clientId ),
+		[ clientId ]
 	);
 
 	const onClick = () => {
