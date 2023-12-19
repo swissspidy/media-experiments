@@ -50,7 +50,7 @@ jobs:
         name: Bundle size check
         runs-on: ubuntu-latest
         permissions:
-            issues: 'write'
+            pull-requests: write
         steps:
             - name: Checkout
               uses: actions/checkout@v4
