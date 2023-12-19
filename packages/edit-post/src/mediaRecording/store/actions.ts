@@ -37,16 +37,24 @@ type ActionCreators = {
 };
 
 export function setVideoInput( deviceId: string ) {
-	return {
-		type: Type.ChangeVideoInput,
-		deviceId,
+	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
+		dispatch( {
+			type: Type.ChangeVideoInput,
+			deviceId,
+		} );
+
+		dispatch.invalidateResolutionForStoreSelector( 'getMediaStream' );
 	};
 }
 
 export function setAudioInput( deviceId: string ) {
-	return {
-		type: Type.ChangeAudioInput,
-		deviceId,
+	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
+		dispatch( {
+			type: Type.ChangeAudioInput,
+			deviceId,
+		} );
+
+		dispatch.invalidateResolutionForStoreSelector( 'getMediaStream' );
 	};
 }
 
