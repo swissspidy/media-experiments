@@ -871,7 +871,7 @@ function filter_wp_content_img_tag_add_placeholders( string $filtered_image, str
 	}
 
 	// BlurHash conversion is completely untested. Probably contains faulty logic.
-	if ( is_string( $blurhash ) ) {
+	if ( is_string( $blurhash ) && ! empty( $blurhash ) ) {
 		$pixels = BlurHash::decode( $blurhash, 4, 3 );
 
 		$gradients = [];
