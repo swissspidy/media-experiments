@@ -122,7 +122,7 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 					);
 					const mediaSourceTerms: MediaSourceTerm[] | undefined =
 						[ 'video', 'image' ].includes( mediaType ) &&
-						! item.mediaSourceTerms
+						! item.mediaSourceTerms?.length
 							? [ 'media-optimization' ]
 							: item.mediaSourceTerms;
 
