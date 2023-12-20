@@ -44,12 +44,25 @@ registerPlugin( 'media-experiments-preferences', {
 const defaultPreferences: MediaPreferences = {
 	// General.
 	requireApproval: true,
-	bigImageSizeThreshold: window.mediaExperiments.bigImageSizeThreshold,
-	clientSideThumbnails: true,
 	optimizeOnUpload: true,
+	thumbnailGeneration: 'smart',
 	imageLibrary: 'vips',
-	imageFormat: 'jpeg',
-	imageQuality: 82, // 82 for jpeg, 86 for webp.
+	bigImageSizeThreshold: window.mediaExperiments.bigImageSizeThreshold,
+	// Formats.
+	default_outputFormat: 'jpeg',
+	jpeg_outputFormat: 'jpeg',
+	jpeg_quality: 82,
+	png_outputFormat: 'webp',
+	png_quality: 82,
+	webp_outputFormat: 'webp',
+	webp_quality: 86,
+	avif_outputFormat: 'avif',
+	avif_quality: 80,
+	heic_outputFormat: 'avif',
+	heic_quality: 80,
+	gif_outputFormat: 'webp',
+	gif_quality: 80,
+	gif_convert: true,
 	// Media recording.
 	videoInput: undefined,
 	audioInput: undefined,

@@ -13,6 +13,7 @@ import type {
 	ImageFormat,
 	ImageLibrary,
 	ImageSizeCrop,
+	ThumbnailGeneration,
 } from './store/types';
 import { UploadError } from './uploadError';
 
@@ -28,6 +29,7 @@ export type {
 	ImageFormat,
 	ImageLibrary,
 	ImageSizeCrop,
+	ThumbnailGeneration,
 };
 
 export { uploadStore as store, UploadError };

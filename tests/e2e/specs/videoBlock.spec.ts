@@ -68,6 +68,14 @@ test.describe( 'Video block', () => {
 			/8oLRkaz/
 		);
 
+		const blockAttributes = await page.evaluate(
+			() =>
+				window.wp.data.select( 'core/block-editor' ).getSelectedBlock()
+					?.attributes ?? {}
+		);
+		await expect( blockAttributes.src ).toMatch( /\.mp4$/ );
+		await expect( blockAttributes.poster ).toMatch( /-poster\.jpeg$/ );
+
 		await expect(
 			page.getByRole( 'button', { name: 'Remove audio channel' } )
 		).toBeVisible();

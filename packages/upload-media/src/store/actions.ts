@@ -36,6 +36,7 @@ import type {
 	CancelAction,
 	ImageFormat,
 	ImageLibrary,
+	ThumbnailGeneration,
 	ImageSizeCrop,
 	MediaSourceTerm,
 	OnBatchSuccessHandler,
@@ -181,9 +182,9 @@ export function addItem( {
 			  }
 			: undefined;
 
-		const clientSideThumbnails: boolean = registry
+		const thumbnailGeneration: ThumbnailGeneration = registry
 			.select( preferencesStore )
-			.get( PREFERENCES_NAME, 'clientSideThumbnails' );
+			.get( PREFERENCES_NAME, 'thumbnailGeneration' );
 
 		dispatch< AddAction >( {
 			type: Type.Add,
@@ -200,7 +201,7 @@ export function addItem( {
 					url: createBlobURL( file ),
 				},
 				additionalData: {
-					generate_sub_sizes: ! clientSideThumbnails,
+					generate_sub_sizes: 'server' === thumbnailGeneration,
 					...additionalData,
 				},
 				onChange,
@@ -483,9 +484,9 @@ export function optimizeExistingItem( {
 			{ type: sourceFile.type }
 		);
 
-		const clientSideThumbnails: boolean = registry
+		const thumbnailGeneration: ThumbnailGeneration = registry
 			.select( preferencesStore )
-			.get( PREFERENCES_NAME, 'clientSideThumbnails' );
+			.get( PREFERENCES_NAME, 'thumbnailGeneration' );
 
 		// TODO: Same considerations apply as for muteExistingVideo.
 
@@ -502,7 +503,7 @@ export function optimizeExistingItem( {
 					poster,
 				},
 				additionalData: {
-					generate_sub_sizes: ! clientSideThumbnails,
+					generate_sub_sizes: 'server' === thumbnailGeneration,
 					...additionalData,
 				},
 				onChange,
@@ -741,14 +742,14 @@ export function finishUploading( id: QueueItemId, attachment: Attachment ) {
 			return;
 		}
 
-		const clientSideThumbnails: boolean = registry
+		const thumbnailGeneration: ThumbnailGeneration = registry
 			.select( preferencesStore )
-			.get( PREFERENCES_NAME, 'clientSideThumbnails' );
+			.get( PREFERENCES_NAME, 'thumbnailGeneration' );
 
 		if (
 			'missingImageSizes' in attachment &&
 			attachment.missingImageSizes &&
-			clientSideThumbnails
+			'server' !== thumbnailGeneration
 		) {
 			const file = attachment.fileName
 				? new File( [ item.sourceFile ], attachment.fileName, {
@@ -998,7 +999,11 @@ async function vipsCompressImage( file: File, quality: number ) {
 		file.type
 	);
 }
-async function vipsResizeImage( file: File, resize: ImageSizeCrop ) {
+async function vipsResizeImage(
+	file: File,
+	resize: ImageSizeCrop,
+	smartCrop: boolean
+) {
 	const ext = getExtensionFromMimeType( file.type );
 
 	if ( ! ext ) {
@@ -1008,7 +1013,8 @@ async function vipsResizeImage( file: File, resize: ImageSizeCrop ) {
 	const { buffer, width, height } = await vipsWorker.resizeImage(
 		await file.arrayBuffer(),
 		ext,
-		resize
+		resize,
+		smartCrop
 	);
 	const fileName = `${ getFileBasename(
 		file.name
@@ -1066,74 +1072,84 @@ export function optimizeImageItem(
 				.select( preferencesStore )
 				.get( PREFERENCES_NAME, 'imageLibrary' ) || 'vips';
 
-		const imageFormat: ImageFormat =
-			registry
-				.select( preferencesStore )
-				.get( PREFERENCES_NAME, 'imageFormat' ) || 'jpeg';
-
-		// TODO: Pass quality to all the different encoders.
-		const imageQuality: number =
-			registry
-				.select( preferencesStore )
-				.get( PREFERENCES_NAME, 'imageQuality' ) || 82;
-
 		try {
 			let file: File;
 
-			switch ( imageFormat ) {
-				case 'none':
+			const inputFormat = getExtensionFromMimeType( item.file.type );
+
+			if ( ! inputFormat ) {
+				throw new Error( 'Unsupported file type' );
+			}
+
+			const outputFormat: ImageFormat =
+				registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, `${ inputFormat }_outputFormat` ) ||
+				inputFormat;
+
+			// TODO: Pass quality to all the different encoders.
+			const outputQuality: number =
+				registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, `${ inputFormat }_quality` ) || 80;
+
+			switch ( outputFormat ) {
+				case inputFormat:
+				default:
 					if ( 'browser' === imageLibrary ) {
 						file = await compressImage(
 							item.file,
-							imageQuality / 100
+							outputQuality / 100
 						);
 					} else {
 						file = await vipsCompressImage(
 							item.file,
-							imageQuality / 100
+							outputQuality / 100
 						);
 					}
 					break;
+
 				case 'webp':
 					if ( 'browser' === imageLibrary && ! isSafari ) {
 						file = await convertImageFormat(
 							item.file,
 							'image/webp',
-							imageQuality / 100
+							outputQuality / 100
 						);
 					} else {
 						file = await vipsConvertImageFormat(
 							item.file,
 							'image/webp',
-							imageQuality / 100
+							outputQuality / 100
 						);
 					}
 					break;
+
 				case 'avif':
 					// No browsers support AVIF in HTMLCanvasElement.toBlob() yet, so always use vips.
 					// See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
 					file = await vipsConvertImageFormat(
 						item.file,
 						'image/avif',
-						imageQuality / 100
+						outputQuality / 100
 					);
 					break;
+
 				case 'jpeg':
-				default:
+				case 'png':
 					if ( 'browser' === imageLibrary ) {
 						file = await convertImageFormat(
 							item.file,
 							'image/jpeg',
-							imageQuality / 100
+							outputQuality / 100
 						);
 					} else {
 						file = await vipsConvertImageFormat(
 							item.file,
 							'image/jpeg',
-							imageQuality / 100
+							outputQuality / 100
 						);
 					}
-					break;
 			}
 
 			if ( requireApproval ) {
@@ -1337,9 +1353,11 @@ export function resizeCropItem( id: QueueItemId ) {
 	return async ( {
 		select,
 		dispatch,
+		registry,
 	}: {
 		select: Selectors;
 		dispatch: ActionCreators;
+		registry: WPDataRegistry;
 	} ) => {
 		const item = select.getItem( id );
 		if ( ! item ) {
@@ -1353,8 +1371,18 @@ export function resizeCropItem( id: QueueItemId ) {
 
 		dispatch.startTranscoding( id );
 
+		const thumbnailGeneration: ThumbnailGeneration = registry
+			.select( preferencesStore )
+			.get( PREFERENCES_NAME, 'thumbnailGeneration' );
+
+		const smartCrop = thumbnailGeneration === 'smart';
+
 		try {
-			const file = await vipsResizeImage( item.file, item.resize );
+			const file = await vipsResizeImage(
+				item.file,
+				item.resize,
+				smartCrop
+			);
 			dispatch.finishTranscoding( id, file );
 		} catch ( error ) {
 			dispatch.cancelItem(

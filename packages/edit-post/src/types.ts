@@ -1,6 +1,11 @@
 import { type BlockInstance } from '@wordpress/blocks';
 
-import type { Attachment, ImageFormat, ImageLibrary } from '@mexp/upload-media';
+import type {
+	Attachment,
+	ImageFormat,
+	ImageLibrary,
+	ThumbnailGeneration,
+} from '@mexp/upload-media';
 
 export type BulkOptimizationAttachmentData = Pick<
 	Attachment,
@@ -16,12 +21,25 @@ export type BulkOptimizationAttachmentData = Pick<
 export type MediaPreferences = {
 	// General.
 	requireApproval: boolean;
-	bigImageSizeThreshold: number;
-	clientSideThumbnails: boolean;
 	optimizeOnUpload: boolean;
+	thumbnailGeneration: ThumbnailGeneration;
 	imageLibrary: ImageLibrary;
-	imageFormat: ImageFormat;
-	imageQuality: number;
+	bigImageSizeThreshold: number;
+	// Formats.
+	default_outputFormat: ImageFormat;
+	jpeg_outputFormat: ImageFormat;
+	jpeg_quality: number;
+	png_outputFormat: ImageFormat;
+	png_quality: number;
+	webp_outputFormat: ImageFormat;
+	webp_quality: number;
+	avif_outputFormat: ImageFormat;
+	avif_quality: number;
+	heic_outputFormat: ImageFormat;
+	heic_quality: number;
+	gif_outputFormat: ImageFormat;
+	gif_quality: number;
+	gif_convert: boolean;
 	// Media recording.
 	videoInput?: string;
 	audioInput?: string;
