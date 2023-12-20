@@ -94,6 +94,13 @@ test.describe( 'Image block', () => {
 						.dispatch( 'core/preferences' )
 						.set(
 							'media-experiments/preferences',
+							'optimizeOnUpload',
+							false
+						);
+					window.wp.data
+						.dispatch( 'core/preferences' )
+						.set(
+							'media-experiments/preferences',
 							'png_outputFormat',
 							'png'
 						);
@@ -145,6 +152,13 @@ test.describe( 'Image block', () => {
 
 				await page.evaluate(
 					( [ fmt, lib ] ) => {
+						window.wp.data
+							.dispatch( 'core/preferences' )
+							.set(
+								'media-experiments/preferences',
+								'optimizeOnUpload',
+								true
+							);
 						window.wp.data
 							.dispatch( 'core/preferences' )
 							.set(
@@ -266,6 +280,13 @@ test.describe( 'Image block', () => {
 
 				await page.evaluate(
 					( [ fmt, lib ] ) => {
+						window.wp.data
+							.dispatch( 'core/preferences' )
+							.set(
+								'media-experiments/preferences',
+								'optimizeOnUpload',
+								true
+							);
 						window.wp.data
 							.dispatch( 'core/preferences' )
 							.set(
