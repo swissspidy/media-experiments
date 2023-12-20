@@ -2,7 +2,7 @@ import type { ComponentProps, PropsWithChildren } from 'react';
 
 import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis -- Why is this still experimental?
-	__experimentalNumberControl as NumberControl,
+	__experimentalUnitControl as UnitControl,
 } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
@@ -12,7 +12,7 @@ import { PREFERENCES_NAME } from './constants';
 
 type FeatureNumberControlProps = PropsWithChildren<
 	Omit<
-		ComponentProps< typeof NumberControl >,
+		ComponentProps< typeof UnitControl >,
 		'value' | 'onChange' | 'children'
 	> & { featureName: keyof MediaPreferences }
 >;
@@ -29,10 +29,15 @@ export function FeatureNumberControl( props: FeatureNumberControlProps ) {
 	);
 	const { set } = useDispatch( preferencesStore );
 	const onChange = ( newValue?: string ) => {
-		void set( PREFERENCES_NAME, featureName, Number( newValue ) );
+		void set(
+			PREFERENCES_NAME,
+			featureName,
+			// Need to strip unit from received value.
+			newValue ? Number( newValue.replace( /\D/g, '' ) ) : 0
+		);
 	};
 	return (
-		<NumberControl
+		<UnitControl
 			onChange={ onChange }
 			value={ value }
 			{ ...remainingProps }

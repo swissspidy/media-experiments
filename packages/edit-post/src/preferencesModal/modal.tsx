@@ -130,6 +130,17 @@ export function Modal() {
 							shiftStep={ 5 }
 							max={ 100 }
 							min={ 1 }
+							units={ [
+								{
+									value: '%',
+									label: '%',
+									a11yLabel: __(
+										'Percent (%)',
+										'media-experiments'
+									),
+									step: 1,
+								},
+							] }
 						/>
 						<FeatureNumberControl
 							className="interface-preferences-modal__option interface-preferences-modal__option--number"
@@ -139,12 +150,20 @@ export function Modal() {
 							) }
 							isShiftStepEnabled={ true }
 							featureName="bigImageSizeThreshold"
-							step={ 5 }
 							shiftStep={ 10 }
 							max={ 10000 }
 							min={ 0 }
-							// TODO: Make prefix if RTL?
-							suffix="px"
+							units={ [
+								{
+									value: 'px',
+									label: 'px',
+									a11yLabel: __(
+										'Pixels (px)',
+										'media-experiments'
+									),
+									step: 1,
+								},
+							] }
 						/>
 					</PreferencesModalSection>
 				),
