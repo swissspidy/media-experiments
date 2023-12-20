@@ -585,7 +585,11 @@ export function prepareItem( id: QueueItemId ) {
 
 				const isGif = isAnimatedGif( fileBuffer );
 
-				if ( isGif && canTranscode ) {
+				const convertAnimatedGifs: boolean = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'gif_convert' );
+
+				if ( isGif && canTranscode && convertAnimatedGifs ) {
 					dispatch.prepareForTranscoding( id, [
 						TranscodingType.Gif,
 					] );
