@@ -149,7 +149,7 @@ test.describe( 'Image block', () => {
 							.dispatch( 'core/preferences' )
 							.set(
 								'media-experiments/preferences',
-								`${ fmt }_outputFormat`,
+								'png_outputFormat',
 								fmt
 							);
 						window.wp.data
@@ -270,7 +270,7 @@ test.describe( 'Image block', () => {
 							.dispatch( 'core/preferences' )
 							.set(
 								'media-experiments/preferences',
-								'imageFormat',
+								'png_outputFormat',
 								fmt
 							);
 						window.wp.data
