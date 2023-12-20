@@ -87,6 +87,7 @@ describe( 'resizeImage', () => {
 		} );
 		expect( mockCrop ).not.toHaveBeenCalled();
 	} );
+
 	it( 'resizes with center crop and zero height', async () => {
 		const jpegFile = new File( [ '<BLOB>' ], 'example.jpg', {
 			lastModified: 1234567891,
@@ -102,6 +103,57 @@ describe( 'resizeImage', () => {
 
 		expect( mockThumbnailBuffer ).toHaveBeenCalledWith( buffer, 100, {
 			crop: 'centre',
+			size: 'down',
+		} );
+		expect( mockCrop ).not.toHaveBeenCalled();
+	} );
+
+	it( 'resizes without crop and attention strategy', async () => {
+		const jpegFile = new File( [ '<BLOB>' ], 'example.jpg', {
+			lastModified: 1234567891,
+			type: 'image/jpeg',
+		} );
+		const buffer = await jpegFile.arrayBuffer();
+
+		await resizeImage(
+			buffer,
+			'jpeg',
+			{
+				width: 100,
+				height: 100,
+			},
+			true
+		);
+
+		expect( mockThumbnailBuffer ).toHaveBeenCalledWith( buffer, 100, {
+			height: 100,
+			size: 'down',
+			crop: 'attention',
+		} );
+		expect( mockCrop ).not.toHaveBeenCalled();
+	} );
+
+	it( 'resizes with center crop and attention strategy', async () => {
+		const jpegFile = new File( [ '<BLOB>' ], 'example.jpg', {
+			lastModified: 1234567891,
+			type: 'image/jpeg',
+		} );
+		const buffer = await jpegFile.arrayBuffer();
+
+		await resizeImage(
+			buffer,
+			'jpeg',
+			{
+				width: 100,
+				height: 100,
+				crop: true,
+			},
+			true
+		);
+
+		expect( mockThumbnailBuffer ).toHaveBeenCalledWith( buffer, 100, {
+			height: 100,
+			crop: 'attention',
 			size: 'down',
 		} );
 		expect( mockCrop ).not.toHaveBeenCalled();
