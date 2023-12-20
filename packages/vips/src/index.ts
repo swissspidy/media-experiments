@@ -115,7 +115,7 @@ export async function resizeImage(
 	buffer: ArrayBuffer,
 	ext: string,
 	resize: ImageSizeCrop,
-	smartCrop: boolean,
+	smartCrop: boolean = false
 ) {
 	const vips = await getVips();
 	const options: ThumbnailOptions = {
