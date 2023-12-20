@@ -97,6 +97,7 @@ jobs:
                   flags: e2e
 
             - name: Get artifact name
+              if: always()
               run: |
                   ARTIFACT_NAME=${ARTIFACT_NAME//\//-}
                   echo "ARTIFACT_NAME=${ARTIFACT_NAME}" >> $GITHUB_ENV
