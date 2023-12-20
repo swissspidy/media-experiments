@@ -3,7 +3,7 @@
  * Plugin Name: Media Experiments
  * Plugin URI:  https://github.com/swissspidy/media-experiments
  * Description: Media Experiments
- * Version:     0.0.1
+ * Version:     0.0.2
  * Author:      Pascal Birchler
  * Author URI:  https://pascalbirchler.com
  * License:     Apache-2.0
