@@ -753,7 +753,7 @@ export function finishUploading( id: QueueItemId, attachment: Attachment ) {
 		) {
 			const file = attachment.fileName
 				? new File( [ item.sourceFile ], attachment.fileName, {
-						type: item.sourceFile.type,
+						type: attachment.mimeType,
 				  } )
 				: item.sourceFile;
 			const batchId = uuidv4();
