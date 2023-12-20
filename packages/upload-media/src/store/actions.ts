@@ -615,8 +615,12 @@ export function prepareItem( id: QueueItemId ) {
 					operations.push( TranscodingType.Image );
 				}
 
-				dispatch.prepareForTranscoding( id, operations );
-				return;
+				if ( operations.length ) {
+					dispatch.prepareForTranscoding( id, operations );
+					return;
+				}
+
+				break;
 
 			case 'video':
 				// Here we are potentially dealing with an unsupported file type (e.g. MOV)
