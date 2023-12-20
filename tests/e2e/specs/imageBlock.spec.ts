@@ -3,49 +3,48 @@ import type { ImageFormat, ImageLibrary } from '@mexp/upload-media';
 import { test, expect } from '../fixtures';
 
 const scenarios: {
-	imageFormat: ImageFormat;
+	outputFormat: ImageFormat;
 	imageLibrary: ImageLibrary;
 	expectedMimeType: string;
 }[] = [
 	{
-		imageFormat: 'jpeg',
+		outputFormat: 'jpeg',
 		imageLibrary: 'browser',
 		expectedMimeType: 'image/jpeg',
 	},
 	{
-		imageFormat: 'webp',
+		outputFormat: 'webp',
 		imageLibrary: 'browser',
 		expectedMimeType: 'image/webp',
 	},
-	// TODO: skip or test behavior separately, as it's not a supported scenario.
 	{
-		imageFormat: 'avif',
+		outputFormat: 'avif',
 		imageLibrary: 'browser',
 		expectedMimeType: 'image/avif',
 	},
 	{
-		imageFormat: 'none',
+		outputFormat: 'png',
 		imageLibrary: 'browser',
 		// Default image in tests is a png, so type should be unchanged.
 		expectedMimeType: 'image/png',
 	},
 	{
-		imageFormat: 'jpeg',
+		outputFormat: 'jpeg',
 		imageLibrary: 'vips',
 		expectedMimeType: 'image/jpeg',
 	},
 	{
-		imageFormat: 'webp',
+		outputFormat: 'webp',
 		imageLibrary: 'vips',
 		expectedMimeType: 'image/webp',
 	},
 	{
-		imageFormat: 'avif',
+		outputFormat: 'avif',
 		imageLibrary: 'vips',
 		expectedMimeType: 'image/avif',
 	},
 	{
-		imageFormat: 'none',
+		outputFormat: 'png',
 		imageLibrary: 'vips',
 		// Default image in tests is a png, so type should be unchanged.
 		expectedMimeType: 'image/png',
@@ -59,11 +58,11 @@ test.describe( 'Image block', () => {
 
 	test.describe( 'uploads a file and allows optimizing it afterwards', () => {
 		for ( const {
-			imageFormat,
+			outputFormat,
 			imageLibrary,
 			expectedMimeType,
 		} of scenarios ) {
-			test( `uses ${ imageFormat }@${ imageLibrary } to convert to ${ expectedMimeType }`, async ( {
+			test( `uses ${ outputFormat }@${ imageLibrary } to convert to ${ expectedMimeType }`, async ( {
 				admin,
 				page,
 				editor,
@@ -72,12 +71,12 @@ test.describe( 'Image block', () => {
 			} ) => {
 				test.skip(
 					browserName === 'webkit' &&
-						( imageLibrary === 'vips' || imageFormat === 'avif' ),
+						( imageLibrary === 'vips' || outputFormat === 'avif' ),
 					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
 				);
 
 				test.skip(
-					browserName === 'webkit' && imageFormat === 'webp',
+					browserName === 'webkit' && outputFormat === 'webp',
 					'WebKit does not currently support Canvas.toBlob with WebP'
 				);
 
@@ -89,13 +88,14 @@ test.describe( 'Image block', () => {
 
 				await admin.createNewPost();
 
+				// Ensure the initially uploaded PNG is left untouched.
 				await page.evaluate( () => {
 					window.wp.data
 						.dispatch( 'core/preferences' )
 						.set(
 							'media-experiments/preferences',
-							'imageFormat',
-							'none'
+							'png_outputFormat',
+							'png'
 						);
 					window.wp.data
 						.dispatch( 'core/preferences' )
@@ -149,7 +149,7 @@ test.describe( 'Image block', () => {
 							.dispatch( 'core/preferences' )
 							.set(
 								'media-experiments/preferences',
-								'imageFormat',
+								'png_outputFormat',
 								fmt
 							);
 						window.wp.data
@@ -160,7 +160,7 @@ test.describe( 'Image block', () => {
 								lib
 							);
 					},
-					[ imageFormat, imageLibrary ]
+					[ outputFormat, imageLibrary ]
 				);
 
 				await page.getByRole( 'button', { name: 'Optimize' } ).click();
@@ -234,11 +234,11 @@ test.describe( 'Image block', () => {
 
 	test.describe( 'optimizes a file on upload', () => {
 		for ( const {
-			imageFormat,
+			outputFormat,
 			imageLibrary,
 			expectedMimeType,
 		} of scenarios ) {
-			test( `uses ${ imageFormat }@${ imageLibrary } to convert to ${ expectedMimeType }`, async ( {
+			test( `uses ${ outputFormat }@${ imageLibrary } to convert to ${ expectedMimeType }`, async ( {
 				admin,
 				page,
 				editor,
@@ -247,12 +247,12 @@ test.describe( 'Image block', () => {
 			} ) => {
 				test.skip(
 					browserName === 'webkit' &&
-						( imageLibrary === 'vips' || imageFormat === 'avif' ),
+						( imageLibrary === 'vips' || outputFormat === 'avif' ),
 					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
 				);
 
 				test.skip(
-					browserName === 'webkit' && imageFormat === 'webp',
+					browserName === 'webkit' && outputFormat === 'webp',
 					'WebKit does not currently support Canvas.toBlob with WebP'
 				);
 
@@ -270,7 +270,7 @@ test.describe( 'Image block', () => {
 							.dispatch( 'core/preferences' )
 							.set(
 								'media-experiments/preferences',
-								'imageFormat',
+								'png_outputFormat',
 								fmt
 							);
 						window.wp.data
@@ -281,7 +281,7 @@ test.describe( 'Image block', () => {
 								lib
 							);
 					},
-					[ imageFormat, imageLibrary ]
+					[ outputFormat, imageLibrary ]
 				);
 
 				await editor.insertBlock( { name: 'core/image' } );

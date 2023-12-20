@@ -22,7 +22,11 @@ test.describe( 'Animated GIFs', () => {
 		await page.evaluate( () => {
 			window.wp.data
 				.dispatch( 'core/preferences' )
-				.set( 'media-experiments/preferences', 'imageFormat', 'jpeg' );
+				.set(
+					'media-experiments/preferences',
+					'default_outputFormat',
+					'jpeg'
+				);
 			window.wp.data
 				.dispatch( 'core/preferences' )
 				.set(

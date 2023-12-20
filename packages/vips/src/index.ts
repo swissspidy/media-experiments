@@ -105,15 +105,17 @@ export async function compressImage(
 /**
  * Resizes an image using vips.
  *
- * @param buffer Original file object.
- * @param ext    File extension.
- * @param resize
+ * @param buffer    Original file object.
+ * @param ext       File extension.
+ * @param resize    Resize options.
+ * @param smartCrop Whether to use smart cropping (i.e. saliency-aware).
  * @return Processed file object.
  */
 export async function resizeImage(
 	buffer: ArrayBuffer,
 	ext: string,
-	resize: ImageSizeCrop
+	resize: ImageSizeCrop,
+	smartCrop: boolean = false
 ) {
 	const vips = await getVips();
 	const options: ThumbnailOptions = {
@@ -129,6 +131,9 @@ export async function resizeImage(
 	let image;
 
 	if ( ! resize.crop || true === resize.crop ) {
+		if ( smartCrop ) {
+			options.crop = 'attention';
+		}
 		image = vips.Image.thumbnailBuffer( buffer, resize.width, options );
 	} else {
 		image = vips.Image.newFromBuffer( buffer );

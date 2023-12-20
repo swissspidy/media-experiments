@@ -6,12 +6,24 @@ import {
 	store as interfaceStore,
 } from '@wordpress/interface';
 import { useMemo } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, _x, sprintf } from '@wordpress/i18n';
 
 import { store as recordingStore } from '../mediaRecording/store';
 import { FeatureNumberControl } from './numberControl';
 import { SelectFeature } from './selectFeature';
 import { EnableFeature } from './enableFeature';
+
+type InputFormat = 'jpeg' | 'webp' | 'avif' | 'png' | 'heic' | 'gif';
+type InputFormatLabel = 'JPEG' | 'PNG' | 'WebP' | 'AVIF' | 'HEIC' | 'GIF';
+
+const inputFormats: InputFormatLabel[] = [
+	'JPEG',
+	'PNG',
+	'WebP',
+	'AVIF',
+	'HEIC',
+	'GIF',
+];
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -53,26 +65,49 @@ export function Modal() {
 							label={ __( 'Approval step', 'media-experiments' ) }
 						/>
 						<EnableFeature
-							featureName="clientSideThumbnails"
-							help={ __(
-								'Generate thumbnails on the client instead of the server.',
-								'media-experiments'
-							) }
-							label={ __(
-								'Thumbnail generation',
-								'media-experiments'
-							) }
-						/>
-						<EnableFeature
 							featureName="optimizeOnUpload"
 							help={ __(
-								'Compress and optimize media items during upload. Disabling restores old WordPress behavior.',
+								'Compress and optimize media items before uploading to the server.',
 								'media-experiments'
 							) }
 							label={ __(
 								'Pre-upload compression',
 								'media-experiments'
 							) }
+						/>
+						<SelectFeature
+							featureName="thumbnailGeneration"
+							help={ __(
+								'Preferred method for thumbnail generation.',
+								'media-experiments'
+							) }
+							label={ __(
+								'Thumbnail generation',
+								'media-experiments'
+							) }
+							options={ [
+								{
+									label: __(
+										'Legacy (server-side)',
+										'media-experiments'
+									),
+									value: 'server',
+								},
+								{
+									label: __(
+										'Regular (client-side)',
+										'media-experiments'
+									),
+									value: 'client',
+								},
+								{
+									label: __(
+										'Smart (saliency-aware)',
+										'media-experiments'
+									),
+									value: 'smart',
+								},
+							] }
 						/>
 						<SelectFeature
 							featureName="imageLibrary"
@@ -89,56 +124,6 @@ export function Modal() {
 								{
 									label: __( 'libvips', 'media-experiments' ),
 									value: 'vips',
-								},
-							] }
-						/>
-						<SelectFeature
-							featureName="imageFormat"
-							help={ __(
-								'Preferred file type to convert images to.',
-								'media-experiments'
-							) }
-							label={ __( 'Image Format', 'media-experiments' ) }
-							options={ [
-								{
-									label: __( 'JPEG', 'media-experiments' ),
-									value: 'jpeg',
-								},
-								{
-									label: __( 'WebP', 'media-experiments' ),
-									value: 'webp',
-								},
-								{
-									label: __( 'AVIF', 'media-experiments' ),
-									value: 'avif',
-								},
-								{
-									label: __(
-										'None (do not change file type)',
-										'media-experiments'
-									),
-									value: 'none',
-								},
-							] }
-						/>
-						{ /* default for jpeg: 82, for webp: 86 */ }
-						<FeatureNumberControl
-							className="interface-preferences-modal__option interface-preferences-modal__option--number"
-							label={ __( 'Image Quality', 'media-experiments' ) }
-							isShiftStepEnabled={ true }
-							featureName="imageQuality"
-							shiftStep={ 5 }
-							max={ 100 }
-							min={ 1 }
-							units={ [
-								{
-									value: '%',
-									label: '%',
-									a11yLabel: __(
-										'Percent (%)',
-										'media-experiments'
-									),
-									step: 1,
 								},
 							] }
 						/>
@@ -166,6 +151,160 @@ export function Modal() {
 							] }
 						/>
 					</PreferencesModalSection>
+				),
+			},
+			{
+				name: 'formats',
+				tabLabel: __( 'Formats', 'media-experiments' ),
+				content: (
+					<>
+						<PreferencesModalSection
+							title={ _x(
+								'Default',
+								'image format',
+								'media-experiments'
+							) }
+							description={ __(
+								'Specify the default format for newly generated images, such as poster images.',
+								'media-experiments'
+							) }
+						>
+							<SelectFeature
+								featureName="default_outputFormat"
+								help={ __(
+									'Default file type for new images.',
+									'media-experiments'
+								) }
+								label={ __(
+									'Image Format',
+									'media-experiments'
+								) }
+								options={ [
+									{
+										label: 'JPEG',
+										value: 'jpeg',
+									},
+									{
+										label: 'PNG',
+										value: 'png',
+									},
+									{
+										label: 'GIF',
+										value: 'gif',
+									},
+									{
+										label: 'WebP',
+										value: 'webp',
+									},
+									{
+										label: 'AVIF',
+										value: 'avif',
+									},
+								] }
+							/>
+						</PreferencesModalSection>
+						{ inputFormats.map( ( inputFormat ) => (
+							<PreferencesModalSection
+								key={ inputFormat }
+								title={ inputFormat }
+								description={ sprintf(
+									/* translators: %s: image format. */
+									__(
+										'Tweak the behavior for %s images.',
+										'media-experiments'
+									),
+									inputFormat
+								) }
+							>
+								<SelectFeature
+									featureName={ `${
+										inputFormat.toLowerCase() as InputFormat
+									}_outputFormat` }
+									help={ __(
+										'Preferred file type to convert images to.',
+										'media-experiments'
+									) }
+									label={ __(
+										'Image Format',
+										'media-experiments'
+									) }
+									options={ [
+										{
+											label: 'JPEG',
+											value: 'jpeg',
+										},
+										{
+											label: 'PNG',
+											value: 'png',
+										},
+										{
+											label: 'GIF',
+											value: 'gif',
+										},
+										{
+											label: 'WebP',
+											value: 'webp',
+										},
+										{
+											label: 'AVIF',
+											value: 'avif',
+										},
+									].map( ( option ) => {
+										if ( inputFormat === option.label ) {
+											option.label = sprintf(
+												/* translators: %s: image format */
+												__(
+													'%s (unchanged)',
+													'media-experiments'
+												),
+												inputFormat
+											);
+										}
+										return option;
+									} ) }
+								/>
+								{ /* default for jpeg: 82, for webp: 86 */ }
+								<FeatureNumberControl
+									className="interface-preferences-modal__option interface-preferences-modal__option--number"
+									label={ __(
+										'Image Quality',
+										'media-experiments'
+									) }
+									isShiftStepEnabled={ true }
+									featureName={ `${
+										inputFormat.toLowerCase() as InputFormat
+									}_quality` }
+									shiftStep={ 5 }
+									max={ 100 }
+									min={ 1 }
+									units={ [
+										{
+											value: '%',
+											label: '%',
+											a11yLabel: __(
+												'Percent (%)',
+												'media-experiments'
+											),
+											step: 1,
+										},
+									] }
+								/>
+								{ 'GIF' === inputFormat ? (
+									<EnableFeature
+										featureName="gif_convert"
+										help={ __(
+											'Convert animated GIFs to videos.',
+											'media-experiments'
+										) }
+										label={ __(
+											'Convert animated GIFs',
+											'media-experiments'
+										) }
+									/>
+								) : null }
+							</PreferencesModalSection>
+						) ) }
+					</>
 				),
 			},
 			{

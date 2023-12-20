@@ -23,9 +23,20 @@ jobs:
             fail-fast: false
             matrix:
                 wp: ['latest']
+                shard: ['1/4', '2/4', '3/4', '4/4']
                 experimental: [false]
                 include:
                     - wp: 'trunk'
+                      shard: '1/4'
+                      experimental: true
+                    - wp: 'trunk'
+                      shard: '2/4'
+                      experimental: true
+                    - wp: 'trunk'
+                      shard: '3/4'
+                      experimental: true
+                    - wp: 'trunk'
+                      shard: '4/4'
                       experimental: true
         steps:
             - name: Checkout
@@ -75,7 +86,7 @@ jobs:
                   cd -
 
             - name: Run tests
-              run: npm run test:e2e
+              run: npm run test:e2e -- --shard=${{ matrix.shard }}
               env:
                   COLLECT_COVERAGE: ${{ matrix.wp == 'latest' }}
 
@@ -85,9 +96,16 @@ jobs:
                   file: artifacts/e2e-coverage/coverage/lcov.info
                   flags: e2e
 
+            - name: Get artifact name
+              run: |
+                  ARTIFACT_NAME=${ARTIFACT_NAME//\//-}
+                  echo "ARTIFACT_NAME=${ARTIFACT_NAME}" >> $GITHUB_ENV
+              env:
+                  ARTIFACT_NAME: failures-artifacts-${{ matrix.wp }}-${{ matrix.shard }}
+
             - name: Archive debug artifacts (screenshots, HTML snapshots)
               uses: actions/upload-artifact@v4
               if: always()
               with:
-                  name: failures-artifacts-${{ matrix.wp }}
+                  name: ${{ env.ARTIFACT_NAME }}
                   path: artifacts
