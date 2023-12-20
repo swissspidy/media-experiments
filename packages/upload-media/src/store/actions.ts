@@ -1140,13 +1140,13 @@ export function optimizeImageItem(
 					if ( 'browser' === imageLibrary ) {
 						file = await convertImageFormat(
 							item.file,
-							'image/jpeg',
+							`image/${ outputFormat }`,
 							outputQuality / 100
 						);
 					} else {
 						file = await vipsConvertImageFormat(
 							item.file,
-							'image/jpeg',
+							`image/${ outputFormat }`,
 							outputQuality / 100
 						);
 					}
