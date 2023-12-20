@@ -210,6 +210,6 @@ export type ImageSizeCrop = {
 
 export type ImageLibrary = 'browser' | 'vips';
 
-export type ImageFormat = 'jpeg' | 'webp' | 'avif' | 'png';
+export type ImageFormat = 'jpeg' | 'webp' | 'avif' | 'png' | 'gif';
 
 export type ThumbnailGeneration = 'server' | 'client' | 'smart';

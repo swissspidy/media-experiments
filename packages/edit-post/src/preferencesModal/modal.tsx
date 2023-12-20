@@ -189,6 +189,10 @@ export function Modal() {
 										value: 'png',
 									},
 									{
+										label: 'GIF',
+										value: 'gif',
+									},
+									{
 										label: 'WebP',
 										value: 'webp',
 									},
@@ -232,6 +236,10 @@ export function Modal() {
 										{
 											label: 'PNG',
 											value: 'png',
+										},
+										{
+											label: 'GIF',
+											value: 'gif',
 										},
 										{
 											label: 'WebP',

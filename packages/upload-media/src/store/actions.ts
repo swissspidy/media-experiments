@@ -1135,6 +1135,16 @@ export function optimizeImageItem(
 					);
 					break;
 
+				case 'gif':
+					// Browsers don't typically support image/gif in HTMLCanvasElement.toBlob() yet, so always use vips.
+					// See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
+					file = await vipsConvertImageFormat(
+						item.file,
+						'image/avif',
+						outputQuality / 100
+					);
+					break;
+
 				case 'jpeg':
 				case 'png':
 					if ( 'browser' === imageLibrary ) {
