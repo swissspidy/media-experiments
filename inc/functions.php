@@ -723,7 +723,7 @@ function rest_after_insert_attachment_handle_pdf_poster( WP_Post $attachment, WP
 		$pdf_metadata['sizes']['full'] = [
 			'width'     => $poster_metadata['width'],
 			'height'    => $poster_metadata['height'],
-			'mime-type' => $poster->post_mime_type,
+			'mime_type' => $poster->post_mime_type,
 			'filesize'  => $poster_metadata['filesize'],
 		];
 
