@@ -6,8 +6,6 @@ import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as preferencesStore } from '@wordpress/preferences';
 
 import {
-	blobToFile,
-	bufferToBlob,
 	getExtensionFromMimeType,
 	getFileBasename,
 	getMediaTypeFromMimeType,
@@ -26,6 +24,12 @@ import {
 } from '../utils';
 import { sideloadFile, updateMediaItem, uploadToServer } from '../api';
 import { PREFERENCES_NAME } from '../constants';
+import { isHeifImage, transcodeHeifImage } from './utils/heif';
+import {
+	vipsCompressImage,
+	vipsConvertImageFormat,
+	vipsResizeImage,
+} from './utils/vips';
 import type {
 	AddAction,
 	AdditionalData,
@@ -73,16 +77,6 @@ const createBlurhashWorker = createWorkerFactory(
 );
 const blurhashWorker = createBlurhashWorker();
 
-const createVipsWorker = createWorkerFactory(
-	() => import( /* webpackChunkName: 'vips' */ '@mexp/vips' )
-);
-const vipsWorker = createVipsWorker();
-
-const createHeifWorker = createWorkerFactory(
-	() => import( /* webpackChunkName: 'heif' */ '@mexp/heif' )
-);
-const heifWorker = createHeifWorker();
-
 // Safari does not currently support WebP in HTMLCanvasElement.toBlob()
 // See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
 const isSafari = Boolean(
@@ -118,7 +112,6 @@ type ActionCreators = {
 	finishUploading: typeof finishUploading;
 	finishSideloading: typeof finishSideloading;
 	cancelItem: typeof cancelItem;
-	uploadPosterForItem: typeof uploadPosterForItem;
 	addPoster: typeof addPoster;
 	< T = Record< string, unknown > >( args: T ): void;
 };
@@ -594,7 +587,7 @@ export function prepareItem( id: QueueItemId ) {
 					return;
 				}
 
-				const isHeif = await heifWorker.isHeifImage( fileBuffer );
+				const isHeif = await isHeifImage( fileBuffer );
 
 				// TODO: Do we need a placeholder for a HEIF image?
 				// Maybe a base64 encoded 1x1 gray PNG?
@@ -1033,86 +1026,6 @@ export function maybeTranscodeItem( id: QueueItemId ) {
 			// This shouldn't happen. Only happens with too many state updates.
 		}
 	};
-}
-
-async function vipsConvertImageFormat(
-	file: File,
-	type:
-		| 'image/jpeg'
-		| 'image/png'
-		| 'image/webp'
-		| 'image/avif'
-		| 'image/gif',
-	quality: number
-) {
-	const buffer = await vipsWorker.convertImageFormat(
-		await file.arrayBuffer(),
-		type,
-		quality
-	);
-	const ext = getExtensionFromMimeType( type );
-	const fileName = `${ getFileBasename( file.name ) }.${ ext }`;
-	return blobToFile( new Blob( [ buffer ], { type } ), fileName, type );
-}
-
-async function vipsCompressImage( file: File, quality: number ) {
-	const buffer = await vipsWorker.compressImage(
-		await file.arrayBuffer(),
-		file.type,
-		quality
-	);
-	return blobToFile(
-		new Blob( [ buffer ], { type: file.type } ),
-		file.name,
-		file.type
-	);
-}
-async function vipsResizeImage(
-	file: File,
-	resize: ImageSizeCrop,
-	smartCrop: boolean
-) {
-	const ext = getExtensionFromMimeType( file.type );
-
-	if ( ! ext ) {
-		throw new Error( 'Unsupported file type' );
-	}
-
-	const { buffer, width, height } = await vipsWorker.resizeImage(
-		await file.arrayBuffer(),
-		ext,
-		resize,
-		smartCrop
-	);
-	const fileName = `${ getFileBasename(
-		file.name
-	) }-${ width }x${ height }.${ ext }`;
-
-	return blobToFile(
-		new Blob( [ buffer ], { type: file.type } ),
-		fileName,
-		file.type
-	);
-}
-
-async function transcodeHeifImage(
-	file: File,
-	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/jpeg',
-	quality = 0.82
-) {
-	const { buffer, width, height } = await heifWorker.transcodeHeifImage(
-		await file.arrayBuffer()
-	);
-
-	const blob = await bufferToBlob( buffer, width, height, type, quality );
-
-	return blobToFile(
-		blob,
-		`${ getFileBasename( file.name ) }.${ getExtensionFromMimeType(
-			type
-		) }`,
-		type
-	);
 }
 
 export function optimizeImageItem(
