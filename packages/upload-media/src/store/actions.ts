@@ -563,8 +563,6 @@ export function prepareItem( id: QueueItemId ) {
 			id,
 		} );
 
-		console.log( 'prepareItem', item );
-
 		// Transcoding type has already been set, e.g. via muteExistingVideo() or addSideloadItem().
 		// TODO: Check canTranscode either here, in muteExistingVideo, or in the UI.
 		if ( item.transcode ) {
@@ -576,8 +574,6 @@ export function prepareItem( id: QueueItemId ) {
 		const canTranscode = canTranscodeFile( file );
 
 		const mediaType = getMediaTypeFromMimeType( file.type );
-
-		console.log( 'prepareItem', item, file.type, mediaType );
 
 		switch ( mediaType ) {
 			case 'image':
@@ -761,8 +757,6 @@ export function completeItem( id: QueueItemId ) {
 			return;
 		}
 
-		console.log( 'completeItem', item );
-
 		dispatch.removeItem( id );
 
 		const attachment: Attachment = item.attachment as Attachment;
@@ -790,8 +784,6 @@ export function completeItem( id: QueueItemId ) {
 								getFileNameFromUrl( attachment.url )
 						) }}-poster`
 					) );
-
-				console.log( 'completeItem poster', poster );
 
 				if ( poster ) {
 					// Adding the poster to the queue on its own allows for it to be optimized, etc.
