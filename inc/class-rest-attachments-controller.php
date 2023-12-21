@@ -397,6 +397,11 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		$metadata['sizes'] = $metadata['sizes'] ?? [];
 
+		// In case we're sideloading a PDF poster.
+		if ( 'application/pdf' === get_post_mime_type( $attachment_id ) ) {
+			$request['image_size'] = 'full';
+		}
+
 		$size = wp_getimagesize( $path );
 		// TODO: Better fallback if image_size is not provided.
 		$metadata['sizes'][ $request['image_size'] ?? 'thumbnail' ] = [
