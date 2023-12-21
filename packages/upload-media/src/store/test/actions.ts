@@ -152,9 +152,21 @@ describe( 'actions', () => {
 				1
 			);
 
+			const attachment = {
+				id: 123,
+				url: 'https://example.com/attachment.jpg',
+				alt: '',
+				title: '',
+				mimeType: 'image/jpeg',
+			};
+
 			const item: QueueItem = registry
 				.select( uploadStore )
 				.getItems()[ 0 ];
+
+			registry
+				.dispatch( uploadStore )
+				.finishUploading( item.id, attachment );
 
 			registry.dispatch( uploadStore ).completeItem( item.id );
 
@@ -435,7 +447,7 @@ describe( 'actions', () => {
 	} );
 
 	describe( 'finishUploading', () => {
-		it( 'should mark the item as uploaded', async () => {
+		it( 'should mark the item as uploaded', () => {
 			const attachment = {
 				id: 123,
 				url: 'https://example.com/attachment.jpg',
@@ -457,7 +469,7 @@ describe( 'actions', () => {
 				.select( uploadStore )
 				.getItems()[ 0 ];
 
-			await registry
+			registry
 				.dispatch( uploadStore )
 				.finishUploading( item.id, attachment );
 

@@ -83,12 +83,9 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 					'callback'            => [ $this, 'sideload_item' ],
 					'permission_callback' => [ $this, 'create_item_permissions_check' ],
 					'args'                => [
-						'id'             => [
-							'description' => __( 'Unique identifier for the attachment.', 'media-experiments' ),
-							'type'        => 'integer',
-						],
 						'image_size'     => [
-							'type' => 'string',
+							'description' => __( 'Image size.', 'media-experiments' ),
+							'type'        => 'string',
 						],
 						'upload_request' => [
 							'description' => __( 'Upload request this file is for.', 'media-experiments' ),
@@ -400,13 +397,18 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		$metadata['sizes'] = $metadata['sizes'] ?? [];
 
+		// In case we're sideloading a PDF poster.
+		if ( 'application/pdf' === get_post_mime_type( $attachment_id ) ) {
+			$request['image_size'] = 'full';
+		}
+
 		$size = wp_getimagesize( $path );
 		// TODO: Better fallback if image_size is not provided.
 		$metadata['sizes'][ $request['image_size'] ?? 'thumbnail' ] = [
 			'width'     => $size ? $size[0] : 0,
 			'height'    => $size ? $size[1] : 0,
 			'file'      => basename( $path ),
-			'mime-type' => $type,
+			'mime_type' => $type,
 			'filesize'  => wp_filesize( $path ),
 		];
 

@@ -6,8 +6,6 @@ import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as preferencesStore } from '@wordpress/preferences';
 
 import {
-	blobToFile,
-	bufferToBlob,
 	getExtensionFromMimeType,
 	getFileBasename,
 	getMediaTypeFromMimeType,
@@ -26,6 +24,12 @@ import {
 } from '../utils';
 import { sideloadFile, updateMediaItem, uploadToServer } from '../api';
 import { PREFERENCES_NAME } from '../constants';
+import { isHeifImage, transcodeHeifImage } from './utils/heif';
+import {
+	vipsCompressImage,
+	vipsConvertImageFormat,
+	vipsResizeImage,
+} from './utils/vips';
 import type {
 	AddAction,
 	AdditionalData,
@@ -44,7 +48,6 @@ import type {
 	OnErrorHandler,
 	OnSuccessHandler,
 	PrepareAction,
-	QueueItem,
 	QueueItemId,
 	RemoveAction,
 	RequestApprovalAction,
@@ -54,7 +57,6 @@ import type {
 	TranscodingFinishAction,
 	TranscodingPrepareAction,
 	TranscodingStartAction,
-	UploadFinishAction,
 	UploadStartAction,
 } from './types';
 import { ItemStatus, TranscodingType, Type } from './types';
@@ -74,16 +76,6 @@ const createBlurhashWorker = createWorkerFactory(
 		)
 );
 const blurhashWorker = createBlurhashWorker();
-
-const createVipsWorker = createWorkerFactory(
-	() => import( /* webpackChunkName: 'vips' */ '@mexp/vips' )
-);
-const vipsWorker = createVipsWorker();
-
-const createHeifWorker = createWorkerFactory(
-	() => import( /* webpackChunkName: 'heif' */ '@mexp/heif' )
-);
-const heifWorker = createHeifWorker();
 
 // Safari does not currently support WebP in HTMLCanvasElement.toBlob()
 // See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
@@ -120,7 +112,6 @@ type ActionCreators = {
 	finishUploading: typeof finishUploading;
 	finishSideloading: typeof finishSideloading;
 	cancelItem: typeof cancelItem;
-	uploadPosterForItem: typeof uploadPosterForItem;
 	addPoster: typeof addPoster;
 	< T = Record< string, unknown > >( args: T ): void;
 };
@@ -596,7 +587,7 @@ export function prepareItem( id: QueueItemId ) {
 					return;
 				}
 
-				const isHeif = await heifWorker.isHeifImage( fileBuffer );
+				const isHeif = await isHeifImage( fileBuffer );
 
 				// TODO: Do we need a placeholder for a HEIF image?
 				// Maybe a base64 encoded 1x1 gray PNG?
@@ -730,6 +721,21 @@ export function startUploading( id: QueueItemId ): UploadStartAction {
 }
 
 export function finishUploading( id: QueueItemId, attachment: Attachment ) {
+	return {
+		type: Type.UploadFinish,
+		id,
+		attachment,
+	};
+}
+
+export function finishSideloading( id: QueueItemId ): SideloadFinishAction {
+	return {
+		type: Type.SideloadFinish,
+		id,
+	};
+}
+
+export function completeItem( id: QueueItemId ) {
 	return async ( {
 		select,
 		dispatch,
@@ -740,22 +746,110 @@ export function finishUploading( id: QueueItemId, attachment: Attachment ) {
 		registry: WPDataRegistry;
 	} ) => {
 		const item = select.getItem( id );
-
 		if ( ! item ) {
-			dispatch< UploadFinishAction >( {
-				type: Type.UploadFinish,
-				id,
-				attachment,
-			} );
 			return;
 		}
+
+		dispatch.removeItem( id );
+
+		const attachment: Attachment = item.attachment as Attachment;
+
+		// Video poster generation.
+
+		const mediaType = getMediaTypeFromMimeType( attachment.mimeType );
+		// In the event that the uploaded video already has a poster, do not upload another one.
+		// Can happen when using muteExistingVideo() or when a poster is generated server-side.
+		// TODO: Make the latter scenario actually work.
+		//       Use getEntityRecord to actually get poster URL from posterID returned by uploadToServer()
+		if (
+			'video' === mediaType &&
+			( ! attachment.poster || isBlobURL( attachment.poster ) )
+		) {
+			try {
+				const poster =
+					item.poster ||
+					( await getPosterFromVideo(
+						attachment.url,
+						// Derive the basename from the uploaded video's file name
+						// if available for more accuracy.
+						`${ getFileBasename(
+							attachment.fileName ??
+								getFileNameFromUrl( attachment.url )
+						) }}-poster`
+					) );
+
+				if ( poster ) {
+					// Adding the poster to the queue on its own allows for it to be optimized, etc.
+					dispatch.addItem( {
+						file: poster,
+						onChange: ( [ posterAttachment ] ) => {
+							if (
+								! posterAttachment.url ||
+								isBlobURL( posterAttachment.url )
+							) {
+								return;
+							}
+
+							// Video block expects such a structure for the poster.
+							// https://github.com/WordPress/gutenberg/blob/e0a413d213a2a829ece52c6728515b10b0154d8d/packages/block-library/src/video/edit.js#L154
+							const updatedAttachment = {
+								...attachment,
+								image: {
+									src: posterAttachment.url,
+								},
+							};
+
+							// This might be confusing, but the idea is to update the original
+							// video item in the editor with the newly uploaded poster.
+							item.onChange?.( [ updatedAttachment ] );
+						},
+						onSuccess: async ( [ posterAttachment ] ) => {
+							// Similarly, update the original video in the DB to have the
+							// poster as the featured image.
+							// TODO: Do this server-side instead.
+							void updateMediaItem( attachment.id, {
+								featured_media: posterAttachment.id,
+								meta: {
+									mexp_generated_poster_id:
+										posterAttachment.id,
+								},
+							} );
+						},
+						additionalData: {
+							// Reminder: Parent post ID might not be set, depending on context,
+							// but should be carried over if it does.
+							post: item.additionalData.post,
+						},
+						mediaSourceTerms: [ 'poster-generation' ],
+						blurHash: item.blurHash,
+						dominantColor: item.dominantColor,
+					} );
+				}
+			} catch ( err ) {
+				// TODO: Debug & catch & throw.
+			}
+		}
+
+		// PDF "poster" generation.
+		if ( 'pdf' === mediaType && item.poster ) {
+			dispatch.addSideloadItem( {
+				file: item.poster,
+				additionalData: {
+					// Sideloading does not use the parent post ID but the
+					// attachment ID as the image sizes need to be added to it.
+					post: attachment.id,
+				},
+				transcode: [ TranscodingType.Image ],
+			} );
+		}
+
+		// Client-side thumbnail generation.
 
 		const thumbnailGeneration: ThumbnailGeneration = registry
 			.select( preferencesStore )
 			.get( PREFERENCES_NAME, 'thumbnailGeneration' );
 
 		if (
-			'missingImageSizes' in attachment &&
 			attachment.missingImageSizes &&
 			'server' !== thumbnailGeneration
 		) {
@@ -782,47 +876,6 @@ export function finishUploading( id: QueueItemId, attachment: Attachment ) {
 						transcode: [ TranscodingType.ResizeCrop ],
 					} );
 				}
-			}
-		}
-
-		dispatch< UploadFinishAction >( {
-			type: Type.UploadFinish,
-			id,
-			attachment,
-		} );
-	};
-}
-
-export function finishSideloading( id: QueueItemId ): SideloadFinishAction {
-	return {
-		type: Type.SideloadFinish,
-		id,
-	};
-}
-
-export function completeItem( id: QueueItemId ) {
-	return async ( {
-		select,
-		dispatch,
-	}: {
-		select: Selectors;
-		dispatch: ActionCreators;
-	} ) => {
-		const item = select.getItem( id );
-		if ( ! item ) {
-			return;
-		}
-
-		dispatch.removeItem( id );
-
-		if ( item.attachment && item.attachment.mimeType ) {
-			// TODO: Trigger client-side thumbnail generation here?
-
-			const mediaType = getMediaTypeFromMimeType(
-				item.attachment.mimeType
-			);
-			if ( [ 'video', 'pdf' ].includes( mediaType ) ) {
-				void dispatch.uploadPosterForItem( item );
 			}
 		}
 	};
@@ -973,86 +1026,6 @@ export function maybeTranscodeItem( id: QueueItemId ) {
 			// This shouldn't happen. Only happens with too many state updates.
 		}
 	};
-}
-
-async function vipsConvertImageFormat(
-	file: File,
-	type:
-		| 'image/jpeg'
-		| 'image/png'
-		| 'image/webp'
-		| 'image/avif'
-		| 'image/gif',
-	quality: number
-) {
-	const buffer = await vipsWorker.convertImageFormat(
-		await file.arrayBuffer(),
-		type,
-		quality
-	);
-	const ext = getExtensionFromMimeType( type );
-	const fileName = `${ getFileBasename( file.name ) }.${ ext }`;
-	return blobToFile( new Blob( [ buffer ], { type } ), fileName, type );
-}
-
-async function vipsCompressImage( file: File, quality: number ) {
-	const buffer = await vipsWorker.compressImage(
-		await file.arrayBuffer(),
-		file.type,
-		quality
-	);
-	return blobToFile(
-		new Blob( [ buffer ], { type: file.type } ),
-		file.name,
-		file.type
-	);
-}
-async function vipsResizeImage(
-	file: File,
-	resize: ImageSizeCrop,
-	smartCrop: boolean
-) {
-	const ext = getExtensionFromMimeType( file.type );
-
-	if ( ! ext ) {
-		throw new Error( 'Unsupported file type' );
-	}
-
-	const { buffer, width, height } = await vipsWorker.resizeImage(
-		await file.arrayBuffer(),
-		ext,
-		resize,
-		smartCrop
-	);
-	const fileName = `${ getFileBasename(
-		file.name
-	) }-${ width }x${ height }.${ ext }`;
-
-	return blobToFile(
-		new Blob( [ buffer ], { type: file.type } ),
-		fileName,
-		file.type
-	);
-}
-
-async function transcodeHeifImage(
-	file: File,
-	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/jpeg',
-	quality = 0.82
-) {
-	const { buffer, width, height } = await heifWorker.transcodeHeifImage(
-		await file.arrayBuffer()
-	);
-
-	const blob = await bufferToBlob( buffer, width, height, type, quality );
-
-	return blobToFile(
-		blob,
-		`${ getFileBasename( file.name ) }.${ getExtensionFromMimeType(
-			type
-		) }`,
-		type
-	);
 }
 
 export function optimizeImageItem(
@@ -1413,98 +1386,6 @@ export function resizeCropItem( id: QueueItemId ) {
 							file: item.file,
 					  } )
 			);
-		}
-	};
-}
-
-export function uploadPosterForItem( item: QueueItem ) {
-	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
-		const { attachment: uploadedAttachment } = item as QueueItem & {
-			attachment: Attachment;
-		};
-
-		if ( ! uploadedAttachment ) {
-			return;
-		}
-
-		// In the event that the uploaded video already has a poster, do not upload another one.
-		// Can happen when using muteExistingVideo() or when a poster is generated server-side.
-		// TODO: Make the latter scenario actually work.
-		//       Use getEntityRecord to actually get poster URL from posterID returned by uploadToServer()
-		if (
-			uploadedAttachment.poster &&
-			! isBlobURL( uploadedAttachment.poster )
-		) {
-			return;
-		}
-
-		try {
-			let poster = item.poster;
-
-			if (
-				! poster &&
-				'video' === getMediaTypeFromMimeType( item.file.type )
-			) {
-				// Derive the basename from the uploaded video's file name
-				// if available for more accuracy.
-				poster = await getPosterFromVideo(
-					uploadedAttachment.url,
-					`${ getFileBasename(
-						uploadedAttachment.fileName ??
-							getFileNameFromUrl( uploadedAttachment.url )
-					) }}-poster`
-				);
-			}
-
-			if ( ! poster ) {
-				return;
-			}
-
-			// Adding the poster to the queue on its own allows for it to be optimized, etc.
-			dispatch.addItem( {
-				file: poster,
-				onChange: ( [ posterAttachment ] ) => {
-					if (
-						! posterAttachment.url ||
-						isBlobURL( posterAttachment.url )
-					) {
-						return;
-					}
-
-					// Video block expects such a structure for the poster.
-					// https://github.com/WordPress/gutenberg/blob/e0a413d213a2a829ece52c6728515b10b0154d8d/packages/block-library/src/video/edit.js#L154
-					const updatedAttachment = {
-						...uploadedAttachment,
-						image: {
-							src: posterAttachment.url,
-						},
-					};
-
-					// This might be confusing, but the idea is to update the original
-					// video item in the editor with the newly uploaded poster.
-					item.onChange?.( [ updatedAttachment ] );
-				},
-				onSuccess: async ( [ posterAttachment ] ) => {
-					// Similarly, update the original video in the DB to have the
-					// poster as the featured image.
-					updateMediaItem( uploadedAttachment.id, {
-						featured_media: posterAttachment.id,
-						meta: {
-							mexp_generated_poster_id: posterAttachment.id,
-						},
-					} );
-				},
-				additionalData: {
-					// Reminder: Parent post ID might not be set, depending on context,
-					// but should be carried over if it does.
-					post: item.additionalData.post,
-				},
-				mediaSourceTerms: [ 'poster-generation' ],
-				blurHash: item.blurHash,
-				dominantColor: item.dominantColor,
-			} );
-		} catch ( err ) {
-			// TODO: Debug & catch & throw.
 		}
 	};
 }
