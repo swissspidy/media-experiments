@@ -403,7 +403,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			'width'     => $size ? $size[0] : 0,
 			'height'    => $size ? $size[1] : 0,
 			'file'      => basename( $path ),
-			'mime-type' => $type,
+			'mime_type' => $type,
 			'filesize'  => wp_filesize( $path ),
 		];
 
