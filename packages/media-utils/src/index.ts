@@ -45,26 +45,6 @@ export function preloadImage( src: string, width?: number, height?: number ) {
 	} );
 }
 
-export function getImageData( image: HTMLImageElement, width?: number ) {
-	const canvas = document.createElement( 'canvas' );
-	const desiredWidth = width || image.naturalWidth;
-	const desiredHeight =
-		( image.naturalHeight / image.naturalWidth ) * desiredWidth;
-	canvas.width = desiredWidth;
-	canvas.height = desiredHeight;
-
-	const ctx = canvas.getContext( '2d' );
-
-	// If the contextType doesn't match a possible drawing context,
-	// or differs from the first contextType requested, null is returned.
-	if ( ! ctx ) {
-		throw new Error( 'Could not get context' );
-	}
-
-	ctx.drawImage( image, 0, 0, canvas.width, canvas.height );
-	return ctx.getImageData( 0, 0, desiredWidth, desiredHeight );
-}
-
 export function getCanvasBlob(
 	canvasEl: HTMLCanvasElement,
 	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/jpeg',

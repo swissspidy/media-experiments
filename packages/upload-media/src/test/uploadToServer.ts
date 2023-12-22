@@ -29,9 +29,9 @@ describe( 'uploadToServer', () => {
 			featured_media: 123,
 			mexp_filename: 'example.jpg',
 			meta: {
-				mexp_is_muted: false,
 				mexp_original_id: 9,
 			},
+			mexp_is_muted: false,
 		} );
 
 		// TODO: Actually test sent form data is flattened.

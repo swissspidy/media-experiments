@@ -46,6 +46,12 @@ export async function vipsCompressImage( file: File, quality: number ) {
 	);
 }
 
+export async function vipsHasTransparency( url: string ) {
+	return vipsWorker.hasTransparency(
+		await ( await fetch( url ) ).arrayBuffer()
+	);
+}
+
 export async function vipsResizeImage(
 	file: File,
 	resize: ImageSizeCrop,

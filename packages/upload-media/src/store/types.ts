@@ -175,13 +175,14 @@ export interface RestAttachment extends WP_REST_API_Attachment {
 	mexp_filesize: number | null;
 	mexp_media_source: number[];
 	meta: {
-		mexp_blurhash?: string;
-		mexp_dominant_color?: string;
-		mexp_is_muted?: boolean;
 		mexp_generated_poster_id?: number;
 		mexp_original_id?: number;
 		mexp_optimized_id?: number;
 	};
+	mexp_blurhash?: string;
+	mexp_dominant_color?: string;
+	mexp_is_muted?: boolean;
+	mexp_has_transparency?: boolean;
 }
 
 export type CreateRestAttachment = Partial< RestAttachment > & {

@@ -79,7 +79,7 @@ export function DebugInfo( { id }: DebugInfoProps ) {
 						) }
 					</PanelRow>
 				) : null }
-				{ attachment.meta.mexp_dominant_color ? (
+				{ attachment.mexp_dominant_color ? (
 					<PanelRow>
 						{ createInterpolateElement(
 							sprintf(
@@ -94,20 +94,16 @@ export function DebugInfo( { id }: DebugInfoProps ) {
 								b: <b />,
 								ColorIndicator: (
 									<Tooltip
-										text={
-											attachment.meta.mexp_dominant_color
-										}
+										text={ attachment.mexp_dominant_color }
 									>
 										<Text
 											aria-label={
-												attachment.meta
-													.mexp_dominant_color
+												attachment.mexp_dominant_color
 											}
 										>
 											<ColorIndicator
 												colorValue={
-													attachment.meta
-														.mexp_dominant_color
+													attachment.mexp_dominant_color
 												}
 											/>
 										</Text>
@@ -117,7 +113,25 @@ export function DebugInfo( { id }: DebugInfoProps ) {
 						) }
 					</PanelRow>
 				) : null }
-				{ attachment.meta.mexp_blurhash ? (
+				{ attachment.mexp_has_transparency !== null ? (
+					<PanelRow>
+						{ createInterpolateElement(
+							attachment.mexp_has_transparency
+								? __(
+										'<b>Has transparency:</b> yes',
+										'media-experiments'
+								  )
+								: __(
+										'<b>Has transparency:</b> no',
+										'media-experiments'
+								  ),
+							{
+								b: <b />,
+							}
+						) }
+					</PanelRow>
+				) : null }
+				{ attachment.mexp_blurhash ? (
 					<PanelRow>
 						{ createInterpolateElement(
 							sprintf(
@@ -132,11 +146,11 @@ export function DebugInfo( { id }: DebugInfoProps ) {
 								b: <b />,
 								Blurhash: (
 									<Blurhash
-										hash={ attachment.meta.mexp_blurhash }
+										hash={ attachment.mexp_blurhash }
 										width={ 100 }
 										height={ 100 / aspectRatio }
 										data-blurhash={
-											attachment.meta.mexp_blurhash
+											attachment.mexp_blurhash
 										}
 									/>
 								),

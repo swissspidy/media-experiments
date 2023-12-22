@@ -25,7 +25,7 @@ export function MuteVideo( { id, url, poster, onChange }: MuteVideoProps ) {
 		[]
 	);
 
-	if ( ! post || post.meta.mexp_is_muted ) {
+	if ( ! post || post.mexp_is_muted ) {
 		return null;
 	}
 
@@ -37,8 +37,8 @@ export function MuteVideo( { id, url, poster, onChange }: MuteVideoProps ) {
 			poster,
 			onChange: ( [ media ] ) => onChange( media ),
 			onSuccess: ( [ media ] ) => onChange( media ),
-			blurHash: post?.meta.mexp_blurhash,
-			dominantColor: post?.meta.mexp_dominant_color,
+			blurHash: post?.mexp_blurhash,
+			dominantColor: post?.mexp_dominant_color,
 			generatedPosterId: post?.meta.mexp_generated_poster_id,
 			additionalData: {
 				post: currentPostId,

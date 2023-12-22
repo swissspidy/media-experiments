@@ -28,7 +28,7 @@ export function GenerateSubtitles( {
 		[]
 	);
 
-	if ( ! post || post.meta.mexp_is_muted || attributes.tracks.length > 0 ) {
+	if ( ! post || post.mexp_is_muted || attributes.tracks.length > 0 ) {
 		return null;
 	}
 

@@ -77,8 +77,8 @@ export function OptimizeMedia( {
 					}
 				);
 			},
-			blurHash: attachment.meta.mexp_blurhash,
-			dominantColor: attachment.meta.mexp_dominant_color,
+			blurHash: attachment.mexp_blurhash,
+			dominantColor: attachment.mexp_dominant_color,
 			generatedPosterId: attachment.meta.mexp_generated_poster_id,
 			additionalData: {
 				post: currentPostId,

@@ -218,7 +218,7 @@ function enqueue_block_editor_assets(): void {
  *
  * @return void
  */
-function enqueue_block_assets() {
+function enqueue_block_assets(): void {
 	if ( ! is_admin() ) {
 		return;
 	}
@@ -291,7 +291,7 @@ function register_rest_fields(): void {
 			'schema'       => [
 				'description' => __( 'Original attachment file name', 'media-experiments' ),
 				'type'        => 'string',
-				'context'     => [ 'edit' ],
+				'context'     => [ 'view', 'edit' ],
 			],
 			'get_callback' => __NAMESPACE__ . '\rest_get_attachment_filename',
 		]
@@ -304,9 +304,62 @@ function register_rest_fields(): void {
 			'schema'       => [
 				'description' => __( 'Attachment file size', 'media-experiments' ),
 				'type'        => 'number',
-				'context'     => [ 'edit' ],
+				'context'     => [ 'view', 'edit' ],
 			],
 			'get_callback' => __NAMESPACE__ . '\rest_get_attachment_filesize',
+		]
+	);
+
+	register_rest_field(
+		'attachment',
+		'mexp_blurhash',
+		[
+			'schema'       => [
+				'description' => __( 'Attachment BlurHash', 'media-experiments' ),
+				'type'        => 'string',
+				'context'     => [ 'view', 'edit' ],
+			],
+			'get_callback' => __NAMESPACE__ . '\rest_get_attachment_blurhash',
+		]
+	);
+
+	register_rest_field(
+		'attachment',
+		'mexp_dominant_color',
+		[
+			'schema'       => [
+				'description' => __( 'Dominant color of the attachment', 'media-experiments' ),
+				'type'        => 'string',
+				'context'     => [ 'view', 'edit' ],
+			],
+			'get_callback' => __NAMESPACE__ . '\rest_get_attachment_dominant_color',
+		]
+	);
+
+	register_rest_field(
+		'attachment',
+		'mexp_is_muted',
+		[
+			'schema'       => [
+				'description' => __( 'Whether the video is muted', 'media-experiments' ),
+				'type'        => 'boolean',
+				'default'     => false,
+				'context'     => [ 'view', 'edit' ],
+			],
+			'get_callback' => __NAMESPACE__ . '\rest_get_attachment_is_muted',
+		]
+	);
+
+	register_rest_field(
+		'attachment',
+		'mexp_has_transparency',
+		[
+			'schema'       => [
+				'description' => __( 'Whether the attachment has transparency', 'media-experiments' ),
+				'type'        => 'boolean',
+				'context'     => [ 'view', 'edit' ],
+			],
+			'get_callback' => __NAMESPACE__ . '\rest_get_attachment_has_transparency',
 		]
 	);
 }
@@ -363,6 +416,50 @@ function get_attachment_filesize( int $attachment_id ): ?int {
 }
 
 /**
+ * Returns the attachment's BlurHash.
+ *
+ * @param array $post Post data.
+ * @return string|null Attachment BlurHash.
+ */
+function rest_get_attachment_blurhash( array $post ): ?string {
+	$meta = wp_get_attachment_metadata( $post['id'] );
+	return $meta['blurhash'] ?? null;
+}
+
+/**
+ * Returns the attachment's dominant color.
+ *
+ * @param array $post Post data.
+ * @return int|null Attachment dominant color.
+ */
+function rest_get_attachment_dominant_color( array $post ): ?string {
+	$meta = wp_get_attachment_metadata( $post['id'] );
+	return $meta['dominant_color'] ?? null;
+}
+
+/**
+ * Returns whether the attachment is muted.
+ *
+ * @param array $post Post data.
+ * @return bool Whether attachment is muted.
+ */
+function rest_get_attachment_is_muted( array $post ): bool {
+	$meta = wp_get_attachment_metadata( $post['id'] );
+	return isset( $meta['is_muted'] ) && $meta['is_muted'];
+}
+
+/**
+ * Returns whether the attachment has transparency (alpha channel).
+ *
+ * @param array $post Post data.
+ * @return bool|null Whether attachment has transparency.
+ */
+function rest_get_attachment_has_transparency( array $post ): ?bool {
+	$meta = wp_get_attachment_metadata( $post['id'] );
+	return isset( $meta['has_transparency'] ) ? (bool) $meta['has_transparency'] : null;
+}
+
+/**
  * Sets the featured image when uploading a new attachment via the REST API.
  *
  * @see \WP_REST_Posts_Controller::handle_featured_media
@@ -403,36 +500,6 @@ function rest_create_attachment_handle_featured_media( int $value, WP_Post $post
 function register_attachment_post_meta(): void {
 	register_post_meta(
 		'attachment',
-		'mexp_blurhash',
-		[
-			'type'         => 'string',
-			'description'  => __( 'BlurHash of the object.', 'media-experiments' ),
-			'show_in_rest' => [
-				'schema' => [
-					'type' => 'string',
-				],
-			],
-			'single'       => true,
-		]
-	);
-
-	register_post_meta(
-		'attachment',
-		'mexp_dominant_color',
-		[
-			'type'         => 'string',
-			'description'  => __( 'Dominant color of the object.', 'media-experiments' ),
-			'show_in_rest' => [
-				'schema' => [
-					'type' => 'string',
-				],
-			],
-			'single'       => true,
-		]
-	);
-
-	register_post_meta(
-		'attachment',
 		'mexp_generated_poster_id',
 		[
 			'type'              => 'integer',
@@ -441,19 +508,6 @@ function register_attachment_post_meta(): void {
 			'single'            => true,
 			'default'           => 0,
 			'sanitize_callback' => 'absint',
-		]
-	);
-
-	register_post_meta(
-		'attachment',
-		'mexp_is_muted',
-		[
-			'type'              => 'boolean',
-			'description'       => __( 'Whether the video is muted.', 'media-experiments' ),
-			'show_in_rest'      => true,
-			'single'            => true,
-			'default'           => false,
-			'sanitize_callback' => 'rest_sanitize_boolean',
 		]
 	);
 
@@ -687,6 +741,52 @@ function rest_after_insert_attachment_copy_metadata( WP_Post $attachment, WP_RES
 }
 
 /**
+ * Fires after a single attachment is completely created or updated via the REST API.
+ *
+ * Inserts additional information from provided REST fields to generated attachment metadata.
+ *
+ * @param WP_Post         $attachment Inserted or updated attachment object.
+ * @param WP_REST_Request $request    Request object.
+ * @phpstan-param WP_REST_Request<array{mexp_blurhash?: string, mexp_dominant_color?: string, mexp_is_muted?: bool, mexp_has_transparency?: bool}> $request
+ */
+function rest_after_insert_attachment_insert_additional_metadata( WP_Post $attachment, WP_REST_Request $request ): void {
+	/**
+	 * Filters the generated attachment meta data.
+	 *
+	 * @param array  $metadata      An array of attachment meta data.
+	 * @param int    $attachment_id Current attachment ID.
+	 * @return array Filtered meta data.
+	 */
+	$filter_attachment_metadata = static function ( array $metadata, int $attachment_id ) use ( $attachment, $request ) {
+		// TODO: Remove filter again here?
+
+		if ( $attachment_id !== $attachment->ID ) {
+			return $metadata;
+		}
+
+		if ( isset( $request['mexp_blurhash'] ) ) {
+			$metadata['blurhash'] = sanitize_text_field( $request['mexp_blurhash'] );
+		}
+
+		if ( isset( $request['mexp_dominant_color'] ) ) {
+			$metadata['dominant_color'] = sanitize_text_field( $request['mexp_dominant_color'] );
+		}
+
+		if ( isset( $request['mexp_is_muted'] ) ) {
+			$metadata['is_muted'] = rest_sanitize_boolean( $request['mexp_is_muted'] );
+		}
+
+		if ( isset( $request['mexp_has_transparency'] ) ) {
+			$metadata['has_transparency'] = rest_sanitize_boolean( $request['mexp_has_transparency'] );
+		}
+
+		return $metadata;
+	};
+
+	add_filter( 'wp_generate_attachment_metadata', $filter_attachment_metadata, 10, 2 );
+}
+
+/**
  * Filters the arguments for registering a post type.
  *
  * @since 4.4.0
@@ -751,8 +851,18 @@ function filter_wp_content_img_tag_add_placeholders( string $filtered_image, str
 		return $filtered_image;
 	}
 
-	$dominant_color = get_post_meta( $attachment_id, 'mexp_dominant_color', true );
-	$blurhash       = get_post_meta( $attachment_id, 'mexp_blurhash', true );
+	$meta = wp_get_attachment_metadata( $attachment_id );
+
+	if ( ! $meta ) {
+		return $filtered_image;
+	}
+
+	if ( $meta['has_transparency'] ) {
+		return $filtered_image;
+	}
+
+	$dominant_color = $meta['dominant_color'];
+	$blurhash       = $meta['blurhash'];
 
 	if ( ! is_string( $dominant_color ) && ! is_string( $blurhash ) ) {
 		return $filtered_image;

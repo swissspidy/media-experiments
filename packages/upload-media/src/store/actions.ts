@@ -29,6 +29,7 @@ import {
 	vipsCompressImage,
 	vipsConvertImageFormat,
 	vipsResizeImage,
+	vipsHasTransparency,
 } from './utils/vips';
 import type {
 	AddAction,
@@ -58,6 +59,7 @@ import type {
 	TranscodingPrepareAction,
 	TranscodingStartAction,
 	UploadStartAction,
+	CreateRestAttachment,
 } from './types';
 import { ItemStatus, TranscodingType, Type } from './types';
 
@@ -1407,19 +1409,18 @@ export function uploadItem( id: QueueItemId ) {
 
 		dispatch.startUploading( id );
 
-		const additionalData = {
+		const additionalData: Partial< CreateRestAttachment > = {
 			...item.additionalData,
 			mexp_media_source: item.mediaSourceTerms
 				?.map( ( slug ) => select.getMediaSourceTermId( slug ) )
 				.filter( Boolean ) as number[],
 			// generatedPosterId is set when using muteExistingVideo() for example.
 			meta: {
-				mexp_blurhash: item.blurHash,
-				mexp_dominant_color: item.dominantColor,
 				mexp_generated_poster_id: item.generatedPosterId,
 				mexp_original_id: item.sourceAttachmentId,
-				mexp_is_muted: false,
 			},
+			mexp_blurhash: item.blurHash,
+			mexp_dominant_color: item.dominantColor,
 			featured_media: item.generatedPosterId,
 		};
 
@@ -1445,18 +1446,18 @@ export function uploadItem( id: QueueItemId ) {
 				const hasAudio =
 					item.attachment?.url &&
 					( await videoHasAudio( item.attachment.url ) );
-				additionalData.meta.mexp_is_muted = ! hasAudio;
+				additionalData.mexp_is_muted = ! hasAudio;
 			} catch {
 				// No big deal if this fails, we can still continue uploading.
 			}
 		}
 
-		if ( ! additionalData.meta.mexp_dominant_color && stillUrl ) {
+		if ( ! additionalData.mexp_dominant_color && stillUrl ) {
 			// TODO: Make this async after upload?
 			// Could be made reusable to enable backfilling of existing blocks.
 			// TODO: Create a scaled-down version of the image first for performance reasons.
 			try {
-				additionalData.meta.mexp_dominant_color =
+				additionalData.mexp_dominant_color =
 					await dominantColorWorker.getDominantColor( stillUrl );
 			} catch ( err ) {
 				// No big deal if this fails, we can still continue uploading.
@@ -1464,12 +1465,25 @@ export function uploadItem( id: QueueItemId ) {
 			}
 		}
 
-		if ( ! additionalData.meta?.mexp_blurhash && stillUrl ) {
+		if ( 'image' === mediaType && stillUrl ) {
 			// TODO: Make this async after upload?
 			// Could be made reusable to enable backfilling of existing blocks.
 			// TODO: Create a scaled-down version of the image first for performance reasons.
 			try {
-				additionalData.meta.mexp_blurhash =
+				additionalData.mexp_has_transparency =
+					await vipsHasTransparency( stillUrl );
+			} catch ( err ) {
+				// No big deal if this fails, we can still continue uploading.
+				// TODO: Debug & catch & throw.
+			}
+		}
+
+		if ( ! additionalData.mexp_blurhash && stillUrl ) {
+			// TODO: Make this async after upload?
+			// Could be made reusable to enable backfilling of existing blocks.
+			// TODO: Create a scaled-down version of the image first for performance reasons.
+			try {
+				additionalData.mexp_blurhash =
 					await blurhashWorker.getBlurHash( stillUrl );
 			} catch ( err ) {
 				// No big deal if this fails, we can still continue uploading.
