@@ -412,7 +412,7 @@ test.describe( 'Image block', () => {
 		);
 	} );
 
-	test.only( 'detects transparency in image', async ( {
+	test( 'detects transparency in image', async ( {
 		admin,
 		page,
 		editor,
