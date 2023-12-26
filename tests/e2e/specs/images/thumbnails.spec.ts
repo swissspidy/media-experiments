@@ -120,7 +120,9 @@ test.describe( 'Images', () => {
 							// @ts-ignore
 							media.media_details.sizes.thumbnail.source_url
 						)
-					).toMatchSnapshot();
+					).toMatchSnapshot(
+						`thumbnail-generation-${ thumbnailGeneration }.jpeg`
+					);
 				}
 			);
 		}

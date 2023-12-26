@@ -80,6 +80,6 @@ test.describe( 'PDF', () => {
 				// @ts-ignore
 				media.media_details.sizes.full.source_url
 			)
-		).toMatchSnapshot();
+		).toMatchSnapshot( `pdf-thumbnail-generation.jpeg` );
 	} );
 } );
