@@ -118,7 +118,7 @@ test.describe( 'Images', () => {
 					expect(
 						await mediaUtils.getImageBuffer(
 							// @ts-ignore
-							media.media_details.sizes.thumbnail.src
+							media.media_details.sizes.thumbnail.source_url
 						)
 					).toMatchSnapshot();
 				}
