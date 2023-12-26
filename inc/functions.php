@@ -857,12 +857,12 @@ function filter_wp_content_img_tag_add_placeholders( string $filtered_image, str
 		return $filtered_image;
 	}
 
-	if ( $meta['has_transparency'] ) {
+	if ( isset( $meta['has_transparency'] ) && $meta['has_transparency'] ) {
 		return $filtered_image;
 	}
 
-	$dominant_color = $meta['dominant_color'];
-	$blurhash       = $meta['blurhash'];
+	$dominant_color = $meta['dominant_color'] ?? null;
+	$blurhash       = $meta['blurhash'] ?? null;
 
 	if ( ! is_string( $dominant_color ) && ! is_string( $blurhash ) ) {
 		return $filtered_image;
