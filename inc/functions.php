@@ -378,7 +378,7 @@ function rest_get_attachment_filename( array $post ): ?string {
 		return basename( $path );
 	}
 
-	$path = get_attached_file(  $post['id'] );
+	$path = get_attached_file( $post['id'] );
 
 	if ( $path ) {
 		return basename( $path );
