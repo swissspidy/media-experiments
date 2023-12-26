@@ -117,10 +117,3 @@ jobs:
               with:
                   name: ${{ env.ARTIFACT_NAME }}-snapshots
                   path: tests/e2e/specs/images/__snapshots__
-
-            - name: Upload pdf snapshots
-              uses: actions/upload-artifact@v4
-              if: always()
-              with:
-                  name: ${{ env.ARTIFACT_NAME }}-snapshots
-                  path: tests/e2e/specs/__snapshots__
