@@ -38,7 +38,6 @@ const config = defineConfig( {
 			name: 'chromium',
 			use: { ...devices[ 'Desktop Chrome' ] },
 		},
-		// Probably just disalbe Webkit tests because of
 		{
 			name: 'webkit',
 			use: { ...devices[ 'Desktop Safari' ] },
