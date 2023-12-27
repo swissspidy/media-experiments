@@ -41,6 +41,6 @@ export class MediaUtils {
 
 	async getImageBuffer( url: string ) {
 		const response = await this.page.request.get( url );
-		return await response.body();
+		return response.body();
 	}
 }

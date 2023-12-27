@@ -1064,6 +1064,7 @@ export function optimizeImageItem(
 				throw new Error( 'Unsupported file type' );
 			}
 
+			// TODO: Use default_outputFormat if this is e.g. a PDF thumbnail.
 			const outputFormat: ImageFormat =
 				registry
 					.select( preferencesStore )

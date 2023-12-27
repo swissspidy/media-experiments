@@ -374,11 +374,17 @@ function register_rest_fields(): void {
 function rest_get_attachment_filename( array $post ): ?string {
 	$path = wp_get_original_image_path( $post['id'] );
 
-	if ( ! $path ) {
-		return null;
+	if ( $path ) {
+		return basename( $path );
 	}
 
-	return basename( $path );
+	$path = get_attached_file( $post['id'] );
+
+	if ( $path ) {
+		return basename( $path );
+	}
+
+	return null;
 }
 
 /**
