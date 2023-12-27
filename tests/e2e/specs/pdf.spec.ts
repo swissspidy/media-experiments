@@ -86,7 +86,7 @@ test.describe( 'PDF', () => {
 				media.media_details.sizes.full.source_url
 			)
 		).toMatchSnapshot( 'pdf-thumbnail-generation.jpeg', {
-			threshold: 0.1,
+			maxDiffPixelRatio: 0.05,
 		} );
 	} );
 } );

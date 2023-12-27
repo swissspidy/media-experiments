@@ -121,8 +121,7 @@ test.describe( 'Images', () => {
 							media.media_details.sizes.thumbnail.source_url
 						)
 					).toMatchSnapshot(
-						`thumbnail-generation-${ thumbnailGeneration }.jpeg`,
-						{ threshold: 0.1 }
+						`thumbnail-generation-${ thumbnailGeneration }.jpeg`
 					);
 				}
 			);
