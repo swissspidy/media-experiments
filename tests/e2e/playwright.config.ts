@@ -14,13 +14,12 @@ const config = defineConfig( {
 			{
 				outputFile: './artifacts/e2e-coverage/report.html',
 				logging: 'off',
-				foo: 'bar',
 				coverage: {
 					entryFilter: ( entry: any ) => {
 						return (
 							entry.url.startsWith( 'blob:' ) ||
 							entry.url.includes(
-								'media-experiments/build/media-experiments.js'
+								'plugins/media-experiments/build/'
 							)
 						);
 					},
