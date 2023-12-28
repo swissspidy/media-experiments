@@ -35,4 +35,11 @@ class Avif_Test extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'image', $actual );
 		$this->assertContains( 'avif', $actual['image'] );
 	}
+
+	public function test_filter_file_is_displayable_image() {
+		$actual = file_is_displayable_image( DIR_PLUGIN_TESTDATA . '/media/fox.avif' );
+		$this->assertTrue( $actual );
+		$actual = MediaExperiments\filter_file_is_displayable_image( false, DIR_PLUGIN_TESTDATA . '/media/fox.avif' );
+		$this->assertTrue( $actual );
+	}
 }
