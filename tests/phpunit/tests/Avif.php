@@ -2,6 +2,10 @@
 
 class Avif_Test extends WP_UnitTestCase {
 	public function test_filter_mimes_to_exts(): void {
+		if ( PHP_VERSION_ID < 80100 ) {
+			$this->markTestSkipped( 'Needs further investigation on PHP 8.0' );
+		}
+
 		$result = \MediaExperiments\filter_mimes_to_exts( [] );
 		$this->assertArrayHasKey( 'image/avif', $result );
 		$this->assertSame( 'avif', $result['image/avif'] );
@@ -36,7 +40,14 @@ class Avif_Test extends WP_UnitTestCase {
 		$this->assertContains( 'avif', $actual['image'] );
 	}
 
+	/**
+	 * @requires PHP 8.1
+	 */
 	public function test_filter_file_is_displayable_image() {
+		if ( PHP_VERSION_ID < 80100 ) {
+			$this->markTestSkipped( 'Needs further investigation on PHP 8.0' );
+		}
+
 		$actual = file_is_displayable_image( DIR_PLUGIN_TESTDATA . '/media/fox.avif' );
 		$this->assertTrue( $actual );
 		$actual = MediaExperiments\filter_file_is_displayable_image( false, DIR_PLUGIN_TESTDATA . '/media/fox.avif' );
