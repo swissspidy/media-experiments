@@ -9,6 +9,7 @@ declare(strict_types = 1);
 
 namespace MediaExperiments;
 
+use MediaExperiments\AvifInfo\Parser;
 use WP_Error;
 use WP_Post;
 use WP_Query;
@@ -26,9 +27,46 @@ use function register_post_meta;
  * @phpstan-param array<string, string> $mime_to_ext
  * @phpstan-return array<string, string>
  */
-function filter_mimes_to_exts( array $mime_to_ext ): array {
+function filter_getimagesize_mimes_to_exts( array $mime_to_ext ): array {
 	$mime_to_ext['image/avif'] = 'avif';
 	return $mime_to_ext;
+}
+
+/**
+ * Filters the "real" file type of the given file.
+ *
+ * @since 3.0.0
+ * @since 5.1.0 The $real_mime parameter was added.
+ *
+ * @param array         $result {
+ *     Values for the extension, mime type, and corrected filename.
+ *
+ *     @type string|false $ext             File extension, or false if the file doesn't match a mime type.
+ *     @type string|false $type            File mime type, or false if the file doesn't match a mime type.
+ *     @type string|false $proper_filename File name with its correct extension, or false if it cannot be determined.
+ * }
+ * @param string        $file                      Full path to the file.
+ * @param string        $filename                  The name of the file (may differ from $file due to
+ *                                                 $file being in a tmp directory).
+ * @param string[]|null $mimes                     Array of mime types keyed by their file extension regex, or null if
+ *                                                 none were provided.
+ * @return array Values for the extension, mime type, and corrected filename.
+ */
+function filter_wp_check_filetype_and_ext( $result, $file, string $filename, ?array $mimes ) {
+	if ( false !== $result['ext'] || false !== $result['type'] ) {
+		return $result;
+	}
+
+	// Do basic extension validation and MIME mapping.
+	$wp_filetype = wp_check_filetype( $filename, $mimes );
+	$type        = $wp_filetype['type'];
+
+	if ( $type && str_starts_with( $type, 'image/' ) && ! wp_get_image_mime( $file ) && has_avif_bytes( $file ) ) {
+		$result['type'] = 'image/avif';
+		$result['ext']  = 'avif';
+	}
+
+	return $result;
 }
 
 /**
@@ -63,6 +101,82 @@ function filter_ext_types( array $ext2type ): array {
 }
 
 /**
+ * Extracts meta information about an AVIF file: width, height, and type.
+ *
+ * @param string $filename Path to an AVIF file.
+ * @return array {
+ *    An array of AVIF image information.
+ *
+ *   @type int|false    $width  Image width on success, false on failure.
+ *   @type int|false    $height Image height on success, false on failure.
+ *   @type string|false $type   The AVIF type: one of 'lossy' or 'lossless'. False on failure.
+ * }
+ */
+function get_avif_info( string $filename ): array {
+	$width  = false;
+	$height = false;
+	$type   = false;
+
+	if ( function_exists( 'avif_get_info' ) ) {
+
+		$avif_info = avif_get_info( $filename );
+
+		if ( ! $avif_info ) {
+			return compact( 'width', 'height', 'type' );
+		}
+
+		$width  = $avif_info['width'];
+		$height = $avif_info['height'];
+		$type   = $avif_info['type'];
+
+		return compact( 'width', 'height', 'type' );
+	} else {
+		// Fall back to directly parsing the file headers.
+		require_once __DIR__ . '/class-avif-info.php';
+		$features = array(
+			'width'        => false,
+			'height'       => false,
+			'bit_depth'    => false,
+			'num_channels' => false,
+		);
+
+		$handle = fopen( $filename, 'rb' );
+		if ( $handle ) {
+			$parser  = new Parser( $handle );
+			$success = $parser->parse_ftyp() && $parser->parse_file();
+			fclose( $handle );
+			if ( $success ) {
+				$features = $parser->features->primary_item_features;
+			}
+		}
+
+		return $features;
+
+	}
+}
+
+/**
+ * Add AVIF fallback detection when image library doesn't support AVIF.
+ *
+ * Note: detection values come from libavif.
+ *
+ * @param string $filename File name.
+ *
+ * @return bool
+ */
+function has_avif_bytes( string $filename ): bool {
+	$magic = file_get_contents( $filename, false, null, 0, 12 );
+
+	if ( false === $magic ) {
+		return false;
+	}
+
+	$magic = bin2hex( $magic );
+
+	return str_starts_with( $magic, '0000002066' );
+}
+
+/**
  * Filters whether the current image is displayable in the browser.
  *
  * @param bool   $result Whether the image can be displayed. Default true.
@@ -83,6 +197,32 @@ function filter_file_is_displayable_image( bool $result, string $path ): bool {
 	$displayable_image_types = [ IMAGETYPE_AVIF ];
 
 	$info = wp_getimagesize( $path );
+
+	if ( false === $info ) {
+		// For PHP versions that don't support AVIF images,
+		// extract the image size info from the file headers.
+		if ( 'image/avif' === wp_get_image_mime( $path ) || has_avif_bytes( $path ) ) {
+			$avif_info = get_avif_info( $path );
+			$width     = $avif_info['width'];
+			$height    = $avif_info['height'];
+
+			// Mimic the native return format.
+			if ( $width && $height ) {
+				$info = [
+					$width,
+					$height,
+					IMAGETYPE_AVIF,
+					sprintf(
+						'width="%d" height="%d"',
+						$width,
+						$height
+					),
+					'mime' => 'image/avif',
+				];
+			}
+		}
+	}
+
 	return is_array( $info ) && in_array( $info[2], $displayable_image_types, true );
 }
 

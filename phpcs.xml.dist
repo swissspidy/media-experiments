@@ -45,6 +45,7 @@
 	<config name="testVersion" value="8.0-"/>
 
 	<exclude-pattern>inc/class-blurhash.php</exclude-pattern>
+	<exclude-pattern>inc/class-avif-info.php</exclude-pattern>
 	<exclude-pattern>*/build/*</exclude-pattern>
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
 	<exclude-pattern>*/vendor/*</exclude-pattern>

@@ -31,10 +31,11 @@ add_filter( 'wp_prepare_attachment_for_js', __NAMESPACE__ . '\filter_wp_prepare_
 add_filter( 'wp_content_img_tag', __NAMESPACE__ . '\filter_wp_content_img_tag_add_placeholders', 100, 3 );
 
 // AVIF support, see https://github.com/swissspidy/media-experiments/issues/6.
-add_filter( 'getimagesize_mimes_to_exts', __NAMESPACE__ . '\filter_mimes_to_exts' );
+add_filter( 'getimagesize_mimes_to_exts', __NAMESPACE__ . '\filter_getimagesize_mimes_to_exts' );
 add_filter( 'mime_types', __NAMESPACE__ . '\filter_mime_types' );
 add_filter( 'ext2type', __NAMESPACE__ . '\filter_ext_types' );
 add_filter( 'file_is_displayable_image', __NAMESPACE__ . '\filter_file_is_displayable_image', 10, 2 );
+add_filter( 'wp_check_filetype_and_ext', __NAMESPACE__ . '\filter_wp_check_filetype_and_ext', 10, 4 );
 
 // Upload requests, see https://github.com/swissspidy/media-experiments/issues/246.
 
