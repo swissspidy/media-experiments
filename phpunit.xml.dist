@@ -28,7 +28,7 @@
 	</groups>
 
 	<filter>
-		<whitelist processUncoveredFilesFromWhitelist="true">
+		<whitelist processUncoveredFilesFromWhitelist="false">
 			<directory suffix=".php">./inc/</directory>
 		</whitelist>
 	</filter>
