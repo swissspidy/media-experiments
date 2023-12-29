@@ -12,7 +12,6 @@ namespace MediaExperiments;
 use MediaExperiments\AvifInfo\Parser;
 use WP_Error;
 use WP_Post;
-use WP_Query;
 use WP_REST_Request;
 use WP_Screen;
 use function register_post_meta;
@@ -51,6 +50,9 @@ function filter_getimagesize_mimes_to_exts( array $mime_to_ext ): array {
  * @param string[]|null $mimes                     Array of mime types keyed by their file extension regex, or null if
  *                                                 none were provided.
  * @return array Values for the extension, mime type, and corrected filename.
+ *
+ * @phpstan-param array{ext: false|string, type: false|string, proper_filename: false|string} $result
+ * @phpstan-return array{ext: false|string, type: false|string, proper_filename: false|string}
  */
 function filter_wp_check_filetype_and_ext( $result, $file, string $filename, ?array $mimes ) {
 	if ( false !== $result['ext'] || false !== $result['type'] ) {
@@ -1164,7 +1166,7 @@ function register_upload_request_post_type(): void {
  * @param string $template Template path.
  * @return string Filtered template path.
  */
-function load_upload_request_template( string $template ) {
+function load_upload_request_template( string $template ): string {
 	if ( is_singular( 'mexp-upload-request' ) ) {
 		require_once plugin_dir_path( __FILE__ ) . '/class-cross-origin-isolation.php';
 		$instance = new Cross_Origin_Isolation();
@@ -1223,6 +1225,8 @@ function delete_old_upload_requests(): void {
 /**
  * Plugin activation hook.
  *
+ * @codeCoverageIgnore
+ *
  * @return void
  */
 function activate_plugin(): void {
@@ -1237,6 +1241,8 @@ function activate_plugin(): void {
 
 /**
  * Plugin deactivation hook.
+ *
+ * @codeCoverageIgnore
  *
  * @return void
  */

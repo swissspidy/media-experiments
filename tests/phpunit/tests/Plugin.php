@@ -10,4 +10,9 @@ class Plugin_Test extends WP_UnitTestCase {
 			$this->assertIsString( $size['name'] );
 		}
 	}
+
+	public function test_add_quarter_hourly_cron_interval() {
+		$schedules = wp_get_schedules();
+		$this->assertArrayHasKey( 'quarter_hourly', $schedules );
+	}
 }
