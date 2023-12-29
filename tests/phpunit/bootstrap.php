@@ -25,8 +25,8 @@ function _manually_load_plugin() {
 
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 
-define( 'DIR_PLUGIN_TESTDATA', realpath( __DIR__ . '/data' ) );
-define( 'WP_PLUGIN_DIR', realpath( __DIR__ . '/data/plugins' ) );
+define( 'DIR_PLUGIN_TESTDATA', __DIR__ . '/data' );
+define( 'WP_PLUGIN_DIR', __DIR__ . '/data/plugins' );
 
 // Start up the WP testing environment.
 require $_tests_dir . '/includes/bootstrap.php';
