@@ -13,6 +13,7 @@ import {
 	TRANSCODABLE_MIME_TYPES,
 } from './constants';
 import { UploadError } from './uploadError';
+import type { Attachment, RestAttachment } from './store/types';
 
 // TODO: Make work for HEIF, GIF and audio as well.
 export function canTranscodeFile( file: File ) {
@@ -302,4 +303,20 @@ export async function compressImage( file: File, quality = 0.82 ) {
 		throw new Error( 'Unsupported file type' );
 	}
 	return convertImageFormat( file, file.type, quality );
+}
+
+export function transformAttachment( attachment: RestAttachment ): Attachment {
+	return {
+		id: attachment.id,
+		alt: attachment.alt_text,
+		caption: attachment.caption?.raw ?? '',
+		title: attachment.title.raw,
+		url: attachment.source_url,
+		mimeType: attachment.mime_type,
+		blurHash: attachment.mexp_blurhash,
+		dominantColor: attachment.mexp_dominant_color,
+		posterId: attachment.featured_media,
+		missingImageSizes: attachment.missing_image_sizes,
+		fileName: attachment.mexp_filename,
+	} as Attachment;
 }

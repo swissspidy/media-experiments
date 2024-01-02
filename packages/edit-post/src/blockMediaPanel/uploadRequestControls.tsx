@@ -18,11 +18,12 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as editorStore } from '@wordpress/editor';
 import { store as noticesStore } from '@wordpress/notices';
 
-import type { RestAttachment } from '@mexp/upload-media';
+import type { RestAttachment, Attachment } from '@mexp/upload-media';
+import { transformAttachment } from '@mexp/upload-media';
 
 interface UploadRequestControlsProps {
 	url?: string;
-	onInsert: ( url?: string ) => void;
+	onInsert: ( media: Partial< Attachment >[] ) => void;
 }
 
 const UPLOAD_REQUEST_CHECK_INTERVAL = 5; // Seconds.
@@ -100,7 +101,7 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 			);
 
 			if ( attachments && attachments.length > 0 ) {
-				props.onInsert( attachments[ 0 ].source_url );
+				props.onInsert( attachments.map( transformAttachment ) );
 				void deleteUploadRequest();
 				void closeModal();
 				void createSuccessNotice(

@@ -45,12 +45,14 @@ export function ImageControls( props: ImageControlsProps ) {
 		}
 	}
 
-	function onInsertFromUploadRequest( url?: string ) {
-		if ( url ) {
-			props.setAttributes( {
-				url,
-			} );
+	function onInsertFromUploadRequest( [ media ]: Partial< Attachment >[] ) {
+		if ( ! media || ! media.url ) {
+			return;
 		}
+		props.setAttributes( {
+			id: media.id,
+			url: media.url,
+		} );
 	}
 
 	return (

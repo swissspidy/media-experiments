@@ -1,33 +1,18 @@
 import apiFetch from '@wordpress/api-fetch';
 
 import type {
-	Attachment,
 	CreateRestAttachment,
 	RestAttachment,
 	SideloadAdditionalData,
 } from './store/types';
+import { transformAttachment } from './utils';
 
 export async function uploadToServer(
 	file: File,
 	additionalData: CreateRestAttachment = {}
 ) {
 	const savedMedia = await createMediaFromFile( file, additionalData );
-
-	// TODO: Check if a poster happened to be uploaded on the server side already (check featured_media !== 0).
-	// In that case there is no need for client-side generation.
-	return {
-		id: savedMedia.id,
-		alt: savedMedia.alt_text,
-		caption: savedMedia.caption?.raw ?? '',
-		title: savedMedia.title.raw,
-		url: savedMedia.source_url,
-		mimeType: savedMedia.mime_type,
-		blurHash: savedMedia.mexp_blurhash,
-		dominantColor: savedMedia.mexp_dominant_color,
-		posterId: savedMedia.featured_media,
-		missingImageSizes: savedMedia.missing_image_sizes,
-		fileName: savedMedia.mexp_filename,
-	} as Attachment;
+	return transformAttachment( savedMedia );
 }
 
 /**

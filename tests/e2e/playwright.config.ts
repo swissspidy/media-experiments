@@ -35,7 +35,10 @@ const config = defineConfig( {
 	projects: [
 		{
 			name: 'chromium',
-			use: { ...devices[ 'Desktop Chrome' ] },
+			use: {
+				...devices[ 'Desktop Chrome' ],
+				permissions: [ 'clipboard-read' ],
+			},
 		},
 		{
 			name: 'webkit',
@@ -43,7 +46,15 @@ const config = defineConfig( {
 		},
 		{
 			name: 'firefox',
-			use: { ...devices[ 'Desktop Firefox' ] },
+			use: {
+				...devices[ 'Desktop Firefox' ],
+				launchOptions: {
+					firefoxUserPrefs: {
+						'dom.events.asyncClipboard.readText': true,
+						'dom.events.testing.asyncClipboard': true,
+					},
+				},
+			},
 		},
 	],
 } );
