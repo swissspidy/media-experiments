@@ -1,5 +1,7 @@
-const { resolve, dirname, basename } = require( 'path' );
+const { resolve, dirname, basename } = require( 'node:path' );
+const { readFileSync } = require( 'node:fs' );
 
+const webpack = require( 'webpack' );
 const RtlCssPlugin = require( 'rtlcss-webpack-plugin' );
 const MiniCSSExtractPlugin = require( 'mini-css-extract-plugin' );
 const { WebWorkerPlugin } = require( '@shopify/web-worker/webpack' );
@@ -8,6 +10,34 @@ const { hasBabelConfig, hasArgInCLI } = require( '@wordpress/scripts/utils' );
 
 const isProduction = process.env.NODE_ENV === 'production';
 const hasReactFastRefresh = hasArgInCLI( '--hot' ) && ! isProduction;
+
+const {
+	version: mediaPipeVersion,
+	// eslint-disable-next-line import/no-extraneous-dependencies
+} = require( '@mediapipe/selfie_segmentation/package.json' );
+
+// eslint-disable-next-line import/no-extraneous-dependencies
+const { version: pdfJsVersion } = require( 'pdfjs-dist/package.json' );
+
+// eslint-disable-next-line import/no-extraneous-dependencies
+const { version: vipsVersion } = JSON.parse(
+	readFileSync(
+		`${ dirname(
+			dirname( require.resolve( 'wasm-vips' ) )
+		) }/package.json`,
+		{
+			encoding: 'utf-8',
+		}
+	)
+);
+
+// eslint-disable-next-line import/no-extraneous-dependencies
+const { version: ffmpegVersion } = require( '@ffmpeg/core/package.json' );
+
+const mediapipeCdnUrl = `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@${ mediaPipeVersion }`;
+const pdfJsCdnUrl = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${ pdfJsVersion }/build/pdf.worker.mjs`;
+const vipsCdnUrl = `https://cdn.jsdelivr.net/npm/wasm-vips@${ vipsVersion }/lib`;
+const ffmpegCdnUrl = `https://cdn.jsdelivr.net/npm/@ffmpeg/core@${ ffmpegVersion }/dist/ffmpeg-core.js`;
 
 module.exports = {
 	...defaultConfig,
@@ -90,6 +120,12 @@ module.exports = {
 		} ),
 		new RtlCssPlugin( {
 			filename: `../build/[name]-rtl.css`,
+		} ),
+		new webpack.DefinePlugin( {
+			FFMPEG_CDN_URL: JSON.stringify( ffmpegCdnUrl ),
+			MEDIAPIPE_CDN_URL: JSON.stringify( mediapipeCdnUrl ),
+			PDFJS_CDN_URL: JSON.stringify( pdfJsCdnUrl ),
+			VIPS_CDN_URL: JSON.stringify( vipsCdnUrl ),
 		} ),
 	],
 	optimization: {

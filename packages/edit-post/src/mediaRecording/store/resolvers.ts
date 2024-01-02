@@ -125,8 +125,7 @@ export function getMediaStream() {
 				);
 
 				const selfieSegmentation = new SelfieSegmentation( {
-					locateFile: ( file ) =>
-						`https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${ file }`,
+					locateFile: ( file ) => `${ MEDIAPIPE_CDN_URL }/${ file }`,
 				} );
 
 				selfieSegmentation.setOptions( {
