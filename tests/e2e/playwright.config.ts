@@ -1,3 +1,5 @@
+import { resolve } from 'node:path';
+
 import type { CoverageReportOptions } from 'monocart-coverage-reports';
 
 import { defineConfig, devices } from '@playwright/test';
@@ -37,7 +39,20 @@ const config = defineConfig( {
 			name: 'chromium',
 			use: {
 				...devices[ 'Desktop Chrome' ],
-				permissions: [ 'clipboard-read' ],
+				permissions: [ 'clipboard-read', 'camera', 'microphone' ],
+				launchOptions: {
+					args: [
+						'--use-fake-ui-for-media-stream',
+						'--use-fake-device-for-media-stream',
+						'--use-file-for-fake-video-capture=' +
+							resolve( __dirname, './assets/reindeer.mjpeg' ),
+						'--use-file-for-fake-audio-capture=' +
+							resolve(
+								__dirname,
+								'./assets/garden-adventures.wav'
+							),
+					],
+				},
 			},
 		},
 		{

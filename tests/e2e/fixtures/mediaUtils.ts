@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { copyFile, mkdtemp } from 'node:fs/promises';
 
 import { v4 as uuidv4 } from 'uuid';
-import type { Page, ElementHandle, Locator } from '@playwright/test';
+import type { Page, Locator } from '@playwright/test';
 
 export class MediaUtils {
 	page: Page;

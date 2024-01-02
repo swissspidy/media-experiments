@@ -1024,37 +1024,41 @@ function filter_wp_content_img_tag_add_placeholders( string $filtered_image, str
 
 	// BlurHash conversion is completely untested. Probably contains faulty logic.
 	if ( is_string( $blurhash ) && ! empty( $blurhash ) ) {
-		$pixels = BlurHash::decode( $blurhash, 4, 3 );
+		try {
+			$pixels = BlurHash::decode( $blurhash, 4, 3 );
 
-		$gradients = [];
+			$gradients = [];
 
-		$rows    = count( $pixels );
-		$columns = count( $pixels[0] );
+			$rows    = count( $pixels );
+			$columns = count( $pixels[0] );
 
-		foreach ( $pixels as $row => $r ) {
-			foreach ( $r as $column => $pixel ) {
-				$c = $column % $columns;
-				$r = $row % $rows;
+			foreach ( $pixels as $row => $r ) {
+				foreach ( $r as $column => $pixel ) {
+					$c = $column % $columns;
+					$r = $row % $rows;
 
-				$percent_x = round( ( $c / ( $columns - 1 ) ) * 100 );
-				$percent_y = round( ( $r / ( $rows - 1 ) ) * 100 );
+					$percent_x = round( ( $c / ( $columns - 1 ) ) * 100 );
+					$percent_y = round( ( $r / ( $rows - 1 ) ) * 100 );
 
-				[ $r, $g, $b ] = $pixel;
-				$rgb           = sprintf( '#%02x%02x%02x', $r, $g, $b );
+					[ $r, $g, $b ] = $pixel;
+					$rgb           = sprintf( '#%02x%02x%02x', $r, $g, $b );
 
-				$gradients[] = sprintf(
-					'radial-gradient(at %1$s%% %2$s%%, %3$s, #00000000 50%%)',
-					$percent_x,
-					$percent_y,
-					$rgb
-				);
+					$gradients[] = sprintf(
+						'radial-gradient(at %1$s%% %2$s%%, %3$s, #00000000 50%%)',
+						$percent_x,
+						$percent_y,
+						$rgb
+					);
+				}
 			}
+
+			wp_register_style( 'mexp-placeholder', false ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+			wp_enqueue_style( 'mexp-placeholder' );
+
+			wp_add_inline_style( 'mexp-placeholder', sprintf( '.mexp-placeholder-%1$s { background-image: %2$s; }', $attachment_id, join( ',', $gradients ) ) );
+		} catch ( \InvalidArgumentException $exception ) {
+			// TODO: Investigate error, which is likely because of a blurhash length mismatch.
 		}
-
-		wp_register_style( 'mexp-placeholder', false ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
-		wp_enqueue_style( 'mexp-placeholder' );
-
-		wp_add_inline_style( 'mexp-placeholder', sprintf( '.mexp-placeholder-%1$s { background-image: %2$s; }', $attachment_id, join( ',', $gradients ) ) );
 	}
 
 	return str_replace( ' class="', ' class="' . $class_name . ' ', $filtered_image );
