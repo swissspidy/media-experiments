@@ -15,4 +15,10 @@ module.exports = {
 	coverageDirectory: '<rootDir>/artifacts/logs',
 	collectCoverageFrom: [ '<rootDir>/packages/*/src/**', '!**/test/**' ],
 	coveragePathIgnorePatterns: [ '/@types/' ],
+	globals: {
+		FFMPEG_CDN_URL: 'https://example.com',
+		MEDIAPIPE_CDN_URL: 'https://example.com',
+		PDFJS_CDN_URL: 'https://example.com',
+		VIPS_CDN_URL: 'https://example.com',
+	},
 };
