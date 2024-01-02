@@ -4,6 +4,8 @@ declare global {
 			bigImageSizeThreshold: number;
 		};
 	}
+
+	const MEDIAPIPE_CDN_URL: string;
 }
 
 export {};

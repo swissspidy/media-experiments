@@ -20,11 +20,7 @@ async function getVips(): Promise< typeof VipsInstance > {
 	}
 
 	const workerBlobUrl = URL.createObjectURL(
-		await (
-			await fetch(
-				`https://cdn.jsdelivr.net/npm/wasm-vips@0.0.7/lib/vips.worker.js`
-			)
-		).blob()
+		await ( await fetch( `${ VIPS_CDN_URL }/vips.worker.js` ) ).blob()
 	);
 
 	vipsInstance = await Vips( {
@@ -33,10 +29,9 @@ async function getVips(): Promise< typeof VipsInstance > {
 			if ( url.endsWith( '.worker.js' ) ) {
 				return workerBlobUrl;
 			}
-			return `https://cdn.jsdelivr.net/npm/wasm-vips@0.0.7/lib/${ fileName }`;
+			return `${ VIPS_CDN_URL }/${ fileName }`;
 		},
-		mainScriptUrlOrBlob:
-			'https://cdn.jsdelivr.net/npm/wasm-vips@0.0.7/lib/vips.js',
+		mainScriptUrlOrBlob: `${ VIPS_CDN_URL }/vips.js`,
 		workaroundCors: true,
 		preRun: ( module: EmscriptenModule ) => {
 			// https://github.com/kleisauke/wasm-vips/issues/13#issuecomment-1073246828

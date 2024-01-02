@@ -10,6 +10,12 @@
 	"settings": {
 		"import/resolver": "@mexp/eslint-import-resolver"
 	},
+	"globals": {
+		"FFMPEG_CDN_URL": "readonly",
+		"MEDIAPIPE_CDN_URL": "readonly",
+		"PDFJS_CDN_URL": "readonly",
+		"VIPS_CDN_URL": "readonly"
+	},
 	"rules": {
 		"@wordpress/no-unused-vars-before-return": [
 			"error",

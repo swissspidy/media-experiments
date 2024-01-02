@@ -62,8 +62,7 @@ const FFMPEG_SHARED_CONFIG = [
 	...FFMPEG_CONFIG.PRESET,
 ];
 
-const ffmpegCoreUrl =
-	'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js';
+const ffmpegCoreUrl = FFMPEG_CDN_URL;
 
 const isDevelopment =
 	typeof process !== 'undefined' &&
