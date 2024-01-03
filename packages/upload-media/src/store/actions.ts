@@ -66,16 +66,13 @@ import { ItemStatus, TranscodingType, Type } from './types';
 const createDominantColorWorker = createWorkerFactory(
 	() =>
 		import(
-			/* webpackChunkName: 'dominant-color' */ '../workers/dominantColor.worker'
+			/* webpackChunkName: 'dominant-color' */ '../workers/dominantColor'
 		)
 );
 const dominantColorWorker = createDominantColorWorker();
 
 const createBlurhashWorker = createWorkerFactory(
-	() =>
-		import(
-			/* webpackChunkName: 'blurhash' */ '../workers/blurhash.worker'
-		)
+	() => import( /* webpackChunkName: 'blurhash' */ '../workers/blurhash' )
 );
 const blurhashWorker = createBlurhashWorker();
 
