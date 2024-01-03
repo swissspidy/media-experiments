@@ -56,14 +56,17 @@ export function getMediaStream() {
 			video: false,
 		};
 
-		if ( select.hasAudio() ) {
+		const hasAudio = select.hasAudio();
+		const hasVideo = select.hasVideo();
+
+		if ( hasAudio ) {
 			const audioInput = select.getAudioInput();
 			mediaStreamConstraints.audio = audioInput
 				? { deviceId: audioInput }
 				: true;
 		}
 
-		if ( select.hasVideo() ) {
+		if ( hasVideo ) {
 			const videoInput = select.getVideoInput();
 			mediaStreamConstraints.video = videoInput
 				? { deviceId: videoInput }
@@ -75,6 +78,15 @@ export function getMediaStream() {
 			const stream = await window.navigator.mediaDevices.getUserMedia(
 				mediaStreamConstraints
 			);
+
+			if ( ! hasVideo ) {
+				dispatch( {
+					type: Type.SetMediaStream,
+					stream,
+					recordingStatus: 'ready',
+				} );
+				return;
+			}
 
 			const video = document.createElement( 'video' );
 

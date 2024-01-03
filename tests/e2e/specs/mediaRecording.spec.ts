@@ -5,13 +5,7 @@ test.describe( 'Media Recording', () => {
 		await requestUtils.deleteAllMedia();
 	} );
 
-	test( 'allows recording a video using the webcam', async ( {
-		admin,
-		page,
-		editor,
-		mediaUtils,
-		browserName,
-	} ) => {
+	test( 'Video', async ( { admin, page, editor, browserName } ) => {
 		// See https://github.com/microsoft/playwright/issues/2973
 		test.skip(
 			browserName !== 'chromium',
@@ -117,5 +111,169 @@ test.describe( 'Media Recording', () => {
 		);
 		await expect( blockAttributes.src ).toMatch( /\.mp4$/ );
 		await expect( blockAttributes.poster ).toMatch( /-poster\.jpeg$/ );
+	} );
+
+	test( 'Image', async ( { admin, page, editor, browserName } ) => {
+		// See https://github.com/microsoft/playwright/issues/2973
+		test.skip(
+			browserName !== 'chromium',
+			'Currently fake streams are not supported in other browsers.'
+		);
+
+		await admin.createNewPost();
+
+		await editor.insertBlock( { name: 'core/image' } );
+
+		const imageBlock = editor.canvas.locator(
+			'role=document[name="Block: Image"i]'
+		);
+		await expect( imageBlock ).toBeVisible();
+
+		const settingsPanel = page
+			.getByRole( 'region', {
+				name: 'Editor settings',
+			} )
+			.getByRole( 'tabpanel', {
+				name: 'Settings',
+			} );
+
+		await settingsPanel.getByRole( 'button', { name: 'Start' } ).click();
+
+		const toolbar = page.getByRole( 'toolbar', { name: 'Block tools' } );
+		await expect(
+			toolbar.getByRole( 'button', { name: 'Select Camera' } )
+		).toBeVisible();
+		await expect(
+			toolbar.getByRole( 'button', { name: 'Select Microphone' } )
+		).not.toBeVisible();
+		await expect(
+			toolbar.getByRole( 'button', { name: 'Enable Background Blur' } )
+		).toBeVisible();
+
+		await toolbar.getByRole( 'button', { name: 'Capture Photo' } ).click();
+
+		await expect(
+			toolbar.getByRole( 'button', { name: 'Insert' } )
+		).toBeVisible();
+		await expect(
+			toolbar.getByRole( 'button', { name: 'Retry' } )
+		).toBeVisible();
+
+		await toolbar.getByRole( 'button', { name: 'Insert' } ).click();
+
+		await expect(
+			page
+				.getByRole( 'button', { name: 'Dismiss this notice' } )
+				.filter( {
+					hasText: 'Sorry, this file type is not supported here',
+				} )
+		).not.toBeVisible();
+
+		await page.waitForFunction(
+			() =>
+				window.wp.data.select( 'media-experiments/upload' ).getItems()
+					.length === 0
+		);
+
+		await expect( settingsPanel ).toHaveText( /Mime type: image\/jpeg/ );
+
+		const blockAttributes = await page.evaluate(
+			() =>
+				window.wp.data.select( 'core/block-editor' ).getSelectedBlock()
+					?.attributes ?? {}
+		);
+		await expect( blockAttributes.url ).toMatch( /\.jpeg$/ );
+	} );
+
+	test( 'Audio', async ( { admin, page, editor, browserName } ) => {
+		// See https://github.com/microsoft/playwright/issues/2973
+		test.skip(
+			browserName !== 'chromium',
+			'Currently fake streams are not supported in other browsers.'
+		);
+
+		await admin.createNewPost();
+
+		await editor.insertBlock( { name: 'core/audio' } );
+
+		const audioBlock = editor.canvas.locator(
+			'role=document[name="Block: Audio"i]'
+		);
+		await expect( audioBlock ).toBeVisible();
+
+		const settingsPanel = page
+			.getByRole( 'region', {
+				name: 'Editor settings',
+			} )
+			.getByRole( 'tabpanel', {
+				name: 'Settings',
+			} );
+
+		await settingsPanel.getByRole( 'button', { name: 'Start' } ).click();
+
+		const toolbar = page.getByRole( 'toolbar', { name: 'Block tools' } );
+		await expect(
+			toolbar.getByRole( 'button', { name: 'Select Camera' } )
+		).not.toBeVisible();
+		await expect(
+			toolbar.getByRole( 'button', { name: 'Enable Background Blur' } )
+		).not.toBeVisible();
+		await expect(
+			toolbar.getByRole( 'button', { name: 'Select Microphone' } )
+		).toBeVisible();
+
+		await toolbar.getByRole( 'button', { name: 'Start' } ).click();
+
+		await expect(
+			toolbar.getByRole( 'button', { name: 'Stop' } )
+		).toBeVisible();
+		await expect(
+			toolbar.getByRole( 'button', { name: 'Pause' } )
+		).toBeVisible();
+
+		await toolbar.getByRole( 'button', { name: 'Pause' } ).click();
+
+		await expect(
+			toolbar.getByRole( 'button', { name: 'Start' } )
+		).toBeDisabled();
+		await expect(
+			toolbar.getByRole( 'button', { name: 'Resume' } )
+		).toBeVisible();
+
+		await toolbar.getByRole( 'button', { name: 'Resume' } ).click();
+
+		await toolbar.getByRole( 'button', { name: 'Stop' } ).click();
+
+		await expect(
+			toolbar.getByRole( 'button', { name: 'Insert' } )
+		).toBeVisible();
+		await expect(
+			toolbar.getByRole( 'button', { name: 'Retry' } )
+		).toBeVisible();
+
+		await toolbar.getByRole( 'button', { name: 'Insert' } ).click();
+
+		await expect(
+			page
+				.getByRole( 'button', { name: 'Dismiss this notice' } )
+				.filter( {
+					hasText: 'Sorry, this file type is not supported here',
+				} )
+		).not.toBeVisible();
+
+		await page.waitForFunction(
+			() =>
+				window.wp.data.select( 'media-experiments/upload' ).getItems()
+					.length === 0
+		);
+
+		await expect( settingsPanel ).toHaveText( /Mime type: audio\/mpeg/ );
+
+		const blockAttributes = await page.evaluate(
+			() =>
+				window.wp.data.select( 'core/block-editor' ).getSelectedBlock()
+					?.attributes ?? {}
+		);
+		await expect( blockAttributes.src ).toMatch( /\.mp3$/ );
 	} );
 } );

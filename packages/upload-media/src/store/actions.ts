@@ -1453,7 +1453,11 @@ export function uploadItem( id: QueueItemId ) {
 			}
 		}
 
-		if ( ! additionalData.mexp_dominant_color && stillUrl ) {
+		if (
+			! additionalData.mexp_dominant_color &&
+			stillUrl &&
+			[ 'video', 'image', 'pdf' ].includes( mediaType )
+		) {
 			// TODO: Make this async after upload?
 			// Could be made reusable to enable backfilling of existing blocks.
 			// TODO: Create a scaled-down version of the image first for performance reasons.
@@ -1479,7 +1483,11 @@ export function uploadItem( id: QueueItemId ) {
 			}
 		}
 
-		if ( ! additionalData.mexp_blurhash && stillUrl ) {
+		if (
+			! additionalData.mexp_blurhash &&
+			stillUrl &&
+			[ 'video', 'image', 'pdf' ].includes( mediaType )
+		) {
 			// TODO: Make this async after upload?
 			// Could be made reusable to enable backfilling of existing blocks.
 			// TODO: Create a scaled-down version of the image first for performance reasons.

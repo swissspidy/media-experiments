@@ -232,9 +232,6 @@ export function startRecording() {
 
 				const mediaRecorder = new MediaRecorder( mediaStream );
 
-				const track = mediaStream.getVideoTracks()[ 0 ];
-				const { width, height } = track.getSettings();
-
 				mediaRecorder.addEventListener( 'dataavailable', ( evt ) => {
 					if ( evt.data.size ) {
 						dispatch( {
@@ -246,50 +243,60 @@ export function startRecording() {
 
 				mediaRecorder.addEventListener( 'stop', () => {
 					const mediaChunks = select.getMediaChunks();
+
+					if ( ! mediaChunks.length ) {
+						dispatch( {
+							type: Type.SetError,
+							error: new Error( 'No data received' ),
+						} );
+						return;
+					}
+
 					const hasVideo = select.hasVideo();
 					const previousUrl = select.getUrl();
 					const previousUrlOriginalUrl = select.getOriginalUrl();
 
-					if ( mediaChunks.length ) {
-						const { type } = mediaChunks[ 0 ];
+					const { type } = mediaChunks[ 0 ];
 
-						const blob = new Blob( mediaChunks, { type } );
-						const file = hasVideo
-							? blobToFile(
-									blob,
-									`capture-${ dateI18n(
-										'Y-m-d-H-i',
-										new Date(),
-										undefined
-									) }.mp4`,
-									'video/mp4'
-							  )
-							: blobToFile(
-									blob,
-									`capture-${ dateI18n(
-										'Y-m-d-H-i',
-										new Date(),
-										undefined
-									) }.mp3`,
-									'audio/mp3'
-							  );
+					const blob = new Blob( mediaChunks, { type } );
+					const file = hasVideo
+						? blobToFile(
+								blob,
+								`capture-${ dateI18n(
+									'Y-m-d-H-i',
+									new Date(),
+									undefined
+								) }.mp4`,
+								'video/mp4'
+						  )
+						: blobToFile(
+								blob,
+								`capture-${ dateI18n(
+									'Y-m-d-H-i',
+									new Date(),
+									undefined
+								) }.mp3`,
+								'audio/mp3'
+						  );
 
-						const url = createBlobURL( file );
+					const url = createBlobURL( file );
 
-						dispatch( {
-							type: Type.FinishRecording,
-							file,
-							url,
-							width,
-							height,
-						} );
+					const track = mediaStream.getVideoTracks()[ 0 ];
+					const { width, height } = track?.getSettings() || {};
 
-						if ( previousUrl ) {
-							revokeBlobURL( previousUrl );
-						}
-						if ( previousUrlOriginalUrl ) {
-							revokeBlobURL( previousUrlOriginalUrl );
-						}
+					dispatch( {
+						type: Type.FinishRecording,
+						file,
+						url,
+						width,
+						height,
+					} );
+
+					if ( previousUrl ) {
+						revokeBlobURL( previousUrl );
+					}
+					if ( previousUrlOriginalUrl ) {
+						revokeBlobURL( previousUrlOriginalUrl );
 					}
 				} );
 
