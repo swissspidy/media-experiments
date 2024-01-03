@@ -80,34 +80,36 @@ function Row( props: BulkOptimizationAttachmentData ) {
 
 	// TODO: Add placeholder if there's no poster.
 	return (
-		<PanelRow>
-			{ props.posterUrl ? (
-				<img
-					src={ props.posterUrl }
-					width={ 32 }
-					height={ 32 }
-					alt=""
-				/>
-			) : null }
-			<Tooltip text={ props.url }>
-				<Text aria-label={ props.url }>
-					{ filterURLForDisplay( props.url, 15 ) }
+		<div role="listitem">
+			<PanelRow>
+				{ props.posterUrl ? (
+					<img
+						src={ props.posterUrl }
+						width={ 32 }
+						height={ 32 }
+						alt=""
+					/>
+				) : null }
+				<Tooltip text={ props.url }>
+					<Text aria-label={ props.url }>
+						{ filterURLForDisplay( props.url, 15 ) }
+					</Text>
+				</Tooltip>
+				<Text variant="muted">
+					{ props.fileSize
+						? numberFormatter.format( props.fileSize )
+						: /* translators: unknown file size */
+						  __( '? KB', 'media-experiments' ) }
 				</Text>
-			</Tooltip>
-			<Text variant="muted">
-				{ props.fileSize
-					? numberFormatter.format( props.fileSize )
-					: /* translators: unknown file size */
-					  __( '? KB', 'media-experiments' ) }
-			</Text>
-			<Button
-				icon={ <CompressIcon width={ 32 } height={ 32 } /> }
-				className="mexp-document-panel-row__button"
-				label={ __( 'Optimize', 'media-experiments' ) }
-				onClick={ onClick }
-				disabled={ props.isUploading }
-			></Button>
-		</PanelRow>
+				<Button
+					icon={ <CompressIcon width={ 32 } height={ 32 } /> }
+					className="mexp-document-panel-row__button"
+					label={ __( 'Optimize', 'media-experiments' ) }
+					onClick={ onClick }
+					disabled={ props.isUploading }
+				></Button>
+			</PanelRow>
+		</div>
 	);
 }
 
@@ -197,12 +199,14 @@ export function BulkOptimization( {
 } ) {
 	return (
 		<>
-			{ attachments.map( ( data ) => (
-				<Fragment key={ data.id }>
-					<Row { ...data } />
-					<ApprovalDialog id={ data.id } />
-				</Fragment>
-			) ) }
+			<div role="list">
+				{ attachments.map( ( data ) => (
+					<Fragment key={ data.id }>
+						<Row { ...data } />
+						<ApprovalDialog id={ data.id } />
+					</Fragment>
+				) ) }
+			</div>
 			{ attachments.length > 0 ? (
 				<PanelRow>
 					<CompressAll attachments={ attachments } />
