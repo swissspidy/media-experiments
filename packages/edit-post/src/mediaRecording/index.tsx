@@ -12,6 +12,7 @@ import AudioAnalyzer from './audioAnalyzer';
 
 import './blocks.css';
 import { formatSecondsToMinutesSeconds } from './utils';
+import { UnfinishedRecordingWarning } from './unfinishedRecordingWarning';
 
 const SUPPORTED_BLOCKS = [
 	'core/image',
@@ -275,6 +276,7 @@ const addMediaRecorder = createHigherOrderComponent(
 
 		return (
 			<div { ...blockProps }>
+				<UnfinishedRecordingWarning />
 				<Recorder />
 			</div>
 		);
