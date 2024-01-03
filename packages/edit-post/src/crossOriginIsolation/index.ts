@@ -1,6 +1,4 @@
 import { addFilter } from '@wordpress/hooks';
-import { store as editPostStore } from '@wordpress/edit-post';
-import { select as globalSelect, subscribe } from '@wordpress/data';
 
 type CrossOriginValue = 'anonymous' | 'use-credentials' | '' | undefined;
 
@@ -9,28 +7,12 @@ function forceCrossOrigin( imgCrossOrigin: CrossOriginValue, url: string ) {
 	return 'anonymous' as CrossOriginValue;
 }
 
-async function waitForChildren( element: Element ) {
-	return new Promise< void >( ( resolve ) => {
-		if ( ! element ) {
-			return resolve();
-		}
+function addAttribute( el: HTMLElement ) {
+	if ( el.hasAttribute( 'crossorigin' ) ) {
+		return;
+	}
 
-		if ( element.children.length ) {
-			return resolve();
-		}
-
-		const obs = new MutationObserver( () => {
-			if ( element.children.length ) {
-				obs.disconnect();
-				resolve();
-			}
-		} );
-
-		obs.observe( element, {
-			childList: true,
-			subtree: true,
-		} );
-	} );
+	el.setAttribute( 'crossorigin', 'anonymous' );
 }
 
 if ( window.crossOriginIsolated ) {
@@ -58,64 +40,28 @@ if ( window.crossOriginIsolated ) {
 					return;
 				}
 
-				const elements = [
-					...( node as HTMLElement ).querySelectorAll( 'img' ),
-				];
-				if ( node instanceof HTMLImageElement ) {
-					elements.push( node );
+				( node as HTMLElement )
+					.querySelectorAll( 'img,source,script,video,link' )
+					.forEach( ( el ) => {
+						addAttribute( el as HTMLElement );
+					} );
+
+				if (
+					node instanceof HTMLImageElement ||
+					node instanceof HTMLSourceElement ||
+					node instanceof HTMLScriptElement ||
+					node instanceof HTMLVideoElement ||
+					node instanceof HTMLLinkElement
+				) {
+					addAttribute( node );
 				}
-
-				elements.forEach( ( el: HTMLImageElement ) => {
-					if ( el.hasAttribute( 'crossorigin' ) ) {
-						return;
-					}
-
-					const imgSrc = new URL( el.src );
-
-					if ( imgSrc.origin !== location.origin ) {
-						el.setAttribute( 'crossorigin', 'anonymous' );
-					}
-				} );
 			} );
 		} );
 	} );
 
-	let prevHasMetaBoxes = false;
-
-	document.querySelectorAll( '#wpadminbar' ).forEach( ( subTree ) => {
-		observer.observe( subTree, {
-			childList: true,
-			attributes: true,
-			subtree: true,
-		} );
+	observer.observe( document.body, {
+		childList: true,
+		attributes: true,
+		subtree: true,
 	} );
-
-	const unsubscribe = subscribe( async () => {
-		const wrapperEl = document.querySelector(
-			'.edit-post-layout__metaboxes'
-		);
-		const hasMetaBoxes =
-			globalSelect( editPostStore ).areMetaBoxesInitialized() &&
-			globalSelect( editPostStore ).hasMetaBoxes() &&
-			globalSelect( editPostStore )
-				.getActiveMetaBoxLocations()
-				.some( ( location ) =>
-					globalSelect( editPostStore ).isMetaBoxLocationVisible(
-						location
-					)
-				) &&
-			wrapperEl !== null;
-
-		if ( hasMetaBoxes && ! prevHasMetaBoxes ) {
-			prevHasMetaBoxes = hasMetaBoxes;
-			unsubscribe();
-
-			await waitForChildren( wrapperEl );
-
-			observer.observe( wrapperEl, {
-				attributes: true,
-				subtree: true,
-			} );
-		}
-	}, editPostStore );
 }
