@@ -31,8 +31,8 @@ comment: false
 
 # See https://docs.codecov.com/docs/ignoring-paths
 ignore:
-    - "media-experiments.php"
-    - "inc/class-avif-info.php"
-    - "inc/class-blurhash.php"
-    - "inc/default-filters.php"
-    - "**/*.svg"
+    - 'media-experiments.php'
+    - 'inc/class-avif-info.php'
+    - 'inc/class-blurhash.php'
+    - 'inc/default-filters.php'
+    - '**/*.svg'
