@@ -111,10 +111,3 @@ jobs:
               with:
                   name: ${{ env.ARTIFACT_NAME }}
                   path: artifacts
-
-            - name: Upload image snapshots
-              uses: actions/upload-artifact@v4
-              if: always()
-              with:
-                  name: ${{ env.ARTIFACT_NAME }}-snapshots
-                  path: tests/e2e/specs/images/__snapshots__
