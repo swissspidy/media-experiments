@@ -72,6 +72,12 @@ test.describe( 'Images', () => {
 					.length === 0
 		);
 
+		await page.waitForFunction(
+			() =>
+				window.wp.data.select( 'core/block-editor' ).getSelectedBlock()
+					?.attributes?.id
+		);
+
 		await editor.openDocumentSettingsSidebar();
 
 		await page
