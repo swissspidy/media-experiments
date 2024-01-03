@@ -72,12 +72,6 @@ test.describe( 'Images', () => {
 					.length === 0
 		);
 
-		await page.waitForFunction(
-			() =>
-				window.wp.data.select( 'core/block-editor' ).getSelectedBlock()
-					?.attributes?.id
-		);
-
 		await editor.openDocumentSettingsSidebar();
 
 		await page
@@ -96,6 +90,12 @@ test.describe( 'Images', () => {
 		if ( isClosed ) {
 			await mediaExperimentsPanel.click();
 		}
+
+		await expect(
+			page
+				.getByRole( 'region', { name: 'Editor settings' } )
+				.getByRole( 'listitem' )
+		).toHaveCount( 4 ); // Sidebar tabs plus the 2 images.
 
 		await page
 			.getByRole( 'region', { name: 'Editor settings' } )

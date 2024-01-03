@@ -197,6 +197,10 @@ export function BulkOptimization( {
 }: {
 	attachments: BulkOptimizationAttachmentData[];
 } ) {
+	if ( ! attachments.length ) {
+		return null;
+	}
+
 	return (
 		<>
 			<div role="list">
@@ -207,11 +211,9 @@ export function BulkOptimization( {
 					</Fragment>
 				) ) }
 			</div>
-			{ attachments.length > 0 ? (
-				<PanelRow>
-					<CompressAll attachments={ attachments } />
-				</PanelRow>
-			) : null }
+			<PanelRow>
+				<CompressAll attachments={ attachments } />
+			</PanelRow>
 		</>
 	);
 }
