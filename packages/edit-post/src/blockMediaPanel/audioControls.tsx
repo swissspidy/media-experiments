@@ -8,13 +8,15 @@ import { RecordingControls } from './recordingControls';
 import { ImportMedia } from './importMedia';
 import type { AudioBlock } from './types';
 import { DebugInfo } from './debugInfo';
+import { isBlobURL } from '@wordpress/blob';
 
 type AudioControlsProps = AudioBlock &
 	Pick< BlockEditProps< AudioBlock[ 'attributes' ] >, 'setAttributes' >;
 
 export function AudioControls( props: AudioControlsProps ) {
-	function onChange( media: Partial< Attachment > ) {
-		if ( ! media || ! media.url ) {
+	function onImportMedia( media: Partial< Attachment > ) {
+		// Ignore blob URLs as otherwise the block tries to upload it again.
+		if ( ! media || ! media.url || isBlobURL( media.url ) ) {
 			return;
 		}
 
@@ -47,7 +49,7 @@ export function AudioControls( props: AudioControlsProps ) {
 			{ ! props.attributes.id ? (
 				<ImportMedia
 					url={ props.attributes.src }
-					onChange={ onChange }
+					onChange={ onImportMedia }
 				/>
 			) : null }
 			<DebugInfo id={ props.attributes.id } />

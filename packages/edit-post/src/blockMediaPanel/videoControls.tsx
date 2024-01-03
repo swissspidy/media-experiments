@@ -12,13 +12,15 @@ import { GenerateSubtitles } from './generateSubtitles';
 import { RestorePoster } from './restorePoster';
 import { DebugInfo } from './debugInfo';
 import type { VideoBlock } from './types';
+import { isBlobURL } from '@wordpress/blob';
 
 type VideoControlsProps = VideoBlock &
 	Pick< BlockEditProps< VideoBlock[ 'attributes' ] >, 'setAttributes' >;
 
 export function VideoControls( props: VideoControlsProps ) {
 	function onImportMedia( media: Partial< Attachment > ) {
-		if ( ! media || ! media.url ) {
+		// Ignore blob URLs as otherwise the block tries to upload it again.
+		if ( ! media || ! media.url || isBlobURL( media.url ) ) {
 			return;
 		}
 
@@ -26,7 +28,7 @@ export function VideoControls( props: VideoControlsProps ) {
 			src: media.url,
 			id: media.id,
 			poster: media.image?.src,
-			// TODO: What did I mean with `media.icon` here?
+			// TODO: Check why Gutenberg does the following:
 			// poster: media.image?.src !== media.icon ? media.image?.src : undefined,
 			caption: media.caption,
 		} );

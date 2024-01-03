@@ -73,12 +73,8 @@ test.describe( 'Images', () => {
 				name: 'Settings',
 			} );
 
-		await expect( settingsPanel ).toHaveText(
-			new RegExp( 'Mime type: image/png' )
-		);
-		await expect( settingsPanel ).toHaveText(
-			new RegExp( 'Has transparency: yes' )
-		);
+		await expect( settingsPanel ).toHaveText( /Mime type: image\/png/ );
+		await expect( settingsPanel ).toHaveText( /Has transparency: yes/ );
 		await expect( settingsPanel.getByLabel( '#24292f' ) ).toBeVisible();
 		// No exact comparison as there can be 1-2 char differences between browsers.
 		await expect( page.locator( 'css=[data-blurhash]' ) ).toHaveAttribute(

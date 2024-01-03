@@ -11,13 +11,15 @@ import { DebugInfo } from './debugInfo';
 import type { ImageBlock } from './types';
 import { AnimatedGifConverter } from './animatedGifConverter';
 import { UploadRequestControls } from './uploadRequestControls';
+import { isBlobURL } from '@wordpress/blob';
 
 type ImageControlsProps = ImageBlock &
 	Pick< BlockEditProps< ImageBlock[ 'attributes' ] >, 'setAttributes' >;
 
 export function ImageControls( props: ImageControlsProps ) {
-	function onChange( media: Partial< Attachment > ) {
-		if ( ! media || ! media.url ) {
+	function onImportMedia( media: Partial< Attachment > ) {
+		// Ignore blob URLs as otherwise the block tries to upload it again.
+		if ( ! media || ! media.url || isBlobURL( media.url ) ) {
 			return;
 		}
 
@@ -80,7 +82,7 @@ export function ImageControls( props: ImageControlsProps ) {
 			{ ! props.attributes.id ? (
 				<ImportMedia
 					url={ props.attributes.url }
-					onChange={ onChange }
+					onChange={ onImportMedia }
 				/>
 			) : null }
 			<OptimizeMedia

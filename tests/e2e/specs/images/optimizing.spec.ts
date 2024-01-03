@@ -174,7 +174,10 @@ test.describe( 'Images', () => {
 					[ outputFormat, imageLibrary ]
 				);
 
-				await page.getByRole( 'button', { name: 'Optimize' } ).click();
+				await page
+					.getByRole( 'region', { name: 'Editor settings' } )
+					.getByRole( 'button', { name: 'Optimize' } )
+					.click();
 
 				await expect(
 					page
