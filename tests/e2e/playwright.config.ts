@@ -15,6 +15,7 @@ const config = defineConfig( {
 			/** @type {CoverageReportOptions} **/
 			{
 				outputFile: './artifacts/e2e-coverage/report.html',
+				reports: [ 'lcov' ],
 				logging: 'off',
 				coverage: {
 					entryFilter: ( entry: any ) => {
@@ -28,7 +29,6 @@ const config = defineConfig( {
 					sourcePath: ( sourcePath: string ) => {
 						return sourcePath.replace( 'media-experiments/', '' );
 					},
-					toIstanbul: true,
 					lcov: true,
 				},
 			},

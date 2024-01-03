@@ -8,10 +8,10 @@ test.describe( 'Upload Requests', () => {
 	test( 'allows uploading media from other device', async ( {
 		admin,
 		page,
+		secondPage,
 		editor,
 		mediaUtils,
 		browserName,
-		browser,
 	} ) => {
 		// TODO: Grab URL from input field instead of clipboard.
 		test.skip(
@@ -57,11 +57,9 @@ test.describe( 'Upload Requests', () => {
 			navigator.clipboard.readText()
 		);
 
-		const context = await browser.newContext();
-		const newPage = await context.newPage();
-		await newPage.goto( copiedURL );
+		await secondPage.goto( copiedURL );
 
-		await newPage.evaluate( () => {
+		await secondPage.evaluate( () => {
 			window.wp.data
 				.dispatch( 'core/preferences' )
 				.set(
@@ -86,11 +84,11 @@ test.describe( 'Upload Requests', () => {
 		} );
 
 		await mediaUtils.upload(
-			newPage.locator( 'data-testid=form-file-upload-input' ),
+			secondPage.locator( 'data-testid=form-file-upload-input' ),
 			'github-mark.png'
 		);
 
-		await newPage.waitForFunction(
+		await secondPage.waitForFunction(
 			() =>
 				window.wp.data.select( 'media-experiments/upload' ).getItems()
 					.length === 0,
@@ -101,7 +99,7 @@ test.describe( 'Upload Requests', () => {
 		);
 
 		await expect(
-			newPage
+			secondPage
 				.getByRole( 'button', { name: 'Dismiss this notice' } )
 				.filter( {
 					hasText: 'File successfully uploaded',
@@ -113,7 +111,5 @@ test.describe( 'Upload Requests', () => {
 				window.wp.data.select( 'core/block-editor' ).getSelectedBlock()
 					?.attributes?.id
 		);
-
-		await context.close();
 	} );
 } );
