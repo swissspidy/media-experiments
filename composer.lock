@@ -874,12 +874,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "aa508d47478ddcd7402a4f411e1b57bf1c0101c3"
+                "reference": "2a7b1cf0b2e80b95ae31e7aea4ce23ab4bbe8707"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/aa508d47478ddcd7402a4f411e1b57bf1c0101c3",
-                "reference": "aa508d47478ddcd7402a4f411e1b57bf1c0101c3",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/2a7b1cf0b2e80b95ae31e7aea4ce23ab4bbe8707",
+                "reference": "2a7b1cf0b2e80b95ae31e7aea4ce23ab4bbe8707",
                 "shasum": ""
             },
             "require": {
@@ -929,7 +929,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-01-02T14:23:51+00:00"
+            "time": "2024-01-03T13:31:58+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -3045,12 +3045,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer.git",
-                "reference": "7c632db0afad09c3bb9a767f7dbee876b9231956"
+                "reference": "da51554b7cc9c780bcbef54d002b43a496104097"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/7c632db0afad09c3bb9a767f7dbee876b9231956",
-                "reference": "7c632db0afad09c3bb9a767f7dbee876b9231956",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/da51554b7cc9c780bcbef54d002b43a496104097",
+                "reference": "da51554b7cc9c780bcbef54d002b43a496104097",
                 "shasum": ""
             },
             "require": {
@@ -3118,7 +3118,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2024-01-02T16:58:58+00:00"
+            "time": "2024-01-03T04:41:10+00:00"
         },
         {
             "name": "symfony/polyfill-php73",
