@@ -85,6 +85,18 @@ test.describe( 'Images', () => {
 			.getByLabel( 'Post' )
 			.click();
 
+		const mediaExperimentsPanel = page
+			.getByRole( 'region', { name: 'Editor settings' } )
+			.getByRole( 'button', {
+				name: 'Media Experiments',
+			} );
+		const isClosed =
+			( await mediaExperimentsPanel.getAttribute( 'aria-expanded' ) ) ===
+			'false';
+		if ( isClosed ) {
+			await mediaExperimentsPanel.click();
+		}
+
 		await page
 			.getByRole( 'region', { name: 'Editor settings' } )
 			.getByRole( 'button', { name: 'Optimize all' } )
