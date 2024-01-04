@@ -269,7 +269,22 @@ function register_assets(): void {
 	wp_set_script_translations( 'media-experiments-view-upload-request', 'media-experiments' );
 
 	/** This filter is documented in wp-admin/includes/images.php */
-	$threshold = (int) apply_filters( 'big_image_size_threshold', 2560, array( 0, 0 ), '', 0 ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+	$image_size_threshold = (int) apply_filters( 'big_image_size_threshold', 2560, array( 0, 0 ), '', 0 ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+
+	/**
+	 * Filters the "BIG video" threshold value.
+	 *
+	 * If the original video width or height is above the threshold, it will be scaled down. The threshold is
+	 * used as max width and max height. The scaled down image will be used as the largest available size, including
+	 * the `_wp_attached_file` post meta value.
+	 *
+	 * Returning `false` from the filter callback will disable the scaling.
+	 *
+	 * Analogous to {@see 'big_image_size_threshold'} for images.
+	 *
+	 * @param int    $threshold     The threshold value in pixels. Default 1920.
+	 */
+	$video_size_threshold = (int) apply_filters( 'mexp_big_video_size_threshold', 1920 );
 
 	wp_add_inline_script(
 		'media-experiments-view-upload-request',
@@ -278,7 +293,8 @@ function register_assets(): void {
 			wp_json_encode(
 				[
 					'availableImageSizes'   => get_all_image_sizes(),
-					'bigImageSizeThreshold' => $threshold,
+					'bigImageSizeThreshold' => $image_size_threshold,
+					'bigVideoSizeThreshold' => $video_size_threshold,
 				]
 			)
 		),
@@ -320,7 +336,10 @@ function enqueue_block_editor_assets(): void {
 	wp_set_script_translations( 'media-experiments', 'media-experiments' );
 
 	/** This filter is documented in wp-admin/includes/images.php */
-	$threshold = (int) apply_filters( 'big_image_size_threshold', 2560, array( 0, 0 ), '', 0 ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+	$image_size_threshold = (int) apply_filters( 'big_image_size_threshold', 2560, array( 0, 0 ), '', 0 ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+
+	/** This filter is documented in inc/functions.php */
+	$video_size_threshold = (int) apply_filters( 'mexp_big_video_size_threshold', 1920 );
 
 	wp_add_inline_script(
 		'media-experiments',
@@ -329,7 +348,8 @@ function enqueue_block_editor_assets(): void {
 			wp_json_encode(
 				[
 					'availableImageSizes'   => get_all_image_sizes(),
-					'bigImageSizeThreshold' => $threshold,
+					'bigImageSizeThreshold' => $image_size_threshold,
+					'bigVideoSizeThreshold' => $video_size_threshold,
 				]
 			)
 		),

@@ -5,3 +5,7 @@
 .interface-preferences-modal__option--number {
 	margin-top: 16px;
 }
+
+.interface-preferences-modal__option--number .components-base-control__help {
+	margin-left: 0;
+}

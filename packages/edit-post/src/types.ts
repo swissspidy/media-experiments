@@ -5,6 +5,8 @@ import type {
 	ImageFormat,
 	ImageLibrary,
 	ThumbnailGeneration,
+	VideoFormat,
+	AudioFormat,
 } from '@mexp/upload-media';
 
 export type BulkOptimizationAttachmentData = Pick<
@@ -25,6 +27,7 @@ export type MediaPreferences = {
 	thumbnailGeneration: ThumbnailGeneration;
 	imageLibrary: ImageLibrary;
 	bigImageSizeThreshold: number;
+	bigVideoSizeThreshold: number;
 	// Formats.
 	default_outputFormat: ImageFormat;
 	jpeg_outputFormat: ImageFormat;
@@ -40,6 +43,8 @@ export type MediaPreferences = {
 	gif_outputFormat: ImageFormat;
 	gif_quality: number;
 	gif_convert: boolean;
+	video_outputFormat: VideoFormat;
+	audio_outputFormat: AudioFormat;
 	// Media recording.
 	videoInput?: string;
 	audioInput?: string;

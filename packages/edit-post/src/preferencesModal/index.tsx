@@ -48,6 +48,7 @@ const defaultPreferences: MediaPreferences = {
 	thumbnailGeneration: 'smart',
 	imageLibrary: 'vips',
 	bigImageSizeThreshold: window.mediaExperiments.bigImageSizeThreshold,
+	bigVideoSizeThreshold: window.mediaExperiments.bigVideoSizeThreshold,
 	// Formats.
 	default_outputFormat: 'jpeg',
 	jpeg_outputFormat: 'jpeg',
@@ -63,6 +64,8 @@ const defaultPreferences: MediaPreferences = {
 	gif_outputFormat: 'webp',
 	gif_quality: 80,
 	gif_convert: true,
+	video_outputFormat: 'mp4',
+	audio_outputFormat: 'mp3',
 	// Media recording.
 	videoInput: undefined,
 	audioInput: undefined,

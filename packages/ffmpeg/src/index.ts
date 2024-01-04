@@ -1,24 +1,23 @@
 import { v4 as uuidv4 } from 'uuid';
-import { blobToFile, getFileBasename } from '@mexp/media-utils';
+import {
+	blobToFile,
+	getExtensionFromMimeType,
+	getFileBasename,
+} from '@mexp/media-utils';
 import type { FFmpeg } from '@ffmpeg/ffmpeg';
 
-// import { MAX_VIDEO_RESOLUTION } from './constants';
+const VIDEO_CODEC: Record< string, string > = {
+	'video/mp4': 'libx264', // H.264
+	'video/ogg': 'libtheora',
+	'video/webm': 'libvpx-vp9',
+};
+
+const AUDIO_CODEC: Record< string, string > = {
+	'audio/mp3': 'libmp3lame',
+	'audio/ogg': 'libvorbis',
+};
 
 const FFMPEG_CONFIG = {
-	CODEC: [
-		// Use H.264 video codec.
-		'-vcodec',
-		'libx264',
-	],
-	SCALE: [
-		// TODO: Make configurable by user? Still need to retain original.
-		// See https://github.com/swissspidy/media-experiments/issues/3
-		// Scale down to 1080p to keep file size small.
-		// See https://trac.ffmpeg.org/wiki/Scaling
-		// Adds 1px pad to width/height if they're not divisible by 2, which FFmpeg will complain about.
-		// '-vf',
-		// `scale='min(${ MAX_VIDEO_RESOLUTION[ 0 ] },iw)':'min(${ MAX_VIDEO_RESOLUTION[ 1 ] },ih)':'force_original_aspect_ratio=decrease',pad='width=ceil(iw/2)*2:height=ceil(ih/2)*2'`,
-	],
 	FPS: [
 		// Reduce to 24fps.
 		// See https://trac.ffmpeg.org/wiki/ChangingFrameRate
@@ -52,15 +51,6 @@ const FFMPEG_CONFIG = {
 		'1',
 	],
 };
-
-const FFMPEG_SHARED_CONFIG = [
-	...FFMPEG_CONFIG.CODEC,
-	...FFMPEG_CONFIG.SCALE,
-	...FFMPEG_CONFIG.FPS,
-	...FFMPEG_CONFIG.FASTSTART,
-	...FFMPEG_CONFIG.COLOR_PROFILE,
-	...FFMPEG_CONFIG.PRESET,
-];
 
 const ffmpegCoreUrl = FFMPEG_CDN_URL;
 
@@ -158,79 +148,123 @@ export async function runFFmpegWithConfig(
 }
 
 /**
+ * Get FFmpeg scale argument to keep video within threshold.
+ *
+ * Adds 1px pad to width/height if they're not divisible by 2, which FFmpeg will complain about.
+ *
+ * See https://trac.ffmpeg.org/wiki/Scaling
+ *
+ * @param threshold Big video size threshold
+ */
+function getScaleArg( threshold: number ) {
+	if ( ! threshold ) {
+		return [];
+	}
+
+	return [
+		'-vf',
+		`scale='min(${ threshold },iw)':'min(${ threshold },ih)':'force_original_aspect_ratio=decrease',pad='width=ceil(iw/2)*2:height=ceil(ih/2)*2'`,
+	];
+}
+
+/**
  * Transcode a video using FFmpeg.
  *
- * @param file Original video file object.
+ * @param file      Original video file object.
+ * @param mimeType  Mime type.
+ * @param threshold Big video size threshold.
  * @return Processed video file object.
  */
-export async function transcodeVideo( file: File ) {
-	const outputFileName = `${ getFileBasename( file.name ) }.mp4`;
+export async function transcodeVideo(
+	file: File,
+	mimeType: string,
+	threshold: number
+) {
+	const outputFileName = `${ getFileBasename(
+		file.name
+	) }.${ getExtensionFromMimeType( mimeType ) }`;
 	return runFFmpegWithConfig(
 		file,
 		[
 			// Input filename.
 			'-i',
 			file.name,
-			...FFMPEG_SHARED_CONFIG,
+			// Set desired video codec.
+			'-codec:v',
+			VIDEO_CODEC[ mimeType ] || 'libx264',
+			...getScaleArg( threshold ),
+			...FFMPEG_CONFIG.FPS,
+			...FFMPEG_CONFIG.FASTSTART,
+			...FFMPEG_CONFIG.COLOR_PROFILE,
+			...FFMPEG_CONFIG.PRESET,
 		],
-		'video/mp4',
+		mimeType,
 		outputFileName
 	);
 }
 
 /**
- * Mute a video using FFmpeg.
+ * Mutes a video using FFmpeg while retaining the file type.
  *
  * @param file Original video file object.
  * @return Processed video file object.
  */
 export async function muteVideo( file: File ) {
-	const outputFileName = `${ getFileBasename( file.name ) }.mp4`;
 	return runFFmpegWithConfig(
 		file,
 		[
 			// Input filename.
 			'-i',
 			file.name,
-			'-vcodec',
 			'copy',
+			// Ensure there is no audio.
 			'-an',
 		],
-		'video/mp4',
-		outputFileName
+		file.type,
+		file.name
 	);
 }
 
 /**
- * Transcode an audio file using FFmpeg.
+ * Transcodes an audio file using FFmpeg.
  *
- * @param file Original audio file object.
+ * @param file     Original audio file object.
+ * @param mimeType Desired mime type.
  * @return Processed audio file object.
  */
-export async function transcodeAudio( file: File ) {
-	const outputFileName = `${ getFileBasename( file.name ) }.mp3`;
+export async function transcodeAudio( file: File, mimeType: string ) {
+	const outputFileName = `${ getFileBasename(
+		file.name
+	) }.${ getExtensionFromMimeType( mimeType ) }`;
 	return runFFmpegWithConfig(
 		file,
 		[
 			// Input filename.
 			'-i',
 			file.name,
-			...FFMPEG_SHARED_CONFIG,
+			// Ensure there is no video.
+			'-vn',
+			// Set desired audio codec.
+			'-codec:a',
+			AUDIO_CODEC[ mimeType ] || 'libmp3lame',
 		],
-		'audio/mp3',
+		mimeType,
 		outputFileName
 	);
 }
 
 /**
- * Extract a video's first frame using FFmpeg.
+ * Extracts a video's first frame using FFmpeg.
  *
  * Note: Exact seeking is not possible in most formats.
  *
- * @param file Original video file object.
+ * @todo Remove? Currently unused.
+ *
+ * @param file      Original video file object.
+ * @param threshold Big video size threshold.
  * @return File object for the video frame.
  */
-export async function getFirstFrameOfVideo( file: File ) {
+export async function getFirstFrameOfVideo( file: File, threshold: number ) {
 	const outputFileName = `${ getFileBasename( file.name ) }-poster.jpeg`;
 	return runFFmpegWithConfig(
 		file,
@@ -240,7 +274,7 @@ export async function getFirstFrameOfVideo( file: File ) {
 			'-i',
 			file.name,
 			...FFMPEG_CONFIG.SINGLE_FRAME,
-			...FFMPEG_CONFIG.SCALE,
+			...getScaleArg( threshold ),
 			...FFMPEG_CONFIG.COLOR_PROFILE,
 			...FFMPEG_CONFIG.PRESET,
 		],
@@ -252,9 +286,15 @@ export async function getFirstFrameOfVideo( file: File ) {
 /**
  * Converts an animated GIF to a video using FFmpeg.
  *
- * @param file Original GIF file object.
+ * @param file      Original GIF file object.
+ * @param mimeType  Desired mime type.
+ * @param threshold Big video size threshold.
  * @return Converted video file object.
  */
-export async function convertGifToVideo( file: File ) {
-	return transcodeVideo( file );
+export async function convertGifToVideo(
+	file: File,
+	mimeType: string,
+	threshold: number
+) {
+	return transcodeVideo( file, mimeType, threshold );
 }

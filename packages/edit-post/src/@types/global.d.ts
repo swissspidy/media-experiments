@@ -2,6 +2,7 @@ declare global {
 	interface Window {
 		mediaExperiments: {
 			bigImageSizeThreshold: number;
+			bigVideoSizeThreshold: number;
 		};
 	}
 

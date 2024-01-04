@@ -127,56 +127,33 @@ export function Modal() {
 								},
 							] }
 						/>
-						<FeatureNumberControl
-							className="interface-preferences-modal__option interface-preferences-modal__option--number"
-							label={ __(
-								'Big image size threshold',
-								'media-experiments'
-							) }
-							isShiftStepEnabled={ true }
-							featureName="bigImageSizeThreshold"
-							shiftStep={ 10 }
-							max={ 10000 }
-							min={ 0 }
-							units={ [
-								{
-									value: 'px',
-									label: 'px',
-									a11yLabel: __(
-										'Pixels (px)',
-										'media-experiments'
-									),
-									step: 1,
-								},
-							] }
-						/>
 					</PreferencesModalSection>
 				),
 			},
 			{
-				name: 'formats',
-				tabLabel: __( 'Formats', 'media-experiments' ),
+				name: 'image',
+				tabLabel: __( 'Images', 'media-experiments' ),
 				content: (
 					<>
 						<PreferencesModalSection
 							title={ _x(
-								'Default',
+								'General',
 								'image format',
 								'media-experiments'
 							) }
 							description={ __(
-								'Specify the default format for newly generated images, such as poster images.',
+								'Specify the default settings for images.',
 								'media-experiments'
 							) }
 						>
 							<SelectFeature
 								featureName="default_outputFormat"
 								help={ __(
-									'Default file type for new images.',
+									'Default file type for new images, such as poster images.',
 									'media-experiments'
 								) }
 								label={ __(
-									'Image Format',
+									'Default image format',
 									'media-experiments'
 								) }
 								options={ [
@@ -199,6 +176,33 @@ export function Modal() {
 									{
 										label: 'AVIF',
 										value: 'avif',
+									},
+								] }
+							/>
+							<FeatureNumberControl
+								className="interface-preferences-modal__option interface-preferences-modal__option--number"
+								label={ __(
+									'Big image size threshold',
+									'media-experiments'
+								) }
+								help={ __(
+									'If the original image width or height is above the threshold, it will be scaled down. Aspect ratio is preserved.',
+									'media-experiments'
+								) }
+								isShiftStepEnabled={ true }
+								featureName="bigImageSizeThreshold"
+								shiftStep={ 10 }
+								max={ 10000 }
+								min={ 0 }
+								units={ [
+									{
+										value: 'px',
+										label: 'px',
+										a11yLabel: __(
+											'Pixels (px)',
+											'media-experiments'
+										),
+										step: 1,
 									},
 								] }
 							/>
@@ -225,7 +229,7 @@ export function Modal() {
 										'media-experiments'
 									) }
 									label={ __(
-										'Image Format',
+										'Image format',
 										'media-experiments'
 									) }
 									options={ [
@@ -305,6 +309,112 @@ export function Modal() {
 							</PreferencesModalSection>
 						) ) }
 					</>
+				),
+			},
+			{
+				name: 'video',
+				tabLabel: __( 'Videos', 'media-experiments' ),
+				content: (
+					<PreferencesModalSection
+						title={ _x(
+							'General',
+							'video format',
+							'media-experiments'
+						) }
+						description={ __(
+							'Specify the default settings for videos.',
+							'media-experiments'
+						) }
+					>
+						<SelectFeature
+							featureName="video_outputFormat"
+							help={ __(
+								'Default file type for videos.',
+								'media-experiments'
+							) }
+							label={ __(
+								'Default video format',
+								'media-experiments'
+							) }
+							options={ [
+								{
+									label: 'MP4',
+									value: 'mp4',
+								},
+								{
+									label: 'WebM',
+									value: 'webm',
+								},
+								{
+									label: 'Ogg',
+									value: 'ogg',
+								},
+							] }
+						/>
+						<FeatureNumberControl
+							className="interface-preferences-modal__option interface-preferences-modal__option--number"
+							label={ __(
+								'Big video size threshold',
+								'media-experiments'
+							) }
+							help={ __(
+								'If the original video width or height is above the threshold, it will be scaled down. Aspect ratio is preserved.',
+								'media-experiments'
+							) }
+							isShiftStepEnabled={ true }
+							featureName="bigVideoSizeThreshold"
+							shiftStep={ 10 }
+							max={ 10000 }
+							min={ 0 }
+							units={ [
+								{
+									value: 'px',
+									label: 'px',
+									a11yLabel: __(
+										'Pixels (px)',
+										'media-experiments'
+									),
+									step: 1,
+								},
+							] }
+						/>
+					</PreferencesModalSection>
+				),
+			},
+			{
+				name: 'audio',
+				tabLabel: __( 'Audio', 'media-experiments' ),
+				content: (
+					<PreferencesModalSection
+						title={ _x(
+							'Default',
+							'audio format',
+							'media-experiments'
+						) }
+						description={ __(
+							'Specify the preferred audio file format.',
+							'media-experiments'
+						) }
+					>
+						<SelectFeature
+							featureName="audio_outputFormat"
+							help={ __(
+								'Default file type for audio files.',
+								'media-experiments'
+							) }
+							label={ __( 'Audio Format', 'media-experiments' ) }
+							options={ [
+								{
+									label: 'MP3',
+									value: 'mp3',
+								},
+								{
+									label: 'Ogg',
+									value: 'ogg',
+								},
+							] }
+						/>
+					</PreferencesModalSection>
 				),
 			},
 			{

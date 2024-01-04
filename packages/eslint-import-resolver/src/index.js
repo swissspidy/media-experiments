@@ -21,7 +21,7 @@ exports.interfaceVersion = 2;
  * @param {?Config} config
  * @return {{path: null, found: boolean}|{path: *, found: boolean}|{found: boolean}} Resolver result.
  */
-exports.resolve = function ( source, file, config = {} ) {
+exports.resolve = ( source, file, config = {} ) => {
 	const resolve = ( sourcePath ) =>
 		nodeResolver.resolve( sourcePath, file, {
 			...config,

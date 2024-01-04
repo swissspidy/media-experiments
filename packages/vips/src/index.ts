@@ -36,7 +36,9 @@ async function getVips(): Promise< typeof VipsInstance > {
 		preRun: ( module: EmscriptenModule ) => {
 			// https://github.com/kleisauke/wasm-vips/issues/13#issuecomment-1073246828
 			module.setAutoDeleteLater( true );
-			module.setDelayFunction( ( fn: () => void ) => ( cleanup = fn ) );
+			module.setDelayFunction( ( fn: () => void ) => {
+				cleanup = fn;
+			} );
 		},
 	} );
 
@@ -110,7 +112,7 @@ export async function resizeImage(
 	buffer: ArrayBuffer,
 	ext: string,
 	resize: ImageSizeCrop,
-	smartCrop: boolean = false
+	smartCrop = false
 ) {
 	const vips = await getVips();
 	const options: ThumbnailOptions = {

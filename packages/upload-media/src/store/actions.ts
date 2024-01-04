@@ -60,6 +60,8 @@ import type {
 	TranscodingStartAction,
 	UploadStartAction,
 	CreateRestAttachment,
+	VideoFormat,
+	AudioFormat,
 } from './types';
 import { ItemStatus, TranscodingType, Type } from './types';
 
@@ -165,6 +167,7 @@ export function addItem( {
 			.select( preferencesStore )
 			.get( PREFERENCES_NAME, 'bigImageSizeThreshold' );
 
+		// TODO: Also resize if the *height* exceeds the threshold.
 		const resize = imageSizeThreshold
 			? {
 					width: imageSizeThreshold,
@@ -1170,9 +1173,11 @@ export function optimizeVideoItem( id: QueueItemId ) {
 	return async ( {
 		select,
 		dispatch,
+		registry,
 	}: {
 		select: Selectors;
 		dispatch: ActionCreators;
+		registry: WPDataRegistry;
 	} ) => {
 		const item = select.getItem( id );
 		if ( ! item ) {
@@ -1181,11 +1186,41 @@ export function optimizeVideoItem( id: QueueItemId ) {
 
 		dispatch.startTranscoding( id );
 
+		const outputFormat: VideoFormat =
+			registry
+				.select( preferencesStore )
+				.get( PREFERENCES_NAME, 'video_outputFormat' ) || 'mp4';
+
+		const videoSizeThreshold: number = registry
+			.select( preferencesStore )
+			.get( PREFERENCES_NAME, 'bigVideoSizeThreshold' );
+
 		try {
+			let file: File;
 			const { transcodeVideo } = await import(
 				/* webpackChunkName: 'ffmpeg' */ '@mexp/ffmpeg'
 			);
-			const file = await transcodeVideo( item.file );
+
+			switch ( outputFormat ) {
+				case 'ogg':
+					file = await transcodeVideo(
+						item.file,
+						'video/ogg',
+						videoSizeThreshold
+					);
+					break;
+
+				case 'mp4':
+				case 'webm':
+				default:
+					file = await transcodeVideo(
+						item.file,
+						`video/${ outputFormat }`,
+						videoSizeThreshold
+					);
+					break;
+			}
+
 			dispatch.finishTranscoding( id, file );
 		} catch ( error ) {
 			dispatch.cancelItem(
@@ -1242,9 +1277,11 @@ export function optimizeAudioItem( id: QueueItemId ) {
 	return async ( {
 		select,
 		dispatch,
+		registry,
 	}: {
 		select: Selectors;
 		dispatch: ActionCreators;
+		registry: WPDataRegistry;
 	} ) => {
 		const item = select.getItem( id );
 		if ( ! item ) {
@@ -1253,11 +1290,28 @@ export function optimizeAudioItem( id: QueueItemId ) {
 
 		dispatch.startTranscoding( id );
 
+		const outputFormat: AudioFormat =
+			registry
+				.select( preferencesStore )
+				.get( PREFERENCES_NAME, 'audio_outputFormat' ) || 'mp3';
+
 		try {
+			let file: File;
 			const { transcodeAudio } = await import(
 				/* webpackChunkName: 'ffmpeg' */ '@mexp/ffmpeg'
 			);
-			const file = await transcodeAudio( item.file );
+
+			switch ( outputFormat ) {
+				case 'ogg':
+					file = await transcodeAudio( item.file, 'audio/ogg' );
+					break;
+
+				case 'mp3':
+				default:
+					file = await transcodeAudio( item.file, 'audio/mp3' );
+					break;
+			}
+
 			dispatch.finishTranscoding( id, file );
 		} catch ( error ) {
 			dispatch.cancelItem(
@@ -1278,9 +1332,11 @@ export function convertGifItem( id: QueueItemId ) {
 	return async ( {
 		select,
 		dispatch,
+		registry,
 	}: {
 		select: Selectors;
 		dispatch: ActionCreators;
+		registry: WPDataRegistry;
 	} ) => {
 		const item = select.getItem( id );
 		if ( ! item ) {
@@ -1289,11 +1345,24 @@ export function convertGifItem( id: QueueItemId ) {
 
 		dispatch.startTranscoding( id );
 
+		const outputFormat: VideoFormat =
+			registry
+				.select( preferencesStore )
+				.get( PREFERENCES_NAME, 'video_outputFormat' ) || 'video/mp4';
+
+		const videoSizeThreshold: number = registry
+			.select( preferencesStore )
+			.get( PREFERENCES_NAME, 'bigVideoSizeThreshold' );
+
 		try {
 			const { convertGifToVideo } = await import(
 				/* webpackChunkName: 'ffmpeg' */ '@mexp/ffmpeg'
 			);
-			const file = await convertGifToVideo( item.file );
+			const file = await convertGifToVideo(
+				item.file,
+				outputFormat,
+				videoSizeThreshold
+			);
 			dispatch.finishTranscoding( id, file );
 		} catch ( error ) {
 			dispatch.cancelItem(

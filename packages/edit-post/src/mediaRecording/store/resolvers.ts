@@ -110,9 +110,9 @@ export function getMediaStream() {
 			canvas.height = video.videoHeight;
 
 			const canvasStream = canvas.captureStream();
-			stream
-				.getAudioTracks()
-				.forEach( ( track ) => canvasStream.addTrack( track ) );
+			for ( const track of stream.getAudioTracks() ) {
+				canvasStream.addTrack( track );
+			}
 
 			const ctx = canvas.getContext( '2d' );
 
@@ -236,7 +236,9 @@ export function getMediaStream() {
 							'countdown',
 						].includes( select.getRecordingStatus() )
 					) {
-						stream.getTracks().forEach( ( track ) => track.stop() );
+						for ( const track of stream.getTracks() ) {
+							track.stop();
+						}
 						return;
 					}
 
@@ -262,7 +264,9 @@ export function getMediaStream() {
 							'countdown',
 						].includes( select.getRecordingStatus() )
 					) {
-						stream.getTracks().forEach( ( track ) => track.stop() );
+						for ( const track of stream.getTracks() ) {
+							track.stop();
+						}
 						return;
 					}
 

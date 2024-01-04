@@ -14,6 +14,8 @@ import type {
 	ImageLibrary,
 	ImageSizeCrop,
 	ThumbnailGeneration,
+	VideoFormat,
+	AudioFormat,
 } from './store/types';
 import { UploadError } from './uploadError';
 
@@ -30,6 +32,8 @@ export type {
 	ImageLibrary,
 	ImageSizeCrop,
 	ThumbnailGeneration,
+	VideoFormat,
+	AudioFormat,
 };
 
 export { uploadStore as store, UploadError };

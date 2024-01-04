@@ -30,13 +30,13 @@ async function createMediaFromFile(
 	// Create upload payload.
 	const data = new FormData();
 	data.append( 'file', file, file.name || file.type.replace( '/', '.' ) );
-	Object.entries( additionalData ).forEach( ( [ key, value ] ) =>
+	for ( const [ key, value ] of Object.entries( additionalData ) ) {
 		flattenFormData(
 			data,
 			key,
 			value as string | Record< string, string > | undefined
-		)
-	);
+		);
+	}
 
 	return apiFetch< RestAttachment >( {
 		path: '/wp/v2/media',
@@ -60,13 +60,13 @@ export async function sideloadFile(
 	// Create upload payload.
 	const data = new FormData();
 	data.append( 'file', file, file.name || file.type.replace( '/', '.' ) );
-	Object.entries( additionalData ).forEach( ( [ key, value ] ) =>
+	for ( const [ key, value ] of Object.entries( additionalData ) ) {
 		flattenFormData(
 			data,
 			key,
 			value as string | Record< string, string > | undefined
-		)
-	);
+		);
+	}
 
 	return apiFetch< unknown >( {
 		path: '/wp/v2/media/sideload',
