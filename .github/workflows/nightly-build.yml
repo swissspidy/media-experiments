@@ -57,14 +57,16 @@ jobs:
 
             - name: Create ZIP file
               if: ${{ env.CURRENT_TAG != 'nightly' }}
-              run: wp dist-archive . media-experiments.zip
+              run: wp dist-archive . ./media-experiments.zip
 
             - name: Prepare GitHub Pages
+              if: ${{ env.CURRENT_TAG != 'nightly' }}
               run: |
-                mkdir -p _site
-                cp media-experiments.zip _site/nightly.zip
+                  mkdir -p _site
+                  cp ./media-experiments.zip _site/nightly.zip
 
             - name: Upload artifact
+              if: ${{ env.CURRENT_TAG != 'nightly' }}
               uses: actions/upload-pages-artifact@v3
 
             - name: Delete existing release
