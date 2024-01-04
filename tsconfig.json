@@ -13,7 +13,21 @@
 			"path": "packages/media-utils"
 		},
 		{
+			"path": "packages/pdf"
+		},
+		{
+			"path": "packages/subtitles"
+		},
+		{
 			"path": "packages/upload-media"
+		},
+
+		{
+			"path": "packages/upload-requests"
+		},
+
+		{
+			"path": "packages/view-upload-request"
 		},
 		{
 			"path": "packages/vips"
