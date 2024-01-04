@@ -11,7 +11,7 @@
 			"step": "installPlugin",
 			"pluginZipFile": {
 				"resource": "url",
-				"url": "https://api.allorigins.win/raw?url=https://github.com/swissspidy/media-experiments/releases/download/nightly/media-experiments.zip"
+				"url": "https://swissspidy.github.io/media-experiments/nightly.zip"
 			}
 		},
 		{
