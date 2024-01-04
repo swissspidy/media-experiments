@@ -28,13 +28,13 @@ export function GenerateSubtitles( {
 		[]
 	);
 
-	if ( ! post || post.mexp_is_muted || attributes.tracks.length > 0 ) {
+	if ( ( post && post.mexp_is_muted ) || attributes.tracks.length > 0 ) {
 		return null;
 	}
 
 	const onClick = () => {
 		void addSubtitlesForExistingVideo( {
-			id: post.id,
+			id: post?.id || undefined,
 			url: attributes.src,
 			onChange: ( [ media ] ) =>
 				setAttributes( {

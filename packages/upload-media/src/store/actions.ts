@@ -384,7 +384,7 @@ export function muteExistingVideo( {
 }
 
 interface AddSubtitlesForExistingVideoArgs {
-	id: number;
+	id?: number;
 	url: string;
 	onChange?: OnChangeHandler;
 	onSuccess?: OnSuccessHandler;
@@ -405,6 +405,7 @@ export function addSubtitlesForExistingVideo( {
 		const sourceFile = await fetchRemoteFile( url, fileName );
 
 		// TODO: Do this *after* adding to the queue so that we can disable the button quickly.
+		// Plus, this way we can display proper error notice on failure.
 		const { generateSubtitles } = await import(
 			/* webpackChunkName: 'subtitles' */ '@mexp/subtitles'
 		);
