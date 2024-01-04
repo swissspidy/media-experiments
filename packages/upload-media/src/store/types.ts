@@ -89,7 +89,12 @@ export type TranscodingStartAction = Action<
 >;
 export type TranscodingFinishAction = Action<
 	Type.TranscodingFinish,
-	{ id: QueueItemId; file: File; url: string }
+	{
+		id: QueueItemId;
+		file: File;
+		url: string;
+		additionalData?: Partial< AdditionalData >;
+	}
 >;
 export type UploadStartAction = Action< Type.UploadStart, { id: QueueItemId } >;
 export type UploadFinishAction = Action<

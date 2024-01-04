@@ -702,13 +702,15 @@ export function startTranscoding( id: QueueItemId ): TranscodingStartAction {
 
 export function finishTranscoding(
 	id: QueueItemId,
-	file: File
+	file: File,
+	additionalData: Partial< AdditionalData > = {}
 ): TranscodingFinishAction {
 	return {
 		type: Type.TranscodingFinish,
 		id,
 		file,
 		url: createBlobURL( file ),
+		additionalData,
 	};
 }
 
@@ -1219,7 +1221,7 @@ export function muteVideoItem( id: QueueItemId ) {
 				/* webpackChunkName: 'ffmpeg' */ '@mexp/ffmpeg'
 			);
 			const file = await muteVideo( item.file );
-			dispatch.finishTranscoding( id, file );
+			dispatch.finishTranscoding( id, file, { mexp_is_muted: true } );
 		} catch ( error ) {
 			dispatch.cancelItem(
 				id,
@@ -1439,7 +1441,10 @@ export function uploadItem( id: QueueItemId ) {
 
 		// TODO: Make this async after upload?
 		// Could be made reusable to enable back-filling of existing blocks.
-		if ( 'video' === mediaType ) {
+		if (
+			typeof additionalData.mexp_is_muted === 'undefined' &&
+			'video' === mediaType
+		) {
 			try {
 				const hasAudio =
 					item.attachment?.url &&

@@ -139,6 +139,10 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 							url: action.url,
 							mimeType: action.file.type,
 						},
+						additionalData: {
+							...item.additionalData,
+							...action.additionalData,
+						},
 						mediaSourceTerms,
 					};
 				} ),
