@@ -8,13 +8,23 @@
 This experimental WordPress plugin aims to bring improved media capabilities to WordPress and specifically the block editor,
 all powered by new web platform features like [WebAssembly](https://developer.mozilla.org/en-US/docs/WebAssembly).
 
+## Try it
+
+Use [WordPress Playground](https://wordpress.org/playground/) to try this plugin directly in the browser without installing it on your site: 
+
+[![Test on WordPress Playground](https://img.shields.io/badge/Test%20on%20WordPress%20Playground-3F57E1?style=for-the-badge&logo=WordPress&logoColor=ffffff)](https://playground.wordpress.net/?mode=seamless&blueprint-url=https://raw.githubusercontent.com/swissspidy/media-experiments/main/blueprints/playground.json)
+
+**Note:** This is experimental. Not all features are currently supported in playground.
+
 ## Usage
 
 Reminder: this is an experimental WordPress plugin. While you can totally install it on your website, it is recommended to try it on a development environment first.
 
 You can [download the latest nightly build](https://github.com/swissspidy/media-experiments/releases/download/nightly/media-experiments.zip) directly from GitHub.
 Afterwards, you should be able to use a plugin like [Git Updater](https://git-updater.com/) to receive updates.
-Alternatively, simply download the nightly build again every now and then.
+Alternatively, simply download the nightly build again every once in a while.
+
+**Important:** If you clone this repository, you will first need to build the assets.
 
 ## Development
 
