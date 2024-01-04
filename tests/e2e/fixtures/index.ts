@@ -4,9 +4,11 @@ import type { Page } from '@playwright/test';
 import { test as base } from '@wordpress/e2e-test-utils-playwright';
 
 import { MediaUtils } from './mediaUtils';
+import { DraggingUtils } from './draggingUtils';
 
 type E2EFixture = {
 	mediaUtils: MediaUtils;
+	draggingUtils: DraggingUtils;
 	secondPage: Page;
 };
 
@@ -68,6 +70,9 @@ export const test = base.extend< E2EFixture, {} >( {
 	},
 	mediaUtils: async ( { page }, use ) => {
 		await use( new MediaUtils( { page } ) );
+	},
+	draggingUtils: async ( { page }, use ) => {
+		await use( new DraggingUtils( { page } ) );
 	},
 } );
 
