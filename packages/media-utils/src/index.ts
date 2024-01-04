@@ -17,10 +17,35 @@ export function getExtensionFromMimeType( mimeType: string ): string | null {
 	return mime.getExtension( mimeType );
 }
 
+/**
+ * Get the mime type for a given file extension.
+ *
+ * @param ext File extension.
+ * @return Mime type.
+ */
+export function getMimeTypeFromExtension( ext: string ): string | null {
+	return mime.getType( ext );
+}
+
+/**
+ * Returns file basename without extension.
+ *
+ * @param name File name.
+ */
 export function getFileBasename( name: string ) {
 	return name.includes( '.' )
 		? name.split( '.' ).slice( 0, -1 ).join( '.' )
 		: name;
+}
+
+/**
+ * Returns the file extension from a given URL.
+ *
+ * @param file File URL.
+ * @return File extension.
+ */
+export function getFileExtension( file: string ) {
+	return file.includes( '.' ) ? file.split( '.' ).pop() || null : null;
 }
 
 export function blobToFile( blob: Blob, filename: string, type: string ): File {

@@ -5,6 +5,8 @@ import {
 	getCanvasBlob,
 	getExtensionFromMimeType,
 	getFileBasename,
+	getFileExtension,
+	getMimeTypeFromExtension,
 	preloadImage,
 } from '@mexp/media-utils';
 
@@ -79,9 +81,14 @@ export async function fetchRemoteFile( url: string, nameOverride?: string ) {
 
 	const name = nameOverride || getFileNameFromUrl( url );
 	const blob = await response.blob();
-	const file = blobToFile( blob, name, blob.type );
 
-	if ( ! blob.type ) {
+	// Fallback if blob.type is an empty string, e.g. when server does not return correct Content-Type.
+	const mimeType =
+		blob.type || getMimeTypeFromExtension( getFileExtension( name ) || '' );
+
+	const file = blobToFile( blob, name, mimeType || '' );
+
+	if ( ! mimeType ) {
 		throw new UploadError( {
 			code: 'FETCH_REMOTE_FILE_ERROR',
 			message: 'File could not be uploaded',
