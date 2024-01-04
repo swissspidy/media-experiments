@@ -78,17 +78,19 @@ jobs:
               with:
                   github-token: ${{secrets.GITHUB_TOKEN}}
                   script: |
-                      const response = await github.rest.repos.getReleaseByTag({
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        tag: "nightly"
-                      });
+                      try {
+                        const response = await github.rest.repos.getReleaseByTag({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          tag: "nightly"
+                        });
 
-                      github.rest.repos.deleteRelease({
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        release_id: response.data.id,
-                      });
+                        github.rest.repos.deleteRelease({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          release_id: response.data.id,
+                        });
+                      } catch {}
 
             - name: Tag current commit
               if: ${{ env.CURRENT_TAG != 'nightly' }}
