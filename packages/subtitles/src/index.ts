@@ -107,9 +107,13 @@ export async function generateSubtitles( file: File ) {
 			recognizer.acceptWaveform( audioBuffer );
 
 			recognizer.on( 'result', ( message: unknown ) => {
-				results.push(
-					...( message as ServerMessageResult ).result.result
-				);
+				if ( ( message as ServerMessageResult ).result.result ) {
+					results.push(
+						...( message as ServerMessageResult ).result.result
+					);
+				}
+
+				// TODO: Reject if `results` is empty.
 
 				const vtt = createWebVttFromResults( results );
 
