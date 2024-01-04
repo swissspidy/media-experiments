@@ -6,11 +6,12 @@ on:
         branches:
             - main
 
-# Cancels all previous workflow runs for the same branch that have not yet completed.
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
     # The concurrency group contains the workflow name and the branch name.
     group: ${{ github.workflow }}-${{ github.ref }}
-    cancel-in-progress: true
+    cancel-in-progress: false
 
 permissions:
     contents: write
