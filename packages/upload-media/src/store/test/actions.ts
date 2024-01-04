@@ -429,6 +429,7 @@ describe( 'actions', () => {
 				id: 'abc123',
 				file: mp4File,
 				url: expect.stringMatching( /^blob:/ ),
+				additionalData: {},
 			} );
 		} );
 	} );
