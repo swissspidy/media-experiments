@@ -33,6 +33,11 @@ require_once __DIR__ . '/inc/class-blurhash.php';
 require_once __DIR__ . '/inc/functions.php';
 
 /**
+ * Compat functions.
+ */
+require_once __DIR__ . '/inc/compat.php';
+
+/**
  * Adds all plugin actions and filters.
  */
 require_once __DIR__ . '/inc/default-filters.php';

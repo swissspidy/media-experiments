@@ -43,3 +43,7 @@ add_action( 'init', __NAMESPACE__ . '\register_upload_request_post_type' );
 add_filter( 'template_include', __NAMESPACE__ . '\load_upload_request_template' );
 add_filter( 'cron_schedules', __NAMESPACE__ . '\add_quarter_hourly_cron_interval' );
 add_action( 'mexp_upload_requests_cleanup', __NAMESPACE__ . '\delete_old_upload_requests' );
+
+// Plugin compat.
+
+add_action( 'admin_print_scripts', __NAMESPACE__ . '\fix_yoast_seo_worker' );
