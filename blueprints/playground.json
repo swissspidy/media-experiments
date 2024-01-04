@@ -8,21 +8,21 @@
 	"phpExtensionBundles": [ "kitchen-sink" ],
 	"steps": [
 		{
-			"step": "login",
-			"username": "admin",
-			"password": "password"
-		},
-		{
 			"step": "installPlugin",
 			"pluginZipFile": {
 				"resource": "url",
-				"url": "https://github.com/swissspidy/media-experiments/releases/download/nightly/media-experiments.zip"
+				"url": "https://api.allorigins.win/raw?url=https://github.com/swissspidy/media-experiments/releases/download/nightly/media-experiments.zip"
 			}
 		},
 		{
 			"step": "activatePlugin",
 			"pluginName": "Media Experiments",
 			"pluginPath": "/wordpress/wp-content/plugins/media-experiments"
+		},
+		{
+			"step": "login",
+			"username": "admin",
+			"password": "password"
 		}
 	]
 }
