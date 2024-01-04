@@ -54,7 +54,11 @@ test.describe( 'Block Transforms', () => {
 		await page.waitForFunction(
 			() =>
 				window.wp.data.select( 'media-experiments/upload' ).getItems()
-					.length === 0
+					.length === 0,
+			undefined,
+			{
+				timeout: 40000, // Audio transcoding might take longer
+			}
 		);
 
 		await expect(
