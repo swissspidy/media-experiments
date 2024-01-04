@@ -1,0 +1,11 @@
+{
+	"steps": [
+		{
+			"step": "installPlugin",
+			"pluginZipFile": {
+				"resource": "url",
+				"url": "https://github.com/swissspidy/media-experiments/releases/download/nightly/media-experiments.zip"
+			}
+		}
+	]
+}

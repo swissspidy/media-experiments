@@ -4,6 +4,7 @@
 @types
 artifacts
 bin
+blueprints
 node_modules
 packages
 patches
