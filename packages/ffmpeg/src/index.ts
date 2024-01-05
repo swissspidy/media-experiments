@@ -216,6 +216,8 @@ export async function muteVideo( file: File ) {
 			// Input filename.
 			'-i',
 			file.name,
+			// Preserve existing video codec.
+			'-codec:v',
 			'copy',
 			// Ensure there is no audio.
 			'-an',
