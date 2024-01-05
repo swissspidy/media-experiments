@@ -1355,14 +1355,31 @@ export function convertGifItem( id: QueueItemId ) {
 			.get( PREFERENCES_NAME, 'bigVideoSizeThreshold' );
 
 		try {
+			let file: File;
 			const { convertGifToVideo } = await import(
 				/* webpackChunkName: 'ffmpeg' */ '@mexp/ffmpeg'
 			);
-			const file = await convertGifToVideo(
-				item.file,
-				outputFormat,
-				videoSizeThreshold
-			);
+
+			switch ( outputFormat ) {
+				case 'ogg':
+					file = await convertGifToVideo(
+						item.file,
+						'video/ogg',
+						videoSizeThreshold
+					);
+					break;
+
+				case 'mp4':
+				case 'webm':
+				default:
+					file = await convertGifToVideo(
+						item.file,
+						`video/${ outputFormat }`,
+						videoSizeThreshold
+					);
+					break;
+			}
+
 			dispatch.finishTranscoding( id, file );
 		} catch ( error ) {
 			dispatch.cancelItem(
