@@ -10,6 +10,8 @@ import {
 	getExtensionFromMimeType,
 	getFileBasename,
 	getMediaTypeFromMimeType,
+	ImageFile,
+	renameFile,
 } from '@mexp/media-utils';
 
 import { UploadError } from '../uploadError';
@@ -879,6 +881,41 @@ export function completeItem( id: QueueItemId ) {
 				}
 			}
 		}
+
+		// Upload the original image file if it was resized because of the big image size threshold.
+
+		if ( 'image' === mediaType ) {
+			const keepOriginal: boolean = registry
+				.select( preferencesStore )
+				.get( PREFERENCES_NAME, 'keepOriginal' );
+
+			if (
+				! item.isSideload &&
+				item.file instanceof ImageFile &&
+				item.file.wasResized &&
+				keepOriginal
+			) {
+				const basename = getFileBasename( item.file.name );
+
+				dispatch.addSideloadItem( {
+					file: renameFile(
+						item.sourceFile,
+						item.file.name.replace(
+							basename,
+							`${ basename }-original`
+						)
+					),
+					additionalData: {
+						// Sideloading does not use the parent post ID but the
+						// attachment ID as the image sizes need to be added to it.
+						post: attachment.id,
+						// Reference the same upload_request if needed.
+						upload_request: item.additionalData.upload_request,
+						image_size: 'original',
+					},
+				} );
+			}
+		}
 	};
 }
 
@@ -1143,6 +1180,16 @@ export function optimizeImageItem(
 							outputQuality / 100
 						);
 					}
+			}
+
+			if ( item.file instanceof ImageFile ) {
+				file = new ImageFile(
+					file,
+					item.file.width,
+					item.file.height,
+					item.file.originalWidth,
+					item.file.originalHeight
+				);
 			}
 
 			if ( requireApproval ) {
@@ -1648,8 +1695,8 @@ export function sideloadItem( id: QueueItemId ) {
 		try {
 			// TODO: Do something with result.
 			await sideloadFile( item.file, {
-				...item.additionalData,
 				image_size: item.resize?.name,
+				...item.additionalData,
 			} );
 
 			dispatch.finishSideloading( id );

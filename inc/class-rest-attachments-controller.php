@@ -389,28 +389,35 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		$attachment_id = $request['post'];
 
+		// TODO: Better fallback if image_size is not provided.
+		$image_size = $request['image_size'] ?? 'thumbnail';
+
+		// In case we're sideloading a PDF poster.
+		if ( 'application/pdf' === get_post_mime_type( $attachment_id ) ) {
+			$image_size = 'full';
+		}
+
 		$metadata = wp_get_attachment_metadata( $attachment_id, true );
 
 		if ( ! $metadata ) {
 			$metadata = [];
 		}
 
-		$metadata['sizes'] = $metadata['sizes'] ?? [];
+		if ( 'original' === $image_size ) {
+			$metadata['original_image'] = basename( $path );
+		} else {
+			$metadata['sizes'] = $metadata['sizes'] ?? [];
 
-		// In case we're sideloading a PDF poster.
-		if ( 'application/pdf' === get_post_mime_type( $attachment_id ) ) {
-			$request['image_size'] = 'full';
+			$size = wp_getimagesize( $path );
+
+			$metadata['sizes'][ $image_size ] = [
+				'width'     => $size ? $size[0] : 0,
+				'height'    => $size ? $size[1] : 0,
+				'file'      => basename( $path ),
+				'mime_type' => $type,
+				'filesize'  => wp_filesize( $path ),
+			];
 		}
-
-		$size = wp_getimagesize( $path );
-		// TODO: Better fallback if image_size is not provided.
-		$metadata['sizes'][ $request['image_size'] ?? 'thumbnail' ] = [
-			'width'     => $size ? $size[0] : 0,
-			'height'    => $size ? $size[1] : 0,
-			'file'      => basename( $path ),
-			'mime_type' => $type,
-			'filesize'  => wp_filesize( $path ),
-		];
 
 		wp_update_attachment_metadata( $attachment_id, $metadata );
 
