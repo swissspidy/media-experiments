@@ -4,6 +4,7 @@ import {
 	blobToFile,
 	getExtensionFromMimeType,
 	getFileBasename,
+	ImageFile,
 } from '@mexp/media-utils';
 
 import type { ImageSizeCrop } from '../types';
@@ -55,27 +56,36 @@ export async function vipsHasTransparency( url: string ) {
 export async function vipsResizeImage(
 	file: File,
 	resize: ImageSizeCrop,
-	smartCrop: boolean
+	smartCrop: boolean,
+	addSuffix: boolean
 ) {
-	const ext = getExtensionFromMimeType( file.type );
+	const { buffer, width, height, originalWidth, originalHeight } =
+		await vipsWorker.resizeImage(
+			await file.arrayBuffer(),
+			file.type,
+			resize,
+			smartCrop
+		);
 
-	if ( ! ext ) {
-		throw new Error( 'Unsupported file type' );
+	let fileName = file.name;
+
+	if ( addSuffix && ( originalWidth > width || originalHeight > height ) ) {
+		const basename = getFileBasename( file.name );
+		fileName = file.name.replace(
+			basename,
+			`${ basename }-${ width }x${ height }`
+		);
 	}
 
-	const { buffer, width, height } = await vipsWorker.resizeImage(
-		await file.arrayBuffer(),
-		ext,
-		resize,
-		smartCrop
-	);
-	const fileName = `${ getFileBasename(
-		file.name
-	) }-${ width }x${ height }.${ ext }`;
-
-	return blobToFile(
-		new Blob( [ buffer ], { type: file.type } ),
-		fileName,
-		file.type
+	return new ImageFile(
+		blobToFile(
+			new Blob( [ buffer ], { type: file.type } ),
+			fileName,
+			file.type
+		),
+		width,
+		height,
+		originalWidth,
+		originalHeight
 	);
 }

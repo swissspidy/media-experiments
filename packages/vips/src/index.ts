@@ -103,17 +103,23 @@ export async function compressImage(
  * Resizes an image using vips.
  *
  * @param buffer    Original file object.
- * @param ext       File extension.
+ * @param type      Mime type.
  * @param resize    Resize options.
  * @param smartCrop Whether to use smart cropping (i.e. saliency-aware).
  * @return Processed file object.
  */
 export async function resizeImage(
 	buffer: ArrayBuffer,
-	ext: string,
+	type: string,
 	resize: ImageSizeCrop,
 	smartCrop = false
 ) {
+	const ext = getExtensionFromMimeType( type );
+
+	if ( ! ext ) {
+		throw new Error( 'Unsupported file type' );
+	}
+
 	const vips = await getVips();
 	const options: ThumbnailOptions = {
 		size: 'down',
@@ -123,14 +129,18 @@ export async function resizeImage(
 	}
 	if ( true === resize.crop ) {
 		options.crop = 'centre';
-	}
 
-	let image;
-
-	if ( ! resize.crop || true === resize.crop ) {
 		if ( smartCrop ) {
 			options.crop = 'attention';
 		}
+	}
+
+	let image = vips.Image.newFromBuffer( buffer );
+
+	const originalWidth = image.width;
+	const originalHeight = image.height;
+
+	if ( ! resize.crop || true === resize.crop ) {
 		image = vips.Image.thumbnailBuffer( buffer, resize.width, options );
 	} else {
 		image = vips.Image.newFromBuffer( buffer );
@@ -160,6 +170,8 @@ export async function resizeImage(
 		buffer: outBuffer.buffer,
 		width: image.width,
 		height: image.height,
+		originalWidth,
+		originalHeight,
 	};
 
 	// Only call after `image` is no longer being used.

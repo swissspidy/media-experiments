@@ -49,6 +49,7 @@ const defaultPreferences: MediaPreferences = {
 	imageLibrary: 'vips',
 	bigImageSizeThreshold: window.mediaExperiments.bigImageSizeThreshold,
 	bigVideoSizeThreshold: window.mediaExperiments.bigVideoSizeThreshold,
+	keepOriginal: false,
 	// Formats.
 	default_outputFormat: 'jpeg',
 	jpeg_outputFormat: 'jpeg',

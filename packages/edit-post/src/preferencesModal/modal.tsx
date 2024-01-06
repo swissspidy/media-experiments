@@ -206,6 +206,17 @@ export function Modal() {
 									},
 								] }
 							/>
+							<EnableFeature
+								featureName="keepOriginal"
+								help={ __(
+									'Retain the original image as backup if it exceeds the threshold.',
+									'media-experiments'
+								) }
+								label={ __(
+									'Keep original',
+									'media-experiments'
+								) }
+							/>
 						</PreferencesModalSection>
 						{ inputFormats.map( ( inputFormat ) => (
 							<PreferencesModalSection

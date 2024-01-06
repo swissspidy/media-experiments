@@ -28,6 +28,7 @@ export type MediaPreferences = {
 	imageLibrary: ImageLibrary;
 	bigImageSizeThreshold: number;
 	bigVideoSizeThreshold: number;
+	keepOriginal: boolean;
 	// Formats.
 	default_outputFormat: ImageFormat;
 	jpeg_outputFormat: ImageFormat;

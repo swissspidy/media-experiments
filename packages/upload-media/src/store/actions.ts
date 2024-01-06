@@ -6,6 +6,7 @@ import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as preferencesStore } from '@wordpress/preferences';
 
 import {
+	cloneFile,
 	getExtensionFromMimeType,
 	getFileBasename,
 	getMediaTypeFromMimeType,
@@ -167,11 +168,10 @@ export function addItem( {
 			.select( preferencesStore )
 			.get( PREFERENCES_NAME, 'bigImageSizeThreshold' );
 
-		// TODO: Also resize if the *height* exceeds the threshold.
 		const resize = imageSizeThreshold
 			? {
 					width: imageSizeThreshold,
-					height: 0,
+					height: imageSizeThreshold,
 			  }
 			: undefined;
 
@@ -185,10 +185,7 @@ export function addItem( {
 				id: uuidv4(),
 				batchId,
 				status: ItemStatus.Pending,
-				sourceFile: new File( [ file ], file.name, {
-					type: file.type,
-					lastModified: file.lastModified,
-				} ),
+				sourceFile: cloneFile( file ),
 				file,
 				attachment: {
 					url: createBlobURL( file ),
@@ -297,10 +294,7 @@ export function addSideloadItem( {
 				id: uuidv4(),
 				batchId,
 				status: ItemStatus.Pending,
-				sourceFile: new File( [ file ], file.name, {
-					type: file.type,
-					lastModified: file.lastModified,
-				} ),
+				sourceFile: cloneFile( file ),
 				file,
 				additionalData: {
 					generate_sub_sizes: false,
@@ -598,8 +592,10 @@ export function prepareItem( id: QueueItemId ) {
 				// Image/Video block already have a placeholder state.
 				if ( isHeif ) {
 					operations.push( TranscodingType.Heif );
-					operations.push( TranscodingType.ResizeCrop );
 				}
+
+				// Always add resize operation to comply with big image size threshold.
+				operations.push( TranscodingType.ResizeCrop );
 
 				const optimizeOnUpload: boolean = registry
 					.select( preferencesStore )
@@ -1455,13 +1451,17 @@ export function resizeCropItem( id: QueueItemId ) {
 			.select( preferencesStore )
 			.get( PREFERENCES_NAME, 'thumbnailGeneration' );
 
-		const smartCrop = thumbnailGeneration === 'smart';
+		const smartCrop = Boolean( thumbnailGeneration === 'smart' );
+
+		// TODO: Add canvas-based alternative.
 
 		try {
+			const addSuffix = Boolean( item.isSideload );
 			const file = await vipsResizeImage(
 				item.file,
 				item.resize,
-				smartCrop
+				smartCrop,
+				addSuffix
 			);
 			dispatch.finishTranscoding( id, file );
 		} catch ( error ) {

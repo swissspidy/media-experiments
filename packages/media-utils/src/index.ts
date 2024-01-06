@@ -1,5 +1,7 @@
 import mime from 'mime/lite';
 
+export { ImageFile } from './imageFile';
+
 export function getMediaTypeFromMimeType( mimeType: string ) {
 	if ( mimeType === 'application/pdf' ) {
 		return 'pdf';
@@ -50,6 +52,17 @@ export function getFileExtension( file: string ) {
 
 export function blobToFile( blob: Blob, filename: string, type: string ): File {
 	return new File( [ blob ], filename, { type } );
+}
+
+export function renameFile( file: File, name: string ) {
+	return new File( [ file ], name, {
+		type: file.type,
+		lastModified: file.lastModified,
+	} );
+}
+
+export function cloneFile( file: File ) {
+	return renameFile( file, file.name );
 }
 
 export function preloadImage( src: string, width?: number, height?: number ) {
