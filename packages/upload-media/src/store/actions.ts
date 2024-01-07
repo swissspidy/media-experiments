@@ -895,6 +895,9 @@ export function completeItem( id: QueueItemId ) {
 			) {
 				const basename = getFileBasename( item.file.name );
 
+				// TODO: What if sourceFile is of type HEIC/HEIF?
+				// Mime types of item.sourceFile and item.file are different.
+				// Right now this triggers another HEIC conversion, which is not ideal.
 				dispatch.addSideloadItem( {
 					file: renameFile(
 						item.sourceFile,
