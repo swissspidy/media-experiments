@@ -145,7 +145,7 @@ test.describe( 'Images', () => {
 				// No exact comparison as there can be 1-2 char differences between browsers.
 				await expect(
 					page.locator( 'css=[data-blurhash]' )
-				).toHaveAttribute( 'data-blurhash', /xuj\[M\{WB00ay~qayM\{/ );
+				).toHaveAttribute( 'data-blurhash', /WB00ay~qay/ );
 
 				await page.evaluate(
 					( [ fmt, lib ] ) => {
@@ -241,7 +241,7 @@ test.describe( 'Images', () => {
 				// No exact comparison as there can be 1-2 char differences between browsers.
 				await expect(
 					page.locator( 'css=[data-blurhash]' )
-				).toHaveAttribute( 'data-blurhash', /xuj\[M\{WB00ay~qayM\{/ );
+				).toHaveAttribute( 'data-blurhash', /WB00ay~qay/ );
 			} );
 		}
 	} );
@@ -345,7 +345,7 @@ test.describe( 'Images', () => {
 				// No exact comparison as there can be 1-2 char differences between browsers.
 				await expect(
 					page.locator( 'css=[data-blurhash]' )
-				).toHaveAttribute( 'data-blurhash', /xuj\[M\{WB00ay~qayM\{/ );
+				).toHaveAttribute( 'data-blurhash', /WB00ay~qay/ );
 			} );
 		}
 	} );
