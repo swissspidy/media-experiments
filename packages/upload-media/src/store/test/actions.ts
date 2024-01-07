@@ -430,6 +430,7 @@ describe( 'actions', () => {
 				file: mp4File,
 				url: expect.stringMatching( /^blob:/ ),
 				additionalData: {},
+				mediaSourceTerm: undefined,
 			} );
 		} );
 	} );

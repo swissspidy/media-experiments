@@ -93,6 +93,7 @@ export type TranscodingFinishAction = Action<
 		id: QueueItemId;
 		file: File;
 		url: string;
+		mediaSourceTerm?: MediaSourceTerm;
 		additionalData?: Partial< AdditionalData >;
 	}
 >;

@@ -1,5 +1,3 @@
-import { getMediaTypeFromMimeType } from '@mexp/media-utils';
-
 import {
 	type AddAction,
 	type AddPosterAction,
@@ -20,7 +18,6 @@ import {
 	type UnknownAction,
 	type UploadFinishAction,
 	type UploadStartAction,
-	type MediaSourceTerm,
 } from './types';
 
 const DEFAULT_STATE: State = {
@@ -117,15 +114,6 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 						? item.transcode.slice( 1 )
 						: [];
 
-					const mediaType = getMediaTypeFromMimeType(
-						action.file.type
-					);
-					const mediaSourceTerms: MediaSourceTerm[] | undefined =
-						[ 'video', 'image' ].includes( mediaType ) &&
-						! item.mediaSourceTerms?.length
-							? [ 'media-optimization' ]
-							: item.mediaSourceTerms;
-
 					return {
 						...item,
 						status:
@@ -143,7 +131,10 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 							...item.additionalData,
 							...action.additionalData,
 						},
-						mediaSourceTerms,
+						mediaSourceTerms: [
+							...( item.mediaSourceTerms || [] ),
+							action.mediaSourceTerm,
+						],
 					};
 				} ),
 			};

@@ -705,6 +705,7 @@ export function startTranscoding( id: QueueItemId ): TranscodingStartAction {
 export function finishTranscoding(
 	id: QueueItemId,
 	file: File,
+	mediaSourceTerm?: MediaSourceTerm,
 	additionalData: Partial< AdditionalData > = {}
 ): TranscodingFinishAction {
 	return {
@@ -712,6 +713,7 @@ export function finishTranscoding(
 		id,
 		file,
 		url: createBlobURL( file ),
+		mediaSourceTerm,
 		additionalData,
 	};
 }
@@ -1196,7 +1198,7 @@ export function optimizeImageItem(
 			if ( requireApproval ) {
 				dispatch.requestApproval( id, file );
 			} else {
-				dispatch.finishTranscoding( id, file );
+				dispatch.finishTranscoding( id, file, 'media-optimization' );
 			}
 		} catch ( error ) {
 			dispatch.cancelItem(
@@ -1265,7 +1267,7 @@ export function optimizeVideoItem( id: QueueItemId ) {
 					break;
 			}
 
-			dispatch.finishTranscoding( id, file );
+			dispatch.finishTranscoding( id, file, 'media-optimization' );
 		} catch ( error ) {
 			dispatch.cancelItem(
 				id,
@@ -1301,7 +1303,9 @@ export function muteVideoItem( id: QueueItemId ) {
 				/* webpackChunkName: 'ffmpeg' */ '@mexp/ffmpeg'
 			);
 			const file = await muteVideo( item.file );
-			dispatch.finishTranscoding( id, file, { mexp_is_muted: true } );
+			dispatch.finishTranscoding( id, file, undefined, {
+				mexp_is_muted: true,
+			} );
 		} catch ( error ) {
 			dispatch.cancelItem(
 				id,
@@ -1356,7 +1360,7 @@ export function optimizeAudioItem( id: QueueItemId ) {
 					break;
 			}
 
-			dispatch.finishTranscoding( id, file );
+			dispatch.finishTranscoding( id, file, 'media-optimization' );
 		} catch ( error ) {
 			dispatch.cancelItem(
 				id,
@@ -1424,7 +1428,7 @@ export function convertGifItem( id: QueueItemId ) {
 					break;
 			}
 
-			dispatch.finishTranscoding( id, file );
+			dispatch.finishTranscoding( id, file, 'gif-conversion' );
 		} catch ( error ) {
 			dispatch.cancelItem(
 				id,
