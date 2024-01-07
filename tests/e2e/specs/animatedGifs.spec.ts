@@ -107,8 +107,6 @@ test.describe( 'Animated GIFs', () => {
 		// TODO: Ensure dominant color and blurhash are properly extracted.
 
 		await expect( settingsPanel.getByLabel( '#7a6e96' ) ).toBeVisible();
-
-		// No exact comparison as there can be slight differences between browsers.
 		await expect( page.locator( 'css=[data-blurhash]' ) ).toBeVisible();
 	} );
 } );

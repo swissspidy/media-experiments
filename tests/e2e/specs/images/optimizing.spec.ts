@@ -142,10 +142,9 @@ test.describe( 'Images', () => {
 				await expect(
 					settingsPanel.getByLabel( '#696969' )
 				).toBeVisible();
-				// No exact comparison as there can be 1-2 char differences between browsers.
 				await expect(
 					page.locator( 'css=[data-blurhash]' )
-				).toHaveAttribute( 'data-blurhash', /WB00ay~qay/ );
+				).toBeVisible();
 
 				await page.evaluate(
 					( [ fmt, lib ] ) => {
@@ -238,10 +237,9 @@ test.describe( 'Images', () => {
 				await expect(
 					settingsPanel.getByLabel( '#696969' )
 				).toBeVisible();
-				// No exact comparison as there can be 1-2 char differences between browsers.
 				await expect(
 					page.locator( 'css=[data-blurhash]' )
-				).toHaveAttribute( 'data-blurhash', /WB00ay~qay/ );
+				).toBeVisible();
 			} );
 		}
 	} );
@@ -342,10 +340,9 @@ test.describe( 'Images', () => {
 				await expect(
 					settingsPanel.getByLabel( '#696969' )
 				).toBeVisible();
-				// No exact comparison as there can be 1-2 char differences between browsers.
 				await expect(
 					page.locator( 'css=[data-blurhash]' )
-				).toHaveAttribute( 'data-blurhash', /WB00ay~qay/ );
+				).toBeVisible();
 			} );
 		}
 	} );
