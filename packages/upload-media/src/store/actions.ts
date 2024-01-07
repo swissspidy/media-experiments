@@ -857,10 +857,8 @@ export function completeItem( id: QueueItemId ) {
 			'server' !== thumbnailGeneration
 		) {
 			const file = attachment.fileName
-				? new File( [ item.sourceFile ], attachment.fileName, {
-						type: attachment.mimeType,
-				  } )
-				: item.sourceFile;
+				? renameFile( item.file, attachment.fileName )
+				: item.file;
 			const batchId = uuidv4();
 			for ( const name of attachment.missingImageSizes ) {
 				const imageSize = select.getImageSize( name );
