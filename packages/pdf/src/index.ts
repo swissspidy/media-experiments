@@ -22,8 +22,15 @@ export async function getImageFromPdf(
 	const viewport = pdfPage.getViewport( { scale: 1.0 } );
 
 	const canvas = document.createElement( 'canvas' );
-	canvas.width = viewport.width;
-	canvas.height = viewport.height;
+
+	// Default is 72DPI but WordPress defaults to 128DPI (see \WP_Image_Editor_Imagick::pdf_setup()).
+	// Increase canvas dimensions to accommodate for that.
+	const outputScale = 128 / 72;
+
+	canvas.width = Math.floor( viewport.width * outputScale );
+	canvas.height = Math.floor( viewport.height * outputScale );
+	canvas.style.width = Math.floor( viewport.width ) + 'px';
+	canvas.style.height = Math.floor( viewport.height ) + 'px';
 	const ctx = canvas.getContext( '2d' );
 
 	if ( ! ctx ) {
