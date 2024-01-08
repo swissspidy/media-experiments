@@ -18,19 +18,19 @@ export async function getImageFromPdf(
 	const pdf = await getDocument( url ).promise;
 	const pdfPage = await pdf.getPage( 1 );
 
-	// Display page on the existing canvas with 100% scale.
-	const viewport = pdfPage.getViewport( { scale: 1.0 } );
+	const viewport = pdfPage.getViewport( { scale: 1.5 } );
 
 	const canvas = document.createElement( 'canvas' );
 
 	// Default is 72DPI but WordPress defaults to 128DPI (see \WP_Image_Editor_Imagick::pdf_setup()).
 	// Increase canvas dimensions to accommodate for that.
+	// See https://github.com/mozilla/pdf.js/blob/29faa38dd78d319ac99ab35aed7e659f3b070f4f/docs/contents/examples/index.md#rendering-the-page
 	const outputScale = 128 / 72;
 
 	canvas.width = Math.floor( viewport.width * outputScale );
 	canvas.height = Math.floor( viewport.height * outputScale );
-	canvas.style.width = Math.floor( viewport.width ) + 'px';
-	canvas.style.height = Math.floor( viewport.height ) + 'px';
+	canvas.style.width = `${ Math.floor( viewport.width ) }px`;
+	canvas.style.height = `${ Math.floor( viewport.height ) }px`;
 	const ctx = canvas.getContext( '2d' );
 
 	if ( ! ctx ) {
@@ -39,6 +39,7 @@ export async function getImageFromPdf(
 
 	await pdfPage.render( {
 		canvasContext: ctx,
+		transform: [ outputScale, 0, 0, outputScale, 0, 0 ],
 		viewport,
 	} ).promise;
 
