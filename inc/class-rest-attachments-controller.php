@@ -159,6 +159,67 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	}
 
 	/**
+	 * Prepares a single attachment output for response.
+	 *
+	 * Ensures 'missing_image_sizes' is set for PDFs and not just images.
+	 *
+	 * @param WP_Post         $item    Attachment object.
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function prepare_item_for_response( $item, $request ) {
+		$fields   = $this->get_fields_for_response( $request );
+		$response = parent::prepare_item_for_response( $item, $request );
+
+		$data = $response->get_data();
+
+		if ( rest_is_field_included( 'missing_image_sizes', $fields ) ) {
+			$mime_type = get_post_mime_type( $item );
+			if ( 'application/pdf' === $mime_type ) {
+				// Try to create missing image sizes for PDFs.
+
+				$metadata = wp_get_attachment_metadata( $item->ID, true );
+
+				$metadata['sizes'] = $metadata['sizes'] ?? [];
+
+				$fallback_sizes = array(
+					'thumbnail',
+					'medium',
+					'large',
+				);
+
+				remove_filter( 'fallback_intermediate_image_sizes', '__return_empty_array', 100 );
+
+				/** This filter is documented in wp-admin/includes/image.php */
+				$fallback_sizes = apply_filters( 'fallback_intermediate_image_sizes', $fallback_sizes, $metadata ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+
+				$registered_sizes = wp_get_registered_image_subsizes();
+				$merged_sizes     = array_keys( array_intersect_key( $registered_sizes, array_flip( $fallback_sizes ) ) );
+
+				$missing_image_sizes         = array_diff( $merged_sizes, $metadata['sizes'] );
+				$data['missing_image_sizes'] = $missing_image_sizes;
+			}
+		}
+
+		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data    = $this->add_additional_fields_to_object( $data, $request );
+		$data    = $this->filter_response_by_context( $data, $context );
+
+		$links = $response->get_links();
+
+		// Wrap the data in a response object.
+		$response = rest_ensure_response( $data );
+
+		foreach ( $links as $rel => $rel_links ) {
+			foreach ( $rel_links as $link ) {
+				$response->add_link( $rel, $link['href'], $link['attributes'] );
+			}
+		}
+
+		return $response;
+	}
+
+	/**
 	 * Creates a single attachment.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -168,6 +229,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	public function create_item( $request ): WP_Error|WP_REST_Response {
 		if ( false === $request['generate_sub_sizes'] ) {
 			add_filter( 'intermediate_image_sizes_advanced', '__return_empty_array', 100 );
+			add_filter( 'fallback_intermediate_image_sizes', '__return_empty_array', 100 );
 		}
 
 		$upload_request = $this->get_upload_request_post( $request );
@@ -197,6 +259,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		$response = parent::create_item( $request );
 
 		remove_filter( 'intermediate_image_sizes_advanced', '__return_empty_array', 100 );
+		remove_filter( 'fallback_intermediate_image_sizes', '__return_empty_array', 100 );
 		remove_filter( 'map_meta_cap', $grant_meta_update );
 
 		if ( $upload_request && $response instanceof WP_REST_Response ) {
@@ -392,11 +455,6 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		// TODO: Better fallback if image_size is not provided.
 		$image_size = $request['image_size'] ?? 'thumbnail';
 
-		// In case we're sideloading a PDF poster.
-		if ( 'application/pdf' === get_post_mime_type( $attachment_id ) ) {
-			$image_size = 'full';
-		}
-
 		$metadata = wp_get_attachment_metadata( $attachment_id, true );
 
 		if ( ! $metadata ) {
@@ -414,7 +472,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 				'width'     => $size ? $size[0] : 0,
 				'height'    => $size ? $size[1] : 0,
 				'file'      => basename( $path ),
-				'mime_type' => $type,
+				'mime-type' => $type,
 				'filesize'  => wp_filesize( $path ),
 			];
 		}

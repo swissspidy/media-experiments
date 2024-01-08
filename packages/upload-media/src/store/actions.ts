@@ -835,36 +835,46 @@ export function completeItem( id: QueueItemId ) {
 			}
 		}
 
-		// PDF "poster" generation.
-		if ( 'pdf' === mediaType && item.poster ) {
-			dispatch.addSideloadItem( {
-				file: item.poster,
-				additionalData: {
-					// Sideloading does not use the parent post ID but the
-					// attachment ID as the image sizes need to be added to it.
-					post: attachment.id,
-				},
-				transcode: [ TranscodingType.Image ],
-			} );
-		}
-
-		// Client-side thumbnail generation.
-
 		const thumbnailGeneration: ThumbnailGeneration = registry
 			.select( preferencesStore )
 			.get( PREFERENCES_NAME, 'thumbnailGeneration' );
+
+		// Client-side thumbnail generation.
+		// Works for images and PDF posters.
 
 		if (
 			attachment.missingImageSizes &&
 			'server' !== thumbnailGeneration
 		) {
-			const file = attachment.fileName
+			let file = attachment.fileName
 				? renameFile( item.file, attachment.fileName )
 				: item.file;
 			const batchId = uuidv4();
+
+			if ( 'pdf' === mediaType && item.poster ) {
+				file = item.poster;
+
+				// Upload the "full" version without a resize param.
+				dispatch.addSideloadItem( {
+					file: item.poster,
+					additionalData: {
+						// Sideloading does not use the parent post ID but the
+						// attachment ID as the image sizes need to be added to it.
+						post: attachment.id,
+						image_size: 'full',
+					},
+					transcode: [ TranscodingType.Image ],
+				} );
+			}
+
 			for ( const name of attachment.missingImageSizes ) {
 				const imageSize = select.getImageSize( name );
 				if ( imageSize ) {
+					// Force thumbnails to be soft crops, see wp_generate_attachment_metadata().
+					if ( 'pdf' === mediaType && 'thumbnail' === name ) {
+						imageSize.crop = false;
+					}
+
 					dispatch.addSideloadItem( {
 						file,
 						batchId,
