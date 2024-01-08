@@ -50,7 +50,7 @@
 		"eslint": "^8.56.0",
 		"eslint-plugin-oxlint": "^0.1.0",
 		"mini-css-extract-plugin": "^2.7.6",
-		"monocart-reporter": "^2.1.1",
+		"monocart-reporter": "^2.2.1",
 		"oxlint": "^0.1.1",
 		"patch-package": "^8.0.0",
 		"prettier": "npm:wp-prettier@^3.0.3",
