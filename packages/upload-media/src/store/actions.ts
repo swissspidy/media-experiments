@@ -24,6 +24,7 @@ import {
 	getPosterFromVideo,
 	isAnimatedGif,
 	videoHasAudio,
+	resizeImage,
 } from '../utils';
 import { sideloadFile, updateMediaItem, uploadToServer } from '../api';
 import { PREFERENCES_NAME } from '../constants';
@@ -1517,14 +1518,26 @@ export function resizeCropItem( id: QueueItemId ) {
 
 		// TODO: Add canvas-based alternative.
 
+		const imageLibrary: ImageLibrary =
+			registry
+				.select( preferencesStore )
+				.get( PREFERENCES_NAME, 'imageLibrary' ) || 'vips';
+
+		const addSuffix = Boolean( item.isSideload );
+
 		try {
-			const addSuffix = Boolean( item.isSideload );
-			const file = await vipsResizeImage(
-				item.file,
-				item.resize,
-				smartCrop,
-				addSuffix
-			);
+			let file: File;
+
+			if ( 'browser' === imageLibrary ) {
+				file = await resizeImage( item.file, item.resize, addSuffix );
+			} else {
+				file = await vipsResizeImage(
+					item.file,
+					item.resize,
+					smartCrop,
+					addSuffix
+				);
+			}
 			dispatch.finishTranscoding( id, file );
 		} catch ( error ) {
 			dispatch.cancelItem(

@@ -84,19 +84,26 @@ export function preloadImage( src: string, width?: number, height?: number ) {
 }
 
 export function getCanvasBlob(
-	canvasEl: HTMLCanvasElement,
-	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/jpeg',
+	canvas: HTMLCanvasElement | OffscreenCanvas,
+	type = 'image/jpeg',
 	quality = 0.82
 ) {
-	return new Promise< Blob >( ( resolve, reject ) => {
-		canvasEl.toBlob(
-			( blob ) =>
-				blob
-					? resolve( blob )
-					: reject( new Error( 'Could not get canvas blob' ) ),
-			type,
-			quality
-		);
+	if ( 'toBlob' in canvas ) {
+		return new Promise< Blob >( ( resolve, reject ) => {
+			canvas.toBlob(
+				( blob ) =>
+					blob
+						? resolve( blob )
+						: reject( new Error( 'Could not get canvas blob' ) ),
+				type,
+				quality
+			);
+		} );
+	}
+	// OffscreenCanvas.
+	return canvas.convertToBlob( {
+		type,
+		quality,
 	} );
 }
 
@@ -107,9 +114,7 @@ export async function bufferToBlob(
 	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/jpeg',
 	quality = 0.82
 ) {
-	const canvas = document.createElement( 'canvas' );
-	canvas.width = width;
-	canvas.height = height;
+	const canvas = new OffscreenCanvas( width, height );
 
 	const ctx = canvas.getContext( '2d' );
 
