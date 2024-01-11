@@ -432,15 +432,56 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		$files   = $request->get_file_params();
 		$headers = $request->get_headers();
 
-		// Note: wp_unique_filename() will always add numeric suffix if the name looks like a sub-size to avoid conflicts.
+		// wp_unique_filename() will always add numeric suffix if the name looks like a sub-size to avoid conflicts.
 		// See https://github.com/WordPress/wordpress-develop/blob/30954f7ac0840cfdad464928021d7f380940c347/src/wp-includes/functions.php#L2576-L2582
-		// TODO: Document this or add workaround.
+		// With this filter we can work around this safeguard.
+
+		$attachment_id       = $request['post'];
+		$attachment_filename = get_attached_file( $attachment_id, true );
+		$attachment_filename = $attachment_filename ? basename( $attachment_filename ) : null;
+
+		/**
+		 * Filters the result when generating a unique file name.
+		 *
+		 * @param string        $filename                 Unique file name.
+		 * @param string        $ext                      File extension. Example: ".png".
+		 * @param string        $dir                      Directory path.
+		 * @param callable|null $unique_filename_callback Callback function that generates the unique file name.
+		 * @param string[]      $alt_filenames            Array of alternate file names that were checked for collisions.
+		 * @param int|string    $number                   The highest number that was used to make the file name unique
+		 *                                                or an empty string if unused.
+		 *
+		 * @return string Filtered file name.
+		 */
+		$filter_filename = static function ( $filename, $ext, $dir, $unique_filename_callback, $alt_filenames, $number ) use ( $attachment_filename ) {
+			$ext       = pathinfo( $filename, PATHINFO_EXTENSION );
+			$name      = pathinfo( $filename, PATHINFO_FILENAME );
+			$orig_name = pathinfo( $attachment_filename, PATHINFO_FILENAME );
+
+			if ( empty( $number ) || ! $ext || ! $name ) {
+				return $filename;
+			}
+
+			$matches = [];
+			if ( preg_match( '/(.*)(-\d+x\d+)-' . $number . '$/', $name, $matches ) ) {
+				$filename_without_suffix = $matches[1] . $matches[2] . ".$ext";
+				if ( $matches[1] === $orig_name && ! file_exists( "$dir/$filename_without_suffix" ) ) {
+					return $filename_without_suffix;
+				}
+			}
+
+			return $filename;
+		};
+
+		add_filter( 'wp_unique_filename', $filter_filename, 10, 6 );
 
 		if ( ! empty( $files ) ) {
 			$file = $this->upload_from_file( $files, $headers );
 		} else {
 			$file = $this->upload_from_data( $request->get_body(), $headers );
 		}
+
+		remove_filter( 'wp_unique_filename', $filter_filename );
 
 		if ( is_wp_error( $file ) ) {
 			return $file;
@@ -449,8 +490,6 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		$url  = $file['url'];
 		$type = $file['type'];
 		$path = $file['file'];
-
-		$attachment_id = $request['post'];
 
 		// TODO: Better fallback if image_size is not provided.
 		$image_size = $request['image_size'] ?? 'thumbnail';
