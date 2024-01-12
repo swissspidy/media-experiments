@@ -1,27 +1,27 @@
 import { resizeImage } from '../';
 import type { ImageSizeCrop } from '../types';
 
-const mockImage: any = {
-	writeToBuffer: jest.fn( () => ( {
+const mockThumbnailBuffer = jest.fn( () => new MockImage() );
+const mockCrop = jest.fn( () => new MockImage() );
+const mockNewFromBuffer = jest.fn( () => new MockImage() );
+
+class MockImage {
+	width = 100;
+	height = 100;
+	crop = mockCrop;
+	writeToBuffer = jest.fn( () => ( {
 		buffer: '',
-	} ) ),
-};
-const mockThumbnailBuffer = jest.fn( () => mockImage );
-const mockCrop = jest.fn( () => mockImage );
+	} ) );
+}
+
+class MockVipsImage {
+	static thumbnailBuffer = mockThumbnailBuffer;
+	static newFromBuffer = mockNewFromBuffer;
+}
 
 jest.mock( 'wasm-vips', () =>
 	jest.fn( () => ( {
-		Image: {
-			newFromBuffer: jest.fn( () => ( {
-				crop: mockCrop,
-				writeToBuffer: jest.fn( () => ( {
-					buffer: '',
-				} ) ),
-				width: 100,
-				height: 100,
-			} ) ),
-			thumbnailBuffer: mockThumbnailBuffer,
-		},
+		Image: MockVipsImage,
 	} ) )
 );
 
@@ -63,6 +63,7 @@ describe( 'resizeImage', () => {
 
 		expect( mockThumbnailBuffer ).toHaveBeenCalledWith( buffer, 100, {
 			size: 'down',
+			height: 100,
 		} );
 		expect( mockCrop ).not.toHaveBeenCalled();
 	} );
@@ -103,6 +104,7 @@ describe( 'resizeImage', () => {
 
 		expect( mockThumbnailBuffer ).toHaveBeenCalledWith( buffer, 100, {
 			crop: 'centre',
+			height: 100,
 			size: 'down',
 		} );
 		expect( mockCrop ).not.toHaveBeenCalled();
@@ -166,7 +168,7 @@ describe( 'resizeImage', () => {
 			],
 			[
 				[ 'center', 'top' ],
-				[ 50, 0, 25, 25 ],
+				[ 37.5, 0, 25, 25 ],
 			],
 			[
 				[ 'right', 'top' ],
@@ -174,15 +176,15 @@ describe( 'resizeImage', () => {
 			],
 			[
 				[ 'left', 'center' ],
-				[ 0, 50, 25, 25 ],
+				[ 0, 37.5, 25, 25 ],
 			],
 			[
 				[ 'center', 'center' ],
-				[ 50, 50, 25, 25 ],
+				[ 37.5, 37.5, 25, 25 ],
 			],
 			[
 				[ 'right', 'center' ],
-				[ 75, 50, 25, 25 ],
+				[ 75, 37.5, 25, 25 ],
 			],
 			[
 				[ 'left', 'bottom' ],
@@ -190,7 +192,7 @@ describe( 'resizeImage', () => {
 			],
 			[
 				[ 'center', 'bottom' ],
-				[ 50, 75, 25, 25 ],
+				[ 37.5, 75, 25, 25 ],
 			],
 			[
 				[ 'right', 'bottom' ],
