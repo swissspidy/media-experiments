@@ -124,41 +124,60 @@ export async function resizeImage(
 	const options: ThumbnailOptions = {
 		size: 'down',
 	};
-	if ( resize.height ) {
-		options.height = resize.height;
-	}
-	if ( true === resize.crop ) {
-		options.crop = 'centre';
-
-		if ( smartCrop ) {
-			options.crop = 'attention';
-		}
-	}
 
 	let image = vips.Image.newFromBuffer( buffer );
+	const { width, height } = image;
 
-	const originalWidth = image.width;
-	const originalHeight = image.height;
+	// If resize.height is zero.
+	resize.height = resize.height || ( height / width ) * resize.width;
 
-	if ( ! resize.crop || true === resize.crop ) {
-		image = vips.Image.thumbnailBuffer( buffer, resize.width, options );
+	let resizeWidth = resize.width;
+	options.height = resize.height;
+
+	if ( ! resize.crop ) {
+		image = vips.Image.thumbnailBuffer( buffer, resizeWidth, options );
+	} else if ( true === resize.crop ) {
+		options.crop = smartCrop ? 'attention' : 'centre';
+
+		image = vips.Image.thumbnailBuffer( buffer, resizeWidth, options );
 	} else {
-		image = vips.Image.newFromBuffer( buffer );
+		// First resize, then do the cropping.
+		// This allows operating on the second bitmap with the correct dimensions.
 
-		const { width, height } = image;
+		if ( width < height ) {
+			resizeWidth =
+				resize.width >= resize.height
+					? resize.width
+					: ( width / height ) * resize.height;
+			options.height =
+				resize.width >= resize.height
+					? ( height / width ) * resizeWidth
+					: resize.height;
+		} else {
+			resizeWidth =
+				resize.width >= resize.height
+					? ( width / height ) * resize.height
+					: resize.width;
+			options.height =
+				resize.width >= resize.height
+					? resize.height
+					: ( height / width ) * resizeWidth;
+		}
+
+		image = vips.Image.thumbnailBuffer( buffer, resizeWidth, options );
 
 		let left = 0;
 		if ( 'center' === resize.crop[ 0 ] ) {
-			left = width / 2;
+			left = ( image.width - resize.width ) / 2;
 		} else if ( 'right' === resize.crop[ 0 ] ) {
-			left = width - resize.width;
+			left = image.width - resize.width;
 		}
 
 		let top = 0;
 		if ( 'center' === resize.crop[ 1 ] ) {
-			top = height / 2;
+			top = ( image.height - resize.height ) / 2;
 		} else if ( 'bottom' === resize.crop[ 1 ] ) {
-			top = height - resize.height;
+			top = image.height - resize.height;
 		}
 
 		image = image.crop( left, top, resize.width, resize.height );
@@ -170,8 +189,8 @@ export async function resizeImage(
 		buffer: outBuffer.buffer,
 		width: image.width,
 		height: image.height,
-		originalWidth,
-		originalHeight,
+		originalWidth: width,
+		originalHeight: height,
 	};
 
 	// Only call after `image` is no longer being used.
