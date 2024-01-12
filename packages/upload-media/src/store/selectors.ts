@@ -148,6 +148,13 @@ export function isUploadingById( state: State, id: number ) {
 	);
 }
 
+export function isUploadingByBatchId( state: State, batchId: BatchId ) {
+	return state.queue.some(
+		( item ) =>
+			item.status === ItemStatus.Uploading && item.batchId === batchId
+	);
+}
+
 export function getMediaSourceTermId( state: State, slug: MediaSourceTerm ) {
 	return state.mediaSourceTerms[ slug ];
 }

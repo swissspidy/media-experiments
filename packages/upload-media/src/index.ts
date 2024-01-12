@@ -49,9 +49,15 @@ subscribe( () => {
 
 subscribe( () => {
 	const items: QueueItem[] = select( uploadStore ).getTranscodedItems();
-	for ( const { id, isSideload } of items ) {
+	for ( const { id, isSideload, batchId } of items ) {
 		if ( isSideload ) {
-			void dispatch( uploadStore ).sideloadItem( id );
+			// Prevent race conditions, see https://github.com/swissspidy/media-experiments/issues/303.
+			if (
+				! batchId ||
+				! select( uploadStore ).isUploadingByBatchId( batchId )
+			) {
+				void dispatch( uploadStore ).sideloadItem( id );
+			}
 		} else {
 			void dispatch( uploadStore ).uploadItem( id );
 		}
