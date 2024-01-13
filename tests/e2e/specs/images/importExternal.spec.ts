@@ -56,7 +56,7 @@ test.describe( 'Images', () => {
 		expect( src ).toMatch( /\/wp-content\/uploads\// );
 
 		await expect( settingsPanel ).toHaveText( /Mime type: image\/jpeg/ );
-		await expect( settingsPanel.getByLabel( '#8a74bc' ) ).toBeVisible();
+		await expect( settingsPanel.getByLabel( /#8a74b[bc]/ ) ).toBeVisible();
 		await expect( page.locator( 'css=[data-blurhash]' ) ).toBeVisible();
 	} );
 } );

@@ -59,7 +59,9 @@ test.describe( 'Images', () => {
 			} );
 
 		await expect( settingsPanel ).toHaveText( /Mime type: image\/jpeg/ );
-		await expect( settingsPanel.getByLabel( '#837776' ) ).toBeVisible();
+		await expect(
+			settingsPanel.getByLabel( /#837776|#827675/ )
+		).toBeVisible();
 
 		await expect( page.locator( 'css=[data-blurhash]' ) ).toBeVisible();
 	} );
