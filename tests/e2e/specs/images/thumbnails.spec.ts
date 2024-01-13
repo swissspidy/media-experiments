@@ -20,11 +20,6 @@ const scenarios: {
 		imageLibrary: 'browser',
 		thumbnailGeneration: 'client',
 	},
-	// Same behavior as browser & client, just added for completeness.
-	{
-		imageLibrary: 'browser',
-		thumbnailGeneration: 'smart',
-	},
 	{
 		imageLibrary: 'vips',
 		thumbnailGeneration: 'client',
