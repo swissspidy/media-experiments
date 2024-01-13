@@ -88,22 +88,22 @@ export function getCanvasBlob(
 	type = 'image/jpeg',
 	quality = 0.82
 ) {
-	if ( 'toBlob' in canvas ) {
-		return new Promise< Blob >( ( resolve, reject ) => {
-			canvas.toBlob(
-				( blob ) =>
-					blob
-						? resolve( blob )
-						: reject( new Error( 'Could not get canvas blob' ) ),
-				type,
-				quality
-			);
+	if ( 'convertToBlob' in canvas ) {
+		return canvas.convertToBlob( {
+			type,
+			quality,
 		} );
 	}
-	// OffscreenCanvas.
-	return canvas.convertToBlob( {
-		type,
-		quality,
+
+	return new Promise< Blob >( ( resolve, reject ) => {
+		canvas.toBlob(
+			( blob ) =>
+				blob
+					? resolve( blob )
+					: reject( new Error( 'Could not get canvas blob' ) ),
+			type,
+			quality
+		);
 	} );
 }
 
