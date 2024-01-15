@@ -906,15 +906,19 @@ export function completeItem( id: QueueItemId ) {
 				item.file.wasResized &&
 				keepOriginal
 			) {
+				const originalName = attachment.fileName || item.file.name;
+				const originalBaseName = getFileBasename( originalName );
+
 				// TODO: What if sourceFile is of type HEIC/HEIF?
 				// Mime types of item.sourceFile and item.file are different.
 				// Right now this triggers another HEIC conversion, which is not ideal.
 				dispatch.addSideloadItem( {
 					file: renameFile(
 						item.sourceFile,
-						`${ getFileBasename(
-							attachment.fileName || item.file.name
-						) }-original`
+						originalName.replace(
+							originalBaseName,
+							`${ originalBaseName }-original`
+						)
 					),
 					additionalData: {
 						// Sideloading does not use the parent post ID but the
