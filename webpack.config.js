@@ -1,7 +1,7 @@
 const { resolve, dirname, basename } = require( 'node:path' );
 const { readFileSync } = require( 'node:fs' );
 
-const webpack = require( 'webpack' );
+const { DefinePlugin } = require( 'webpack' );
 const RtlCssPlugin = require( 'rtlcss-webpack-plugin' );
 const MiniCSSExtractPlugin = require( 'mini-css-extract-plugin' );
 const { WebWorkerPlugin } = require( '@shopify/web-worker/webpack' );
@@ -101,6 +101,7 @@ module.exports = {
 										require.resolve(
 											'react-refresh/babel'
 										),
+									require.resolve( '@mexp/log/babel-plugin' ),
 								].filter( Boolean ),
 							} ),
 						},
@@ -121,7 +122,7 @@ module.exports = {
 		new RtlCssPlugin( {
 			filename: `../build/[name]-rtl.css`,
 		} ),
-		new webpack.DefinePlugin( {
+		new DefinePlugin( {
 			FFMPEG_CDN_URL: JSON.stringify( ffmpegCdnUrl ),
 			MEDIAPIPE_CDN_URL: JSON.stringify( mediapipeCdnUrl ),
 			PDFJS_CDN_URL: JSON.stringify( pdfJsCdnUrl ),

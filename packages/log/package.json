@@ -1,0 +1,35 @@
+{
+	"name": "@mexp/log",
+	"version": "0.0.1",
+	"description": "Logging utility",
+	"private": true,
+	"author": "",
+	"license": "GPL-2.0-or-later",
+	"keywords": [
+		"wordpress",
+		"logging"
+	],
+	"homepage": "https://github.com/swissspidy/media-experiments/tree/HEAD/packages/log/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/swissspidy/media-experiments.git",
+		"directory": "packages/log"
+	},
+	"bugs": {
+		"url": "https://github.com/swissspidy/media-experiments/issues"
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"main": "dist/index.js",
+	"types": "dist-types/index.d.ts",
+	"source": "src/index.ts",
+	"exports": {
+		".": {
+			"default": "./src/index.ts"
+		},
+		"./babel-plugin": {
+			"default": "./src/babel-plugin.js"
+		}
+	}
+}
