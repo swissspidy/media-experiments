@@ -1,12 +1,8 @@
 import {
 	blobToFile,
-	getCanvasBlob,
 	getExtensionFromMimeType,
-	getFileBasename,
 	getFileExtension,
 	getMimeTypeFromExtension,
-	ImageFile,
-	preloadImage,
 } from '@mexp/media-utils';
 
 import {
@@ -14,7 +10,7 @@ import {
 	TRANSCODABLE_MIME_TYPES,
 } from './constants';
 import { UploadError } from './uploadError';
-import type { Attachment, ImageSizeCrop, RestAttachment } from './store/types';
+import type { Attachment, RestAttachment } from './store/types';
 
 // TODO: Make work for HEIF, GIF and audio as well.
 export function canTranscodeFile( file: File ) {
@@ -197,9 +193,7 @@ export function getImageFromVideo(
 	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/jpeg',
 	quality = 0.82
 ) {
-	const canvas = document.createElement( 'canvas' );
-	canvas.width = video.videoWidth;
-	canvas.height = video.videoHeight;
+	const canvas = new OffscreenCanvas( video.videoWidth, video.videoHeight );
 
 	const ctx = canvas.getContext( '2d' );
 
@@ -210,7 +204,7 @@ export function getImageFromVideo(
 	}
 
 	ctx.drawImage( video, 0, 0, canvas.width, canvas.height );
-	return getCanvasBlob( canvas, type, quality );
+	return canvas.convertToBlob( { type, quality } );
 }
 
 /**
@@ -255,222 +249,6 @@ export function isAnimatedGif( buffer: ArrayBuffer ) {
 	}
 
 	return frames > 1;
-}
-
-export async function convertImageFormat(
-	file: File,
-	type: 'image/jpeg' | 'image/png' | 'image/webp',
-	quality = 0.82
-) {
-	const url = URL.createObjectURL( file );
-
-	try {
-		const img = await preloadImage( url );
-
-		const canvas = new OffscreenCanvas(
-			img.naturalWidth,
-			img.naturalHeight
-		);
-
-		const ctx = canvas.getContext( '2d' );
-
-		// If the contextType doesn't match a possible drawing context,
-		// or differs from the first contextType requested, null is returned.
-		if ( ! ctx ) {
-			throw new Error( 'Could not get context' );
-		}
-
-		ctx.drawImage( img, 0, 0, canvas.width, canvas.height );
-
-		const blob = await getCanvasBlob( canvas, type, quality );
-
-		return blobToFile(
-			blob,
-			`${ getFileBasename( file.name ) }.${ getExtensionFromMimeType(
-				blob.type
-			) }`,
-			blob.type
-		);
-
-		// No catch, as error handling should be done in prepareItem()
-		// or wherever this is called from.
-	} finally {
-		URL.revokeObjectURL( url );
-	}
-}
-
-function isFileTypeSupported(
-	type: string
-): type is 'image/jpeg' | 'image/png' | 'image/webp' {
-	return [ 'image/jpeg', 'image/png', 'image/webp' ].includes( type );
-}
-
-export async function compressImage( file: File, quality = 0.82 ) {
-	if ( ! isFileTypeSupported( file.type ) ) {
-		throw new Error( 'Unsupported file type' );
-	}
-	return convertImageFormat( file, file.type, quality );
-}
-
-/**
- * Resizes and crops an image using createImageBitmap and canvas.
- *
- * @param file      File.
- * @param resize    Resize options.
- * @param addSuffix Whether to add a dimensions suffix to the resized file's name.
- */
-export async function resizeImage(
-	file: File,
-	resize: ImageSizeCrop,
-	addSuffix: boolean
-) {
-	const url = URL.createObjectURL( file );
-
-	try {
-		const img = await preloadImage( url );
-		const { naturalWidth: width, naturalHeight: height } = img;
-
-		// If resize.height is zero.
-		resize.height = resize.height || ( height / width ) * resize.width;
-
-		let resizeWidth: number | undefined;
-		let resizeHeight: number | undefined;
-
-		let expectedWidth = resize.width;
-		let expectedHeight = resize.height;
-
-		let bitmap;
-
-		if ( ! resize.crop ) {
-			if ( width < height ) {
-				if ( resize.width <= resize.height ) {
-					if ( resize.height > height ) {
-						resizeWidth = resize.width;
-					} else {
-						resizeHeight = resize.height;
-					}
-				} else if ( resize.width > width ) {
-					resizeHeight = resize.height;
-				} else {
-					resizeWidth = resize.width;
-				}
-			} else if ( resize.width <= resize.height ) {
-				resizeWidth = resize.width > width ? width : resize.width;
-				if ( resize.width > width ) {
-					resizeHeight = resize.height;
-				} else {
-					resizeWidth = resize.width;
-				}
-			} else if ( resize.height > height ) {
-				resizeWidth = resize.width;
-			} else {
-				resizeHeight = resize.height;
-			}
-
-			if ( resizeWidth ) {
-				expectedWidth = resizeWidth;
-				expectedHeight = ( height / width ) * resizeWidth;
-			} else if ( resizeHeight ) {
-				expectedHeight = resizeHeight;
-				expectedWidth = ( width / height ) * resizeHeight;
-			}
-
-			bitmap = await createImageBitmap( img, 0, 0, width, height, {
-				resizeWidth,
-				resizeHeight,
-				resizeQuality: 'pixelated', // Not currently supported in Firefox.
-				premultiplyAlpha: 'none',
-				colorSpaceConversion: 'none',
-			} );
-		} else {
-			// These are equal.
-			if ( true === resize.crop ) {
-				resize.crop = [ 'center', 'center' ];
-			}
-
-			// First resize, then do the cropping.
-			// This allows operating on the second bitmap with the correct dimensions.
-
-			if ( width < height || ! resize.height ) {
-				resizeWidth = resize.width;
-			} else {
-				resizeHeight = resize.height;
-			}
-
-			bitmap = await createImageBitmap( img, 0, 0, width, height, {
-				resizeWidth,
-				resizeHeight,
-				resizeQuality: 'high', // Not currently supported in Firefox.
-				premultiplyAlpha: 'none',
-				colorSpaceConversion: 'none',
-			} );
-
-			let sx = 0;
-			let sy = 0;
-			const sw = resize.width;
-			const sh = resize.height;
-
-			if ( 'center' === resize.crop[ 0 ] ) {
-				sx = ( bitmap.width - resize.width ) / 2;
-			} else if ( 'right' === resize.crop[ 0 ] ) {
-				sx = bitmap.width - resize.width;
-			}
-
-			if ( 'center' === resize.crop[ 1 ] ) {
-				sy = ( bitmap.height - resize.height ) / 2;
-			} else if ( 'bottom' === resize.crop[ 1 ] ) {
-				sy = bitmap.height - resize.height;
-			}
-
-			bitmap = await createImageBitmap( bitmap, sx, sy, sw, sh, {
-				resizeQuality: 'pixelated', // Not currently supported in Firefox.
-				premultiplyAlpha: 'none',
-				colorSpaceConversion: 'none',
-			} );
-		}
-
-		// Using expected width/height over bitmap.width / bitmap.height to fix 1px rounding errors.
-		expectedWidth = Math.round( Number( expectedWidth.toFixed( 1 ) ) );
-		expectedHeight = Math.round( Number( expectedHeight.toFixed( 1 ) ) );
-
-		const canvas = new OffscreenCanvas( expectedWidth, expectedHeight );
-		const ctx = canvas.getContext( '2d' );
-
-		// If the contextType doesn't match a possible drawing context,
-		// or differs from the first contextType requested, null is returned.
-		if ( ! ctx ) {
-			throw new Error( 'Could not get context' );
-		}
-
-		ctx.drawImage( bitmap, 0, 0, expectedWidth, expectedHeight );
-
-		const blob = await getCanvasBlob( canvas, file.type );
-
-		let fileName = file.name;
-
-		if ( addSuffix && ( width > canvas.width || height > canvas.height ) ) {
-			const basename = getFileBasename( file.name );
-			fileName = file.name.replace(
-				basename,
-				`${ basename }-${ canvas.width }x${ canvas.height }`
-			);
-		}
-
-		const newFile = blobToFile( blob, fileName, blob.type );
-
-		return new ImageFile(
-			newFile,
-			canvas.width,
-			canvas.height,
-			width,
-			height
-		);
-
-		// No catch, as error handling should be done in prepareItem()
-		// or wherever this is called from.
-	} finally {
-		URL.revokeObjectURL( url );
-	}
 }
 
 export function transformAttachment( attachment: RestAttachment ): Attachment {

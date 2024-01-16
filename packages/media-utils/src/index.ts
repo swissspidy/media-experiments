@@ -84,17 +84,10 @@ export function preloadImage( src: string, width?: number, height?: number ) {
 }
 
 export function getCanvasBlob(
-	canvas: HTMLCanvasElement | OffscreenCanvas,
+	canvas: HTMLCanvasElement,
 	type = 'image/jpeg',
 	quality = 0.82
 ) {
-	if ( 'convertToBlob' in canvas ) {
-		return canvas.convertToBlob( {
-			type,
-			quality,
-		} );
-	}
-
 	return new Promise< Blob >( ( resolve, reject ) => {
 		canvas.toBlob(
 			( blob ) =>
@@ -130,5 +123,5 @@ export async function bufferToBlob(
 
 	ctx.putImageData( imageData, 0, 0 );
 
-	return getCanvasBlob( canvas, type, quality );
+	return canvas.convertToBlob( { type, quality } );
 }

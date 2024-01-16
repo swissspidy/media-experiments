@@ -17,14 +17,11 @@ import {
 import { UploadError } from '../uploadError';
 import {
 	canTranscodeFile,
-	compressImage,
-	convertImageFormat,
 	fetchRemoteFile,
 	getFileNameFromUrl,
 	getPosterFromVideo,
 	isAnimatedGif,
 	videoHasAudio,
-	resizeImage,
 } from '../utils';
 import { sideloadFile, updateMediaItem, uploadToServer } from '../api';
 import { PREFERENCES_NAME } from '../constants';
@@ -35,6 +32,11 @@ import {
 	vipsResizeImage,
 	vipsHasTransparency,
 } from './utils/vips';
+import {
+	compressImage as canvasCompressImage,
+	resizeImage as canvasResizeImage,
+	convertImageFormat as canvasConvertImageFormat,
+} from './utils/canvas';
 import type {
 	AddAction,
 	AdditionalData,
@@ -72,13 +74,13 @@ import { ItemStatus, TranscodingType, Type } from './types';
 const createDominantColorWorker = createWorkerFactory(
 	() =>
 		import(
-			/* webpackChunkName: 'dominant-color' */ '../workers/dominantColor'
+			/* webpackChunkName: 'dominant-color' */ './workers/dominantColor'
 		)
 );
 const dominantColorWorker = createDominantColorWorker();
 
 const createBlurhashWorker = createWorkerFactory(
-	() => import( /* webpackChunkName: 'blurhash' */ '../workers/blurhash' )
+	() => import( /* webpackChunkName: 'blurhash' */ './workers/blurhash' )
 );
 const blurhashWorker = createBlurhashWorker();
 
@@ -1132,7 +1134,7 @@ export function optimizeImageItem(
 				case inputFormat:
 				default:
 					if ( 'browser' === imageLibrary ) {
-						file = await compressImage(
+						file = await canvasCompressImage(
 							item.file,
 							outputQuality / 100
 						);
@@ -1146,7 +1148,7 @@ export function optimizeImageItem(
 
 				case 'webp':
 					if ( 'browser' === imageLibrary && ! isSafari ) {
-						file = await convertImageFormat(
+						file = await canvasConvertImageFormat(
 							item.file,
 							'image/webp',
 							outputQuality / 100
@@ -1183,7 +1185,7 @@ export function optimizeImageItem(
 				case 'jpeg':
 				case 'png':
 					if ( 'browser' === imageLibrary ) {
-						file = await convertImageFormat(
+						file = await canvasConvertImageFormat(
 							item.file,
 							`image/${ outputFormat }`,
 							outputQuality / 100
@@ -1517,8 +1519,6 @@ export function resizeCropItem( id: QueueItemId ) {
 
 		const smartCrop = Boolean( thumbnailGeneration === 'smart' );
 
-		// TODO: Add canvas-based alternative.
-
 		const imageLibrary: ImageLibrary =
 			registry
 				.select( preferencesStore )
@@ -1530,7 +1530,11 @@ export function resizeCropItem( id: QueueItemId ) {
 			let file: File;
 
 			if ( 'browser' === imageLibrary ) {
-				file = await resizeImage( item.file, item.resize, addSuffix );
+				file = await canvasResizeImage(
+					item.file,
+					item.resize,
+					addSuffix
+				);
 			} else {
 				file = await vipsResizeImage(
 					item.file,
@@ -1539,6 +1543,7 @@ export function resizeCropItem( id: QueueItemId ) {
 					addSuffix
 				);
 			}
+
 			dispatch.finishTranscoding( id, file );
 		} catch ( error ) {
 			dispatch.cancelItem(
