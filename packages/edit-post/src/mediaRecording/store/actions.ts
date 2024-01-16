@@ -6,11 +6,7 @@ import { ImageCapture } from 'image-capture';
 import { createBlobURL, revokeBlobURL } from '@wordpress/blob';
 import { dateI18n } from '@wordpress/date';
 
-import {
-	getExtensionFromMimeType,
-	blobToFile,
-	getCanvasBlob,
-} from '@mexp/media-utils';
+import { getExtensionFromMimeType, blobToFile } from '@mexp/media-utils';
 
 import {
 	COUNTDOWN_TIME_IN_SECONDS,
@@ -456,9 +452,10 @@ export function captureImage() {
 					// Downside is we need to get a Blob ourselves.
 					const bitmap = await captureDevice.grabFrame();
 
-					const canvas = document.createElement( 'canvas' );
-					canvas.width = bitmap.width;
-					canvas.height = bitmap.height;
+					const canvas = new OffscreenCanvas(
+						bitmap.width,
+						bitmap.height
+					);
 
 					const ctx = canvas.getContext( '2d' );
 
@@ -467,7 +464,9 @@ export function captureImage() {
 					}
 
 					ctx.drawImage( bitmap, 0, 0, bitmap.width, bitmap.height );
-					const blob = await getCanvasBlob( canvas, 'image/jpeg' );
+					const blob = await canvas.convertToBlob( {
+						type: 'image/jpeg',
+					} );
 
 					const { type } = blob;
 					const ext = getExtensionFromMimeType( type );
