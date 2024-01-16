@@ -13,6 +13,7 @@ import {
 	ImageFile,
 	renameFile,
 } from '@mexp/media-utils';
+import { start } from '@mexp/log';
 
 import { UploadError } from '../uploadError';
 import {
@@ -1108,6 +1109,8 @@ export function optimizeImageItem(
 				.select( preferencesStore )
 				.get( PREFERENCES_NAME, 'imageLibrary' ) || 'vips';
 
+		let stop;
+
 		try {
 			let file: File;
 
@@ -1129,6 +1132,10 @@ export function optimizeImageItem(
 				registry
 					.select( preferencesStore )
 					.get( PREFERENCES_NAME, `${ inputFormat }_quality` ) || 80;
+
+			stop = start(
+				`Optimize Item: ${ imageLibrary } | ${ inputFormat } | ${ outputFormat } | ${ outputQuality }`
+			);
 
 			switch ( outputFormat ) {
 				case inputFormat:
@@ -1225,6 +1232,8 @@ export function optimizeImageItem(
 							file: item.file,
 					  } )
 			);
+		} finally {
+			stop?.();
 		}
 	};
 }
@@ -1526,6 +1535,10 @@ export function resizeCropItem( id: QueueItemId ) {
 
 		const addSuffix = Boolean( item.isSideload );
 
+		const stop = start(
+			`Resize Item: ${ imageLibrary } | ${ thumbnailGeneration } | ${ smartCrop } | ${ addSuffix }`
+		);
+
 		try {
 			let file: File;
 
@@ -1546,6 +1559,7 @@ export function resizeCropItem( id: QueueItemId ) {
 
 			dispatch.finishTranscoding( id, file );
 		} catch ( error ) {
+			stop();
 			dispatch.cancelItem(
 				id,
 				error instanceof Error
