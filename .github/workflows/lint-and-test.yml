@@ -267,3 +267,4 @@ jobs:
                       late_escaping
                       plugin_review_phpcs
                       trademarks
+                      plugin_readme
