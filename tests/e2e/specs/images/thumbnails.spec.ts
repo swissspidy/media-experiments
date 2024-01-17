@@ -128,31 +128,19 @@ test.describe( 'Images', () => {
 				} );
 
 				/* eslint-disable camelcase */
-				if ( 'server' === thumbnailGeneration ) {
-					// Because we're not filtering big_image_size_threshold in PHP for this test.
-					expect( media.media_details ).toEqual(
-						expect.objectContaining( {
-							width: 1200,
-							height: 800,
-							filesize: expect.any( Number ),
-							original_image: media.media_details.file,
-						} )
-					);
-				} else {
-					expect( media.media_details ).toEqual(
-						expect.objectContaining( {
-							width: 1140,
-							height: 760,
-							filesize: expect.any( Number ),
-							// original_image: expect.any( String ),
-							blurhash: expect.any( String ),
-							dominant_color: expect.any( String ),
-							has_transparency: false,
-							image_meta: expect.anything(),
-							sizes: expect.anything(),
-						} )
-					);
-				}
+				expect( media.media_details ).toEqual(
+					expect.objectContaining( {
+						width: 1140,
+						height: 760,
+						filesize: expect.any( Number ),
+						// original_image: expect.any( String ),
+						blurhash: expect.any( String ),
+						dominant_color: expect.any( String ),
+						has_transparency: false,
+						image_meta: expect.anything(),
+						sizes: expect.anything(),
+					} )
+				);
 				expect( media.media_details.sizes ).toEqual(
 					expect.objectContaining( {
 						thumbnail: expect.objectContaining( {
@@ -229,18 +217,11 @@ test.describe( 'Images', () => {
 							source_url:
 								expect.stringContaining( '-900x600.jpeg' ),
 						} ),
-						full:
-							'server' === thumbnailGeneration
-								? expect.objectContaining( {
-										width: 1200,
-										height: 800,
-										mime_type: 'image/jpeg',
-								  } )
-								: expect.objectContaining( {
-										width: 1140,
-										height: 760,
-										mime_type: 'image/jpeg',
-								  } ),
+						full: expect.objectContaining( {
+							width: 1140,
+							height: 760,
+							mime_type: 'image/jpeg',
+						} ),
 					} )
 				);
 				/* eslint-enable camelcase */
