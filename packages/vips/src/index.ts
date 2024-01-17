@@ -191,6 +191,7 @@ export async function resizeImage(
 	// TODO: Allow passing quality?
 	const saveOptions: SaveOptions = {
 		keep: 'none',
+		lossless: true,
 	};
 	const outBuffer = image.writeToBuffer( `.${ ext }`, saveOptions );
 

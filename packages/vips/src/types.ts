@@ -63,6 +63,7 @@ type Intent = 'perceptual' | 'relative' | 'saturation' | 'absolute';
  */
 type FailOn = 'none' | 'truncated' | 'error' | 'warning';
 
+// TODO: Different options depending on mime type.
 export type SaveOptions = {
 	/**
 	 * Quality factor.
