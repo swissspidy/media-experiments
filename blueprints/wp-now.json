@@ -1,0 +1,34 @@
+{
+	"steps": [
+		{
+			"step": "defineWpConfigConsts",
+			"consts": {
+				"WP_DEBUG": true,
+				"WP_DEBUG_DISPLAY": false,
+				"WP_DEBUG_LOG": "/var/www/html/wp-content/plugins/media-experiments/artifacts/debug.log"
+			},
+			"virtualize": true
+		},
+		{
+			"step": "cp",
+			"fromPath": "/var/www/html/wp-content/plugins/media-experiments/tests/e2e/mu-plugins/additional-image-sizes.php",
+			"toPath": "/var/www/html/wp-content/plugins/additional-image-sizes.php"
+		},
+		{
+			"step": "cp",
+			"fromPath": "/var/www/html/wp-content/plugins/media-experiments/tests/e2e/mu-plugins/fix-gravatar.php",
+			"toPath": "/var/www/html/wp-content/plugins/fix-gravatar.php"
+		},
+		{
+			"step": "activatePlugin",
+			"pluginName": "Additional image sizes",
+			"pluginPath": "additional-image-sizes.php"
+		},
+
+		{
+			"step": "activatePlugin",
+			"pluginName": "Fix Gravatar URLs",
+			"pluginPath": "fix-gravatar.php"
+		}
+	]
+}
