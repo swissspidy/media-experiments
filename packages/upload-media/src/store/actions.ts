@@ -1138,7 +1138,7 @@ export function optimizeImageItem(
 					.get( PREFERENCES_NAME, `${ inputFormat }_quality` ) || 80;
 
 			stop = start(
-				`Optimize Item: ${ imageLibrary } | ${ inputFormat } | ${ outputFormat } | ${ outputQuality }`
+				`Optimize Item: ${ item.file.name } | ${ imageLibrary } | ${ inputFormat } | ${ outputFormat } | ${ outputQuality }`
 			);
 
 			switch ( outputFormat ) {
@@ -1540,7 +1540,7 @@ export function resizeCropItem( id: QueueItemId ) {
 		const addSuffix = Boolean( item.isSideload );
 
 		const stop = start(
-			`Resize Item: ${ imageLibrary } | ${ thumbnailGeneration } | ${ smartCrop } | ${ addSuffix }`
+			`Resize Item: ${ item.file.name } | ${ imageLibrary } | ${ thumbnailGeneration } | ${ smartCrop } | ${ addSuffix }`
 		);
 
 		try {
@@ -1563,7 +1563,6 @@ export function resizeCropItem( id: QueueItemId ) {
 
 			dispatch.finishTranscoding( id, file );
 		} catch ( error ) {
-			stop();
 			dispatch.cancelItem(
 				id,
 				error instanceof Error
@@ -1574,6 +1573,8 @@ export function resizeCropItem( id: QueueItemId ) {
 							file: item.file,
 					  } )
 			);
+		} finally {
+			stop();
 		}
 	};
 }
