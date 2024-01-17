@@ -75,10 +75,12 @@ export type SaveOptions = {
 	keep?: ForeignKeep;
 	/**
 	 * Generate an interlaced (progressive) JPEG/PNG/GIF.
+	 * Do not provide for any other type!
 	 */
 	interlace?: boolean;
 	/**
 	 * Enable lossless compression (for WebP).
+	 * Do not provide for any other type!
 	 */
 	lossless?: boolean;
 };

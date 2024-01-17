@@ -1017,6 +1017,11 @@ export function maybeTranscodeItem( id: QueueItemId ) {
 
 		const transcode = item.transcode ? item.transcode[ 0 ] : undefined;
 
+		if ( ! transcode ) {
+			dispatch.finishTranscoding( id, item.file );
+			return;
+		}
+
 		// Prevent simultaneous FFmpeg processes to reduce resource usage.
 		const isTranscoding = select.isTranscoding();
 

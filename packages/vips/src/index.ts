@@ -66,7 +66,6 @@ export async function convertImageFormat(
 
 	const options: SaveOptions = {
 		Q: quality * 100,
-		keep: 'none',
 	};
 	const outBuffer = image.writeToBuffer( `.${ ext }`, options );
 	const result = outBuffer.buffer;
@@ -189,10 +188,7 @@ export async function resizeImage(
 	}
 
 	// TODO: Allow passing quality?
-	const saveOptions: SaveOptions = {
-		keep: 'none',
-		lossless: true,
-	};
+	const saveOptions: SaveOptions = {};
 	const outBuffer = image.writeToBuffer( `.${ ext }`, saveOptions );
 
 	const result = {
