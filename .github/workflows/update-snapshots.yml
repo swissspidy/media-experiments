@@ -71,6 +71,7 @@ jobs:
               run: npm run test:e2e -- --shard=${{ matrix.shard }} --update-snapshots
 
             - name: Update snapshots
+              if: always()
               run: |
                   git config --local user.email "swissspidy@users.noreply.github.com"
                   git config --local user.name "swissspidy-bot"
