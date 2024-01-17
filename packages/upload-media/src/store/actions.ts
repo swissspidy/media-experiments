@@ -559,9 +559,11 @@ export function prepareItem( id: QueueItemId ) {
 			id,
 		} );
 
-		// Transcoding type has already been set, e.g. via muteExistingVideo() or addSideloadItem().
 		// TODO: Check canTranscode either here, in muteExistingVideo, or in the UI.
-		if ( item.transcode ) {
+
+		// Transcoding type has already been set, e.g. via muteExistingVideo() or addSideloadItem().
+		// Also allow empty arrays, useful for example when sideloading original image.
+		if ( item.transcode !== undefined ) {
 			dispatch.prepareForTranscoding( id );
 			return;
 		}
@@ -931,6 +933,8 @@ export function completeItem( id: QueueItemId ) {
 						upload_request: item.additionalData.upload_request,
 						image_size: 'original',
 					},
+					// Allows skipping any resizing or optimization of the original image.
+					transcode: [],
 				} );
 			}
 		}
