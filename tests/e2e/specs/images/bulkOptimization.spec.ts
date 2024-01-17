@@ -38,6 +38,13 @@ test.describe( 'Images', () => {
 					'imageLibrary',
 					'browser'
 				);
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
+					'requireApproval',
+					true
+				);
 		} );
 
 		await editor.insertBlock( { name: 'core/image' } );

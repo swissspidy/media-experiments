@@ -169,6 +169,13 @@ test.describe( 'Images', () => {
 								'imageLibrary',
 								lib
 							);
+						window.wp.data
+							.dispatch( 'core/preferences' )
+							.set(
+								'media-experiments/preferences',
+								'requireApproval',
+								true
+							);
 					},
 					[ outputFormat, imageLibrary ]
 				);
