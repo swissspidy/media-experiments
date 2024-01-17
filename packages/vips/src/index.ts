@@ -3,7 +3,7 @@ import type VipsInstance from 'wasm-vips';
 
 import { getExtensionFromMimeType } from '@mexp/media-utils';
 
-import type { ImageSizeCrop, ThumbnailOptions } from './types';
+import type { ImageSizeCrop, SaveOptions, ThumbnailOptions } from './types';
 
 type EmscriptenModule = {
 	setAutoDeleteLater: ( autoDelete: boolean ) => void;
@@ -63,7 +63,12 @@ export async function convertImageFormat(
 
 	const vips = await getVips();
 	const image = vips.Image.newFromBuffer( buffer );
-	const outBuffer = image.writeToBuffer( `.${ ext }`, { Q: quality * 100 } );
+
+	const options: SaveOptions = {
+		Q: quality * 100,
+		keep: 'none',
+	};
+	const outBuffer = image.writeToBuffer( `.${ ext }`, options );
 	const result = outBuffer.buffer;
 
 	cleanup?.();
@@ -183,7 +188,11 @@ export async function resizeImage(
 		image = image.crop( left, top, resize.width, resize.height );
 	}
 
-	const outBuffer = image.writeToBuffer( `.${ ext }` );
+	// TODO: Allow passing quality?
+	const saveOptions: SaveOptions = {
+		keep: 'none',
+	};
+	const outBuffer = image.writeToBuffer( `.${ ext }`, saveOptions );
 
 	const result = {
 		buffer: outBuffer.buffer,
