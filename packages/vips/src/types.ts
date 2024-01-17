@@ -27,6 +27,17 @@ type Interesting =
 	| 'all';
 
 /**
+ * none: Don't attach metadata.
+ * exif: Keep Exif metadata.
+ * xmp: Keep XMP metadata.
+ * iptc: Keep IPTC metadata.
+ * icc: Keep ICC metadata.
+ * other: Keep other metadata (e.g. PNG comments and some TIFF tags).
+ * all: Keep all metadata.
+ */
+type ForeignKeep = 'none' | 'exif' | 'xmp' | 'iptc' | 'icc' | 'other' | 'all';
+
+/**
  * The rendering intent.'absolute' is best for
  * scientific work, 'relative' is usually best for
  * accurate communication with other imaging libraries.
@@ -51,6 +62,25 @@ type Intent = 'perceptual' | 'relative' | 'saturation' | 'absolute';
  * warning: Stop on anything, even warnings.
  */
 type FailOn = 'none' | 'truncated' | 'error' | 'warning';
+
+export type SaveOptions = {
+	/**
+	 * Quality factor.
+	 */
+	Q?: number;
+	/**
+	 * Which metadata to retain.
+	 */
+	keep?: ForeignKeep;
+	/**
+	 * Generate an interlaced (progressive) JPEG/PNG/GIF.
+	 */
+	interlace?: boolean;
+	/**
+	 * Enable lossless compression (for WebP).
+	 */
+	lossless?: boolean;
+};
 
 export type ThumbnailOptions = {
 	/**

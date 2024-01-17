@@ -13,6 +13,7 @@ import {
 	ImageFile,
 	renameFile,
 } from '@mexp/media-utils';
+import { start } from '@mexp/log';
 
 import { UploadError } from '../uploadError';
 import {
@@ -29,13 +30,13 @@ import { isHeifImage, transcodeHeifImage } from './utils/heif';
 import {
 	vipsCompressImage,
 	vipsConvertImageFormat,
-	vipsResizeImage,
 	vipsHasTransparency,
+	vipsResizeImage,
 } from './utils/vips';
 import {
 	compressImage as canvasCompressImage,
-	resizeImage as canvasResizeImage,
 	convertImageFormat as canvasConvertImageFormat,
+	resizeImage as canvasResizeImage,
 } from './utils/canvas';
 import type {
 	AddAction,
@@ -43,11 +44,12 @@ import type {
 	AddPosterAction,
 	ApproveUploadAction,
 	Attachment,
+	AudioFormat,
 	BatchId,
 	CancelAction,
+	CreateRestAttachment,
 	ImageFormat,
 	ImageLibrary,
-	ThumbnailGeneration,
 	ImageSizeCrop,
 	MediaSourceTerm,
 	OnBatchSuccessHandler,
@@ -61,13 +63,12 @@ import type {
 	SetImageSizesAction,
 	SetMediaSourceTermsAction,
 	SideloadFinishAction,
+	ThumbnailGeneration,
 	TranscodingFinishAction,
 	TranscodingPrepareAction,
 	TranscodingStartAction,
 	UploadStartAction,
-	CreateRestAttachment,
 	VideoFormat,
-	AudioFormat,
 } from './types';
 import { ItemStatus, TranscodingType, Type } from './types';
 
@@ -558,9 +559,11 @@ export function prepareItem( id: QueueItemId ) {
 			id,
 		} );
 
-		// Transcoding type has already been set, e.g. via muteExistingVideo() or addSideloadItem().
 		// TODO: Check canTranscode either here, in muteExistingVideo, or in the UI.
-		if ( item.transcode ) {
+
+		// Transcoding type has already been set, e.g. via muteExistingVideo() or addSideloadItem().
+		// Also allow empty arrays, useful for example when sideloading original image.
+		if ( item.transcode !== undefined ) {
 			dispatch.prepareForTranscoding( id );
 			return;
 		}
@@ -930,6 +933,8 @@ export function completeItem( id: QueueItemId ) {
 						upload_request: item.additionalData.upload_request,
 						image_size: 'original',
 					},
+					// Allows skipping any resizing or optimization of the original image.
+					transcode: [],
 				} );
 			}
 		}
@@ -1108,6 +1113,8 @@ export function optimizeImageItem(
 				.select( preferencesStore )
 				.get( PREFERENCES_NAME, 'imageLibrary' ) || 'vips';
 
+		let stop;
+
 		try {
 			let file: File;
 
@@ -1129,6 +1136,10 @@ export function optimizeImageItem(
 				registry
 					.select( preferencesStore )
 					.get( PREFERENCES_NAME, `${ inputFormat }_quality` ) || 80;
+
+			stop = start(
+				`Optimize Item: ${ item.file.name } | ${ imageLibrary } | ${ inputFormat } | ${ outputFormat } | ${ outputQuality }`
+			);
 
 			switch ( outputFormat ) {
 				case inputFormat:
@@ -1225,6 +1236,8 @@ export function optimizeImageItem(
 							file: item.file,
 					  } )
 			);
+		} finally {
+			stop?.();
 		}
 	};
 }
@@ -1526,6 +1539,10 @@ export function resizeCropItem( id: QueueItemId ) {
 
 		const addSuffix = Boolean( item.isSideload );
 
+		const stop = start(
+			`Resize Item: ${ item.file.name } | ${ imageLibrary } | ${ thumbnailGeneration } | ${ item.resize.width }x${ item.resize.height }`
+		);
+
 		try {
 			let file: File;
 
@@ -1556,6 +1573,8 @@ export function resizeCropItem( id: QueueItemId ) {
 							file: item.file,
 					  } )
 			);
+		} finally {
+			stop();
 		}
 	};
 }

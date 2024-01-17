@@ -16,6 +16,7 @@ module.exports = {
 	collectCoverageFrom: [ '<rootDir>/packages/*/src/**', '!**/test/**' ],
 	coveragePathIgnorePatterns: [ '/@types/' ],
 	globals: {
+		SCRIPT_DEBUG: true,
 		FFMPEG_CDN_URL: 'https://example.com',
 		MEDIAPIPE_CDN_URL: 'https://example.com',
 		PDFJS_CDN_URL: 'https://example.com',
