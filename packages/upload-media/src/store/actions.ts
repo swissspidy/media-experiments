@@ -30,13 +30,13 @@ import { isHeifImage, transcodeHeifImage } from './utils/heif';
 import {
 	vipsCompressImage,
 	vipsConvertImageFormat,
-	vipsResizeImage,
 	vipsHasTransparency,
+	vipsResizeImage,
 } from './utils/vips';
 import {
 	compressImage as canvasCompressImage,
-	resizeImage as canvasResizeImage,
 	convertImageFormat as canvasConvertImageFormat,
+	resizeImage as canvasResizeImage,
 } from './utils/canvas';
 import type {
 	AddAction,
@@ -44,11 +44,12 @@ import type {
 	AddPosterAction,
 	ApproveUploadAction,
 	Attachment,
+	AudioFormat,
 	BatchId,
 	CancelAction,
+	CreateRestAttachment,
 	ImageFormat,
 	ImageLibrary,
-	ThumbnailGeneration,
 	ImageSizeCrop,
 	MediaSourceTerm,
 	OnBatchSuccessHandler,
@@ -62,13 +63,12 @@ import type {
 	SetImageSizesAction,
 	SetMediaSourceTermsAction,
 	SideloadFinishAction,
+	ThumbnailGeneration,
 	TranscodingFinishAction,
 	TranscodingPrepareAction,
 	TranscodingStartAction,
 	UploadStartAction,
-	CreateRestAttachment,
 	VideoFormat,
-	AudioFormat,
 } from './types';
 import { ItemStatus, TranscodingType, Type } from './types';
 
