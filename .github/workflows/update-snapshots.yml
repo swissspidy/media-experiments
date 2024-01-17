@@ -79,5 +79,4 @@ jobs:
                   git status
                   git diff --staged --quiet && echo 'No changes to commit; exiting!' && exit 0
                   git commit -m "Update e2e snapshots"
-                  git pull --rebase
                   git push origin
