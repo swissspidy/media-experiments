@@ -1540,7 +1540,7 @@ export function resizeCropItem( id: QueueItemId ) {
 		const addSuffix = Boolean( item.isSideload );
 
 		const stop = start(
-			`Resize Item: ${ item.file.name } | ${ imageLibrary } | ${ thumbnailGeneration } | ${ smartCrop } | ${ addSuffix }`
+			`Resize Item: ${ item.file.name } | ${ imageLibrary } | ${ thumbnailGeneration } | ${ item.resize.width }x${ item.resize.height }`
 		);
 
 		try {
