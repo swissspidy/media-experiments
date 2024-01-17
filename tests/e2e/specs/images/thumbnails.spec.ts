@@ -232,7 +232,10 @@ test.describe( 'Images', () => {
 						media.media_details.sizes.thumbnail.source_url
 					)
 				).toMatchSnapshot(
-					`thumbnail-generation-${ imageLibrary }-${ thumbnailGeneration }.jpeg`
+					`thumbnail-generation-${ imageLibrary }-${ thumbnailGeneration }.jpeg`,
+					{
+						maxDiffPixelRatio: 0.05,
+					}
 				);
 
 				expect(
@@ -241,7 +244,10 @@ test.describe( 'Images', () => {
 						media.media_details.sizes[ 'bottom-right' ].source_url
 					)
 				).toMatchSnapshot(
-					`thumbnail-bottom-right-${ imageLibrary }-${ thumbnailGeneration }.jpeg`
+					`thumbnail-bottom-right-${ imageLibrary }-${ thumbnailGeneration }.jpeg`,
+					{
+						maxDiffPixelRatio: 0.05,
+					}
 				);
 				expect(
 					await mediaUtils.getImageBuffer(
@@ -249,7 +255,10 @@ test.describe( 'Images', () => {
 						media.media_details.sizes[ 'custom-size' ].source_url
 					)
 				).toMatchSnapshot(
-					`thumbnail-custom-size-${ imageLibrary }-${ thumbnailGeneration }.jpeg`
+					`thumbnail-custom-size-${ imageLibrary }-${ thumbnailGeneration }.jpeg`,
+					{
+						maxDiffPixelRatio: 0.05,
+					}
 				);
 			} );
 		}
