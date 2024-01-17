@@ -1088,7 +1088,8 @@ export function maybeTranscodeItem( id: QueueItemId ) {
 				break;
 
 			default:
-			// This shouldn't happen. Only happens with too many state updates.
+			// This shouldn't happen.
+			// TODO: Add error handling.
 		}
 	};
 }
