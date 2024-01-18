@@ -71,7 +71,8 @@ export function error( message: string ) {
 
 export function start( message: string ) {
 	if ( ! isDev() ) {
-		return () => {};
+		// Forces consumer to use optional chaining to avoid errors in prod.
+		return undefined;
 	}
 
 	const before = performance.now();

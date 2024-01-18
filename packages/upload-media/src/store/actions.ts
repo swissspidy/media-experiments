@@ -1580,7 +1580,7 @@ export function resizeCropItem( id: QueueItemId ) {
 					  } )
 			);
 		} finally {
-			stop();
+			stop?.();
 		}
 	};
 }
