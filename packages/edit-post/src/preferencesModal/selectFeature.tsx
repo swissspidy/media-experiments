@@ -14,10 +14,11 @@ function BaseSelectOption( {
 	options,
 	onChange,
 	children,
+	disabled,
 }: PropsWithChildren<
 	Pick<
 		ComponentProps< typeof SelectControl >,
-		'help' | 'label' | 'value' | 'options' | 'onChange'
+		'help' | 'label' | 'value' | 'options' | 'onChange' | 'disabled'
 	>
 > ) {
 	return (
@@ -30,6 +31,7 @@ function BaseSelectOption( {
 				value={ value }
 				options={ options }
 				onChange={ onChange }
+				disabled={ disabled }
 			/>
 			{ children }
 		</div>

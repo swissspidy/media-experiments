@@ -20,10 +20,39 @@ const inputFormats: InputFormatLabel[] = [
 	'JPEG',
 	'PNG',
 	'WebP',
-	'AVIF',
 	'HEIC',
 	'GIF',
 ];
+
+if ( window.crossOriginIsolated ) {
+	inputFormats.push( 'AVIF' );
+}
+
+const outputFormatOptions = [
+	{
+		label: 'JPEG',
+		value: 'jpeg',
+	},
+	{
+		label: 'PNG',
+		value: 'png',
+	},
+	{
+		label: 'GIF',
+		value: 'gif',
+	},
+	{
+		label: 'WebP',
+		value: 'webp',
+	},
+];
+
+if ( window.crossOriginIsolated ) {
+	outputFormatOptions.push( {
+		label: 'AVIF',
+		value: 'avif',
+	} );
+}
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -110,6 +139,7 @@ export function Modal() {
 							] }
 						/>
 						<SelectFeature
+							disabled={ ! window.crossOriginIsolated }
 							featureName="imageLibrary"
 							help={ __(
 								'Preferred library to use for image conversion.',
@@ -156,28 +186,7 @@ export function Modal() {
 									'Default image format',
 									'media-experiments'
 								) }
-								options={ [
-									{
-										label: 'JPEG',
-										value: 'jpeg',
-									},
-									{
-										label: 'PNG',
-										value: 'png',
-									},
-									{
-										label: 'GIF',
-										value: 'gif',
-									},
-									{
-										label: 'WebP',
-										value: 'webp',
-									},
-									{
-										label: 'AVIF',
-										value: 'avif',
-									},
-								] }
+								options={ outputFormatOptions }
 							/>
 							<FeatureNumberControl
 								className="interface-preferences-modal__option interface-preferences-modal__option--number"
@@ -243,40 +252,23 @@ export function Modal() {
 										'Image format',
 										'media-experiments'
 									) }
-									options={ [
-										{
-											label: 'JPEG',
-											value: 'jpeg',
-										},
-										{
-											label: 'PNG',
-											value: 'png',
-										},
-										{
-											label: 'GIF',
-											value: 'gif',
-										},
-										{
-											label: 'WebP',
-											value: 'webp',
-										},
-										{
-											label: 'AVIF',
-											value: 'avif',
-										},
-									].map( ( option ) => {
-										if ( inputFormat === option.label ) {
-											option.label = sprintf(
-												/* translators: %s: image format */
-												__(
-													'%s (unchanged)',
-													'media-experiments'
-												),
-												inputFormat
-											);
+									options={ outputFormatOptions.map(
+										( option ) => {
+											if (
+												inputFormat === option.label
+											) {
+												option.label = sprintf(
+													/* translators: %s: image format */
+													__(
+														'%s (unchanged)',
+														'media-experiments'
+													),
+													inputFormat
+												);
+											}
+											return option;
 										}
-										return option;
-									} ) }
+									) }
 								/>
 								{ /* default for jpeg: 82, for webp: 86 */ }
 								<FeatureNumberControl

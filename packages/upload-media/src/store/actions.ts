@@ -1665,7 +1665,7 @@ export function uploadItem( id: QueueItemId ) {
 			}
 		}
 
-		if ( 'image' === mediaType && stillUrl ) {
+		if ( 'image' === mediaType && stillUrl && window.crossOriginIsolated ) {
 			// TODO: Make this async after upload?
 			// Could be made reusable to enable backfilling of existing blocks.
 			// TODO: Create a scaled-down version of the image first for performance reasons.
