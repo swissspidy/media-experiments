@@ -82,8 +82,6 @@ jobs:
                   git config --local user.name "swissspidy-bot"
                   git add tests/e2e/**/__snapshots__/\*.jpeg
                   git restore .
-                  git fetch --all
-                  git reset --mixed
                   git pull --rebase
                   git status --short
                   git diff --staged --quiet && echo 'No changes to commit; exiting!' && exit 0
