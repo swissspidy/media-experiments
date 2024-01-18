@@ -27,6 +27,7 @@ jobs:
               with:
                   # 0 indicates all history for all branches and tags.
                   fetch-depth: 0
+                  token: ${{ secrets.WORKFLOWS_TOKEN }}
 
             - name: Setup Node
               uses: actions/setup-node@v4
