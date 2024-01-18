@@ -44,17 +44,3 @@ require_once __DIR__ . '/inc/default-filters.php';
 
 register_activation_hook( __FILE__, 'MediaExperiments\\activate_plugin' );
 register_deactivation_hook( __FILE__, 'MediaExperiments\\deactivate_plugin' );
-
-if ( defined( 'MEXP_IS_PLAYGROUND' ) && MEXP_IS_PLAYGROUND ) {
-// Disable editor iframing, see https://make.wordpress.org/core/2023/07/18/miscellaneous-editor-changes-in-wordpress-6-3/#post-editor-iframed
-// See https://github.com/WordPress/wordpress-playground/issues/952
-	add_action(
-		'enqueue_block_editor_assets',
-		static function () {
-			wp_add_inline_script(
-				'wp-blocks',
-				"wp.blocks.registerBlockType('mexp/noop', { title: 'Noop', version: 2 } )"
-			);
-		}
-	);
-}
