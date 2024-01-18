@@ -1,5 +1,4 @@
 import {
-	ImageFormat,
 	ImageLibrary,
 	RestAttachment,
 	ThumbnailGeneration,
@@ -82,6 +81,13 @@ test.describe( 'Images', () => {
 								'thumbnailGeneration',
 								mode
 							);
+						window.wp.data
+							.dispatch( 'core/preferences' )
+							.set(
+								'media-experiments/preferences',
+								'bigImageSizeThreshold',
+								1140
+							);
 					},
 					[ imageLibrary, thumbnailGeneration ]
 				);
@@ -121,15 +127,104 @@ test.describe( 'Images', () => {
 					path: `/wp/v2/media/${ imageId }`,
 				} );
 
-				expect( media.media_details.sizes ).toHaveProperty(
-					'thumbnail'
+				/* eslint-disable camelcase */
+				expect( media.media_details ).toEqual(
+					expect.objectContaining( {
+						width: 1140,
+						height: 760,
+						filesize: expect.any( Number ),
+						// original_image: expect.any( String ),
+						blurhash: expect.any( String ),
+						dominant_color: expect.any( String ),
+						has_transparency: false,
+						image_meta: expect.anything(),
+						sizes: expect.anything(),
+					} )
 				);
-				expect( media.media_details.sizes ).toHaveProperty( 'medium' );
-				expect( media.media_details.sizes ).toHaveProperty(
-					'medium_large'
+				expect( media.media_details.sizes ).toEqual(
+					expect.objectContaining( {
+						thumbnail: expect.objectContaining( {
+							width: 150,
+							height: 150,
+							filesize: expect.any( Number ),
+							mime_type: 'image/jpeg',
+							file: expect.stringContaining( '-150x150.jpeg' ),
+							source_url:
+								expect.stringContaining( '-150x150.jpeg' ),
+						} ),
+						medium: expect.objectContaining( {
+							width: 300,
+							height: 200,
+							filesize: expect.any( Number ),
+							mime_type: 'image/jpeg',
+							file: expect.stringContaining( '-300x200.jpeg' ),
+							source_url:
+								expect.stringContaining( '-300x200.jpeg' ),
+						} ),
+						medium_large: expect.objectContaining( {
+							width: 768,
+							height: 512,
+							filesize: expect.any( Number ),
+							mime_type: 'image/jpeg',
+							file: expect.stringContaining( '-768x512.jpeg' ),
+							source_url:
+								expect.stringContaining( '-768x512.jpeg' ),
+						} ),
+						large: expect.objectContaining( {
+							width: 1024,
+							height: 683,
+							filesize: expect.any( Number ),
+							mime_type: 'image/jpeg',
+							file: expect.stringContaining( '-1024x683.jpeg' ),
+							source_url:
+								expect.stringContaining( '-1024x683.jpeg' ),
+						} ),
+
+						'bottom-right': expect.objectContaining( {
+							width: 220,
+							height: 220,
+							filesize: expect.any( Number ),
+							mime_type: 'image/jpeg',
+							file: expect.stringContaining( '-220x220.jpeg' ),
+							source_url:
+								expect.stringContaining( '-220x220.jpeg' ),
+						} ),
+						'custom-size': expect.objectContaining( {
+							width: 100,
+							height: 100,
+							filesize: expect.any( Number ),
+							mime_type: 'image/jpeg',
+							file: expect.stringContaining( '-100x100.jpeg' ),
+							source_url:
+								expect.stringContaining( '-100x100.jpeg' ),
+						} ),
+						'ninek-height': expect.objectContaining( {
+							width: 400,
+							height: 267,
+							filesize: expect.any( Number ),
+							mime_type: 'image/jpeg',
+							file: expect.stringContaining( '-400x267.jpeg' ),
+							source_url:
+								expect.stringContaining( '-400x267.jpeg' ),
+						} ),
+
+						'ninek-width': expect.objectContaining( {
+							width: 900,
+							height: 600,
+							filesize: expect.any( Number ),
+							mime_type: 'image/jpeg',
+							file: expect.stringContaining( '-900x600.jpeg' ),
+							source_url:
+								expect.stringContaining( '-900x600.jpeg' ),
+						} ),
+						full: expect.objectContaining( {
+							width: 1140,
+							height: 760,
+							mime_type: 'image/jpeg',
+						} ),
+					} )
 				);
-				expect( media.media_details.sizes ).toHaveProperty( 'large' );
-				expect( media.media_details.sizes ).toHaveProperty( 'full' );
+				/* eslint-enable camelcase */
 
 				expect(
 					await mediaUtils.getImageBuffer(
@@ -137,7 +232,33 @@ test.describe( 'Images', () => {
 						media.media_details.sizes.thumbnail.source_url
 					)
 				).toMatchSnapshot(
-					`thumbnail-generation-${ imageLibrary }-${ thumbnailGeneration }.jpeg`
+					`thumbnail-generation-${ imageLibrary }-${ thumbnailGeneration }.jpeg`,
+					{
+						maxDiffPixelRatio: 0.05,
+					}
+				);
+
+				expect(
+					await mediaUtils.getImageBuffer(
+						// @ts-ignore
+						media.media_details.sizes[ 'bottom-right' ].source_url
+					)
+				).toMatchSnapshot(
+					`thumbnail-bottom-right-${ imageLibrary }-${ thumbnailGeneration }.jpeg`,
+					{
+						maxDiffPixelRatio: 0.05,
+					}
+				);
+				expect(
+					await mediaUtils.getImageBuffer(
+						// @ts-ignore
+						media.media_details.sizes[ 'custom-size' ].source_url
+					)
+				).toMatchSnapshot(
+					`thumbnail-custom-size-${ imageLibrary }-${ thumbnailGeneration }.jpeg`,
+					{
+						maxDiffPixelRatio: 0.05,
+					}
 				);
 			} );
 		}

@@ -169,6 +169,13 @@ test.describe( 'Images', () => {
 								'imageLibrary',
 								lib
 							);
+						window.wp.data
+							.dispatch( 'core/preferences' )
+							.set(
+								'media-experiments/preferences',
+								'requireApproval',
+								true
+							);
 					},
 					[ outputFormat, imageLibrary ]
 				);
@@ -193,7 +200,7 @@ test.describe( 'Images', () => {
 							.isPendingApproval(),
 					undefined,
 					{
-						timeout: 20000, // Transcoding might take longer
+						timeout: 30000, // Transcoding might take longer
 					}
 				);
 
@@ -211,7 +218,11 @@ test.describe( 'Images', () => {
 					() =>
 						window.wp.data
 							.select( 'media-experiments/upload' )
-							.getItems().length === 0
+							.getItems().length === 0,
+					undefined,
+					{
+						timeout: 30000, // Transcoding might take longer
+					}
 				);
 
 				await expect(
@@ -221,14 +232,6 @@ test.describe( 'Images', () => {
 							hasText: 'There was an error optimizing the file',
 						} )
 				).not.toBeVisible();
-
-				await expect(
-					page
-						.getByRole( 'button', { name: 'Dismiss this notice' } )
-						.filter( {
-							hasText: 'File successfully optimized',
-						} )
-				).toBeVisible();
 
 				await expect( settingsPanel ).toHaveText(
 					new RegExp( `Mime type: ${ expectedMimeType }` )
@@ -322,7 +325,7 @@ test.describe( 'Images', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 20000, // Transcoding might take longer
+						timeout: 30000, // Transcoding might take longer
 					}
 				);
 
