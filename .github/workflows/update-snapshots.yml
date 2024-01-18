@@ -80,9 +80,10 @@ jobs:
               run: |
                   git config --local user.email "swissspidy@users.noreply.github.com"
                   git config --local user.name "swissspidy-bot"
+                  git fetch --all
+                  git reset --mixed
                   git add tests/e2e/**/__snapshots__/\*.jpeg
                   git status --short
                   git diff --staged --quiet && echo 'No changes to commit; exiting!' && exit 0
                   git commit -m "Update e2e snapshots"
-                  git pull --rebase
                   git push origin
