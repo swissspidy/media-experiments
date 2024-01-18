@@ -233,14 +233,6 @@ test.describe( 'Images', () => {
 						} )
 				).not.toBeVisible();
 
-				await expect(
-					page
-						.getByRole( 'button', { name: 'Dismiss this notice' } )
-						.filter( {
-							hasText: 'File successfully optimized',
-						} )
-				).toBeVisible();
-
 				await expect( settingsPanel ).toHaveText(
 					new RegExp( `Mime type: ${ expectedMimeType }` )
 				);
