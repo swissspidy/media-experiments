@@ -252,23 +252,21 @@ export function Modal() {
 										'Image format',
 										'media-experiments'
 									) }
-									options={ outputFormatOptions.map(
-										( option ) => {
-											if (
-												inputFormat === option.label
-											) {
-												option.label = sprintf(
-													/* translators: %s: image format */
-													__(
-														'%s (unchanged)',
-														'media-experiments'
-													),
-													inputFormat
-												);
-											}
-											return option;
+									options={ structuredClone(
+										outputFormatOptions
+									).map( ( option ) => {
+										if ( inputFormat === option.label ) {
+											option.label = sprintf(
+												/* translators: %s: image format */
+												__(
+													'%s (unchanged)',
+													'media-experiments'
+												),
+												inputFormat
+											);
 										}
-									) }
+										return option;
+									} ) }
 								/>
 								{ /* default for jpeg: 82, for webp: 86 */ }
 								<FeatureNumberControl
