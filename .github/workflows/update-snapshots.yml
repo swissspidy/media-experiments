@@ -9,7 +9,8 @@ concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
 
-permissions: {}
+permissions:
+    contents: write
 
 jobs:
     update-snapshots:
@@ -23,6 +24,9 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v4
+              with:
+                  # 0 indicates all history for all branches and tags.
+                  fetch-depth: 0
 
             - name: Setup Node
               uses: actions/setup-node@v4
@@ -76,7 +80,7 @@ jobs:
                   git config --local user.email "swissspidy@users.noreply.github.com"
                   git config --local user.name "swissspidy-bot"
                   git add tests/e2e/**/__snapshots__/\*.jpeg
-                  git status
+                  git status --short
                   git diff --staged --quiet && echo 'No changes to commit; exiting!' && exit 0
                   git commit -m "Update e2e snapshots"
                   git push origin
