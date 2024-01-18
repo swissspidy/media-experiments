@@ -135,7 +135,7 @@ class Cross_Origin_Isolation {
 	 * @return bool Whether the conditional object is needed.
 	 */
 	private function needs_isolation(): bool {
-		// See https://github.com/WordPress/wordpress-playground/issues/952
+		// See https://github.com/WordPress/wordpress-playground/issues/952.
 		if ( defined( 'MEXP_IS_PLAYGROUND' ) && MEXP_IS_PLAYGROUND ) {
 			return false;
 		}
