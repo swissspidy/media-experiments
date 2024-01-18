@@ -23,6 +23,12 @@
 			"step": "login",
 			"username": "admin",
 			"password": "password"
+		},
+		{
+			"step": "defineWpConfigConsts",
+			"consts": {
+				"MEXP_IS_PLAYGROUND": true
+			}
 		}
 	]
 }
