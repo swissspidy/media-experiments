@@ -28,12 +28,6 @@
 			"step": "activatePlugin",
 			"pluginName": "Fix Gravatar URLs",
 			"pluginPath": "fix-gravatar.php"
-		},
-		{
-			"step": "defineWpConfigConsts",
-			"consts": {
-				"MEXP_IS_PLAYGROUND": true
-			}
 		}
 	]
 }
