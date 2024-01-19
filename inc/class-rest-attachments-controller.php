@@ -256,7 +256,48 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			}
 		}
 
+		$before_upload   = microtime( true );
+		$before_metadata = 0;
+
+		// Add Server-Timing headers if Performance Lab is active.
+		// One for initial upload, and one for thumbnail generation.
+		if ( function_exists( 'perflab_server_timing_register_metric' ) ) {
+			perflab_server_timing_register_metric(
+				'upload',
+				array(
+					'measure_callback' => function ( \Perflab_Server_Timing_Metric $metric ) use ( $before_upload ) {
+						add_action(
+							'rest_insert_attachment',
+							static function () use ( $metric, $before_upload ) {
+								$metric->set_value( microtime( true ) - $before_upload );
+							}
+						);
+					},
+					'access_cap'       => 'exist',
+				)
+			);
+
+			add_action(
+				'rest_after_insert_attachment',
+				static function () use ( &$before_metadata ) {
+					$before_metadata = microtime( true );
+				}
+			);
+		}
+
 		$response = parent::create_item( $request );
+
+		if ( function_exists( 'perflab_server_timing_register_metric' ) && ! empty( $before_metadata ) ) {
+			perflab_server_timing_register_metric(
+				'generate-metadata',
+				array(
+					'measure_callback' => function ( \Perflab_Server_Timing_Metric $metric ) use ( $before_metadata ) {
+						$metric->set_value( microtime( true ) - $before_metadata );
+					},
+					'access_cap'       => 'exist',
+				)
+			);
+		}
 
 		remove_filter( 'intermediate_image_sizes_advanced', '__return_empty_array', 100 );
 		remove_filter( 'fallback_intermediate_image_sizes', '__return_empty_array', 100 );
@@ -428,6 +469,8 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			);
 		}
 
+		$before_upload = microtime( true );
+
 		// Get the file via $_FILES or raw data.
 		$files   = $request->get_file_params();
 		$headers = $request->get_headers();
@@ -528,6 +571,18 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		if ( ! is_wp_error( $response ) ) {
 			$response->set_status( 201 );
 			$response->header( 'Location', rest_url( sprintf( '%s/%s/%d', $this->namespace, $this->rest_base, $attachment_id ) ) );
+		}
+
+		if ( function_exists( 'perflab_server_timing_register_metric' ) ) {
+			perflab_server_timing_register_metric(
+				'upload',
+				array(
+					'measure_callback' => function ( \Perflab_Server_Timing_Metric $metric ) use ( $before_upload ) {
+						$metric->set_value( microtime( true ) - $before_upload );
+					},
+					'access_cap'       => 'exist',
+				)
+			);
 		}
 
 		return $response;

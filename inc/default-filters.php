@@ -47,3 +47,6 @@ add_action( 'mexp_upload_requests_cleanup', __NAMESPACE__ . '\delete_old_upload_
 // Plugin compat.
 
 add_action( 'admin_print_scripts', __NAMESPACE__ . '\fix_yoast_seo_worker' );
+
+// Performance Lab.
+add_filter( 'rest_post_dispatch', __NAMESPACE__ . '\rest_post_dispatch_add_server_timing' );
