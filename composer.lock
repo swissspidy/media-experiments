@@ -741,12 +741,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHPCSUtils.git",
-                "reference": "38de05ce73de8e9ec1e4cad49c1e2a9e69c4a25b"
+                "reference": "26dcb893d86fbe90ab2a8abd7b08a3fda3602237"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHPCSUtils/zipball/38de05ce73de8e9ec1e4cad49c1e2a9e69c4a25b",
-                "reference": "38de05ce73de8e9ec1e4cad49c1e2a9e69c4a25b",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHPCSUtils/zipball/26dcb893d86fbe90ab2a8abd7b08a3fda3602237",
+                "reference": "26dcb893d86fbe90ab2a8abd7b08a3fda3602237",
                 "shasum": ""
             },
             "require": {
@@ -822,7 +822,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2024-01-12T04:03:57+00:00"
+            "time": "2024-01-15T05:03:54+00:00"
         },
         {
             "name": "phpstan/extension-installer",
@@ -874,12 +874,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "359d723c0697187bbb62fb7cb0b2608ebc8fdec8"
+                "reference": "4bf4a2407479e83fa97e00077bb67e4dae6bbee0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/359d723c0697187bbb62fb7cb0b2608ebc8fdec8",
-                "reference": "359d723c0697187bbb62fb7cb0b2608ebc8fdec8",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/4bf4a2407479e83fa97e00077bb67e4dae6bbee0",
+                "reference": "4bf4a2407479e83fa97e00077bb67e4dae6bbee0",
                 "shasum": ""
             },
             "require": {
@@ -929,7 +929,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-01-14T18:01:30+00:00"
+            "time": "2024-01-19T12:48:56+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -1256,12 +1256,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "7e7adbde43513a3b2832f4cf53896cd4dd6da621"
+                "reference": "d774fe84b49ecc500d5a8a140b73b168a44c591e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/7e7adbde43513a3b2832f4cf53896cd4dd6da621",
-                "reference": "7e7adbde43513a3b2832f4cf53896cd4dd6da621",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/d774fe84b49ecc500d5a8a140b73b168a44c591e",
+                "reference": "d774fe84b49ecc500d5a8a140b73b168a44c591e",
                 "shasum": ""
             },
             "require": {
@@ -1351,7 +1351,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-01-13T09:18:02+00:00"
+            "time": "2024-01-19T09:31:14+00:00"
         },
         {
             "name": "roave/security-advisories",
@@ -1359,12 +1359,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "c892bcc085a40eaa63e195cabdab5a7558c1b1c0"
+                "reference": "f81bd7cb90f5f30d3b246e342843ae905947158f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/c892bcc085a40eaa63e195cabdab5a7558c1b1c0",
-                "reference": "c892bcc085a40eaa63e195cabdab5a7558c1b1c0",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/f81bd7cb90f5f30d3b246e342843ae905947158f",
+                "reference": "f81bd7cb90f5f30d3b246e342843ae905947158f",
                 "shasum": ""
             },
             "conflict": {
@@ -1486,6 +1486,7 @@
                 "drupal/drupal": ">=6,<6.38|>=7,<7.80|>=8,<8.9.16|>=9,<9.1.12|>=9.2,<9.2.4",
                 "duncanmcclean/guest-entries": "<3.1.2",
                 "dweeves/magmi": "<=0.7.24",
+                "ec-cube/ec-cube": "<2.4.4",
                 "ecodev/newsletter": "<=4",
                 "ectouch/ectouch": "<=2.7.2",
                 "elefant/cms": "<2.0.7",
@@ -1593,6 +1594,7 @@
                 "illuminate/encryption": ">=4,<=4.0.11|>=4.1,<=4.1.31|>=4.2,<=4.2.22|>=5,<=5.0.35|>=5.1,<=5.1.46|>=5.2,<=5.2.45|>=5.3,<=5.3.31|>=5.4,<=5.4.36|>=5.5,<5.5.40|>=5.6,<5.6.15",
                 "illuminate/view": "<6.20.42|>=7,<7.30.6|>=8,<8.75",
                 "impresscms/impresscms": "<=1.4.5",
+                "impresspages/impresspages": "<=1.0.12",
                 "in2code/femanager": "<5.5.3|>=6,<6.3.4|>=7,<7.2.3",
                 "in2code/ipandlanguageredirect": "<5.1.2",
                 "in2code/lux": "<17.6.1|>=18,<24.0.2",
@@ -1694,8 +1696,8 @@
                 "neorazorx/facturascripts": "<2022.04",
                 "neos/flow": ">=1,<1.0.4|>=1.1,<1.1.1|>=2,<2.0.1|>=2.3,<2.3.16|>=3,<3.0.12|>=3.1,<3.1.10|>=3.2,<3.2.13|>=3.3,<3.3.13|>=4,<4.0.6",
                 "neos/form": ">=1.2,<4.3.3|>=5,<5.0.9|>=5.1,<5.1.3",
+                "neos/media-browser": "<7.3.19|>=8,<8.0.16|>=8.1,<8.1.11|>=8.2,<8.2.11|>=8.3,<8.3.9",
                 "neos/neos": ">=1.1,<1.1.3|>=1.2,<1.2.13|>=2,<2.0.4|>=2.3,<2.9.99|>=3,<3.0.20|>=3.1,<3.1.18|>=3.2,<3.2.14|>=3.3,<5.3.10|>=7,<7.0.9|>=7.1,<7.1.7|>=7.2,<7.2.6|>=7.3,<7.3.4|>=8,<8.0.2",
-                "neos/neos-ui": "<=8.3.3",
                 "neos/swiftmailer": ">=4.1,<4.1.99|>=5.4,<5.4.5",
                 "netgen/tagsbundle": ">=3.4,<3.4.11|>=4,<4.0.15",
                 "nette/application": ">=2,<2.0.19|>=2.1,<2.1.13|>=2.2,<2.2.10|>=2.3,<2.3.14|>=2.4,<2.4.16|>=3,<3.0.6",
@@ -1818,8 +1820,8 @@
                 "serluck/phpwhois": "<=4.2.6",
                 "sfroemken/url_redirect": "<=1.2.1",
                 "sheng/yiicms": "<=1.2",
-                "shopware/core": "<=6.4.20",
-                "shopware/platform": "<=6.4.20",
+                "shopware/core": "<=6.5.7.3",
+                "shopware/platform": "<=6.5.7.3",
                 "shopware/production": "<=6.3.5.2",
                 "shopware/shopware": "<=5.7.17",
                 "shopware/storefront": "<=6.4.8.1",
@@ -2080,7 +2082,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-01-12T17:04:19+00:00"
+            "time": "2024-01-17T21:04:22+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -3052,12 +3054,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer.git",
-                "reference": "074ad2a81e2314905b6dfd89ccb6fd863029f769"
+                "reference": "c4251a1183dbfb2cc9ea4f39427dbda749d0b85e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/074ad2a81e2314905b6dfd89ccb6fd863029f769",
-                "reference": "074ad2a81e2314905b6dfd89ccb6fd863029f769",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/c4251a1183dbfb2cc9ea4f39427dbda749d0b85e",
+                "reference": "c4251a1183dbfb2cc9ea4f39427dbda749d0b85e",
                 "shasum": ""
             },
             "require": {
@@ -3125,7 +3127,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2024-01-14T07:07:51+00:00"
+            "time": "2024-01-19T05:11:22+00:00"
         },
         {
             "name": "symfony/polyfill-php73",
