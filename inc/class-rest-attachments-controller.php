@@ -85,7 +85,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 					'callback'            => [ $this, 'sideload_item' ],
 					'permission_callback' => [ $this, 'sideload_item_permissions_check' ],
 					'args'                => [
-						'id'     => array(
+						'id'             => array(
 							'description' => __( 'Unique identifier for the attachment.' ),
 							'type'        => 'integer',
 						),
