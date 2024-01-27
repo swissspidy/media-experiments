@@ -46,7 +46,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		$args['generate_sub_sizes'] = [
 			'type'        => 'boolean',
 			'default'     => true,
-			'description' => __( 'Whether to generate image sub sizes.' ),
+			'description' => __( 'Whether to generate image sub sizes.', 'media-experiments' ),
 		];
 		$args['upload_request']     = [
 			'description' => __( 'Upload request this file is for.', 'media-experiments' ),
@@ -86,7 +86,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 					'permission_callback' => [ $this, 'sideload_item_permissions_check' ],
 					'args'                => [
 						'id'             => array(
-							'description' => __( 'Unique identifier for the attachment.' ),
+							'description' => __( 'Unique identifier for the attachment.', 'media-experiments' ),
 							'type'        => 'integer',
 						),
 						'image_size'     => [
@@ -117,7 +117,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		$params['upload_request'] = [
 			'default'     => null,
-			'description' => __( 'Limit result set to attachments associated with a given attachment request.' ),
+			'description' => __( 'Limit result set to attachments associated with a given attachment request.', 'media-experiments' ),
 			'type'        => 'string',
 		];
 
@@ -340,7 +340,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		if ( ! empty( $request['id'] ) ) {
 			return new WP_Error(
 				'rest_post_exists',
-				__( 'Cannot create existing post.' ),
+				__( 'Cannot create existing post.', 'media-experiments' ),
 				[ 'status' => 400 ]
 			);
 		}
@@ -350,7 +350,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		if ( ! $post_type ) {
 			return new WP_Error(
 				'rest_cannot_edit_others',
-				__( 'Sorry, you are not allowed to create posts as this user.' ),
+				__( 'Sorry, you are not allowed to create posts as this user.', 'media-experiments' ),
 				[ 'status' => rest_authorization_required_code() ]
 			);
 		}
@@ -358,7 +358,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		if ( ! empty( $request['author'] ) && get_current_user_id() !== $request['author'] && ! current_user_can( $post_type->cap->edit_others_posts ) ) {
 			return new WP_Error(
 				'rest_cannot_edit_others',
-				__( 'Sorry, you are not allowed to create posts as this user.' ),
+				__( 'Sorry, you are not allowed to create posts as this user.', 'media-experiments' ),
 				[ 'status' => rest_authorization_required_code() ]
 			);
 		}
@@ -366,7 +366,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		if ( ! empty( $request['sticky'] ) && ! current_user_can( $post_type->cap->edit_others_posts ) && ! current_user_can( $post_type->cap->publish_posts ) ) {
 			return new WP_Error(
 				'rest_cannot_assign_sticky',
-				__( 'Sorry, you are not allowed to make posts sticky.' ),
+				__( 'Sorry, you are not allowed to make posts sticky.', 'media-experiments' ),
 				[ 'status' => rest_authorization_required_code() ]
 			);
 		}
@@ -374,7 +374,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		if ( ! current_user_can( $post_type->cap->create_posts ) && ! $this->is_valid_upload_request( $request ) ) {
 			return new WP_Error(
 				'rest_cannot_create',
-				__( 'Sorry, you are not allowed to create posts as this user.' ),
+				__( 'Sorry, you are not allowed to create posts as this user.', 'media-experiments' ),
 				[ 'status' => rest_authorization_required_code() ]
 			);
 		}
@@ -382,7 +382,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		if ( ! $this->check_assign_terms_permission( $request ) ) {
 			return new WP_Error(
 				'rest_cannot_assign_term',
-				__( 'Sorry, you are not allowed to assign the provided terms.' ),
+				__( 'Sorry, you are not allowed to assign the provided terms.', 'media-experiments' ),
 				[ 'status' => rest_authorization_required_code() ]
 			);
 		}
@@ -390,7 +390,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		if ( ! current_user_can( 'upload_files' ) && ! $this->is_valid_upload_request( $request ) ) {
 			return new WP_Error(
 				'rest_cannot_create',
-				__( 'Sorry, you are not allowed to upload media on this site.' ),
+				__( 'Sorry, you are not allowed to upload media on this site.', 'media-experiments' ),
 				[ 'status' => 400 ]
 			);
 		}
@@ -407,7 +407,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		) {
 			return new WP_Error(
 				'rest_cannot_edit',
-				__( 'Sorry, you are not allowed to upload media to this post.' ),
+				__( 'Sorry, you are not allowed to upload media to this post.', 'media-experiments' ),
 				[ 'status' => rest_authorization_required_code() ]
 			);
 		}
@@ -461,29 +461,34 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	}
 
 	/**
-	 * Checks if a given request has access to update a post.
+	 * Checks if a given request has access to sideload a file.
 	 *
-	 * @since 4.7.0
+	 * Sideloading a file for an existing attachment
+	 * requires both update and create permissions.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return true|WP_Error True if the request has access to update the item, WP_Error object otherwise.
 	 */
 	public function sideload_item_permissions_check( $request ): WP_Error|bool {
-		// Sideloading a file for an existing attachment
-		// requires both update and create permissions.
-		$update = $this->update_item_permissions_check( $request );
+		$post = $this->get_post( $request['id'] );
 
-		if ( is_wp_error( $update ) ) {
-			return $update;
+		if ( is_wp_error( $post ) ) {
+			return $post;
 		}
 
-		$post_type = get_post_type_object( $this->post_type );
+		if ( ! $this->check_update_permission( $post ) && ! $this->is_valid_upload_request( $request ) ) {
+			return new WP_Error(
+				'rest_cannot_edit',
+				__( 'Sorry, you are not allowed to edit this post.', 'media-experiments' ),
+				array( 'status' => rest_authorization_required_code() )
+			);
+		}
 
-		if ( ! current_user_can( $post_type->cap->create_posts ) && ! $this->is_valid_upload_request( $request ) ) {
+		if ( ! current_user_can( 'upload_files' ) && ! $this->is_valid_upload_request( $request ) ) {
 			return new WP_Error(
 				'rest_cannot_create',
-				__( 'Sorry, you are not allowed to create posts as this user.' ),
-				[ 'status' => rest_authorization_required_code() ]
+				__( 'Sorry, you are not allowed to upload media on this site.', 'media-experiments' ),
+				[ 'status' => 400 ]
 			);
 		}
 
