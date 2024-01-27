@@ -28,8 +28,9 @@ use WP_REST_Server;
  *   generate_sub_sizes?: bool,
  * }
  * @phpstan-type SideloadRequest array{
- *   post?: int,
- *   image_size?: string,
+ *   id: int,
+ *   image_size: string,
+ *   upload_request?: string,
  * }
  */
 class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
@@ -74,18 +75,24 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			true
 		);
 
+		// TODO: Consider support general sideloading, not attached to any post.
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/sideload',
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/sideload',
 			[
 				[
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => [ $this, 'sideload_item' ],
-					'permission_callback' => [ $this, 'create_item_permissions_check' ],
+					'permission_callback' => [ $this, 'sideload_item_permissions_check' ],
 					'args'                => [
+						'id'     => array(
+							'description' => __( 'Unique identifier for the attachment.' ),
+							'type'        => 'integer',
+						),
 						'image_size'     => [
 							'description' => __( 'Image size.', 'media-experiments' ),
 							'type'        => 'string',
+							'required'    => true,
 						],
 						'upload_request' => [
 							'description' => __( 'Upload request this file is for.', 'media-experiments' ),
@@ -454,6 +461,36 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	}
 
 	/**
+	 * Checks if a given request has access to update a post.
+	 *
+	 * @since 4.7.0
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return true|WP_Error True if the request has access to update the item, WP_Error object otherwise.
+	 */
+	public function sideload_item_permissions_check( $request ): WP_Error|bool {
+		// Sideloading a file for an existing attachment
+		// requires both update and create permissions.
+		$update = $this->update_item_permissions_check( $request );
+
+		if ( is_wp_error( $update ) ) {
+			return $update;
+		}
+
+		$post_type = get_post_type_object( $this->post_type );
+
+		if ( ! current_user_can( $post_type->cap->create_posts ) && ! $this->is_valid_upload_request( $request ) ) {
+			return new WP_Error(
+				'rest_cannot_create',
+				__( 'Sorry, you are not allowed to create posts as this user.' ),
+				[ 'status' => rest_authorization_required_code() ]
+			);
+		}
+
+		return true;
+	}
+
+	/**
 	 * Side-loads a media file without creating an attachment.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -461,7 +498,9 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 * @phpstan-param WP_REST_Request<SideloadRequest> $request
 	 */
 	public function sideload_item( WP_REST_Request $request ): WP_Error|WP_REST_Response {
-		if ( ! empty( $request['post'] ) && 'attachment' !== get_post_type( $request['post'] ) ) {
+		$attachment_id = $request['id'];
+
+		if ( 'attachment' !== get_post_type( $attachment_id ) ) {
 			return new WP_Error(
 				'rest_invalid_param',
 				__( 'Invalid parent type.', 'media-experiments' ),
@@ -479,7 +518,6 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		// See https://github.com/WordPress/wordpress-develop/blob/30954f7ac0840cfdad464928021d7f380940c347/src/wp-includes/functions.php#L2576-L2582
 		// With this filter we can work around this safeguard.
 
-		$attachment_id       = $request['post'];
 		$attachment_filename = get_attached_file( $attachment_id, true );
 		$attachment_filename = $attachment_filename ? basename( $attachment_filename ) : null;
 
@@ -530,12 +568,11 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			return $file;
 		}
 
-		$url  = $file['url'];
 		$type = $file['type'];
 		$path = $file['file'];
 
 		// TODO: Better fallback if image_size is not provided.
-		$image_size = $request['image_size'] ?? 'thumbnail';
+		$image_size = $request['image_size'];
 
 		$metadata = wp_get_attachment_metadata( $attachment_id, true );
 
@@ -561,17 +598,17 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		wp_update_attachment_metadata( $attachment_id, $metadata );
 
-		$data = [
-			'success' => true,
-			'url'     => $url,
-		];
+		$response = $this->prepare_item_for_response(
+			get_post( $attachment_id ),
+			// TODO: Maybe forward context or _fields param?
+			new WP_REST_Request(
+				WP_REST_Server::READABLE,
+				rest_url( sprintf( '%s/%s/%d', $this->namespace, $this->rest_base, $attachment_id ) )
+			)
+		);
 
-		$response = rest_ensure_response( $data );
-
-		if ( ! is_wp_error( $response ) ) {
-			$response->set_status( 201 );
-			$response->header( 'Location', rest_url( sprintf( '%s/%s/%d', $this->namespace, $this->rest_base, $attachment_id ) ) );
-		}
+		$response->set_status( 201 );
+		$response->header( 'Location', rest_url( sprintf( '%s/%s/%d', $this->namespace, $this->rest_base, $attachment_id ) ) );
 
 		if ( function_exists( 'perflab_server_timing_register_metric' ) ) {
 			perflab_server_timing_register_metric(
