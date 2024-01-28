@@ -57,12 +57,6 @@ class REST_Upload_Requests_Controller extends WP_REST_Posts_Controller {
 					],
 				],
 				[
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'get_item' ],
-					'permission_callback' => [ $this, 'get_item_permissions_check' ],
-					'args'                => $get_item_args,
-				],
-				[
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => [ $this, 'delete_item' ],
 					'permission_callback' => [ $this, 'delete_item_permissions_check' ],
@@ -74,17 +68,14 @@ class REST_Upload_Requests_Controller extends WP_REST_Posts_Controller {
 	}
 
 	/**
-	 * Retrieves a single post.
+	 * Gets an upload request by its slug.
 	 *
-	 * @since 4.7.0
-	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
-	 * @phpstan-param WP_REST_Request<array{slug: string}> $request
+	 * @param string $slug Supplied slug.
+	 * @return WP_Post|WP_Error Post object if slug is valid, WP_Error otherwise.
 	 */
-	public function get_item( $request ) {
+	protected function get_post( $slug ) {
 		$args = [
-			'name'             => $request['slug'],
+			'name'             => $slug,
 			'post_type'        => 'mexp-upload-request',
 			'post_status'      => 'publish',
 			'numberposts'      => 1,
@@ -101,7 +92,22 @@ class REST_Upload_Requests_Controller extends WP_REST_Posts_Controller {
 			);
 		}
 
-		$post = $posts[0];
+		return $posts[0];
+	}
+
+	/**
+	 * Retrieves a single post.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 * @phpstan-param WP_REST_Request<array{slug: string}> $request
+	 */
+	public function get_item( $request ) {
+		$post = $this->get_post( $request['slug'] );
+
+		if ( is_wp_error( $post ) ) {
+			return $post;
+		}
 
 		$data     = $this->prepare_item_for_response( $post, $request );
 		$response = rest_ensure_response( $data );
@@ -120,8 +126,6 @@ class REST_Upload_Requests_Controller extends WP_REST_Posts_Controller {
 
 	/**
 	 * Retrieves the post's schema, conforming to JSON Schema.
-	 *
-	 * @since 4.7.0
 	 *
 	 * @return array Item schema data.
 	 * @phpstan-return array<string,mixed>
@@ -200,8 +204,6 @@ class REST_Upload_Requests_Controller extends WP_REST_Posts_Controller {
 		 *  - `rest_post_item_schema`
 		 *  - `rest_page_item_schema`
 		 *  - `rest_attachment_item_schema`
-		 *
-		 * @since 5.4.0
 		 *
 		 * @param array $schema Item schema data.
 		 */
