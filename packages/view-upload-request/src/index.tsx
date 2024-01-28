@@ -1,6 +1,6 @@
 import type { ChangeEvent } from 'react';
 
-import { createRoot, useState } from '@wordpress/element';
+import { createRoot, useState, useRef, useEffect } from '@wordpress/element';
 import {
 	Button,
 	FormFileUpload,
@@ -27,13 +27,29 @@ const MULTIPLE = false;
 const ACCEPT = [ 'image/*', 'video/*', 'audio/*', '.pdf' ].join( ',' );
 
 function App() {
+	const { createErrorNotice, createSuccessNotice, removeNotice } =
+		useDispatch( noticesStore );
+
 	const isUploading = useSelect(
 		( select ) => select( uploadStore ).getItems().length > 0,
 		[]
 	);
+	const wasUploading = useRef( false );
 
-	const { createErrorNotice, createSuccessNotice, removeNotice } =
-		useDispatch( noticesStore );
+	useEffect( () => {
+		if ( ! isUploading && wasUploading.current ) {
+			void createSuccessNotice(
+				__(
+					'File successfully uploaded. You may now close this page.',
+					'media-experiments'
+				),
+				{ type: 'snackbar' }
+			);
+		}
+
+		wasUploading.current = isUploading;
+	}, [ createSuccessNotice, isUploading ] );
+
 	const notices = useSelect(
 		( select ) => select( noticesStore ).getNotices(),
 		[]
@@ -63,14 +79,6 @@ function App() {
 				}
 
 				setAttachment( media );
-
-				void createSuccessNotice(
-					__(
-						'File successfully uploaded. You may now close this page.',
-						'media-experiments'
-					),
-					{ type: 'snackbar' }
-				);
 			},
 		} );
 	};
