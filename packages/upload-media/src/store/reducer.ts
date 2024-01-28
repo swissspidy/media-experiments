@@ -193,6 +193,10 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 						? {
 								...item,
 								status: ItemStatus.Uploaded,
+								attachment: {
+									...item.attachment,
+									...action.attachment,
+								},
 						  }
 						: item
 				),

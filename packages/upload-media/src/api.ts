@@ -2,8 +2,8 @@ import apiFetch from '@wordpress/api-fetch';
 
 import type {
 	CreateRestAttachment,
+	CreateSideloadFile,
 	RestAttachment,
-	SideloadAdditionalData,
 } from './store/types';
 import { transformAttachment } from './utils';
 
@@ -49,13 +49,15 @@ async function createMediaFromFile(
  * Uploads a file to the server without creating an attachment.
  *
  * @param file           Media File to Save.
+ * @param attachmentId   Parent attachment ID.
  * @param additionalData Additional data to include in the request.
  *
  * @return The saved attachment.
  */
 export async function sideloadFile(
 	file: File,
-	additionalData: SideloadAdditionalData = {}
+	attachmentId: RestAttachment[ 'id' ],
+	additionalData: CreateSideloadFile = {}
 ) {
 	// Create upload payload.
 	const data = new FormData();
@@ -68,11 +70,13 @@ export async function sideloadFile(
 		);
 	}
 
-	return apiFetch< unknown >( {
-		path: '/wp/v2/media/sideload',
-		body: data,
-		method: 'POST',
-	} );
+	return transformAttachment(
+		await apiFetch< RestAttachment >( {
+			path: `/wp/v2/media/${ attachmentId }/sideload`,
+			body: data,
+			method: 'POST',
+		} )
+	);
 }
 
 /**

@@ -104,7 +104,7 @@ export type UploadFinishAction = Action<
 >;
 export type SideloadFinishAction = Action<
 	Type.SideloadFinish,
-	{ id: QueueItemId }
+	{ id: QueueItemId; attachment: Attachment }
 >;
 export type CancelAction = Action<
 	Type.Cancel,
@@ -201,10 +201,16 @@ export type AdditionalData = Omit<
 	'meta' | 'mexp_media_source'
 >;
 
-export type SideloadAdditionalData = Partial< {
+export type CreateSideloadFile = {
+	image_size?: string;
+	upload_request?: string;
+};
+
+export type SideloadAdditionalData = {
 	post: RestAttachment[ 'id' ];
-	image_size: string;
-} >;
+	image_size?: string;
+	upload_request?: string;
+};
 
 export type ImageSizeCrop = {
 	name?: string; // Only set if dealing with sub-sizes, not for general cropping.

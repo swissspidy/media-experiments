@@ -62,12 +62,14 @@ import type {
 	RequestApprovalAction,
 	SetImageSizesAction,
 	SetMediaSourceTermsAction,
+	SideloadAdditionalData,
 	SideloadFinishAction,
 	ThumbnailGeneration,
 	TranscodingFinishAction,
 	TranscodingPrepareAction,
 	TranscodingStartAction,
 	UploadStartAction,
+	UploadFinishAction,
 	VideoFormat,
 } from './types';
 import { ItemStatus, TranscodingType, Type } from './types';
@@ -280,6 +282,7 @@ export function addItemFromUrl( {
 
 interface AddSideloadItemArgs {
 	file: File;
+	onChange?: OnChangeHandler;
 	additionalData?: AdditionalData;
 	resize?: ImageSizeCrop;
 	transcode?: TranscodingType[];
@@ -288,6 +291,7 @@ interface AddSideloadItemArgs {
 
 export function addSideloadItem( {
 	file,
+	onChange,
 	additionalData,
 	resize,
 	transcode,
@@ -302,6 +306,7 @@ export function addSideloadItem( {
 				status: ItemStatus.Pending,
 				sourceFile: cloneFile( file ),
 				file,
+				onChange,
 				additionalData: {
 					generate_sub_sizes: false,
 					...additionalData,
@@ -731,7 +736,10 @@ export function startUploading( id: QueueItemId ): UploadStartAction {
 	};
 }
 
-export function finishUploading( id: QueueItemId, attachment: Attachment ) {
+export function finishUploading(
+	id: QueueItemId,
+	attachment: Attachment
+): UploadFinishAction {
 	return {
 		type: Type.UploadFinish,
 		id,
@@ -739,10 +747,14 @@ export function finishUploading( id: QueueItemId, attachment: Attachment ) {
 	};
 }
 
-export function finishSideloading( id: QueueItemId ): SideloadFinishAction {
+export function finishSideloading(
+	id: QueueItemId,
+	attachment: Attachment
+): SideloadFinishAction {
 	return {
 		type: Type.SideloadFinish,
 		id,
+		attachment,
 	};
 }
 
@@ -883,6 +895,11 @@ export function completeItem( id: QueueItemId ) {
 
 					dispatch.addSideloadItem( {
 						file,
+						onChange: ( [ updatedAttachment ] ) => {
+							// This might be confusing, but the idea is to update the original
+							// image item in the editor with the new one with the added sub-size.
+							item.onChange?.( [ updatedAttachment ] );
+						},
 						batchId,
 						additionalData: {
 							// Sideloading does not use the parent post ID but the
@@ -890,6 +907,7 @@ export function completeItem( id: QueueItemId ) {
 							post: attachment.id,
 							// Reference the same upload_request if needed.
 							upload_request: item.additionalData.upload_request,
+							image_size: name,
 						},
 						resize: imageSize,
 						transcode: [ TranscodingType.ResizeCrop ],
@@ -1751,14 +1769,17 @@ export function sideloadItem( id: QueueItemId ) {
 
 		dispatch.startUploading( id );
 
-		try {
-			// TODO: Do something with result.
-			await sideloadFile( item.file, {
-				image_size: item.resize?.name,
-				...item.additionalData,
-			} );
+		const { post, ...additionalData } =
+			item.additionalData as SideloadAdditionalData;
 
-			dispatch.finishSideloading( id );
+		try {
+			const attachment = await sideloadFile(
+				item.file,
+				post,
+				additionalData
+			);
+
+			dispatch.finishSideloading( id, attachment );
 		} catch ( err ) {
 			const error =
 				err instanceof Error

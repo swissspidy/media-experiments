@@ -264,5 +264,6 @@ export function transformAttachment( attachment: RestAttachment ): Attachment {
 		posterId: attachment.featured_media,
 		missingImageSizes: attachment.missing_image_sizes,
 		fileName: attachment.mexp_filename,
+		media_details: attachment.media_details,
 	} as Attachment;
 }
