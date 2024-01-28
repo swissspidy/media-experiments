@@ -106,10 +106,16 @@ test.describe( 'Upload Requests', () => {
 				} )
 		).toBeVisible();
 
+		// Simple verification that the upload request was successful.
+
 		await page.waitForFunction(
 			() =>
 				window.wp.data.select( 'core/block-editor' ).getSelectedBlock()
 					?.attributes?.id
 		);
+
+		// Verifies that the upload request was properly deleted.
+		const response = await secondPage.reload();
+		expect( response.status() ).toBe( 404 );
 	} );
 } );
