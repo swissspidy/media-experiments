@@ -115,6 +115,16 @@ test.describe( 'Images', () => {
 					}
 				);
 
+				const imageUrl = await page.evaluate(
+					() =>
+						window.wp.data
+							.select( 'core/block-editor' )
+							.getSelectedBlock()?.attributes?.url
+				);
+
+				// See https://github.com/swissspidy/media-experiments/issues/321.
+				expect( imageUrl ).toMatch( /-1024x683\.jpeg$/ );
+
 				const imageId = await page.evaluate(
 					() =>
 						window.wp.data
