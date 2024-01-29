@@ -57,7 +57,7 @@
 		"rtlcss-webpack-plugin": "^4.0.7",
 		"typescript": "^5.2.2",
 		"uuid": "^9.0.1",
-		"webpack": "^5.89.0",
+		"webpack": "^5.90.0",
 		"webpack-cli": "^5.1.4",
 		"webpack-virtual-modules": "^0.5.0"
 	},
