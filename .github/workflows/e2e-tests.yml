@@ -95,6 +95,7 @@ jobs:
               with:
                   file: artifacts/e2e-coverage/coverage/lcov.info
                   flags: e2e
+                  token: ${{ secrets.CODECOV_TOKEN }}
               if: ${{ matrix.wp == 'latest' }}
 
             - name: Get artifact name
