@@ -166,7 +166,7 @@ export function PreferencesModalTabs( {
 								path={ section.name }
 							>
 								<Card isBorderless size="large">
-									{/* @ts-ignore*/}
+									{ /* @ts-ignore*/ }
 									<CardHeader
 										isBorderless={ false }
 										justify="left"
