@@ -1,7 +1,7 @@
 
 .preferences__tabs-tablist {
 	position: absolute;
-	top: calc( 60px + 24px);
+	top: calc(60px + 24px);
 	left: 16px;
 	width: 160px;
 
@@ -38,6 +38,7 @@
 }
 
 @media (max-width: calc(782px - 1px)) {
+
 	.preferences__provider {
 		height: 100%;
 	}
