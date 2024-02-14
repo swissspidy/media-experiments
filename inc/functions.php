@@ -209,31 +209,12 @@ function get_all_image_sizes(): array {
 }
 
 /**
- * Add post thumbnail support to attachments by default.
+ * Register additional REST fields for attachments.
  *
- * Works around core limitation so that featured images for videos
- * can be set via the REST API.
- *
- * @link https://core.trac.wordpress.org/ticket/41692
- *
- * @uses rest_create_attachment_handle_featured_media
  * @uses rest_get_attachment_filename
  * @uses rest_get_attachment_filesize
  */
 function register_rest_fields(): void {
-	register_rest_field(
-		'attachment',
-		'featured_media',
-		[
-			'schema'          => [
-				'description' => __( 'The ID of the featured media for the object.', 'media-experiments' ),
-				'type'        => 'integer',
-				'context'     => [ 'view', 'edit', 'embed' ],
-			],
-			'update_callback' => __NAMESPACE__ . '\rest_create_attachment_handle_featured_media',
-		]
-	);
-
 	register_rest_field(
 		'attachment',
 		'mexp_filename',
@@ -416,39 +397,6 @@ function rest_get_attachment_has_transparency( array $post ): ?bool {
 }
 
 /**
- * Sets the featured image when uploading a new attachment via the REST API.
- *
- * @see \WP_REST_Posts_Controller::handle_featured_media
- *
- * @param int     $value Value to set.
- * @param WP_Post $post  Post instance.
- * @return true|WP_Error True on success, error instance on failure.
- */
-function rest_create_attachment_handle_featured_media( int $value, WP_Post $post ): bool|WP_Error {
-	if ( $value ) {
-		if ( get_post_thumbnail_id( $post->ID ) === $value ) {
-			return true;
-		}
-
-		$result = set_post_thumbnail( $post->ID, $value );
-
-		if ( $result ) {
-			return true;
-		}
-
-		return new WP_Error(
-			'rest_invalid_featured_media',
-			__( 'Invalid featured media ID.', 'media-experiments' ),
-			array( 'status' => 400 )
-		);
-	}
-
-	delete_post_thumbnail( $post->ID );
-
-	return true;
-}
-
-/**
  * Registers additional post meta for the attachment post type.
  *
  * @return void
@@ -552,42 +500,6 @@ function is_upload_screen(): bool {
 	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
 
 	return $screen && 'upload' === $screen->id;
-}
-
-/**
- * Fires after a single attachment is completely created or updated via the REST API.
- *
- * Works around a core limitation where the attachment controller does not handle
- * terms on upload.
- *
- * @link https://core.trac.wordpress.org/ticket/57897
- *
- * @param WP_Post         $attachment Inserted or updated attachment object.
- * @param WP_REST_Request $request    Request object.
- * @param bool            $creating   True when creating an attachment, false when updating.
- *
- * @phpstan-param WP_REST_Request<array<string, string[]>> $request
- */
-function rest_after_insert_attachment_handle_terms( WP_Post $attachment, WP_REST_Request $request, bool $creating ): void {
-	if ( ! $creating ) {
-		return;
-	}
-
-	$taxonomies = wp_list_filter( get_object_taxonomies( 'attachment', 'objects' ), [ 'show_in_rest' => true ] );
-
-	foreach ( $taxonomies as $taxonomy ) {
-		$base = ! empty( $taxonomy->rest_base ) ? $taxonomy->rest_base : $taxonomy->name;
-
-		if ( ! isset( $request[ $base ] ) ) {
-			continue;
-		}
-
-		$result = wp_set_object_terms( $attachment->ID, $request[ $base ], $taxonomy->name );
-
-		if ( is_wp_error( $result ) ) {
-			return;
-		}
-	}
 }
 
 /**
