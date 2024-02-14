@@ -71,7 +71,7 @@ index 0000000..8fc1663
 +}
 +export type PostType<C extends Context = 'edit'> = OmitNevers<_BaseEntityRecords.PostType<C>>;
 diff --git a/node_modules/@wordpress/core-data/build-types/index.d.ts b/node_modules/@wordpress/core-data/build-types/index.d.ts
-index ca5f7e4..3e3a8dd 100644
+index d66cd23..9f4aabf 100644
 --- a/node_modules/@wordpress/core-data/build-types/index.d.ts
 +++ b/node_modules/@wordpress/core-data/build-types/index.d.ts
 @@ -25,13 +25,13 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
@@ -111,7 +111,7 @@ index ca5f7e4..3e3a8dd 100644
      getRevisions: (state: selectors.State, kind: string, name: string, recordKey: string | number, query?: {
          [x: string]: any;
 diff --git a/node_modules/@wordpress/core-data/build-types/selectors.d.ts b/node_modules/@wordpress/core-data/build-types/selectors.d.ts
-index b9748a8..6b5c995 100644
+index 1021511..73b69f9 100644
 --- a/node_modules/@wordpress/core-data/build-types/selectors.d.ts
 +++ b/node_modules/@wordpress/core-data/build-types/selectors.d.ts
 @@ -356,7 +356,7 @@ export declare function hasEditsForEntityRecord(state: State, kind: string, name

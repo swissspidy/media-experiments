@@ -3,7 +3,7 @@
 	"landingPage": "/wp-admin/post-new.php",
 	"preferredVersions": {
 		"php": "latest",
-		"wp": "latest"
+		"wp": "nightly"
 	},
 	"phpExtensionBundles": [ "kitchen-sink" ],
 	"steps": [

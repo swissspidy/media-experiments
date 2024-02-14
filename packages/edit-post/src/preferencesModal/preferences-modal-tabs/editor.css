@@ -1,0 +1,45 @@
+
+.preferences__tabs-tablist {
+	position: absolute;
+	top: calc(60px + 24px);
+	left: 16px;
+	width: 160px;
+
+}
+
+.preferences__tabs-tab {
+	border-radius: 2px;
+	font-weight: 400;
+
+}
+
+.preferences__tabs-tab[aria-selected="true"] {
+	background: #f0f0f0;
+	box-shadow: none;
+	font-weight: 500;
+}
+
+.preferences__tabs-tab[aria-selected="true"]::after {
+	content: none;
+}
+
+.preferences__tabs-tab[role="tab"]:focus:not(:disabled) {
+	box-shadow: inset 0 0 0 var(--wp-admin-border-width-focus) var(--wp-admin-theme-color);
+	outline: 2px solid transparent;
+}
+
+.preferences__tabs-tab:focus-visible::before {
+	content: none;
+}
+
+.preferences__tabs-tabpanel {
+	padding-left: 24px;
+	margin-left: 160px;
+}
+
+@media (max-width: calc(782px - 1px)) {
+
+	.preferences__provider {
+		height: 100%;
+	}
+}

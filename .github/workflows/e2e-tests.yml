@@ -22,22 +22,9 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                wp: ['latest']
+                wp: ['trunk']
                 shard: ['1/4', '2/4', '3/4', '4/4']
-                experimental: [false]
-                include:
-                    - wp: 'trunk'
-                      shard: '1/4'
-                      experimental: true
-                    - wp: 'trunk'
-                      shard: '2/4'
-                      experimental: true
-                    - wp: 'trunk'
-                      shard: '3/4'
-                      experimental: true
-                    - wp: 'trunk'
-                      shard: '4/4'
-                      experimental: true
+                experimental: [true]
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -88,7 +75,7 @@ jobs:
             - name: Run tests
               run: npm run test:e2e -- --shard=${{ matrix.shard }}
               env:
-                  COLLECT_COVERAGE: ${{ matrix.wp == 'latest' }}
+                  COLLECT_COVERAGE: ${{ matrix.wp == 'trunk' }}
 
             - name: Upload code coverage report
               uses: codecov/codecov-action@v4.0.1
@@ -96,7 +83,7 @@ jobs:
                   file: artifacts/e2e-coverage/coverage/lcov.info
                   flags: e2e
                   token: ${{ secrets.CODECOV_TOKEN }}
-              if: ${{ matrix.wp == 'latest' }}
+              if: ${{ matrix.wp == 'trunk' }}
 
             - name: Get artifact name
               if: always()

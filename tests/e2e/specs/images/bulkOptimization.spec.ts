@@ -81,10 +81,7 @@ test.describe( 'Images', () => {
 
 		await editor.openDocumentSettingsSidebar();
 
-		await page
-			.getByRole( 'region', { name: 'Editor settings' } )
-			.getByLabel( 'Post' )
-			.click();
+		await page.getByRole( 'tab', { name: 'Post' } ).click();
 
 		const mediaExperimentsPanel = page
 			.getByRole( 'region', { name: 'Editor settings' } )
@@ -102,7 +99,7 @@ test.describe( 'Images', () => {
 			page
 				.getByRole( 'region', { name: 'Editor settings' } )
 				.getByRole( 'listitem' )
-		).toHaveCount( 4 ); // Sidebar tabs plus the 2 images.
+		).toHaveCount( 2 );
 
 		await page
 			.getByRole( 'region', { name: 'Editor settings' } )

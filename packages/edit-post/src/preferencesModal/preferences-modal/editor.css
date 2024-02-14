@@ -1,0 +1,29 @@
+@media (min-width: 600px) {
+
+	.preferences-modal {
+		width: calc(100% - 32px);
+		height: calc(100% - 120px);
+	}
+}
+
+@media (max-width: 781px) {
+
+	.components-modal__content {
+		padding: 0;
+	}
+}
+
+@media (min-width: 782px) {
+
+	.preferences-modal {
+		width: calc(782px - 32px);
+	}
+}
+
+@media (min-width: 960px) {
+
+	.preferences-modal {
+		height: 70%;
+
+	}
+}

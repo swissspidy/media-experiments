@@ -1627,12 +1627,12 @@ export function uploadItem( id: QueueItemId ) {
 				.filter( Boolean ) as number[],
 			// generatedPosterId is set when using muteExistingVideo() for example.
 			meta: {
-				mexp_generated_poster_id: item.generatedPosterId,
-				mexp_original_id: item.sourceAttachmentId,
+				mexp_generated_poster_id: item.generatedPosterId || undefined,
+				mexp_original_id: item.sourceAttachmentId || undefined,
 			},
 			mexp_blurhash: item.blurHash,
 			mexp_dominant_color: item.dominantColor,
-			featured_media: item.generatedPosterId,
+			featured_media: item.generatedPosterId || undefined,
 		};
 
 		const mediaType = getMediaTypeFromMimeType( item.file.type );

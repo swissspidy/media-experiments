@@ -9,7 +9,7 @@
  * License:     Apache-2.0
  * License URI: https://www.apache.org/licenses/LICENSE-2.0
  * Text Domain: media-experiments
- * Requires at least: 6.4
+ * Requires at least: 6.5
  * Requires PHP: 8.0
  * GitHub Plugin URI: https://github.com/swissspidy/media-experiments
  * Primary Branch: main
