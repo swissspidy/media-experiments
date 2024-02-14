@@ -1,0 +1,28 @@
+.preferences-modal__section {
+	margin: 0 0 2.5rem 0;
+}
+
+.preferences-modal__section:last-child {
+	margin: 0;
+}
+
+.preferences-modal__section-legend {
+	margin-bottom: 8px;
+}
+
+.preferences-modal__section-title {
+	font-size: 0.9rem;
+	font-weight: 600;
+	margin-top: 0;
+}
+
+.preferences-modal__section-description {
+	margin: -8px 0 8px 0;
+	font-size: 12px;
+	font-style: normal;
+	color: #757575;
+}
+
+.preferences-modal__section:has(.preferences-modal__section-content:empty) {
+	display: none;
+}

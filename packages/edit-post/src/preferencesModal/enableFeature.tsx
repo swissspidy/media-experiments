@@ -2,10 +2,10 @@ import type { ComponentProps, PropsWithChildren } from 'react';
 
 import { useDispatch, useSelect } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
-import { ___unstablePreferencesModalBaseOption as BaseOption } from '@wordpress/interface';
 
 import type { MediaPreferences } from '../types';
 import { PREFERENCES_NAME } from './constants';
+import { BaseOption } from './preference-base-option';
 
 type EnableFeatureProps = PropsWithChildren<
 	Omit<

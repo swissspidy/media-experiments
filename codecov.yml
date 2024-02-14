@@ -36,3 +36,8 @@ ignore:
     - 'inc/class-blurhash.php'
     - 'inc/default-filters.php'
     - '**/*.svg'
+    - 'packages/edit-post/src/preferencesModal/preference-base-option'
+    - 'packages/edit-post/src/preferencesModal/preferences-modal'
+    - 'packages/edit-post/src/preferencesModal/preferences-modal-section'
+    - 'packages/edit-post/src/preferencesModal/preferences-modal-tabs'
+    - 'packages/edit-post/src/preferencesModal/tabs'

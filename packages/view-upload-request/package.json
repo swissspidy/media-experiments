@@ -33,7 +33,7 @@
 	"dependencies": {
 		"@mexp/media-utils": "../media-utils",
 		"@mexp/upload-media": "../upload-media",
-		"@wordpress/components": "^25.14.0",
+		"@wordpress/components": "^26.0.0",
 		"@wordpress/compose": "^6.10.0",
 		"@wordpress/core-data": "^6.25.0",
 		"@wordpress/data": "^9.6.0"

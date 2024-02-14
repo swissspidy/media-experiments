@@ -1,0 +1,10 @@
+.preference-base-option {
+	& + & {
+		margin-top: 16px;
+	}
+
+	.components-base-control__help {
+		margin-top: 0;
+		margin-left: 48px;
+	}
+}
