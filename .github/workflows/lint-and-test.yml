@@ -266,6 +266,7 @@ jobs:
               uses: swissspidy/wp-plugin-check-action@main
               with:
                   build-dir: './tmp-build/media-experiments'
+                  wp-version: 'trunk'
                   exclude-checks: |
                       late_escaping
                       plugin_review_phpcs
