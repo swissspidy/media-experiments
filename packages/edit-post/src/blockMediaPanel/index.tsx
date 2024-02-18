@@ -5,6 +5,8 @@ import { createHigherOrderComponent } from '@wordpress/compose';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { InspectorControls } from '@wordpress/block-editor';
 import { PanelBody } from '@wordpress/components';
+import { media } from '@wordpress/icons';
+
 import { VideoControls } from './videoControls';
 import { ImageControls } from './imageControls';
 import { AudioControls } from './audioControls';
@@ -124,7 +126,7 @@ const addMediaPanel = createHigherOrderComponent(
 				<InspectorControls>
 					<PanelBody
 						initialOpen={ true }
-						icon="admin-media"
+						icon={ media }
 						title={ __( 'Media Experiments', 'media-experiments' ) }
 					>
 						<PerBlockControls { ...props } />
