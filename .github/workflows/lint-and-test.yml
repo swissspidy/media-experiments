@@ -126,7 +126,7 @@ jobs:
         runs-on: ubuntu-latest
         services:
             mysql:
-                image: mariadb:latest
+                image: mariadb:lts
                 env:
                     MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: true
                     MARIADB_DATABASE: wordpress_test
