@@ -13,6 +13,7 @@
  * Requires PHP: 8.0
  * GitHub Plugin URI: https://github.com/swissspidy/media-experiments
  * Primary Branch: main
+ * Release Asset: true
  *
  * @package MediaExperiments
  */
