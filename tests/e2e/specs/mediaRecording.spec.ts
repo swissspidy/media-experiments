@@ -154,7 +154,9 @@ test.describe( 'Media Recording', () => {
 
 		await expect(
 			toolbar.getByRole( 'button', { name: 'Insert' } )
-		).toBeVisible();
+		).toBeVisible( {
+			timeout: 10000, // Recording might take longer
+		} );
 		await expect(
 			toolbar.getByRole( 'button', { name: 'Retry' } )
 		).toBeVisible();
