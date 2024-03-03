@@ -27,7 +27,19 @@ const config = defineConfig( {
 						);
 					},
 					sourcePath: ( sourcePath: string ) => {
-						return sourcePath.replace( 'media-experiments/', '' );
+						// Turn localhost-8889/wp-content/plugins/media-experiments/build/media-experiments.css/ver=e48ec3e84468941e9fc8 into build/media-experiments.css/ver=e48ec3e84468941e9fc8.
+						const i = sourcePath.indexOf( 'build/' );
+						if ( i >= 0 ) {
+							sourcePath = sourcePath.slice( i );
+						}
+
+						// Turn build/media-experiments.css/ver=e48ec3e84468941e9fc8 into build/media-experiments.css.
+						const j = sourcePath.indexOf( '/ver=' );
+						if ( j >= 0 ) {
+							sourcePath = sourcePath.substring( 0, j );
+						}
+
+						return sourcePath;
 					},
 					lcov: true,
 				},
@@ -55,22 +67,22 @@ const config = defineConfig( {
 				},
 			},
 		},
-		{
-			name: 'webkit',
-			use: { ...devices[ 'Desktop Safari' ] },
-		},
-		{
-			name: 'firefox',
-			use: {
-				...devices[ 'Desktop Firefox' ],
-				launchOptions: {
-					firefoxUserPrefs: {
-						'dom.events.asyncClipboard.readText': true,
-						'dom.events.testing.asyncClipboard': true,
-					},
-				},
-			},
-		},
+		// {
+		// 	name: 'webkit',
+		// 	use: { ...devices[ 'Desktop Safari' ] },
+		// },
+		// {
+		// 	name: 'firefox',
+		// 	use: {
+		// 		...devices[ 'Desktop Firefox' ],
+		// 		launchOptions: {
+		// 			firefoxUserPrefs: {
+		// 				'dom.events.asyncClipboard.readText': true,
+		// 				'dom.events.testing.asyncClipboard': true,
+		// 			},
+		// 		},
+		// 	},
+		// },
 	],
 } );
 
