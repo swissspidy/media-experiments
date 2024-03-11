@@ -107,7 +107,7 @@ jobs:
                   git push origin --tags
 
             - name: Publish Release
-              uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844
+              uses: softprops/action-gh-release@3198ee18f814cdf787321b4a32a26ddbf37acc52
               if: ${{ env.CURRENT_TAG != 'nightly' }}
               with:
                   tag_name: nightly
