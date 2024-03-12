@@ -6,7 +6,8 @@
 		"requireConfigFile": false,
 		"babelOptions": {
 			"presets": ["@wordpress/babel-preset-default"]
-		}
+		},
+		"warnOnUnsupportedTypeScriptVersion": false
 	},
 	"settings": {
 		"import/resolver": "@mexp/eslint-import-resolver"
