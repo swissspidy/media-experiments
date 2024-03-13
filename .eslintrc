@@ -1,6 +1,9 @@
 {
 	"root": true,
-	"extends": ["plugin:@wordpress/eslint-plugin/recommended"],
+	"extends": [
+		"plugin:@wordpress/eslint-plugin/recommended",
+		"plugin:@wordpress/eslint-plugin/i18n"
+	],
 	"plugins": ["oxlint"],
 	"parserOptions": {
 		"requireConfigFile": false,
@@ -25,6 +28,7 @@
 				"excludePattern": "^use"
 			}
 		],
+		"@wordpress/i18n-no-flanking-whitespace": "error",
 		"@wordpress/i18n-text-domain": [
 			"error",
 			{
