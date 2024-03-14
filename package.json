@@ -83,6 +83,6 @@
 		"test:unit:watch": "wp-scripts test-unit-js --watch",
 		"test:unit:debug": "wp-scripts --inspect-brk test-unit-js --runInBand --no-cache",
 		"wp-env": "wp-env",
-		"wp-now": "wp-now start --port=8889 --php=8.2 --wp=6.5-beta3 --blueprint=blueprints/wp-now.json"
+		"wp-now": "wp-now start --port=8889 --php=8.2 --wp=6.5-RC2 --blueprint=blueprints/wp-now.json"
 	}
 }
