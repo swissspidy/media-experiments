@@ -85,7 +85,22 @@ jobs:
                   token: ${{ secrets.CODECOV_TOKEN }}
               if: ${{ matrix.wp == 'trunk' }}
 
-            - name: Get artifact name
+            - name: Get coverage artifact name
+              if: always()
+              run: |
+                ARTIFACT_NAME=${ARTIFACT_NAME//\//-}
+                echo "ARTIFACT_NAME=${ARTIFACT_NAME}" >> $GITHUB_ENV
+              env:
+                ARTIFACT_NAME: coverage-${{ matrix.wp }}-${{ matrix.shard }}
+
+            - name: Archive coverage report
+              uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                name: ${{ env.ARTIFACT_NAME }}
+                path: artifacts/e2e-coverage/coverage/lcov.info
+
+            - name: Get debug artifact name
               if: always()
               run: |
                   ARTIFACT_NAME=${ARTIFACT_NAME//\//-}
