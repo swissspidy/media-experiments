@@ -45,6 +45,8 @@ jobs:
               run: npm run build
               env:
                   WP_DEVTOOL: source-map
+                  # To get CSS source maps
+                  NODE_ENV: development
 
             - name: Configure WordPress version
               run: |
@@ -80,7 +82,7 @@ jobs:
             - name: Upload code coverage report
               uses: codecov/codecov-action@v4.1.0
               with:
-                  file: artifacts/e2e-coverage/coverage/lcov.info
+                  file: artifacts/e2e-coverage/coverage/codecov.json
                   flags: e2e
                   token: ${{ secrets.CODECOV_TOKEN }}
               if: ${{ matrix.wp == 'trunk' }}
@@ -98,7 +100,7 @@ jobs:
               if: always()
               with:
                 name: ${{ env.ARTIFACT_NAME }}
-                path: artifacts/e2e-coverage/coverage/lcov.info
+                path: artifacts/e2e-coverage/coverage/codecov.json
 
             - name: Get debug artifact name
               if: always()

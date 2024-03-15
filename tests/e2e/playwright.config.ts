@@ -1,7 +1,9 @@
 import { resolve } from 'node:path';
 
-import type { CoverageReportOptions } from 'monocart-coverage-reports';
-
+import type {
+	CoverageReportOptions,
+	V8CoverageEntry,
+} from 'monocart-coverage-reports';
 import { defineConfig, devices } from '@playwright/test';
 
 import baseConfig from '@wordpress/scripts/config/playwright.config';
@@ -15,10 +17,10 @@ const config = defineConfig( {
 			/** @type {CoverageReportOptions} **/
 			{
 				outputFile: './artifacts/e2e-coverage/report.html',
-				reports: [ 'lcov' ],
-				logging: 'off',
 				coverage: {
-					entryFilter: ( entry: any ) => {
+					logging: 'debug',
+					reports: [ [ 'codecov' ], [ 'v8' ], [ 'console-summary' ] ],
+					entryFilter: ( entry: V8CoverageEntry ) => {
 						return (
 							entry.url.startsWith( 'blob:' ) ||
 							entry.url.includes(
@@ -26,22 +28,21 @@ const config = defineConfig( {
 							)
 						);
 					},
-					sourcePath: ( sourcePath: string ) => {
-						// Turn localhost-8889/wp-content/plugins/media-experiments/build/media-experiments.css/ver=e48ec3e84468941e9fc8 into build/media-experiments.css/ver=e48ec3e84468941e9fc8.
-						const i = sourcePath.indexOf( 'build/' );
-						if ( i >= 0 ) {
-							sourcePath = sourcePath.slice( i );
-						}
-
-						// Turn build/media-experiments.css/ver=e48ec3e84468941e9fc8 into build/media-experiments.css.
-						const j = sourcePath.indexOf( '/ver=' );
-						if ( j >= 0 ) {
-							sourcePath = sourcePath.substring( 0, j );
-						}
-
-						return sourcePath;
+					sourceFilter: ( sourcePath: string ) => {
+						return (
+							sourcePath.startsWith( 'packages/' ) &&
+							! sourcePath.includes( 'node_modules/' ) && // dependencies.
+							! sourcePath.includes( 'build/esm/' ) && // @shopify/web-worker.
+							! sourcePath.includes( 'external-window' ) && // webpack externals.
+							! sourcePath.includes( 'webpack/' ) && // webpack runtime.
+							! sourcePath.includes( '.css/' ) && // css js chunks.
+							! sourcePath.includes( 'test/' )
+						);
 					},
-					lcov: true,
+					sourcePath: ( filePath: string ) => {
+						// Remove project folder.
+						return filePath.replace( 'media-experiments/', '' );
+					},
 				},
 			},
 		],
