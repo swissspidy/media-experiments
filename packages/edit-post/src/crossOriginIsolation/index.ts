@@ -1,4 +1,5 @@
 import { addFilter } from '@wordpress/hooks';
+import { isBlobURL } from '@wordpress/blob';
 
 type CrossOriginValue = 'anonymous' | 'use-credentials' | '' | undefined;
 
@@ -8,11 +9,21 @@ function forceCrossOrigin( imgCrossOrigin: CrossOriginValue, url: string ) {
 }
 
 function addAttribute( el: HTMLElement ) {
-	if ( el.hasAttribute( 'crossorigin' ) ) {
-		return;
+	if ( ! el.hasAttribute( 'crossorigin' ) ) {
+		el.setAttribute( 'crossorigin', 'anonymous' );
 	}
 
-	el.setAttribute( 'crossorigin', 'anonymous' );
+	if ( el.nodeName === 'IFRAME' && ! el.hasAttribute( 'credentialless' ) ) {
+		el.setAttribute( 'credentialless', 'true' );
+		if ( ! isBlobURL( ( el as HTMLIFrameElement ).src ) ) {
+			( el as HTMLIFrameElement ).src +=
+				( ( el as HTMLIFrameElement ).src.indexOf( '?' ) > -1
+					? '&'
+					: '?' ) +
+				'mexp-reload=' +
+				Date.now();
+		}
+	}
 }
 
 if ( window.crossOriginIsolated ) {
@@ -32,29 +43,46 @@ if ( window.crossOriginIsolated ) {
 
 	const observer = new MutationObserver( ( mutations ) => {
 		mutations.forEach( ( mutation ) => {
+			// console.log( mutation );
 			[ mutation.addedNodes, mutation.target ].forEach( ( node ) => {
-				if (
-					! ( 'querySelectorAll' in node ) ||
-					! node.querySelectorAll
-				) {
-					return;
-				}
+				const nodes = node instanceof NodeList ? node : [ node ];
+				nodes.forEach( ( n ) => {
+					( n as HTMLElement )
+						.querySelectorAll(
+							'img,source,script,video,link,iframe'
+						)
+						.forEach( ( el ) => {
+							addAttribute( el as HTMLElement );
+						} );
 
-				( node as HTMLElement )
-					.querySelectorAll( 'img,source,script,video,link' )
-					.forEach( ( el ) => {
-						addAttribute( el as HTMLElement );
-					} );
+					if ( n.nodeName === 'IFRAME' ) {
+						// @ts-ignore
+						const iframeNode: HTMLIFrameElement = n;
 
-				if (
-					node instanceof HTMLImageElement ||
-					node instanceof HTMLSourceElement ||
-					node instanceof HTMLScriptElement ||
-					node instanceof HTMLVideoElement ||
-					node instanceof HTMLLinkElement
-				) {
-					addAttribute( node );
-				}
+						iframeNode.addEventListener( 'load', () => {
+							if ( iframeNode.contentDocument !== null ) {
+								observer.observe( iframeNode.contentDocument, {
+									childList: true,
+									attributes: true,
+									subtree: true,
+								} );
+							}
+						} );
+					}
+
+					if (
+						[
+							'IMG',
+							'SOURCE',
+							'SCRIPT',
+							'VIDEO',
+							'LINK',
+							'IFRAME',
+						].includes( n.nodeName )
+					) {
+						addAttribute( n as HTMLElement );
+					}
+				} );
 			} );
 		} );
 	} );
