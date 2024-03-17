@@ -16,7 +16,7 @@ function addAttribute( el: HTMLElement ) {
 		el.setAttribute( 'credentialless', 'true' );
 
 		if ( ! el.hasAttribute( 'src' ) ) {
-			el.setAttribute( 'src', '');
+			el.setAttribute( 'src', '' );
 		}
 	}
 }
