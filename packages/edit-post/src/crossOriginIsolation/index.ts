@@ -1,5 +1,4 @@
 import { addFilter } from '@wordpress/hooks';
-import { isBlobURL } from '@wordpress/blob';
 
 type CrossOriginValue = 'anonymous' | 'use-credentials' | '' | undefined;
 
@@ -15,13 +14,9 @@ function addAttribute( el: HTMLElement ) {
 
 	if ( el.nodeName === 'IFRAME' && ! el.hasAttribute( 'credentialless' ) ) {
 		el.setAttribute( 'credentialless', 'true' );
-		if ( ! isBlobURL( ( el as HTMLIFrameElement ).src ) ) {
-			( el as HTMLIFrameElement ).src +=
-				( ( el as HTMLIFrameElement ).src.indexOf( '?' ) > -1
-					? '&'
-					: '?' ) +
-				'mexp-reload=' +
-				Date.now();
+
+		if ( ! el.hasAttribute( 'src' ) ) {
+			el.setAttribute( 'src', '');
 		}
 	}
 }
