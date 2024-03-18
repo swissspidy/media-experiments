@@ -7,7 +7,7 @@ function forceCrossOrigin( imgCrossOrigin: CrossOriginValue, url: string ) {
 	return 'anonymous' as CrossOriginValue;
 }
 
-function addAttribute( el: HTMLElement ) {
+function addAttribute( el: Element ) {
 	if ( ! el.hasAttribute( 'crossorigin' ) ) {
 		el.setAttribute( 'crossorigin', 'anonymous' );
 	}
@@ -28,34 +28,43 @@ if ( window.crossOriginIsolated ) {
 		forceCrossOrigin
 	);
 
-	/**
+	/*
 	 * Complementary component to the Cross_Origin_Isolation PHP class
 	 * that detects dynamically added DOM nodes that are missing the `crossorigin` attribute.
 	 * These are typically found in custom meta boxes and the WordPress admin bar.
-	 *
-	 * @return {null} Rendered component
 	 */
-
 	const observer = new MutationObserver( ( mutations ) => {
 		mutations.forEach( ( mutation ) => {
-			// console.log( mutation );
-			[ mutation.addedNodes, mutation.target ].forEach( ( node ) => {
-				const nodes = node instanceof NodeList ? node : [ node ];
-				nodes.forEach( ( n ) => {
-					( n as HTMLElement )
-						.querySelectorAll(
-							'img,source,script,video,link,iframe'
-						)
-						.forEach( ( el ) => {
-							addAttribute( el as HTMLElement );
-						} );
+			[ mutation.addedNodes, mutation.target ].forEach( ( value ) => {
+				const nodes = value instanceof NodeList ? value : [ value ];
+				nodes.forEach( ( node ) => {
+					const el: HTMLElement = node as HTMLElement;
 
-					if ( n.nodeName === 'IFRAME' ) {
-						// @ts-ignore
-						const iframeNode: HTMLIFrameElement = n;
+					if ( ! el.querySelectorAll ) {
+						// Most likely a text node.
+						return;
+					}
+
+					el.querySelectorAll(
+						'img,source,script,video,link,iframe'
+					).forEach( ( v ) => {
+						addAttribute( v );
+					} );
+
+					if ( el.nodeName === 'IFRAME' ) {
+						const iframeNode: HTMLIFrameElement =
+							el as HTMLIFrameElement;
 
 						iframeNode.addEventListener( 'load', () => {
-							if ( iframeNode.contentDocument !== null ) {
+							if ( iframeNode.contentDocument ) {
+								iframeNode.contentDocument
+									.querySelectorAll(
+										'img,source,script,video,link,iframe'
+									)
+									.forEach( ( v ) => {
+										addAttribute( v );
+									} );
+
 								observer.observe( iframeNode.contentDocument, {
 									childList: true,
 									attributes: true,
@@ -73,9 +82,9 @@ if ( window.crossOriginIsolated ) {
 							'VIDEO',
 							'LINK',
 							'IFRAME',
-						].includes( n.nodeName )
+						].includes( el.nodeName )
 					) {
-						addAttribute( n as HTMLElement );
+						addAttribute( el );
 					}
 				} );
 			} );
