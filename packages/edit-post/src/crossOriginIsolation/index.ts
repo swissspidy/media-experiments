@@ -2,8 +2,7 @@ import { addFilter } from '@wordpress/hooks';
 
 type CrossOriginValue = 'anonymous' | 'use-credentials' | '' | undefined;
 
-// @ts-ignore -- Params are unused, but maybe we need them in the future.
-function forceCrossOrigin( imgCrossOrigin: CrossOriginValue, url: string ) {
+function forceCrossOrigin( _imgCrossOrigin: CrossOriginValue, _url: string ) {
 	return 'anonymous' as CrossOriginValue;
 }
 
@@ -55,23 +54,31 @@ if ( window.crossOriginIsolated ) {
 						const iframeNode: HTMLIFrameElement =
 							el as HTMLIFrameElement;
 
-						iframeNode.addEventListener( 'load', () => {
-							if ( iframeNode.contentDocument ) {
-								iframeNode.contentDocument
-									.querySelectorAll(
-										'img,source,script,video,link,iframe'
-									)
-									.forEach( ( v ) => {
-										addAttribute( v );
-									} );
+						/*
+						 * If for example embedding a tweet, it should be loaded
+						 * in a credentialless iframe, but the tweet itself
+						 * should not be modified.
+						 */
 
-								observer.observe( iframeNode.contentDocument, {
-									childList: true,
-									attributes: true,
-									subtree: true,
-								} );
-							}
-						} );
+						const isEmbedSandboxIframe =
+							iframeNode.classList.contains(
+								'components-sandbox'
+							);
+
+						if ( ! isEmbedSandboxIframe ) {
+							iframeNode.addEventListener( 'load', () => {
+								if ( iframeNode.contentDocument ) {
+									observer.observe(
+										iframeNode.contentDocument,
+										{
+											childList: true,
+											attributes: true,
+											subtree: true,
+										}
+									);
+								}
+							} );
+						}
 					}
 
 					if (
