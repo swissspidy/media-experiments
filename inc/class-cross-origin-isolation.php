@@ -34,7 +34,7 @@ class Cross_Origin_Isolation {
 	public function send_headers(): void {
 		if ( $this->needs_isolation() ) {
 			header( 'Cross-Origin-Opener-Policy: same-origin' );
-			header( 'Cross-Origin-Embedder-Policy: require-corp' );
+			header( 'Cross-Origin-Embedder-Policy: credentialless' );
 		}
 
 		ob_start( [ $this, 'replace_in_dom' ] );
