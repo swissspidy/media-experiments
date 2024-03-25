@@ -16,6 +16,12 @@ function addAttribute( el: Element ) {
 
 		if ( ! el.hasAttribute( 'src' ) ) {
 			el.setAttribute( 'src', '' );
+		} else {
+			const origSrc = el.getAttribute( 'src' );
+			if ( origSrc ) {
+				el.setAttribute( 'src', '' );
+				el.setAttribute( 'src', origSrc );
+			}
 		}
 	}
 }
