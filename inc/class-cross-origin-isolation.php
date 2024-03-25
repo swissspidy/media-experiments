@@ -32,9 +32,13 @@ class Cross_Origin_Isolation {
 	 * @since 1.6.0
 	 */
 	public function send_headers(): void {
+		global $is_safari;
+
+		$coep = $is_safari ? 'require-corp' : 'credentialless';
+
 		if ( $this->needs_isolation() ) {
 			header( 'Cross-Origin-Opener-Policy: same-origin' );
-			header( 'Cross-Origin-Embedder-Policy: credentialless' );
+			header( "Cross-Origin-Embedder-Policy: $coep" );
 		}
 
 		ob_start( [ $this, 'replace_in_dom' ] );
