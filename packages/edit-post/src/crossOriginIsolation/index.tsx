@@ -1,4 +1,5 @@
 import { addFilter } from '@wordpress/hooks';
+import { createHigherOrderComponent } from '@wordpress/compose';
 
 type CrossOriginValue = 'anonymous' | 'use-credentials' | '' | undefined;
 
@@ -109,4 +110,31 @@ if ( window.crossOriginIsolated ) {
 		attributes: true,
 		subtree: true,
 	} );
+}
+
+const disableEmbedPreviews = createHigherOrderComponent(
+	( BlockEdit ) => ( props ) => {
+		if ( 'core/embed' !== props.name ) {
+			return <BlockEdit { ...props } />;
+		}
+
+		return (
+			<BlockEdit
+				{ ...props }
+				attributes={ { ...props.attributes, previewable: false } }
+			/>
+		);
+	},
+	'withDisabledEmbedPreview'
+);
+
+if (
+	window.crossOriginIsolated &&
+	! ( 'credentialless' in HTMLIFrameElement.prototype )
+) {
+	addFilter(
+		'editor.BlockEdit',
+		'media-experiments/disable-embed-previews',
+		disableEmbedPreviews
+	);
 }
