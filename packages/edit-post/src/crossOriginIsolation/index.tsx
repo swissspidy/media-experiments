@@ -112,29 +112,35 @@ if ( window.crossOriginIsolated ) {
 	} );
 }
 
+const supportsCredentialless =
+	window.crossOriginIsolated &&
+	'credentialless' in HTMLIFrameElement.prototype;
+
 const disableEmbedPreviews = createHigherOrderComponent(
 	( BlockEdit ) => ( props ) => {
 		if ( 'core/embed' !== props.name ) {
 			return <BlockEdit { ...props } />;
 		}
 
+		// Denylist taken from packages/block-library/src/embed/variations.js in Gutenberg.
+		const previewable =
+			supportsCredentialless &&
+			! [ 'facebook', 'smugmug' ].includes(
+				props.attributes.providerNameSlug
+			);
+
 		return (
 			<BlockEdit
 				{ ...props }
-				attributes={ { ...props.attributes, previewable: false } }
+				attributes={ { ...props.attributes, previewable } }
 			/>
 		);
 	},
 	'withDisabledEmbedPreview'
 );
 
-if (
-	window.crossOriginIsolated &&
-	! ( 'credentialless' in HTMLIFrameElement.prototype )
-) {
-	addFilter(
-		'editor.BlockEdit',
-		'media-experiments/disable-embed-previews',
-		disableEmbedPreviews
-	);
-}
+addFilter(
+	'editor.BlockEdit',
+	'media-experiments/disable-embed-previews',
+	disableEmbedPreviews
+);
