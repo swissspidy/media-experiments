@@ -45,7 +45,7 @@
 		"@wordpress/env": "^9.6.0",
 		"@wordpress/eslint-plugin": "^17.11.0",
 		"@wordpress/scripts": "^27.5.0",
-		"@wp-now/wp-now": "^0.1.65",
+		"@wp-now/wp-now": "^0.1.66",
 		"blob-polyfill": "^7.0.20220408",
 		"eslint": "^8.57.0",
 		"eslint-plugin-oxlint": "^0.2.7",
