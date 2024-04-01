@@ -115,7 +115,7 @@ jobs:
               run: npm run test:unit -- --collectCoverage
 
             - name: Upload code coverage report
-              uses: codecov/codecov-action@v4.1.0
+              uses: codecov/codecov-action@v4.1.1
               with:
                   file: artifacts/logs/lcov.info
                   flags: js
@@ -213,7 +213,7 @@ jobs:
               if: ${{ matrix.coverage }}
 
             - name: Upload code coverage report
-              uses: codecov/codecov-action@v4.1.0
+              uses: codecov/codecov-action@v4.1.1
               with:
                   file: artifacts/coverage.xml
                   flags: default
@@ -221,7 +221,7 @@ jobs:
               if: ${{ matrix.coverage }}
 
             - name: Upload code coverage report
-              uses: codecov/codecov-action@v4.1.0
+              uses: codecov/codecov-action@v4.1.1
               with:
                   file: coverage-multisite.xml
                   flags: multisite
