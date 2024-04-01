@@ -37,7 +37,7 @@
 		"@testing-library/react": "^14.2.2",
 		"@types/jest": "^29.5.12",
 		"@types/mime": "^3.0.4",
-		"@types/node": "^20.11.30",
+		"@types/node": "^20.12.2",
 		"@types/uuid": "^9.0.8",
 		"@types/wordpress__blocks": "^12.5.13",
 		"@types/wordpress__components": "^23.0.12",
