@@ -37,7 +37,7 @@
 		"@mexp/pdf": "../pdf",
 		"@mexp/subtitles": "../subtitles",
 		"@mexp/vips": "../vips",
-		"@shopify/web-worker": "^6.0.5",
+		"@shopify/web-worker": "^6.1.0",
 		"@wordpress/api-fetch": "^6.33.0",
 		"@wordpress/blob": "^3.54.0",
 		"@wordpress/core-data": "^6.31.0",
