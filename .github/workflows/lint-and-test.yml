@@ -192,9 +192,9 @@ jobs:
             # See https://make.wordpress.org/core/handbook/references/phpunit-compatibility-and-wordpress-versions/
             - name: Update PHPUnit
               run: |
-                  if [[ $PHP_VERSION == "7.4" || $PHP_VERSION == "8.0" || $PHP_VERSION == "8.1" || $PHP_VERSION == "8.2" ]]; then
+                  if [[ $PHP_VERSION == "8.0" || $PHP_VERSION == "8.1" || $PHP_VERSION == "8.2" ]]; then
                     echo "Installing latest version of PHPUnit"
-                    composer update --ignore-platform-reqs --no-interaction --no-scripts yoast/phpunit-polyfills --with-dependencies
+                    composer update --ignore-platform-reqs --no-interaction --no-scripts yoast/phpunit-polyfills --with-dependencies --with "phpunit/phpunit:^9.6"
                   fi
               env:
                   WP_VERSION: ${{ matrix.wp }}
