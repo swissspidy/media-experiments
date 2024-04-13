@@ -63,12 +63,11 @@ type Intent = 'perceptual' | 'relative' | 'saturation' | 'absolute';
  */
 type FailOn = 'none' | 'truncated' | 'error' | 'warning';
 
-// TODO: Different options depending on mime type.
-export type SaveOptions = {
+export type SaveOptions< T extends string > = {
 	/**
 	 * Quality factor.
 	 */
-	Q?: number;
+	Q?: T extends 'image/gif' ? never : number;
 	/**
 	 * Which metadata to retain.
 	 */
@@ -82,7 +81,7 @@ export type SaveOptions = {
 	 * Enable lossless compression (for WebP).
 	 * Do not provide for any other type!
 	 */
-	lossless?: boolean;
+	lossless?: T extends 'image/gif' ? never : boolean;
 };
 
 export type ThumbnailOptions = {

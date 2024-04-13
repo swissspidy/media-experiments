@@ -45,14 +45,16 @@ async function getVips(): Promise< typeof VipsInstance > {
 	return vipsInstance;
 }
 
+// TODO: Make this smarter.
+function supportsQuality( type: string ) {
+	return [ 'image/jpeg', 'image/png', 'image/webp', 'image/avif' ].includes(
+		type
+	);
+}
+
 export async function convertImageFormat(
 	buffer: ArrayBuffer,
-	type:
-		| 'image/jpeg'
-		| 'image/png'
-		| 'image/webp'
-		| 'image/avif'
-		| 'image/gif',
+	type: string,
 	quality = 0.82
 ) {
 	const ext = getExtensionFromMimeType( type );
@@ -64,9 +66,12 @@ export async function convertImageFormat(
 	const vips = await getVips();
 	const image = vips.Image.newFromBuffer( buffer );
 
-	const options: SaveOptions = {
-		Q: quality * 100,
-	};
+	const options: SaveOptions< typeof type > = {};
+
+	if ( supportsQuality( type ) ) {
+		options.Q = quality * 100;
+	}
+
 	const outBuffer = image.writeToBuffer( `.${ ext }`, options );
 	const result = outBuffer.buffer;
 
@@ -188,7 +193,7 @@ export async function resizeImage(
 	}
 
 	// TODO: Allow passing quality?
-	const saveOptions: SaveOptions = {};
+	const saveOptions: SaveOptions< typeof type > = {};
 	const outBuffer = image.writeToBuffer( `.${ ext }`, saveOptions );
 
 	const result = {
