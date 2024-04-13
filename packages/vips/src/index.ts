@@ -74,15 +74,17 @@ export async function convertImageFormat(
 		throw new Error( 'Unsupported file type' );
 	}
 
+	let strOptions = '';
 	const loadOptions: LoadOptions< typeof type > = {};
 
 	// To ensure all frames are loaded in case the image is animated.
 	if ( supportsAnimation( type ) ) {
+		strOptions = '[n=-1]';
 		( loadOptions as LoadOptions< typeof type > ).n = -1;
 	}
 
 	const vips = await getVips();
-	const image = vips.Image.newFromBuffer( buffer, '[n=-1]', loadOptions );
+	const image = vips.Image.newFromBuffer( buffer, strOptions, loadOptions );
 
 	const saveOptions: SaveOptions< typeof type > = {};
 
@@ -152,17 +154,21 @@ export async function resizeImage(
 		size: 'down',
 	};
 
+	let strOptions = '';
 	const loadOptions: LoadOptions< typeof type > = {};
 
 	// To ensure all frames are loaded in case the image is animated.
 	if ( supportsAnimation( type ) ) {
+		strOptions = '[n=-1]';
 		( loadOptions as LoadOptions< typeof type > ).n = -1;
 	}
 
-	let image = vips.Image.newFromBuffer( buffer, '', loadOptions );
+	let image = vips.Image.newFromBuffer( buffer, strOptions, loadOptions );
 	const { width } = image;
 
-	const numberOfFrames = image.getInt( 'n-pages' );
+	const numberOfFrames = supportsAnimation( type )
+		? image.getInt( 'n-pages' )
+		: 1;
 	const height = image.height / numberOfFrames;
 	const isAnimated = numberOfFrames > 1;
 
