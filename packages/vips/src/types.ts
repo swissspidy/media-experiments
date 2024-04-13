@@ -63,6 +63,40 @@ type Intent = 'perceptual' | 'relative' | 'saturation' | 'absolute';
  */
 type FailOn = 'none' | 'truncated' | 'error' | 'warning';
 
+/**
+ * The type of access an operation has to supply. See vips_tilecache()
+ * and #VipsForeign.
+ *
+ * random: means requests can come in any order.
+ *
+ * sequential: means requests will be top-to-bottom, but with some
+ * amount of buffering behind the read point for small non-local accesses.
+ */
+type Access = 'random' | 'sequential' | 'sequential-unbuffered';
+
+export type LoadOptions< T extends string > = {
+	/**
+	 * Number of pages to load, -1 for all.
+	 */
+	n?: T extends 'image/gif'
+		? number
+		: T extends 'image/webp'
+		? number
+		: never;
+	/**
+	 * Required access pattern for this file.
+	 */
+	access?: Access;
+	/**
+	 * Error level to fail on.
+	 */
+	fail_on?: FailOn;
+	/**
+	 * Don't use a cached result for this operation.
+	 */
+	revalidate?: boolean;
+};
+
 export type SaveOptions< T extends string > = {
 	/**
 	 * Quality factor.

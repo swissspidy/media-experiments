@@ -3,7 +3,12 @@ import type VipsInstance from 'wasm-vips';
 
 import { getExtensionFromMimeType } from '@mexp/media-utils';
 
-import type { ImageSizeCrop, SaveOptions, ThumbnailOptions } from './types';
+import type {
+	ImageSizeCrop,
+	SaveOptions,
+	ThumbnailOptions,
+	LoadOptions,
+} from './types';
 
 type EmscriptenModule = {
 	setAutoDeleteLater: ( autoDelete: boolean ) => void;
@@ -46,10 +51,16 @@ async function getVips(): Promise< typeof VipsInstance > {
 }
 
 // TODO: Make this smarter.
-function supportsQuality( type: string ) {
+function supportsQuality(
+	type: string
+): type is 'image/jpeg' | 'image/png' | 'image/webp' | 'image/avif' {
 	return [ 'image/jpeg', 'image/png', 'image/webp', 'image/avif' ].includes(
 		type
 	);
+}
+// TODO: Make this smarter.
+function supportsAnimation( type: string ): type is 'image/webp' | 'image/gif' {
+	return [ 'image/webp', 'image/gif' ].includes( type );
 }
 
 export async function convertImageFormat(
@@ -63,16 +74,23 @@ export async function convertImageFormat(
 		throw new Error( 'Unsupported file type' );
 	}
 
-	const vips = await getVips();
-	const image = vips.Image.newFromBuffer( buffer );
+	const loadOptions: LoadOptions< typeof type > = {};
 
-	const options: SaveOptions< typeof type > = {};
-
-	if ( supportsQuality( type ) ) {
-		options.Q = quality * 100;
+	// To ensure all frames are loaded in case the image is animated.
+	if ( supportsAnimation( type ) ) {
+		( loadOptions as LoadOptions< typeof type > ).n = -1;
 	}
 
-	const outBuffer = image.writeToBuffer( `.${ ext }`, options );
+	const vips = await getVips();
+	const image = vips.Image.newFromBuffer( buffer, '[n=-1]', loadOptions );
+
+	const saveOptions: SaveOptions< typeof type > = {};
+
+	if ( supportsQuality( type ) ) {
+		saveOptions.Q = quality * 100;
+	}
+
+	const outBuffer = image.writeToBuffer( `.${ ext }`, saveOptions );
 	const result = outBuffer.buffer;
 
 	cleanup?.();
@@ -130,25 +148,55 @@ export async function resizeImage(
 	}
 
 	const vips = await getVips();
-	const options: ThumbnailOptions = {
+	const thumbnailOptions: ThumbnailOptions = {
 		size: 'down',
 	};
 
-	let image = vips.Image.newFromBuffer( buffer );
-	const { width, height } = image;
+	const loadOptions: LoadOptions< typeof type > = {};
+
+	// To ensure all frames are loaded in case the image is animated.
+	if ( supportsAnimation( type ) ) {
+		( loadOptions as LoadOptions< typeof type > ).n = -1;
+	}
+
+	let image = vips.Image.newFromBuffer( buffer, '', loadOptions );
+	const { width } = image;
+
+	const numberOfFrames = image.getInt( 'n-pages' );
+	const height = image.height / numberOfFrames;
+	const isAnimated = numberOfFrames > 1;
+
+	// To preserve all frames when cropping.
+	if ( isAnimated ) {
+		thumbnailOptions.option_string = '[n=-1]';
+	}
 
 	// If resize.height is zero.
 	resize.height = resize.height || ( height / width ) * resize.width;
 
 	let resizeWidth = resize.width;
-	options.height = resize.height;
+	thumbnailOptions.height = resize.height;
+
+	let newHeight;
 
 	if ( ! resize.crop ) {
-		image = vips.Image.thumbnailBuffer( buffer, resizeWidth, options );
-	} else if ( true === resize.crop ) {
-		options.crop = smartCrop ? 'attention' : 'centre';
+		image = vips.Image.thumbnailBuffer(
+			buffer,
+			resizeWidth,
+			thumbnailOptions
+		);
 
-		image = vips.Image.thumbnailBuffer( buffer, resizeWidth, options );
+		newHeight = image.height / numberOfFrames;
+	} else if ( true === resize.crop ) {
+		thumbnailOptions.crop = smartCrop ? 'attention' : 'centre';
+
+		image = vips.Image.thumbnailBuffer(
+			buffer,
+			resizeWidth,
+			thumbnailOptions
+		);
+
+		newHeight = image.height;
 	} else {
 		// First resize, then do the cropping.
 		// This allows operating on the second bitmap with the correct dimensions.
@@ -158,7 +206,7 @@ export async function resizeImage(
 				resize.width >= resize.height
 					? resize.width
 					: ( width / height ) * resize.height;
-			options.height =
+			thumbnailOptions.height =
 				resize.width >= resize.height
 					? ( height / width ) * resizeWidth
 					: resize.height;
@@ -167,13 +215,17 @@ export async function resizeImage(
 				resize.width >= resize.height
 					? ( width / height ) * resize.height
 					: resize.width;
-			options.height =
+			thumbnailOptions.height =
 				resize.width >= resize.height
 					? resize.height
 					: ( height / width ) * resizeWidth;
 		}
 
-		image = vips.Image.thumbnailBuffer( buffer, resizeWidth, options );
+		image = vips.Image.thumbnailBuffer(
+			buffer,
+			resizeWidth,
+			thumbnailOptions
+		);
 
 		let left = 0;
 		if ( 'center' === resize.crop[ 0 ] ) {
@@ -190,6 +242,8 @@ export async function resizeImage(
 		}
 
 		image = image.crop( left, top, resize.width, resize.height );
+
+		newHeight = image.height;
 	}
 
 	// TODO: Allow passing quality?
@@ -199,7 +253,7 @@ export async function resizeImage(
 	const result = {
 		buffer: outBuffer.buffer,
 		width: image.width,
-		height: image.height,
+		height: newHeight,
 		originalWidth: width,
 		originalHeight: height,
 	};

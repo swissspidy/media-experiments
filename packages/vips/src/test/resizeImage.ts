@@ -12,6 +12,7 @@ class MockImage {
 	writeToBuffer = jest.fn( () => ( {
 		buffer: '',
 	} ) );
+	getInt = jest.fn( () => 1 );
 }
 
 class MockVipsImage {

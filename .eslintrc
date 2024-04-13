@@ -50,7 +50,8 @@
 					"[a-z]+_outputFormat",
 					"[a-z]+_quality",
 					"gif_convert",
-					"media_details"
+					"media_details",
+					"option_string"
 				]
 			}
 		]
