@@ -65,30 +65,31 @@ function supportsAnimation( type: string ): type is 'image/webp' | 'image/gif' {
 
 export async function convertImageFormat(
 	buffer: ArrayBuffer,
-	type: string,
+	inputType: string,
+	outputType: string,
 	quality = 0.82
 ) {
-	const ext = getExtensionFromMimeType( type );
+	const ext = getExtensionFromMimeType( outputType );
 
 	if ( ! ext ) {
 		throw new Error( 'Unsupported file type' );
 	}
 
 	let strOptions = '';
-	const loadOptions: LoadOptions< typeof type > = {};
+	const loadOptions: LoadOptions< typeof inputType > = {};
 
 	// To ensure all frames are loaded in case the image is animated.
-	if ( supportsAnimation( type ) ) {
+	if ( supportsAnimation( inputType ) ) {
 		strOptions = '[n=-1]';
-		( loadOptions as LoadOptions< typeof type > ).n = -1;
+		( loadOptions as LoadOptions< typeof inputType > ).n = -1;
 	}
 
 	const vips = await getVips();
 	const image = vips.Image.newFromBuffer( buffer, strOptions, loadOptions );
 
-	const saveOptions: SaveOptions< typeof type > = {};
+	const saveOptions: SaveOptions< typeof outputType > = {};
 
-	if ( supportsQuality( type ) ) {
+	if ( supportsQuality( outputType ) ) {
 		saveOptions.Q = quality * 100;
 	}
 
@@ -125,7 +126,7 @@ export async function compressImage(
 	if ( ! isFileTypeSupported( type ) ) {
 		throw new Error( 'Unsupported file type' );
 	}
-	return convertImageFormat( buffer, type, quality );
+	return convertImageFormat( buffer, type, type, quality );
 }
 
 /**
@@ -166,9 +167,11 @@ export async function resizeImage(
 	let image = vips.Image.newFromBuffer( buffer, strOptions, loadOptions );
 	const { width } = image;
 
-	const numberOfFrames = supportsAnimation( type )
-		? image.getInt( 'n-pages' )
-		: 1;
+	// Using getTypeof acts an isset check.
+	const numberOfFrames =
+		supportsAnimation( type ) && image.getTypeof( 'n-pages' )
+			? image.getInt( 'n-pages' )
+			: 1;
 	const height = image.height / numberOfFrames;
 	const isAnimated = numberOfFrames > 1;
 

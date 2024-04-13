@@ -26,6 +26,7 @@ export async function vipsConvertImageFormat(
 ) {
 	const buffer = await vipsWorker.convertImageFormat(
 		await file.arrayBuffer(),
+		file.type,
 		type,
 		quality
 	);
