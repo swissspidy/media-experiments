@@ -39,7 +39,7 @@
 		"@types/mime": "^3.0.4",
 		"@types/node": "^20.12.7",
 		"@types/uuid": "^9.0.8",
-		"@types/wordpress__blocks": "^12.5.13",
+		"@types/wordpress__blocks": "^12.5.14",
 		"@wordpress/dependency-extraction-webpack-plugin": "^5.6.0",
 		"@wordpress/env": "^9.7.0",
 		"@wordpress/eslint-plugin": "^17.12.0",
