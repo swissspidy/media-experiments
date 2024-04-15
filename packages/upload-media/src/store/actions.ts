@@ -32,6 +32,7 @@ import {
 	vipsConvertImageFormat,
 	vipsHasTransparency,
 	vipsResizeImage,
+	vipsCancelOperations,
 } from './utils/vips';
 import {
 	compressImage as canvasCompressImage,
@@ -46,7 +47,6 @@ import type {
 	Attachment,
 	AudioFormat,
 	BatchId,
-	CancelAction,
 	CreateRestAttachment,
 	ImageFormat,
 	ImageLibrary,
@@ -1014,11 +1014,43 @@ export function grantApproval( id: number ) {
 	};
 }
 
-export function cancelItem( id: QueueItemId, error: Error ): CancelAction {
-	return {
-		type: Type.Cancel,
-		id,
-		error,
+export function cancelItem( id: QueueItemId, error: Error ) {
+	return async ( {
+		select,
+		dispatch,
+		registry,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+		registry: WPDataRegistry;
+	} ) => {
+		const item = select.getItem( id );
+
+		if ( ! item ) {
+			/*
+			 * Do nothing if item has already been removed.
+			 * This can happen if an upload is cancelled manually
+			 * while transcoding with vips is still in progress.
+			 * Then, cancelItem() is once invoked manually and once
+			 * by the error handler in optimizeImageItem().
+			 */
+			return;
+		}
+
+		const imageLibrary: ImageLibrary =
+			registry
+				.select( preferencesStore )
+				.get( PREFERENCES_NAME, 'imageLibrary' ) || 'vips';
+
+		if ( 'vips' === imageLibrary ) {
+			await vipsCancelOperations( id );
+		}
+
+		dispatch( {
+			type: Type.Cancel,
+			id,
+			error,
+		} );
 	};
 }
 
@@ -1179,6 +1211,7 @@ export function optimizeImageItem(
 						);
 					} else {
 						file = await vipsCompressImage(
+							item.id,
 							item.file,
 							outputQuality / 100
 						);
@@ -1194,6 +1227,7 @@ export function optimizeImageItem(
 						);
 					} else {
 						file = await vipsConvertImageFormat(
+							item.id,
 							item.file,
 							'image/webp',
 							outputQuality / 100
@@ -1205,6 +1239,7 @@ export function optimizeImageItem(
 					// No browsers support AVIF in HTMLCanvasElement.toBlob() yet, so always use vips.
 					// See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
 					file = await vipsConvertImageFormat(
+						item.id,
 						item.file,
 						'image/avif',
 						outputQuality / 100
@@ -1215,6 +1250,7 @@ export function optimizeImageItem(
 					// Browsers don't typically support image/gif in HTMLCanvasElement.toBlob() yet, so always use vips.
 					// See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
 					file = await vipsConvertImageFormat(
+						item.id,
 						item.file,
 						'image/avif',
 						outputQuality / 100
@@ -1231,6 +1267,7 @@ export function optimizeImageItem(
 						);
 					} else {
 						file = await vipsConvertImageFormat(
+							item.id,
 							item.file,
 							`image/${ outputFormat }`,
 							outputQuality / 100
@@ -1582,6 +1619,7 @@ export function resizeCropItem( id: QueueItemId ) {
 				);
 			} else {
 				file = await vipsResizeImage(
+					item.id,
 					item.file,
 					item.resize,
 					smartCrop,
