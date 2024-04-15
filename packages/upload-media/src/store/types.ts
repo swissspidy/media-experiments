@@ -35,7 +35,7 @@ export type QueueItem = {
 	blurHash?: string;
 	dominantColor?: string;
 	generatedPosterId?: number;
-	isSideload?: boolean;
+	parentId?: QueueItemId;
 	resize?: ImageSizeCrop;
 };
 

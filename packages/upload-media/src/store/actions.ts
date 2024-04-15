@@ -147,7 +147,7 @@ interface AddItemArgs {
 	mediaSourceTerms?: MediaSourceTerm[];
 	blurHash?: string;
 	dominantColor?: string;
-	isSideload?: boolean;
+	parentId?: QueueItemId;
 	resize?: ImageSizeCrop;
 }
 
@@ -287,6 +287,7 @@ interface AddSideloadItemArgs {
 	resize?: ImageSizeCrop;
 	transcode?: TranscodingType[];
 	batchId?: BatchId;
+	parentId?: QueueItemId;
 }
 
 export function addSideloadItem( {
@@ -296,6 +297,7 @@ export function addSideloadItem( {
 	resize,
 	transcode,
 	batchId,
+	parentId,
 }: AddSideloadItemArgs ) {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
 		dispatch< AddAction >( {
@@ -311,7 +313,7 @@ export function addSideloadItem( {
 					generate_sub_sizes: false,
 					...additionalData,
 				},
-				isSideload: true,
+				parentId,
 				resize,
 				transcode,
 			},
@@ -678,7 +680,7 @@ export function prepareItem( id: QueueItemId ) {
 				dispatch.addPoster( id, pdfThumbnail );
 		}
 
-		if ( item.isSideload ) {
+		if ( item.parentId ) {
 			dispatch.sideloadItem( id );
 		} else {
 			dispatch.uploadItem( id );
@@ -882,6 +884,7 @@ export function completeItem( id: QueueItemId ) {
 						image_size: 'full',
 					},
 					transcode: [ TranscodingType.Image ],
+					parentId: item.id,
 				} );
 			}
 
@@ -901,6 +904,7 @@ export function completeItem( id: QueueItemId ) {
 							item.onChange?.( [ updatedAttachment ] );
 						},
 						batchId,
+						parentId: item.id,
 						additionalData: {
 							// Sideloading does not use the parent post ID but the
 							// attachment ID as the image sizes need to be added to it.
@@ -924,7 +928,7 @@ export function completeItem( id: QueueItemId ) {
 				.get( PREFERENCES_NAME, 'keepOriginal' );
 
 			if (
-				! item.isSideload &&
+				! item.parentId &&
 				item.file instanceof ImageFile &&
 				item.file.wasResized &&
 				keepOriginal
@@ -1561,7 +1565,7 @@ export function resizeCropItem( id: QueueItemId ) {
 				.select( preferencesStore )
 				.get( PREFERENCES_NAME, 'imageLibrary' ) || 'vips';
 
-		const addSuffix = Boolean( item.isSideload );
+		const addSuffix = Boolean( item.parentId );
 
 		const stop = start(
 			`Resize Item: ${ item.file.name } | ${ imageLibrary } | ${ thumbnailGeneration } | ${ item.resize.width }x${ item.resize.height }`
