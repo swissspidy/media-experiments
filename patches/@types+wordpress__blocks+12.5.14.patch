@@ -1,0 +1,12 @@
+diff --git a/node_modules/@types/wordpress__blocks/index.d.ts b/node_modules/@types/wordpress__blocks/index.d.ts
+index 6bfba5e..7ee2477 100644
+--- a/node_modules/@types/wordpress__blocks/index.d.ts
++++ b/node_modules/@types/wordpress__blocks/index.d.ts
+@@ -294,6 +294,7 @@ export interface Block<T extends Record<string, any> = {}> {
+      * @see {@link https://developer.wordpress.org/block-editor/reference-guides/block-api/block-metadata/#context}
+      */
+     readonly usesContext?: string[];
++	readonly variations?: BlockVariation<T>[];
+     /**
+      * The current version number of the block, such as 1.0 or 1.0.3.
+      *
