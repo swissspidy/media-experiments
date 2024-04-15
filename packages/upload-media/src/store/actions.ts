@@ -149,6 +149,7 @@ interface AddItemArgs {
 	dominantColor?: string;
 	parentId?: QueueItemId;
 	resize?: ImageSizeCrop;
+	abortController?: AbortController;
 }
 
 export function addItem( {
@@ -164,6 +165,7 @@ export function addItem( {
 	mediaSourceTerms = [],
 	blurHash,
 	dominantColor,
+	abortController,
 }: AddItemArgs ) {
 	return async ( {
 		dispatch,
@@ -212,6 +214,7 @@ export function addItem( {
 				blurHash,
 				dominantColor,
 				resize,
+				abortController: abortController || new AbortController(),
 			},
 		} );
 	};
@@ -316,6 +319,7 @@ export function addSideloadItem( {
 				parentId,
 				resize,
 				transcode,
+				abortController: new AbortController(),
 			},
 		} );
 	};
@@ -388,6 +392,7 @@ export function muteExistingVideo( {
 				dominantColor,
 				transcode: [ TranscodingType.MuteVideo ],
 				generatedPosterId,
+				abortController: new AbortController(),
 			},
 		} );
 	};
@@ -435,6 +440,7 @@ export function addSubtitlesForExistingVideo( {
 				sourceAttachmentId: id,
 				mediaSourceTerms: [ 'subtitles-generation' ],
 				additionalData,
+				abortController: new AbortController(),
 			},
 		} );
 	};
@@ -491,6 +497,8 @@ export function optimizeExistingItem( {
 
 		// TODO: Same considerations apply as for muteExistingVideo.
 
+		const abortController = new AbortController();
+
 		dispatch< AddAction >( {
 			type: Type.Add,
 			item: {
@@ -512,11 +520,15 @@ export function optimizeExistingItem( {
 					onSuccess?.( [ attachment ] );
 					// Update the original attachment in the DB to have
 					// a reference to the optimized version.
-					void updateMediaItem( id, {
-						meta: {
-							mexp_optimized_id: attachment.id,
+					void updateMediaItem(
+						id,
+						{
+							meta: {
+								mexp_optimized_id: attachment.id,
+							},
 						},
-					} );
+						abortController.signal
+					);
 				},
 				onBatchSuccess,
 				onError,
@@ -527,6 +539,7 @@ export function optimizeExistingItem( {
 				dominantColor,
 				transcode: [ TranscodingType.OptimizeExisting ],
 				generatedPosterId,
+				abortController,
 			},
 		} );
 	};
@@ -804,6 +817,8 @@ export function completeItem( id: QueueItemId ) {
 					) );
 
 				if ( poster ) {
+					const abortController = new AbortController();
+
 					// Adding the poster to the queue on its own allows for it to be optimized, etc.
 					dispatch.addItem( {
 						file: poster,
@@ -832,13 +847,17 @@ export function completeItem( id: QueueItemId ) {
 							// Similarly, update the original video in the DB to have the
 							// poster as the featured image.
 							// TODO: Do this server-side instead.
-							void updateMediaItem( attachment.id, {
-								featured_media: posterAttachment.id,
-								meta: {
-									mexp_generated_poster_id:
-										posterAttachment.id,
+							void updateMediaItem(
+								attachment.id,
+								{
+									featured_media: posterAttachment.id,
+									meta: {
+										mexp_generated_poster_id:
+											posterAttachment.id,
+									},
 								},
-							} );
+								abortController.signal
+							);
 						},
 						additionalData: {
 							// Reminder: Parent post ID might not be set, depending on context,
@@ -848,6 +867,7 @@ export function completeItem( id: QueueItemId ) {
 						mediaSourceTerms: [ 'poster-generation' ],
 						blurHash: item.blurHash,
 						dominantColor: item.dominantColor,
+						abortController,
 					} );
 				}
 			} catch ( err ) {
@@ -1045,6 +1065,8 @@ export function cancelItem( id: QueueItemId, error: Error ) {
 		if ( 'vips' === imageLibrary ) {
 			await vipsCancelOperations( id );
 		}
+
+		item.abortController?.abort();
 
 		dispatch( {
 			type: Type.Cancel,
@@ -1763,7 +1785,8 @@ export function uploadItem( id: QueueItemId ) {
 		try {
 			const attachment = await uploadToServer(
 				item.file,
-				additionalData
+				additionalData,
+				item.abortController?.signal
 			);
 
 			// TODO: Check if a poster happened to be generated on the server side already (check attachment.posterId !== 0).
@@ -1818,7 +1841,8 @@ export function sideloadItem( id: QueueItemId ) {
 			const attachment = await sideloadFile(
 				item.file,
 				post,
-				additionalData
+				additionalData,
+				item.abortController?.signal
 			);
 
 			dispatch.finishSideloading( id, attachment );

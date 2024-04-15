@@ -37,6 +37,7 @@ export type QueueItem = {
 	generatedPosterId?: number;
 	parentId?: QueueItemId;
 	resize?: ImageSizeCrop;
+	abortController?: AbortController;
 };
 
 export interface State {
