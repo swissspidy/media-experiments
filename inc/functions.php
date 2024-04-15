@@ -74,15 +74,18 @@ function register_assets(): void {
 	 */
 	$video_size_threshold = (int) apply_filters( 'mexp_big_video_size_threshold', 1920 );
 
+	$default_image_output_formats = get_default_image_output_formats();
+
 	wp_add_inline_script(
 		'media-experiments-view-upload-request',
 		sprintf(
 			'window.mediaExperiments = %s;',
 			wp_json_encode(
 				[
-					'availableImageSizes'   => get_all_image_sizes(),
-					'bigImageSizeThreshold' => $image_size_threshold,
-					'bigVideoSizeThreshold' => $video_size_threshold,
+					'availableImageSizes'       => get_all_image_sizes(),
+					'bigImageSizeThreshold'     => $image_size_threshold,
+					'bigVideoSizeThreshold'     => $video_size_threshold,
+					'defaultImageOutputFormats' => (object) $default_image_output_formats,
 				]
 			)
 		),
@@ -97,6 +100,35 @@ function register_assets(): void {
 	);
 
 	wp_style_add_data( 'media-experiments-view-upload-request', 'rtl', 'replace' );
+}
+
+/**
+ * Returns the default output format mapping for the supported image formats.
+ *
+ * @return array<string,string> Map of input formats to output formats.
+ */
+function get_default_image_output_formats() {
+	$input_formats = [
+		'image/jpeg',
+		'image/png',
+		'image/gif',
+		'image/webp',
+		'image/avif',
+		'image/heic',
+	];
+
+	$output_formats = [];
+
+	foreach ( $input_formats as $mime_type ) {
+		$output_formats = apply_filters(
+			'image_editor_output_format', // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+			$output_formats,
+			'',
+			$mime_type
+		);
+	}
+
+	return $output_formats;
 }
 
 /**
@@ -129,15 +161,18 @@ function enqueue_block_editor_assets(): void {
 	/** This filter is documented in inc/functions.php */
 	$video_size_threshold = (int) apply_filters( 'mexp_big_video_size_threshold', 1920 );
 
+	$default_image_output_formats = get_default_image_output_formats();
+
 	wp_add_inline_script(
 		'media-experiments',
 		sprintf(
 			'window.mediaExperiments = %s;',
 			wp_json_encode(
 				[
-					'availableImageSizes'   => get_all_image_sizes(),
-					'bigImageSizeThreshold' => $image_size_threshold,
-					'bigVideoSizeThreshold' => $video_size_threshold,
+					'availableImageSizes'       => get_all_image_sizes(),
+					'bigImageSizeThreshold'     => $image_size_threshold,
+					'bigVideoSizeThreshold'     => $video_size_threshold,
+					'defaultImageOutputFormats' => (object) $default_image_output_formats,
 				]
 			)
 		),

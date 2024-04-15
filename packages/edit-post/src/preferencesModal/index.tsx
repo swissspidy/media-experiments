@@ -10,6 +10,9 @@ import {
 import { store as interfaceStore } from '@wordpress/interface';
 import { store as preferencesStore } from '@wordpress/preferences';
 
+import type { ImageFormat } from '@mexp/upload-media';
+import { getExtensionFromMimeType } from '@mexp/media-utils';
+
 import type { MediaPreferences } from '../types';
 import { Modal } from './modal';
 import { PREFERENCES_NAME } from './constants';
@@ -41,6 +44,10 @@ registerPlugin( 'media-experiments-preferences', {
 	render: PreferencesMenuItem,
 } );
 
+function getExtension( mimeType: string ): ImageFormat {
+	return ( getExtensionFromMimeType( mimeType ) || 'jpeg' ) as ImageFormat;
+}
+
 const defaultPreferences: MediaPreferences = {
 	// General.
 	requireApproval: true,
@@ -52,17 +59,35 @@ const defaultPreferences: MediaPreferences = {
 	keepOriginal: false,
 	// Formats.
 	default_outputFormat: 'jpeg',
-	jpeg_outputFormat: 'jpeg',
+	jpeg_outputFormat: getExtension(
+		window.mediaExperiments.defaultImageOutputFormats[ 'image/jpeg' ] ||
+			'image/jpeg'
+	),
 	jpeg_quality: 82,
-	png_outputFormat: 'png',
+	png_outputFormat: getExtension(
+		window.mediaExperiments.defaultImageOutputFormats[ 'image/png' ] ||
+			'image/png'
+	),
 	png_quality: 82,
-	webp_outputFormat: 'webp',
+	webp_outputFormat: getExtension(
+		window.mediaExperiments.defaultImageOutputFormats[ 'image/webp' ] ||
+			'image/webp'
+	),
 	webp_quality: 86,
-	avif_outputFormat: 'avif',
+	avif_outputFormat: getExtension(
+		window.mediaExperiments.defaultImageOutputFormats[ 'image/avif' ] ||
+			'image/avif'
+	),
 	avif_quality: 80,
-	heic_outputFormat: 'jpeg',
+	heic_outputFormat: getExtension(
+		window.mediaExperiments.defaultImageOutputFormats[ 'image/heic' ] ||
+			'image/jpeg'
+	),
 	heic_quality: 80,
-	gif_outputFormat: 'webp',
+	gif_outputFormat: getExtension(
+		window.mediaExperiments.defaultImageOutputFormats[ 'image/gif' ] ||
+			'image/webp'
+	),
 	gif_quality: 80,
 	gif_convert: true,
 	video_outputFormat: 'mp4',
