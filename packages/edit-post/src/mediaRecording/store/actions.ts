@@ -123,10 +123,8 @@ export function enterRecordingMode(
 }
 
 export function leaveRecordingMode() {
-	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
-		dispatch( {
-			type: Type.LeaveRecordingMode,
-		} );
+	return {
+		type: Type.LeaveRecordingMode,
 	};
 }
 
