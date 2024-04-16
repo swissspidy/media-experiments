@@ -114,7 +114,7 @@ test.describe( 'Animated GIFs', () => {
 		await expect( page.locator( 'css=[data-blurhash]' ) ).toBeVisible();
 	} );
 
-	test.only( 'maintains animation in thumbnails', async ( {
+	test( 'maintains animation in thumbnails', async ( {
 		admin,
 		page,
 		editor,
