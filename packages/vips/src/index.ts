@@ -182,7 +182,8 @@ export async function resizeImage(
 	const loadOptions: LoadOptions< typeof type > = {};
 
 	// To ensure all frames are loaded in case the image is animated.
-	if ( supportsAnimation( type ) ) {
+	// But only if we're not cropping.
+	if ( supportsAnimation( type ) && ! resize.crop ) {
 		strOptions = '[n=-1]';
 		( loadOptions as LoadOptions< typeof type > ).n = -1;
 	}
@@ -202,7 +203,9 @@ export async function resizeImage(
 
 	// Using getTypeof acts an isset check.
 	const numberOfFrames =
-		supportsAnimation( type ) && image.getTypeof( 'n-pages' )
+		supportsAnimation( type ) &&
+		image.getTypeof( 'n-pages' ) &&
+		! resize.crop
 			? image.getInt( 'n-pages' )
 			: 1;
 	const height = image.height / numberOfFrames;
