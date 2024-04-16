@@ -32,6 +32,7 @@ import {
 	vipsConvertImageFormat,
 	vipsHasTransparency,
 	vipsResizeImage,
+	vipsCancelOperations,
 } from './utils/vips';
 import {
 	compressImage as canvasCompressImage,
@@ -46,7 +47,6 @@ import type {
 	Attachment,
 	AudioFormat,
 	BatchId,
-	CancelAction,
 	CreateRestAttachment,
 	ImageFormat,
 	ImageLibrary,
@@ -147,8 +147,9 @@ interface AddItemArgs {
 	mediaSourceTerms?: MediaSourceTerm[];
 	blurHash?: string;
 	dominantColor?: string;
-	isSideload?: boolean;
+	parentId?: QueueItemId;
 	resize?: ImageSizeCrop;
+	abortController?: AbortController;
 }
 
 export function addItem( {
@@ -164,6 +165,7 @@ export function addItem( {
 	mediaSourceTerms = [],
 	blurHash,
 	dominantColor,
+	abortController,
 }: AddItemArgs ) {
 	return async ( {
 		dispatch,
@@ -212,6 +214,7 @@ export function addItem( {
 				blurHash,
 				dominantColor,
 				resize,
+				abortController: abortController || new AbortController(),
 			},
 		} );
 	};
@@ -287,6 +290,7 @@ interface AddSideloadItemArgs {
 	resize?: ImageSizeCrop;
 	transcode?: TranscodingType[];
 	batchId?: BatchId;
+	parentId?: QueueItemId;
 }
 
 export function addSideloadItem( {
@@ -296,6 +300,7 @@ export function addSideloadItem( {
 	resize,
 	transcode,
 	batchId,
+	parentId,
 }: AddSideloadItemArgs ) {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
 		dispatch< AddAction >( {
@@ -311,9 +316,10 @@ export function addSideloadItem( {
 					generate_sub_sizes: false,
 					...additionalData,
 				},
-				isSideload: true,
+				parentId,
 				resize,
 				transcode,
+				abortController: new AbortController(),
 			},
 		} );
 	};
@@ -386,6 +392,7 @@ export function muteExistingVideo( {
 				dominantColor,
 				transcode: [ TranscodingType.MuteVideo ],
 				generatedPosterId,
+				abortController: new AbortController(),
 			},
 		} );
 	};
@@ -433,6 +440,7 @@ export function addSubtitlesForExistingVideo( {
 				sourceAttachmentId: id,
 				mediaSourceTerms: [ 'subtitles-generation' ],
 				additionalData,
+				abortController: new AbortController(),
 			},
 		} );
 	};
@@ -489,6 +497,8 @@ export function optimizeExistingItem( {
 
 		// TODO: Same considerations apply as for muteExistingVideo.
 
+		const abortController = new AbortController();
+
 		dispatch< AddAction >( {
 			type: Type.Add,
 			item: {
@@ -510,11 +520,15 @@ export function optimizeExistingItem( {
 					onSuccess?.( [ attachment ] );
 					// Update the original attachment in the DB to have
 					// a reference to the optimized version.
-					void updateMediaItem( id, {
-						meta: {
-							mexp_optimized_id: attachment.id,
+					void updateMediaItem(
+						id,
+						{
+							meta: {
+								mexp_optimized_id: attachment.id,
+							},
 						},
-					} );
+						abortController.signal
+					);
 				},
 				onBatchSuccess,
 				onError,
@@ -525,6 +539,7 @@ export function optimizeExistingItem( {
 				dominantColor,
 				transcode: [ TranscodingType.OptimizeExisting ],
 				generatedPosterId,
+				abortController,
 			},
 		} );
 	};
@@ -678,7 +693,7 @@ export function prepareItem( id: QueueItemId ) {
 				dispatch.addPoster( id, pdfThumbnail );
 		}
 
-		if ( item.isSideload ) {
+		if ( item.parentId ) {
 			dispatch.sideloadItem( id );
 		} else {
 			dispatch.uploadItem( id );
@@ -802,6 +817,8 @@ export function completeItem( id: QueueItemId ) {
 					) );
 
 				if ( poster ) {
+					const abortController = new AbortController();
+
 					// Adding the poster to the queue on its own allows for it to be optimized, etc.
 					dispatch.addItem( {
 						file: poster,
@@ -830,13 +847,17 @@ export function completeItem( id: QueueItemId ) {
 							// Similarly, update the original video in the DB to have the
 							// poster as the featured image.
 							// TODO: Do this server-side instead.
-							void updateMediaItem( attachment.id, {
-								featured_media: posterAttachment.id,
-								meta: {
-									mexp_generated_poster_id:
-										posterAttachment.id,
+							void updateMediaItem(
+								attachment.id,
+								{
+									featured_media: posterAttachment.id,
+									meta: {
+										mexp_generated_poster_id:
+											posterAttachment.id,
+									},
 								},
-							} );
+								abortController.signal
+							);
 						},
 						additionalData: {
 							// Reminder: Parent post ID might not be set, depending on context,
@@ -846,6 +867,7 @@ export function completeItem( id: QueueItemId ) {
 						mediaSourceTerms: [ 'poster-generation' ],
 						blurHash: item.blurHash,
 						dominantColor: item.dominantColor,
+						abortController,
 					} );
 				}
 			} catch ( err ) {
@@ -882,6 +904,7 @@ export function completeItem( id: QueueItemId ) {
 						image_size: 'full',
 					},
 					transcode: [ TranscodingType.Image ],
+					parentId: item.id,
 				} );
 			}
 
@@ -901,6 +924,7 @@ export function completeItem( id: QueueItemId ) {
 							item.onChange?.( [ updatedAttachment ] );
 						},
 						batchId,
+						parentId: item.id,
 						additionalData: {
 							// Sideloading does not use the parent post ID but the
 							// attachment ID as the image sizes need to be added to it.
@@ -924,7 +948,7 @@ export function completeItem( id: QueueItemId ) {
 				.get( PREFERENCES_NAME, 'keepOriginal' );
 
 			if (
-				! item.isSideload &&
+				! item.parentId &&
 				item.file instanceof ImageFile &&
 				item.file.wasResized &&
 				keepOriginal
@@ -1010,11 +1034,45 @@ export function grantApproval( id: number ) {
 	};
 }
 
-export function cancelItem( id: QueueItemId, error: Error ): CancelAction {
-	return {
-		type: Type.Cancel,
-		id,
-		error,
+export function cancelItem( id: QueueItemId, error: Error ) {
+	return async ( {
+		select,
+		dispatch,
+		registry,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+		registry: WPDataRegistry;
+	} ) => {
+		const item = select.getItem( id );
+
+		if ( ! item ) {
+			/*
+			 * Do nothing if item has already been removed.
+			 * This can happen if an upload is cancelled manually
+			 * while transcoding with vips is still in progress.
+			 * Then, cancelItem() is once invoked manually and once
+			 * by the error handler in optimizeImageItem().
+			 */
+			return;
+		}
+
+		const imageLibrary: ImageLibrary =
+			registry
+				.select( preferencesStore )
+				.get( PREFERENCES_NAME, 'imageLibrary' ) || 'vips';
+
+		if ( 'vips' === imageLibrary ) {
+			await vipsCancelOperations( id );
+		}
+
+		item.abortController?.abort();
+
+		dispatch( {
+			type: Type.Cancel,
+			id,
+			error,
+		} );
 	};
 }
 
@@ -1175,6 +1233,7 @@ export function optimizeImageItem(
 						);
 					} else {
 						file = await vipsCompressImage(
+							item.id,
 							item.file,
 							outputQuality / 100
 						);
@@ -1190,6 +1249,7 @@ export function optimizeImageItem(
 						);
 					} else {
 						file = await vipsConvertImageFormat(
+							item.id,
 							item.file,
 							'image/webp',
 							outputQuality / 100
@@ -1201,6 +1261,7 @@ export function optimizeImageItem(
 					// No browsers support AVIF in HTMLCanvasElement.toBlob() yet, so always use vips.
 					// See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
 					file = await vipsConvertImageFormat(
+						item.id,
 						item.file,
 						'image/avif',
 						outputQuality / 100
@@ -1211,6 +1272,7 @@ export function optimizeImageItem(
 					// Browsers don't typically support image/gif in HTMLCanvasElement.toBlob() yet, so always use vips.
 					// See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
 					file = await vipsConvertImageFormat(
+						item.id,
 						item.file,
 						'image/avif',
 						outputQuality / 100
@@ -1227,6 +1289,7 @@ export function optimizeImageItem(
 						);
 					} else {
 						file = await vipsConvertImageFormat(
+							item.id,
 							item.file,
 							`image/${ outputFormat }`,
 							outputQuality / 100
@@ -1561,7 +1624,7 @@ export function resizeCropItem( id: QueueItemId ) {
 				.select( preferencesStore )
 				.get( PREFERENCES_NAME, 'imageLibrary' ) || 'vips';
 
-		const addSuffix = Boolean( item.isSideload );
+		const addSuffix = Boolean( item.parentId );
 
 		const stop = start(
 			`Resize Item: ${ item.file.name } | ${ imageLibrary } | ${ thumbnailGeneration } | ${ item.resize.width }x${ item.resize.height }`
@@ -1578,6 +1641,7 @@ export function resizeCropItem( id: QueueItemId ) {
 				);
 			} else {
 				file = await vipsResizeImage(
+					item.id,
 					item.file,
 					item.resize,
 					smartCrop,
@@ -1721,7 +1785,8 @@ export function uploadItem( id: QueueItemId ) {
 		try {
 			const attachment = await uploadToServer(
 				item.file,
-				additionalData
+				additionalData,
+				item.abortController?.signal
 			);
 
 			// TODO: Check if a poster happened to be generated on the server side already (check attachment.posterId !== 0).
@@ -1776,7 +1841,8 @@ export function sideloadItem( id: QueueItemId ) {
 			const attachment = await sideloadFile(
 				item.file,
 				post,
-				additionalData
+				additionalData,
+				item.abortController?.signal
 			);
 
 			dispatch.finishSideloading( id, attachment );

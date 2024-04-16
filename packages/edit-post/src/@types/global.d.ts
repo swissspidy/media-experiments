@@ -3,7 +3,7 @@ declare global {
 		mediaExperiments: {
 			bigImageSizeThreshold: number;
 			bigVideoSizeThreshold: number;
-			defaultImageOutputFormats: Record<string, string>;
+			defaultImageOutputFormats: Record< string, string >;
 		};
 	}
 

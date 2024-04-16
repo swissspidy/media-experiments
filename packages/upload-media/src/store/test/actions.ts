@@ -21,6 +21,10 @@ jest.mock( '@mexp/pdf', () => ( {
 	getImageFromPdf: jest.fn( () => mockImageFromPdf ),
 } ) );
 
+jest.mock( '../utils/vips', () => ( {
+	vipsCancelOperations: jest.fn( () => true ),
+} ) );
+
 function createRegistryWithStores() {
 	// Create a registry and register used stores.
 	const registry = createRegistry();

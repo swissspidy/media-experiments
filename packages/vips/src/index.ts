@@ -5,9 +5,9 @@ import { getExtensionFromMimeType } from '@mexp/media-utils';
 
 import type {
 	ImageSizeCrop,
+	LoadOptions,
 	SaveOptions,
 	ThumbnailOptions,
-	LoadOptions,
 } from './types';
 
 type EmscriptenModule = {
@@ -18,6 +18,14 @@ type EmscriptenModule = {
 let cleanup: () => void;
 
 let vipsInstance: typeof VipsInstance;
+
+type ItemId = string;
+
+const inProgressOperations = new Set< ItemId >();
+
+export async function cancelOperations( id: ItemId ) {
+	return inProgressOperations.delete( id );
+}
 
 async function getVips(): Promise< typeof VipsInstance > {
 	if ( vipsInstance ) {
@@ -64,6 +72,7 @@ function supportsAnimation( type: string ): type is 'image/webp' | 'image/gif' {
 }
 
 export async function convertImageFormat(
+	id: ItemId,
 	buffer: ArrayBuffer,
 	inputType: string,
 	outputType: string,
@@ -74,6 +83,8 @@ export async function convertImageFormat(
 	if ( ! ext ) {
 		throw new Error( 'Unsupported file type' );
 	}
+
+	inProgressOperations.add( id );
 
 	let strOptions = '';
 	const loadOptions: LoadOptions< typeof inputType > = {};
@@ -86,6 +97,13 @@ export async function convertImageFormat(
 
 	const vips = await getVips();
 	const image = vips.Image.newFromBuffer( buffer, strOptions, loadOptions );
+
+	// TODO: Report progress, see https://github.com/swissspidy/media-experiments/issues/327.
+	image.onProgress = () => {
+		if ( ! inProgressOperations.has( id ) ) {
+			image.kill = true;
+		}
+	};
 
 	const saveOptions: SaveOptions< typeof outputType > = {};
 
@@ -119,6 +137,7 @@ function isFileTypeSupported(
 }
 
 export async function compressImage(
+	id: ItemId,
 	buffer: ArrayBuffer,
 	type: string,
 	quality = 0.82
@@ -126,12 +145,13 @@ export async function compressImage(
 	if ( ! isFileTypeSupported( type ) ) {
 		throw new Error( 'Unsupported file type' );
 	}
-	return convertImageFormat( buffer, type, type, quality );
+	return convertImageFormat( id, buffer, type, type, quality );
 }
 
 /**
  * Resizes an image using vips.
  *
+ * @param id        Item ID.
  * @param buffer    Original file object.
  * @param type      Mime type.
  * @param resize    Resize options.
@@ -139,6 +159,7 @@ export async function compressImage(
  * @return Processed file object.
  */
 export async function resizeImage(
+	id: ItemId,
 	buffer: ArrayBuffer,
 	type: string,
 	resize: ImageSizeCrop,
@@ -149,6 +170,8 @@ export async function resizeImage(
 	if ( ! ext ) {
 		throw new Error( 'Unsupported file type' );
 	}
+
+	inProgressOperations.add( id );
 
 	const vips = await getVips();
 	const thumbnailOptions: ThumbnailOptions = {
@@ -164,7 +187,17 @@ export async function resizeImage(
 		( loadOptions as LoadOptions< typeof type > ).n = -1;
 	}
 
+	// TODO: Report progress, see https://github.com/swissspidy/media-experiments/issues/327.
+	const onProgress = () => {
+		if ( ! inProgressOperations.has( id ) ) {
+			image.kill = true;
+		}
+	};
+
 	let image = vips.Image.newFromBuffer( buffer, strOptions, loadOptions );
+
+	image.onProgress = onProgress;
+
 	const { width } = image;
 
 	// Using getTypeof acts an isset check.
@@ -195,6 +228,8 @@ export async function resizeImage(
 			thumbnailOptions
 		);
 
+		image.onProgress = onProgress;
+
 		newHeight = image.height / numberOfFrames;
 	} else if ( true === resize.crop ) {
 		thumbnailOptions.crop = smartCrop ? 'attention' : 'centre';
@@ -204,6 +239,8 @@ export async function resizeImage(
 			resizeWidth,
 			thumbnailOptions
 		);
+
+		image.onProgress = onProgress;
 
 		newHeight = image.height;
 	} else {
@@ -236,6 +273,8 @@ export async function resizeImage(
 			thumbnailOptions
 		);
 
+		image.onProgress = onProgress;
+
 		let left = 0;
 		if ( 'center' === resize.crop[ 0 ] ) {
 			left = ( image.width - resize.width ) / 2;
@@ -251,6 +290,8 @@ export async function resizeImage(
 		}
 
 		image = image.crop( left, top, resize.width, resize.height );
+
+		image.onProgress = onProgress;
 
 		newHeight = image.height;
 	}

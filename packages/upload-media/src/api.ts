@@ -9,9 +9,14 @@ import { transformAttachment } from './utils';
 
 export async function uploadToServer(
 	file: File,
-	additionalData: CreateRestAttachment = {}
+	additionalData: CreateRestAttachment = {},
+	signal?: AbortSignal
 ) {
-	const savedMedia = await createMediaFromFile( file, additionalData );
+	const savedMedia = await createMediaFromFile(
+		file,
+		additionalData,
+		signal
+	);
 	return transformAttachment( savedMedia );
 }
 
@@ -20,12 +25,14 @@ export async function uploadToServer(
  *
  * @param file           Media File to Save.
  * @param additionalData Additional data to include in the request.
+ * @param signal         Abort signal.
  *
  * @return The saved attachment.
  */
 async function createMediaFromFile(
 	file: File,
-	additionalData: CreateRestAttachment = {}
+	additionalData: CreateRestAttachment = {},
+	signal?: AbortSignal
 ) {
 	// Create upload payload.
 	const data = new FormData();
@@ -42,6 +49,7 @@ async function createMediaFromFile(
 		path: '/wp/v2/media',
 		body: data,
 		method: 'POST',
+		signal,
 	} );
 }
 
@@ -51,13 +59,15 @@ async function createMediaFromFile(
  * @param file           Media File to Save.
  * @param attachmentId   Parent attachment ID.
  * @param additionalData Additional data to include in the request.
+ * @param signal         Abort signal.
  *
  * @return The saved attachment.
  */
 export async function sideloadFile(
 	file: File,
 	attachmentId: RestAttachment[ 'id' ],
-	additionalData: CreateSideloadFile = {}
+	additionalData: CreateSideloadFile = {},
+	signal?: AbortSignal
 ) {
 	// Create upload payload.
 	const data = new FormData();
@@ -75,6 +85,7 @@ export async function sideloadFile(
 			path: `/wp/v2/media/${ attachmentId }/sideload`,
 			body: data,
 			method: 'POST',
+			signal,
 		} )
 	);
 }
@@ -82,17 +93,20 @@ export async function sideloadFile(
 /**
  * Update an existing attachment in the database.
  *
- * @param id   Attachment ID.
- * @param data Attachment data.
+ * @param id     Attachment ID.
+ * @param data   Attachment data.
+ * @param signal Abort signal.
  */
 export function updateMediaItem(
 	id: RestAttachment[ 'id' ],
-	data: Partial< RestAttachment >
+	data: Partial< RestAttachment >,
+	signal?: AbortSignal
 ) {
 	return apiFetch< RestAttachment >( {
 		path: `/wp/v2/media/${ id }`,
 		data,
 		method: 'POST',
+		signal,
 	} );
 }
 

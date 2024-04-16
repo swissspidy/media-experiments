@@ -38,7 +38,7 @@ describe( 'resizeImage', () => {
 		} );
 		const buffer = await jpegFile.arrayBuffer();
 
-		await resizeImage( buffer, 'image/jpeg', {
+		await resizeImage( 'itemId', buffer, 'image/jpeg', {
 			width: 100,
 			height: 100,
 		} );
@@ -57,7 +57,7 @@ describe( 'resizeImage', () => {
 		} );
 		const buffer = await jpegFile.arrayBuffer();
 
-		await resizeImage( buffer, 'image/jpeg', {
+		await resizeImage( 'itemId', buffer, 'image/jpeg', {
 			width: 100,
 			height: 0,
 		} );
@@ -76,7 +76,7 @@ describe( 'resizeImage', () => {
 		} );
 		const buffer = await jpegFile.arrayBuffer();
 
-		await resizeImage( buffer, 'image/jpeg', {
+		await resizeImage( 'itemId', buffer, 'image/jpeg', {
 			width: 100,
 			height: 100,
 			crop: true,
@@ -97,7 +97,7 @@ describe( 'resizeImage', () => {
 		} );
 		const buffer = await jpegFile.arrayBuffer();
 
-		await resizeImage( buffer, 'image/jpeg', {
+		await resizeImage( 'itemId', buffer, 'image/jpeg', {
 			width: 100,
 			height: 0,
 			crop: true,
@@ -119,6 +119,7 @@ describe( 'resizeImage', () => {
 		const buffer = await jpegFile.arrayBuffer();
 
 		await resizeImage(
+			'itemId',
 			buffer,
 			'image/jpeg',
 			{
@@ -143,6 +144,7 @@ describe( 'resizeImage', () => {
 		const buffer = await jpegFile.arrayBuffer();
 
 		await resizeImage(
+			'itemId',
 			buffer,
 			'image/jpeg',
 			{
@@ -207,7 +209,7 @@ describe( 'resizeImage', () => {
 		} );
 		const buffer = await jpegFile.arrayBuffer();
 
-		await resizeImage( buffer, 'image/jpeg', {
+		await resizeImage( 'itemId', buffer, 'image/jpeg', {
 			width: 25,
 			height: 25,
 			crop,
