@@ -1,4 +1,5 @@
 import { test, expect } from '../fixtures';
+import type { RestAttachment } from '@mexp/upload-media';
 
 test.describe( 'Animated GIFs', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
@@ -34,6 +35,9 @@ test.describe( 'Animated GIFs', () => {
 					'imageLibrary',
 					'browser'
 				);
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set( 'media-experiments/preferences', 'gif_convert', true );
 		} );
 
 		await editor.insertBlock( { name: 'core/image' } );
@@ -108,5 +112,96 @@ test.describe( 'Animated GIFs', () => {
 
 		await expect( settingsPanel.getByLabel( '#7a6e96' ) ).toBeVisible();
 		await expect( page.locator( 'css=[data-blurhash]' ) ).toBeVisible();
+	} );
+
+	test.only( 'maintains animation in thumbnails', async ( {
+		admin,
+		page,
+		editor,
+		mediaUtils,
+		browserName,
+		requestUtils,
+	} ) => {
+		test.skip(
+			browserName === 'webkit',
+			'Needs some investigation as to why conversion is not working on CI'
+		);
+
+		await admin.createNewPost();
+
+		await page.evaluate( () => {
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
+					'gif_outputFormat',
+					'gif'
+				);
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set( 'media-experiments/preferences', 'imageLibrary', 'vips' );
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set( 'media-experiments/preferences', 'gif_convert', false );
+		} );
+
+		await editor.insertBlock( { name: 'core/image' } );
+
+		const imageBlock = editor.canvas.locator(
+			'role=document[name="Block: Image"i]'
+		);
+		await expect( imageBlock ).toBeVisible();
+
+		await mediaUtils.upload(
+			imageBlock.locator( 'data-testid=form-file-upload-input' ),
+			'nyancat-256x256.gif'
+		);
+
+		await page.waitForFunction(
+			() =>
+				window.wp.data.select( 'media-experiments/upload' ).getItems()
+					.length === 0,
+			undefined,
+			{
+				timeout: 20000, // Transcoding might take longer
+			}
+		);
+
+		const imageUrl = await page.evaluate(
+			() =>
+				window.wp.data.select( 'core/block-editor' ).getSelectedBlock()
+					?.attributes?.url
+		);
+
+		// See https://github.com/swissspidy/media-experiments/issues/321.
+		expect( imageUrl ).toMatch( /\.gif$/ );
+
+		const imageId = await page.evaluate(
+			() =>
+				window.wp.data.select( 'core/block-editor' ).getSelectedBlock()
+					?.attributes?.id
+		);
+
+		const media: RestAttachment = await requestUtils.rest( {
+			method: 'GET',
+			path: `/wp/v2/media/${ imageId }`,
+		} );
+
+		// @ts-ignore
+		for ( const size in media.media_details.sizes ) {
+			const isAnimated = await mediaUtils.isAnimatedGif(
+				await mediaUtils.getImageBuffer(
+					// @ts-ignore
+					media.media_details.sizes[ size ].source_url
+				)
+			);
+
+			// Custom crops can't be animated, but resized images should be.
+			if ( [ 'full' ].includes( size ) ) {
+				expect( isAnimated ).toBe( true );
+			} else {
+				expect( isAnimated ).toBe( false );
+			}
+		}
 	} );
 } );

@@ -43,4 +43,48 @@ export class MediaUtils {
 		const response = await this.page.request.get( url );
 		return response.body();
 	}
+
+	/**
+	 * Whether an image is an animated GIF.
+	 *
+	 * Loosely based on https://www.npmjs.com/package/animated-gif-detector (MIT-compatible ISC license)
+	 *
+	 * See http://www.matthewflickinger.com/lab/whatsinagif/bits_and_bytes.asp for how GIFs are structured.
+	 *
+	 * @param buffer The GIF ArrayBuffer instance.
+	 * @return Whether this is an animated GIF or not.
+	 */
+	async isAnimatedGif( buffer: ArrayBuffer ) {
+		// See http://www.matthewflickinger.com/lab/whatsinagif/bits_and_bytes.asp.
+		const BLOCK_TERMINATOR = 0x00;
+		const EXTENSION_INTRODUCER = 0x21;
+		const GRAPHIC_CONTROL_LABEL = 0xf9;
+
+		const arr = new Uint8Array( buffer );
+		let frames = 0;
+
+		// Make sure it's a GIF and skip early if it isn't.
+		// 47="G", 49="I", 46="F", 38="8"
+		if (
+			arr[ 0 ] !== 0x47 ||
+			arr[ 1 ] !== 0x49 ||
+			arr[ 2 ] !== 0x46 ||
+			arr[ 3 ] !== 0x38
+		) {
+			return false;
+		}
+
+		for ( let i = 4; i < arr.length; i++ ) {
+			// We reached a new block, increase frame count.
+			if (
+				arr[ i ] === BLOCK_TERMINATOR &&
+				arr[ i + 1 ] === EXTENSION_INTRODUCER &&
+				arr[ i + 2 ] === GRAPHIC_CONTROL_LABEL
+			) {
+				frames++;
+			}
+		}
+
+		return frames > 1;
+	}
 }
