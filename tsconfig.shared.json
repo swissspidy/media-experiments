@@ -17,7 +17,7 @@
 		"noImplicitReturns": true,
 		"noFallthroughCasesInSwitch": true,
 		"verbatimModuleSyntax": true,
-		"moduleResolution": "node",
+		"moduleResolution": "bundler",
 		"esModuleInterop": false,
 		"resolveJsonModule": true,
 		"allowUnreachableCode": false,
