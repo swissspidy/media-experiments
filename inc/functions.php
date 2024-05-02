@@ -1054,12 +1054,9 @@ function deactivate_plugin(): void {
 }
 
 /**
- * Filters the REST API response.
+ * Filters REST API responses to add Server-Timing header.
  *
- * Allows modification of the response before returning.
- *
- * @since 4.4.0
- * @since 4.5.0 Applied to embedded responses.
+ * @codeCoverageIgnore
  *
  * @param WP_REST_Response|WP_Error $response Result to send to the client. Usually a `WP_REST_Response`.
  * @return WP_REST_Response|WP_Error Filtered response.
