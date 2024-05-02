@@ -35,6 +35,7 @@ function set_up_cross_origin_isolation_editor( WP_Screen $screen ): void {
 /**
  * Returns the given user's persisted media preferences.
  *
+ * @param int $user_id User ID.
  * @return array<string, mixed>
  */
 function get_user_media_preferences( int $user_id ) {
