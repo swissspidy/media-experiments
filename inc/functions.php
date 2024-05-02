@@ -40,6 +40,10 @@ function set_up_cross_origin_isolation_editor( WP_Screen $screen ): void {
  */
 function get_user_media_preferences( int $user_id ) {
 	$preferences = get_user_meta( $user_id, 'wp_persisted_preferences', true );
+	if ( ! $preferences ) {
+		return [];
+	}
+
 	return (array) $preferences['media-experiments/preferences'] ?? [];
 }
 
