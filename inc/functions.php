@@ -33,6 +33,38 @@ function set_up_cross_origin_isolation_editor( WP_Screen $screen ): void {
 }
 
 /**
+ * Returns the given user's persisted media preferences.
+ *
+ * @return array<string, mixed>
+ */
+function get_user_media_preferences( int $user_id ) {
+	$preferences = get_user_meta( $user_id, 'wp_persisted_preferences', true );
+	return (array) $preferences['media-experiments/preferences'] ?? [];
+}
+
+/**
+ * Filters the big image size threshold setting based on user preferences.
+ *
+ * @param int $threshold The threshold value in pixels.
+ * @return int The filtered threshold value.
+ */
+function filter_big_image_size_threshold( $threshold ) {
+	$user_id = get_current_user_id();
+
+	if ( ! $user_id ) {
+		return $threshold;
+	}
+
+	$preferences = get_user_media_preferences( $user_id );
+
+	if ( isset( $preferences['bigImageSizeThreshold'] ) ) {
+		return (int) $preferences['bigImageSizeThreshold'];
+	}
+
+	return $threshold;
+}
+
+/**
  * Register assets used by editor integration and others.
  *
  * @return void
@@ -70,7 +102,7 @@ function register_assets(): void {
 	 *
 	 * Analogous to {@see 'big_image_size_threshold'} for images.
 	 *
-	 * @param int    $threshold     The threshold value in pixels. Default 1920.
+	 * @param int $threshold The threshold value in pixels. Default 1920.
 	 */
 	$video_size_threshold = (int) apply_filters( 'mexp_big_video_size_threshold', 1920 );
 
