@@ -40,6 +40,6 @@
 		"@wordpress/icons": "^9.38.0",
 		"@wordpress/notices": "^4.1.0",
 		"qrcode.react": "^3.1.0",
-		"short-unique-id": "^5.0.3"
+		"short-unique-id": "^5.2.0"
 	}
 }
