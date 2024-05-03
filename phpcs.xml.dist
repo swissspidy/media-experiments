@@ -23,6 +23,10 @@
 		</properties>
 	</rule>
 
+	<rule ref="WordPress.Files.FileName">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
 	<!-- We only support the latest major WordPress release. -->
 	<config name="minimum_supported_wp_version" value="6.4" />
 	<rule ref="WordPress.WP.DeprecatedFunctions" />
