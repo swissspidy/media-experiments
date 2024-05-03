@@ -117,7 +117,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		$params['upload_request'] = [
 			'default'     => null,
-			'description' => __( 'Limit result set to attachments associated with a given attachment request.', 'media-experiments' ),
+			'description' => __( 'Limit result set to attachments associated with a given upload request.', 'media-experiments' ),
 			'type'        => 'string',
 		];
 
@@ -207,7 +207,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 				$registered_sizes = wp_get_registered_image_subsizes();
 				$merged_sizes     = array_keys( array_intersect_key( $registered_sizes, array_flip( $fallback_sizes ) ) );
 
-				$missing_image_sizes         = array_diff( $merged_sizes, $metadata['sizes'] );
+				$missing_image_sizes         = array_diff( $merged_sizes, array_keys( $metadata['sizes'] ) );
 				$data['missing_image_sizes'] = $missing_image_sizes;
 			}
 		}
@@ -607,14 +607,18 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		wp_update_attachment_metadata( $attachment_id, $metadata );
 
-		$response = $this->prepare_item_for_response(
-			get_post( $attachment_id ),
-			// TODO: Maybe forward context or _fields param?
-			new WP_REST_Request(
-				WP_REST_Server::READABLE,
-				rest_url( sprintf( '%s/%s/%d', $this->namespace, $this->rest_base, $attachment_id ) )
-			)
+		$response_request = new WP_REST_Request(
+			WP_REST_Server::READABLE,
+			rest_url( sprintf( '%s/%s/%d', $this->namespace, $this->rest_base, $attachment_id ) )
 		);
+
+		$response_request->set_param( 'context', 'edit' );
+
+		if ( isset( $request['_fields'] ) ) {
+			$response_request['_fields'] = $request['_fields'];
+		}
+
+		$response = $this->prepare_item_for_response( get_post( $attachment_id ), $response_request );
 
 		$response->set_status( 201 );
 		$response->header( 'Location', rest_url( sprintf( '%s/%s/%d', $this->namespace, $this->rest_base, $attachment_id ) ) );

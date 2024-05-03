@@ -13,12 +13,17 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 	/**
 	 * @var int Administrator ID.
 	 */
-	protected static $admin_id;
+	protected static int $admin_id;
 
 	/**
 	 * @var string Image file path.
 	 */
 	private static string $image_file;
+
+	/**
+	 * @var string Image file path.
+	 */
+	private static string $image_file_2;
 
 	/**
 	 * @var string PDF file path.
@@ -41,9 +46,14 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 			copy( DIR_TESTDATA . '/images/canola.jpg', self::$image_file );
 		}
 
+		self::$image_file_2 = get_temp_dir() . 'gradient-square.jpg';
+		if ( ! file_exists( self::$image_file_2 ) ) {
+			copy( DIR_TESTDATA . '/images/gradient-square.jpg', self::$image_file_2 );
+		}
+
 		self::$pdf_file = get_temp_dir() . 'test-alpha.pdf';
-		if ( ! file_exists( self::$image_file ) ) {
-			copy( DIR_TESTDATA . '/images/test-alpha.pdf', self::$image_file );
+		if ( ! file_exists( self::$pdf_file ) ) {
+			copy( DIR_TESTDATA . '/images/test-alpha.pdf', self::$pdf_file );
 		}
 	}
 
@@ -95,6 +105,7 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 	 *
 	 * @covers ::create_item
 	 * @covers ::create_item_permissions_check
+	 * @covers ::get_upload_request_post
 	 */
 	public function test_create_item() {
 		wp_set_current_user( self::$admin_id );
@@ -123,6 +134,8 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 	 *
 	 * @covers ::create_item
 	 * @covers ::create_item_permissions_check
+	 * @covers ::is_valid_upload_request
+	 * @covers ::get_upload_request_post
 	 */
 	public function test_create_item_for_upload_request() {
 		$this->markTestIncomplete( 'TODO: Implement' );
@@ -145,8 +158,7 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 			)
 		);
 
-		$attachment = get_post( $attachment_id );
-		$request    = new WP_REST_Request( 'GET', sprintf( '/wp/v2/media/%d', $attachment_id ) );
+		$request = new WP_REST_Request( 'GET', sprintf( '/wp/v2/media/%d', $attachment_id ) );
 		$request->set_param( 'context', 'edit' );
 
 		$response = rest_get_server()->dispatch( $request );
@@ -154,5 +166,59 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 
 		$this->assertArrayHasKey( 'missing_image_sizes', $data );
 		$this->assertNotEmpty( $data['missing_image_sizes'] );
+	}
+
+	/**
+	 * @covers ::prepare_items_query
+	 * @covers ::get_upload_request_post
+	 */
+	public function test_get_items_for_upload_request() {
+		$this->markTestIncomplete( 'TODO: Implement' );
+	}
+
+	/**
+	 * @covers ::sideload_item
+	 * @covers ::sideload_item_permissions_check
+	 */
+	public function test_sideload_item() {
+		wp_set_current_user( self::$admin_id );
+
+		$attachment_id = self::factory()->attachment->create_object(
+			self::$image_file,
+			0,
+			array(
+				'post_mime_type' => 'image/jpeg',
+				'post_excerpt'   => 'A sample caption',
+			)
+		);
+
+		wp_update_attachment_metadata( $attachment_id, wp_generate_attachment_metadata( $attachment_id, self::$image_file ) );
+
+		$request = new WP_REST_Request( 'POST', "/wp/v2/media/$attachment_id/sideload" );
+		$request->set_header( 'Content-Type', 'image/jpeg' );
+		$request->set_header( 'Content-Disposition', 'attachment; filename=gradient-square.jpg' );
+		$request->set_param( 'image_size', 'medium' );
+
+		$request->set_body( file_get_contents( self::$image_file_2 ) );
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 201, $response->get_status() );
+		$this->assertSame( 'image', $data['media_type'] );
+		$this->assertArrayHasKey( 'missing_image_sizes', $data );
+		$this->assertEmpty( $data['missing_image_sizes'] );
+		$this->assertArrayHasKey( 'media_details', $data );
+		$this->assertArrayHasKey( 'sizes', $data['media_details'] );
+		$this->assertArrayHasKey( 'medium', $data['media_details']['sizes'] );
+		$this->assertArrayHasKey( 'file', $data['media_details']['sizes']['medium'] );
+		$this->assertSame( 'gradient-square.jpg', $data['media_details']['sizes']['medium']['file'] );
+	}
+
+	/**
+	 * @covers ::sideload_item
+	 * @covers ::sideload_item_permissions_check
+	 */
+	public function test_sideload_item_for_upload_request() {
+		$this->markTestIncomplete( 'TODO: Implement' );
 	}
 }
