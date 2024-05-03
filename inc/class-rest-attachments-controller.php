@@ -187,6 +187,10 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 				$metadata = wp_get_attachment_metadata( $item->ID, true );
 
+				if ( ! is_array( $metadata ) ) {
+					$metadata = [];
+				}
+
 				$metadata['sizes'] = $metadata['sizes'] ?? [];
 
 				$fallback_sizes = array(

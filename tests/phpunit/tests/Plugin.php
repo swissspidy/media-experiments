@@ -1,17 +1,22 @@
 <?php
 
+namespace MediaExperiments\Tests;
+
 use MediaExperiments\REST_Attachments_Controller;
+use WP_UnitTestCase;
 use function MediaExperiments\delete_old_upload_requests;
+use function MediaExperiments\get_all_image_sizes;
+use function MediaExperiments\get_default_image_output_formats;
 use function MediaExperiments\register_attachment_post_meta;
 use function MediaExperiments\register_media_source_taxonomy;
 use function MediaExperiments\register_upload_request_post_type;
 
-class Plugin_Test extends WP_UnitTestCase {
+class Test_Plugin extends WP_UnitTestCase {
 	/**
 	 * @covers \MediaExperiments\get_all_image_sizes
 	 */
 	public function test_get_all_image_sizes() {
-		$sizes = MediaExperiments\get_all_image_sizes();
+		$sizes = get_all_image_sizes();
 		$this->assertNotEmpty( $sizes );
 		foreach ( $sizes as $size ) {
 			$this->assertIsInt( $size['width'] );
@@ -98,7 +103,7 @@ class Plugin_Test extends WP_UnitTestCase {
 	 * @covers \MediaExperiments\get_default_image_output_formats
 	 */
 	public function test_get_default_image_output_formats() {
-		$input_output_formats = MediaExperiments\get_default_image_output_formats();
+		$input_output_formats = get_default_image_output_formats();
 		$this->assertEmpty( $input_output_formats );
 	}
 }
