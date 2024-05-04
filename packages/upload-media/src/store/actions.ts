@@ -883,6 +883,7 @@ export function completeItem( id: QueueItemId ) {
 		// Works for images and PDF posters.
 
 		if (
+			! item.parentId &&
 			attachment.missingImageSizes &&
 			'server' !== thumbnailGeneration
 		) {
