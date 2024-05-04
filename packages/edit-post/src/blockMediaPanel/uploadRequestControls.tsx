@@ -17,6 +17,7 @@ import { store as interfaceStore } from '@wordpress/interface';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as editorStore } from '@wordpress/editor';
 import { store as noticesStore } from '@wordpress/notices';
+import apiFetch from '@wordpress/api-fetch';
 
 import type { RestAttachment, Attachment } from '@mexp/upload-media';
 import { transformAttachment } from '@mexp/upload-media';
@@ -34,7 +35,7 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 
 	const { openModal, closeModal } = useDispatch( interfaceStore );
 	// @ts-ignore -- invalidateResolution is not yet exposed in GB types.
-	const { saveEntityRecord, deleteEntityRecord, invalidateResolution } =
+	const { deleteEntityRecord, invalidateResolution } =
 		useDispatch( coreStore );
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( noticesStore );
@@ -161,14 +162,15 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 			/* webpackChunkName: 'upload-requests-modal' */ '@mexp/upload-requests'
 		);
 
-		// TODO: Do not use saveEntityRecord as it causes another GET request
-		//       to /wp/v2/upload-requests/ which has not been implemented.
-		// Maybe just use apiFetch directly?
 		setUploadRequest(
-			await saveEntityRecord( 'postType', 'mexp-upload-request', {
-				slug: getUniqueId(),
-				status: 'publish',
-				parent: currentPostId,
+			await apiFetch< Post >( {
+				path: `/wp/v2/upload-requests`,
+				data: {
+					slug: getUniqueId(),
+					status: 'publish',
+					parent: currentPostId,
+				},
+				method: 'POST',
 			} )
 		);
 	}
