@@ -2,6 +2,7 @@
 
 namespace MediaExperiments\Tests;
 
+use MediaExperiments\REST_Upload_Requests_Controller;
 use WP_REST_Request;
 use WP_Test_REST_Post_Type_Controller_Testcase;
 use WP_UnitTest_Factory;
@@ -86,6 +87,19 @@ class Test_REST_Upload_Requests_Controller extends WP_Test_REST_Post_Type_Contro
 		$response   = rest_get_server()->dispatch( $request );
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
+		$this->assertCount( 8, $properties );
+		$this->assertArrayHasKey( 'date', $properties );
+		$this->assertArrayHasKey( 'date_gmt', $properties );
+		$this->assertArrayHasKey( 'link', $properties );
+		$this->assertArrayHasKey( 'slug', $properties );
+		$this->assertArrayHasKey( 'status', $properties );
+		$this->assertArrayHasKey( 'parent', $properties );
+		$this->assertArrayHasKey( 'author', $properties );
+		$this->assertArrayHasKey( 'meta', $properties );
+
+		$controller = new REST_Upload_Requests_Controller( 'mexp-upload-request' );
+		$schema     = $controller->get_item_schema();
+		$properties = $schema['properties'];
 		$this->assertCount( 8, $properties );
 		$this->assertArrayHasKey( 'date', $properties );
 		$this->assertArrayHasKey( 'date_gmt', $properties );

@@ -976,6 +976,8 @@ function filter_rest_route_for_post_for_upload_requests( string $route, WP_Post 
 /**
  * Filters the path of the queried template for single upload requests.
  *
+ * @codeCoverageIgnore
+ *
  * @param string $template Template path.
  * @return string Filtered template path.
  */

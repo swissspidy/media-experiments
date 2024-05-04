@@ -5,13 +5,41 @@ namespace MediaExperiments\Tests;
 use MediaExperiments\REST_Attachments_Controller;
 use WP_UnitTestCase;
 use function MediaExperiments\delete_old_upload_requests;
+use function MediaExperiments\filter_attachment_post_type_args;
 use function MediaExperiments\get_all_image_sizes;
+use function MediaExperiments\get_attachment_filesize;
 use function MediaExperiments\get_default_image_output_formats;
 use function MediaExperiments\register_attachment_post_meta;
 use function MediaExperiments\register_media_source_taxonomy;
 use function MediaExperiments\register_upload_request_post_type;
+use function MediaExperiments\rest_get_attachment_blurhash;
+use function MediaExperiments\rest_get_attachment_dominant_color;
+use function MediaExperiments\rest_get_attachment_filename;
+use function MediaExperiments\rest_get_attachment_filesize;
+use function MediaExperiments\rest_get_attachment_has_transparency;
+use function MediaExperiments\rest_get_attachment_is_muted;
 
 class Test_Plugin extends WP_UnitTestCase {
+	/**
+	 * @var string Image file path.
+	 */
+	private static string $image_file;
+
+	public function set_up() {
+		parent::set_up();
+
+		self::$image_file = get_temp_dir() . 'canola.jpg';
+		if ( ! file_exists( self::$image_file ) ) {
+			copy( DIR_TESTDATA . '/images/canola.jpg', self::$image_file );
+		}
+	}
+
+	public function tear_down() {
+		$this->remove_added_uploads();
+
+		parent::tear_down();
+	}
+
 	/**
 	 * @covers \MediaExperiments\get_all_image_sizes
 	 */
@@ -70,6 +98,15 @@ class Test_Plugin extends WP_UnitTestCase {
 	public function test_filter_attachment_post_type_args() {
 		$post_type_object = get_post_type_object( 'attachment' );
 		$this->assertInstanceOf( REST_Attachments_Controller::class, $post_type_object->get_rest_controller() );
+
+		$this->assertSame(
+			[ 'rest_controller_class' => REST_Attachments_Controller::class ],
+			filter_attachment_post_type_args( [], 'attachment' )
+		);
+		$this->assertSame(
+			[],
+			filter_attachment_post_type_args( [], 'post' )
+		);
 	}
 
 	/**
@@ -121,5 +158,80 @@ class Test_Plugin extends WP_UnitTestCase {
 
 		$actual = rest_get_route_for_post( $upload_request );
 		$this->assertSame( '/wp/v2/upload-requests/someslug', $actual );
+	}
+
+	/**
+	 * @covers \MediaExperiments\get_attachment_filesize
+	 */
+	public function test_get_attachment_filesize() {
+		$attachment_id = self::factory()->attachment->create_object(
+			self::$image_file,
+			0,
+			array(
+				'post_mime_type' => 'image/jpeg',
+				'post_excerpt'   => 'A sample caption',
+			)
+		);
+
+		$this->assertSame( wp_filesize( self::$image_file ), get_attachment_filesize( $attachment_id ) );
+	}
+	/**
+	 * @covers \MediaExperiments\rest_get_attachment_filesize
+	 */
+	public function test_rest_get_attachment_filesize() {
+		$attachment_id = self::factory()->attachment->create_object(
+			self::$image_file,
+			0,
+			array(
+				'post_mime_type' => 'image/jpeg',
+				'post_excerpt'   => 'A sample caption',
+			)
+		);
+
+		$this->assertSame( wp_filesize( self::$image_file ), rest_get_attachment_filesize( [ 'id' => $attachment_id ] ) );
+	}
+
+	/**
+	 * @covers \MediaExperiments\rest_get_attachment_filename
+	 */
+	public function test_rest_get_attachment_filename() {
+		$attachment_id = self::factory()->attachment->create_object(
+			self::$image_file,
+			0,
+			array(
+				'post_mime_type' => 'image/jpeg',
+				'post_excerpt'   => 'A sample caption',
+			)
+		);
+
+		$this->assertSame( 'canola.jpg', rest_get_attachment_filename( [ 'id' => $attachment_id ] ) );
+	}
+
+	/**
+	 * @covers \MediaExperiments\rest_get_attachment_blurhash
+	 */
+	public function test_rest_get_attachment_blurhash() {
+		$this->assertNull( rest_get_attachment_blurhash( [ 'id' => 0 ] ) );
+	}
+
+	/**
+	 * @covers \MediaExperiments\rest_get_attachment_dominant_color
+	 */
+	public function test_rest_get_attachment_dominant_color() {
+		$this->assertNull( rest_get_attachment_dominant_color( [ 'id' => 0 ] ) );
+	}
+
+	/**
+	 * @covers \MediaExperiments\rest_get_attachment_is_muted
+	 */
+	public function test_rest_get_attachment_is_muted() {
+		$this->assertFalse( rest_get_attachment_is_muted( [ 'id' => 0 ] ) );
+	}
+
+	/**
+	 * @covers \MediaExperiments\rest_get_attachment_has_transparency
+	 */
+	public function test_rest_get_attachment_has_transparency() {
+		$this->assertNull( rest_get_attachment_has_transparency( [ 'id' => 0 ] ) );
 	}
 }
