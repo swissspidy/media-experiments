@@ -957,6 +957,23 @@ function register_upload_request_post_type(): void {
 }
 
 /**
+ * Filters the REST API route for a post.
+
+ * @param string  $route The route path.
+ * @param WP_Post $post  The post object.
+ * @return string Filtered route path.
+ */
+function filter_rest_route_for_post_for_upload_requests( string $route, WP_Post $post ): string {
+	if ( 'mexp-upload-request' === $post->post_type ) {
+		$post_type_route = rest_get_route_for_post_type_items( $post->post_type );
+
+		return sprintf( '%s/%s', $post_type_route, $post->post_name );
+	}
+
+	return $route;
+}
+
+/**
  * Filters the path of the queried template for single upload requests.
  *
  * @param string $template Template path.

@@ -42,24 +42,20 @@ class REST_Upload_Requests_Controller extends WP_REST_Posts_Controller {
 			]
 		);
 
-		$get_item_args = [
-			'context' => $this->get_context_param( [ 'default' => 'view' ] ),
-		];
-
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<slug>[\w]+)',
 			[
+				[
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => [ $this, 'delete_item' ],
+					'permission_callback' => [ $this, 'delete_item_permissions_check' ],
+				],
 				'args'        => [
 					'slug' => [
 						'description' => __( 'Unique alphanumeric identifier for the upload request.' ),
 						'type'        => 'string',
 					],
-				],
-				[
-					'methods'             => WP_REST_Server::DELETABLE,
-					'callback'            => [ $this, 'delete_item' ],
-					'permission_callback' => [ $this, 'delete_item_permissions_check' ],
 				],
 				'allow_batch' => $this->allow_batch,
 				'schema'      => [ $this, 'get_public_item_schema' ],
@@ -93,35 +89,6 @@ class REST_Upload_Requests_Controller extends WP_REST_Posts_Controller {
 		}
 
 		return $posts[0];
-	}
-
-	/**
-	 * Retrieves a single post.
-	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
-	 * @phpstan-param WP_REST_Request<array{slug: string}> $request
-	 */
-	public function get_item( $request ) {
-		$post = $this->get_post( $request['slug'] );
-
-		if ( is_wp_error( $post ) ) {
-			return $post;
-		}
-
-		$data     = $this->prepare_item_for_response( $post, $request );
-		$response = rest_ensure_response( $data );
-
-		$post_type = get_post_type_object( $post->post_type );
-
-		if ( ! is_wp_error( $response ) && $post_type instanceof WP_Post_Type && is_post_type_viewable( $post_type ) ) {
-			$permalink = get_permalink( $post->ID );
-			if ( $permalink ) {
-				$response->link_header( 'alternate', $permalink, [ 'type' => 'text/html' ] );
-			}
-		}
-
-		return $response;
 	}
 
 	/**
@@ -189,39 +156,6 @@ class REST_Upload_Requests_Controller extends WP_REST_Posts_Controller {
 				'meta'     => $this->meta->get_field_schema(),
 			],
 		];
-
-		// Take a snapshot of which fields are in the schema pre-filtering.
-		$schema_fields = array_keys( $schema['properties'] );
-
-		/**
-		 * Filters the post's schema.
-		 *
-		 * The dynamic portion of the filter, `$this->post_type`, refers to the
-		 * post type slug for the controller.
-		 *
-		 * Possible hook names include:
-		 *
-		 *  - `rest_post_item_schema`
-		 *  - `rest_page_item_schema`
-		 *  - `rest_attachment_item_schema`
-		 *
-		 * @param array $schema Item schema data.
-		 */
-		$schema = apply_filters( "rest_{$this->post_type}_item_schema", $schema ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-
-		// Emit a _doing_it_wrong warning if user tries to add new properties using this filter.
-		$new_fields = array_diff( array_keys( $schema['properties'] ), $schema_fields );
-		if ( count( $new_fields ) > 0 ) {
-			_doing_it_wrong(
-				__METHOD__,
-				sprintf(
-				/* translators: %s: register_rest_field */
-					__( 'Please use %s to add new schema properties.' ),
-					'register_rest_field'
-				),
-				'5.4.0'
-			);
-		}
 
 		$this->schema = $schema;
 

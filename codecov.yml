@@ -31,10 +31,11 @@ comment: false
 
 # See https://docs.codecov.com/docs/ignoring-paths
 ignore:
+    - '**/*.svg'
     - 'media-experiments.php'
+    - 'inc/templates'
     - 'inc/class-blurhash.php'
     - 'inc/default-filters.php'
-    - '**/*.svg'
     - 'packages/edit-post/src/preferencesModal/preference-base-option'
     - 'packages/edit-post/src/preferencesModal/preferences-modal'
     - 'packages/edit-post/src/preferencesModal/preferences-modal-section'

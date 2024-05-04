@@ -37,6 +37,7 @@ add_action( 'init', __NAMESPACE__ . '\register_upload_request_post_type' );
 add_filter( 'template_include', __NAMESPACE__ . '\load_upload_request_template' );
 add_filter( 'cron_schedules', __NAMESPACE__ . '\add_quarter_hourly_cron_interval' );
 add_action( 'mexp_upload_requests_cleanup', __NAMESPACE__ . '\delete_old_upload_requests' );
+add_filter( 'rest_route_for_post', __NAMESPACE__ . '\filter_rest_route_for_post_for_upload_requests', 10, 2 );
 
 // Plugin compat.
 

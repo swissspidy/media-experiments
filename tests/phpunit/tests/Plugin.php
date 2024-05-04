@@ -106,4 +106,20 @@ class Test_Plugin extends WP_UnitTestCase {
 		$input_output_formats = get_default_image_output_formats();
 		$this->assertEmpty( $input_output_formats );
 	}
+
+	/**
+	 * @covers \MediaExperiments\filter_rest_route_for_post_for_upload_requests
+	 */
+	public function test_filter_rest_route_for_post_for_upload_requests() {
+		$upload_request = $this->factory()->post->create(
+			[
+				'post_type'   => 'mexp-upload-request',
+				'post_status' => 'publish',
+				'post_name'   => 'someslug',
+			]
+		);
+
+		$actual = rest_get_route_for_post( $upload_request );
+		$this->assertSame( '/wp/v2/upload-requests/someslug', $actual );
+	}
 }
