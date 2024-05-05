@@ -3,12 +3,18 @@
 namespace MediaExperiments\Tests;
 
 use MediaExperiments\REST_Attachments_Controller;
+use WP_UnitTest_Factory;
 use WP_UnitTestCase;
 use function MediaExperiments\delete_old_upload_requests;
+use function MediaExperiments\enqueue_block_assets;
+use function MediaExperiments\enqueue_block_editor_assets;
 use function MediaExperiments\filter_attachment_post_type_args;
 use function MediaExperiments\get_all_image_sizes;
 use function MediaExperiments\get_attachment_filesize;
 use function MediaExperiments\get_default_image_output_formats;
+use function MediaExperiments\get_user_media_preferences;
+use function MediaExperiments\is_upload_screen;
+use function MediaExperiments\register_assets;
 use function MediaExperiments\register_attachment_post_meta;
 use function MediaExperiments\register_media_source_taxonomy;
 use function MediaExperiments\register_upload_request_post_type;
@@ -21,9 +27,22 @@ use function MediaExperiments\rest_get_attachment_is_muted;
 
 class Test_Plugin extends WP_UnitTestCase {
 	/**
+	 * @var int Administrator ID.
+	 */
+	protected static int $admin_id;
+
+	/**
 	 * @var string Image file path.
 	 */
 	private static string $image_file;
+
+	public static function wpSetUpBeforeClass( WP_UnitTest_Factory $factory ) {
+		self::$admin_id = $factory->user->create(
+			[
+				'role' => 'administrator',
+			]
+		);
+	}
 
 	public function set_up() {
 		parent::set_up();
@@ -38,6 +57,89 @@ class Test_Plugin extends WP_UnitTestCase {
 		$this->remove_added_uploads();
 
 		parent::tear_down();
+	}
+
+	/**
+	 * @covers \MediaExperiments\get_user_media_preferences
+	 */
+	public function test_get_user_media_preferences() {
+		$actual_1 = get_user_media_preferences( self::$admin_id );
+
+		add_user_meta( self::$admin_id, 'wp_persisted_preferences', [ 'media-experiments/preferences' => [ 'bigImageSizeThreshold' => 1000 ] ] );
+
+		$actual_2 = get_user_media_preferences( self::$admin_id );
+
+		delete_user_meta( self::$admin_id, 'wp_persisted_preferences' );
+
+		$this->assertEmpty( $actual_1 );
+		$this->assertSame( [ 'bigImageSizeThreshold' => 1000 ], $actual_2 );
+	}
+
+	/**
+	 * @covers \MediaExperiments\filter_big_image_size_threshold
+	 */
+	public function test_filter_big_image_size_threshold() {
+		wp_set_current_user( self::$admin_id );
+
+		add_user_meta( self::$admin_id, 'wp_persisted_preferences', [ 'media-experiments/preferences' => [ 'bigImageSizeThreshold' => 1000 ] ] );
+
+		$image_size_threshold = (int) apply_filters( 'big_image_size_threshold', 2560, array( 0, 0 ), '', 0 ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+
+		$this->assertSame( 1000, $image_size_threshold );
+	}
+
+	/**
+	 * @covers \MediaExperiments\register_assets
+	 */
+	public function test_register_assets() {
+		register_assets();
+
+		$this->assertTrue( wp_script_is( 'media-experiments-view-upload-request', 'registered' ) );
+		$this->assertTrue( wp_style_is( 'media-experiments-view-upload-request', 'registered' ) );
+	}
+
+	/**
+	 * @covers \MediaExperiments\enqueue_block_editor_assets
+	 */
+	public function test_enqueue_block_editor_assets() {
+		enqueue_block_editor_assets();
+
+		$this->assertTrue( wp_script_is( 'media-experiments' ) );
+		$this->assertTrue( wp_style_is( 'media-experiments-editor' ) );
+		$this->assertTrue( wp_style_is( 'media-experiments-upload-requests' ) );
+	}
+
+	/**
+	 * @covers \MediaExperiments\enqueue_block_assets
+	 */
+	public function test_enqueue_block_assets_frontend() {
+		enqueue_block_assets();
+
+		$this->assertFalse( wp_style_is( 'media-experiments-blocks' ) );
+	}
+
+	/**
+	 * @covers \MediaExperiments\enqueue_block_assets
+	 */
+	public function test_enqueue_block_assets_admin() {
+		set_current_screen( 'edit.php' );
+
+		enqueue_block_assets();
+
+		$this->assertTrue( wp_style_is( 'media-experiments-blocks' ) );
+	}
+
+	/**
+	 * @covers \MediaExperiments\is_upload_screen
+	 */
+	public function test_is_upload_screen() {
+		$actual_1 = is_upload_screen();
+
+		set_current_screen( 'upload.php' );
+		$actual_2 = is_upload_screen();
+
+		$this->assertFalse( $actual_1 );
+		$this->assertTrue( $actual_2 );
 	}
 
 	/**

@@ -19,6 +19,8 @@ use function register_post_meta;
 /**
  * Sets up cross-origin isolation in the block editor.
  *
+ * @codeCoverageIgnore
+ *
  * @param WP_Screen $screen Current WP_Screen object.
  * @return void
  */
