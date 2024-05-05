@@ -167,9 +167,155 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 	}
 
 	/**
+	 * Verifies that skipping sub-size generation works.
+	 *
+	 * @covers ::create_item
+	 * @covers ::create_item_permissions_check
+	 * @covers \MediaExperiments\rest_after_insert_attachment_copy_metadata
+	 */
+	public function test_create_item_copy_metadata_from_original() {
+		wp_set_current_user( self::$admin_id );
+
+		$original_id = self::factory()->attachment->create_object(
+			self::$image_file_2,
+			0,
+			array(
+				'post_mime_type' => 'image/jpeg',
+				'post_excerpt'   => 'A sample caption',
+			)
+		);
+
+		wp_update_attachment_metadata( $original_id, wp_generate_attachment_metadata( $original_id, self::$image_file_2 ) );
+
+		add_filter( 'wp_generate_attachment_metadata', '__return_empty_array', 1 );
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/media' );
+		$request->set_header( 'Content-Type', 'image/jpeg' );
+		$request->set_header( 'Content-Disposition', 'attachment; filename=canola.jpg' );
+		$request->set_param( 'title', 'My title is very cool' );
+		$request->set_param( 'caption', 'This is a better caption.' );
+		$request->set_param( 'description', 'Without a description, my attachment is descriptionless.' );
+		$request->set_param( 'alt_text', 'Alt text is stored outside post schema.' );
+		$request->set_param( 'generate_sub_sizes', false );
+		$request->set_param( 'meta', [ 'mexp_original_id' => $original_id ] );
+
+		$request->set_body( file_get_contents( self::$image_file ) );
+		$response = rest_get_server()->dispatch( $request );
+
+		remove_filter( 'wp_generate_attachment_metadata', '__return_empty_array', 1 );
+
+		$this->assertSame( 201, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertArrayHasKey( 'media_details', $data );
+		$this->assertArrayHasKey( 'width', $data['media_details'] );
+		$this->assertArrayHasKey( 'height', $data['media_details'] );
+		$this->assertArrayHasKey( 'file', $data['media_details'] );
+	}
+
+	/**
+	 * Verifies that skipping sub-size generation works.
+	 *
+	 * @covers ::create_item
+	 * @covers ::create_item_permissions_check
+	 * @covers \MediaExperiments\rest_after_insert_attachment_insert_additional_metadata
+	 */
+	public function test_create_item_insert_additional_metadata() {
+		wp_set_current_user( self::$admin_id );
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/media' );
+		$request->set_header( 'Content-Type', 'image/jpeg' );
+		$request->set_header( 'Content-Disposition', 'attachment; filename=canola.jpg' );
+		$request->set_param( 'title', 'My title is very cool' );
+		$request->set_param( 'caption', 'This is a better caption.' );
+		$request->set_param( 'description', 'Without a description, my attachment is descriptionless.' );
+		$request->set_param( 'alt_text', 'Alt text is stored outside post schema.' );
+		$request->set_param( 'generate_sub_sizes', false );
+		$request->set_param( 'mexp_blurhash', '123abcdef' );
+		$request->set_param( 'mexp_dominant_color', '#fff000' );
+		$request->set_param( 'mexp_is_muted', true );
+		$request->set_param( 'mexp_has_transparency', true );
+
+		$request->set_body( file_get_contents( self::$image_file ) );
+		$response = rest_get_server()->dispatch( $request );
+
+		remove_filter( 'wp_generate_attachment_metadata', '__return_empty_array', 1 );
+
+		$this->assertSame( 201, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertArrayHasKey( 'mexp_blurhash', $data );
+		$this->assertArrayHasKey( 'mexp_dominant_color', $data );
+		$this->assertArrayHasKey( 'mexp_is_muted', $data );
+		$this->assertArrayHasKey( 'mexp_has_transparency', $data );
+
+		$this->assertSame( '123abcdef', $data['mexp_blurhash'] );
+		$this->assertSame( '#fff000', $data['mexp_dominant_color'] );
+		$this->assertSame( true, $data['mexp_is_muted'] );
+		$this->assertSame( true, $data['mexp_has_transparency'] );
+
+		$this->assertArrayHasKey( 'media_details', $data );
+		$this->assertArrayHasKey( 'image_meta', $data['media_details'] );
+		$this->assertArrayHasKey( 'blurhash', $data['media_details'] );
+		$this->assertArrayHasKey( 'dominant_color', $data['media_details'] );
+		$this->assertArrayHasKey( 'is_muted', $data['media_details'] );
+		$this->assertArrayHasKey( 'has_transparency', $data['media_details'] );
+	}
+
+	/**
+	 * Verifies that PDF metadata is updated with information
+	 * about the generated poster.
+	 *
+	 * @covers \MediaExperiments\rest_after_insert_attachment_handle_pdf_poster
+	 */
+	public function test_update_item_pdf_generated_poster() {
+		wp_set_current_user( self::$admin_id );
+
+		$pdf_attachment_id = self::factory()->attachment->create_object(
+			self::$pdf_file,
+			0,
+			array(
+				'post_mime_type' => 'application/pdf',
+				'post_excerpt'   => 'A sample caption',
+			)
+		);
+
+		wp_update_attachment_metadata( $pdf_attachment_id, wp_generate_attachment_metadata( $pdf_attachment_id, self::$pdf_file ) );
+
+		$image_attachment_id = self::factory()->attachment->create_object(
+			self::$image_file,
+			0,
+			array(
+				'post_mime_type' => 'image/jpeg',
+				'post_excerpt'   => 'A sample caption',
+			)
+		);
+
+		wp_update_attachment_metadata( $image_attachment_id, wp_generate_attachment_metadata( $image_attachment_id, self::$image_file ) );
+
+		$request = new WP_REST_Request( 'POST', sprintf( '/wp/v2/media/%d', $pdf_attachment_id ) );
+		$request->set_param( 'context', 'edit' );
+		$request->set_param( 'featured_media', $image_attachment_id );
+		$request->set_param( 'meta', [ 'mexp_generated_poster_id' => $image_attachment_id ] );
+
+		rest_get_server()->dispatch( $request );
+
+		$pdf_metadata = wp_get_attachment_metadata( $pdf_attachment_id );
+
+		$this->assertIsArray( $pdf_metadata );
+		$this->assertArrayHasKey( 'sizes', $pdf_metadata );
+		$this->assertArrayHasKey( 'full', $pdf_metadata['sizes'] );
+		$this->assertArrayHasKey( 'file', $pdf_metadata['sizes']['full'] );
+		$this->assertSame( 'canola.jpg', $pdf_metadata['sizes']['full']['file'] );
+	}
+
+	/**
 	 * Verifies that the controller adds missing_image_sizes to the response for PDFs.
 	 *
 	 * @covers ::prepare_item_for_response
+	 * @covers \MediaExperiments\register_rest_fields
 	 */
 	public function test_prepare_item() {
 		wp_set_current_user( self::$admin_id );
@@ -191,6 +337,12 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 
 		$this->assertArrayHasKey( 'missing_image_sizes', $data );
 		$this->assertNotEmpty( $data['missing_image_sizes'] );
+		$this->assertArrayHasKey( 'mexp_filename', $data );
+		$this->assertArrayHasKey( 'mexp_filesize', $data );
+		$this->assertArrayHasKey( 'mexp_blurhash', $data );
+		$this->assertArrayHasKey( 'mexp_dominant_color', $data );
+		$this->assertArrayHasKey( 'mexp_is_muted', $data );
+		$this->assertArrayHasKey( 'mexp_has_transparency', $data );
 	}
 
 	/**
