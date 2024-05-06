@@ -14,6 +14,7 @@ use WP_Post;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_Screen;
+use function is_array;
 use function register_post_meta;
 
 /**
@@ -541,28 +542,6 @@ function register_media_source_taxonomy(): void {
 	wp_insert_term( 'media-import', 'mexp_media_source' );
 	wp_insert_term( 'media-optimization', 'mexp_media_source' );
 	wp_insert_term( 'subtitles-generation', 'mexp_media_source' );
-}
-
-/**
- * Filters the attachment query args to hide generated video poster images.
- *
- * Reduces unnecessary noise in the Media grid view.
- *
- * @param array<string, mixed>|mixed $args Query args.
- * @return array<string, mixed>|mixed Filtered query args.
- *
- * @template T
- *
- * @phpstan-return ($args is array<T> ? array<T> : mixed)
- */
-function filter_ajax_query_attachments_args( mixed $args ): mixed {
-	if ( ! \is_array( $args ) ) {
-		return $args;
-	}
-
-	$args['tax_query'] = get_exclude_tax_query( $args ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-
-	return $args;
 }
 
 /**
