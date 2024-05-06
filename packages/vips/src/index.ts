@@ -145,7 +145,50 @@ export async function compressImage(
 	if ( ! isFileTypeSupported( type ) ) {
 		throw new Error( 'Unsupported file type' );
 	}
-	return convertImageFormat( id, buffer, type, type, quality );
+
+	const startTime = performance.now();
+
+	const measure = {
+		detail: {
+			devtools: {
+				metadata: {
+					extensionName: 'React Extension',
+					dataType: 'marker',
+				},
+				color: 'error',
+				detailsPairs: [
+					[ 'Description', 'This marks the start of a task' ],
+				],
+				hintText: 'A mark',
+			},
+		},
+	};
+	// performance.mark( 'Custom mark', measure );
+
+	const result = await convertImageFormat( id, buffer, type, type, quality );
+
+	const measure2 = {
+		start: startTime,
+		end: performance.now(),
+		detail: {
+			devtools: {
+				metadata: {
+					extensionName: 'React Extension',
+					dataType: 'track-entry',
+				},
+				color: 'primary',
+				track: 'An Extension Track',
+				detailsPairs: [
+					[ 'Description', 'This is a top level rendering task' ],
+					[ 'Tip', 'A tip to improve this' ],
+				],
+				hintText: 'A hint if needed',
+			},
+		},
+	};
+	// performance.measure( 'An extension measurement', measure2 );
+
+	return result;
 }
 
 /**

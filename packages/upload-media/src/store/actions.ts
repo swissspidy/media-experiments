@@ -13,7 +13,7 @@ import {
 	ImageFile,
 	renameFile,
 } from '@mexp/media-utils';
-import { start } from '@mexp/log';
+import { measure, start } from '@mexp/log';
 
 import { UploadError } from '../uploadError';
 import {
@@ -174,6 +174,12 @@ export function addItem( {
 		dispatch: ActionCreators;
 		registry: WPDataRegistry;
 	} ) => {
+		const itemId = uuidv4();
+
+		performance.mark( 'upload-item-start', {
+			detail: { itemId, batchId },
+		} );
+
 		const imageSizeThreshold: number = registry
 			.select( preferencesStore )
 			.get( PREFERENCES_NAME, 'bigImageSizeThreshold' );
@@ -192,7 +198,7 @@ export function addItem( {
 		dispatch< AddAction >( {
 			type: Type.Add,
 			item: {
-				id: uuidv4(),
+				id: itemId,
 				batchId,
 				status: ItemStatus.Pending,
 				sourceFile: cloneFile( file ),
@@ -303,10 +309,16 @@ export function addSideloadItem( {
 	parentId,
 }: AddSideloadItemArgs ) {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
+		const itemId = uuidv4();
+
+		performance.mark( 'upload-item-start', {
+			detail: { itemId, batchId },
+		} );
+
 		dispatch< AddAction >( {
 			type: Type.Add,
 			item: {
-				id: uuidv4(),
+				id: itemId,
 				batchId,
 				status: ItemStatus.Pending,
 				sourceFile: cloneFile( file ),
@@ -351,6 +363,12 @@ export function muteExistingVideo( {
 	generatedPosterId,
 }: MuteExistingVideoArgs ) {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
+		const itemId = uuidv4();
+
+		performance.mark( 'upload-item-start', {
+			detail: { itemId },
+		} );
+
 		const fileName = getFileNameFromUrl( url );
 		const baseName = getFileBasename( fileName );
 		const sourceFile = await fetchRemoteFile( url, fileName );
@@ -373,7 +391,7 @@ export function muteExistingVideo( {
 		dispatch< AddAction >( {
 			type: Type.Add,
 			item: {
-				id: uuidv4(),
+				id: itemId,
 				status: ItemStatus.Pending,
 				sourceFile,
 				file,
@@ -416,6 +434,12 @@ export function addSubtitlesForExistingVideo( {
 	additionalData,
 }: AddSubtitlesForExistingVideoArgs ) {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
+		const itemId = uuidv4();
+
+		performance.mark( 'upload-item-start', {
+			detail: { itemId },
+		} );
+
 		const fileName = getFileNameFromUrl( url );
 		const sourceFile = await fetchRemoteFile( url, fileName );
 
@@ -429,7 +453,7 @@ export function addSubtitlesForExistingVideo( {
 		dispatch< AddAction >( {
 			type: Type.Add,
 			item: {
-				id: uuidv4(),
+				id: itemId,
 				status: ItemStatus.Pending,
 				sourceFile,
 				file: vttFile,
@@ -459,6 +483,7 @@ interface OptimizexistingItemArgs {
 	blurHash?: string;
 	dominantColor?: string;
 	generatedPosterId?: number;
+	startTime?: number;
 }
 
 export function optimizeExistingItem( {
@@ -474,6 +499,7 @@ export function optimizeExistingItem( {
 	blurHash,
 	dominantColor,
 	generatedPosterId,
+	startTime,
 }: OptimizexistingItemArgs ) {
 	return async ( {
 		dispatch,
@@ -482,6 +508,8 @@ export function optimizeExistingItem( {
 		dispatch: ActionCreators;
 		registry: WPDataRegistry;
 	} ) => {
+		const itemId = uuidv4();
+
 		const fileName = getFileNameFromUrl( url );
 		const baseName = getFileBasename( fileName );
 		const sourceFile = await fetchRemoteFile( url, fileName );
@@ -498,11 +526,32 @@ export function optimizeExistingItem( {
 		// TODO: Same considerations apply as for muteExistingVideo.
 
 		const abortController = new AbortController();
+		const msr = {
+			start: startTime || performance.now(),
+			detail: {
+				devtools: {
+					metadata: {
+						extensionName: 'Media Experiments',
+						dataType: 'track-entry',
+					},
+					color: 'primary',
+					track: 'An Extension Track',
+					hintText: 'This is a rendering task',
+					detailsPairs: [
+						[ 'Item ID', itemId ],
+						[ 'File name', file.name ],
+					],
+				},
+			},
+		};
+		const timings = [
+			{ name: `Optimize existing item ${ file.name }`, measure: msr },
+		];
 
 		dispatch< AddAction >( {
 			type: Type.Add,
 			item: {
-				id: uuidv4(),
+				id: itemId,
 				batchId,
 				status: ItemStatus.Pending,
 				sourceFile,
@@ -540,6 +589,7 @@ export function optimizeExistingItem( {
 				transcode: [ TranscodingType.OptimizeExisting ],
 				generatedPosterId,
 				abortController,
+				timings,
 			},
 		} );
 	};
@@ -732,7 +782,8 @@ export function finishTranscoding(
 	id: QueueItemId,
 	file: File,
 	mediaSourceTerm?: MediaSourceTerm,
-	additionalData: Partial< AdditionalData > = {}
+	additionalData: Partial< AdditionalData > = {},
+	timings?: []
 ): TranscodingFinishAction {
 	return {
 		type: Type.TranscodingFinish,
@@ -741,6 +792,7 @@ export function finishTranscoding(
 		url: createBlobURL( file ),
 		mediaSourceTerm,
 		additionalData,
+		timings,
 	};
 }
 
@@ -753,12 +805,14 @@ export function startUploading( id: QueueItemId ): UploadStartAction {
 
 export function finishUploading(
 	id: QueueItemId,
-	attachment: Attachment
+	attachment: Attachment,
+	timings?: any
 ): UploadFinishAction {
 	return {
 		type: Type.UploadFinish,
 		id,
 		attachment,
+		timings,
 	};
 }
 
@@ -984,10 +1038,36 @@ export function completeItem( id: QueueItemId ) {
 	};
 }
 
-export function removeItem( id: QueueItemId ): RemoveAction {
-	return {
-		type: Type.Remove,
-		id,
+export function removeItem( id: QueueItemId ) {
+	return async ( {
+		select,
+		dispatch,
+	}: {
+		select: Selectors;
+		dispatch: ActionCreators;
+	} ) => {
+		const item = select.getItem( id );
+		if ( ! item ) {
+			return;
+		}
+
+		if ( item.timings ) {
+			for ( const timing of item.timings ) {
+				console.log( 'performance.measure', timing.name, {
+					...timing.measure,
+					end: timing.measure.end || performance.now(),
+				});
+				performance.measure( timing.name, {
+					...timing.measure,
+					end: timing.measure.end || performance.now(),
+				} );
+			}
+		}
+
+		dispatch( {
+			type: Type.Remove,
+			id,
+		} );
 	};
 }
 
@@ -1189,6 +1269,8 @@ export function optimizeImageItem(
 			return;
 		}
 
+		const startTime = performance.now();
+
 		dispatch.startTranscoding( id );
 
 		const imageLibrary: ImageLibrary =
@@ -1308,10 +1390,46 @@ export function optimizeImageItem(
 				);
 			}
 
+			const endTime = performance.now();
+
+			const msr = {
+				start: startTime,
+				end: endTime,
+				detail: {
+					devtools: {
+						metadata: {
+							extensionName: 'Media Experiments',
+							dataType: 'track-entry',
+						},
+						color: 'primary',
+						track: 'An Extension Track',
+						hintText: 'This is a rendering task',
+						detailsPairs: [
+							[ 'Item ID', item.id ],
+							[ 'File name', item.file.name ],
+							[ 'Image library', imageLibrary ],
+							[ 'Input format', inputFormat ],
+							[ 'Output format', outputFormat ],
+							[ 'Output quality', outputQuality ],
+						],
+					},
+				},
+			};
+
+			const timings = [
+				{ name: `Optimize image ${ item.file.name }`, measure: msr },
+			];
+
 			if ( requireApproval ) {
 				dispatch.requestApproval( id, file );
 			} else {
-				dispatch.finishTranscoding( id, file, 'media-optimization' );
+				dispatch.finishTranscoding(
+					id,
+					file,
+					'media-optimization',
+					undefined,
+					timings
+				);
 			}
 		} catch ( error ) {
 			dispatch.cancelItem(
@@ -1681,6 +1799,8 @@ export function uploadItem( id: QueueItemId ) {
 			return;
 		}
 
+		const startTime = performance.now();
+
 		const { poster } = item;
 
 		dispatch.startUploading( id );
@@ -1804,7 +1924,31 @@ export function uploadItem( id: QueueItemId ) {
 				}
 			}
 
-			dispatch.finishUploading( id, attachment );
+			const msr = {
+				start: startTime,
+				end: performance.now(),
+				detail: {
+					devtools: {
+						metadata: {
+							extensionName: 'Media Experiments',
+							dataType: 'track-entry',
+						},
+						color: 'primary',
+						track: 'An Extension Track',
+						hintText: 'This is a rendering task',
+						detailsPairs: [
+							[ 'Item ID', id ],
+							[ 'File name', item.file.name ],
+						],
+					},
+				},
+			};
+
+			const timings = [
+				{ name: `Upload item ${ item.file.name }`, measure: msr },
+			];
+
+			dispatch.finishUploading( id, attachment, timings );
 		} catch ( err ) {
 			const error =
 				err instanceof Error

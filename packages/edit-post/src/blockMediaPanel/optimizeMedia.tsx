@@ -1,3 +1,4 @@
+import type { MouseEvent } from 'react';
 import {
 	BaseControl,
 	Button,
@@ -48,7 +49,7 @@ export function OptimizeMedia( {
 		return null;
 	}
 
-	const onClick = () => {
+	const onClick = ( evt: MouseEvent< HTMLButtonElement > ) => {
 		void optimizeExistingItem( {
 			id,
 			url: attachment.source_url || url,
@@ -83,6 +84,7 @@ export function OptimizeMedia( {
 			additionalData: {
 				post: currentPostId,
 			},
+			startTime: evt.timeStamp,
 		} );
 	};
 
