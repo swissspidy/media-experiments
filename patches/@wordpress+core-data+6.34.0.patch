@@ -1,0 +1,140 @@
+diff --git a/node_modules/@wordpress/core-data/build-types/actions.d.ts b/node_modules/@wordpress/core-data/build-types/actions.d.ts
+index eddee87..06062ac 100644
+--- a/node_modules/@wordpress/core-data/build-types/actions.d.ts
++++ b/node_modules/@wordpress/core-data/build-types/actions.d.ts
+@@ -176,7 +176,7 @@ export function receiveNavigationFallbackId(fallbackId: integer): any;
+  * @return {Object} Action object.
+  */
+ export function receiveDefaultTemplateId(query: any, templateId: string): any;
+-export function deleteEntityRecord(kind: string, name: string, recordId: string, query: any | null, { __unstableFetch, throwOnError }?: {
++export function deleteEntityRecord(kind: string, name: string, recordId: string | number, query: any | null, { __unstableFetch, throwOnError }?: {
+     __unstableFetch?: Function | undefined;
+     throwOnError?: boolean | undefined;
+ } | undefined): ({ dispatch }: {
+diff --git a/node_modules/@wordpress/core-data/build-types/entity-provider.d.ts b/node_modules/@wordpress/core-data/build-types/entity-provider.d.ts
+index 2f44457..af6d485 100644
+--- a/node_modules/@wordpress/core-data/build-types/entity-provider.d.ts
++++ b/node_modules/@wordpress/core-data/build-types/entity-provider.d.ts
+@@ -42,7 +42,7 @@ export function useEntityId(kind: string, name: string): any;
+  * 							  information like `raw`, `rendered` and
+  * 							  `protected` props.
+  */
+-export function useEntityProp(kind: string, name: string, prop: string, _id?: string | undefined): [any, Function, any];
++export function useEntityProp(kind: string, name: string, prop: string, _id?: number | undefined): [any, Function, any];
+ /**
+  * Hook that returns block content getters and setters for
+  * the nearest provided entity of the specified type.
+diff --git a/node_modules/@wordpress/core-data/build-types/entity-types/index.d.ts b/node_modules/@wordpress/core-data/build-types/entity-types/index.d.ts
+index ed4d540..10da47c 100644
+--- a/node_modules/@wordpress/core-data/build-types/entity-types/index.d.ts
++++ b/node_modules/@wordpress/core-data/build-types/entity-types/index.d.ts
+@@ -11,6 +11,7 @@ import type { NavMenuItem } from './nav-menu-item';
+ import type { Page } from './page';
+ import type { Plugin } from './plugin';
+ import type { Post } from './post';
++import type { PostType } from './post-type';
+ import type { PostRevision } from './post-revision';
+ import type { Settings } from './settings';
+ import type { Sidebar } from './sidebar';
+@@ -23,7 +24,7 @@ import type { WidgetType } from './widget-type';
+ import type { WpTemplate } from './wp-template';
+ import type { WpTemplatePart } from './wp-template-part';
+ export type { BaseEntityRecords } from './base-entity-records';
+-export type { Attachment, Comment, Context, GlobalStylesRevision, MenuLocation, NavMenu, NavMenuItem, Page, Plugin, Post, PostRevision, Settings, Sidebar, Taxonomy, Theme, Updatable, User, Type, Widget, WidgetType, WpTemplate, WpTemplatePart, };
++export type { Attachment, Comment, Context, GlobalStylesRevision, MenuLocation, NavMenu, NavMenuItem, Page, Plugin, Post, PostType, PostRevision, Settings, Sidebar, Taxonomy, Theme, Updatable, User, Type, Widget, WidgetType, WpTemplate, WpTemplatePart, };
+ /**
+  * An interface that may be extended to add types for new entities. Each entry
+  * must be a union of entity definitions adhering to the EntityInterface type.
+@@ -57,7 +58,7 @@ export type { Attachment, Comment, Context, GlobalStylesRevision, MenuLocation,
+  * ```
+  */
+ export interface PerPackageEntityRecords<C extends Context> {
+-    core: Attachment<C> | Comment<C> | GlobalStylesRevision<C> | MenuLocation<C> | NavMenu<C> | NavMenuItem<C> | Page<C> | Plugin<C> | Post<C> | PostRevision<C> | Settings<C> | Sidebar<C> | Taxonomy<C> | Theme<C> | User<C> | Type<C> | Widget<C> | WidgetType<C> | WpTemplate<C> | WpTemplatePart<C>;
++    core: Attachment<C> | Comment<C> | GlobalStylesRevision<C> | MenuLocation<C> | NavMenu<C> | NavMenuItem<C> | Page<C> | Plugin<C> | Post<C> | PostType<C> | PostRevision<C> | Settings<C> | Sidebar<C> | Taxonomy<C> | Theme<C> | User<C> | Type<C> | Widget<C> | WidgetType<C> | WpTemplate<C> | WpTemplatePart<C>;
+ }
+ /**
+  * A union of all known record types.
+diff --git a/node_modules/@wordpress/core-data/build-types/entity-types/post-type.d.ts b/node_modules/@wordpress/core-data/build-types/entity-types/post-type.d.ts
+new file mode 100644
+index 0000000..a672baa
+--- /dev/null
++++ b/node_modules/@wordpress/core-data/build-types/entity-types/post-type.d.ts
+@@ -0,0 +1,18 @@
++/**
++ * Internal dependencies
++ */
++import type { Context, OmitNevers } from './helpers';
++import type { BaseEntityRecords as _BaseEntityRecords } from './base-entity-records';
++
++declare module './base-entity-records' {
++	namespace BaseEntityRecords {
++			interface PostType<C extends Context> {
++				/**
++		 * Whether the post type is viewable.
++		 */
++				viewable: boolean;
++			}
++		}
++}
++
++export type PostType<C extends Context = 'edit'> = OmitNevers<_BaseEntityRecords.PostType<C>>;
+diff --git a/node_modules/@wordpress/core-data/build-types/index.d.ts b/node_modules/@wordpress/core-data/build-types/index.d.ts
+index 5abea16..8fed8d4 100644
+--- a/node_modules/@wordpress/core-data/build-types/index.d.ts
++++ b/node_modules/@wordpress/core-data/build-types/index.d.ts
+@@ -25,13 +25,13 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
+     receiveAutosaves(postId: number, autosaves: any): any;
+     receiveNavigationFallbackId(fallbackId: integer): any;
+     receiveDefaultTemplateId(query: any, templateId: string): any;
+-    deleteEntityRecord: (kind: string, name: string, recordId: string, query: any, { __unstableFetch, throwOnError }?: {
++    deleteEntityRecord: (kind: string, name: string, recordId: string | number, query: any, { __unstableFetch, throwOnError }?: {
+         __unstableFetch?: Function | undefined;
+         throwOnError?: boolean | undefined;
+     } | undefined) => ({ dispatch }: {
+         dispatch: any;
+     }) => Promise<boolean | undefined>;
+-    editEntityRecord: (kind: string, name: string, recordId: string | number, edits: any, options?: {
++    editEntityRecord: (kind: string, name: string, recordId: string | number | undefined, edits: any, options?: {
+         undoIgnore?: boolean | undefined;
+     }) => any;
+     undo: () => ({ select, dispatch }: {
+@@ -69,6 +69,8 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
+         [x: string]: any;
+     } | undefined): import("./entity-types").User[];
+     getCurrentUser(state: selectors.State): import("./entity-types").User<"edit">;
++	getPostType(state: selectors.State, slug: string): import("./entity-types").PostType | null;
++	getMedia<U,V,W>(state: selectors.State, id: number, query?: { [x: string]: any; }): import("./entity-types").Attachment;
+     getEntitiesByKind(state: selectors.State, kind: string): any[];
+     getEntity(state: selectors.State, kind: string, name: string): any;
+     getEntityConfig(state: selectors.State, kind: string, name: string): any;
+@@ -93,7 +95,7 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
+     getEmbedPreview(state: selectors.State, url: string): any;
+     isPreviewEmbedFallback(state: selectors.State, url: string): boolean;
+     canUser(state: selectors.State, action: string, resource: string, id?: (string | number) | undefined): boolean | undefined;
+-    canUserEditEntityRecord(state: selectors.State, kind: string, name: string, recordId: string | number): boolean | undefined;
++    canUserEditEntityRecord(state: selectors.State, kind: string, name: string, recordId: string | number | undefined): boolean | undefined;
+     getAutosaves(state: selectors.State, postType: string, postId: string | number): any[] | undefined;
+     getAutosave<EntityRecord_1 extends import("./entity-types").Attachment<any> | import("./entity-types").Comment<any> | import("./entity-types").GlobalStylesRevision<any> | import("./entity-types").MenuLocation<any> | import("./entity-types").NavMenu<any> | import("./entity-types").NavMenuItem<any> | import("./entity-types").Page<any> | import("./entity-types").Plugin<any> | import("./entity-types").Post<any> | import("./entity-types").PostRevision<any> | import("./entity-types").Settings<any> | import("./entity-types").Sidebar<any> | import("./entity-types").Taxonomy<any> | import("./entity-types").Theme<any> | import("./entity-types").User<any> | import("./entity-types").Type<any> | import("./entity-types").Widget<any> | import("./entity-types").WidgetType<any> | import("./entity-types").WpTemplate<any> | import("./entity-types").WpTemplatePart<any>>(state: selectors.State, postType: string, postId: string | number, authorId: string | number): EntityRecord_1 | undefined;
+     getReferenceByDistinctEdits(state: any): any;
+@@ -134,7 +136,7 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
+         kind: string;
+     }[]) & import("rememo").EnhancedSelector;
+     getEntityRecordNonTransientEdits: ((state: selectors.State, kind: string, name: string, recordId: string | number) => any) & import("rememo").EnhancedSelector;
+-    getEditedEntityRecord: (<EntityRecord_3 extends import("./entity-types").Attachment<any> | import("./entity-types").Comment<any> | import("./entity-types").GlobalStylesRevision<any> | import("./entity-types").MenuLocation<any> | import("./entity-types").NavMenu<any> | import("./entity-types").NavMenuItem<any> | import("./entity-types").Page<any> | import("./entity-types").Plugin<any> | import("./entity-types").Post<any> | import("./entity-types").PostRevision<any> | import("./entity-types").Settings<any> | import("./entity-types").Sidebar<any> | import("./entity-types").Taxonomy<any> | import("./entity-types").Theme<any> | import("./entity-types").User<any> | import("./entity-types").Type<any> | import("./entity-types").Widget<any> | import("./entity-types").WidgetType<any> | import("./entity-types").WpTemplate<any> | import("./entity-types").WpTemplatePart<any>>(state: selectors.State, kind: string, name: string, recordId: string | number) => false | import("./entity-types").Updatable<EntityRecord_3>) & import("rememo").EnhancedSelector;
++    getEditedEntityRecord: (<EntityRecord_3 extends import("./entity-types").Attachment<any> | import("./entity-types").Comment<any> | import("./entity-types").GlobalStylesRevision<any> | import("./entity-types").MenuLocation<any> | import("./entity-types").NavMenu<any> | import("./entity-types").NavMenuItem<any> | import("./entity-types").Page<any> | import("./entity-types").Plugin<any> | import("./entity-types").Post<any> | import("./entity-types").PostType<any> | import("./entity-types").PostRevision<any> | import("./entity-types").Settings<any> | import("./entity-types").Sidebar<any> | import("./entity-types").Taxonomy<any> | import("./entity-types").Theme<any> | import("./entity-types").User<any> | import("./entity-types").Type<any> | import("./entity-types").Widget<any> | import("./entity-types").WidgetType<any> | import("./entity-types").WpTemplate<any> | import("./entity-types").WpTemplatePart<any>>(state: selectors.State, kind: string, name: string, recordId: string | number | undefined) => false | import("./entity-types").Updatable<EntityRecord_3>) & import("rememo").EnhancedSelector;
+     hasFetchedAutosaves: Function;
+     getRevisions: (state: selectors.State, kind: string, name: string, recordKey: string | number, query?: {
+         [x: string]: any;
+diff --git a/node_modules/@wordpress/core-data/build-types/selectors.d.ts b/node_modules/@wordpress/core-data/build-types/selectors.d.ts
+index 70c3e01..e7f661e 100644
+--- a/node_modules/@wordpress/core-data/build-types/selectors.d.ts
++++ b/node_modules/@wordpress/core-data/build-types/selectors.d.ts
+@@ -356,7 +356,7 @@ export declare function hasEditsForEntityRecord(state: State, kind: string, name
+  *
+  * @return The entity record, merged with its edits.
+  */
+-export declare const getEditedEntityRecord: (<EntityRecord extends ET.Attachment<any> | ET.Comment<any> | ET.GlobalStylesRevision<any> | ET.MenuLocation<any> | ET.NavMenu<any> | ET.NavMenuItem<any> | ET.Page<any> | ET.Plugin<any> | ET.Post<any> | ET.PostRevision<any> | ET.Settings<any> | ET.Sidebar<any> | ET.Taxonomy<any> | ET.Theme<any> | ET.User<any> | ET.Type<any> | ET.Widget<any> | ET.WidgetType<any> | ET.WpTemplate<any> | ET.WpTemplatePart<any>>(state: State, kind: string, name: string, recordId: EntityRecordKey) => ET.Updatable<EntityRecord> | false) & import("rememo").EnhancedSelector;
++export declare const getEditedEntityRecord: (<EntityRecord extends ET.Attachment<any> | ET.Comment<any> | ET.GlobalStylesRevision<any> | ET.MenuLocation<any> | ET.NavMenu<any> | ET.NavMenuItem<any> | ET.Page<any> | ET.Plugin<any> | ET.Post<any> | ET.PostType<any> | ET.PostRevision<any> | ET.Settings<any> | ET.Sidebar<any> | ET.Taxonomy<any> | ET.Theme<any> | ET.User<any> | ET.Type<any> | ET.Widget<any> | ET.WidgetType<any> | ET.WpTemplate<any> | ET.WpTemplatePart<any>>(state: State, kind: string, name: string, recordId: EntityRecordKey) => ET.Updatable<EntityRecord> | undefined) & import("rememo").EnhancedSelector;
+ /**
+  * Returns true if the specified entity record is autosaving, and false otherwise.
+  *
