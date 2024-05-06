@@ -272,6 +272,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		// Add Server-Timing headers if Performance Lab is active.
 		// One for initial upload, and one for thumbnail generation.
+		// @codeCoverageIgnoreStart
 		if ( function_exists( 'perflab_server_timing_register_metric' ) ) {
 			perflab_server_timing_register_metric(
 				'upload',
@@ -295,9 +296,11 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 				}
 			);
 		}
+		// @codeCoverageIgnoreEnd
 
 		$response = parent::create_item( $request );
 
+		// @codeCoverageIgnoreStart
 		if ( function_exists( 'perflab_server_timing_register_metric' ) && ! empty( $before_metadata ) ) {
 			perflab_server_timing_register_metric(
 				'generate-metadata',
@@ -309,6 +312,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 				)
 			);
 		}
+		// @codeCoverageIgnoreEnd
 
 		remove_filter( 'intermediate_image_sizes_advanced', '__return_empty_array', 100 );
 		remove_filter( 'fallback_intermediate_image_sizes', '__return_empty_array', 100 );
@@ -623,6 +627,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		$response->set_status( 201 );
 		$response->header( 'Location', rest_url( sprintf( '%s/%s/%d', $this->namespace, $this->rest_base, $attachment_id ) ) );
 
+		// @codeCoverageIgnoreStart
 		if ( function_exists( 'perflab_server_timing_register_metric' ) ) {
 			perflab_server_timing_register_metric(
 				'upload',
@@ -634,6 +639,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 				)
 			);
 		}
+		// @codeCoverageIgnoreEnd
 
 		return $response;
 	}
