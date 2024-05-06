@@ -270,8 +270,11 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		$before_upload   = microtime( true );
 		$before_metadata = 0;
 
-		// Add Server-Timing headers if Performance Lab is active.
-		// One for initial upload, and one for thumbnail generation.
+		/*
+		 * Add Server-Timing headers if Performance Lab is active.
+		 * One for initial upload, and one for thumbnail generation.
+		 */
+
 		// @codeCoverageIgnoreStart
 		if ( function_exists( 'perflab_server_timing_register_metric' ) ) {
 			perflab_server_timing_register_metric(
