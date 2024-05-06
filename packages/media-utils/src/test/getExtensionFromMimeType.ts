@@ -1,4 +1,4 @@
-import { getExtensionFromMimeType } from '../index';
+import { getExtensionFromMimeType } from '../';
 
 describe( 'getExtensionFromMimeType', () => {
 	it.each( [

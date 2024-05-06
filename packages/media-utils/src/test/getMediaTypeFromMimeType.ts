@@ -1,4 +1,4 @@
-import { getMediaTypeFromMimeType } from '../index';
+import { getMediaTypeFromMimeType } from '../';
 
 describe( 'getMediaTypeFromMimeType', () => {
 	it.each( [

@@ -1,4 +1,4 @@
-import { getFileBasename } from '../index';
+import { getFileBasename } from '../';
 
 describe( 'getFileBasename', () => {
 	it.each( [
