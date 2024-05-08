@@ -904,12 +904,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "3361c84ac3df6447aeb98d4b8688468d734d9fdb"
+                "reference": "e55a83fdcd903dd95b35c2ebc66df98cf0c15b4c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/3361c84ac3df6447aeb98d4b8688468d734d9fdb",
-                "reference": "3361c84ac3df6447aeb98d4b8688468d734d9fdb",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/e55a83fdcd903dd95b35c2ebc66df98cf0c15b4c",
+                "reference": "e55a83fdcd903dd95b35c2ebc66df98cf0c15b4c",
                 "shasum": ""
             },
             "require": {
@@ -955,7 +955,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-05-03T09:37:47+00:00"
+            "time": "2024-05-07T12:20:35+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -1385,12 +1385,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "f9d568f4dfd55d0a2a306d67330dde426277e0dc"
+                "reference": "386924e51b2e98d13dcc88bb530807046edbda90"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/f9d568f4dfd55d0a2a306d67330dde426277e0dc",
-                "reference": "f9d568f4dfd55d0a2a306d67330dde426277e0dc",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/386924e51b2e98d13dcc88bb530807046edbda90",
+                "reference": "386924e51b2e98d13dcc88bb530807046edbda90",
                 "shasum": ""
             },
             "conflict": {
@@ -1604,7 +1604,7 @@
                 "getkirby/panel": "<2.5.14",
                 "getkirby/starterkit": "<=3.7.0.2",
                 "gilacms/gila": "<=1.15.4",
-                "gleez/cms": "<=1.2|==2",
+                "gleez/cms": "<=1.3|==2",
                 "globalpayments/php-sdk": "<2",
                 "gogentooss/samlbase": "<1.2.7",
                 "google/protobuf": "<3.15",
@@ -1858,7 +1858,7 @@
                 "processwire/processwire": "<=3.0.210",
                 "propel/propel": ">=2.0.0.0-alpha1,<=2.0.0.0-alpha7",
                 "propel/propel1": ">=1,<=1.7.1",
-                "pterodactyl/panel": "<1.7",
+                "pterodactyl/panel": "<1.11.6",
                 "ptheofan/yii2-statemachine": ">=2.0.0.0-RC1-dev,<=2",
                 "ptrofimov/beanstalk_console": "<1.7.14",
                 "pubnub/pubnub": "<6.1",
@@ -2015,7 +2015,7 @@
                 "topthink/thinkphp": "<=3.2.3",
                 "torrentpier/torrentpier": "<=2.4.1",
                 "tpwd/ke_search": "<4.0.3|>=4.1,<4.6.6|>=5,<5.0.2",
-                "tribalsystems/zenario": "<=9.4.59197",
+                "tribalsystems/zenario": "<9.5.60602",
                 "truckersmp/phpwhois": "<=4.3.1",
                 "ttskch/pagination-service-provider": "<1",
                 "twig/twig": "<1.44.7|>=2,<2.15.3|>=3,<3.4.3",
@@ -2169,7 +2169,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-05-03T05:04:43+00:00"
+            "time": "2024-05-06T15:04:21+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -3141,12 +3141,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer.git",
-                "reference": "bb267bb2c612d57306afd03ec1dc030ae495965d"
+                "reference": "4fd52f75c8f29114423e9a379bf86fa894750bc3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/bb267bb2c612d57306afd03ec1dc030ae495965d",
-                "reference": "bb267bb2c612d57306afd03ec1dc030ae495965d",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/4fd52f75c8f29114423e9a379bf86fa894750bc3",
+                "reference": "4fd52f75c8f29114423e9a379bf86fa894750bc3",
                 "shasum": ""
             },
             "require": {
@@ -3214,7 +3214,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2024-05-02T07:29:35+00:00"
+            "time": "2024-05-06T04:13:19+00:00"
         },
         {
             "name": "symfony/polyfill-php73",
