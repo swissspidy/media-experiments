@@ -49,7 +49,7 @@ test.describe( 'Block Transforms', () => {
 				.filter( {
 					hasText: 'Sorry, this file type is not supported here',
 				} )
-		).not.toBeVisible();
+		).toBeHidden();
 
 		await page.waitForFunction(
 			() =>

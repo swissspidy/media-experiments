@@ -197,6 +197,7 @@ test.describe( 'Animated GIFs', () => {
 			);
 
 			// Custom crops can't be animated, but resized images should be.
+			// eslint-disable-next-line playwright/no-conditional-in-test
 			if ( [ 'full' ].includes( size ) ) {
 				expect( isAnimated ).toBe( true );
 			} else {

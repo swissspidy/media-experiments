@@ -37,7 +37,7 @@ test.describe( 'Videos', () => {
 				.filter( {
 					hasText: 'Sorry, this file type is not supported here',
 				} )
-		).not.toBeVisible();
+		).toBeHidden();
 
 		await page.waitForFunction(
 			() =>

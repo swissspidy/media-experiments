@@ -79,7 +79,7 @@ test.describe( 'Media Recording', () => {
 				.filter( {
 					hasText: 'Sorry, this file type is not supported here',
 				} )
-		).not.toBeVisible();
+		).toBeHidden();
 
 		await page.waitForFunction(
 			() =>
@@ -145,7 +145,7 @@ test.describe( 'Media Recording', () => {
 		).toBeVisible();
 		await expect(
 			toolbar.getByRole( 'button', { name: 'Select Microphone' } )
-		).not.toBeVisible();
+		).toBeHidden();
 		await expect(
 			toolbar.getByRole( 'button', { name: 'Enable Background Blur' } )
 		).toBeVisible();
@@ -169,7 +169,7 @@ test.describe( 'Media Recording', () => {
 				.filter( {
 					hasText: 'Sorry, this file type is not supported here',
 				} )
-		).not.toBeVisible();
+		).toBeHidden();
 
 		await page.waitForFunction(
 			() =>
@@ -216,10 +216,10 @@ test.describe( 'Media Recording', () => {
 		const toolbar = page.getByRole( 'toolbar', { name: 'Block tools' } );
 		await expect(
 			toolbar.getByRole( 'button', { name: 'Select Camera' } )
-		).not.toBeVisible();
+		).toBeHidden();
 		await expect(
 			toolbar.getByRole( 'button', { name: 'Enable Background Blur' } )
-		).not.toBeVisible();
+		).toBeHidden();
 		await expect(
 			toolbar.getByRole( 'button', { name: 'Select Microphone' } )
 		).toBeVisible();
@@ -261,7 +261,7 @@ test.describe( 'Media Recording', () => {
 				.filter( {
 					hasText: 'Sorry, this file type is not supported here',
 				} )
-		).not.toBeVisible();
+		).toBeHidden();
 
 		await page.waitForFunction(
 			() =>

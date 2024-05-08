@@ -91,6 +91,7 @@ test.describe( 'Images', () => {
 		const isClosed =
 			( await mediaExperimentsPanel.getAttribute( 'aria-expanded' ) ) ===
 			'false';
+		// eslint-disable-next-line playwright/no-conditional-in-test
 		if ( isClosed ) {
 			await mediaExperimentsPanel.click();
 		}
@@ -112,7 +113,7 @@ test.describe( 'Images', () => {
 				.filter( {
 					hasText: 'There was an error optimizing the file',
 				} )
-		).not.toBeVisible();
+		).toBeHidden();
 
 		await page.waitForFunction(
 			() =>
@@ -161,7 +162,7 @@ test.describe( 'Images', () => {
 				.filter( {
 					hasText: 'There was an error optimizing the file',
 				} )
-		).not.toBeVisible();
+		).toBeHidden();
 
 		await expect(
 			page

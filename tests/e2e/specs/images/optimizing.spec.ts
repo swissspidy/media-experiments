@@ -191,7 +191,7 @@ test.describe( 'Images', () => {
 						.filter( {
 							hasText: 'There was an error optimizing the file',
 						} )
-				).not.toBeVisible();
+				).toBeHidden();
 
 				await page.waitForFunction(
 					() =>
@@ -231,7 +231,7 @@ test.describe( 'Images', () => {
 						.filter( {
 							hasText: 'There was an error optimizing the file',
 						} )
-				).not.toBeVisible();
+				).toBeHidden();
 
 				await expect( settingsPanel ).toHaveText(
 					new RegExp( `Mime type: ${ expectedMimeType }` )

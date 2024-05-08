@@ -37,7 +37,7 @@ test.describe( 'Videos', () => {
 				.filter( {
 					hasText: 'Sorry, this file type is not supported here',
 				} )
-		).not.toBeVisible();
+		).toBeHidden();
 
 		await page.waitForFunction(
 			() =>
@@ -97,6 +97,6 @@ test.describe( 'Videos', () => {
 
 		await expect(
 			page.getByRole( 'button', { name: 'Remove audio channel' } )
-		).not.toBeVisible();
+		).toBeHidden();
 	} );
 } );

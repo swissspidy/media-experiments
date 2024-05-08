@@ -33,7 +33,7 @@ test.describe( 'Videos', () => {
 
 		await expect(
 			page.getByRole( 'button', { name: 'Remove audio channel' } )
-		).not.toBeVisible();
+		).toBeHidden();
 
 		const vttUrl = await page.evaluate(
 			() =>
