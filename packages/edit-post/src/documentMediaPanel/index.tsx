@@ -4,7 +4,7 @@ import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
-import { type BlockInstance } from '@wordpress/blocks';
+import type { BlockInstance } from '@wordpress/blocks';
 import { media as mediaIcon } from '@wordpress/icons';
 
 import { store as uploadStore, type RestAttachment } from '@mexp/upload-media';

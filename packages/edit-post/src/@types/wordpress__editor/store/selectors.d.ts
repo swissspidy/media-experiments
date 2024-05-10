@@ -1,5 +1,5 @@
-import { BlockInstance } from '@wordpress/blocks';
-import { EntityRecord, Page, Post, User } from '@wordpress/core-data';
+import type { BlockInstance } from '@wordpress/blocks';
+import type { EntityRecord, Page, Post, User } from '@wordpress/core-data';
 
 /**
  * Returns whether or not the user has the unfiltered_html capability.

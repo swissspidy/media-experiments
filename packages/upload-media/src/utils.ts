@@ -40,8 +40,8 @@ export function getMimeTypesArray(
 	if ( ! wpMimeTypesObject ) {
 		return [];
 	}
-	return Object.entries( wpMimeTypesObject )
-		.map( ( [ extensionsString, mime ] ) => {
+	return Object.entries( wpMimeTypesObject ).flatMap(
+		( [ extensionsString, mime ] ) => {
 			const [ type ] = mime.split( '/' );
 			const extensions = extensionsString.split( '|' );
 			return [
@@ -50,8 +50,8 @@ export function getMimeTypesArray(
 					( extension ) => `${ type }/${ extension }`
 				),
 			];
-		} )
-		.flat();
+		}
+	);
 }
 
 /**

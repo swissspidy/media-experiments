@@ -1,4 +1,4 @@
-import { ImageSizeCrop } from '@mexp/upload-media';
+import type { ImageSizeCrop } from '@mexp/upload-media';
 
 declare global {
 	interface Window {
@@ -11,5 +11,3 @@ declare global {
 		};
 	}
 }
-
-export {};

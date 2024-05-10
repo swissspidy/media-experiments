@@ -1,4 +1,4 @@
-import { BlockInstance, TemplateArray } from '@wordpress/blocks';
+import type { BlockInstance, TemplateArray } from '@wordpress/blocks';
 
 /**
  * Action generator used in signalling that the post should autosave.

@@ -44,7 +44,10 @@ type Action =
 	| RequestApprovalAction
 	| ApproveUploadAction;
 
-function reducer( state = DEFAULT_STATE, action: Action ) {
+function reducer(
+	state = DEFAULT_STATE,
+	action: Action = { type: Type.Unknown }
+) {
 	switch ( action.type ) {
 		case Type.Add:
 			return {

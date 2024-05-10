@@ -222,7 +222,7 @@ export async function resizeImage(
 	let resizeWidth = resize.width;
 	thumbnailOptions.height = resize.height;
 
-	let newHeight;
+	let newHeight: number;
 
 	if ( ! resize.crop ) {
 		image = vips.Image.thumbnailBuffer(

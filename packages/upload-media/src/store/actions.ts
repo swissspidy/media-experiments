@@ -1171,10 +1171,7 @@ export function maybeTranscodeItem( id: QueueItemId ) {
 	};
 }
 
-export function optimizeImageItem(
-	id: QueueItemId,
-	requireApproval: boolean = false
-) {
+export function optimizeImageItem( id: QueueItemId, requireApproval = false ) {
 	return async ( {
 		select,
 		dispatch,

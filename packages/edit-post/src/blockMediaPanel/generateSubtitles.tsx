@@ -1,4 +1,4 @@
-import { type BlockEditProps } from '@wordpress/blocks';
+import type { BlockEditProps } from '@wordpress/blocks';
 import { isBlobURL } from '@wordpress/blob';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
@@ -28,7 +28,7 @@ export function GenerateSubtitles( {
 		[]
 	);
 
-	if ( ( post && post.mexp_is_muted ) || attributes.tracks.length > 0 ) {
+	if ( post?.mexp_is_muted || attributes.tracks.length > 0 ) {
 		return null;
 	}
 

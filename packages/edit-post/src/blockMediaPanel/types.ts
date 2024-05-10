@@ -1,4 +1,4 @@
-import { type BlockInstance } from '@wordpress/blocks';
+import type { BlockInstance } from '@wordpress/blocks';
 
 export type ImageBlock = BlockInstance< {
 	id: number;

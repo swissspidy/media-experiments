@@ -1,5 +1,5 @@
 import { createRegistry } from '@wordpress/data';
-import { type WPDataRegistry } from '@wordpress/data/build-types/registry';
+import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 
 import { store as recordingStore } from '../';

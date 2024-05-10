@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { createRegistry } from '@wordpress/data';
-import { type WPDataRegistry } from '@wordpress/data/build-types/registry';
+import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as preferencesStore } from '@wordpress/preferences';
 
 /**

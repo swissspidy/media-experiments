@@ -1,10 +1,10 @@
 declare module '@wordpress/interface' {
-	import {
+	import type {
 		ReduxStoreConfig,
 		StoreDescriptor,
 	} from '@wordpress/data/build-types/types';
-	import { ToggleControl } from '@wordpress/components';
-	import { ComponentType, ReactNode, ComponentProps } from 'react';
+	import type { ToggleControl } from '@wordpress/components';
+	import type { ComponentType, ReactNode, ComponentProps } from 'react';
 
 	const store: {
 		name: 'core/interface';

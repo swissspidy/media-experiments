@@ -1,20 +1,18 @@
-import { type Results } from '@mediapipe/selfie_segmentation';
+import type { Results } from '@mediapipe/selfie_segmentation';
 
 import { blur } from '../utils';
 import { BACKGROUND_BLUR_PX } from '../constants';
-import { Type } from './types';
+import { Type, type State } from './types';
 
 type AllSelectors = typeof import('./selectors');
-type CurriedState< F > = F extends ( state: any, ...args: infer P ) => infer R
+type CurriedState< F > = F extends ( state: State, ...args: infer P ) => infer R
 	? ( ...args: P ) => R
 	: F;
 type Selectors = {
 	[ key in keyof AllSelectors ]: CurriedState< AllSelectors[ key ] >;
 };
 
-type ActionCreators = {
-	( args: Record< string, unknown > ): void;
-};
+type ActionCreators = ( args: Record< string, unknown > ) => void;
 
 export function getDevices() {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {

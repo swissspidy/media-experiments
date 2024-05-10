@@ -1,10 +1,10 @@
 declare module '@wordpress/block-editor' {
-	import {
+	import type {
 		ReduxStoreConfig,
 		StoreDescriptor,
 	} from '@wordpress/data/build-types/types';
 
-	import {
+	import type {
 		ComponentType,
 		FC,
 		MouseEventHandler,
@@ -12,7 +12,7 @@ declare module '@wordpress/block-editor' {
 		ReactNode,
 		ComponentProps,
 	} from 'react';
-	import { Slot, Toolbar } from '@wordpress/components';
+	import type { Slot, Toolbar } from '@wordpress/components';
 
 	const store: {
 		name: 'core/block-editor';
@@ -24,7 +24,7 @@ declare module '@wordpress/block-editor' {
 		>
 	>;
 
-	import { Ref, RefCallback } from 'react';
+	import type { Ref, RefCallback } from 'react';
 
 	interface Reserved {
 		id: string;
@@ -86,7 +86,5 @@ declare module '@wordpress/block-editor' {
 		children: ReactNode;
 	}
 
-	const InspectorControls: {
-		( props: InspectorControlsProps ): JSX.Element;
-	};
+	const InspectorControls: ( props: InspectorControlsProps ) => JSX.Element;
 }

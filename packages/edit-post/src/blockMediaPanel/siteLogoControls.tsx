@@ -1,9 +1,9 @@
 import { useDispatch, useSelect } from '@wordpress/data';
 import { type Settings, store as coreStore } from '@wordpress/core-data';
-import { type BlockEditProps } from '@wordpress/blocks';
+import type { BlockEditProps } from '@wordpress/blocks';
 import { Fragment } from '@wordpress/element';
 
-import { type Attachment } from '@mexp/upload-media';
+import type { Attachment } from '@mexp/upload-media';
 
 import { useAttachment } from '../utils/hooks';
 import { UploadIndicator } from './uploadIndicator';

@@ -1,4 +1,4 @@
-import { type BlockEditProps, type BlockInstance } from '@wordpress/blocks';
+import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as coreStore } from '@wordpress/core-data';

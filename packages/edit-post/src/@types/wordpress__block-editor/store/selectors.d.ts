@@ -1,4 +1,4 @@
-import { BlockInstance } from '@wordpress/blocks';
+import type { BlockInstance } from '@wordpress/blocks';
 
 /**
  * Determines if the given block type is allowed to be inserted into the block list.

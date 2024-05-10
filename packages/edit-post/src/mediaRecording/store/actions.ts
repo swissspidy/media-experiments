@@ -109,7 +109,7 @@ export function resetVideoInput() {
 // TODO(#230): Allow passing an array for recordingType.
 export function enterRecordingMode(
 	clientId: string,
-	recordingType: string = 'video'
+	recordingType = 'video'
 ) {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
 		dispatch( {

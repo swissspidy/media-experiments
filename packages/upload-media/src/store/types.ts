@@ -65,7 +65,7 @@ export enum Type {
 	ApproveUpload = 'APPROVE_UPLOAD',
 }
 
-type Action< T = Type, Payload = {} > = {
+type Action< T = Type, Payload = Record< string, unknown > > = {
 	type: T;
 } & Payload;
 

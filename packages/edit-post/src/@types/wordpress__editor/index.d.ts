@@ -1,5 +1,5 @@
 declare module '@wordpress/editor' {
-	import {
+	import type {
 		ReduxStoreConfig,
 		StoreDescriptor,
 	} from '@wordpress/data/build-types/types';

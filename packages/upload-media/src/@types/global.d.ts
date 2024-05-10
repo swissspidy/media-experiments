@@ -1,4 +1,4 @@
-import { ImageSizeCrop } from '../store/types';
+import type { ImageSizeCrop } from '../store/types';
 
 declare global {
 	interface Window {
@@ -8,5 +8,3 @@ declare global {
 		};
 	}
 }
-
-export {};

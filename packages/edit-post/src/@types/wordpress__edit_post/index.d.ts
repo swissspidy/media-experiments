@@ -1,10 +1,10 @@
 declare module '@wordpress/edit-post' {
-	import {
+	import type {
 		ReduxStoreConfig,
 		StoreDescriptor,
 	} from '@wordpress/data/build-types/types';
-	import { MenuItem } from '@wordpress/components';
-	import { ComponentType, ReactNode, ComponentProps } from 'react';
+	import type { MenuItem } from '@wordpress/components';
+	import type { ComponentType, ReactNode, ComponentProps } from 'react';
 
 	const store: {
 		name: 'core/edit-post';

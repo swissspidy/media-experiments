@@ -10,7 +10,7 @@ import {
 import { __ } from '@wordpress/i18n';
 import { copy } from '@wordpress/icons';
 import { useDispatch } from '@wordpress/data';
-import { type Post } from '@wordpress/core-data';
+import type { Post } from '@wordpress/core-data';
 import { useCopyToClipboard } from '@wordpress/compose';
 import { store as noticesStore } from '@wordpress/notices';
 

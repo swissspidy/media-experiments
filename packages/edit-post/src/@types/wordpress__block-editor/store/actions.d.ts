@@ -1,4 +1,4 @@
-import { BlockInstance } from '@wordpress/blocks';
+import type { BlockInstance } from '@wordpress/blocks';
 
 /**
  * Signals that the block selection is cleared.

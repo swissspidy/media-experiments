@@ -1,6 +1,6 @@
 import { addFilter } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
-import { type Block, type BlockAttributes } from '@wordpress/blocks';
+import type { Block, BlockAttributes } from '@wordpress/blocks';
 
 import { isGifVariation } from './utils';
 
