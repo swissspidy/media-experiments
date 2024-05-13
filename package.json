@@ -37,7 +37,7 @@
 		"@testing-library/react": "^15.0.6",
 		"@types/jest": "^29.5.12",
 		"@types/mime": "^3.0.4",
-		"@types/node": "^20.12.10",
+		"@types/node": "^20.12.11",
 		"@types/uuid": "^9.0.8",
 		"@types/wordpress__blocks": "^12.5.14",
 		"@wordpress/dependency-extraction-webpack-plugin": "^5.8.0",
