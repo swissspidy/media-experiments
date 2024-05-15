@@ -6,27 +6,44 @@
 
 
 This experimental WordPress plugin aims to bring improved media capabilities to WordPress and specifically the block editor,
-all powered by new web platform features like [WebAssembly](https://developer.mozilla.org/en-US/docs/WebAssembly).
+all powered by new web platform features like [WebAssembly](https://developer.mozilla.org/en-US/docs/WebAssembly). Highlights include:
 
-## Try it
+* 100% client-side image compression for all new uploads, including for all thumbnails.
+* Convert HEIC images (typically from iPhone) to more web-safe formats such as JPEG or AVIF.
+* Effortlessly optimize existing images and videos in your content.
+* Convert animated GIFs to videos for improved performance.
+* Easily upload images from another device (nice AirDrop alternative!).
+
+Want to see it in action? [Check out my demo tweet](https://twitter.com/swissspidy/status/1733138082591912154) or [this interview](https://wpshout.com/pascal-birchler-interview-wordpress-media-experiements/). Detailed feature descriptions, including for upcoming features, are further below.
+
+## Quick Start
+
+Install and activate the latest nightly build on your WordPress website and then start dragging media files into a new post, or optimize images in an existing post.
+
+[![Download latest nightly build](https://img.shields.io/badge/Download%20latest%20nightly-24282D?style=for-the-badge&logo=Files&logoColor=ffffff)](https://github.com/swissspidy/media-experiments/releases/download/nightly/media-experiments.zip)
+
+Note: Requires **WordPress 6.5+** and **PHP 8.0+**.
+
+### Using WordPress Playground
 
 Use [WordPress Playground](https://wordpress.org/playground/) to try this plugin directly in the browser without installing it on your site: 
 
 [![Test on WordPress Playground](https://img.shields.io/badge/Test%20on%20WordPress%20Playground-3F57E1?style=for-the-badge&logo=WordPress&logoColor=ffffff)](https://playground.wordpress.net/?mode=seamless&blueprint-url=https://raw.githubusercontent.com/swissspidy/media-experiments/main/blueprints/playground.json)
 
-**Note:** This is experimental. Not all features are currently supported in playground.
+**Note:** This is experimental. Playground does not support some of the WebAssembly features, so you will not have the full experience.
 
 ## Usage
 
+You can [download the latest nightly build](https://github.com/swissspidy/media-experiments/releases/download/nightly/media-experiments.zip) directly from GitHub.
+
 Reminder: this is an experimental WordPress plugin. While you can totally install it on your website, it is recommended to try it on a development environment first.
 
-You can [download the latest nightly build](https://github.com/swissspidy/media-experiments/releases/download/nightly/media-experiments.zip) directly from GitHub.
 Afterwards, you should be able to use a plugin like [Git Updater](https://git-updater.com/) to receive updates.
 Alternatively, simply download the nightly build again every once in a while.
 
 **Important:** If you clone this repository, you will first need to build the assets.
 
-## Development
+## Contributing
 
 Run `npm install` and `npm run build` to build all the JavaScript and CSS.
 
@@ -38,7 +55,7 @@ A non-exclusive list of things that have been implemented so far:
 * Preview image generation for PDFs
 * Converting GIFs to videos
 * Video transcoding and compression (e.g. MOV to MP4)
-* Image transcoding and compression (e.g. HEIF to WebP)
+* Image transcoding and compression (e.g. HEIF/HEIC to WebP or AVIF)
 * Audio transcoding (e.g. OGG to MP3)
 * Video audio track detection and muting
 * Optimization of existing media with a comparison screen
@@ -73,7 +90,7 @@ This project automatically converts animated GIFs to an actual video file during
 
 https://github.com/swissspidy/media-experiments/assets/841956/df3343e5-6e49-44da-bb45-9f6f43f92665
 
-### HEIF Image Transcoding
+### HEIF/HEIC Image Transcoding
 
 Uses [`libheif-js`](https://www.npmjs.com/package/libheif-js) to automatically convert HEIC images (typically taken on iPhone) to a more common format (WebP or JPEG).
 
