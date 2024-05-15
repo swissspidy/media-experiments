@@ -528,7 +528,7 @@ function register_media_source_taxonomy(): void {
 		'attachment',
 		[
 			'label'        => __( 'Source', 'media-experiments' ),
-			'public'       => true, // Set to true for debugging.
+			'public'       => false,
 			'rewrite'      => false,
 			'hierarchical' => false,
 			'show_in_rest' => true,
