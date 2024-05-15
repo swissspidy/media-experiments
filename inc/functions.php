@@ -44,6 +44,8 @@ function set_up_cross_origin_isolation_editor( WP_Screen $screen ): void {
  */
 function get_user_media_preferences( int $user_id ) {
 	/**
+	 * User preferences.
+	 *
 	 * @var false|array<string, array<string, array{bigImageSizeThreshold?: int}>> $preferences
 	 */
 	$preferences = get_user_meta( $user_id, 'wp_persisted_preferences', true );
