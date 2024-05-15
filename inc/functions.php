@@ -40,14 +40,18 @@ function set_up_cross_origin_isolation_editor( WP_Screen $screen ): void {
  *
  * @param int $user_id User ID.
  * @return array<string, mixed>
+ * @phpstan-return array<string, array{bigImageSizeThreshold?: int}>
  */
 function get_user_media_preferences( int $user_id ) {
+	/**
+	 * @var false|array<string, array<string, array{bigImageSizeThreshold?: int}>> $preferences
+	 */
 	$preferences = get_user_meta( $user_id, 'wp_persisted_preferences', true );
 	if ( ! $preferences ) {
 		return [];
 	}
 
-	return (array) $preferences['media-experiments/preferences'] ?? [];
+	return (array) ( $preferences['media-experiments/preferences'] ?? [] );
 }
 
 /**
@@ -268,7 +272,7 @@ function enqueue_block_assets(): void {
  * Returns a list of all available image sizes.
  *
  * @return array Existing image sizes.
- * @phpstan-return array<string,string|int>
+ * @phpstan-return array<string, array<string,string|int>>
  */
 function get_all_image_sizes(): array {
 	$sizes = wp_get_registered_image_subsizes();
