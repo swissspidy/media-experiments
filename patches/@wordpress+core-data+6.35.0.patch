@@ -1,5 +1,5 @@
 diff --git a/node_modules/@wordpress/core-data/build-types/actions.d.ts b/node_modules/@wordpress/core-data/build-types/actions.d.ts
-index eddee87..06062ac 100644
+index eddee87..aebde8b 100644
 --- a/node_modules/@wordpress/core-data/build-types/actions.d.ts
 +++ b/node_modules/@wordpress/core-data/build-types/actions.d.ts
 @@ -176,7 +176,7 @@ export function receiveNavigationFallbackId(fallbackId: integer): any;
@@ -12,7 +12,7 @@ index eddee87..06062ac 100644
      throwOnError?: boolean | undefined;
  } | undefined): ({ dispatch }: {
 diff --git a/node_modules/@wordpress/core-data/build-types/entity-provider.d.ts b/node_modules/@wordpress/core-data/build-types/entity-provider.d.ts
-index 2f44457..af6d485 100644
+index 2f44457..886486d 100644
 --- a/node_modules/@wordpress/core-data/build-types/entity-provider.d.ts
 +++ b/node_modules/@wordpress/core-data/build-types/entity-provider.d.ts
 @@ -42,7 +42,7 @@ export function useEntityId(kind: string, name: string): any;
@@ -25,7 +25,7 @@ index 2f44457..af6d485 100644
   * Hook that returns block content getters and setters for
   * the nearest provided entity of the specified type.
 diff --git a/node_modules/@wordpress/core-data/build-types/index.d.ts b/node_modules/@wordpress/core-data/build-types/index.d.ts
-index 5abea16..7bbbbcd 100644
+index 5abea16..7e698b6 100644
 --- a/node_modules/@wordpress/core-data/build-types/index.d.ts
 +++ b/node_modules/@wordpress/core-data/build-types/index.d.ts
 @@ -25,13 +25,13 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
@@ -72,7 +72,7 @@ index 5abea16..7bbbbcd 100644
      getRevisions: (state: selectors.State, kind: string, name: string, recordKey: string | number, query?: {
          [x: string]: any;
 diff --git a/node_modules/@wordpress/core-data/build-types/selectors.d.ts b/node_modules/@wordpress/core-data/build-types/selectors.d.ts
-index 70c3e01..d4615ac 100644
+index 70c3e01..f612a6b 100644
 --- a/node_modules/@wordpress/core-data/build-types/selectors.d.ts
 +++ b/node_modules/@wordpress/core-data/build-types/selectors.d.ts
 @@ -356,7 +356,7 @@ export declare function hasEditsForEntityRecord(state: State, kind: string, name
