@@ -23,6 +23,10 @@ updates:
           wp-packages:
               patterns:
                   - '@wordpress/*'
+          oxlint:
+              patterns:
+                  - 'oxlint'
+                  - 'eslint-plugin-oxlint'
 
     - package-ecosystem: composer
       directory: '/'
