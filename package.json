@@ -31,7 +31,7 @@
 	},
 	"devDependencies": {
 		"@mexp/eslint-import-resolver": "*",
-		"@playwright/test": "^1.44.0",
+		"@playwright/test": "^1.44.1",
 		"@shopify/web-worker": "^6.1.2",
 		"@testing-library/jest-dom": "^6.4.5",
 		"@testing-library/react": "^15.0.7",
