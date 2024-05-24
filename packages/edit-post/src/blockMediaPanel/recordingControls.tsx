@@ -144,7 +144,6 @@ function ToolbarControls( { onInsert }: ToolbarControlsProps ) {
 			{ 'audio' !== recordingType && (
 				<BlockControls group="inline">
 					<ToolbarButton
-						placeholder="" // Fixes unexpected TS error for missing prop.
 						onClick={ () => {
 							void toggleBlurEffect();
 						} }
@@ -178,7 +177,6 @@ function ToolbarControls( { onInsert }: ToolbarControlsProps ) {
 					<Fragment>
 						{ ! isStopped && (
 							<ToolbarButton
-								placeholder="" // Fixes unexpected TS error for missing prop.
 								onClick={ () => {
 									if ( isRecordingOrCountdown ) {
 										void stopRecording();
@@ -198,7 +196,6 @@ function ToolbarControls( { onInsert }: ToolbarControlsProps ) {
 						) }
 						{ isRecording && (
 							<ToolbarButton
-								placeholder="" // Fixes unexpected TS error for missing prop.
 								onClick={ () => {
 									void pauseRecording();
 								} }
@@ -208,7 +205,6 @@ function ToolbarControls( { onInsert }: ToolbarControlsProps ) {
 						) }
 						{ isPaused && (
 							<ToolbarButton
-								placeholder="" // Fixes unexpected TS error for missing prop.
 								onClick={ () => {
 									void resumeRecording();
 								} }
@@ -220,7 +216,6 @@ function ToolbarControls( { onInsert }: ToolbarControlsProps ) {
 				) }
 				{ 'image' === recordingType && ! isStopped && (
 					<ToolbarButton
-						placeholder="" // Fixes unexpected TS error for missing prop.
 						onClick={ () => {
 							void captureImage();
 						} }
@@ -234,7 +229,6 @@ function ToolbarControls( { onInsert }: ToolbarControlsProps ) {
 				{ isStopped && (
 					<Fragment>
 						<ToolbarButton
-							placeholder="" // Fixes unexpected TS error for missing prop.
 							onClick={ () => {
 								// Upload the file and leave recording mode.
 
@@ -252,7 +246,6 @@ function ToolbarControls( { onInsert }: ToolbarControlsProps ) {
 							{ __( 'Insert', 'media-experiments' ) }
 						</ToolbarButton>
 						<ToolbarButton
-							placeholder="" // Fixes unexpected TS error for missing prop.
 							onClick={ () => {
 								void retryRecording();
 							} }
