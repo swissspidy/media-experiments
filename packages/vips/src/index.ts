@@ -32,9 +32,13 @@ async function getVips(): Promise< typeof VipsInstance > {
 		return vipsInstance;
 	}
 
+	const mainBlobUrl = URL.createObjectURL(
+		await ( await fetch( `${ VIPS_CDN_URL }/vips.js` ) ).blob()
+	);
+
 	vipsInstance = await Vips( {
 		locateFile: ( fileName: string ) => `${ VIPS_CDN_URL }/${ fileName }`,
-		workaroundCors: true,
+		mainScriptUrlOrBlob: mainBlobUrl,
 		preRun: ( module: EmscriptenModule ) => {
 			// https://github.com/kleisauke/wasm-vips/issues/13#issuecomment-1073246828
 			module.setAutoDeleteLater( true );
