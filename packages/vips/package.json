@@ -32,6 +32,6 @@
 	},
 	"dependencies": {
 		"@mexp/media-utils": "../media-utils",
-		"wasm-vips": "^0.0.8"
+		"wasm-vips": "^0.0.9"
 	}
 }

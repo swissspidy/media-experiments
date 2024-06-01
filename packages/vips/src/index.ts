@@ -32,19 +32,8 @@ async function getVips(): Promise< typeof VipsInstance > {
 		return vipsInstance;
 	}
 
-	const workerBlobUrl = URL.createObjectURL(
-		await ( await fetch( `${ VIPS_CDN_URL }/vips.worker.js` ) ).blob()
-	);
-
 	vipsInstance = await Vips( {
-		locateFile: ( fileName: string, scriptDirectory: string ) => {
-			const url = scriptDirectory + fileName;
-			if ( url.endsWith( '.worker.js' ) ) {
-				return workerBlobUrl;
-			}
-			return `${ VIPS_CDN_URL }/${ fileName }`;
-		},
-		mainScriptUrlOrBlob: `${ VIPS_CDN_URL }/vips.js`,
+		locateFile: ( fileName: string ) => `${ VIPS_CDN_URL }/${ fileName }`,
 		workaroundCors: true,
 		preRun: ( module: EmscriptenModule ) => {
 			// https://github.com/kleisauke/wasm-vips/issues/13#issuecomment-1073246828
@@ -185,6 +174,7 @@ export async function resizeImage(
 	// But only if we're not cropping.
 	if ( supportsAnimation( type ) && ! resize.crop ) {
 		strOptions = '[n=-1]';
+		thumbnailOptions.option_string = strOptions;
 		( loadOptions as LoadOptions< typeof type > ).n = -1;
 	}
 
@@ -199,30 +189,13 @@ export async function resizeImage(
 
 	image.onProgress = onProgress;
 
-	const { width } = image;
-
-	// Using getTypeof acts an isset check.
-	const numberOfFrames =
-		supportsAnimation( type ) &&
-		image.getTypeof( 'n-pages' ) &&
-		! resize.crop
-			? image.getInt( 'n-pages' )
-			: 1;
-	const height = image.height / numberOfFrames;
-	const isAnimated = numberOfFrames > 1;
-
-	// To preserve all frames when cropping.
-	if ( isAnimated ) {
-		thumbnailOptions.option_string = '[n=-1]';
-	}
+	const { width, pageHeight } = image;
 
 	// If resize.height is zero.
-	resize.height = resize.height || ( height / width ) * resize.width;
+	resize.height = resize.height || ( pageHeight / width ) * resize.width;
 
 	let resizeWidth = resize.width;
 	thumbnailOptions.height = resize.height;
-
-	let newHeight: number;
 
 	if ( ! resize.crop ) {
 		image = vips.Image.thumbnailBuffer(
@@ -232,8 +205,6 @@ export async function resizeImage(
 		);
 
 		image.onProgress = onProgress;
-
-		newHeight = image.height / numberOfFrames;
 	} else if ( true === resize.crop ) {
 		thumbnailOptions.crop = smartCrop ? 'attention' : 'centre';
 
@@ -244,30 +215,28 @@ export async function resizeImage(
 		);
 
 		image.onProgress = onProgress;
-
-		newHeight = image.height;
 	} else {
 		// First resize, then do the cropping.
 		// This allows operating on the second bitmap with the correct dimensions.
 
-		if ( width < height ) {
+		if ( width < pageHeight ) {
 			resizeWidth =
 				resize.width >= resize.height
 					? resize.width
-					: ( width / height ) * resize.height;
+					: ( width / pageHeight ) * resize.height;
 			thumbnailOptions.height =
 				resize.width >= resize.height
-					? ( height / width ) * resizeWidth
+					? ( pageHeight / width ) * resizeWidth
 					: resize.height;
 		} else {
 			resizeWidth =
 				resize.width >= resize.height
-					? ( width / height ) * resize.height
+					? ( width / pageHeight ) * resize.height
 					: resize.width;
 			thumbnailOptions.height =
 				resize.width >= resize.height
 					? resize.height
-					: ( height / width ) * resizeWidth;
+					: ( pageHeight / width ) * resizeWidth;
 		}
 
 		image = vips.Image.thumbnailBuffer(
@@ -295,8 +264,6 @@ export async function resizeImage(
 		image = image.crop( left, top, resize.width, resize.height );
 
 		image.onProgress = onProgress;
-
-		newHeight = image.height;
 	}
 
 	// TODO: Allow passing quality?
@@ -306,9 +273,9 @@ export async function resizeImage(
 	const result = {
 		buffer: outBuffer.buffer,
 		width: image.width,
-		height: newHeight,
+		height: image.pageHeight,
 		originalWidth: width,
-		originalHeight: height,
+		originalHeight: pageHeight,
 	};
 
 	// Only call after `image` is no longer being used.
