@@ -26,7 +26,8 @@ export type QueueItem = {
 	onSuccess?: OnSuccessHandler;
 	onError?: OnErrorHandler;
 	onBatchSuccess?: OnBatchSuccessHandler;
-	transcode?: TranscodingType[];
+	currentOperation?: OperationType;
+	operations?: OperationType[];
 	error?: Error;
 	batchId?: string;
 	sourceUrl?: string;
@@ -50,19 +51,16 @@ export enum Type {
 	Unknown = 'REDUX_UNKNOWN',
 	Add = 'ADD_ITEM',
 	Prepare = 'PREPARE_ITEM',
-	TranscodingPrepare = 'TRANSCODING_PREPARE',
-	TranscodingStart = 'TRANSCODING_START',
-	TranscodingFinish = 'TRANSCODING_FINISH',
 	UploadStart = 'UPLOAD_START',
-	UploadFinish = 'UPLOAD_FINISH',
-	SideloadFinish = 'SIDELOAD_FINISH',
 	Cancel = 'CANCEL_ITEM',
 	Remove = 'REMOVE_ITEM',
-	AddPoster = 'ADD_POSTER',
 	SetMediaSourceTerms = 'ADD_MEDIA_SOURCE_TERMS',
 	SetImageSizes = 'ADD_IMAGE_SIZES',
 	RequestApproval = 'REQUEST_APPROVAL',
 	ApproveUpload = 'APPROVE_UPLOAD',
+	OperationStart = 'OPERATION_START',
+	OperationFinish = 'OPERATION_FINISH',
+	AddOperations = 'ADD_OPERATIONS',
 }
 
 type Action< T = Type, Payload = Record< string, unknown > > = {
@@ -70,8 +68,28 @@ type Action< T = Type, Payload = Record< string, unknown > > = {
 } & Payload;
 
 export type UnknownAction = Action< Type.Unknown >;
-export type AddAction = Action< Type.Add, { item: QueueItem } >;
-export type PrepareAction = Action< Type.Prepare, { id: QueueItemId } >;
+export type AddAction = Action<
+	Type.Add,
+	{
+		item: Omit< QueueItem, 'operations' > &
+			Partial< Pick< QueueItem, 'operations' > >;
+	}
+>;
+export type OperationStartAction = Action<
+	Type.OperationStart,
+	{ id: QueueItemId }
+>;
+export type OperationFinishAction = Action<
+	Type.OperationFinish,
+	{
+		id: QueueItemId;
+		item: Partial< QueueItem >;
+	}
+>;
+export type AddOperationsAction = Action<
+	Type.AddOperations,
+	{ id: QueueItemId; operations: OperationType[] }
+>;
 export type RequestApprovalAction = Action<
 	Type.RequestApproval,
 	{ id: QueueItemId; file: File; url: string }
@@ -80,42 +98,11 @@ export type ApproveUploadAction = Action<
 	Type.ApproveUpload,
 	{ id: QueueItemId }
 >;
-export type TranscodingPrepareAction = Action<
-	Type.TranscodingPrepare,
-	{ id: QueueItemId; transcode?: TranscodingType[] }
->;
-export type TranscodingStartAction = Action<
-	Type.TranscodingStart,
-	{ id: QueueItemId }
->;
-export type TranscodingFinishAction = Action<
-	Type.TranscodingFinish,
-	{
-		id: QueueItemId;
-		file: File;
-		url: string;
-		mediaSourceTerm?: MediaSourceTerm;
-		additionalData?: Partial< AdditionalData >;
-	}
->;
-export type UploadStartAction = Action< Type.UploadStart, { id: QueueItemId } >;
-export type UploadFinishAction = Action<
-	Type.UploadFinish,
-	{ id: QueueItemId; attachment: Attachment }
->;
-export type SideloadFinishAction = Action<
-	Type.SideloadFinish,
-	{ id: QueueItemId; attachment: Attachment }
->;
 export type CancelAction = Action<
 	Type.Cancel,
 	{ id: QueueItemId; error: Error }
 >;
 export type RemoveAction = Action< Type.Remove, { id: QueueItemId } >;
-export type AddPosterAction = Action<
-	Type.AddPoster,
-	{ id: QueueItemId; file: File; url: string }
->;
 export type SetMediaSourceTermsAction = Action<
 	Type.SetMediaSourceTerms,
 	{ terms: Record< MediaSourceTerm, number > }
@@ -152,28 +139,25 @@ export type OnErrorHandler = ( error: Error ) => void;
 export type OnBatchSuccessHandler = () => void;
 
 export enum ItemStatus {
-	Pending = 'PENDING',
-	Preparing = 'PREPARING',
-	PendingTranscoding = 'PENDING_TRANSCODING',
-	Transcoding = 'TRANSCODING',
-	Transcoded = 'TRANSCODED',
+	Processing = 'PROCESSING',
+	Paused = 'PAUSED', // TODO: Implement pausing, mostly for testing.
 	PendingApproval = 'PENDING_APPROVAL',
-	Approved = 'APPROVED',
-	Uploading = 'UPLOADING',
-	Uploaded = 'UPLOADED',
-	Cancelled = 'CANCELLED',
 }
 
-export enum TranscodingType {
-	ResizeCrop = 'RESIZE_CROP',
-	Heif = 'HEIF',
-	Gif = 'GIF',
-	Audio = 'AUDIO',
-	Video = 'VIDEO',
-	Image = 'IMAGE',
-	MuteVideo = 'MUTE_VIDEO',
-	OptimizeExisting = 'OPTIMIZE_EXISTING',
-	Default = 'DEFAULT', // TODO: Unused. Remove?
+export enum OperationType {
+	AddPoster = 'ADD_POSTER',
+	UploadPoster = 'UPLOAD_POSTER',
+	UploadOriginal = 'UPLOAD_ORIGINAL',
+	ThumbnailGeneration = 'THUMBNAIL_GENERATION',
+	TranscodeResizeCrop = 'RESIZE_CROP',
+	TranscodeHeif = 'TRANSCODE_HEIF',
+	TranscodeGif = 'TRANSCODE_GIF',
+	TranscodeAudio = 'TRANSCODE_AUDIO',
+	TranscodeVideo = 'TRANSCODE_VIDEO',
+	TranscodeImage = 'TRANSCODE_IMAGE',
+	TranscodeMuteVideo = 'TRANSCODE_MUTE_VIDEO',
+	TranscodeCompress = 'TRANSCODE_COMPRESS',
+	Upload = 'UPLOAD',
 }
 
 export interface RestAttachment extends WP_REST_API_Attachment {

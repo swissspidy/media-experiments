@@ -9,7 +9,7 @@ import { store as preferencesStore } from '@wordpress/preferences';
  * Internal dependencies
  */
 import { store as uploadStore } from '..';
-import { ItemStatus, type QueueItem, TranscodingType, Type } from '../types';
+import { ItemStatus, type QueueItem, OperationType, Type } from '../types';
 import { UploadError } from '../../uploadError';
 
 const mockImageFromPdf = new File( [], 'example.jpg', {
@@ -65,7 +65,7 @@ describe( 'actions', () => {
 					id: expect.any( String ),
 					file: jpegFile,
 					sourceFile: jpegFile,
-					status: ItemStatus.Pending,
+					status: ItemStatus.Processing,
 					attachment: {
 						url: expect.stringMatching( /^blob:/ ),
 					},
@@ -90,7 +90,7 @@ describe( 'actions', () => {
 					id: expect.any( String ),
 					file: jpegFile,
 					sourceFile: jpegFile,
-					status: ItemStatus.Pending,
+					status: ItemStatus.Processing,
 					attachment: {
 						url: expect.stringMatching( /^blob:/ ),
 					},
@@ -103,7 +103,7 @@ describe( 'actions', () => {
 					id: expect.any( String ),
 					file: mp4File,
 					sourceFile: mp4File,
-					status: ItemStatus.Pending,
+					status: ItemStatus.Processing,
 					attachment: {
 						url: expect.stringMatching( /^blob:/ ),
 					},
@@ -136,46 +136,12 @@ describe( 'actions', () => {
 					sourceUrl: 'https://example.com/example.jpg',
 					file: jpegFile,
 					sourceFile: jpegFile,
-					status: ItemStatus.Pending,
+					status: ItemStatus.Processing,
 					attachment: {
 						url: expect.stringMatching( /^blob:/ ),
 					},
 					mediaSourceTerms: [ 'media-import' ],
 				} )
-			);
-		} );
-	} );
-
-	describe( 'completeItem', () => {
-		it( 'removes an item from the queue', () => {
-			registry.dispatch( uploadStore ).addItem( {
-				file: jpegFile,
-			} );
-
-			expect( registry.select( uploadStore ).getItems() ).toHaveLength(
-				1
-			);
-
-			const attachment = {
-				id: 123,
-				url: 'https://example.com/attachment.jpg',
-				alt: '',
-				title: '',
-				mimeType: 'image/jpeg',
-			};
-
-			const item: QueueItem = registry
-				.select( uploadStore )
-				.getItems()[ 0 ];
-
-			registry
-				.dispatch( uploadStore )
-				.finishUploading( item.id, attachment );
-
-			registry.dispatch( uploadStore ).completeItem( item.id );
-
-			expect( registry.select( uploadStore ).getItems() ).toHaveLength(
-				0
 			);
 		} );
 	} );
@@ -231,11 +197,11 @@ describe( 'actions', () => {
 					file: expect.any( File ),
 					sourceFile: expect.any( File ),
 					sourceAttachmentId: 1234,
-					status: ItemStatus.Pending,
+					status: ItemStatus.Processing,
 					attachment: {
 						url: 'https://example.com/awesome-video.mp4',
 					},
-					transcode: [ TranscodingType.MuteVideo ],
+					transcode: [ OperationType.TranscodeMuteVideo ],
 				} )
 			);
 			expect( item.file.name ).toBe( 'awesome-video-muted.mp4' );
@@ -271,11 +237,11 @@ describe( 'actions', () => {
 					file: expect.any( File ),
 					sourceFile: expect.any( File ),
 					sourceAttachmentId: 1234,
-					status: ItemStatus.Pending,
+					status: ItemStatus.Processing,
 					attachment: {
 						url: 'https://example.com/awesome-video.mp4',
 					},
-					transcode: [ TranscodingType.OptimizeExisting ],
+					operations: [ OperationType.TranscodeCompress ],
 				} )
 			);
 			expect( item.file.name ).toBe( 'awesome-video-optimized.mp4' );
@@ -313,7 +279,7 @@ describe( 'actions', () => {
 				registry.select( uploadStore ).getItems()[ 0 ]
 			).toStrictEqual(
 				expect.objectContaining( {
-					status: ItemStatus.Approved,
+					status: ItemStatus.Processing,
 				} )
 			);
 		} );
@@ -354,7 +320,7 @@ describe( 'actions', () => {
 				registry.select( uploadStore ).getItems()[ 0 ]
 			).toStrictEqual(
 				expect.objectContaining( {
-					status: ItemStatus.Cancelled,
+					status: ItemStatus.Processing,
 					error: expect.any( UploadError ),
 				} )
 			);
@@ -376,115 +342,6 @@ describe( 'actions', () => {
 
 			expect( registry.select( uploadStore ).getItems()[ 0 ] ).toBe(
 				item
-			);
-		} );
-	} );
-
-	describe( 'addPoster', () => {
-		it( `should return the ${ Type.AddPoster } action`, async () => {
-			const result = await registry
-				.dispatch( uploadStore )
-				.addPoster( 'abc123', jpegFile );
-
-			expect( result ).toStrictEqual( {
-				type: Type.AddPoster,
-				id: 'abc123',
-				file: jpegFile,
-				url: expect.stringMatching( /^blob:/ ),
-			} );
-		} );
-	} );
-
-	describe( 'prepareForTranscoding', () => {
-		it( `should return the ${ Type.TranscodingPrepare } action`, async () => {
-			const result = await registry
-				.dispatch( uploadStore )
-				.prepareForTranscoding( 'abc123', [ TranscodingType.Image ] );
-
-			await expect( result ).toStrictEqual( {
-				type: Type.TranscodingPrepare,
-				id: 'abc123',
-				transcode: [ TranscodingType.Image ],
-			} );
-		} );
-	} );
-
-	describe( 'startTranscoding', () => {
-		it( `should return the ${ Type.TranscodingStart } action`, async () => {
-			const result = await registry
-				.dispatch( uploadStore )
-				.startTranscoding( 'abc123' );
-
-			expect( result ).toStrictEqual( {
-				type: Type.TranscodingStart,
-				id: 'abc123',
-			} );
-		} );
-	} );
-
-	describe( 'finishTranscoding', () => {
-		it( `should return the ${ Type.TranscodingFinish } action`, async () => {
-			const result = await registry
-				.dispatch( uploadStore )
-				.finishTranscoding( 'abc123', mp4File );
-
-			await expect( result ).toStrictEqual( {
-				type: Type.TranscodingFinish,
-				id: 'abc123',
-				file: mp4File,
-				url: expect.stringMatching( /^blob:/ ),
-				additionalData: {},
-				mediaSourceTerm: undefined,
-			} );
-		} );
-	} );
-
-	describe( 'startUploading', () => {
-		it( `should return the ${ Type.UploadStart } action`, async () => {
-			const result = await registry
-				.dispatch( uploadStore )
-				.startUploading( 'abc123' );
-
-			expect( result ).toStrictEqual( {
-				type: Type.UploadStart,
-				id: 'abc123',
-			} );
-		} );
-	} );
-
-	describe( 'finishUploading', () => {
-		it( 'should mark the item as uploaded', () => {
-			const attachment = {
-				id: 123,
-				url: 'https://example.com/attachment.jpg',
-				alt: '',
-				title: '',
-				mimeType: 'image/jpeg',
-			};
-
-			registry.dispatch( uploadStore ).addItem( {
-				file: jpegFile,
-				sourceAttachmentId: 1234,
-			} );
-
-			expect( registry.select( uploadStore ).getItems() ).toHaveLength(
-				1
-			);
-
-			const item: QueueItem = registry
-				.select( uploadStore )
-				.getItems()[ 0 ];
-
-			registry
-				.dispatch( uploadStore )
-				.finishUploading( item.id, attachment );
-
-			expect(
-				registry.select( uploadStore ).getItems()[ 0 ]
-			).toStrictEqual(
-				expect.objectContaining( {
-					status: ItemStatus.Uploaded,
-				} )
 			);
 		} );
 	} );

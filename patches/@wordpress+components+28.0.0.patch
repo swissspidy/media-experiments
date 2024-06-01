@@ -1,10 +1,10 @@
 diff --git a/node_modules/@wordpress/components/build-types/card/card-divider/hook.d.ts b/node_modules/@wordpress/components/build-types/card/card-divider/hook.d.ts
-index e9e8ddb..b51e295 100644
+index a13724a..239c1de 100644
 --- a/node_modules/@wordpress/components/build-types/card/card-divider/hook.d.ts
 +++ b/node_modules/@wordpress/components/build-types/card/card-divider/hook.d.ts
 @@ -272,7 +272,7 @@ export declare function useCardDivider(props: WordPressComponentProps<DividerPro
-     unselectable?: "off" | "on" | undefined;
-     inputMode?: "search" | "none" | "text" | "email" | "tel" | "url" | "numeric" | "decimal" | undefined;
+     unselectable?: "on" | "off" | undefined;
+     inputMode?: "none" | "text" | "numeric" | "search" | "tel" | "url" | "email" | "decimal" | undefined;
      is?: string | undefined;
 -    wrapElement?: import("@ariakit/react-core/cjs/utils/types").WrapElement | undefined;
 +    wrapElement?: undefined;

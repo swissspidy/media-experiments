@@ -2,24 +2,24 @@ import reducer from '../reducer';
 import { ItemStatus, type QueueItem, Type } from '../types';
 
 describe( 'reducer', () => {
-	describe( `${ Type.Prepare }`, () => {
-		it( 'marks an item as preparing', () => {
+	describe( `${ Type.Remove }`, () => {
+		it( 'removes an item from the queue', () => {
 			const initialState = {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queue: [
 					{
 						id: '1',
-						status: ItemStatus.Pending,
+						status: ItemStatus.Processing,
 					} as QueueItem,
 					{
 						id: '2',
-						status: ItemStatus.Pending,
+						status: ItemStatus.Processing,
 					} as QueueItem,
 				],
 			};
 			const state = reducer( initialState, {
-				type: Type.Prepare,
+				type: Type.Remove,
 				id: '1',
 			} );
 
@@ -28,12 +28,8 @@ describe( 'reducer', () => {
 				imageSizes: {},
 				queue: [
 					{
-						id: '1',
-						status: ItemStatus.Preparing,
-					},
-					{
 						id: '2',
-						status: ItemStatus.Pending,
+						status: ItemStatus.Processing,
 					},
 				],
 			} );

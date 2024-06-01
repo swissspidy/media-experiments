@@ -5,6 +5,7 @@ declare global {
 		mediaExperiments: {
 			availableImageSizes: Record< string, ImageSizeCrop >;
 			allowedMimeTypes?: Record< string, string > | null;
+			mediaSourceTerms: Record< string, number >;
 		};
 	}
 }

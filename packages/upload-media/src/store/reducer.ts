@@ -1,23 +1,18 @@
 import {
+	ItemStatus,
+	Type,
 	type AddAction,
-	type AddPosterAction,
+	type AddOperationsAction,
 	type ApproveUploadAction,
 	type CancelAction,
-	ItemStatus,
-	type PrepareAction,
+	type OperationFinishAction,
+	type OperationStartAction,
 	type RemoveAction,
 	type RequestApprovalAction,
 	type SetImageSizesAction,
 	type SetMediaSourceTermsAction,
-	type SideloadFinishAction,
 	type State,
-	type TranscodingFinishAction,
-	type TranscodingPrepareAction,
-	type TranscodingStartAction,
-	Type,
 	type UnknownAction,
-	type UploadFinishAction,
-	type UploadStartAction,
 } from './types';
 
 const DEFAULT_STATE: State = {
@@ -27,47 +22,45 @@ const DEFAULT_STATE: State = {
 };
 
 type Action =
-	| UnknownAction
 	| AddAction
-	| PrepareAction
-	| TranscodingPrepareAction
-	| TranscodingStartAction
-	| TranscodingFinishAction
-	| UploadStartAction
-	| UploadFinishAction
-	| SideloadFinishAction
+	| AddOperationsAction
+	| ApproveUploadAction
 	| CancelAction
+	| OperationFinishAction
+	| OperationStartAction
 	| RemoveAction
-	| AddPosterAction
-	| SetMediaSourceTermsAction
-	| SetImageSizesAction
 	| RequestApprovalAction
-	| ApproveUploadAction;
+	| SetImageSizesAction
+	| SetMediaSourceTermsAction
+	| UnknownAction;
 
 function reducer(
 	state = DEFAULT_STATE,
 	action: Action = { type: Type.Unknown }
 ) {
+	console.log( 'reducer', state, action );
 	switch ( action.type ) {
 		case Type.Add:
 			return {
 				...state,
 				queue: [ ...state.queue, action.item ],
 			};
-		case Type.Prepare:
+
+		case Type.OperationStart: {
 			return {
 				...state,
 				queue: state.queue.map( ( item ) =>
 					item.id === action.id
 						? {
 								...item,
-								status: ItemStatus.Preparing,
+								currentOperation: item.operations?.[ 0 ],
 						  }
 						: item
 				),
 			};
+		}
 
-		case Type.TranscodingPrepare:
+		case Type.AddOperations:
 			return {
 				...state,
 				queue: state.queue.map( ( item ) => {
@@ -75,37 +68,17 @@ function reducer(
 						return item;
 					}
 
-					if ( ! action.transcode ) {
-						return {
-							...item,
-							status: ItemStatus.PendingTranscoding,
-						};
-					}
-
 					return {
 						...item,
-						status: ItemStatus.PendingTranscoding,
-						transcode: item.transcode
-							? [ ...item.transcode, ...action.transcode ]
-							: [ ...action.transcode ],
+						operations: [
+							...action.operations,
+							...( item.operations || [] ),
+						],
 					};
 				} ),
 			};
 
-		case Type.TranscodingStart:
-			return {
-				...state,
-				queue: state.queue.map( ( item ) =>
-					item.id === action.id
-						? {
-								...item,
-								status: ItemStatus.Transcoding,
-						  }
-						: item
-				),
-			};
-
-		case Type.TranscodingFinish:
+		case Type.OperationFinish:
 			return {
 				...state,
 				queue: state.queue.map( ( item ) => {
@@ -113,30 +86,28 @@ function reducer(
 						return item;
 					}
 
-					const transcode = item.transcode
-						? item.transcode.slice( 1 )
+					const operations = item.operations
+						? item.operations.slice( 1 )
 						: [];
 
 					return {
 						...item,
-						status:
-							transcode.length > 0
-								? ItemStatus.PendingTranscoding
-								: ItemStatus.Transcoded,
-						transcode,
-						file: action.file,
+						operations,
+						...action.item,
 						attachment: {
 							...item.attachment,
-							url: action.url,
-							mimeType: action.file.type,
+							...action.item.attachment,
+							// TODO: Update to pass this correctly.
+							// url: action.item?.url,
+							// mimeType: action.item?.file?.type,
 						},
 						additionalData: {
 							...item.additionalData,
-							...action.additionalData,
+							...action.item.additionalData,
 						},
 						mediaSourceTerms: [
 							...( item.mediaSourceTerms || [] ),
-							action.mediaSourceTerm,
+							...( action.item.mediaSourceTerms || [] ),
 						],
 					};
 				} ),
@@ -149,74 +120,7 @@ function reducer(
 					item.id === action.id
 						? {
 								...item,
-								status: ItemStatus.Cancelled,
 								error: action.error,
-						  }
-						: item
-				),
-			};
-
-		case Type.UploadStart:
-			return {
-				...state,
-				queue: state.queue.map( ( item ) =>
-					item.id === action.id
-						? {
-								...item,
-								status: ItemStatus.Uploading,
-						  }
-						: item
-				),
-			};
-
-		case Type.UploadFinish:
-			return {
-				...state,
-				queue: state.queue.map( ( item ) =>
-					item.id === action.id
-						? {
-								...item,
-								status: ItemStatus.Uploaded,
-								attachment: {
-									...item.attachment,
-									...action.attachment,
-								},
-								blurHash: action.attachment.blurHash,
-								dominantColor: action.attachment.dominantColor,
-						  }
-						: item
-				),
-			};
-
-		case Type.SideloadFinish:
-			return {
-				...state,
-				queue: state.queue.map( ( item ) =>
-					item.id === action.id
-						? {
-								...item,
-								status: ItemStatus.Uploaded,
-								attachment: {
-									...item.attachment,
-									...action.attachment,
-								},
-						  }
-						: item
-				),
-			};
-
-		case Type.AddPoster:
-			return {
-				...state,
-				queue: state.queue.map( ( item ) =>
-					item.id === action.id
-						? {
-								...item,
-								poster: action.file,
-								attachment: {
-									...item.attachment,
-									poster: action.url,
-								},
 						  }
 						: item
 				),
@@ -254,7 +158,7 @@ function reducer(
 					item.id === action.id
 						? {
 								...item,
-								status: ItemStatus.Approved,
+								status: ItemStatus.Processing,
 						  }
 						: item
 				),

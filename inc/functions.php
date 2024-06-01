@@ -122,6 +122,17 @@ function register_assets(): void {
 
 	$default_image_output_formats = get_default_image_output_formats();
 
+	$media_source_terms = array_flip(
+		get_terms(
+			[
+				'taxonomy'   => 'mexp_media_source',
+				'hide_empty' => false,
+				'orderby'    => false,
+				'fields'     => 'id=>slug',
+			]
+		)
+	);
+
 	wp_add_inline_script(
 		'media-experiments-view-upload-request',
 		sprintf(
@@ -132,6 +143,7 @@ function register_assets(): void {
 					'bigImageSizeThreshold'     => $image_size_threshold,
 					'bigVideoSizeThreshold'     => $video_size_threshold,
 					'defaultImageOutputFormats' => (object) $default_image_output_formats,
+					'mediaSourceTerms'          => $media_source_terms,
 				]
 			)
 		),
@@ -209,6 +221,17 @@ function enqueue_block_editor_assets(): void {
 
 	$default_image_output_formats = get_default_image_output_formats();
 
+	$media_source_terms = array_flip(
+		get_terms(
+			[
+				'taxonomy'   => 'mexp_media_source',
+				'hide_empty' => false,
+				'orderby'    => false,
+				'fields'     => 'id=>slug',
+			]
+		)
+	);
+
 	wp_add_inline_script(
 		'media-experiments',
 		sprintf(
@@ -219,6 +242,7 @@ function enqueue_block_editor_assets(): void {
 					'bigImageSizeThreshold'     => $image_size_threshold,
 					'bigVideoSizeThreshold'     => $video_size_threshold,
 					'defaultImageOutputFormats' => (object) $default_image_output_formats,
+					'mediaSourceTerms'          => $media_source_terms,
 				]
 			)
 		),

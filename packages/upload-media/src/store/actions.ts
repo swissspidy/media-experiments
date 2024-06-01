@@ -28,11 +28,11 @@ import { sideloadFile, updateMediaItem, uploadToServer } from '../api';
 import { PREFERENCES_NAME } from '../constants';
 import { isHeifImage, transcodeHeifImage } from './utils/heif';
 import {
+	vipsCancelOperations,
 	vipsCompressImage,
 	vipsConvertImageFormat,
 	vipsHasTransparency,
 	vipsResizeImage,
-	vipsCancelOperations,
 } from './utils/vips';
 import {
 	compressImage as canvasCompressImage,
@@ -42,7 +42,7 @@ import {
 import type {
 	AddAction,
 	AdditionalData,
-	AddPosterAction,
+	AddOperationsAction,
 	ApproveUploadAction,
 	Attachment,
 	AudioFormat,
@@ -56,23 +56,19 @@ import type {
 	OnChangeHandler,
 	OnErrorHandler,
 	OnSuccessHandler,
-	PrepareAction,
+	OperationFinishAction,
+	OperationStartAction,
+	QueueItem,
 	QueueItemId,
 	RemoveAction,
 	RequestApprovalAction,
 	SetImageSizesAction,
 	SetMediaSourceTermsAction,
 	SideloadAdditionalData,
-	SideloadFinishAction,
 	ThumbnailGeneration,
-	TranscodingFinishAction,
-	TranscodingPrepareAction,
-	TranscodingStartAction,
-	UploadStartAction,
-	UploadFinishAction,
 	VideoFormat,
 } from './types';
-import { ItemStatus, TranscodingType, Type } from './types';
+import { ItemStatus, OperationType, Type } from './types';
 
 const createDominantColorWorker = createWorkerFactory(
 	() =>
@@ -97,11 +93,18 @@ const isSafari = Boolean(
 );
 
 type ActionCreators = {
+	addItem: typeof addItem;
+	addItems: typeof addItems;
+	addItemFromUrl: typeof addItemFromUrl;
+	addSideloadItem: typeof addSideloadItem;
+	prepareItem: typeof prepareItem;
+	processItem: typeof processItem;
+	finishOperation: typeof finishOperation;
 	uploadItem: typeof uploadItem;
 	sideloadItem: typeof sideloadItem;
-	addItem: typeof addItem;
-	addSideloadItem: typeof addSideloadItem;
+	requestApproval: typeof requestApproval;
 	removeItem: typeof removeItem;
+	addPosterForItem: typeof addPosterForItem;
 	muteVideoItem: typeof muteVideoItem;
 	muteExistingVideo: typeof muteExistingVideo;
 	addSubtitlesForExistingVideo: typeof addSubtitlesForExistingVideo;
@@ -112,17 +115,12 @@ type ActionCreators = {
 	optimizeVideoItem: typeof optimizeVideoItem;
 	optimizeAudioItem: typeof optimizeAudioItem;
 	optimizeImageItem: typeof optimizeImageItem;
-	requestApproval: typeof requestApproval;
 	rejectApproval: typeof rejectApproval;
 	grantApproval: typeof grantApproval;
-	prepareForTranscoding: typeof prepareForTranscoding;
-	startTranscoding: typeof startTranscoding;
-	finishTranscoding: typeof finishTranscoding;
-	startUploading: typeof startUploading;
-	finishUploading: typeof finishUploading;
-	finishSideloading: typeof finishSideloading;
 	cancelItem: typeof cancelItem;
-	addPoster: typeof addPoster;
+	generateThumbnails: typeof generateThumbnails;
+	uploadOriginal: typeof uploadOriginal;
+	uploadPoster: typeof uploadPoster;
 	< T = Record< string, unknown > >( args: T ): void;
 };
 
@@ -132,6 +130,12 @@ type CurriedState< F > = F extends ( state: any, ...args: infer P ) => infer R
 	: F;
 type Selectors = {
 	[ key in keyof AllSelectors ]: CurriedState< AllSelectors[ key ] >;
+};
+
+type ThunkArgs = {
+	select: Selectors;
+	dispatch: ActionCreators;
+	registry: WPDataRegistry;
 };
 
 interface AddItemArgs {
@@ -189,12 +193,14 @@ export function addItem( {
 			.select( preferencesStore )
 			.get( PREFERENCES_NAME, 'thumbnailGeneration' );
 
+		const itemId = uuidv4();
+
 		dispatch< AddAction >( {
 			type: Type.Add,
 			item: {
-				id: uuidv4(),
+				id: itemId,
 				batchId,
-				status: ItemStatus.Pending,
+				status: ItemStatus.Processing,
 				sourceFile: cloneFile( file ),
 				file,
 				attachment: {
@@ -217,6 +223,8 @@ export function addItem( {
 				abortController: abortController || new AbortController(),
 			},
 		} );
+
+		dispatch.prepareItem( itemId );
 	};
 }
 
@@ -288,7 +296,7 @@ interface AddSideloadItemArgs {
 	onChange?: OnChangeHandler;
 	additionalData?: AdditionalData;
 	resize?: ImageSizeCrop;
-	transcode?: TranscodingType[];
+	operations?: OperationType[];
 	batchId?: BatchId;
 	parentId?: QueueItemId;
 }
@@ -298,17 +306,18 @@ export function addSideloadItem( {
 	onChange,
 	additionalData,
 	resize,
-	transcode,
+	operations,
 	batchId,
 	parentId,
 }: AddSideloadItemArgs ) {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
+		const itemId = uuidv4();
 		dispatch< AddAction >( {
 			type: Type.Add,
 			item: {
-				id: uuidv4(),
+				id: itemId,
 				batchId,
-				status: ItemStatus.Pending,
+				status: ItemStatus.Processing,
 				sourceFile: cloneFile( file ),
 				file,
 				onChange,
@@ -318,10 +327,12 @@ export function addSideloadItem( {
 				},
 				parentId,
 				resize,
-				transcode,
+				operations,
 				abortController: new AbortController(),
 			},
 		} );
+
+		dispatch.prepareItem( itemId );
 	};
 }
 
@@ -370,11 +381,13 @@ export function muteExistingVideo( {
 
 		// TODO: Maybe pass on the original as a "sourceAttachment"
 
+		const itemId = uuidv4();
+
 		dispatch< AddAction >( {
 			type: Type.Add,
 			item: {
-				id: uuidv4(),
-				status: ItemStatus.Pending,
+				id: itemId,
+				status: ItemStatus.Processing,
 				sourceFile,
 				file,
 				attachment: {
@@ -390,11 +403,13 @@ export function muteExistingVideo( {
 				mediaSourceTerms: [],
 				blurHash,
 				dominantColor,
-				transcode: [ TranscodingType.MuteVideo ],
+				operations: [ OperationType.TranscodeMuteVideo ],
 				generatedPosterId,
 				abortController: new AbortController(),
 			},
 		} );
+
+		void dispatch.prepareItem( itemId );
 	};
 }
 
@@ -426,11 +441,13 @@ export function addSubtitlesForExistingVideo( {
 		);
 		const vttFile = await generateSubtitles( sourceFile );
 
+		const itemId = uuidv4();
+
 		dispatch< AddAction >( {
 			type: Type.Add,
 			item: {
-				id: uuidv4(),
-				status: ItemStatus.Pending,
+				id: itemId,
+				status: ItemStatus.Processing,
 				sourceFile,
 				file: vttFile,
 				onChange,
@@ -443,6 +460,8 @@ export function addSubtitlesForExistingVideo( {
 				abortController: new AbortController(),
 			},
 		} );
+
+		void dispatch.prepareItem( itemId );
 	};
 }
 
@@ -499,12 +518,14 @@ export function optimizeExistingItem( {
 
 		const abortController = new AbortController();
 
+		const itemId = uuidv4();
+
 		dispatch< AddAction >( {
 			type: Type.Add,
 			item: {
-				id: uuidv4(),
+				id: itemId,
 				batchId,
-				status: ItemStatus.Pending,
+				status: ItemStatus.Processing,
 				sourceFile,
 				file,
 				attachment: {
@@ -537,11 +558,135 @@ export function optimizeExistingItem( {
 				mediaSourceTerms: [ 'media-optimization' ],
 				blurHash,
 				dominantColor,
-				transcode: [ TranscodingType.OptimizeExisting ],
+				operations: [ OperationType.TranscodeCompress ],
 				generatedPosterId,
 				abortController,
 			},
 		} );
+
+		void dispatch.prepareItem( itemId );
+	};
+}
+
+export function processItem( id: QueueItemId ) {
+	return async ( { select, dispatch }: ThunkArgs ) => {
+		const item = select.getItem( id ) as QueueItem;
+
+		const { attachment, onChange, onSuccess, onBatchSuccess, batchId } =
+			item;
+
+		if ( attachment ) {
+			const { poster, ...media } = attachment;
+			// Video block expects such a structure for the poster.
+			// https://github.com/WordPress/gutenberg/blob/e0a413d213a2a829ece52c6728515b10b0154d8d/packages/block-library/src/video/edit.js#L154
+			if ( poster ) {
+				media.image = {
+					src: poster,
+				};
+			}
+
+			onChange?.( [ media ] );
+		}
+
+		const nextOperation = item.operations?.[ 0 ];
+
+		if ( ! nextOperation ) {
+			console.log( 'Finish item', item );
+
+			if ( attachment ) {
+				onSuccess?.( [ attachment ] );
+			}
+			if ( batchId && select.isBatchUploaded( batchId ) ) {
+				onBatchSuccess?.();
+			}
+			void dispatch.removeItem( id );
+
+			return;
+		}
+
+		console.log( 'processItem', item, nextOperation );
+
+		dispatch< OperationStartAction >( {
+			type: Type.OperationStart,
+			id,
+		} );
+
+		switch ( nextOperation ) {
+			case OperationType.TranscodeResizeCrop:
+				void dispatch.resizeCropItem( item.id );
+				break;
+
+			case OperationType.TranscodeHeif:
+				void dispatch.convertHeifItem( item.id );
+				break;
+
+			case OperationType.TranscodeGif:
+				void dispatch.convertGifItem( item.id );
+				break;
+
+			case OperationType.TranscodeAudio:
+				void dispatch.optimizeAudioItem( item.id );
+				break;
+
+			case OperationType.TranscodeVideo:
+				void dispatch.optimizeVideoItem( item.id );
+				break;
+
+			case OperationType.TranscodeMuteVideo:
+				void dispatch.muteVideoItem( item.id );
+				break;
+
+			case OperationType.TranscodeImage:
+				void dispatch.optimizeImageItem( item.id );
+				break;
+
+			// TODO: Right now only handles images.
+			case OperationType.TranscodeCompress:
+				void dispatch.optimizeImageItem( item.id );
+				break;
+
+			case OperationType.AddPoster:
+				void dispatch.addPosterForItem( item.id );
+				break;
+
+			case OperationType.Upload:
+				if ( item.parentId ) {
+					dispatch.sideloadItem( id );
+				} else {
+					dispatch.uploadItem( id );
+				}
+				break;
+
+			case OperationType.ThumbnailGeneration:
+				void dispatch.generateThumbnails( id );
+				break;
+
+			case OperationType.UploadOriginal:
+				void dispatch.uploadOriginal( id );
+				break;
+
+			case OperationType.UploadPoster:
+				void dispatch.uploadPoster( id );
+				break;
+
+			default:
+			// This shouldn't happen.
+		}
+	};
+}
+
+export function finishOperation(
+	id: QueueItemId,
+	updates: Partial< QueueItem >
+) {
+	return async ( { dispatch }: ThunkArgs ) => {
+		dispatch< OperationFinishAction >( {
+			type: Type.OperationFinish,
+			id,
+			item: updates,
+		} );
+
+		dispatch.processItem( id );
 	};
 }
 
@@ -557,124 +702,33 @@ export function requestApproval(
 	};
 }
 
-export function prepareItem( id: QueueItemId ) {
+export function addPosterForItem( id: QueueItemId ) {
 	return async ( {
 		select,
 		dispatch,
-		registry,
 	}: {
 		select: Selectors;
 		dispatch: ActionCreators;
-		registry: WPDataRegistry;
 	} ) => {
-		const item = select.getItem( id );
-		if ( ! item ) {
-			return;
-		}
+		const item = select.getItem( id ) as QueueItem;
 
 		const { file } = item;
-
-		dispatch< PrepareAction >( {
-			type: Type.Prepare,
-			id,
-		} );
-
-		// TODO: Check canTranscode either here, in muteExistingVideo, or in the UI.
-
-		// Transcoding type has already been set, e.g. via muteExistingVideo() or addSideloadItem().
-		// Also allow empty arrays, useful for example when sideloading original image.
-		if ( item.transcode !== undefined ) {
-			dispatch.prepareForTranscoding( id );
-			return;
-		}
-
-		// eslint-disable-next-line @wordpress/no-unused-vars-before-return
-		const canTranscode = canTranscodeFile( file );
 
 		const mediaType = getMediaTypeFromMimeType( file.type );
 
 		switch ( mediaType ) {
-			case 'image':
-				const operations: TranscodingType[] = [];
-
-				const fileBuffer = await file.arrayBuffer();
-
-				const isGif = isAnimatedGif( fileBuffer );
-
-				const convertAnimatedGifs: boolean = registry
-					.select( preferencesStore )
-					.get( PREFERENCES_NAME, 'gif_convert' );
-
-				if ( isGif && canTranscode && convertAnimatedGifs ) {
-					dispatch.prepareForTranscoding( id, [
-						TranscodingType.Gif,
-					] );
-					return;
-				}
-
-				const isHeif = await isHeifImage( fileBuffer );
-
-				// TODO: Do we need a placeholder for a HEIF image?
-				// Maybe a base64 encoded 1x1 gray PNG?
-				// Use preloadImage() and getImageDimensions() so see if browser can render it.
-				// Image/Video block already have a placeholder state.
-				if ( isHeif ) {
-					operations.push( TranscodingType.Heif );
-				}
-
-				// Always add resize operation to comply with big image size threshold.
-				operations.push( TranscodingType.ResizeCrop );
-
-				const optimizeOnUpload: boolean = registry
-					.select( preferencesStore )
-					.get( PREFERENCES_NAME, 'optimizeOnUpload' );
-
-				if ( optimizeOnUpload ) {
-					operations.push( TranscodingType.Image );
-				}
-
-				if ( operations.length ) {
-					dispatch.prepareForTranscoding( id, operations );
-					return;
-				}
-
-				break;
-
 			case 'video':
-				// Here we are potentially dealing with an unsupported file type (e.g. MOV)
-				// that cannot be *played* by the browser, but could still be used for generating a poster.
+				const poster = await getPosterFromVideo(
+					createBlobURL( file ),
+					`${ getFileBasename( item.file.name ) }-poster`
+				);
 
-				try {
-					// TODO: is this the right place?
-					// Note: Causes another state update.
-					const poster = await getPosterFromVideo(
-						createBlobURL( file ),
-						`${ getFileBasename( item.file.name ) }-poster`
-					);
-					dispatch.addPoster( id, poster );
-				} catch {
-					// Do nothing for now.
-				}
-
-				// TODO: First check if video already meets criteria, e.g. with mediainfo.js.
-				// No need to compress a video that's already quite small.
-
-				if ( canTranscode ) {
-					dispatch.prepareForTranscoding( id, [
-						TranscodingType.Video,
-					] );
-					return;
-				}
-
-				break;
-
-			case 'audio':
-				if ( canTranscode ) {
-					dispatch.prepareForTranscoding( id, [
-						TranscodingType.Audio,
-					] );
-					return;
-				}
+				dispatch.finishOperation( id, {
+					poster,
+					attachment: {
+						poster: createBlobURL( file ),
+					},
+				} );
 
 				break;
 
@@ -690,190 +744,223 @@ export function prepareItem( id: QueueItemId ) {
 					// Same suffix as WP core uses, see https://github.com/WordPress/wordpress-develop/blob/8a5daa6b446e8c70ba22d64820f6963f18d36e92/src/wp-admin/includes/image.php#L609-L634
 					`${ getFileBasename( item.file.name ) }-pdf`
 				);
-				dispatch.addPoster( id, pdfThumbnail );
+
+				dispatch.finishOperation( id, {
+					poster: pdfThumbnail,
+					attachment: {
+						poster: createBlobURL( pdfThumbnail ),
+					},
+				} );
+				break;
 		}
-
-		if ( item.parentId ) {
-			dispatch.sideloadItem( id );
-		} else {
-			dispatch.uploadItem( id );
-		}
 	};
 }
 
-export function addPoster( id: QueueItemId, file: File ): AddPosterAction {
-	return {
-		type: Type.AddPoster,
-		id,
-		file,
-		url: createBlobURL( file ),
-	};
-}
+export function prepareItem( id: QueueItemId ) {
+	return async ( { select, dispatch, registry }: ThunkArgs ) => {
+		const item = select.getItem( id ) as QueueItem;
 
-export function prepareForTranscoding(
-	id: QueueItemId,
-	transcode?: TranscodingType[]
-): TranscodingPrepareAction {
-	return {
-		type: Type.TranscodingPrepare,
-		id,
-		transcode,
-	};
-}
+		const { file } = item;
 
-export function startTranscoding( id: QueueItemId ): TranscodingStartAction {
-	return {
-		type: Type.TranscodingStart,
-		id,
-	};
-}
+		// TODO: Check canTranscode either here, in muteExistingVideo, or in the UI.
 
-export function finishTranscoding(
-	id: QueueItemId,
-	file: File,
-	mediaSourceTerm?: MediaSourceTerm,
-	additionalData: Partial< AdditionalData > = {}
-): TranscodingFinishAction {
-	return {
-		type: Type.TranscodingFinish,
-		id,
-		file,
-		url: createBlobURL( file ),
-		mediaSourceTerm,
-		additionalData,
-	};
-}
+		// Transcoding type has already been set, e.g. via muteExistingVideo() or addSideloadItem().
+		// Also allow empty arrays, useful for example when sideloading original image.
+		if ( item.operations !== undefined ) {
+			dispatch< AddOperationsAction >( {
+				type: Type.AddOperations,
+				id,
+				operations: [ ...item.operations, OperationType.Upload ],
+			} );
 
-export function startUploading( id: QueueItemId ): UploadStartAction {
-	return {
-		type: Type.UploadStart,
-		id,
-	};
-}
-
-export function finishUploading(
-	id: QueueItemId,
-	attachment: Attachment
-): UploadFinishAction {
-	return {
-		type: Type.UploadFinish,
-		id,
-		attachment,
-	};
-}
-
-export function finishSideloading(
-	id: QueueItemId,
-	attachment: Attachment
-): SideloadFinishAction {
-	return {
-		type: Type.SideloadFinish,
-		id,
-		attachment,
-	};
-}
-
-export function completeItem( id: QueueItemId ) {
-	return async ( {
-		select,
-		dispatch,
-		registry,
-	}: {
-		select: Selectors;
-		dispatch: ActionCreators;
-		registry: WPDataRegistry;
-	} ) => {
-		const item = select.getItem( id );
-		if ( ! item ) {
+			dispatch.finishOperation( id, {} );
 			return;
 		}
 
-		dispatch.removeItem( id );
+		// eslint-disable-next-line @wordpress/no-unused-vars-before-return
+		const canTranscode = canTranscodeFile( file );
+
+		const mediaType = getMediaTypeFromMimeType( file.type );
+
+		const operations: OperationType[] = [];
+
+		switch ( mediaType ) {
+			case 'image':
+				const fileBuffer = await file.arrayBuffer();
+
+				const isGif = isAnimatedGif( fileBuffer );
+
+				const convertAnimatedGifs: boolean = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'gif_convert' );
+
+				if ( isGif && canTranscode && convertAnimatedGifs ) {
+					operations.push( OperationType.TranscodeGif );
+					break;
+				}
+
+				const isHeif = await isHeifImage( fileBuffer );
+
+				// TODO: Do we need a placeholder for a HEIF image?
+				// Maybe a base64 encoded 1x1 gray PNG?
+				// Use preloadImage() and getImageDimensions() so see if browser can render it.
+				// Image/Video block already have a placeholder state.
+				if ( isHeif ) {
+					operations.push( OperationType.TranscodeHeif );
+				}
+
+				// Always add resize operation to comply with big image size threshold.
+				operations.push( OperationType.TranscodeResizeCrop );
+
+				const optimizeOnUpload: boolean = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'optimizeOnUpload' );
+
+				if ( optimizeOnUpload ) {
+					operations.push( OperationType.TranscodeImage );
+				}
+
+				break;
+
+			case 'video':
+				// Here we are potentially dealing with an unsupported file type (e.g. MOV)
+				// that cannot be *played* by the browser, but could still be used for generating a poster.
+
+				operations.push( OperationType.AddPoster );
+
+				// TODO: First check if video already meets criteria, e.g. with mediainfo.js.
+				// No need to compress a video that's already quite small.
+
+				if ( canTranscode ) {
+					operations.push( OperationType.TranscodeVideo );
+				}
+
+				break;
+
+			case 'audio':
+				if ( canTranscode ) {
+					operations.push( OperationType.TranscodeAudio );
+				}
+
+				break;
+
+			case 'pdf':
+				operations.push( OperationType.AddPoster );
+
+				break;
+		}
+
+		operations.push( OperationType.Upload );
+
+		// Try poster generation again *after* upload if it's still mising
+		if ( 'video' === mediaType ) {
+			operations.push( OperationType.AddPoster );
+			operations.push( OperationType.UploadPoster );
+		}
+
+		if ( 'image' === mediaType || 'pdf' === mediaType ) {
+			operations.push( OperationType.ThumbnailGeneration );
+		}
+
+		if ( 'image' === mediaType ) {
+			operations.push( OperationType.UploadOriginal );
+		}
+
+		dispatch< AddOperationsAction >( {
+			type: Type.AddOperations,
+			id,
+			operations,
+		} );
+
+		dispatch.processItem( id );
+	};
+}
+
+export function uploadPoster( id: QueueItemId ) {
+	return async ( { select, dispatch }: ThunkArgs ) => {
+		const item = select.getItem( id ) as QueueItem;
 
 		const attachment: Attachment = item.attachment as Attachment;
 
-		// Video poster generation.
-
-		const mediaType = getMediaTypeFromMimeType( attachment.mimeType );
 		// In the event that the uploaded video already has a poster, do not upload another one.
 		// Can happen when using muteExistingVideo() or when a poster is generated server-side.
 		// TODO: Make the latter scenario actually work.
 		//       Use getEntityRecord to actually get poster URL from posterID returned by uploadToServer()
 		if (
-			'video' === mediaType &&
-			( ! attachment.poster || isBlobURL( attachment.poster ) )
+			( ! attachment.poster || isBlobURL( attachment.poster ) ) &&
+			item.poster
 		) {
 			try {
-				const poster =
-					item.poster ||
-					( await getPosterFromVideo(
-						attachment.url,
-						// Derive the basename from the uploaded video's file name
-						// if available for more accuracy.
-						`${ getFileBasename(
-							attachment.fileName ??
-								getFileNameFromUrl( attachment.url )
-						) }}-poster`
-					) );
+				const abortController = new AbortController();
 
-				if ( poster ) {
-					const abortController = new AbortController();
+				// Adding the poster to the queue on its own allows for it to be optimized, etc.
+				dispatch.addItem( {
+					file: item.poster,
+					onChange: ( [ posterAttachment ] ) => {
+						if (
+							! posterAttachment.url ||
+							isBlobURL( posterAttachment.url )
+						) {
+							return;
+						}
 
-					// Adding the poster to the queue on its own allows for it to be optimized, etc.
-					dispatch.addItem( {
-						file: poster,
-						onChange: ( [ posterAttachment ] ) => {
-							if (
-								! posterAttachment.url ||
-								isBlobURL( posterAttachment.url )
-							) {
-								return;
-							}
+						// Video block expects such a structure for the poster.
+						// https://github.com/WordPress/gutenberg/blob/e0a413d213a2a829ece52c6728515b10b0154d8d/packages/block-library/src/video/edit.js#L154
+						const updatedAttachment = {
+							...attachment,
+							image: {
+								src: posterAttachment.url,
+							},
+						};
 
-							// Video block expects such a structure for the poster.
-							// https://github.com/WordPress/gutenberg/blob/e0a413d213a2a829ece52c6728515b10b0154d8d/packages/block-library/src/video/edit.js#L154
-							const updatedAttachment = {
-								...attachment,
-								image: {
-									src: posterAttachment.url,
+						// This might be confusing, but the idea is to update the original
+						// video item in the editor with the newly uploaded poster.
+						item.onChange?.( [ updatedAttachment ] );
+					},
+					onSuccess: async ( [ posterAttachment ] ) => {
+						// Similarly, update the original video in the DB to have the
+						// poster as the featured image.
+						// TODO: Do this server-side instead.
+						void updateMediaItem(
+							attachment.id,
+							{
+								featured_media: posterAttachment.id,
+								meta: {
+									mexp_generated_poster_id:
+										posterAttachment.id,
 								},
-							};
-
-							// This might be confusing, but the idea is to update the original
-							// video item in the editor with the newly uploaded poster.
-							item.onChange?.( [ updatedAttachment ] );
-						},
-						onSuccess: async ( [ posterAttachment ] ) => {
-							// Similarly, update the original video in the DB to have the
-							// poster as the featured image.
-							// TODO: Do this server-side instead.
-							void updateMediaItem(
-								attachment.id,
-								{
-									featured_media: posterAttachment.id,
-									meta: {
-										mexp_generated_poster_id:
-											posterAttachment.id,
-									},
-								},
-								abortController.signal
-							);
-						},
-						additionalData: {
-							// Reminder: Parent post ID might not be set, depending on context,
-							// but should be carried over if it does.
-							post: item.additionalData.post,
-						},
-						mediaSourceTerms: [ 'poster-generation' ],
-						blurHash: item.blurHash,
-						dominantColor: item.dominantColor,
-						abortController,
-					} );
-				}
+							},
+							abortController.signal
+						);
+					},
+					additionalData: {
+						// Reminder: Parent post ID might not be set, depending on context,
+						// but should be carried over if it does.
+						post: item.additionalData.post,
+					},
+					mediaSourceTerms: [ 'poster-generation' ],
+					blurHash: item.blurHash,
+					dominantColor: item.dominantColor,
+					abortController,
+				} );
 			} catch ( err ) {
 				// TODO: Debug & catch & throw.
 			}
 		}
+
+		dispatch.finishOperation( id, {} );
+	};
+}
+
+export function generateThumbnails( id: QueueItemId ) {
+	return async ( { select, dispatch, registry }: ThunkArgs ) => {
+		const item = select.getItem( id ) as QueueItem;
+
+		console.log( 'generateThumbnails', item, item.file );
+
+		const attachment: Attachment = item.attachment as Attachment;
+
+		const mediaType = getMediaTypeFromMimeType( item.file.type );
 
 		const thumbnailGeneration: ThumbnailGeneration = registry
 			.select( preferencesStore )
@@ -896,7 +983,7 @@ export function completeItem( id: QueueItemId ) {
 				file = item.poster;
 
 				// Upload the "full" version without a resize param.
-				dispatch.addSideloadItem( {
+				void dispatch.addSideloadItem( {
 					file: item.poster,
 					additionalData: {
 						// Sideloading does not use the parent post ID but the
@@ -904,7 +991,7 @@ export function completeItem( id: QueueItemId ) {
 						post: attachment.id,
 						image_size: 'full',
 					},
-					transcode: [ TranscodingType.Image ],
+					operations: [ OperationType.TranscodeImage ],
 					parentId: item.id,
 				} );
 			}
@@ -917,7 +1004,7 @@ export function completeItem( id: QueueItemId ) {
 						imageSize.crop = false;
 					}
 
-					dispatch.addSideloadItem( {
+					void dispatch.addSideloadItem( {
 						file,
 						onChange: ( [ updatedAttachment ] ) => {
 							// This might be confusing, but the idea is to update the original
@@ -935,11 +1022,22 @@ export function completeItem( id: QueueItemId ) {
 							image_size: name,
 						},
 						resize: imageSize,
-						transcode: [ TranscodingType.ResizeCrop ],
+						operations: [ OperationType.TranscodeResizeCrop ],
 					} );
 				}
 			}
 		}
+
+		dispatch.finishOperation( id, {} );
+	};
+}
+export function uploadOriginal( id: QueueItemId ) {
+	return async ( { select, dispatch, registry }: ThunkArgs ) => {
+		const item = select.getItem( id ) as QueueItem;
+
+		const attachment: Attachment = item.attachment as Attachment;
+
+		const mediaType = getMediaTypeFromMimeType( item.file.type );
 
 		// Upload the original image file if it was resized because of the big image size threshold.
 
@@ -977,10 +1075,12 @@ export function completeItem( id: QueueItemId ) {
 						image_size: 'original',
 					},
 					// Allows skipping any resizing or optimization of the original image.
-					transcode: [],
+					operations: [],
 				} );
 			}
 		}
+
+		dispatch.finishOperation( id, {} );
 	};
 }
 
@@ -992,13 +1092,7 @@ export function removeItem( id: QueueItemId ): RemoveAction {
 }
 
 export function rejectApproval( id: number ) {
-	return async ( {
-		select,
-		dispatch,
-	}: {
-		select: Selectors;
-		dispatch: ActionCreators;
-	} ) => {
+	return async ( { select, dispatch }: ThunkArgs ) => {
 		const item = select.getItemByAttachmentId( id );
 		if ( ! item ) {
 			return;
@@ -1016,13 +1110,7 @@ export function rejectApproval( id: number ) {
 }
 
 export function grantApproval( id: number ) {
-	return async ( {
-		select,
-		dispatch,
-	}: {
-		select: Selectors;
-		dispatch: ActionCreators;
-	} ) => {
+	return async ( { select, dispatch }: ThunkArgs ) => {
 		const item = select.getItemByAttachmentId( id );
 		if ( ! item ) {
 			return;
@@ -1032,19 +1120,13 @@ export function grantApproval( id: number ) {
 			type: Type.ApproveUpload,
 			id: item.id,
 		} );
+
+		dispatch.processItem( item.id );
 	};
 }
 
 export function cancelItem( id: QueueItemId, error: Error ) {
-	return async ( {
-		select,
-		dispatch,
-		registry,
-	}: {
-		select: Selectors;
-		dispatch: ActionCreators;
-		registry: WPDataRegistry;
-	} ) => {
+	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id );
 
 		if ( ! item ) {
@@ -1069,124 +1151,30 @@ export function cancelItem( id: QueueItemId, error: Error ) {
 
 		item.abortController?.abort();
 
+		const { onError } = item;
+		onError?.( error ?? new Error( 'Upload cancelled' ) );
+		if ( ! onError && error ) {
+			// TODO: Find better way to surface errors with sideloads etc.
+			// eslint-disable-next-line no-console -- Deliberately log errors here.
+			console.error( 'Upload cancelled', error );
+		}
+
 		dispatch( {
 			type: Type.Cancel,
 			id,
 			error,
 		} );
+		void dispatch.removeItem( id );
 	};
 }
 
-export function maybeTranscodeItem( id: QueueItemId ) {
-	return async ( {
-		select,
-		dispatch,
-		registry,
-	}: {
-		select: Selectors;
-		dispatch: ActionCreators;
-		registry: WPDataRegistry;
-	} ) => {
-		const item = select.getItem( id );
-		if ( ! item ) {
-			return;
-		}
+export function optimizeImageItem( id: QueueItemId ) {
+	return async ( { select, dispatch, registry }: ThunkArgs ) => {
+		const item = select.getItem( id ) as QueueItem;
 
-		const transcode = item.transcode ? item.transcode[ 0 ] : undefined;
-
-		if ( ! transcode ) {
-			dispatch.finishTranscoding( id, item.file );
-			return;
-		}
-
-		// Prevent simultaneous FFmpeg processes to reduce resource usage.
-		const isTranscoding = select.isTranscoding();
-
-		switch ( transcode ) {
-			case TranscodingType.ResizeCrop:
-				void dispatch.resizeCropItem( item.id );
-				break;
-
-			case TranscodingType.Heif:
-				void dispatch.convertHeifItem( item.id );
-				break;
-
-			case TranscodingType.Gif:
-				if ( isTranscoding ) {
-					return;
-				}
-
-				void dispatch.convertGifItem( item.id );
-				break;
-
-			case TranscodingType.Audio:
-				if ( isTranscoding ) {
-					return;
-				}
-
-				void dispatch.optimizeAudioItem( item.id );
-				break;
-
-			case TranscodingType.Video:
-				if ( isTranscoding ) {
-					return;
-				}
-
-				void dispatch.optimizeVideoItem( item.id );
-				break;
-
-			case TranscodingType.MuteVideo:
-				if ( isTranscoding ) {
-					return;
-				}
-
-				void dispatch.muteVideoItem( item.id );
-				break;
-
-			case TranscodingType.Image:
-				if ( isTranscoding ) {
-					return;
-				}
-
-				void dispatch.optimizeImageItem( item.id );
-				break;
-
-			// TODO: Right now only handles images.
-			case TranscodingType.OptimizeExisting:
-				if ( isTranscoding ) {
-					return;
-				}
-
-				const requireApproval = registry
-					.select( preferencesStore )
-					.get( PREFERENCES_NAME, 'requireApproval' );
-
-				void dispatch.optimizeImageItem( item.id, requireApproval );
-				break;
-
-			default:
-			// This shouldn't happen.
-			// TODO: Add error handling.
-		}
-	};
-}
-
-export function optimizeImageItem( id: QueueItemId, requireApproval = false ) {
-	return async ( {
-		select,
-		dispatch,
-		registry,
-	}: {
-		select: Selectors;
-		dispatch: ActionCreators;
-		registry: WPDataRegistry;
-	} ) => {
-		const item = select.getItem( id );
-		if ( ! item ) {
-			return;
-		}
-
-		dispatch.startTranscoding( id );
+		const requireApproval = registry
+			.select( preferencesStore )
+			.get( PREFERENCES_NAME, 'requireApproval' );
 
 		const imageLibrary: ImageLibrary =
 			registry
@@ -1307,9 +1295,12 @@ export function optimizeImageItem( id: QueueItemId, requireApproval = false ) {
 
 			if ( requireApproval ) {
 				dispatch.requestApproval( id, file );
-			} else {
-				dispatch.finishTranscoding( id, file, 'media-optimization' );
 			}
+
+			dispatch.finishOperation( id, {
+				file,
+				mediaSourceTerms: [ 'media-optimization' ],
+			} );
 		} catch ( error ) {
 			dispatch.cancelItem(
 				id,
@@ -1328,21 +1319,8 @@ export function optimizeImageItem( id: QueueItemId, requireApproval = false ) {
 }
 
 export function optimizeVideoItem( id: QueueItemId ) {
-	return async ( {
-		select,
-		dispatch,
-		registry,
-	}: {
-		select: Selectors;
-		dispatch: ActionCreators;
-		registry: WPDataRegistry;
-	} ) => {
-		const item = select.getItem( id );
-		if ( ! item ) {
-			return;
-		}
-
-		dispatch.startTranscoding( id );
+	return async ( { select, dispatch, registry }: ThunkArgs ) => {
+		const item = select.getItem( id ) as QueueItem;
 
 		const outputFormat: VideoFormat =
 			registry
@@ -1379,7 +1357,10 @@ export function optimizeVideoItem( id: QueueItemId ) {
 					break;
 			}
 
-			dispatch.finishTranscoding( id, file, 'media-optimization' );
+			dispatch.finishOperation( id, {
+				file,
+				mediaSourceTerms: [ 'media-optimization' ],
+			} );
 		} catch ( error ) {
 			dispatch.cancelItem(
 				id,
@@ -1396,27 +1377,20 @@ export function optimizeVideoItem( id: QueueItemId ) {
 }
 
 export function muteVideoItem( id: QueueItemId ) {
-	return async ( {
-		select,
-		dispatch,
-	}: {
-		select: Selectors;
-		dispatch: ActionCreators;
-	} ) => {
-		const item = select.getItem( id );
-		if ( ! item ) {
-			return;
-		}
-
-		dispatch.startTranscoding( id );
+	return async ( { select, dispatch }: ThunkArgs ) => {
+		const item = select.getItem( id ) as QueueItem;
 
 		try {
 			const { muteVideo } = await import(
 				/* webpackChunkName: 'ffmpeg' */ '@mexp/ffmpeg'
 			);
 			const file = await muteVideo( item.file );
-			dispatch.finishTranscoding( id, file, undefined, {
-				mexp_is_muted: true,
+
+			dispatch.finishOperation( id, {
+				file,
+				additionalData: {
+					mexp_is_muted: true,
+				},
 			} );
 		} catch ( error ) {
 			dispatch.cancelItem(
@@ -1434,21 +1408,8 @@ export function muteVideoItem( id: QueueItemId ) {
 }
 
 export function optimizeAudioItem( id: QueueItemId ) {
-	return async ( {
-		select,
-		dispatch,
-		registry,
-	}: {
-		select: Selectors;
-		dispatch: ActionCreators;
-		registry: WPDataRegistry;
-	} ) => {
-		const item = select.getItem( id );
-		if ( ! item ) {
-			return;
-		}
-
-		dispatch.startTranscoding( id );
+	return async ( { select, dispatch, registry }: ThunkArgs ) => {
+		const item = select.getItem( id ) as QueueItem;
 
 		const outputFormat: AudioFormat =
 			registry
@@ -1472,7 +1433,10 @@ export function optimizeAudioItem( id: QueueItemId ) {
 					break;
 			}
 
-			dispatch.finishTranscoding( id, file, 'media-optimization' );
+			dispatch.finishOperation( id, {
+				file,
+				mediaSourceTerms: [ 'media-optimization' ],
+			} );
 		} catch ( error ) {
 			dispatch.cancelItem(
 				id,
@@ -1489,21 +1453,8 @@ export function optimizeAudioItem( id: QueueItemId ) {
 }
 
 export function convertGifItem( id: QueueItemId ) {
-	return async ( {
-		select,
-		dispatch,
-		registry,
-	}: {
-		select: Selectors;
-		dispatch: ActionCreators;
-		registry: WPDataRegistry;
-	} ) => {
-		const item = select.getItem( id );
-		if ( ! item ) {
-			return;
-		}
-
-		dispatch.startTranscoding( id );
+	return async ( { select, dispatch, registry }: ThunkArgs ) => {
+		const item = select.getItem( id ) as QueueItem;
 
 		const outputFormat: VideoFormat =
 			registry
@@ -1540,7 +1491,10 @@ export function convertGifItem( id: QueueItemId ) {
 					break;
 			}
 
-			dispatch.finishTranscoding( id, file, 'gif-conversion' );
+			dispatch.finishOperation( id, {
+				file,
+				mediaSourceTerms: [ 'gif-conversion' ],
+			} );
 		} catch ( error ) {
 			dispatch.cancelItem(
 				id,
@@ -1557,23 +1511,14 @@ export function convertGifItem( id: QueueItemId ) {
 }
 
 export function convertHeifItem( id: QueueItemId ) {
-	return async ( {
-		select,
-		dispatch,
-	}: {
-		select: Selectors;
-		dispatch: ActionCreators;
-	} ) => {
-		const item = select.getItem( id );
-		if ( ! item ) {
-			return;
-		}
-
-		dispatch.startTranscoding( id );
+	return async ( { select, dispatch }: ThunkArgs ) => {
+		const item = select.getItem( id ) as QueueItem;
 
 		try {
 			const file = await transcodeHeifImage( item.file );
-			dispatch.finishTranscoding( id, file );
+			dispatch.finishOperation( id, {
+				file,
+			} );
 		} catch ( error ) {
 			dispatch.cancelItem(
 				id,
@@ -1590,26 +1535,15 @@ export function convertHeifItem( id: QueueItemId ) {
 }
 
 export function resizeCropItem( id: QueueItemId ) {
-	return async ( {
-		select,
-		dispatch,
-		registry,
-	}: {
-		select: Selectors;
-		dispatch: ActionCreators;
-		registry: WPDataRegistry;
-	} ) => {
-		const item = select.getItem( id );
-		if ( ! item ) {
-			return;
-		}
+	return async ( { select, dispatch, registry }: ThunkArgs ) => {
+		const item = select.getItem( id ) as QueueItem;
 
 		if ( ! item.resize ) {
-			dispatch.finishTranscoding( id, item.file );
+			dispatch.finishOperation( id, {
+				file: item.file,
+			} );
 			return;
 		}
-
-		dispatch.startTranscoding( id );
 
 		const thumbnailGeneration: ThumbnailGeneration = registry
 			.select( preferencesStore )
@@ -1647,7 +1581,9 @@ export function resizeCropItem( id: QueueItemId ) {
 				);
 			}
 
-			dispatch.finishTranscoding( id, file );
+			dispatch.finishOperation( id, {
+				file,
+			} );
 		} catch ( error ) {
 			dispatch.cancelItem(
 				id,
@@ -1666,21 +1602,10 @@ export function resizeCropItem( id: QueueItemId ) {
 }
 
 export function uploadItem( id: QueueItemId ) {
-	return async ( {
-		select,
-		dispatch,
-	}: {
-		select: Selectors;
-		dispatch: ActionCreators;
-	} ) => {
-		const item = select.getItem( id );
-		if ( ! item ) {
-			return;
-		}
+	return async ( { select, dispatch }: ThunkArgs ) => {
+		const item = select.getItem( id ) as QueueItem;
 
 		const { poster } = item;
-
-		dispatch.startUploading( id );
 
 		const additionalData: Partial< CreateRestAttachment > = {
 			...item.additionalData,
@@ -1801,7 +1726,9 @@ export function uploadItem( id: QueueItemId ) {
 				}
 			}
 
-			dispatch.finishUploading( id, attachment );
+			dispatch.finishOperation( id, {
+				attachment,
+			} );
 		} catch ( err ) {
 			const error =
 				err instanceof Error
@@ -1818,19 +1745,8 @@ export function uploadItem( id: QueueItemId ) {
 }
 
 export function sideloadItem( id: QueueItemId ) {
-	return async ( {
-		select,
-		dispatch,
-	}: {
-		select: Selectors;
-		dispatch: ActionCreators;
-	} ) => {
-		const item = select.getItem( id );
-		if ( ! item ) {
-			return;
-		}
-
-		dispatch.startUploading( id );
+	return async ( { select, dispatch }: ThunkArgs ) => {
+		const item = select.getItem( id ) as QueueItem;
 
 		const { post, ...additionalData } =
 			item.additionalData as SideloadAdditionalData;
@@ -1843,7 +1759,7 @@ export function sideloadItem( id: QueueItemId ) {
 				item.abortController?.signal
 			);
 
-			dispatch.finishSideloading( id, attachment );
+			void dispatch.finishOperation( id, { attachment } );
 		} catch ( err ) {
 			const error =
 				err instanceof Error
