@@ -8,11 +8,11 @@ const mockNewFromBuffer = jest.fn( () => new MockImage() );
 class MockImage {
 	width = 100;
 	height = 100;
+	pageHeight = 100;
 	crop = mockCrop;
 	writeToBuffer = jest.fn( () => ( {
 		buffer: '',
 	} ) );
-	getInt = jest.fn( () => 1 );
 }
 
 class MockVipsImage {
