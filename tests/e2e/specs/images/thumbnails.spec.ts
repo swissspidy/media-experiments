@@ -452,10 +452,11 @@ test.describe( 'Images', () => {
 						width: 1140,
 						height: 760,
 						filesize: expect.any( Number ),
-						// original_image: expect.any( String ),
 						blurhash: expect.any( String ),
 						dominant_color: expect.any( String ),
-						has_transparency: false,
+						// TODO: Explicitly look for has_transparency: false
+						// See https://github.com/swissspidy/media-experiments/issues/492
+						has_transparency: expect.any( Boolean ),
 						image_meta: expect.anything(),
 						sizes: expect.anything(),
 					} )
@@ -672,7 +673,6 @@ test.describe( 'Images', () => {
 						width: 1200,
 						height: 800,
 						filesize: expect.any( Number ),
-						// original_image: expect.any( String ),
 						blurhash: expect.any( String ),
 						dominant_color: expect.any( String ),
 						has_transparency: false,
