@@ -968,6 +968,7 @@ export function completeItem( id: QueueItemId ) {
 							`${ originalBaseName }-original`
 						)
 					),
+					parentId: item.id,
 					additionalData: {
 						// Sideloading does not use the parent post ID but the
 						// attachment ID as the image sizes need to be added to it.
