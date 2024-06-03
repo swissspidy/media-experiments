@@ -325,7 +325,7 @@ test.describe( 'Images', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 30000, // Transcoding might take longer
+						timeout: 120000, // Transcoding might take longer, especially AVIF on Firefox.
 					}
 				);
 

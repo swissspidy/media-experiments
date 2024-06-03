@@ -177,7 +177,7 @@ test.describe( 'Images', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 90000, // Especially AVIF might be slower.
+						timeout: 120000, // Transcoding might take longer, especially AVIF on Firefox.
 					}
 				);
 
@@ -425,7 +425,7 @@ test.describe( 'Images', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 90000, // Especially AVIF might be slower.
+						timeout: 120000, // Transcoding might take longer, especially AVIF on Firefox.
 					}
 				);
 
@@ -655,7 +655,7 @@ test.describe( 'Images', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 90000, // Especially AVIF might be slower.
+						timeout: 120000, // Transcoding might take longer, especially AVIF on Firefox.
 					}
 				);
 
