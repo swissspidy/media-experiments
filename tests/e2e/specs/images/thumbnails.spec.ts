@@ -115,6 +115,10 @@ test.describe( 'Images', () => {
 					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
 				);
 
+				// Transcoding might take longer, especially AVIF on Firefox.
+				// eslint-disable-next-line playwright/no-conditional-in-test
+				test.setTimeout( 120_000 );
+
 				await admin.createNewPost();
 
 				await page.evaluate(
@@ -177,7 +181,7 @@ test.describe( 'Images', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 120000, // Transcoding might take longer, especially AVIF on Firefox.
+						timeout: 120_000, // Transcoding might take longer, especially AVIF on Firefox.
 					}
 				);
 
@@ -363,6 +367,10 @@ test.describe( 'Images', () => {
 					'WebKit does not currently support Canvas.toBlob with WebP'
 				);
 
+				// Transcoding might take longer, especially AVIF on Firefox.
+				// eslint-disable-next-line playwright/no-conditional-in-test
+				test.setTimeout( 120_000 );
+
 				await admin.createNewPost();
 
 				await page.evaluate(
@@ -425,7 +433,7 @@ test.describe( 'Images', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 120000, // Transcoding might take longer, especially AVIF on Firefox.
+						timeout: 120_000, // Transcoding might take longer, especially AVIF on Firefox.
 					}
 				);
 
@@ -593,6 +601,10 @@ test.describe( 'Images', () => {
 					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
 				);
 
+				// Transcoding might take longer, especially AVIF on Firefox.
+				// eslint-disable-next-line playwright/no-conditional-in-test
+				test.setTimeout( 120_000 );
+
 				await admin.createNewPost();
 
 				await page.evaluate(
@@ -655,7 +667,7 @@ test.describe( 'Images', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 120000, // Transcoding might take longer, especially AVIF on Firefox.
+						timeout: 120_000, // Transcoding might take longer, especially AVIF on Firefox.
 					}
 				);
 
