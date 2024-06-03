@@ -2,6 +2,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { useMemo } from '@wordpress/element';
 import { __, _x, sprintf } from '@wordpress/i18n';
 
+import { store as interfaceStore } from '../interface/store';
 import { store as recordingStore } from '../mediaRecording/store';
 import { FeatureNumberControl } from './numberControl';
 import { SelectFeature } from './selectFeature';
@@ -9,7 +10,6 @@ import { EnableFeature } from './enableFeature';
 import { PreferencesModal } from './preferences-modal';
 import { PreferencesModalSection } from './preferences-modal-section';
 import { PreferencesModalTabs } from './preferences-modal-tabs';
-import { store as interfaceStore } from '@wordpress/interface';
 
 type InputFormat = 'jpeg' | 'webp' | 'avif' | 'png' | 'heic' | 'gif';
 type InputFormatLabel = 'JPEG' | 'PNG' | 'WebP' | 'AVIF' | 'HEIC' | 'GIF';
