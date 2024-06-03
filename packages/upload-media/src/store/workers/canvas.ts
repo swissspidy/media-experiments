@@ -62,6 +62,10 @@ export async function resizeImage(
 	// If resize.height is zero.
 	resize.height = resize.height || ( height / width ) * resize.width;
 
+	// Prevent upscaling images.
+	resize.width = resize.width > width ? width : resize.width;
+	resize.height = resize.height > height ? height : resize.height;
+
 	let resizeWidth: number | undefined;
 	let resizeHeight: number | undefined;
 
