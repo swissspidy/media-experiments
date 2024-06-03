@@ -94,6 +94,10 @@ test.describe( 'Images', () => {
 	} );
 
 	test.describe( 'Thumbnail generation', () => {
+		test.afterEach( async ( { requestUtils } ) => {
+			await requestUtils.deleteAllMedia();
+		} );
+
 		for ( const {
 			imageLibrary,
 			thumbnailGeneration,
