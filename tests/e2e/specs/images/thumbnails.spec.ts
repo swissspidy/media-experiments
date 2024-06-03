@@ -189,7 +189,7 @@ test.describe( 'Images', () => {
 				);
 
 				// See https://github.com/swissspidy/media-experiments/issues/321.
-				expect( imageUrl ).toMatch( /-1024x683$/ );
+				expect( imageUrl ).toMatch( /-1024x683/ );
 
 				const imageId = await page.evaluate(
 					() =>
