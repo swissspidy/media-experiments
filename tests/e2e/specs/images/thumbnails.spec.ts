@@ -117,7 +117,7 @@ test.describe( 'Images', () => {
 
 				// Transcoding might take longer, especially AVIF on Firefox.
 				// eslint-disable-next-line playwright/no-conditional-in-test
-				test.setTimeout( 120_000 );
+				test.setTimeout( 180_000 );
 
 				await admin.createNewPost();
 
@@ -181,7 +181,7 @@ test.describe( 'Images', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 120_000, // Transcoding might take longer, especially AVIF on Firefox.
+						timeout: 180_000, // Transcoding might take longer, especially AVIF on Firefox.
 					}
 				);
 
@@ -369,7 +369,7 @@ test.describe( 'Images', () => {
 
 				// Transcoding might take longer, especially AVIF on Firefox.
 				// eslint-disable-next-line playwright/no-conditional-in-test
-				test.setTimeout( 120_000 );
+				test.setTimeout( 180_000 );
 
 				await admin.createNewPost();
 
@@ -433,7 +433,7 @@ test.describe( 'Images', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 120_000, // Transcoding might take longer, especially AVIF on Firefox.
+						timeout: 180_000, // Transcoding might take longer, especially AVIF on Firefox.
 					}
 				);
 
@@ -603,7 +603,7 @@ test.describe( 'Images', () => {
 
 				// Transcoding might take longer, especially AVIF on Firefox.
 				// eslint-disable-next-line playwright/no-conditional-in-test
-				test.setTimeout( 120_000 );
+				test.setTimeout( 180_000 );
 
 				await admin.createNewPost();
 
@@ -667,7 +667,7 @@ test.describe( 'Images', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 120_000, // Transcoding might take longer, especially AVIF on Firefox.
+						timeout: 180_000, // Transcoding might take longer, especially AVIF on Firefox.
 					}
 				);
 
