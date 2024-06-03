@@ -392,6 +392,13 @@ test.describe( 'Images', () => {
 							.dispatch( 'core/preferences' )
 							.set(
 								'media-experiments/preferences',
+								'thumbnailGeneration',
+								'client'
+							);
+						window.wp.data
+							.dispatch( 'core/preferences' )
+							.set(
+								'media-experiments/preferences',
 								'bigImageSizeThreshold',
 								1140
 							);
