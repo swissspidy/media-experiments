@@ -13,7 +13,6 @@ import {
 	useEffect,
 	useCallback,
 } from '@wordpress/element';
-import { store as interfaceStore } from '@wordpress/interface';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as editorStore } from '@wordpress/editor';
 import { store as noticesStore } from '@wordpress/notices';
@@ -21,6 +20,8 @@ import apiFetch from '@wordpress/api-fetch';
 
 import type { RestAttachment, Attachment } from '@mexp/upload-media';
 import { transformAttachment } from '@mexp/upload-media';
+
+import { store as interfaceStore } from '../interface/store';
 
 interface UploadRequestControlsProps {
 	url?: string;
