@@ -551,11 +551,15 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		 * @return string Filtered file name.
 		 */
 		$filter_filename = static function ( $filename, $ext, $dir, $unique_filename_callback, $alt_filenames, $number ) use ( $attachment_filename ) {
+			if ( empty( $number ) || ! $attachment_filename ) {
+				return $filename;
+			}
+
 			$ext       = pathinfo( $filename, PATHINFO_EXTENSION );
 			$name      = pathinfo( $filename, PATHINFO_FILENAME );
 			$orig_name = pathinfo( $attachment_filename, PATHINFO_FILENAME );
 
-			if ( empty( $number ) || ! $ext || ! $name ) {
+			if ( ! $ext || ! $name ) {
 				return $filename;
 			}
 
