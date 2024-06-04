@@ -37,7 +37,6 @@ export type QueueItem = {
 	dominantColor?: string;
 	generatedPosterId?: number;
 	parentId?: QueueItemId;
-	resize?: ImageSizeCrop;
 	abortController?: AbortController;
 };
 
@@ -162,6 +161,7 @@ export enum OperationType {
 
 export type OperationArgs = {
 	[ OperationType.TranscodeCompress ]: { requireApproval?: boolean };
+	[ OperationType.TranscodeResizeCrop ]: { resize?: ImageSizeCrop };
 };
 
 type OperationWithArgs< T extends keyof OperationArgs = keyof OperationArgs > =

@@ -153,8 +153,6 @@ interface AddItemArgs {
 	mediaSourceTerms?: MediaSourceTerm[];
 	blurHash?: string;
 	dominantColor?: string;
-	parentId?: QueueItemId;
-	resize?: ImageSizeCrop;
 	abortController?: AbortController;
 }
 
@@ -180,17 +178,6 @@ export function addItem( {
 		dispatch: ActionCreators;
 		registry: WPDataRegistry;
 	} ) => {
-		const imageSizeThreshold: number = registry
-			.select( preferencesStore )
-			.get( PREFERENCES_NAME, 'bigImageSizeThreshold' );
-
-		const resize = imageSizeThreshold
-			? {
-					width: imageSizeThreshold,
-					height: imageSizeThreshold,
-			  }
-			: undefined;
-
 		const thumbnailGeneration: ThumbnailGeneration = registry
 			.select( preferencesStore )
 			.get( PREFERENCES_NAME, 'thumbnailGeneration' );
@@ -221,7 +208,6 @@ export function addItem( {
 				mediaSourceTerms,
 				blurHash,
 				dominantColor,
-				resize,
 				abortController: abortController || new AbortController(),
 			},
 		} );
@@ -297,7 +283,6 @@ interface AddSideloadItemArgs {
 	file: File;
 	onChange?: OnChangeHandler;
 	additionalData?: AdditionalData;
-	resize?: ImageSizeCrop;
 	operations?: Operation[];
 	batchId?: BatchId;
 	parentId?: QueueItemId;
@@ -307,7 +292,6 @@ export function addSideloadItem( {
 	file,
 	onChange,
 	additionalData,
-	resize,
 	operations,
 	batchId,
 	parentId,
@@ -328,7 +312,6 @@ export function addSideloadItem( {
 					...additionalData,
 				},
 				parentId,
-				resize,
 				operations,
 				abortController: new AbortController(),
 			},
@@ -615,6 +598,7 @@ export function processItem( id: QueueItemId ) {
 		const operation = Array.isArray( item.operations[ 0 ] )
 			? item.operations[ 0 ][ 0 ]
 			: item.operations[ 0 ];
+		// TODO: Improve type here to avoid using "as" further down.
 		const operationArgs = Array.isArray( item.operations[ 0 ] )
 			? item.operations[ 0 ][ 1 ]
 			: undefined;
@@ -626,7 +610,10 @@ export function processItem( id: QueueItemId ) {
 
 		switch ( operation ) {
 			case OperationType.TranscodeResizeCrop:
-				void dispatch.resizeCropItem( item.id );
+				void dispatch.resizeCropItem(
+					item.id,
+					operationArgs as OperationArgs[ OperationType.TranscodeResizeCrop ]
+				);
 				break;
 
 			case OperationType.TranscodeHeif:
@@ -655,7 +642,10 @@ export function processItem( id: QueueItemId ) {
 
 			// TODO: Right now only handles images.
 			case OperationType.TranscodeCompress:
-				void dispatch.optimizeImageItem( item.id, operationArgs );
+				void dispatch.optimizeImageItem(
+					item.id,
+					operationArgs as OperationArgs[ OperationType.TranscodeCompress ]
+				);
 				break;
 
 			case OperationType.AddPoster:
@@ -789,7 +779,7 @@ export function prepareItem( id: QueueItemId ) {
 
 		const mediaType = getMediaTypeFromMimeType( file.type );
 
-		const operations: OperationType[] = [];
+		const operations: Operation[] = [];
 
 		switch ( mediaType ) {
 			case 'image':
@@ -824,8 +814,21 @@ export function prepareItem( id: QueueItemId ) {
 					operations.push( OperationType.TranscodeHeif );
 				}
 
-				// Always add resize operation to comply with big image size threshold.
-				operations.push( OperationType.TranscodeResizeCrop );
+				const imageSizeThreshold: number = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'bigImageSizeThreshold' );
+
+				if ( imageSizeThreshold ) {
+					operations.push( [
+						OperationType.TranscodeResizeCrop,
+						{
+							resize: {
+								width: imageSizeThreshold,
+								height: imageSizeThreshold,
+							},
+						},
+					] );
+				}
 
 				const optimizeOnUpload: boolean = registry
 					.select( preferencesStore )
@@ -1045,9 +1048,11 @@ export function generateThumbnails( id: QueueItemId ) {
 							upload_request: item.additionalData.upload_request,
 							image_size: name,
 						},
-						resize: imageSize,
 						operations: [
-							OperationType.TranscodeResizeCrop,
+							[
+								OperationType.TranscodeResizeCrop,
+								{ resize: imageSize },
+							],
 							OperationType.Upload,
 						],
 					} );
@@ -1564,11 +1569,14 @@ export function convertHeifItem( id: QueueItemId ) {
 	};
 }
 
-export function resizeCropItem( id: QueueItemId ) {
+export function resizeCropItem(
+	id: QueueItemId,
+	args?: OperationArgs[ OperationType.TranscodeResizeCrop ]
+) {
 	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
 
-		if ( ! item.resize ) {
+		if ( ! args?.resize ) {
 			dispatch.finishOperation( id, {
 				file: item.file,
 			} );
@@ -1589,7 +1597,7 @@ export function resizeCropItem( id: QueueItemId ) {
 		const addSuffix = Boolean( item.parentId );
 
 		const stop = start(
-			`Resize Item: ${ item.file.name } | ${ imageLibrary } | ${ thumbnailGeneration } | ${ item.resize.width }x${ item.resize.height }`
+			`Resize Item: ${ item.file.name } | ${ imageLibrary } | ${ thumbnailGeneration } | ${ args.resize.width }x${ args.resize.height }`
 		);
 
 		try {
@@ -1605,14 +1613,14 @@ export function resizeCropItem( id: QueueItemId ) {
 			) {
 				file = await canvasResizeImage(
 					item.file,
-					item.resize,
+					args.resize,
 					addSuffix
 				);
 			} else {
 				file = await vipsResizeImage(
 					item.id,
 					item.file,
-					item.resize,
+					args.resize,
 					smartCrop,
 					addSuffix
 				);
