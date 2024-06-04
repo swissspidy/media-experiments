@@ -47,7 +47,9 @@ describe( 'selectors', () => {
 				imageSizes: {},
 			};
 
-			expect( getItems( state, ItemStatus.Processing ) ).toHaveLength( 3 );
+			expect( getItems( state, ItemStatus.Processing ) ).toHaveLength(
+				3
+			);
 		} );
 	} );
 
