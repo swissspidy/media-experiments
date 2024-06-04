@@ -728,7 +728,7 @@ export function addPosterForItem( id: QueueItemId ) {
 				dispatch.finishOperation( id, {
 					poster,
 					attachment: {
-						poster: createBlobURL( file ),
+						poster: createBlobURL( poster ),
 					},
 				} );
 
