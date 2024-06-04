@@ -1,5 +1,4 @@
 import {
-	ImageFormat,
 	ImageLibrary,
 	RestAttachment,
 	ThumbnailGeneration,

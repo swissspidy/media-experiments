@@ -1,8 +1,4 @@
-import {
-	ImageFormat,
-	ImageLibrary,
-	RestAttachment,
-} from '@mexp/upload-media';
+import { ImageFormat, ImageLibrary, RestAttachment } from '@mexp/upload-media';
 
 import { test, expect } from '../../fixtures';
 
