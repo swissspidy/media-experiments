@@ -1,5 +1,6 @@
 import { registerPlugin } from '@wordpress/plugins';
-import { PluginDocumentSettingPanel } from '@wordpress/editor';
+import { PluginDocumentSettingPanel as PluginDocumentSettingPanel65 } from '@wordpress/edit-post';
+import { PluginDocumentSettingPanel as PluginDocumentSettingPanel66 } from '@wordpress/editor';
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
@@ -13,6 +14,10 @@ import { BulkOptimization } from '../components/bulkOptimization';
 import type { BulkOptimizationAttachmentData } from '../types';
 
 import './editor.css';
+
+// PluginDocumentSettingPanel from @wordpress/edit-post is deprecated since WP 6.6.
+const PluginDocumentSettingPanel =
+	PluginDocumentSettingPanel66 || PluginDocumentSettingPanel65;
 
 const SUPPORTED_BLOCKS = [ 'core/image', 'core/video' ];
 
