@@ -796,6 +796,7 @@ export function prepareItem( id: QueueItemId ) {
 
 				if ( isGif && canTranscode && convertAnimatedGifs ) {
 					operations.push( OperationType.TranscodeGif );
+					operations.push( OperationType.AddPoster );
 					break;
 				}
 
