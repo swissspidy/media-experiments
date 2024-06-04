@@ -719,42 +719,48 @@ export function addPosterForItem( id: QueueItemId ) {
 
 		const mediaType = getMediaTypeFromMimeType( file.type );
 
-		switch ( mediaType ) {
-			case 'video':
-				const poster = await getPosterFromVideo(
-					createBlobURL( file ),
-					`${ getFileBasename( item.file.name ) }-poster`
-				);
+		try {
+			switch ( mediaType ) {
+				case 'video':
+					const poster = await getPosterFromVideo(
+						createBlobURL( file ),
+						`${ getFileBasename( item.file.name ) }-poster`
+					);
 
-				dispatch.finishOperation( id, {
-					poster,
-					attachment: {
-						poster: createBlobURL( poster ),
-					},
-				} );
+					dispatch.finishOperation( id, {
+						poster,
+						attachment: {
+							poster: createBlobURL( poster ),
+						},
+					} );
 
-				break;
+					break;
 
-			case 'pdf':
-				const { getImageFromPdf } = await import(
-					/* webpackChunkName: 'pdf' */ '@mexp/pdf'
-				);
+				case 'pdf':
+					const { getImageFromPdf } = await import(
+						/* webpackChunkName: 'pdf' */ '@mexp/pdf'
+					);
 
-				// TODO: is this the right place?
-				// Note: Causes another state update.
-				const pdfThumbnail = await getImageFromPdf(
-					createBlobURL( file ),
-					// Same suffix as WP core uses, see https://github.com/WordPress/wordpress-develop/blob/8a5daa6b446e8c70ba22d64820f6963f18d36e92/src/wp-admin/includes/image.php#L609-L634
-					`${ getFileBasename( item.file.name ) }-pdf`
-				);
+					// TODO: is this the right place?
+					// Note: Causes another state update.
+					const pdfThumbnail = await getImageFromPdf(
+						createBlobURL( file ),
+						// Same suffix as WP core uses, see https://github.com/WordPress/wordpress-develop/blob/8a5daa6b446e8c70ba22d64820f6963f18d36e92/src/wp-admin/includes/image.php#L609-L634
+						`${ getFileBasename( item.file.name ) }-pdf`
+					);
 
-				dispatch.finishOperation( id, {
-					poster: pdfThumbnail,
-					attachment: {
-						poster: createBlobURL( pdfThumbnail ),
-					},
-				} );
-				break;
+					dispatch.finishOperation( id, {
+						poster: pdfThumbnail,
+						attachment: {
+							poster: createBlobURL( pdfThumbnail ),
+						},
+					} );
+					break;
+			}
+		} catch ( err ) {
+			// Do not throw error. Could be a simple error such as video playback not working in tests.
+
+			dispatch.finishOperation( id, {} );
 		}
 	};
 }
