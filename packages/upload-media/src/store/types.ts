@@ -27,7 +27,7 @@ export type QueueItem = {
 	onError?: OnErrorHandler;
 	onBatchSuccess?: OnBatchSuccessHandler;
 	currentOperation?: OperationType;
-	operations?: OperationType[];
+	operations?: Operation[];
 	error?: Error;
 	batchId?: string;
 	sourceUrl?: string;
@@ -88,7 +88,7 @@ export type OperationFinishAction = Action<
 >;
 export type AddOperationsAction = Action<
 	Type.AddOperations,
-	{ id: QueueItemId; operations: OperationType[] }
+	{ id: QueueItemId; operations: Operation[] }
 >;
 export type RequestApprovalAction = Action<
 	Type.RequestApproval,
@@ -159,6 +159,15 @@ export enum OperationType {
 	TranscodeCompress = 'TRANSCODE_COMPRESS',
 	Upload = 'UPLOAD',
 }
+
+export type OperationArgs = {
+	[ OperationType.TranscodeCompress ]: { requireApproval?: boolean };
+};
+
+type OperationWithArgs< T extends keyof OperationArgs = keyof OperationArgs > =
+	[ T, OperationArgs[ T ] ];
+
+export type Operation = OperationType | OperationWithArgs;
 
 export interface RestAttachment extends WP_REST_API_Attachment {
 	featured_media: number;

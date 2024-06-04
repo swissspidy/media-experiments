@@ -56,6 +56,8 @@ import type {
 	OnChangeHandler,
 	OnErrorHandler,
 	OnSuccessHandler,
+	Operation,
+	OperationArgs,
 	OperationFinishAction,
 	OperationStartAction,
 	QueueItem,
@@ -296,7 +298,7 @@ interface AddSideloadItemArgs {
 	onChange?: OnChangeHandler;
 	additionalData?: AdditionalData;
 	resize?: ImageSizeCrop;
-	operations?: OperationType[];
+	operations?: Operation[];
 	batchId?: BatchId;
 	parentId?: QueueItemId;
 }
@@ -513,6 +515,10 @@ export function optimizeExistingItem( {
 			{ type: sourceFile.type }
 		);
 
+		const requireApproval = registry
+			.select( preferencesStore )
+			.get( PREFERENCES_NAME, 'requireApproval' );
+
 		const thumbnailGeneration: ThumbnailGeneration = registry
 			.select( preferencesStore )
 			.get( PREFERENCES_NAME, 'thumbnailGeneration' );
@@ -562,7 +568,7 @@ export function optimizeExistingItem( {
 				blurHash,
 				dominantColor,
 				operations: [
-					OperationType.TranscodeCompress,
+					[ OperationType.TranscodeCompress, { requireApproval } ],
 					OperationType.Upload,
 				],
 				generatedPosterId,
@@ -594,9 +600,7 @@ export function processItem( id: QueueItemId ) {
 			onChange?.( [ media ] );
 		}
 
-		const nextOperation = item.operations?.[ 0 ];
-
-		if ( ! nextOperation ) {
+		if ( ! item.operations || ! item.operations[ 0 ] ) {
 			if ( attachment ) {
 				onSuccess?.( [ attachment ] );
 			}
@@ -608,12 +612,19 @@ export function processItem( id: QueueItemId ) {
 			return;
 		}
 
+		const operation = Array.isArray( item.operations[ 0 ] )
+			? item.operations[ 0 ][ 0 ]
+			: item.operations[ 0 ];
+		const operationArgs = Array.isArray( item.operations[ 0 ] )
+			? item.operations[ 0 ][ 1 ]
+			: undefined;
+
 		dispatch< OperationStartAction >( {
 			type: Type.OperationStart,
 			id,
 		} );
 
-		switch ( nextOperation ) {
+		switch ( operation ) {
 			case OperationType.TranscodeResizeCrop:
 				void dispatch.resizeCropItem( item.id );
 				break;
@@ -644,7 +655,7 @@ export function processItem( id: QueueItemId ) {
 
 			// TODO: Right now only handles images.
 			case OperationType.TranscodeCompress:
-				void dispatch.optimizeImageItem( item.id );
+				void dispatch.optimizeImageItem( item.id, operationArgs );
 				break;
 
 			case OperationType.AddPoster:
@@ -791,8 +802,15 @@ export function prepareItem( id: QueueItemId ) {
 					.get( PREFERENCES_NAME, 'gif_convert' );
 
 				if ( isGif && canTranscode && convertAnimatedGifs ) {
-					operations.push( OperationType.TranscodeGif );
-					operations.push( OperationType.AddPoster );
+					operations.push(
+						OperationType.TranscodeGif,
+						OperationType.AddPoster,
+						OperationType.Upload,
+						// Try poster generation again *after* upload if it's still missing.
+						OperationType.AddPoster,
+						OperationType.UploadPoster
+					);
+
 					break;
 				}
 
@@ -817,6 +835,12 @@ export function prepareItem( id: QueueItemId ) {
 					operations.push( OperationType.TranscodeImage );
 				}
 
+				operations.push(
+					OperationType.Upload,
+					OperationType.ThumbnailGeneration,
+					OperationType.UploadOriginal
+				);
+
 				break;
 
 			case 'video':
@@ -832,6 +856,13 @@ export function prepareItem( id: QueueItemId ) {
 					operations.push( OperationType.TranscodeVideo );
 				}
 
+				operations.push(
+					OperationType.Upload,
+					// Try poster generation again *after* upload if it's still missing.
+					OperationType.AddPoster,
+					OperationType.UploadPoster
+				);
+
 				break;
 
 			case 'audio':
@@ -839,28 +870,23 @@ export function prepareItem( id: QueueItemId ) {
 					operations.push( OperationType.TranscodeAudio );
 				}
 
+				operations.push( OperationType.Upload );
+
 				break;
 
 			case 'pdf':
-				operations.push( OperationType.AddPoster );
+				operations.push(
+					OperationType.AddPoster,
+					OperationType.Upload,
+					OperationType.ThumbnailGeneration
+				);
 
 				break;
-		}
 
-		operations.push( OperationType.Upload );
+			default:
+				operations.push( OperationType.Upload );
 
-		// Try poster generation again *after* upload if it's still mising
-		if ( 'video' === mediaType ) {
-			operations.push( OperationType.AddPoster );
-			operations.push( OperationType.UploadPoster );
-		}
-
-		if ( 'image' === mediaType || 'pdf' === mediaType ) {
-			operations.push( OperationType.ThumbnailGeneration );
-		}
-
-		if ( 'image' === mediaType ) {
-			operations.push( OperationType.UploadOriginal );
+				break;
 		}
 
 		dispatch< AddOperationsAction >( {
@@ -1172,13 +1198,12 @@ export function cancelItem( id: QueueItemId, error: Error ) {
 	};
 }
 
-export function optimizeImageItem( id: QueueItemId ) {
+export function optimizeImageItem(
+	id: QueueItemId,
+	args?: OperationArgs[ OperationType.TranscodeCompress ]
+) {
 	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
-
-		const requireApproval = registry
-			.select( preferencesStore )
-			.get( PREFERENCES_NAME, 'requireApproval' );
 
 		const imageLibrary: ImageLibrary =
 			registry
@@ -1299,7 +1324,7 @@ export function optimizeImageItem( id: QueueItemId ) {
 				);
 			}
 
-			if ( requireApproval ) {
+			if ( args?.requireApproval ) {
 				dispatch.requestApproval( id, file );
 			} else {
 				dispatch.finishOperation( id, {
