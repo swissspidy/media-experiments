@@ -403,7 +403,10 @@ export function muteExistingVideo( {
 				mediaSourceTerms: [],
 				blurHash,
 				dominantColor,
-				operations: [ OperationType.TranscodeMuteVideo ],
+				operations: [
+					OperationType.TranscodeMuteVideo,
+					OperationType.Upload,
+				],
 				generatedPosterId,
 				abortController: new AbortController(),
 			},
@@ -558,7 +561,10 @@ export function optimizeExistingItem( {
 				mediaSourceTerms: [ 'media-optimization' ],
 				blurHash,
 				dominantColor,
-				operations: [ OperationType.TranscodeCompress ],
+				operations: [
+					OperationType.TranscodeCompress,
+					OperationType.Upload,
+				],
 				generatedPosterId,
 				abortController,
 			},
@@ -763,12 +769,6 @@ export function prepareItem( id: QueueItemId ) {
 		// Transcoding type has already been set, e.g. via muteExistingVideo() or addSideloadItem().
 		// Also allow empty arrays, useful for example when sideloading original image.
 		if ( item.operations !== undefined ) {
-			dispatch< AddOperationsAction >( {
-				type: Type.AddOperations,
-				id,
-				operations: [ ...item.operations, OperationType.Upload ],
-			} );
-
 			dispatch.processItem( id );
 			return;
 		}
@@ -986,7 +986,10 @@ export function generateThumbnails( id: QueueItemId ) {
 						post: attachment.id,
 						image_size: 'full',
 					},
-					operations: [ OperationType.TranscodeImage ],
+					operations: [
+						OperationType.TranscodeImage,
+						OperationType.Upload,
+					],
 					parentId: item.id,
 				} );
 			}
@@ -1017,7 +1020,10 @@ export function generateThumbnails( id: QueueItemId ) {
 							image_size: name,
 						},
 						resize: imageSize,
-						operations: [ OperationType.TranscodeResizeCrop ],
+						operations: [
+							OperationType.TranscodeResizeCrop,
+							OperationType.Upload,
+						],
 					} );
 				}
 			}
@@ -1117,7 +1123,9 @@ export function grantApproval( id: number ) {
 			id: item.id,
 		} );
 
-		dispatch.processItem( item.id );
+		dispatch.finishOperation( item.id, {
+			mediaSourceTerms: [ 'media-optimization' ],
+		} );
 	};
 }
 
@@ -1293,12 +1301,11 @@ export function optimizeImageItem( id: QueueItemId ) {
 
 			if ( requireApproval ) {
 				dispatch.requestApproval( id, file );
+			} else {
+				dispatch.finishOperation( id, {
+					file,
+				} );
 			}
-
-			dispatch.finishOperation( id, {
-				file,
-				mediaSourceTerms: [ 'media-optimization' ],
-			} );
 		} catch ( error ) {
 			dispatch.cancelItem(
 				id,
