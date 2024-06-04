@@ -27,6 +27,13 @@ test.describe( 'PDF', () => {
 				.dispatch( 'core/preferences' )
 				.set(
 					'media-experiments/preferences',
+					'jpeg_outputFormat',
+					'jpeg'
+				);
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
 					'default_outputFormat',
 					'jpeg'
 				);
