@@ -115,15 +115,14 @@ test.describe( 'Images', () => {
 					}
 				);
 
-				const imageUrl = await page.evaluate(
+				// See https://github.com/swissspidy/media-experiments/issues/321.
+				await page.waitForFunction(
 					() =>
 						window.wp.data
 							.select( 'core/block-editor' )
-							.getSelectedBlock()?.attributes?.url
+							.getSelectedBlock()
+							?.attributes?.url.includes( '-1024x683' )
 				);
-
-				// See https://github.com/swissspidy/media-experiments/issues/321.
-				expect( imageUrl ).toMatch( /-1024x683/ );
 
 				const imageId = await page.evaluate(
 					() =>
@@ -138,6 +137,7 @@ test.describe( 'Images', () => {
 				} );
 
 				/* eslint-disable camelcase */
+				expect( media.missing_image_sizes ).toEqual( [] );
 				expect( media.media_details ).toEqual(
 					expect.objectContaining( {
 						width: 1140,
