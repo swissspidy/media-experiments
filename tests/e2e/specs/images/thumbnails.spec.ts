@@ -115,10 +115,6 @@ test.describe( 'Images', () => {
 					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
 				);
 
-				// Transcoding might take longer, especially AVIF on Firefox.
-				// eslint-disable-next-line playwright/no-conditional-in-test
-				test.setTimeout( 300_000 );
-
 				await admin.createNewPost();
 
 				await page.evaluate(
@@ -181,7 +177,7 @@ test.describe( 'Images', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 300_000, // Transcoding might take longer, especially AVIF on Firefox.
+						timeout: 30_000, // Transcoding might take longer
 					}
 				);
 
@@ -367,9 +363,10 @@ test.describe( 'Images', () => {
 					'WebKit does not currently support Canvas.toBlob with WebP'
 				);
 
-				// Transcoding might take longer, especially AVIF on Firefox.
-				// eslint-disable-next-line playwright/no-conditional-in-test
-				test.setTimeout( 300_000 );
+				test.skip(
+					browserName === 'firefox' && outputFormat === 'avif',
+					'AVIF encoding on Firefox is very slow'
+				);
 
 				await admin.createNewPost();
 
@@ -433,7 +430,7 @@ test.describe( 'Images', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 300_000, // Transcoding might take longer, especially AVIF on Firefox.
+						timeout: 60_000, // Transcoding might take longer, especially AVIF
 					}
 				);
 
@@ -601,10 +598,6 @@ test.describe( 'Images', () => {
 					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
 				);
 
-				// Transcoding might take longer, especially AVIF on Firefox.
-				// eslint-disable-next-line playwright/no-conditional-in-test
-				test.setTimeout( 300_000 );
-
 				await admin.createNewPost();
 
 				await page.evaluate(
@@ -667,7 +660,7 @@ test.describe( 'Images', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 300_000, // Transcoding might take longer, especially AVIF on Firefox.
+						timeout: 30_000, // Transcoding might take longer
 					}
 				);
 
