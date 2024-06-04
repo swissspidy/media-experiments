@@ -1,6 +1,12 @@
 import type { ChangeEvent } from 'react';
 
-import { createRoot, useState, useRef, useEffect } from '@wordpress/element';
+import {
+	createRoot,
+	useState,
+	useRef,
+	useEffect,
+	StrictMode,
+} from '@wordpress/element';
 import {
 	Button,
 	FormFileUpload,
@@ -129,5 +135,9 @@ const container = document.getElementById(
 );
 if ( container ) {
 	const root = createRoot( container );
-	root.render( <App /> );
+	root.render(
+		<StrictMode>
+			<App />
+		</StrictMode>
+	);
 }
