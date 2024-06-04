@@ -1340,6 +1340,9 @@ export function optimizeImageItem(
 			} else {
 				dispatch.finishOperation( id, {
 					file,
+					attachment: {
+						url: createBlobURL( file ),
+					},
 				} );
 			}
 		} catch ( error ) {
@@ -1400,6 +1403,9 @@ export function optimizeVideoItem( id: QueueItemId ) {
 
 			dispatch.finishOperation( id, {
 				file,
+				attachment: {
+					url: createBlobURL( file ),
+				},
 				mediaSourceTerms: [ 'media-optimization' ],
 			} );
 		} catch ( error ) {
@@ -1429,6 +1435,9 @@ export function muteVideoItem( id: QueueItemId ) {
 
 			dispatch.finishOperation( id, {
 				file,
+				attachment: {
+					url: createBlobURL( file ),
+				},
 				additionalData: {
 					mexp_is_muted: true,
 				},
@@ -1476,6 +1485,9 @@ export function optimizeAudioItem( id: QueueItemId ) {
 
 			dispatch.finishOperation( id, {
 				file,
+				attachment: {
+					url: createBlobURL( file ),
+				},
 				mediaSourceTerms: [ 'media-optimization' ],
 			} );
 		} catch ( error ) {
@@ -1534,6 +1546,9 @@ export function convertGifItem( id: QueueItemId ) {
 
 			dispatch.finishOperation( id, {
 				file,
+				attachment: {
+					url: createBlobURL( file ),
+				},
 				mediaSourceTerms: [ 'gif-conversion' ],
 			} );
 		} catch ( error ) {
@@ -1559,6 +1574,9 @@ export function convertHeifItem( id: QueueItemId ) {
 			const file = await transcodeHeifImage( item.file );
 			dispatch.finishOperation( id, {
 				file,
+				attachment: {
+					url: createBlobURL( file ),
+				},
 			} );
 		} catch ( error ) {
 			dispatch.cancelItem(
@@ -1634,6 +1652,9 @@ export function resizeCropItem(
 
 			dispatch.finishOperation( id, {
 				file,
+				attachment: {
+					url: createBlobURL( file ),
+				},
 			} );
 		} catch ( error ) {
 			dispatch.cancelItem(
