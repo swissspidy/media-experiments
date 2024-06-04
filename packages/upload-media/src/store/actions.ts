@@ -769,7 +769,7 @@ export function prepareItem( id: QueueItemId ) {
 				operations: [ ...item.operations, OperationType.Upload ],
 			} );
 
-			dispatch.finishOperation( id, {} );
+			dispatch.processItem( id );
 			return;
 		}
 
