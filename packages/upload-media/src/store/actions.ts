@@ -591,8 +591,6 @@ export function processItem( id: QueueItemId ) {
 		const nextOperation = item.operations?.[ 0 ];
 
 		if ( ! nextOperation ) {
-			console.log( 'Finish item', item );
-
 			if ( attachment ) {
 				onSuccess?.( [ attachment ] );
 			}
@@ -603,8 +601,6 @@ export function processItem( id: QueueItemId ) {
 
 			return;
 		}
-
-		console.log( 'processItem', item, nextOperation );
 
 		dispatch< OperationStartAction >( {
 			type: Type.OperationStart,
@@ -956,8 +952,6 @@ export function uploadPoster( id: QueueItemId ) {
 export function generateThumbnails( id: QueueItemId ) {
 	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
-
-		console.log( 'generateThumbnails', item, item.file );
 
 		const attachment: Attachment = item.attachment as Attachment;
 
