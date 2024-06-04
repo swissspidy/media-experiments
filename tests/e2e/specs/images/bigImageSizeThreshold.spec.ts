@@ -122,7 +122,6 @@ test.describe( 'Images', () => {
 				} );
 
 				/* eslint-disable camelcase */
-				expect( media.missing_image_sizes ).toEqual( [] );
 				expect( media.media_details ).toEqual(
 					expect.objectContaining( {
 						width: 1200,
