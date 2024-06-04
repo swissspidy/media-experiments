@@ -968,6 +968,7 @@ export function completeItem( id: QueueItemId ) {
 							`${ originalBaseName }-original`
 						)
 					),
+					parentId: item.id,
 					additionalData: {
 						// Sideloading does not use the parent post ID but the
 						// attachment ID as the image sizes need to be added to it.
@@ -1239,6 +1240,8 @@ export function optimizeImageItem( id: QueueItemId, requireApproval = false ) {
 					break;
 
 				case 'webp':
+					// Safari doesn't support WebP in HTMLCanvasElement.toBlob().
+					// See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
 					if ( 'browser' === imageLibrary && ! isSafari ) {
 						file = await canvasConvertImageFormat(
 							item.file,
@@ -1631,7 +1634,14 @@ export function resizeCropItem( id: QueueItemId ) {
 		try {
 			let file: File;
 
-			if ( 'browser' === imageLibrary ) {
+			// No browsers support GIF/AVIF in HTMLCanvasElement.toBlob().
+			// Safari doesn't support WebP.
+			// See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
+			if (
+				'browser' === imageLibrary &&
+				! [ 'image/gif', 'image/avif' ].includes( item.file.type ) &&
+				! ( 'image/webp' === item.file.type && isSafari )
+			) {
 				file = await canvasResizeImage(
 					item.file,
 					item.resize,

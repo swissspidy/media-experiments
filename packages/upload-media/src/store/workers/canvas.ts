@@ -16,7 +16,10 @@ export async function convertImageFormat(
 
 	const canvas = new OffscreenCanvas( width, height );
 
-	const ctx = canvas.getContext( '2d' );
+	const ctx = canvas.getContext( '2d', {
+		// TODO: Make this based on actual opacity.
+		alpha: [ 'image/png', 'image/webp' ].includes( sourceType ),
+	} );
 
 	// If the contextType doesn't match a possible drawing context,
 	// or differs from the first contextType requested, null is returned.
@@ -58,6 +61,9 @@ export async function resizeImage(
 
 	let bitmap = await createImageBitmap( imgBlob );
 	const { width, height } = bitmap;
+
+	// Prevent upscaling images.
+	resize.width = resize.width > width ? width : resize.width;
 
 	// If resize.height is zero.
 	resize.height = resize.height || ( height / width ) * resize.width;
@@ -161,7 +167,10 @@ export async function resizeImage(
 	expectedHeight = Math.round( Number( expectedHeight.toFixed( 1 ) ) );
 
 	const canvas = new OffscreenCanvas( expectedWidth, expectedHeight );
-	const ctx = canvas.getContext( '2d' );
+	const ctx = canvas.getContext( '2d', {
+		// TODO: Make this based on actual opacity.
+		alpha: [ 'image/png', 'image/webp' ].includes( sourceType ),
+	} );
 
 	// If the contextType doesn't match a possible drawing context,
 	// or differs from the first contextType requested, null is returned.

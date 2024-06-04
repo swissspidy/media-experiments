@@ -12,22 +12,12 @@
 		{
 			"step": "cp",
 			"fromPath": "/var/www/html/wp-content/plugins/media-experiments/tests/e2e/mu-plugins/additional-image-sizes.php",
-			"toPath": "/var/www/html/wp-content/plugins/additional-image-sizes.php"
+			"toPath": "/var/www/html/wp-content/mu-plugins/additional-image-sizes.php"
 		},
 		{
 			"step": "cp",
 			"fromPath": "/var/www/html/wp-content/plugins/media-experiments/tests/e2e/mu-plugins/fix-gravatar.php",
-			"toPath": "/var/www/html/wp-content/plugins/fix-gravatar.php"
-		},
-		{
-			"step": "activatePlugin",
-			"pluginName": "Additional image sizes",
-			"pluginPath": "additional-image-sizes.php"
-		},
-		{
-			"step": "activatePlugin",
-			"pluginName": "Fix Gravatar URLs",
-			"pluginPath": "fix-gravatar.php"
+			"toPath": "/var/www/html/wp-content/mu-plugins/fix-gravatar.php"
 		}
 	]
 }

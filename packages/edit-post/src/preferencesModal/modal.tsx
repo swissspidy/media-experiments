@@ -146,11 +146,14 @@ export function Modal() {
 							label={ __( 'Image Library', 'media-experiments' ) }
 							options={ [
 								{
-									label: __( 'Browser', 'media-experiments' ),
+									label: __( 'Native', 'media-experiments' ),
 									value: 'browser',
 								},
 								{
-									label: __( 'libvips', 'media-experiments' ),
+									label: __(
+										'Enhanced (libvips)',
+										'media-experiments'
+									),
 									value: 'vips',
 								},
 							] }
