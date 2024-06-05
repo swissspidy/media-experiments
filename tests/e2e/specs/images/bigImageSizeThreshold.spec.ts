@@ -172,7 +172,6 @@ test.describe( 'Images', () => {
 							source_url:
 								expect.stringContaining( '-1024x683.jpeg' ),
 						} ),
-
 						'bottom-right': expect.objectContaining( {
 							width: 220,
 							height: 220,
@@ -200,7 +199,6 @@ test.describe( 'Images', () => {
 							source_url:
 								expect.stringContaining( '-400x267.jpeg' ),
 						} ),
-
 						'ninek-width': expect.objectContaining( {
 							width: 900,
 							height: 600,

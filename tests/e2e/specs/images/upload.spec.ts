@@ -236,7 +236,6 @@ test.describe( 'Images', () => {
 								`-1024x683.${ outputFormat }`
 							),
 						} ),
-
 						'bottom-right': expect.objectContaining( {
 							width: 220,
 							height: 220,
@@ -273,7 +272,6 @@ test.describe( 'Images', () => {
 								`-400x267.${ outputFormat }`
 							),
 						} ),
-
 						'ninek-width': expect.objectContaining( {
 							width: 900,
 							height: 600,
