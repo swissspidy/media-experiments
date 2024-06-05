@@ -3,32 +3,37 @@ import {
 	type AddOperationsAction,
 	type ApproveUploadAction,
 	type CancelAction,
-	ItemStatus,
 	type OperationFinishAction,
 	type OperationStartAction,
-	type PauseAction,
+	type PauseItemAction,
+	type PauseQueueAction,
+	type ResumeQueueAction,
 	type RemoveAction,
 	type RequestApprovalAction,
-	type ResumeAction,
+	type ResumeItemAction,
 	type SetImageSizesAction,
 	type SetMediaSourceTermsAction,
 	type State,
-	Type,
 	type UnknownAction,
+	ItemStatus,
+	Type,
 } from './types';
 
 const DEFAULT_STATE: State = {
 	queue: [],
 	mediaSourceTerms: {},
 	imageSizes: {},
+	queueStatus: 'active',
 };
 
 type Action =
 	| AddAction
 	| RemoveAction
 	| CancelAction
-	| PauseAction
-	| ResumeAction
+	| PauseItemAction
+	| ResumeItemAction
+	| PauseQueueAction
+	| ResumeQueueAction
 	| AddOperationsAction
 	| ApproveUploadAction
 	| OperationFinishAction
@@ -43,6 +48,20 @@ function reducer(
 	action: Action = { type: Type.Unknown }
 ) {
 	switch ( action.type ) {
+		case Type.PauseQueue: {
+			return {
+				...state,
+				queueStatus: 'paused',
+			};
+		}
+
+		case Type.ResumeQueue: {
+			return {
+				...state,
+				queueStatus: 'active',
+			};
+		}
+
 		case Type.Add:
 			return {
 				...state,
@@ -68,7 +87,7 @@ function reducer(
 				queue: state.queue.filter( ( item ) => item.id !== action.id ),
 			};
 
-		case Type.Pause:
+		case Type.PauseItem:
 			return {
 				...state,
 				queue: state.queue.map( ( item ) =>
@@ -81,7 +100,7 @@ function reducer(
 				),
 			};
 
-		case Type.Resume:
+		case Type.ResumeItem:
 			return {
 				...state,
 				queue: state.queue.map( ( item ) =>

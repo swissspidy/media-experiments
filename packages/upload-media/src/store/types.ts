@@ -4,6 +4,8 @@ export type { WP_REST_API_Term };
 
 export type QueueItemId = string;
 
+export type QueueStatus = 'active' | 'paused';
+
 export type BatchId = string;
 
 // Keep in sync with PHP.
@@ -44,6 +46,7 @@ export interface State {
 	queue: QueueItem[];
 	mediaSourceTerms: Partial< Record< MediaSourceTerm, number > >;
 	imageSizes: Record< string, ImageSizeCrop >;
+	queueStatus: QueueStatus;
 }
 
 export enum Type {
@@ -52,8 +55,10 @@ export enum Type {
 	Prepare = 'PREPARE_ITEM',
 	Cancel = 'CANCEL_ITEM',
 	Remove = 'REMOVE_ITEM',
-	Pause = 'PAUSE_ITEM',
-	Resume = 'RESUME_ITEM',
+	PauseItem = 'PAUSE_ITEM',
+	ResumeItem = 'RESUME_ITEM',
+	PauseQueue = 'PAUSE_QUEUE',
+	ResumeQueue = 'RESUME_QUEUE',
 	SetMediaSourceTerms = 'ADD_MEDIA_SOURCE_TERMS',
 	SetImageSizes = 'ADD_IMAGE_SIZES',
 	RequestApproval = 'REQUEST_APPROVAL',
@@ -102,8 +107,10 @@ export type CancelAction = Action<
 	Type.Cancel,
 	{ id: QueueItemId; error: Error }
 >;
-export type PauseAction = Action< Type.Pause, { id: QueueItemId } >;
-export type ResumeAction = Action< Type.Resume, { id: QueueItemId } >;
+export type PauseItemAction = Action< Type.PauseItem, { id: QueueItemId } >;
+export type ResumeItemAction = Action< Type.ResumeItem, { id: QueueItemId } >;
+export type PauseQueueAction = Action< Type.PauseQueue >;
+export type ResumeQueueAction = Action< Type.ResumeQueue >;
 export type RemoveAction = Action< Type.Remove, { id: QueueItemId } >;
 export type SetMediaSourceTermsAction = Action<
 	Type.SetMediaSourceTerms,

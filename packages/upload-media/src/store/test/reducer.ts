@@ -5,14 +5,16 @@ import {
 	Type,
 	type MediaSourceTerm,
 	type QueueItem,
+	type State,
 } from '../types';
 
 describe( 'reducer', () => {
 	describe( `${ Type.Add }`, () => {
 		it( 'adds an item to the queue', () => {
-			const initialState = {
+			const initialState: State = {
 				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'active',
 				queue: [
 					{
 						id: '1',
@@ -31,6 +33,7 @@ describe( 'reducer', () => {
 			expect( state ).toEqual( {
 				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'active',
 				queue: [
 					{
 						id: '1',
@@ -47,9 +50,10 @@ describe( 'reducer', () => {
 
 	describe( `${ Type.Cancel }`, () => {
 		it( 'removes an item from the queue', () => {
-			const initialState = {
+			const initialState: State = {
 				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'active',
 				queue: [
 					{
 						id: '1',
@@ -70,6 +74,7 @@ describe( 'reducer', () => {
 			expect( state ).toEqual( {
 				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'active',
 				queue: [
 					{
 						id: '1',
@@ -87,9 +92,10 @@ describe( 'reducer', () => {
 
 	describe( `${ Type.Remove }`, () => {
 		it( 'removes an item from the queue', () => {
-			const initialState = {
+			const initialState: State = {
 				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'active',
 				queue: [
 					{
 						id: '1',
@@ -109,6 +115,7 @@ describe( 'reducer', () => {
 			expect( state ).toEqual( {
 				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'active',
 				queue: [
 					{
 						id: '2',
@@ -119,11 +126,12 @@ describe( 'reducer', () => {
 		} );
 	} );
 
-	describe( `${ Type.Pause }`, () => {
+	describe( `${ Type.PauseItem }`, () => {
 		it( 'marks an item as paused', () => {
-			const initialState = {
+			const initialState: State = {
 				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'active',
 				queue: [
 					{
 						id: '1',
@@ -136,13 +144,14 @@ describe( 'reducer', () => {
 				],
 			};
 			const state = reducer( initialState, {
-				type: Type.Pause,
+				type: Type.PauseItem,
 				id: '2',
 			} );
 
 			expect( state ).toEqual( {
 				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'active',
 				queue: [
 					{
 						id: '1',
@@ -157,11 +166,12 @@ describe( 'reducer', () => {
 		} );
 	} );
 
-	describe( `${ Type.Resume }`, () => {
+	describe( `${ Type.ResumeItem }`, () => {
 		it( 'marks an item as processing', () => {
-			const initialState = {
+			const initialState: State = {
 				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'active',
 				queue: [
 					{
 						id: '1',
@@ -174,13 +184,14 @@ describe( 'reducer', () => {
 				],
 			};
 			const state = reducer( initialState, {
-				type: Type.Resume,
+				type: Type.ResumeItem,
 				id: '2',
 			} );
 
 			expect( state ).toEqual( {
 				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'active',
 				queue: [
 					{
 						id: '1',
@@ -197,9 +208,10 @@ describe( 'reducer', () => {
 
 	describe( `${ Type.AddOperations }`, () => {
 		it( 'prepends operations to the list', () => {
-			const initialState = {
+			const initialState: State = {
 				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'active',
 				queue: [
 					{
 						id: '1',
@@ -220,6 +232,7 @@ describe( 'reducer', () => {
 			expect( state ).toEqual( {
 				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'active',
 				queue: [
 					{
 						id: '1',
@@ -237,9 +250,10 @@ describe( 'reducer', () => {
 
 	describe( `${ Type.OperationStart }`, () => {
 		it( 'marks an item as processing', () => {
-			const initialState = {
+			const initialState: State = {
 				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'active',
 				queue: [
 					{
 						id: '1',
@@ -267,6 +281,7 @@ describe( 'reducer', () => {
 			expect( state ).toEqual( {
 				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'active',
 				queue: [
 					{
 						id: '1',
@@ -292,9 +307,10 @@ describe( 'reducer', () => {
 
 	describe( `${ Type.OperationFinish }`, () => {
 		it( 'marks an item as processing', () => {
-			const initialState = {
+			const initialState: State = {
 				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'active',
 				queue: [
 					{
 						id: '1',
@@ -319,6 +335,7 @@ describe( 'reducer', () => {
 			expect( state ).toEqual( {
 				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'active',
 				queue: [
 					{
 						id: '1',

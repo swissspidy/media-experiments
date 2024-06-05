@@ -9,8 +9,7 @@ import { store as preferencesStore } from '@wordpress/preferences';
  * Internal dependencies
  */
 import { store as uploadStore } from '..';
-import { ItemStatus, OperationType, type QueueItem, Type } from '../types';
-import { UploadError } from '../../uploadError';
+import { ItemStatus, OperationType, type QueueItem } from '../types';
 
 const mockImageFromPdf = new File( [], 'example.jpg', {
 	lastModified: 1234567891,
@@ -47,6 +46,7 @@ describe( 'actions', () => {
 	let registry: WPDataRegistry;
 	beforeEach( () => {
 		registry = createRegistryWithStores();
+		registry.dispatch( uploadStore ).pauseQueue();
 	} );
 
 	describe( 'addItem', () => {
@@ -146,28 +146,6 @@ describe( 'actions', () => {
 		} );
 	} );
 
-	describe( 'removeItem', () => {
-		it( 'removes an item from the queue', () => {
-			registry.dispatch( uploadStore ).addItem( {
-				file: jpegFile,
-			} );
-
-			expect( registry.select( uploadStore ).getItems() ).toHaveLength(
-				1
-			);
-
-			const item: QueueItem = registry
-				.select( uploadStore )
-				.getItems()[ 0 ];
-
-			registry.dispatch( uploadStore ).removeItem( item.id );
-
-			expect( registry.select( uploadStore ).getItems() ).toHaveLength(
-				0
-			);
-		} );
-	} );
-
 	describe( 'muteExistingVideo', () => {
 		it( 'downloads file and adds it to the queue for transcoding', async () => {
 			window.fetch = jest.fn( () =>
@@ -233,36 +211,33 @@ describe( 'actions', () => {
 				.select( uploadStore )
 				.getItems()[ 0 ];
 
-			expect( item ).toStrictEqual(
+			expect( item ).toEqual(
 				expect.objectContaining( {
+					abortController: expect.any( AbortController ),
 					id: expect.any( String ),
 					sourceUrl: 'https://example.com/awesome-video.mp4',
 					file: expect.any( File ),
 					sourceFile: expect.any( File ),
 					sourceAttachmentId: 1234,
 					status: ItemStatus.Processing,
+					additionalData: {
+						generate_sub_sizes: false,
+					},
 					attachment: {
 						url: 'https://example.com/awesome-video.mp4',
+						poster: undefined,
 					},
-					operations: [ OperationType.TranscodeCompress ],
+					mediaSourceTerms: [ 'media-optimization' ],
+					operations: [
+						[
+							OperationType.TranscodeCompress,
+							{ requireApproval: undefined },
+						],
+						OperationType.Upload,
+					],
 				} )
 			);
 			expect( item.file.name ).toBe( 'awesome-video-optimized.mp4' );
-		} );
-	} );
-
-	describe( 'requestApproval', () => {
-		it( `should return the ${ Type.RequestApproval } action`, async () => {
-			const result = await registry
-				.dispatch( uploadStore )
-				.requestApproval( 'abc123', jpegFile );
-
-			await expect( result ).toStrictEqual( {
-				type: Type.RequestApproval,
-				id: 'abc123',
-				file: jpegFile,
-				url: expect.stringMatching( /^blob:/ ),
-			} );
 		} );
 	} );
 
@@ -309,24 +284,19 @@ describe( 'actions', () => {
 
 	describe( 'rejectApproval', () => {
 		it( 'should cancel upload by attachment ID', async () => {
+			const onError = jest.fn();
 			registry.dispatch( uploadStore ).addItem( {
 				file: jpegFile,
 				sourceAttachmentId: 1234,
+				onError,
 			} );
 
 			await registry.dispatch( uploadStore ).rejectApproval( 1234 );
 
 			expect( registry.select( uploadStore ).getItems() ).toHaveLength(
-				1
+				0
 			);
-			expect(
-				registry.select( uploadStore ).getItems()[ 0 ]
-			).toStrictEqual(
-				expect.objectContaining( {
-					status: ItemStatus.Processing,
-					error: expect.any( UploadError ),
-				} )
-			);
+			expect( onError ).toHaveBeenCalled();
 		} );
 
 		it( 'should do nothing for an invalid attachment ID', async () => {

@@ -26,7 +26,8 @@ import {
 } from '../utils';
 import { sideloadFile, updateMediaItem, uploadToServer } from '../api';
 import { PREFERENCES_NAME } from '../constants';
-import { isHeifImage, transcodeHeifImage } from './utils/heif';
+import { transcodeHeifImage } from './utils/heif';
+import { isHeifImage } from '@mexp/heif';
 import {
 	vipsCancelOperations,
 	vipsCompressImage,
@@ -60,8 +61,8 @@ import type {
 	AddAction,
 	RemoveAction,
 	CancelAction,
-	PauseAction,
-	ResumeAction,
+	PauseItemAction,
+	ResumeItemAction,
 	AddOperationsAction,
 	ApproveUploadAction,
 	OperationFinishAction,
@@ -72,6 +73,8 @@ import type {
 	SideloadAdditionalData,
 	ThumbnailGeneration,
 	VideoFormat,
+	PauseQueueAction,
+	ResumeQueueAction,
 } from './types';
 import { ItemStatus, OperationType, Type } from './types';
 
@@ -107,8 +110,6 @@ type ActionCreators = {
 	finishOperation: typeof finishOperation;
 	uploadItem: typeof uploadItem;
 	sideloadItem: typeof sideloadItem;
-	requestApproval: typeof requestApproval;
-	removeItem: typeof removeItem;
 	cancelItem: typeof cancelItem;
 	resumeItem: typeof resumeItem;
 	addPosterForItem: typeof addPosterForItem;
@@ -240,7 +241,7 @@ export function addItems( {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
 		const batchId = uuidv4();
 		for ( const file of files ) {
-			void dispatch.addItem( {
+			dispatch.addItem( {
 				file,
 				batchId,
 				onChange,
@@ -401,7 +402,7 @@ export function muteExistingVideo( {
 			},
 		} );
 
-		void dispatch.prepareItem( itemId );
+		dispatch.prepareItem( itemId );
 	};
 }
 
@@ -453,7 +454,7 @@ export function addSubtitlesForExistingVideo( {
 			},
 		} );
 
-		void dispatch.prepareItem( itemId );
+		dispatch.prepareItem( itemId );
 	};
 }
 
@@ -563,12 +564,16 @@ export function optimizeExistingItem( {
 			},
 		} );
 
-		void dispatch.prepareItem( itemId );
+		dispatch.prepareItem( itemId );
 	};
 }
 
 export function processItem( id: QueueItemId ) {
 	return async ( { select, dispatch }: ThunkArgs ) => {
+		if ( select.isPaused() ) {
+			return;
+		}
+
 		const item = select.getItem( id ) as QueueItem;
 
 		const { attachment, onChange, onSuccess, onBatchSuccess, batchId } =
@@ -593,8 +598,8 @@ export function processItem( id: QueueItemId ) {
 				item.additionalData.post
 			);
 			if ( isAlreadyUploading ) {
-				dispatch< PauseAction >( {
-					type: Type.Pause,
+				dispatch< PauseItemAction >( {
+					type: Type.PauseItem,
 					id,
 				} );
 				return;
@@ -621,7 +626,11 @@ export function processItem( id: QueueItemId ) {
 			if ( batchId && select.isBatchUploaded( batchId ) ) {
 				onBatchSuccess?.();
 			}
-			void dispatch.removeItem( id );
+
+			dispatch< RemoveAction >( {
+				type: Type.Remove,
+				id,
+			} );
 
 			return;
 		}
@@ -633,46 +642,46 @@ export function processItem( id: QueueItemId ) {
 
 		switch ( operation ) {
 			case OperationType.TranscodeResizeCrop:
-				void dispatch.resizeCropItem(
+				dispatch.resizeCropItem(
 					item.id,
 					operationArgs as OperationArgs[ OperationType.TranscodeResizeCrop ]
 				);
 				break;
 
 			case OperationType.TranscodeHeif:
-				void dispatch.convertHeifItem( item.id );
+				dispatch.convertHeifItem( item.id );
 				break;
 
 			case OperationType.TranscodeGif:
-				void dispatch.convertGifItem( item.id );
+				dispatch.convertGifItem( item.id );
 				break;
 
 			case OperationType.TranscodeAudio:
-				void dispatch.optimizeAudioItem( item.id );
+				dispatch.optimizeAudioItem( item.id );
 				break;
 
 			case OperationType.TranscodeVideo:
-				void dispatch.optimizeVideoItem( item.id );
+				dispatch.optimizeVideoItem( item.id );
 				break;
 
 			case OperationType.TranscodeMuteVideo:
-				void dispatch.muteVideoItem( item.id );
+				dispatch.muteVideoItem( item.id );
 				break;
 
 			case OperationType.TranscodeImage:
-				void dispatch.optimizeImageItem( item.id );
+				dispatch.optimizeImageItem( item.id );
 				break;
 
 			// TODO: Right now only handles images.
 			case OperationType.TranscodeCompress:
-				void dispatch.optimizeImageItem(
+				dispatch.optimizeImageItem(
 					item.id,
 					operationArgs as OperationArgs[ OperationType.TranscodeCompress ]
 				);
 				break;
 
 			case OperationType.AddPoster:
-				void dispatch.addPosterForItem( item.id );
+				dispatch.addPosterForItem( item.id );
 				break;
 
 			case OperationType.Upload:
@@ -684,19 +693,50 @@ export function processItem( id: QueueItemId ) {
 				break;
 
 			case OperationType.ThumbnailGeneration:
-				void dispatch.generateThumbnails( id );
+				dispatch.generateThumbnails( id );
 				break;
 
 			case OperationType.UploadOriginal:
-				void dispatch.uploadOriginal( id );
+				dispatch.uploadOriginal( id );
 				break;
 
 			case OperationType.UploadPoster:
-				void dispatch.uploadPoster( id );
+				dispatch.uploadPoster( id );
 				break;
 
 			default:
 			// This shouldn't happen.
+		}
+	};
+}
+
+export function resumeItem( postOrAttachmentId: number ) {
+	return async ( { select, dispatch }: ThunkArgs ) => {
+		const item = select.getPausedUploadForPost( postOrAttachmentId );
+		if ( item ) {
+			dispatch< ResumeItemAction >( {
+				type: Type.ResumeItem,
+				id: item.id,
+			} );
+			dispatch.processItem( item.id );
+		}
+	};
+}
+
+export function pauseQueue(): PauseQueueAction {
+	return {
+		type: Type.PauseQueue,
+	};
+}
+
+export function resumeQueue() {
+	return async ( { select, dispatch }: ThunkArgs ) => {
+		dispatch< ResumeQueueAction >( {
+			type: Type.ResumeQueue,
+		} );
+
+		for ( const item of select.getItems() ) {
+			dispatch.processItem( item.id );
 		}
 	};
 }
@@ -713,18 +753,6 @@ export function finishOperation(
 		} );
 
 		dispatch.processItem( id );
-	};
-}
-
-export function requestApproval(
-	id: QueueItemId,
-	file: File
-): RequestApprovalAction {
-	return {
-		type: Type.RequestApproval,
-		id,
-		file,
-		url: createBlobURL( file ),
 	};
 }
 
@@ -1036,7 +1064,7 @@ export function generateThumbnails( id: QueueItemId ) {
 				file = item.poster;
 
 				// Upload the "full" version without a resize param.
-				void dispatch.addSideloadItem( {
+				dispatch.addSideloadItem( {
 					file: item.poster,
 					additionalData: {
 						// Sideloading does not use the parent post ID but the
@@ -1060,7 +1088,7 @@ export function generateThumbnails( id: QueueItemId ) {
 						imageSize.crop = false;
 					}
 
-					void dispatch.addSideloadItem( {
+					dispatch.addSideloadItem( {
 						file,
 						onChange: ( [ updatedAttachment ] ) => {
 							// This might be confusing, but the idea is to update the original
@@ -1146,13 +1174,6 @@ export function uploadOriginal( id: QueueItemId ) {
 	};
 }
 
-export function removeItem( id: QueueItemId ): RemoveAction {
-	return {
-		type: Type.Remove,
-		id,
-	};
-}
-
 export function rejectApproval( id: number ) {
 	return async ( { select, dispatch }: ThunkArgs ) => {
 		const item = select.getItemByAttachmentId( id );
@@ -1228,7 +1249,10 @@ export function cancelItem( id: QueueItemId, error: Error ) {
 			id,
 			error,
 		} );
-		void dispatch.removeItem( id );
+		dispatch< RemoveAction >( {
+			type: Type.Remove,
+			id,
+		} );
 	};
 }
 
@@ -1359,7 +1383,12 @@ export function optimizeImageItem(
 			}
 
 			if ( args?.requireApproval ) {
-				dispatch.requestApproval( id, file );
+				dispatch< RequestApprovalAction >( {
+					type: Type.RequestApproval,
+					id,
+					file,
+					url: createBlobURL( file ),
+				} );
 			} else {
 				dispatch.finishOperation( id, {
 					file,
@@ -1839,19 +1868,6 @@ export function uploadItem( id: QueueItemId ) {
 	};
 }
 
-export function resumeItem( postOrAttachmentId: number ) {
-	return async ( { select, dispatch }: ThunkArgs ) => {
-		const item = select.getPausedUploadForPost( postOrAttachmentId );
-		if ( item ) {
-			dispatch< ResumeAction >( {
-				type: Type.Resume,
-				id: item.id,
-			} );
-			dispatch.processItem( item.id );
-		}
-	};
-}
-
 export function sideloadItem( id: QueueItemId ) {
 	return async ( { select, dispatch }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
@@ -1867,10 +1883,7 @@ export function sideloadItem( id: QueueItemId ) {
 				item.abortController?.signal
 			);
 
-			void dispatch.finishOperation( id, { attachment } );
-
-			// Avoid race conditions by uploading items sequentially.
-			void dispatch.resumeItem( post );
+			dispatch.finishOperation( id, { attachment } );
 		} catch ( err ) {
 			const error =
 				err instanceof Error
@@ -1882,6 +1895,9 @@ export function sideloadItem( id: QueueItemId ) {
 					  } );
 
 			dispatch.cancelItem( id, error );
+		} finally {
+			// Avoid race conditions by uploading items sequentially.
+			dispatch.resumeItem( post );
 		}
 	};
 }

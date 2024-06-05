@@ -19,6 +19,7 @@ describe( 'selectors', () => {
 				queue: [],
 				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'paused',
 			};
 
 			expect( getItems( state ) ).toHaveLength( 0 );
@@ -45,6 +46,7 @@ describe( 'selectors', () => {
 				] as QueueItem[],
 				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'paused',
 			};
 
 			expect( getItems( state, ItemStatus.Processing ) ).toHaveLength(
@@ -72,6 +74,7 @@ describe( 'selectors', () => {
 				] as QueueItem[],
 				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'paused',
 			};
 
 			expect( isUploading( state ) ).toBe( true );
@@ -98,6 +101,7 @@ describe( 'selectors', () => {
 				] as QueueItem[],
 				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'paused',
 			};
 
 			expect(
@@ -132,6 +136,7 @@ describe( 'selectors', () => {
 				] as QueueItem[],
 				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'paused',
 			};
 
 			expect( isUploadingById( state, 123 ) ).toBe( true );
@@ -155,6 +160,7 @@ describe( 'selectors', () => {
 				] as QueueItem[],
 				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'paused',
 			};
 
 			expect( isUploadingByBatchId( state, 'foo' ) ).toBe( true );
@@ -193,6 +199,7 @@ describe( 'selectors', () => {
 				] as QueueItem[],
 				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'paused',
 			};
 
 			expect( isPendingApproval( state ) ).toBe( true );
@@ -232,6 +239,7 @@ describe( 'selectors', () => {
 				] as QueueItem[],
 				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'paused',
 			};
 
 			expect( isPendingApprovalByAttachmentId( state, 123 ) ).toBe(
