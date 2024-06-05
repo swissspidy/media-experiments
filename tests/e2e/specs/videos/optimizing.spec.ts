@@ -2,7 +2,10 @@ import { test, expect } from '../../fixtures';
 
 test.describe( 'Videos', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllMedia();
+		await Promise.all( [
+			requestUtils.deleteAllMedia(),
+			requestUtils.resetPreferences(),
+		] );
 	} );
 
 	test( 'uploads a file and allows optimizing it afterwards', async ( {

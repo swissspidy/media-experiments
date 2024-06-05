@@ -3,7 +3,10 @@ import type { RestAttachment } from '@mexp/upload-media';
 
 test.describe( 'Animated GIFs', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllMedia();
+		await Promise.all( [
+			requestUtils.deleteAllMedia(),
+			requestUtils.resetPreferences(),
+		] );
 	} );
 
 	test( 'converts GIFs to looping videos', async ( {

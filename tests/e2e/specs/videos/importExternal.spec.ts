@@ -2,7 +2,10 @@ import { test, expect } from '../../fixtures';
 
 test.describe( 'Videos', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllMedia();
+		await Promise.all( [
+			requestUtils.deleteAllMedia(),
+			requestUtils.resetPreferences(),
+		] );
 	} );
 
 	// Skipped because external video is served with incorrect audio/webm Content-Type.

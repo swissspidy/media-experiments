@@ -1,6 +1,12 @@
 import { test, expect } from '../../fixtures';
 
 test.describe( 'Images', () => {
+	test.beforeAll( async ( { requestUtils } ) => {
+		await Promise.all( [
+			requestUtils.deleteAllMedia(),
+			requestUtils.resetPreferences(),
+		] );
+	} );
 	test( 'Bulk Optimization', async ( {
 		admin,
 		page,

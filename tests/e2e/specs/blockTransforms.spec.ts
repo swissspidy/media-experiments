@@ -4,7 +4,10 @@ import { test, expect } from '../fixtures';
 
 test.describe( 'Block Transforms', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllMedia();
+		await Promise.all( [
+			requestUtils.deleteAllMedia(),
+			requestUtils.resetPreferences(),
+		] );
 	} );
 
 	test( 'uploads multiple audio files', async ( {

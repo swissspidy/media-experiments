@@ -31,7 +31,10 @@ const scenarios: {
 
 test.describe( 'Images', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllMedia();
+		await Promise.all( [
+			requestUtils.deleteAllMedia(),
+			requestUtils.resetPreferences(),
+		] );
 	} );
 
 	test.describe( 'Thumbnail generation', () => {
