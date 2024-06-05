@@ -1,3 +1,4 @@
+import type { MouseEvent } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Fragment } from '@wordpress/element';
@@ -41,7 +42,7 @@ function Row( props: BulkOptimizationAttachmentData ) {
 		[]
 	);
 
-	const onClick = () => {
+	const onClick = ( evt: MouseEvent< HTMLButtonElement > ) => {
 		void optimizeExistingItem( {
 			id: props.id,
 			url: props.url,
@@ -75,6 +76,7 @@ function Row( props: BulkOptimizationAttachmentData ) {
 			additionalData: {
 				post: currentPostId,
 			},
+			startTime: evt.timeStamp,
 		} );
 	};
 
@@ -126,7 +128,7 @@ function CompressAll( props: {
 		useDispatch( noticesStore );
 	const { optimizeExistingItem } = useDispatch( uploadStore );
 
-	const onClick = () => {
+	const onClick = ( evt: MouseEvent< HTMLButtonElement > ) => {
 		const batchId = uuidv4();
 
 		for ( const attachment of props.attachments ) {
@@ -173,6 +175,7 @@ function CompressAll( props: {
 				additionalData: {
 					post: currentPostId,
 				},
+				startTime: evt.timeStamp,
 			} );
 		}
 	};

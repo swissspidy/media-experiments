@@ -138,6 +138,9 @@ function reducer(
 							...( item.mediaSourceTerms || [] ),
 							action.mediaSourceTerm,
 						],
+						timings: action.timings
+							? [ ...item.timings, ...action.timings ]
+							: item.timings,
 					};
 				} ),
 			};
@@ -183,6 +186,9 @@ function reducer(
 								},
 								blurHash: action.attachment.blurHash,
 								dominantColor: action.attachment.dominantColor,
+								timings: action.timings
+									? [ ...item.timings, ...action.timings ]
+									: item.timings,
 						  }
 						: item
 				),

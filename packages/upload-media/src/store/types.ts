@@ -38,6 +38,8 @@ export type QueueItem = {
 	parentId?: QueueItemId;
 	resize?: ImageSizeCrop;
 	abortController?: AbortController;
+	startTime?: number;
+	timings?: PerformanceMeasureOptions[];
 };
 
 export interface State {
@@ -96,6 +98,7 @@ export type TranscodingFinishAction = Action<
 		url: string;
 		mediaSourceTerm?: MediaSourceTerm;
 		additionalData?: Partial< AdditionalData >;
+		timings?: any;
 	}
 >;
 export type UploadStartAction = Action< Type.UploadStart, { id: QueueItemId } >;
