@@ -570,6 +570,31 @@ export function processItem( id: QueueItemId ) {
 		const { attachment, onChange, onSuccess, onBatchSuccess, batchId } =
 			item;
 
+		const operation = Array.isArray( item.operations?.[ 0 ] )
+			? item.operations[ 0 ][ 0 ]
+			: item.operations?.[ 0 ];
+		// TODO: Improve type here to avoid using "as" further down.
+		const operationArgs = Array.isArray( item.operations?.[ 0 ] )
+			? item.operations[ 0 ][ 1 ]
+			: undefined;
+
+		if (
+			operation === OperationType.Upload &&
+			item.parentId &&
+			item.additionalData?.post
+		) {
+			const isAlreadyUploading = select.isUploadingToPost(
+				item.additionalData.post as number,
+				id
+			);
+			if ( isAlreadyUploading ) {
+				setTimeout( () => {
+					void dispatch.processItem( id );
+				}, 100 );
+				return;
+			}
+		}
+
 		if ( attachment ) {
 			const { poster, ...media } = attachment;
 			// Video block expects such a structure for the poster.
@@ -594,14 +619,6 @@ export function processItem( id: QueueItemId ) {
 
 			return;
 		}
-
-		const operation = Array.isArray( item.operations[ 0 ] )
-			? item.operations[ 0 ][ 0 ]
-			: item.operations[ 0 ];
-		// TODO: Improve type here to avoid using "as" further down.
-		const operationArgs = Array.isArray( item.operations[ 0 ] )
-			? item.operations[ 0 ][ 1 ]
-			: undefined;
 
 		dispatch< OperationStartAction >( {
 			type: Type.OperationStart,
