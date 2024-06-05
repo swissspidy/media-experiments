@@ -318,6 +318,23 @@ export function isAnimatedGif( buffer: ArrayBuffer ) {
 	return frames > 1;
 }
 
+export function isHeifImage( buffer: ArrayBuffer ) {
+	const fourCC = String.fromCharCode(
+		...Array.from( new Uint8Array( buffer.slice( 8, 12 ) ) )
+	);
+
+	const validFourCC = [
+		'mif1', // .heic / image/heif
+		'msf1', // .heic / image/heif-sequence
+		'heic', // .heic / image/heic
+		'heix', // .heic / image/heic
+		'hevc', // .heic / image/heic-sequence
+		'hevx', // .heic / image/heic-sequence
+	];
+
+	return validFourCC.includes( fourCC );
+}
+
 export function transformAttachment( attachment: RestAttachment ): Attachment {
 	return {
 		id: attachment.id,

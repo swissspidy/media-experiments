@@ -1,6 +1,7 @@
 import { openAsBlob } from 'node:fs';
 import { resolve } from 'node:path';
-import { isHeifImage } from '../';
+
+import { isHeifImage } from '../utils';
 
 describe( 'isHeifImage', () => {
 	it.each( [

@@ -22,12 +22,12 @@ import {
 	getFileNameFromUrl,
 	getPosterFromVideo,
 	isAnimatedGif,
+	isHeifImage,
 	videoHasAudio,
 } from '../utils';
 import { sideloadFile, updateMediaItem, uploadToServer } from '../api';
 import { PREFERENCES_NAME } from '../constants';
 import { transcodeHeifImage } from './utils/heif';
-import { isHeifImage } from '@mexp/heif';
 import {
 	vipsCancelOperations,
 	vipsCompressImage,
