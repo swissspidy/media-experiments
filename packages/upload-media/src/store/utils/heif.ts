@@ -32,7 +32,3 @@ export async function transcodeHeifImage(
 		type
 	);
 }
-
-export async function isHeifImage( fileBuffer: ArrayBuffer ) {
-	return heifWorker.isHeifImage( fileBuffer );
-}

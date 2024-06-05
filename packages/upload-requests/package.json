@@ -33,12 +33,12 @@
 	"dependencies": {
 		"@mexp/media-utils": "../media-utils",
 		"@mexp/upload-media": "../upload-media",
-		"@wordpress/components": "^27.0.0",
-		"@wordpress/compose": "^6.10.0",
-		"@wordpress/core-data": "^6.35.0",
-		"@wordpress/data": "^9.6.0",
-		"@wordpress/icons": "^9.38.0",
-		"@wordpress/notices": "^4.1.0",
+		"@wordpress/components": "^28.0.0",
+		"@wordpress/compose": "^7.0.0",
+		"@wordpress/core-data": "^7.0.0",
+		"@wordpress/data": "^10.0.0",
+		"@wordpress/icons": "^10.0.0",
+		"@wordpress/notices": "^5.0.0",
 		"qrcode.react": "^3.1.0",
 		"short-unique-id": "^5.2.0"
 	}

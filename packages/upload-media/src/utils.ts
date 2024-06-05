@@ -12,7 +12,16 @@ import {
 import { UploadError } from './uploadError';
 import type { Attachment, RestAttachment } from './store/types';
 
-// TODO: Make work for HEIF, GIF and audio as well.
+/**
+ * Determines whether a file can be possible transcoded in the browser.
+ *
+ * Takes into account cross-origin isolation, a hardcoded list of mime types,
+ * and WebAssembly memory limits.
+ *
+ * @todo Make work for HEIF, GIF and audio as well.
+ *
+ * @param file File object.
+ */
 export function canTranscodeFile( file: File ) {
 	return (
 		window?.crossOriginIsolated &&
@@ -68,6 +77,12 @@ export function getFileNameFromUrl( url: string ) {
 	return tail.split( /[#?]/ ).at( 0 ) ?? tail;
 }
 
+/**
+ * Fetches a remote file and returns a File instance.
+ *
+ * @param url          URL.
+ * @param nameOverride File name to use, instead of deriving it from the URL.
+ */
 export async function fetchRemoteFile( url: string, nameOverride?: string ) {
 	const response = await fetch( url );
 	if ( ! response.ok ) {
@@ -94,6 +109,11 @@ export async function fetchRemoteFile( url: string, nameOverride?: string ) {
 	return file;
 }
 
+/**
+ * Preloads a video's metadata.
+ *
+ * @param src Video URL.
+ */
 function preloadVideoMetadata( src: string ) {
 	const video = document.createElement( 'video' );
 	video.muted = true;
@@ -108,6 +128,11 @@ function preloadVideoMetadata( src: string ) {
 	} );
 }
 
+/**
+ * Preloads a video.
+ *
+ * @param src Video URL.
+ */
 async function preloadVideo( src: string ) {
 	const video = await preloadVideoMetadata( src );
 
@@ -121,6 +146,17 @@ async function preloadVideo( src: string ) {
 	} );
 }
 
+/**
+ * Seeks a video to a new time.
+ *
+ * Note: browsers don't support very accurate seeking
+ * to offer protection against timing attacks and fingerprinting
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/currentTime
+ *
+ * @param video  Video element.
+ * @param offset Desired playback time.
+ */
 function seekVideo( video: HTMLVideoElement, offset = 0.99 ) {
 	if ( video.currentTime === offset ) {
 		return Promise.resolve();
@@ -157,6 +193,16 @@ export async function videoHasAudio( src: string ) {
 	);
 }
 
+/**
+ * Returns a File containing the poster image of a given video.
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
+ *
+ * @param src      Video URL.
+ * @param basename The video's base filename.
+ * @param type     Desired output mime type, as supported by HTMLCanvasElement.toBlob().
+ * @param quality  Desired image quality.
+ */
 export async function getPosterFromVideo(
 	src: string,
 	basename: string,
@@ -178,6 +224,18 @@ export async function getPosterFromVideo(
 	);
 }
 
+/**
+ * Returns the earliest possible still frame from a video.
+ *
+ * Preloads the video and seeks to a very early offset before attempting
+ * to capture the frame.
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
+ *
+ * @param src     Video URL.
+ * @param type    Desired output mime type, as supported by HTMLCanvasElement.toBlob().
+ * @param quality Desired image quality.
+ */
 export async function getFirstFrameOfVideo(
 	src: string,
 	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/jpeg',
@@ -188,6 +246,15 @@ export async function getFirstFrameOfVideo(
 	return getImageFromVideo( video, type, quality );
 }
 
+/**
+ * Returns a still image from a video element.
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
+ *
+ * @param video   HTML video element.
+ * @param type    Desired output mime type, as supported by HTMLCanvasElement.toBlob().
+ * @param quality Desired image quality.
+ */
 export function getImageFromVideo(
 	video: HTMLVideoElement,
 	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/jpeg',
@@ -208,7 +275,7 @@ export function getImageFromVideo(
 }
 
 /**
- * Whether an image is an animated GIF.
+ * Determines whether an image is an animated GIF.
  *
  * Loosely based on https://www.npmjs.com/package/animated-gif-detector (MIT-compatible ISC license)
  *
@@ -249,6 +316,23 @@ export function isAnimatedGif( buffer: ArrayBuffer ) {
 	}
 
 	return frames > 1;
+}
+
+export function isHeifImage( buffer: ArrayBuffer ) {
+	const fourCC = String.fromCharCode(
+		...Array.from( new Uint8Array( buffer.slice( 8, 12 ) ) )
+	);
+
+	const validFourCC = [
+		'mif1', // .heic / image/heif
+		'msf1', // .heic / image/heif-sequence
+		'heic', // .heic / image/heic
+		'heix', // .heic / image/heic
+		'hevc', // .heic / image/heic-sequence
+		'hevx', // .heic / image/heic-sequence
+	];
+
+	return validFourCC.includes( fourCC );
 }
 
 export function transformAttachment( attachment: RestAttachment ): Attachment {

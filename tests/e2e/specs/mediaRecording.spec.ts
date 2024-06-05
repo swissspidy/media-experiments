@@ -2,7 +2,10 @@ import { test, expect } from '../fixtures';
 
 test.describe( 'Media Recording', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllMedia();
+		await Promise.all( [
+			requestUtils.deleteAllMedia(),
+			requestUtils.resetPreferences(),
+		] );
 	} );
 
 	test( 'Video', async ( { admin, page, editor, browserName } ) => {
@@ -13,6 +16,16 @@ test.describe( 'Media Recording', () => {
 		);
 
 		await admin.createNewPost();
+
+		await page.evaluate( () => {
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
+					'jpeg_outputFormat',
+					'jpeg'
+				);
+		} );
 
 		await editor.insertBlock( { name: 'core/video' } );
 
@@ -121,6 +134,16 @@ test.describe( 'Media Recording', () => {
 		);
 
 		await admin.createNewPost();
+
+		await page.evaluate( () => {
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
+					'jpeg_outputFormat',
+					'jpeg'
+				);
+		} );
 
 		await editor.insertBlock( { name: 'core/image' } );
 

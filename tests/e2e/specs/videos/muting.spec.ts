@@ -2,7 +2,10 @@ import { test, expect } from '../../fixtures';
 
 test.describe( 'Videos', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllMedia();
+		await Promise.all( [
+			requestUtils.deleteAllMedia(),
+			requestUtils.resetPreferences(),
+		] );
 	} );
 
 	test( 'mutes an existing video', async ( {
@@ -18,6 +21,16 @@ test.describe( 'Videos', () => {
 		);
 
 		await admin.createNewPost();
+
+		await page.evaluate( () => {
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
+					'jpeg_outputFormat',
+					'jpeg'
+				);
+		} );
 
 		await editor.insertBlock( { name: 'core/video' } );
 

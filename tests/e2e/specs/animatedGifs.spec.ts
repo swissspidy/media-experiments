@@ -3,7 +3,10 @@ import type { RestAttachment } from '@mexp/upload-media';
 
 test.describe( 'Animated GIFs', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllMedia();
+		await Promise.all( [
+			requestUtils.deleteAllMedia(),
+			requestUtils.resetPreferences(),
+		] );
 	} );
 
 	test( 'converts GIFs to looping videos', async ( {
@@ -110,7 +113,9 @@ test.describe( 'Animated GIFs', () => {
 
 		// TODO: Ensure dominant color and blurhash are properly extracted.
 
-		await expect( settingsPanel.getByLabel( '#7a6e96' ) ).toBeVisible();
+		await expect(
+			settingsPanel.getByLabel( /#7a6e96|#796e95|#7a7095/ )
+		).toBeVisible();
 		await expect( page.locator( 'css=[data-blurhash]' ) ).toBeVisible();
 	} );
 

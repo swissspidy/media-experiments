@@ -1,31 +1,15 @@
-import {
-	ImageLibrary,
-	RestAttachment,
-	ThumbnailGeneration,
-} from '@mexp/upload-media';
+import { ImageLibrary, RestAttachment } from '@mexp/upload-media';
 
 import { test, expect } from '../../fixtures';
 
 const scenarios: {
 	imageLibrary: ImageLibrary;
-	thumbnailGeneration: ThumbnailGeneration;
 }[] = [
-	// imageLibrary doesn't matter when thumbnailGeneration === 'server'
 	{
 		imageLibrary: 'browser',
-		thumbnailGeneration: 'server',
-	},
-	{
-		imageLibrary: 'browser',
-		thumbnailGeneration: 'client',
 	},
 	{
 		imageLibrary: 'vips',
-		thumbnailGeneration: 'client',
-	},
-	{
-		imageLibrary: 'vips',
-		thumbnailGeneration: 'smart',
 	},
 ];
 
@@ -37,31 +21,31 @@ test.describe( 'Images', () => {
 		] );
 	} );
 
-	test.describe( 'Thumbnail generation', () => {
-		for ( const { imageLibrary, thumbnailGeneration } of scenarios ) {
-			test( `uses ${ imageLibrary } and ${ thumbnailGeneration } mode to generate thumbnails`, async ( {
+	test.describe( 'Big image size threshold', () => {
+		for ( const { imageLibrary } of scenarios ) {
+			test( `does not upscale when using ${ imageLibrary } library`, async ( {
 				admin,
 				page,
 				editor,
 				mediaUtils,
-				requestUtils,
 				browserName,
+				requestUtils,
 			} ) => {
 				test.skip(
-					browserName === 'webkit',
+					browserName === 'webkit' && imageLibrary === 'vips',
 					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
 				);
 
 				await admin.createNewPost();
 
 				await page.evaluate(
-					( [ lib, mode ] ) => {
+					( [ lib ] ) => {
 						window.wp.data
 							.dispatch( 'core/preferences' )
 							.set(
 								'media-experiments/preferences',
 								'optimizeOnUpload',
-								false
+								true
 							);
 						window.wp.data
 							.dispatch( 'core/preferences' )
@@ -82,17 +66,17 @@ test.describe( 'Images', () => {
 							.set(
 								'media-experiments/preferences',
 								'thumbnailGeneration',
-								mode
+								'client'
 							);
 						window.wp.data
 							.dispatch( 'core/preferences' )
 							.set(
 								'media-experiments/preferences',
 								'bigImageSizeThreshold',
-								1140
+								3000
 							);
 					},
-					[ imageLibrary, thumbnailGeneration ]
+					[ imageLibrary ]
 				);
 
 				await editor.insertBlock( { name: 'core/image' } );
@@ -118,14 +102,15 @@ test.describe( 'Images', () => {
 					}
 				);
 
-				// See https://github.com/swissspidy/media-experiments/issues/321.
-				await page.waitForFunction(
+				const imageUrl = await page.evaluate(
 					() =>
 						window.wp.data
 							.select( 'core/block-editor' )
-							.getSelectedBlock()
-							?.attributes?.url.includes( '-1024x683' )
+							.getSelectedBlock()?.attributes?.url
 				);
+
+				// See https://github.com/swissspidy/media-experiments/issues/321.
+				expect( imageUrl ).toMatch( /-1024x683/ );
 
 				const imageId = await page.evaluate(
 					() =>
@@ -142,10 +127,9 @@ test.describe( 'Images', () => {
 				/* eslint-disable camelcase */
 				expect( media.media_details ).toEqual(
 					expect.objectContaining( {
-						width: 1140,
-						height: 760,
+						width: 1200,
+						height: 800,
 						filesize: expect.any( Number ),
-						// original_image: expect.any( String ),
 						blurhash: expect.any( String ),
 						dominant_color: expect.any( String ),
 						has_transparency: false,
@@ -228,48 +212,13 @@ test.describe( 'Images', () => {
 								expect.stringContaining( '-900x600.jpeg' ),
 						} ),
 						full: expect.objectContaining( {
-							width: 1140,
-							height: 760,
+							width: 1200,
+							height: 800,
 							mime_type: 'image/jpeg',
 						} ),
 					} )
 				);
 				/* eslint-enable camelcase */
-
-				expect(
-					await mediaUtils.getImageBuffer(
-						// @ts-ignore
-						media.media_details.sizes.thumbnail.source_url
-					)
-				).toMatchSnapshot(
-					`thumbnail-generation-${ imageLibrary }-${ thumbnailGeneration }.jpeg`,
-					{
-						maxDiffPixelRatio: 0.05,
-					}
-				);
-
-				expect(
-					await mediaUtils.getImageBuffer(
-						// @ts-ignore
-						media.media_details.sizes[ 'bottom-right' ].source_url
-					)
-				).toMatchSnapshot(
-					`thumbnail-bottom-right-${ imageLibrary }-${ thumbnailGeneration }.jpeg`,
-					{
-						maxDiffPixelRatio: 0.05,
-					}
-				);
-				expect(
-					await mediaUtils.getImageBuffer(
-						// @ts-ignore
-						media.media_details.sizes[ 'custom-size' ].source_url
-					)
-				).toMatchSnapshot(
-					`thumbnail-custom-size-${ imageLibrary }-${ thumbnailGeneration }.jpeg`,
-					{
-						maxDiffPixelRatio: 0.05,
-					}
-				);
 			} );
 		}
 	} );

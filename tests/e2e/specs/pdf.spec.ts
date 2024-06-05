@@ -4,7 +4,10 @@ import { test, expect } from '../fixtures';
 
 test.describe( 'PDF', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllMedia();
+		await Promise.all( [
+			requestUtils.deleteAllMedia(),
+			requestUtils.resetPreferences(),
+		] );
 	} );
 
 	test( 'Thumbnail generation', async ( {
@@ -23,6 +26,13 @@ test.describe( 'PDF', () => {
 		await admin.createNewPost();
 
 		await page.evaluate( () => {
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
+					'jpeg_outputFormat',
+					'jpeg'
+				);
 			window.wp.data
 				.dispatch( 'core/preferences' )
 				.set(
