@@ -1,10 +1,10 @@
 import {
+	ItemStatus,
+	OperationType,
 	type BatchId,
 	type MediaSourceTerm,
 	type QueueItemId,
 	type State,
-	ItemStatus,
-	OperationType,
 } from './types';
 
 export function getItems( state: State, status?: ItemStatus ) {
@@ -93,22 +93,29 @@ export function isUploadingByUrl( state: State, url: string ) {
 	);
 }
 
-export function isUploadingById( state: State, id: number ) {
+export function isUploadingById( state: State, attachmentId: number ) {
 	return state.queue.some(
-		( item ) => item.attachment?.id === id || item.sourceAttachmentId === id
+		( item ) =>
+			item.attachment?.id === attachmentId ||
+			item.sourceAttachmentId === attachmentId
 	);
 }
 
-export function isUploadingToPost(
-	state: State,
-	postId: number,
-	except: QueueItemId
-) {
+export function isUploadingToPost( state: State, postOrAttachmentId: number ) {
 	return state.queue.some(
 		( item ) =>
 			item.currentOperation === OperationType.Upload &&
-			item.additionalData?.post === postId &&
-			item.id !== except
+			item.additionalData.post === postOrAttachmentId
+	);
+}
+export function getPausedUploadForPost(
+	state: State,
+	postOrAttachmentId: number
+) {
+	return state.queue.find(
+		( item ) =>
+			item.status === ItemStatus.Paused &&
+			item.additionalData.post === postOrAttachmentId
 	);
 }
 

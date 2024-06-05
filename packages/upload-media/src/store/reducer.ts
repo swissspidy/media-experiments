@@ -1,17 +1,19 @@
 import {
-	ItemStatus,
-	Type,
 	type AddAction,
 	type AddOperationsAction,
 	type ApproveUploadAction,
 	type CancelAction,
+	ItemStatus,
 	type OperationFinishAction,
 	type OperationStartAction,
+	type PauseAction,
 	type RemoveAction,
 	type RequestApprovalAction,
+	type ResumeAction,
 	type SetImageSizesAction,
 	type SetMediaSourceTermsAction,
 	type State,
+	Type,
 	type UnknownAction,
 } from './types';
 
@@ -23,12 +25,14 @@ const DEFAULT_STATE: State = {
 
 type Action =
 	| AddAction
+	| RemoveAction
+	| CancelAction
+	| PauseAction
+	| ResumeAction
 	| AddOperationsAction
 	| ApproveUploadAction
-	| CancelAction
 	| OperationFinishAction
 	| OperationStartAction
-	| RemoveAction
 	| RequestApprovalAction
 	| SetImageSizesAction
 	| SetMediaSourceTermsAction
@@ -38,11 +42,57 @@ function reducer(
 	state = DEFAULT_STATE,
 	action: Action = { type: Type.Unknown }
 ) {
+	console.log( 'reducer', state.queue, action );
 	switch ( action.type ) {
 		case Type.Add:
 			return {
 				...state,
 				queue: [ ...state.queue, action.item ],
+			};
+
+		case Type.Cancel:
+			return {
+				...state,
+				queue: state.queue.map( ( item ) =>
+					item.id === action.id
+						? {
+								...item,
+								error: action.error,
+						  }
+						: item
+				),
+			};
+
+		case Type.Remove:
+			return {
+				...state,
+				queue: state.queue.filter( ( item ) => item.id !== action.id ),
+			};
+
+		case Type.Pause:
+			return {
+				...state,
+				queue: state.queue.map( ( item ) =>
+					item.id === action.id
+						? {
+								...item,
+								status: ItemStatus.Paused,
+						  }
+						: item
+				),
+			};
+
+		case Type.Resume:
+			return {
+				...state,
+				queue: state.queue.map( ( item ) =>
+					item.id === action.id
+						? {
+								...item,
+								status: ItemStatus.Processing,
+						  }
+						: item
+				),
 			};
 
 		case Type.OperationStart: {
@@ -110,25 +160,6 @@ function reducer(
 						],
 					};
 				} ),
-			};
-
-		case Type.Cancel:
-			return {
-				...state,
-				queue: state.queue.map( ( item ) =>
-					item.id === action.id
-						? {
-								...item,
-								error: action.error,
-						  }
-						: item
-				),
-			};
-
-		case Type.Remove:
-			return {
-				...state,
-				queue: state.queue.filter( ( item ) => item.id !== action.id ),
 			};
 
 		case Type.RequestApproval:

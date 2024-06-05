@@ -50,9 +50,10 @@ export enum Type {
 	Unknown = 'REDUX_UNKNOWN',
 	Add = 'ADD_ITEM',
 	Prepare = 'PREPARE_ITEM',
-	UploadStart = 'UPLOAD_START',
 	Cancel = 'CANCEL_ITEM',
 	Remove = 'REMOVE_ITEM',
+	Pause = 'PAUSE_ITEM',
+	Resume = 'RESUME_ITEM',
 	SetMediaSourceTerms = 'ADD_MEDIA_SOURCE_TERMS',
 	SetImageSizes = 'ADD_IMAGE_SIZES',
 	RequestApproval = 'REQUEST_APPROVAL',
@@ -101,6 +102,8 @@ export type CancelAction = Action<
 	Type.Cancel,
 	{ id: QueueItemId; error: Error }
 >;
+export type PauseAction = Action< Type.Pause, { id: QueueItemId } >;
+export type ResumeAction = Action< Type.Resume, { id: QueueItemId } >;
 export type RemoveAction = Action< Type.Remove, { id: QueueItemId } >;
 export type SetMediaSourceTermsAction = Action<
 	Type.SetMediaSourceTerms,
@@ -139,7 +142,7 @@ export type OnBatchSuccessHandler = () => void;
 
 export enum ItemStatus {
 	Processing = 'PROCESSING',
-	Paused = 'PAUSED', // TODO: Implement pausing, mostly for testing.
+	Paused = 'PAUSED',
 	PendingApproval = 'PENDING_APPROVAL',
 }
 
@@ -170,7 +173,6 @@ type OperationWithArgs< T extends keyof OperationArgs = keyof OperationArgs > =
 export type Operation = OperationType | OperationWithArgs;
 
 export interface RestAttachment extends WP_REST_API_Attachment {
-	featured_media: number;
 	mexp_filename: string | null;
 	mexp_filesize: number | null;
 	mexp_media_source: number[];
@@ -187,13 +189,19 @@ export interface RestAttachment extends WP_REST_API_Attachment {
 
 export type CreateRestAttachment = Partial< RestAttachment > & {
 	generate_sub_sizes?: boolean;
-	upload_request?: string;
 };
 
 export type AdditionalData = Omit<
 	CreateRestAttachment,
 	'meta' | 'mexp_media_source'
->;
+> & {
+	/**
+	 * The ID for the associated post of the attachment.
+	 *
+	 * TODO: Figure out why it's not inherited from RestAttachment / WP_REST_API_Attachment type.
+	 */
+	post?: RestAttachment[ 'id' ];
+};
 
 export type CreateSideloadFile = {
 	image_size?: string;

@@ -40,10 +40,7 @@ import {
 	resizeImage as canvasResizeImage,
 } from './utils/canvas';
 import type {
-	AddAction,
 	AdditionalData,
-	AddOperationsAction,
-	ApproveUploadAction,
 	Attachment,
 	AudioFormat,
 	BatchId,
@@ -52,17 +49,23 @@ import type {
 	ImageLibrary,
 	ImageSizeCrop,
 	MediaSourceTerm,
+	QueueItem,
+	QueueItemId,
 	OnBatchSuccessHandler,
 	OnChangeHandler,
 	OnErrorHandler,
 	OnSuccessHandler,
 	Operation,
 	OperationArgs,
+	AddAction,
+	RemoveAction,
+	CancelAction,
+	PauseAction,
+	ResumeAction,
+	AddOperationsAction,
+	ApproveUploadAction,
 	OperationFinishAction,
 	OperationStartAction,
-	QueueItem,
-	QueueItemId,
-	RemoveAction,
 	RequestApprovalAction,
 	SetImageSizesAction,
 	SetMediaSourceTermsAction,
@@ -106,7 +109,11 @@ type ActionCreators = {
 	sideloadItem: typeof sideloadItem;
 	requestApproval: typeof requestApproval;
 	removeItem: typeof removeItem;
+	cancelItem: typeof cancelItem;
+	resumeItem: typeof resumeItem;
 	addPosterForItem: typeof addPosterForItem;
+	rejectApproval: typeof rejectApproval;
+	grantApproval: typeof grantApproval;
 	muteVideoItem: typeof muteVideoItem;
 	muteExistingVideo: typeof muteExistingVideo;
 	addSubtitlesForExistingVideo: typeof addSubtitlesForExistingVideo;
@@ -117,9 +124,6 @@ type ActionCreators = {
 	optimizeVideoItem: typeof optimizeVideoItem;
 	optimizeAudioItem: typeof optimizeAudioItem;
 	optimizeImageItem: typeof optimizeImageItem;
-	rejectApproval: typeof rejectApproval;
-	grantApproval: typeof grantApproval;
-	cancelItem: typeof cancelItem;
 	generateThumbnails: typeof generateThumbnails;
 	uploadOriginal: typeof uploadOriginal;
 	uploadPoster: typeof uploadPoster;
@@ -163,7 +167,7 @@ export function addItem( {
 	onSuccess,
 	onBatchSuccess,
 	onError,
-	additionalData = {},
+	additionalData = {} as AdditionalData,
 	sourceUrl,
 	sourceAttachmentId,
 	mediaSourceTerms = [],
@@ -341,7 +345,7 @@ export function muteExistingVideo( {
 	onChange,
 	onSuccess,
 	onError,
-	additionalData = {},
+	additionalData = {} as AdditionalData,
 	blurHash,
 	dominantColor,
 	generatedPosterId,
@@ -416,7 +420,7 @@ export function addSubtitlesForExistingVideo( {
 	onChange,
 	onSuccess,
 	onError,
-	additionalData,
+	additionalData = {} as AdditionalData,
 }: AddSubtitlesForExistingVideoArgs ) {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
 		const fileName = getFileNameFromUrl( url );
@@ -477,7 +481,7 @@ export function optimizeExistingItem( {
 	onSuccess,
 	onBatchSuccess,
 	onError,
-	additionalData = {},
+	additionalData = {} as AdditionalData,
 	blurHash,
 	dominantColor,
 	generatedPosterId,
@@ -578,19 +582,21 @@ export function processItem( id: QueueItemId ) {
 			? item.operations[ 0 ][ 1 ]
 			: undefined;
 
+		// If we're sideloading a thumbnail, pause upload to avoid race conditions.
+		// It will be resumed after the previous upload finishes.
 		if (
 			operation === OperationType.Upload &&
 			item.parentId &&
-			item.additionalData?.post
+			item.additionalData.post
 		) {
 			const isAlreadyUploading = select.isUploadingToPost(
-				item.additionalData.post as number,
-				id
+				item.additionalData.post
 			);
 			if ( isAlreadyUploading ) {
-				setTimeout( () => {
-					void dispatch.processItem( id );
-				}, 100 );
+				dispatch< PauseAction >( {
+					type: Type.Pause,
+					id,
+				} );
 				return;
 			}
 		}
@@ -1217,7 +1223,7 @@ export function cancelItem( id: QueueItemId, error: Error ) {
 			console.error( 'Upload cancelled', error );
 		}
 
-		dispatch( {
+		dispatch< CancelAction >( {
 			type: Type.Cancel,
 			id,
 			error,
@@ -1833,6 +1839,19 @@ export function uploadItem( id: QueueItemId ) {
 	};
 }
 
+export function resumeItem( postOrAttachmentId: number ) {
+	return async ( { select, dispatch }: ThunkArgs ) => {
+		const item = select.getPausedUploadForPost( postOrAttachmentId );
+		if ( item ) {
+			dispatch< ResumeAction >( {
+				type: Type.Resume,
+				id: item.id,
+			} );
+			dispatch.processItem( item.id );
+		}
+	};
+}
+
 export function sideloadItem( id: QueueItemId ) {
 	return async ( { select, dispatch }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
@@ -1849,6 +1868,9 @@ export function sideloadItem( id: QueueItemId ) {
 			);
 
 			void dispatch.finishOperation( id, { attachment } );
+
+			// Avoid race conditions by uploading items sequentially.
+			void dispatch.resumeItem( post );
 		} catch ( err ) {
 			const error =
 				err instanceof Error
