@@ -158,7 +158,7 @@ describe( 'selectors', () => {
 			};
 
 			expect( isUploadingByBatchId( state, 'foo' ) ).toBe( true );
-			expect( isUploadingByBatchId( state, 'bar' ) ).toBe( false );
+			expect( isUploadingByBatchId( state, 'baz' ) ).toBe( false );
 		} );
 	} );
 

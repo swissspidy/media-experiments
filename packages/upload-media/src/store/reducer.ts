@@ -42,7 +42,6 @@ function reducer(
 	state = DEFAULT_STATE,
 	action: Action = { type: Type.Unknown }
 ) {
-	console.log( 'reducer', state.queue, action );
 	switch ( action.type ) {
 		case Type.Add:
 			return {
@@ -141,6 +140,7 @@ function reducer(
 
 					return {
 						...item,
+						currentOperation: null,
 						operations,
 						...action.item,
 						attachment: {

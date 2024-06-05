@@ -9,7 +9,7 @@ import { store as preferencesStore } from '@wordpress/preferences';
  * Internal dependencies
  */
 import { store as uploadStore } from '..';
-import { ItemStatus, type QueueItem, OperationType, Type } from '../types';
+import { ItemStatus, OperationType, type QueueItem, Type } from '../types';
 import { UploadError } from '../../uploadError';
 
 const mockImageFromPdf = new File( [], 'example.jpg', {
@@ -201,7 +201,10 @@ describe( 'actions', () => {
 					attachment: {
 						url: 'https://example.com/awesome-video.mp4',
 					},
-					transcode: [ OperationType.TranscodeMuteVideo ],
+					operations: [
+						OperationType.TranscodeMuteVideo,
+						OperationType.Upload,
+					],
 				} )
 			);
 			expect( item.file.name ).toBe( 'awesome-video-muted.mp4' );
