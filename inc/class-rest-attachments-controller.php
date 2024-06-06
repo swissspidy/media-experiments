@@ -576,10 +576,30 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		add_filter( 'wp_unique_filename', $filter_filename, 10, 6 );
 
-		if ( ! empty( $files ) ) {
-			$file = $this->upload_from_file( $files, $headers );
+		// See https://github.com/swissspidy/media-experiments/issues/465
+		// See https://core.trac.wordpress.org/ticket/61189
+		if ( version_compare( get_bloginfo( 'version' ), '6.6-beta1', '>=' ) ) {
+			$parent_post = get_post_parent( $attachment_id );
+
+			$time = null;
+
+			// Matches logic in media_handle_upload().
+			// The post date doesn't usually matter for pages, so don't backdate this upload.
+			if ( $parent_post && 'page' !== $parent_post->post_type && substr( $parent_post->post_date, 0, 4 ) > 0 ) {
+				$time = $parent_post->post_date;
+			}
+
+			if ( ! empty( $files ) ) {
+				$file = $this->upload_from_file( $files, $headers, $time );
+			} else {
+				$file = $this->upload_from_data( $request->get_body(), $headers, $time );
+			}
 		} else {
-			$file = $this->upload_from_data( $request->get_body(), $headers );
+			if ( ! empty( $files ) ) {
+				$file = $this->upload_from_file( $files, $headers );
+			} else {
+				$file = $this->upload_from_data( $request->get_body(), $headers );
+			}
 		}
 
 		remove_filter( 'wp_unique_filename', $filter_filename );
