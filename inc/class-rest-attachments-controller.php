@@ -576,8 +576,8 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		add_filter( 'wp_unique_filename', $filter_filename, 10, 6 );
 
-		// See https://github.com/swissspidy/media-experiments/issues/465
-		// See https://core.trac.wordpress.org/ticket/61189
+		// See https://github.com/swissspidy/media-experiments/issues/465.
+		// See https://core.trac.wordpress.org/ticket/61189.
 		if ( version_compare( get_bloginfo( 'version' ), '6.6-beta1', '>=' ) ) {
 			$parent_post = get_post_parent( $attachment_id );
 
