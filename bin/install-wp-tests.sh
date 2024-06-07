@@ -19,7 +19,7 @@ TMPDIR=$(echo $TMPDIR | sed -e "s/\/$//")
 WP_TESTS_DIR=${WP_TESTS_DIR-$TMPDIR/wordpress-tests-lib}
 WP_TESTS_FILE="$WP_TESTS_DIR"/includes/functions.php
 WP_CORE_DIR=${WP_CORE_DIR-$TMPDIR/wordpress/}
-WP_CORE_FILE="$WP_CORE_DIR"/wp-includs.php
+WP_CORE_FILE="$WP_CORE_DIR"/wp-settings.php
 
 download() {
     if [ `which curl` ]; then
