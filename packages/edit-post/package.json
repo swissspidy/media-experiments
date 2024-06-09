@@ -58,6 +58,6 @@
 		"image-capture": "^0.4.0",
 		"react-blurhash": "^0.3.0",
 		"react-compare-slider": "^3.1.0",
-		"uuid": "^9.0.0"
+		"uuid": "^10.0.0"
 	}
 }
