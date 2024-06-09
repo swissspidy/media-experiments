@@ -263,7 +263,7 @@ jobs:
                   unzip media-experiments.zip -d tmp-build
 
             - name: Run plugin check
-              uses: swissspidy/wp-plugin-check-action@main
+              uses: WordPress/plugin-check-action@main
               with:
                   build-dir: './tmp-build/media-experiments'
                   wp-version: 'trunk'
@@ -272,3 +272,4 @@ jobs:
                       plugin_review_phpcs
                       trademarks
                       plugin_readme
+                      plugin_updater
