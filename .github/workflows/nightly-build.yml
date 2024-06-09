@@ -80,7 +80,7 @@ jobs:
 
                   )
 
-                 echo $UPDATE > update.json
+                  echo $UPDATE > update.json
 
             - name: Create ZIP file
               if: ${{ env.CURRENT_TAG != 'nightly' }}
