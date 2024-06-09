@@ -18,6 +18,39 @@ use function is_array;
 use function register_post_meta;
 
 /**
+ * Filters the update response for this plugin.
+ *
+ * Allows downloading updates from GitHub.
+ *
+ * @param array<string,mixed>|false $update      The plugin update data with the latest details. Default false.
+ * @param array<string,string>      $plugin_data Plugin headers.
+ * @param string                    $plugin_file Plugin filename.
+ *
+ * @return array<string,mixed>|false Filtered update data.
+ */
+function filter_update_plugins( $update, $plugin_data, string $plugin_file ) {
+	if ( MEXP_BASENAME !== $plugin_file ) {
+		return $update;
+	}
+
+	require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+	$updater = new \WP_Automatic_Updater();
+
+	if ( $updater->is_vcs_checkout( dirname( __DIR__ ) ) ) {
+		return $update;
+	}
+
+	$response = wp_remote_get( $plugin_data['UpdateURI'] );
+	$response = wp_remote_retrieve_body( $response );
+
+	if ( ! $response ) {
+		return $update;
+	}
+
+	return json_decode( $response, true );
+}
+
+/**
  * Sets up cross-origin isolation in the block editor.
  *
  * @codeCoverageIgnore

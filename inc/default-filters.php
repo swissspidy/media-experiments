@@ -11,6 +11,8 @@ namespace MediaExperiments;
 
 use function add_action;
 
+add_filter( 'update_plugins_swissspidy.github.io', __NAMESPACE__ . '\filter_update_plugins', 10, 3 );
+
 add_action( 'init', __NAMESPACE__ . '\register_media_source_taxonomy', 5 );
 add_action( 'init', __NAMESPACE__ . '\register_assets' );
 add_action( 'current_screen', __NAMESPACE__ . '\set_up_cross_origin_isolation_editor' );

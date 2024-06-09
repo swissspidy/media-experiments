@@ -16,6 +16,8 @@
  * @package MediaExperiments
  */
 
+define( 'MEXP_BASENAME', plugin_basename( __FILE__ ) );
+
 /**
  * REST attachments controller.
  */
