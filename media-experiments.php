@@ -16,6 +16,10 @@
  * @package MediaExperiments
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 define( 'MEXP_BASENAME', plugin_basename( __FILE__ ) );
 
 /**
