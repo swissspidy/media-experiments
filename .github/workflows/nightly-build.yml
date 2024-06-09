@@ -63,6 +63,25 @@ jobs:
               run: |
                   sed -i -e "s/Version:     0.0.2/Version:     0.0.2-$GITHUB_SHA/g" ./media-experiments.php
 
+            - name: Create updates information
+              if: ${{ env.CURRENT_TAG != 'nightly' }}
+              run: |
+                  UPDATE=$(cat <<-END
+                    {
+                        "id": "https://swissspidy.github.io/media-experiments/update.json",
+                        "slug": "media-experiments",
+                        "version": "0.0.2-$GITHUB_SHA",
+                        "url": "https://github.com/swissspidy/media-experiments",
+                        "package": "https://swissspidy.github.io/media-experiments/nightly.zip",
+                        "tested": "6.6",
+                        "requires_php": "8.0"
+                    }
+                  END
+
+                  )
+
+                 echo $UPDATE > update.json
+
             - name: Create ZIP file
               if: ${{ env.CURRENT_TAG != 'nightly' }}
               run: wp dist-archive . ./media-experiments.zip
@@ -71,6 +90,7 @@ jobs:
               if: ${{ env.CURRENT_TAG != 'nightly' }}
               run: |
                   mkdir -p _site
+                  mv update.json _site/update.json
                   cp ./media-experiments.zip _site/nightly.zip
 
             - name: Upload artifact
