@@ -74,7 +74,8 @@ jobs:
                         "url": "https://github.com/swissspidy/media-experiments",
                         "package": "https://swissspidy.github.io/media-experiments/nightly.zip",
                         "tested": "6.6",
-                        "requires_php": "8.0"
+                        "requires_php": "8.0",
+                        "autoupdate": true
                     }
                   END
 
