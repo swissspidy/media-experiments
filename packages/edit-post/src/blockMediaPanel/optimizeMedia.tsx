@@ -52,6 +52,7 @@ export function OptimizeMedia( {
 		void optimizeExistingItem( {
 			id,
 			url: attachment.source_url || url,
+			fileName: attachment.mexp_filename || undefined,
 			poster,
 			onSuccess: ( [ media ] ) => {
 				onSuccess( media );

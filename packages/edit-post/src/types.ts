@@ -11,7 +11,7 @@ import type {
 
 export type BulkOptimizationAttachmentData = Pick<
 	Attachment,
-	'id' | 'url' | 'fileSize'
+	'id' | 'url' | 'fileSize' | 'fileName'
 > & {
 	posterUrl: Attachment[ 'url' ];
 	clientId: BlockInstance[ 'clientId' ];

@@ -103,6 +103,10 @@ function useMediaBlockAttachments() {
 						if ( media.mexp_filesize ) {
 							attachment.fileSize = media.mexp_filesize;
 						}
+
+						if ( media.mexp_filename ) {
+							attachment.fileName = media.mexp_filename;
+						}
 					}
 
 					return attachment;

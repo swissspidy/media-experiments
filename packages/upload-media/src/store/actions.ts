@@ -461,6 +461,7 @@ export function addSubtitlesForExistingVideo( {
 interface OptimizexistingItemArgs {
 	id: number;
 	url: string;
+	fileName?: string;
 	poster?: string;
 	batchId?: BatchId;
 	onChange?: OnChangeHandler;
@@ -476,6 +477,7 @@ interface OptimizexistingItemArgs {
 export function optimizeExistingItem( {
 	id,
 	url,
+	fileName,
 	poster,
 	batchId,
 	onChange,
@@ -494,7 +496,7 @@ export function optimizeExistingItem( {
 		dispatch: ActionCreators;
 		registry: WPDataRegistry;
 	} ) => {
-		const fileName = getFileNameFromUrl( url );
+		fileName = fileName || getFileNameFromUrl( url );
 		const baseName = getFileBasename( fileName );
 		const sourceFile = await fetchRemoteFile( url, fileName );
 		const file = new File(

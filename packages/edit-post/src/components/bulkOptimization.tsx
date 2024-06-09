@@ -45,6 +45,7 @@ function Row( props: BulkOptimizationAttachmentData ) {
 		void optimizeExistingItem( {
 			id: props.id,
 			url: props.url,
+			fileName: props.fileName,
 			onSuccess: ( [ media ] ) => {
 				void updateBlockAttributes( props.clientId, {
 					id: media.id,
@@ -138,6 +139,7 @@ function CompressAll( props: {
 				batchId,
 				id: attachment.id,
 				url: attachment.url,
+				fileName: attachment.fileName,
 				onSuccess: ( [ media ] ) => {
 					void updateBlockAttributes( attachment.clientId, {
 						id: media.id,
