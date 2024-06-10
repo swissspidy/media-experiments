@@ -36,9 +36,11 @@ if ( $post instanceof WP_Post ) {
 		unset( $dep );
 	}
 
+	// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals
 	$allowed_types = get_post_meta( $post->ID, 'mexp_allowed_types', true );
 	$accept        = get_post_meta( $post->ID, 'mexp_accept', true );
 	$multiple      = (bool) get_post_meta( $post->ID, 'mexp_multiple', true );
+	// phpcs:enable WordPress.NamingConventions.PrefixAllGlobals
 
 	wp_add_inline_script(
 		'media-experiments-view-upload-request',
