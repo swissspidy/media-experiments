@@ -61,7 +61,7 @@ jobs:
             - name: Update version number
               if: ${{ env.CURRENT_TAG != 'nightly' }}
               run: |
-                  sed -i -e "s/Version:           0.0.2/Version:           0.0.2-$GITHUB_SHA/g" ./media-experiments.php
+                  sed -i -e "s/Version:           0.0.3/Version:           0.0.3-$GITHUB_SHA/g" ./media-experiments.php
 
             - name: Create updates information
               if: ${{ env.CURRENT_TAG != 'nightly' }}
@@ -70,7 +70,7 @@ jobs:
                     {
                         "id": "https://swissspidy.github.io/media-experiments/update.json",
                         "slug": "media-experiments",
-                        "version": "0.0.2-$GITHUB_SHA",
+                        "version": "0.0.3-$GITHUB_SHA",
                         "url": "https://github.com/swissspidy/media-experiments",
                         "package": "https://swissspidy.github.io/media-experiments/nightly.zip",
                         "tested": "6.6",
