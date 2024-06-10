@@ -7,7 +7,10 @@ declare global {
 			bigImageSizeThreshold: number;
 			bigVideoSizeThreshold: number;
 			allowedMimeTypes?: Record< string, string > | null;
-			uploadRequest?: string;
+			uploadRequest: string;
+			allowedTypes: string[];
+			accept: string[];
+			multiple: boolean;
 		};
 	}
 }

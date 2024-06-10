@@ -998,6 +998,59 @@ function register_upload_request_post_type(): void {
 			'single'       => true,
 		]
 	);
+
+	register_post_meta(
+		'mexp-upload-request',
+		'mexp_allowed_types',
+		[
+			'type'         => 'string',
+			'description'  => __( 'Allowed media types.', 'media-experiments' ),
+			'show_in_rest' => [
+				'schema' => [
+					'type'  => 'array',
+					'items' => [
+						'type' => 'string',
+						'enum' => [ 'image', 'video', 'audio' ],
+					],
+				],
+			],
+			'single'       => true,
+		]
+	);
+
+	// See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#Unique_file_type_specifiers.
+	register_post_meta(
+		'mexp-upload-request',
+		'mexp_accept',
+		[
+			'type'         => 'string',
+			'description'  => __( 'List of allowed file types.', 'media-experiments' ),
+			'show_in_rest' => [
+				'schema' => [
+					'type'  => 'array',
+					'items' => [
+						'type' => 'string',
+					],
+				],
+			],
+			'single'       => true,
+		]
+	);
+
+	register_post_meta(
+		'mexp-upload-request',
+		'mexp_multiple',
+		[
+			'type'         => 'string',
+			'description'  => __( 'Whether multiple files are allowed.', 'media-experiments' ),
+			'show_in_rest' => [
+				'schema' => [
+					'type' => 'boolean',
+				],
+			],
+			'single'       => true,
+		]
+	);
 }
 
 /**

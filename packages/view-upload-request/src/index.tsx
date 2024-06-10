@@ -27,11 +27,6 @@ import {
 
 import './view.css';
 
-// TODO: Restrict based on actual upload request.
-const ALLOWED_MEDIA_TYPES = [ 'image', 'video', 'audio' ];
-const MULTIPLE = false;
-const ACCEPT = [ 'image/*', 'video/*', 'audio/*', '.pdf' ].join( ',' );
-
 function App() {
 	const { createErrorNotice, createSuccessNotice, removeNotice } =
 		useDispatch( noticesStore );
@@ -70,7 +65,7 @@ function App() {
 
 	const onUpload = ( event: ChangeEvent< HTMLInputElement > ) => {
 		uploadMedia( {
-			allowedTypes: ALLOWED_MEDIA_TYPES,
+			allowedTypes: window.mediaExperiments.allowedTypes,
 			filesList: event.target.files ? [ ...event.target.files ] : [],
 			wpAllowedMimeTypes: window.mediaExperiments.allowedMimeTypes,
 			onError: ( message ) => {
@@ -94,8 +89,12 @@ function App() {
 			{ ! attachment.id ? (
 				<FormFileUpload
 					onChange={ onUpload }
-					accept={ ACCEPT }
-					multiple={ MULTIPLE }
+					accept={
+						window.mediaExperiments.accept
+							? window.mediaExperiments.accept.join( ',' )
+							: '*'
+					}
+					multiple={ window.mediaExperiments.multiple }
 					render={ ( { openFileDialog } ) => (
 						<Button
 							variant="primary"

@@ -26,6 +26,9 @@ import { store as interfaceStore } from '../interface/store';
 interface UploadRequestControlsProps {
 	url?: string;
 	onInsert: ( media: Partial< Attachment >[] ) => void;
+	allowedTypes?: string[];
+	multiple?: boolean;
+	accept?: string[];
 }
 
 const UPLOAD_REQUEST_CHECK_INTERVAL = 5; // Seconds.
@@ -165,6 +168,15 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 				data: {
 					status: 'publish',
 					parent: currentPostId,
+					meta: {
+						mexp_allowed_types: props.allowedTypes
+							? props.allowedTypes.join( ',' )
+							: undefined,
+						mexp_multiple: Boolean( props.multiple ),
+						mexp_accept: props.accept
+							? props.accept.join( ',' )
+							: undefined,
+					},
 				},
 				method: 'POST',
 			} )

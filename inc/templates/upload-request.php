@@ -36,15 +36,25 @@ if ( $post instanceof WP_Post ) {
 		unset( $dep );
 	}
 
-	// TODO: Only provide mime types allowed for this upload request.
+	$allowed_types = get_post_meta( $post->ID, 'mexp_allowed_types', true );
+	$accept        = get_post_meta( $post->ID, 'mexp_accept', true );
+	$multiple      = (bool) get_post_meta( $post->ID, 'mexp_multiple', true );
+
 	wp_add_inline_script(
 		'media-experiments-view-upload-request',
 		sprintf(
 			'
 			window.mediaExperiments.allowedMimeTypes = %1$s;
-			window.mediaExperiments.uploadRequest = %2$s;',
+			window.mediaExperiments.uploadRequest = %2$s;
+			window.mediaExperiments.allowedTypes = %3$s;
+			window.mediaExperiments.accept = %4$s;
+			window.mediaExperiments.multiple = %5$s;',
+			// TODO: Only provide mime types allowed for this upload request.
 			wp_json_encode( get_allowed_mime_types() ),
-			wp_json_encode( $post?->post_name )
+			wp_json_encode( $post->post_name ),
+			wp_json_encode( $allowed_types ? (array) $allowed_types : null ),
+			wp_json_encode( $accept ? (array) $accept : null ),
+			wp_json_encode( $multiple ),
 		),
 		'before'
 	);

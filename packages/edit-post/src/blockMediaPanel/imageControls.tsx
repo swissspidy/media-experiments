@@ -78,6 +78,8 @@ export function ImageControls( props: ImageControlsProps ) {
 			<UploadRequestControls
 				url={ props.attributes.url }
 				onInsert={ onInsertFromUploadRequest }
+				allowedTypes={ [ 'image' ] }
+				accept={ [ 'image/*' ] }
 			/>
 			{ ! props.attributes.id ? (
 				<ImportMedia
