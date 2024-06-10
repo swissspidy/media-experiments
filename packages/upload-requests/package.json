@@ -39,7 +39,6 @@
 		"@wordpress/data": "^10.0.0",
 		"@wordpress/icons": "^10.0.0",
 		"@wordpress/notices": "^5.0.0",
-		"qrcode.react": "^3.1.0",
-		"short-unique-id": "^5.2.0"
+		"qrcode.react": "^3.1.0"
 	}
 }

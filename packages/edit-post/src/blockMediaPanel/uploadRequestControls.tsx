@@ -159,15 +159,10 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 	] );
 
 	async function createNewUploadRequest() {
-		const { getUniqueId } = await import(
-			/* webpackChunkName: 'upload-requests-modal' */ '@mexp/upload-requests'
-		);
-
 		setUploadRequest(
 			await apiFetch< Post >( {
 				path: `/wp/v2/upload-requests`,
 				data: {
-					slug: getUniqueId(),
 					status: 'publish',
 					parent: currentPostId,
 				},

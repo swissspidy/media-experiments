@@ -8,6 +8,9 @@
 }
 
 @media (min-width: 600px) {
+	.mexp-upload-requests-modal {
+		min-width: 450px;
+	}
 
 	.mexp-upload-requests-modal__qrcode svg {
 		width: 150px;
