@@ -170,7 +170,13 @@ export enum OperationType {
 }
 
 export type OperationArgs = {
-	[ OperationType.TranscodeCompress ]: { requireApproval?: boolean };
+	[ OperationType.TranscodeCompress ]: {
+		requireApproval?: boolean;
+	};
+	[ OperationType.TranscodeImage ]: {
+		requireApproval?: boolean;
+		outputFormat?: ImageFormat;
+	};
 	[ OperationType.TranscodeResizeCrop ]: { resize?: ImageSizeCrop };
 };
 

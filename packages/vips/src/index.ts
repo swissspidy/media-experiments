@@ -265,6 +265,14 @@ export async function resizeImage(
 			top = image.height - resize.height;
 		}
 
+		// Address rounding errors where `left` or `top` become negative integers
+		// and `resize.width` / `resize.height` are bigger than the actual dimensions.
+		// Downside: one side could be 1px smaller than the requested size.
+		left = Math.max( 0, left );
+		top = Math.max( 0, top );
+		resize.width = Math.min( image.width, resize.width );
+		resize.height = Math.min( image.height, resize.height );
+
 		image = image.crop( left, top, resize.width, resize.height );
 
 		image.onProgress = onProgress;

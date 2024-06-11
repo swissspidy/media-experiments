@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { createWorkerFactory } from '@shopify/web-worker';
 
-import { createBlobURL, isBlobURL, revokeBlobURL } from '@wordpress/blob';
+import { createBlobURL, isBlobURL } from '@wordpress/blob';
 import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as preferencesStore } from '@wordpress/preferences';
 
@@ -159,6 +159,7 @@ interface AddItemArgs {
 	blurHash?: string;
 	dominantColor?: string;
 	abortController?: AbortController;
+	operations?: Operation[];
 }
 
 export function addItem( {
@@ -175,6 +176,7 @@ export function addItem( {
 	blurHash,
 	dominantColor,
 	abortController,
+	operations,
 }: AddItemArgs ) {
 	return async ( {
 		dispatch,
@@ -214,6 +216,7 @@ export function addItem( {
 				blurHash,
 				dominantColor,
 				abortController: abortController || new AbortController(),
+				operations,
 			},
 		} );
 
@@ -671,14 +674,17 @@ export function processItem( id: QueueItemId ) {
 				break;
 
 			case OperationType.TranscodeImage:
-				dispatch.optimizeImageItem( item.id );
+				dispatch.optimizeImageItem(
+					item.id,
+					operationArgs as OperationArgs[ OperationType.TranscodeImage ]
+				);
 				break;
 
-			// TODO: Right now only handles images.
+			// TODO: Right now only handles images, but should support other types too.
 			case OperationType.TranscodeCompress:
 				dispatch.optimizeImageItem(
 					item.id,
-					operationArgs as OperationArgs[ OperationType.TranscodeCompress ]
+					operationArgs as OperationArgs[ OperationType.TranscodeImage ]
 				);
 				break;
 
@@ -770,20 +776,29 @@ export function addPosterForItem( id: QueueItemId ) {
 
 		const { file } = item;
 
+		// Bail early if the video already has a poster.
+		if ( item.poster ) {
+			dispatch.finishOperation( id, {} );
+			return;
+		}
+
 		const mediaType = getMediaTypeFromMimeType( file.type );
 
 		try {
 			switch ( mediaType ) {
 				case 'video':
+					const src = createBlobURL( file );
 					const poster = await getPosterFromVideo(
-						createBlobURL( file ),
+						src,
 						`${ getFileBasename( item.file.name ) }-poster`
 					);
+
+					const posterUrl = createBlobURL( poster );
 
 					dispatch.finishOperation( id, {
 						poster,
 						attachment: {
-							poster: createBlobURL( poster ),
+							poster: posterUrl,
 						},
 					} );
 
@@ -962,7 +977,7 @@ export function prepareItem( id: QueueItemId ) {
 }
 
 export function uploadPoster( id: QueueItemId ) {
-	return async ( { select, dispatch }: ThunkArgs ) => {
+	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
 
 		const attachment: Attachment = item.attachment as Attachment;
@@ -977,6 +992,35 @@ export function uploadPoster( id: QueueItemId ) {
 		) {
 			try {
 				const abortController = new AbortController();
+
+				const operations: Operation[] = [];
+
+				const imageSizeThreshold: number = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'bigImageSizeThreshold' );
+
+				if ( imageSizeThreshold ) {
+					operations.push( [
+						OperationType.TranscodeResizeCrop,
+						{
+							resize: {
+								width: imageSizeThreshold,
+								height: imageSizeThreshold,
+							},
+						},
+					] );
+				}
+
+				const outputFormat = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'default_outputFormat' );
+
+				operations.push(
+					[ OperationType.TranscodeImage, { outputFormat } ],
+					OperationType.Upload,
+					OperationType.ThumbnailGeneration,
+					OperationType.UploadOriginal
+				);
 
 				// Adding the poster to the queue on its own allows for it to be optimized, etc.
 				dispatch.addItem( {
@@ -1027,6 +1071,7 @@ export function uploadPoster( id: QueueItemId ) {
 					blurHash: item.blurHash,
 					dominantColor: item.dominantColor,
 					abortController,
+					operations,
 				} );
 			} catch ( err ) {
 				// TODO: Debug & catch & throw.
@@ -1065,6 +1110,10 @@ export function generateThumbnails( id: QueueItemId ) {
 			if ( 'pdf' === mediaType && item.poster ) {
 				file = item.poster;
 
+				const outputFormat = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'default_outputFormat' );
+
 				// Upload the "full" version without a resize param.
 				dispatch.addSideloadItem( {
 					file: item.poster,
@@ -1075,7 +1124,7 @@ export function generateThumbnails( id: QueueItemId ) {
 						image_size: 'full',
 					},
 					operations: [
-						OperationType.TranscodeImage,
+						[ OperationType.TranscodeImage, { outputFormat } ],
 						OperationType.Upload,
 					],
 					parentId: item.id,
@@ -1260,7 +1309,7 @@ export function cancelItem( id: QueueItemId, error: Error ) {
 
 export function optimizeImageItem(
 	id: QueueItemId,
-	args?: OperationArgs[ OperationType.TranscodeCompress ]
+	args?: OperationArgs[ OperationType.TranscodeImage ]
 ) {
 	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
@@ -1281,8 +1330,8 @@ export function optimizeImageItem(
 				throw new Error( 'Unsupported file type' );
 			}
 
-			// TODO: Use default_outputFormat if this is e.g. a PDF thumbnail.
 			const outputFormat: ImageFormat =
+				args?.outputFormat ||
 				registry
 					.select( preferencesStore )
 					.get( PREFERENCES_NAME, `${ inputFormat }_outputFormat` ) ||
@@ -1824,11 +1873,6 @@ export function uploadItem( id: QueueItemId ) {
 				// No big deal if this fails, we can still continue uploading.
 				// TODO: Debug & catch & throw.
 			}
-		}
-
-		// Revoke blob URL created above.
-		if ( stillUrl && isBlobURL( stillUrl ) ) {
-			revokeBlobURL( stillUrl );
 		}
 
 		try {
