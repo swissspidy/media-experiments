@@ -1215,8 +1215,8 @@ export function uploadOriginal( id: QueueItemId ) {
 						upload_request: item.additionalData.upload_request,
 						image_size: 'original',
 					},
-					// Allows skipping any resizing or optimization of the original image.
-					operations: [],
+					// Skip any resizing or optimization of the original image.
+					operations: [ OperationType.Upload ],
 				} );
 			}
 		}
