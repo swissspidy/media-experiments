@@ -671,14 +671,17 @@ export function processItem( id: QueueItemId ) {
 				break;
 
 			case OperationType.TranscodeImage:
-				dispatch.optimizeImageItem( item.id );
+				dispatch.optimizeImageItem(
+					item.id,
+					operationArgs as OperationArgs[ OperationType.TranscodeImage ]
+				);
 				break;
 
-			// TODO: Right now only handles images.
+			// TODO: Right now only handles images, but should support other types too.
 			case OperationType.TranscodeCompress:
 				dispatch.optimizeImageItem(
 					item.id,
-					operationArgs as OperationArgs[ OperationType.TranscodeCompress ]
+					operationArgs as OperationArgs[ OperationType.TranscodeImage ]
 				);
 				break;
 
@@ -1065,6 +1068,10 @@ export function generateThumbnails( id: QueueItemId ) {
 			if ( 'pdf' === mediaType && item.poster ) {
 				file = item.poster;
 
+				const outputFormat = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'default_outputFormat' );
+
 				// Upload the "full" version without a resize param.
 				dispatch.addSideloadItem( {
 					file: item.poster,
@@ -1075,7 +1082,7 @@ export function generateThumbnails( id: QueueItemId ) {
 						image_size: 'full',
 					},
 					operations: [
-						OperationType.TranscodeImage,
+						[ OperationType.TranscodeImage, { outputFormat } ],
 						OperationType.Upload,
 					],
 					parentId: item.id,
@@ -1260,7 +1267,7 @@ export function cancelItem( id: QueueItemId, error: Error ) {
 
 export function optimizeImageItem(
 	id: QueueItemId,
-	args?: OperationArgs[ OperationType.TranscodeCompress ]
+	args?: OperationArgs[ OperationType.TranscodeImage ]
 ) {
 	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
@@ -1281,8 +1288,8 @@ export function optimizeImageItem(
 				throw new Error( 'Unsupported file type' );
 			}
 
-			// TODO: Use default_outputFormat if this is e.g. a PDF thumbnail.
 			const outputFormat: ImageFormat =
+				args?.outputFormat ||
 				registry
 					.select( preferencesStore )
 					.get( PREFERENCES_NAME, `${ inputFormat }_outputFormat` ) ||
