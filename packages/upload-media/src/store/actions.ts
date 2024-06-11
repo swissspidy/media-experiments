@@ -159,6 +159,7 @@ interface AddItemArgs {
 	blurHash?: string;
 	dominantColor?: string;
 	abortController?: AbortController;
+	operations?: Operation[];
 }
 
 export function addItem( {
@@ -175,6 +176,7 @@ export function addItem( {
 	blurHash,
 	dominantColor,
 	abortController,
+	operations,
 }: AddItemArgs ) {
 	return async ( {
 		dispatch,
@@ -214,6 +216,7 @@ export function addItem( {
 				blurHash,
 				dominantColor,
 				abortController: abortController || new AbortController(),
+				operations,
 			},
 		} );
 
@@ -965,7 +968,7 @@ export function prepareItem( id: QueueItemId ) {
 }
 
 export function uploadPoster( id: QueueItemId ) {
-	return async ( { select, dispatch }: ThunkArgs ) => {
+	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
 
 		const attachment: Attachment = item.attachment as Attachment;
@@ -980,6 +983,35 @@ export function uploadPoster( id: QueueItemId ) {
 		) {
 			try {
 				const abortController = new AbortController();
+
+				const operations: Operation[] = [];
+
+				const imageSizeThreshold: number = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'bigImageSizeThreshold' );
+
+				if ( imageSizeThreshold ) {
+					operations.push( [
+						OperationType.TranscodeResizeCrop,
+						{
+							resize: {
+								width: imageSizeThreshold,
+								height: imageSizeThreshold,
+							},
+						},
+					] );
+				}
+
+				const outputFormat = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'default_outputFormat' );
+
+				operations.push(
+					[ OperationType.TranscodeImage, { outputFormat } ],
+					OperationType.Upload,
+					OperationType.ThumbnailGeneration,
+					OperationType.UploadOriginal
+				);
 
 				// Adding the poster to the queue on its own allows for it to be optimized, etc.
 				dispatch.addItem( {
@@ -1030,6 +1062,7 @@ export function uploadPoster( id: QueueItemId ) {
 					blurHash: item.blurHash,
 					dominantColor: item.dominantColor,
 					abortController,
+					operations,
 				} );
 			} catch ( err ) {
 				// TODO: Debug & catch & throw.
