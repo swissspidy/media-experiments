@@ -13,6 +13,7 @@ import { RestorePoster } from './restorePoster';
 import { DebugInfo } from './debugInfo';
 import type { VideoBlock } from './types';
 import { isBlobURL } from '@wordpress/blob';
+import { UploadRequestControls } from './uploadRequestControls';
 
 type VideoControlsProps = VideoBlock &
 	Pick< BlockEditProps< VideoBlock[ 'attributes' ] >, 'setAttributes' >;
@@ -63,6 +64,16 @@ export function VideoControls( props: VideoControlsProps ) {
 		}
 	}
 
+	function onInsertFromUploadRequest( [ media ]: Partial< Attachment >[] ) {
+		if ( ! media || ! media.url ) {
+			return;
+		}
+		props.setAttributes( {
+			id: media.id,
+			src: media.url,
+		} );
+	}
+
 	return (
 		<Fragment>
 			<UploadIndicator
@@ -76,6 +87,13 @@ export function VideoControls( props: VideoControlsProps ) {
 				onInsert={ onInsertRecording }
 				recordingType="video"
 			/>
+			{ ! props.attributes.src ? (
+				<UploadRequestControls
+					onInsert={ onInsertFromUploadRequest }
+					allowedTypes={ [ 'video' ] }
+					accept={ [ 'video/*' ] }
+				/>
+			) : null }
 			{ ! props.attributes.id ? (
 				<ImportMedia
 					url={ props.attributes.src }

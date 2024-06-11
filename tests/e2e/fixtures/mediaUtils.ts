@@ -20,23 +20,29 @@ export class MediaUtils {
 		);
 	}
 
-	async upload( inputElement: Locator, fileName?: string ) {
+	async upload( inputElement: Locator, ...fileNames: string[] ) {
 		const tmpDirectory = await mkdtemp(
 			join( tmpdir(), 'gutenberg-test-image-' )
 		);
-		const newFileName = uuidv4();
-		const filepath = fileName
-			? join( this.basePath, fileName )
-			: this.DEFAULT_IMAGE_PATH;
-		const tmpFileName = join(
-			tmpDirectory,
-			`${ newFileName }${ extname( filepath ) }`
-		);
-		await copyFile( filepath, tmpFileName );
+		const filePaths = fileNames
+			? fileNames.map( ( fileName ) => join( this.basePath, fileName ) )
+			: [ this.DEFAULT_IMAGE_PATH ];
 
-		await inputElement.setInputFiles( tmpFileName );
+		const files = [];
 
-		return newFileName;
+		for ( const filePath of filePaths ) {
+			const newFileName = uuidv4();
+			const tmpFileName = join(
+				tmpDirectory,
+				`${ newFileName }${ extname( filePath ) }`
+			);
+
+			await copyFile( filePath, tmpFileName );
+
+			files.push( tmpFileName );
+		}
+
+		await inputElement.setInputFiles( files );
 	}
 
 	async getImageBuffer( url: string ) {

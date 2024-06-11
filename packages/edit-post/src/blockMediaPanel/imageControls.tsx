@@ -75,12 +75,13 @@ export function ImageControls( props: ImageControlsProps ) {
 				onInsert={ onInsertRecording }
 				recordingType="image"
 			/>
-			<UploadRequestControls
-				url={ props.attributes.url }
-				onInsert={ onInsertFromUploadRequest }
-				allowedTypes={ [ 'image' ] }
-				accept={ [ 'image/*' ] }
-			/>
+			{ ! props.attributes.url ? (
+				<UploadRequestControls
+					onInsert={ onInsertFromUploadRequest }
+					allowedTypes={ [ 'image' ] }
+					accept={ [ 'image/*' ] }
+				/>
+			) : null }
 			{ ! props.attributes.id ? (
 				<ImportMedia
 					url={ props.attributes.url }

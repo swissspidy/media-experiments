@@ -988,14 +988,13 @@ function register_upload_request_post_type(): void {
 		'mexp-upload-request',
 		'mexp_attachment_id',
 		[
-			'type'         => 'string',
+			'type'         => 'number',
 			'description'  => __( 'Associated attachment ID.', 'media-experiments' ),
 			'show_in_rest' => [
 				'schema' => [
-					'type' => 'string',
+					'type' => 'number',
 				],
 			],
-			'single'       => true,
 		]
 	);
 

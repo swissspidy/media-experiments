@@ -9,6 +9,7 @@ import { ImportMedia } from './importMedia';
 import type { AudioBlock } from './types';
 import { DebugInfo } from './debugInfo';
 import { isBlobURL } from '@wordpress/blob';
+import { UploadRequestControls } from './uploadRequestControls';
 
 type AudioControlsProps = AudioBlock &
 	Pick< BlockEditProps< AudioBlock[ 'attributes' ] >, 'setAttributes' >;
@@ -34,6 +35,16 @@ export function AudioControls( props: AudioControlsProps ) {
 		}
 	}
 
+	function onInsertFromUploadRequest( [ media ]: Partial< Attachment >[] ) {
+		if ( ! media || ! media.url ) {
+			return;
+		}
+		props.setAttributes( {
+			id: media.id,
+			src: media.url,
+		} );
+	}
+
 	return (
 		<Fragment>
 			<UploadIndicator
@@ -46,6 +57,13 @@ export function AudioControls( props: AudioControlsProps ) {
 				onInsert={ onInsertRecording }
 				recordingType="audio"
 			/>
+			{ ! props.attributes.src ? (
+				<UploadRequestControls
+					onInsert={ onInsertFromUploadRequest }
+					allowedTypes={ [ 'audio' ] }
+					accept={ [ 'audio/*' ] }
+				/>
+			) : null }
 			{ ! props.attributes.id ? (
 				<ImportMedia
 					url={ props.attributes.src }

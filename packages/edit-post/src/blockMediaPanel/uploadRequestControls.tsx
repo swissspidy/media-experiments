@@ -24,7 +24,6 @@ import { transformAttachment } from '@mexp/upload-media';
 import { store as interfaceStore } from '../interface/store';
 
 interface UploadRequestControlsProps {
-	url?: string;
 	onInsert: ( media: Partial< Attachment >[] ) => void;
 	allowedTypes?: string[];
 	multiple?: boolean;
@@ -203,10 +202,6 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 	function onClose() {
 		void deleteUploadRequest();
 		void closeModal();
-	}
-
-	if ( props.url ) {
-		return null;
 	}
 
 	if ( ! hasUploadPermissions ) {
