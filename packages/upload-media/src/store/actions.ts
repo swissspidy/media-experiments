@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { createWorkerFactory } from '@shopify/web-worker';
 
-import { createBlobURL, isBlobURL, revokeBlobURL } from '@wordpress/blob';
+import { createBlobURL, isBlobURL } from '@wordpress/blob';
 import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as preferencesStore } from '@wordpress/preferences';
 
@@ -776,20 +776,29 @@ export function addPosterForItem( id: QueueItemId ) {
 
 		const { file } = item;
 
+		// Bail early if the video already has a poster.
+		if ( item.poster ) {
+			dispatch.finishOperation( id, {} );
+			return;
+		}
+
 		const mediaType = getMediaTypeFromMimeType( file.type );
 
 		try {
 			switch ( mediaType ) {
 				case 'video':
+					const src = createBlobURL( file );
 					const poster = await getPosterFromVideo(
-						createBlobURL( file ),
+						src,
 						`${ getFileBasename( item.file.name ) }-poster`
 					);
+
+					const posterUrl = createBlobURL( poster );
 
 					dispatch.finishOperation( id, {
 						poster,
 						attachment: {
-							poster: createBlobURL( poster ),
+							poster: posterUrl,
 						},
 					} );
 
@@ -1864,11 +1873,6 @@ export function uploadItem( id: QueueItemId ) {
 				// No big deal if this fails, we can still continue uploading.
 				// TODO: Debug & catch & throw.
 			}
-		}
-
-		// Revoke blob URL created above.
-		if ( stillUrl && isBlobURL( stillUrl ) ) {
-			revokeBlobURL( stillUrl );
 		}
 
 		try {
