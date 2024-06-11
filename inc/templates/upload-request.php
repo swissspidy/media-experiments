@@ -81,24 +81,52 @@ wp_print_inline_script_tag( "document.body.className = document.body.className.r
 	<div class="inner-wrap">
 		<p>
 			<?php
-			if ( ! $mexp_request_parent instanceof WP_Post ) {
-				printf(
-					'%s would like you to upload a file to their site. Please choose a file below.',
-					get_the_author(),
-				);
-			} elseif ( is_string( $mexp_request_parent_url ) ) {
-				printf(
-					'%1$s would like you to upload a file to their post <a href="%2$s">%3$s</a>. Please choose a file below.',
-					get_the_author(),
-					esc_url( $mexp_request_parent_url ),
-					get_the_title( $mexp_request_parent ),
-				);
+			if ( $multiple ) {
+				if ( ! $mexp_request_parent instanceof WP_Post ) {
+					printf(
+						/* translators: %s: author name */
+						__( '%s would like you to upload files to their site. Please choose files below.', 'media-experiments' ),
+						get_the_author(),
+					);
+				} elseif ( is_string( $mexp_request_parent_url ) ) {
+					printf(
+						/* translators: 1: author name. 2: post URL. 3: post title */
+						__( '%1$s would like you to upload files to their post <a href="%2$s">%3$s</a>. Please choose files below.', 'media-experiments' ),
+						get_the_author(),
+						esc_url( $mexp_request_parent_url ),
+						get_the_title( $mexp_request_parent ),
+					);
+				} else {
+					printf(
+						/* translators: 1: author name. 2: post title */
+						__( '%1$s would like you to upload files to their post "%2$s". Please choose files below.', 'media-experiments' ),
+						get_the_author(),
+						get_the_title( $mexp_request_parent ),
+					);
+				}
 			} else {
-				printf(
-					'%1$s would like you to upload a file to their post "%2$s". Please choose a file below.',
-					get_the_author(),
-					get_the_title( $mexp_request_parent ),
-				);
+				if ( ! $mexp_request_parent instanceof WP_Post ) {
+					printf(
+						/* translators: %s: author name */
+						__( '%s would like you to upload a file to their site. Please choose a file below.', 'media-experiments' ),
+						get_the_author(),
+					);
+				} elseif ( is_string( $mexp_request_parent_url ) ) {
+					printf(
+						/* translators: 1: author name. 2: post URL. 3: post title */
+						__( '%1$s would like you to upload a file to their post <a href="%2$s">%3$s</a>. Please choose a file below.', 'media-experiments' ),
+						get_the_author(),
+						esc_url( $mexp_request_parent_url ),
+						get_the_title( $mexp_request_parent ),
+					);
+				} else {
+					printf(
+						/* translators: 1: author name. 2: post title */
+						__( '%1$s would like you to upload a file to their post "%2$s". Please choose a file below.', 'media-experiments' ),
+						get_the_author(),
+						get_the_title( $mexp_request_parent ),
+					);
+				}
 			}
 			?>
 		</p>

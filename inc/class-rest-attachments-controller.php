@@ -142,14 +142,13 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			$upload_request = $this->get_upload_request_post( $request );
 
 			if ( $upload_request ) {
-				$attachment_id = get_post_meta(
+				$attachment_ids = get_post_meta(
 					$upload_request->ID,
-					'mexp_attachment_id',
-					true
+					'mexp_attachment_id'
 				);
 
-				if ( $attachment_id ) {
-					$query_args['post__in'] = [ $attachment_id ];
+				if ( ! empty( $attachment_ids ) ) {
+					$query_args['post__in'] = $attachment_ids;
 				} else {
 					// Upload has not been completed yet.
 					// Trick into returning an empty list.
@@ -332,8 +331,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			add_post_meta(
 				$upload_request->ID,
 				'mexp_attachment_id',
-				$attachment_id,
-				true
+				$attachment_id
 			);
 		}
 

@@ -1,16 +1,25 @@
+import { Fragment } from '@wordpress/element';
 import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as coreStore } from '@wordpress/core-data';
+import { createBlock } from '@wordpress/blocks';
 
-import { type RestAttachment, store as uploadStore } from '@mexp/upload-media';
+import {
+	type Attachment,
+	type RestAttachment,
+	store as uploadStore,
+} from '@mexp/upload-media';
 
 import { BulkOptimization } from '../components/bulkOptimization';
 import type { BulkOptimizationAttachmentData } from '../types';
 import type { GalleryBlock, ImageBlock } from './types';
+import { UploadRequestControls } from './uploadRequestControls';
 
 type GalleryControlsProps = GalleryBlock &
 	Pick< BlockEditProps< GalleryBlock[ 'attributes' ] >, 'setAttributes' >;
+
+const EMPTY_ARRAY: never[] = [];
 
 // TODO: Refactor to be less ugly and more performant.
 function useGalleryImageAttachments( clientId: BlockInstance[ 'clientId' ] ) {
@@ -18,7 +27,7 @@ function useGalleryImageAttachments( clientId: BlockInstance[ 'clientId' ] ) {
 		( select ) => {
 			return (
 				( select( blockEditorStore ).getBlock( clientId )
-					?.innerBlocks as ImageBlock[] ) ?? []
+					?.innerBlocks as ImageBlock[] ) ?? EMPTY_ARRAY
 			);
 		},
 		[ clientId ]
@@ -82,5 +91,32 @@ function useGalleryImageAttachments( clientId: BlockInstance[ 'clientId' ] ) {
 export function GalleryControls( props: GalleryControlsProps ) {
 	const attachments = useGalleryImageAttachments( props.clientId );
 
-	return <BulkOptimization attachments={ attachments } />;
+	const { replaceInnerBlocks } = useDispatch( blockEditorStore );
+
+	function onInsertFromUploadRequest( images: Partial< Attachment >[] ) {
+		const newBlocks = images.map( ( image ) => {
+			return createBlock( 'core/image', {
+				id: image.id,
+				url: image.url,
+				caption: image.caption,
+				alt: image.alt,
+			} );
+		} );
+
+		void replaceInnerBlocks( props.clientId, newBlocks );
+	}
+
+	return (
+		<Fragment>
+			<BulkOptimization attachments={ attachments } />
+			{ ! attachments.length ? (
+				<UploadRequestControls
+					onInsert={ onInsertFromUploadRequest }
+					allowedTypes={ [ 'image' ] }
+					accept={ [ 'image/*' ] }
+					multiple
+				/>
+			) : null }
+		</Fragment>
+	);
 }
