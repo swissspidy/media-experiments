@@ -33,7 +33,7 @@
 		"@mexp/eslint-import-resolver": "*",
 		"@playwright/test": "^1.44.1",
 		"@shopify/web-worker": "^6.1.2",
-		"@testing-library/jest-dom": "^6.4.5",
+		"@testing-library/jest-dom": "^6.4.6",
 		"@testing-library/react": "^16.0.0",
 		"@types/jest": "^29.5.12",
 		"@types/mime": "^3.0.4",
