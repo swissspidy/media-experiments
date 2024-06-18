@@ -6,7 +6,7 @@ import { ImageCapture } from 'image-capture';
 import { createBlobURL, revokeBlobURL } from '@wordpress/blob';
 import { dateI18n } from '@wordpress/date';
 
-import { getExtensionFromMimeType, blobToFile } from '@mexp/media-utils';
+import { blobToFile, getExtensionFromMimeType } from '@mexp/media-utils';
 
 import {
 	COUNTDOWN_TIME_IN_SECONDS,

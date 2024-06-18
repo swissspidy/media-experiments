@@ -2,12 +2,12 @@ import type { BlockEditProps } from '@wordpress/blocks';
 import type { Attachment } from '@mexp/upload-media';
 import { Fragment } from '@wordpress/element';
 
-import { UploadIndicator } from './uploadIndicator';
-import { RecordingControls } from './recordingControls';
-import { OptimizeMedia } from './optimizeMedia';
-import { MuteVideo } from './muteVideo';
 import { DebugInfo } from './debugInfo';
+import { MuteVideo } from './muteVideo';
+import { OptimizeMedia } from './optimizeMedia';
+import { RecordingControls } from './recordingControls';
 import type { MediaTextBlock } from './types';
+import { UploadIndicator } from './uploadIndicator';
 
 type MediaTextControlsProps = MediaTextBlock &
 	Pick< BlockEditProps< MediaTextBlock[ 'attributes' ] >, 'setAttributes' >;

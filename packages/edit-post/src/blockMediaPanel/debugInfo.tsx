@@ -11,7 +11,7 @@ import {
 	__experimentalText as Text,
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
-import { createInterpolateElement, Component } from '@wordpress/element';
+import { Component, createInterpolateElement } from '@wordpress/element';
 
 import { useAttachment } from '../utils/hooks';
 

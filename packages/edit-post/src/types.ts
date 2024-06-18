@@ -2,11 +2,11 @@ import type { BlockInstance } from '@wordpress/blocks';
 
 import type {
 	Attachment,
+	AudioFormat,
 	ImageFormat,
 	ImageLibrary,
 	ThumbnailGeneration,
 	VideoFormat,
-	AudioFormat,
 } from '@mexp/upload-media';
 
 export type BulkOptimizationAttachmentData = Pick<

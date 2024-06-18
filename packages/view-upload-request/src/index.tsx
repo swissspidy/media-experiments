@@ -1,11 +1,11 @@
 import type { ChangeEvent } from 'react';
 
 import {
-	createRoot,
-	useState,
-	useRef,
-	useEffect,
 	StrictMode,
+	createRoot,
+	useEffect,
+	useRef,
+	useState,
 } from '@wordpress/element';
 import {
 	Button,

@@ -1,11 +1,11 @@
 import reducer from '../reducer';
 import {
 	ItemStatus,
-	OperationType,
-	Type,
 	type MediaSourceTerm,
+	OperationType,
 	type QueueItem,
 	type State,
+	Type,
 } from '../types';
 
 describe( 'reducer', () => {

@@ -5,7 +5,7 @@ import { DropdownMenu } from '@wordpress/components';
 import { useEffect } from '@wordpress/element';
 import { store as editorStore } from '@wordpress/editor';
 
-import { store as uploadStore, UploadError } from '@mexp/upload-media';
+import { UploadError, store as uploadStore } from '@mexp/upload-media';
 import { getMediaTypeFromMimeType } from '@mexp/media-utils';
 
 import { UnfinishedUploadsWarning } from './unfinishedUploadsWarning';

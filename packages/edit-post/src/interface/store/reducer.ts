@@ -1,7 +1,7 @@
 import type {
-	State,
-	OpenModalAction,
 	CloseModalAction,
+	OpenModalAction,
+	State,
 	UnknownAction,
 } from './types';
 import { Type } from './types';

@@ -4,15 +4,15 @@ import { store as uploadStore } from './store';
 import type {
 	AdditionalData,
 	Attachment,
-	OnChangeHandler,
-	OnErrorHandler,
-	RestAttachment,
+	AudioFormat,
 	ImageFormat,
 	ImageLibrary,
 	ImageSizeCrop,
+	OnChangeHandler,
+	OnErrorHandler,
+	RestAttachment,
 	ThumbnailGeneration,
 	VideoFormat,
-	AudioFormat,
 } from './store/types';
 import { UploadError } from './uploadError';
 

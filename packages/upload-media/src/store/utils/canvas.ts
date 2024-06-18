@@ -1,10 +1,10 @@
 import { createWorkerFactory } from '@shopify/web-worker';
 
 import {
+	ImageFile,
 	blobToFile,
 	getExtensionFromMimeType,
 	getFileBasename,
-	ImageFile,
 } from '@mexp/media-utils';
 
 import type { ImageSizeCrop } from '../types';

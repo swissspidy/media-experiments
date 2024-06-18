@@ -1,6 +1,6 @@
 import { RestAttachment } from '@mexp/upload-media';
 
-import { test, expect } from '../fixtures';
+import { expect, test } from '../fixtures';
 
 test.describe( 'PDF', () => {
 	test.beforeAll( async ( { requestUtils } ) => {

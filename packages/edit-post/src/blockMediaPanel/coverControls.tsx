@@ -3,12 +3,12 @@ import type { Attachment } from '@mexp/upload-media';
 import { Fragment } from '@wordpress/element';
 import type { BlockEditProps } from '@wordpress/blocks';
 
-import { UploadIndicator } from './uploadIndicator';
-import { RecordingControls } from './recordingControls';
-import { OptimizeMedia } from './optimizeMedia';
-import { MuteVideo } from './muteVideo';
 import { DebugInfo } from './debugInfo';
+import { MuteVideo } from './muteVideo';
+import { OptimizeMedia } from './optimizeMedia';
+import { RecordingControls } from './recordingControls';
 import type { CoverBlock } from './types';
+import { UploadIndicator } from './uploadIndicator';
 
 type CoverControlsProps = CoverBlock &
 	Pick< BlockEditProps< CoverBlock[ 'attributes' ] >, 'setAttributes' >;

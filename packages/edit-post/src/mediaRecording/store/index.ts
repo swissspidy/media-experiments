@@ -1,4 +1,4 @@
-import { register, createReduxStore } from '@wordpress/data';
+import { createReduxStore, register } from '@wordpress/data';
 
 import reducer from './reducer';
 import * as selectors from './selectors';

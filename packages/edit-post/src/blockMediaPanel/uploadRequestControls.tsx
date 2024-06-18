@@ -5,20 +5,20 @@ import {
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { store as coreStore, type Post } from '@wordpress/core-data';
+import { type Post, store as coreStore } from '@wordpress/core-data';
 import {
-	lazy,
 	Suspense,
-	useState,
-	useEffect,
+	lazy,
 	useCallback,
+	useEffect,
+	useState,
 } from '@wordpress/element';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as editorStore } from '@wordpress/editor';
 import { store as noticesStore } from '@wordpress/notices';
 import apiFetch from '@wordpress/api-fetch';
 
-import type { RestAttachment, Attachment } from '@mexp/upload-media';
+import type { Attachment, RestAttachment } from '@mexp/upload-media';
 import { transformAttachment } from '@mexp/upload-media';
 
 import { store as interfaceStore } from '../interface/store';

@@ -1,5 +1,5 @@
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { useBlockProps, Warning } from '@wordpress/block-editor';
+import { Warning, useBlockProps } from '@wordpress/block-editor';
 import { addFilter } from '@wordpress/hooks';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';

@@ -4,7 +4,7 @@ import {
 	ThumbnailGeneration,
 } from '@mexp/upload-media';
 
-import { test, expect } from '../../fixtures';
+import { expect, test } from '../../fixtures';
 
 const scenarios: {
 	imageLibrary: ImageLibrary;

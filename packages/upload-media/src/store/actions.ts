@@ -6,11 +6,11 @@ import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as preferencesStore } from '@wordpress/preferences';
 
 import {
+	ImageFile,
 	cloneFile,
 	getExtensionFromMimeType,
 	getFileBasename,
 	getMediaTypeFromMimeType,
-	ImageFile,
 	renameFile,
 } from '@mexp/media-utils';
 import { start } from '@mexp/log';
@@ -42,8 +42,8 @@ import {
 } from './utils/canvas';
 import type {
 	AddAction,
-	AdditionalData,
 	AddOperationsAction,
+	AdditionalData,
 	ApproveUploadAction,
 	Attachment,
 	AudioFormat,

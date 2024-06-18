@@ -1,4 +1,4 @@
-import { test, expect } from '../fixtures';
+import { expect, test } from '../fixtures';
 
 test.describe( 'Media Recording', () => {
 	test.beforeAll( async ( { requestUtils } ) => {

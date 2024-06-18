@@ -1,4 +1,4 @@
-import { test, expect } from '../fixtures';
+import { expect, test } from '../fixtures';
 import type { RestAttachment } from '@mexp/upload-media';
 
 test.describe( 'Animated GIFs', () => {

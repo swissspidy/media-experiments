@@ -3,24 +3,24 @@ import type { ReactNode } from 'react';
 import { useViewportMatch } from '@wordpress/compose';
 /* eslint-disable @wordpress/no-unsafe-wp-apis */
 import {
+	Card,
+	CardBody,
+	CardHeader,
+	FlexItem,
+	__experimentalHStack as HStack,
+	__experimentalItem as Item,
+	__experimentalItemGroup as ItemGroup,
+	__experimentalNavigatorBackButton as NavigatorBackButton,
+	__experimentalNavigatorButton as NavigatorButton,
 	__experimentalNavigatorProvider as NavigatorProvider,
 	__experimentalNavigatorScreen as NavigatorScreen,
-	__experimentalNavigatorButton as NavigatorButton,
-	__experimentalNavigatorBackButton as NavigatorBackButton,
-	__experimentalItemGroup as ItemGroup,
-	__experimentalItem as Item,
-	__experimentalHStack as HStack,
 	__experimentalText as Text,
 	__experimentalTruncate as Truncate,
-	FlexItem,
-	Card,
-	CardHeader,
-	CardBody,
 } from '@wordpress/components';
 /* eslint-enable @wordpress/no-unsafe-wp-apis */
 import { useMemo, useState } from '@wordpress/element';
-import { chevronLeft, chevronRight, Icon } from '@wordpress/icons';
-import { isRTL, __ } from '@wordpress/i18n';
+import { Icon, chevronLeft, chevronRight } from '@wordpress/icons';
+import { __, isRTL } from '@wordpress/i18n';
 
 import { Tabs } from '../tabs';
 

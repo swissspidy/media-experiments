@@ -2,7 +2,7 @@ import type { Results } from '@mediapipe/selfie_segmentation';
 
 import { blur } from '../utils';
 import { BACKGROUND_BLUR_PX } from '../constants';
-import { Type, type State } from './types';
+import { type State, Type } from './types';
 
 type AllSelectors = typeof import('./selectors');
 type CurriedState< F > = F extends ( state: State, ...args: infer P ) => infer R

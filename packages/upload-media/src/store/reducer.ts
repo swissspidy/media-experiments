@@ -3,20 +3,20 @@ import {
 	type AddOperationsAction,
 	type ApproveUploadAction,
 	type CancelAction,
+	ItemStatus,
 	type OperationFinishAction,
 	type OperationStartAction,
 	type PauseItemAction,
 	type PauseQueueAction,
-	type ResumeQueueAction,
 	type RemoveAction,
 	type RequestApprovalAction,
 	type ResumeItemAction,
+	type ResumeQueueAction,
 	type SetImageSizesAction,
 	type SetMediaSourceTermsAction,
 	type State,
-	type UnknownAction,
-	ItemStatus,
 	Type,
+	type UnknownAction,
 } from './types';
 
 const DEFAULT_STATE: State = {

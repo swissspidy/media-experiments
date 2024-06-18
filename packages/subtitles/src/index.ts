@@ -1,4 +1,4 @@
-import { WebVtt, VttCue, VttComment } from '@audapolis/webvtt-writer';
+import { VttComment, VttCue, WebVtt } from '@audapolis/webvtt-writer';
 import { createModel } from 'vosk-browser';
 import type { ServerMessageResult } from 'vosk-browser/dist/interfaces';
 

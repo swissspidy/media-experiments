@@ -1,7 +1,7 @@
 import { useEntityRecord } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 
-import { store as uploadStore, type RestAttachment } from '@mexp/upload-media';
+import { type RestAttachment, store as uploadStore } from '@mexp/upload-media';
 import { isBlobURL } from '@wordpress/blob';
 
 export function useAttachment( id?: number ) {

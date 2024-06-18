@@ -1,6 +1,6 @@
 import { addFilter } from '@wordpress/hooks';
 import { createBlobURL } from '@wordpress/blob';
-import { createBlock, type Block, type BlockInstance } from '@wordpress/blocks';
+import { type Block, type BlockInstance, createBlock } from '@wordpress/blocks';
 
 import { getMediaTypeFromMimeType } from '@mexp/media-utils';
 

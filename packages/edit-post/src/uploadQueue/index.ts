@@ -1,7 +1,7 @@
 import {
-	uploadMedia as originalUploadMedia,
 	type AdditionalData,
 	type OnChangeHandler,
+	uploadMedia as originalUploadMedia,
 } from '@mexp/upload-media';
 
 import { dispatch, select, subscribe } from '@wordpress/data';

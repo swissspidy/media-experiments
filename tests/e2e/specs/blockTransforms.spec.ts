@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 
-import { test, expect } from '../fixtures';
+import { expect, test } from '../fixtures';
 
 test.describe( 'Block Transforms', () => {
 	test.beforeAll( async ( { requestUtils } ) => {

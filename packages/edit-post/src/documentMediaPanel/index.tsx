@@ -8,7 +8,7 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import type { BlockInstance } from '@wordpress/blocks';
 import { media as mediaIcon } from '@wordpress/icons';
 
-import { store as uploadStore, type RestAttachment } from '@mexp/upload-media';
+import { type RestAttachment, store as uploadStore } from '@mexp/upload-media';
 
 import { BulkOptimization } from '../components/bulkOptimization';
 import type { BulkOptimizationAttachmentData } from '../types';
