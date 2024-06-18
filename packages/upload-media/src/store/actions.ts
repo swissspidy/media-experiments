@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { createWorkerFactory } from '@shopify/web-worker';
 
-import { createBlobURL, isBlobURL } from '@wordpress/blob';
+import { createBlobURL, isBlobURL, revokeBlobURL } from '@wordpress/blob';
 import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as preferencesStore } from '@wordpress/preferences';
 
@@ -48,6 +48,7 @@ import type {
 	Attachment,
 	AudioFormat,
 	BatchId,
+	CacheBlobUrlAction,
 	CancelAction,
 	CreateRestAttachment,
 	ImageFormat,
@@ -70,6 +71,7 @@ import type {
 	RequestApprovalAction,
 	ResumeItemAction,
 	ResumeQueueAction,
+	RevokeBlobUrlsAction,
 	SetImageSizesAction,
 	SetMediaSourceTermsAction,
 	SideloadAdditionalData,
@@ -128,6 +130,7 @@ type ActionCreators = {
 	generateThumbnails: typeof generateThumbnails;
 	uploadOriginal: typeof uploadOriginal;
 	uploadPoster: typeof uploadPoster;
+	revokeBlobUrls: typeof revokeBlobUrls;
 	< T = Record< string, unknown > >( args: T ): void;
 };
 
@@ -191,6 +194,13 @@ export function addItem( {
 
 		const itemId = uuidv4();
 
+		const blobUrl = createBlobURL( file );
+		dispatch< CacheBlobUrlAction >( {
+			type: Type.CacheBlobUrl,
+			id: itemId,
+			blobUrl,
+		} );
+
 		dispatch< AddAction >( {
 			type: Type.Add,
 			item: {
@@ -200,7 +210,7 @@ export function addItem( {
 				sourceFile: cloneFile( file ),
 				file,
 				attachment: {
-					url: createBlobURL( file ),
+					url: blobUrl,
 				},
 				additionalData: {
 					generate_sub_sizes: 'server' === thumbnailGeneration,
@@ -636,6 +646,7 @@ export function processItem( id: QueueItemId ) {
 				type: Type.Remove,
 				id,
 			} );
+			dispatch.revokeBlobUrls( id );
 
 			return;
 		}
@@ -788,12 +799,25 @@ export function addPosterForItem( id: QueueItemId ) {
 			switch ( mediaType ) {
 				case 'video':
 					const src = createBlobURL( file );
+
+					dispatch< CacheBlobUrlAction >( {
+						type: Type.CacheBlobUrl,
+						id,
+						blobUrl: src,
+					} );
+
 					const poster = await getPosterFromVideo(
 						src,
 						`${ getFileBasename( item.file.name ) }-poster`
 					);
 
 					const posterUrl = createBlobURL( poster );
+
+					dispatch< CacheBlobUrlAction >( {
+						type: Type.CacheBlobUrl,
+						id,
+						blobUrl: posterUrl,
+					} );
 
 					dispatch.finishOperation( id, {
 						poster,
@@ -809,18 +833,34 @@ export function addPosterForItem( id: QueueItemId ) {
 						/* webpackChunkName: 'pdf' */ '@mexp/pdf'
 					);
 
+					const pdfSrc = createBlobURL( file );
+
+					dispatch< CacheBlobUrlAction >( {
+						type: Type.CacheBlobUrl,
+						id,
+						blobUrl: pdfSrc,
+					} );
+
 					// TODO: is this the right place?
 					// Note: Causes another state update.
 					const pdfThumbnail = await getImageFromPdf(
-						createBlobURL( file ),
+						pdfSrc,
 						// Same suffix as WP core uses, see https://github.com/WordPress/wordpress-develop/blob/8a5daa6b446e8c70ba22d64820f6963f18d36e92/src/wp-admin/includes/image.php#L609-L634
 						`${ getFileBasename( item.file.name ) }-pdf`
 					);
 
+					const pdfThumbnailUrl = createBlobURL( pdfThumbnail );
+
+					dispatch< CacheBlobUrlAction >( {
+						type: Type.CacheBlobUrl,
+						id,
+						blobUrl: pdfThumbnailUrl,
+					} );
+
 					dispatch.finishOperation( id, {
 						poster: pdfThumbnail,
 						attachment: {
-							poster: createBlobURL( pdfThumbnail ),
+							poster: pdfThumbnailUrl,
 						},
 					} );
 					break;
@@ -1304,6 +1344,7 @@ export function cancelItem( id: QueueItemId, error: Error ) {
 			type: Type.Remove,
 			id,
 		} );
+		dispatch.revokeBlobUrls( id );
 	};
 }
 
@@ -1433,18 +1474,25 @@ export function optimizeImageItem(
 				);
 			}
 
+			const blobUrl = createBlobURL( file );
+			dispatch< CacheBlobUrlAction >( {
+				type: Type.CacheBlobUrl,
+				id,
+				blobUrl,
+			} );
+
 			if ( args?.requireApproval ) {
 				dispatch< RequestApprovalAction >( {
 					type: Type.RequestApproval,
 					id,
 					file,
-					url: createBlobURL( file ),
+					url: blobUrl,
 				} );
 			} else {
 				dispatch.finishOperation( id, {
 					file,
 					attachment: {
-						url: createBlobURL( file ),
+						url: blobUrl,
 					},
 				} );
 			}
@@ -1504,10 +1552,17 @@ export function optimizeVideoItem( id: QueueItemId ) {
 					break;
 			}
 
+			const blobUrl = createBlobURL( file );
+			dispatch< CacheBlobUrlAction >( {
+				type: Type.CacheBlobUrl,
+				id,
+				blobUrl,
+			} );
+
 			dispatch.finishOperation( id, {
 				file,
 				attachment: {
-					url: createBlobURL( file ),
+					url: blobUrl,
 				},
 				mediaSourceTerms: [ 'media-optimization' ],
 			} );
@@ -1536,10 +1591,17 @@ export function muteVideoItem( id: QueueItemId ) {
 			);
 			const file = await muteVideo( item.file );
 
+			const blobUrl = createBlobURL( file );
+			dispatch< CacheBlobUrlAction >( {
+				type: Type.CacheBlobUrl,
+				id,
+				blobUrl,
+			} );
+
 			dispatch.finishOperation( id, {
 				file,
 				attachment: {
-					url: createBlobURL( file ),
+					url: blobUrl,
 				},
 				additionalData: {
 					mexp_is_muted: true,
@@ -1586,10 +1648,17 @@ export function optimizeAudioItem( id: QueueItemId ) {
 					break;
 			}
 
+			const blobUrl = createBlobURL( file );
+			dispatch< CacheBlobUrlAction >( {
+				type: Type.CacheBlobUrl,
+				id,
+				blobUrl,
+			} );
+
 			dispatch.finishOperation( id, {
 				file,
 				attachment: {
-					url: createBlobURL( file ),
+					url: blobUrl,
 				},
 				mediaSourceTerms: [ 'media-optimization' ],
 			} );
@@ -1647,10 +1716,17 @@ export function convertGifItem( id: QueueItemId ) {
 					break;
 			}
 
+			const blobUrl = createBlobURL( file );
+			dispatch< CacheBlobUrlAction >( {
+				type: Type.CacheBlobUrl,
+				id,
+				blobUrl,
+			} );
+
 			dispatch.finishOperation( id, {
 				file,
 				attachment: {
-					url: createBlobURL( file ),
+					url: blobUrl,
 				},
 				mediaSourceTerms: [ 'gif-conversion' ],
 			} );
@@ -1675,10 +1751,18 @@ export function convertHeifItem( id: QueueItemId ) {
 
 		try {
 			const file = await transcodeHeifImage( item.file );
+
+			const blobUrl = createBlobURL( file );
+			dispatch< CacheBlobUrlAction >( {
+				type: Type.CacheBlobUrl,
+				id,
+				blobUrl,
+			} );
+
 			dispatch.finishOperation( id, {
 				file,
 				attachment: {
-					url: createBlobURL( file ),
+					url: blobUrl,
 				},
 			} );
 		} catch ( error ) {
@@ -1753,10 +1837,17 @@ export function resizeCropItem(
 				);
 			}
 
+			const blobUrl = createBlobURL( file );
+			dispatch< CacheBlobUrlAction >( {
+				type: Type.CacheBlobUrl,
+				id,
+				blobUrl,
+			} );
+
 			dispatch.finishOperation( id, {
 				file,
 				attachment: {
-					url: createBlobURL( file ),
+					url: blobUrl,
 				},
 			} );
 		} catch ( error ) {
@@ -1810,6 +1901,12 @@ export function uploadItem( id: QueueItemId ) {
 			'image' === getMediaTypeFromMimeType( item.sourceFile.type )
 		) {
 			stillUrl = createBlobURL( item.sourceFile );
+
+			dispatch< CacheBlobUrlAction >( {
+				type: Type.CacheBlobUrl,
+				id,
+				blobUrl: stillUrl,
+			} );
 		}
 
 		// TODO: Make this async after upload?
@@ -1893,6 +1990,12 @@ export function uploadItem( id: QueueItemId ) {
 					attachment.poster = item.attachment.poster;
 				} else if ( poster ) {
 					attachment.poster = createBlobURL( poster );
+
+					dispatch< CacheBlobUrlAction >( {
+						type: Type.CacheBlobUrl,
+						id,
+						blobUrl: attachment.poster,
+					} );
 				}
 			}
 
@@ -1963,5 +2066,20 @@ export function setImageSizes(
 	return {
 		type: Type.SetImageSizes,
 		imageSizes,
+	};
+}
+
+export function revokeBlobUrls( id: QueueItemId ) {
+	return async ( { select, dispatch }: ThunkArgs ) => {
+		const blobUrls = select.getBlobUrls( id );
+
+		for ( const blobUrl of blobUrls ) {
+			revokeBlobURL( blobUrl );
+		}
+
+		dispatch< RevokeBlobUrlsAction >( {
+			type: Type.RevokeBlobUrls,
+			id,
+		} );
 	};
 }

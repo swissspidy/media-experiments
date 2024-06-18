@@ -47,6 +47,7 @@ export interface State {
 	mediaSourceTerms: Partial< Record< MediaSourceTerm, number > >;
 	imageSizes: Record< string, ImageSizeCrop >;
 	queueStatus: QueueStatus;
+	blobUrls: Record< QueueItemId, string[] >;
 }
 
 export enum Type {
@@ -66,6 +67,8 @@ export enum Type {
 	OperationStart = 'OPERATION_START',
 	OperationFinish = 'OPERATION_FINISH',
 	AddOperations = 'ADD_OPERATIONS',
+	CacheBlobUrl = 'CACHE_BLOB_URL',
+	RevokeBlobUrls = 'REVOKE_BLOB_URLS',
 }
 
 type Action< T = Type, Payload = Record< string, unknown > > = {
@@ -119,6 +122,14 @@ export type SetMediaSourceTermsAction = Action<
 export type SetImageSizesAction = Action<
 	Type.SetImageSizes,
 	{ imageSizes: Record< string, ImageSizeCrop > }
+>;
+export type CacheBlobUrlAction = Action<
+	Type.CacheBlobUrl,
+	{ id: QueueItemId; blobUrl: string }
+>;
+export type RevokeBlobUrlsAction = Action<
+	Type.RevokeBlobUrls,
+	{ id: QueueItemId }
 >;
 
 export type Attachment = {
