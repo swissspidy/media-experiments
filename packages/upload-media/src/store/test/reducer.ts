@@ -15,6 +15,7 @@ describe( 'reducer', () => {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
+				blobUrls: {},
 				queue: [
 					{
 						id: '1',
@@ -34,6 +35,7 @@ describe( 'reducer', () => {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
+				blobUrls: {},
 				queue: [
 					{
 						id: '1',
@@ -54,6 +56,7 @@ describe( 'reducer', () => {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
+				blobUrls: {},
 				queue: [
 					{
 						id: '1',
@@ -75,6 +78,7 @@ describe( 'reducer', () => {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
+				blobUrls: {},
 				queue: [
 					{
 						id: '1',
@@ -96,6 +100,7 @@ describe( 'reducer', () => {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
+				blobUrls: {},
 				queue: [
 					{
 						id: '1',
@@ -116,6 +121,7 @@ describe( 'reducer', () => {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
+				blobUrls: {},
 				queue: [
 					{
 						id: '2',
@@ -132,6 +138,7 @@ describe( 'reducer', () => {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
+				blobUrls: {},
 				queue: [
 					{
 						id: '1',
@@ -152,6 +159,7 @@ describe( 'reducer', () => {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
+				blobUrls: {},
 				queue: [
 					{
 						id: '1',
@@ -172,6 +180,7 @@ describe( 'reducer', () => {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
+				blobUrls: {},
 				queue: [
 					{
 						id: '1',
@@ -192,6 +201,7 @@ describe( 'reducer', () => {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
+				blobUrls: {},
 				queue: [
 					{
 						id: '1',
@@ -212,6 +222,7 @@ describe( 'reducer', () => {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
+				blobUrls: {},
 				queue: [
 					{
 						id: '1',
@@ -233,6 +244,7 @@ describe( 'reducer', () => {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
+				blobUrls: {},
 				queue: [
 					{
 						id: '1',
@@ -254,6 +266,7 @@ describe( 'reducer', () => {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
+				blobUrls: {},
 				queue: [
 					{
 						id: '1',
@@ -282,6 +295,7 @@ describe( 'reducer', () => {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
+				blobUrls: {},
 				queue: [
 					{
 						id: '1',
@@ -311,6 +325,7 @@ describe( 'reducer', () => {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
+				blobUrls: {},
 				queue: [
 					{
 						id: '1',
@@ -336,6 +351,7 @@ describe( 'reducer', () => {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
+				blobUrls: {},
 				queue: [
 					{
 						id: '1',

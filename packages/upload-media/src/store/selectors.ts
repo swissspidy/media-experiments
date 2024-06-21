@@ -281,3 +281,15 @@ export function getMediaSourceTermId( state: State, slug: MediaSourceTerm ) {
 export function getImageSize( state: State, name: string ) {
 	return state.imageSizes[ name ];
 }
+
+/**
+ * Returns all cached blob URLs for a given item ID.
+ *
+ * @param state Upload state.
+ * @param id    Item ID
+ *
+ * @return List of blob URLs.
+ */
+export function getBlobUrls( state: State, id: QueueItemId ) {
+	return state.blobUrls[ id ] || [];
+}

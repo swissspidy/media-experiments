@@ -2,6 +2,7 @@ import {
 	type AddAction,
 	type AddOperationsAction,
 	type ApproveUploadAction,
+	type CacheBlobUrlAction,
 	type CancelAction,
 	ItemStatus,
 	type OperationFinishAction,
@@ -12,6 +13,7 @@ import {
 	type RequestApprovalAction,
 	type ResumeItemAction,
 	type ResumeQueueAction,
+	type RevokeBlobUrlsAction,
 	type SetImageSizesAction,
 	type SetMediaSourceTermsAction,
 	type State,
@@ -24,6 +26,7 @@ const DEFAULT_STATE: State = {
 	mediaSourceTerms: {},
 	imageSizes: {},
 	queueStatus: 'active',
+	blobUrls: {},
 };
 
 type Action =
@@ -41,6 +44,8 @@ type Action =
 	| RequestApprovalAction
 	| SetImageSizesAction
 	| SetMediaSourceTermsAction
+	| CacheBlobUrlAction
+	| RevokeBlobUrlsAction
 	| UnknownAction;
 
 function reducer(
@@ -224,6 +229,27 @@ function reducer(
 			return {
 				...state,
 				imageSizes: action.imageSizes,
+			};
+		}
+
+		case Type.CacheBlobUrl: {
+			const blobUrls = state.blobUrls[ action.id ] || [];
+			return {
+				...state,
+				blobUrls: {
+					...state.blobUrls,
+					[ action.id ]: [ ...blobUrls, action.blobUrl ],
+				},
+			};
+		}
+
+		case Type.RevokeBlobUrls: {
+			const newBlobUrls = { ...state.blobUrls };
+			delete newBlobUrls[ action.id ];
+
+			return {
+				...state,
+				blobUrls: newBlobUrls,
 			};
 		}
 	}
