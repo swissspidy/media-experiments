@@ -11,6 +11,13 @@ import { store as preferencesStore } from '@wordpress/preferences';
 import { store as uploadStore } from '..';
 import { ItemStatus, OperationType, type QueueItem } from '../types';
 
+jest.mock( '@wordpress/blob', () => ( {
+	__esModule: true,
+	createBlobURL: jest.fn( () => 'blob:foo' ),
+	isBlobURL: jest.fn( ( str: string ) => str.startsWith( 'blob:' ) ),
+	revokeBlobURL: jest.fn(),
+} ) );
+
 const mockImageFromPdf = new File( [], 'example.jpg', {
 	lastModified: 1234567891,
 	type: 'image/jpeg',

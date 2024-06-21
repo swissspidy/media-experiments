@@ -20,6 +20,7 @@ describe( 'selectors', () => {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'paused',
+				blobUrls: {},
 			};
 
 			expect( getItems( state ) ).toHaveLength( 0 );
@@ -47,6 +48,7 @@ describe( 'selectors', () => {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'paused',
+				blobUrls: {},
 			};
 
 			expect( getItems( state, ItemStatus.Processing ) ).toHaveLength(
@@ -75,6 +77,7 @@ describe( 'selectors', () => {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'paused',
+				blobUrls: {},
 			};
 
 			expect( isUploading( state ) ).toBe( true );
@@ -102,6 +105,7 @@ describe( 'selectors', () => {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'paused',
+				blobUrls: {},
 			};
 
 			expect(
@@ -137,6 +141,7 @@ describe( 'selectors', () => {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'paused',
+				blobUrls: {},
 			};
 
 			expect( isUploadingById( state, 123 ) ).toBe( true );
@@ -161,6 +166,7 @@ describe( 'selectors', () => {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'paused',
+				blobUrls: {},
 			};
 
 			expect( isUploadingByBatchId( state, 'foo' ) ).toBe( true );
@@ -200,6 +206,7 @@ describe( 'selectors', () => {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'paused',
+				blobUrls: {},
 			};
 
 			expect( isPendingApproval( state ) ).toBe( true );
@@ -240,6 +247,7 @@ describe( 'selectors', () => {
 				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'paused',
+				blobUrls: {},
 			};
 
 			expect( isPendingApprovalByAttachmentId( state, 123 ) ).toBe(
