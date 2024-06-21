@@ -24,7 +24,7 @@ function WrappedUploadStatusIndicator() {
 	useLayoutEffect( () => {
 		// The upload status indicator should always be inserted right before any other buttons.
 		referenceNode.current = document.querySelector(
-			'.edit-post-header__settings'
+			'.editor-header__settings, .edit-post-header__settings'
 		);
 
 		if ( referenceNode.current ) {
