@@ -143,6 +143,11 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 				'post_type'   => 'mexp-upload-request',
 				'post_status' => 'publish',
 				'post_name'   => 'someslug',
+				'meta_input'  => [
+					'mexp_allowed_types' => [ 'image' ],
+					'mexp_accept'        => 'image/*',
+					'mexp_multiple'      => false,
+				],
 			]
 		);
 
