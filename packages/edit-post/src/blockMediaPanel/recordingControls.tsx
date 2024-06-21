@@ -103,6 +103,9 @@ function InputControls() {
 	);
 }
 
+// See https://github.com/swissspidy/media-experiments/issues/530
+const supportsCanvasBlur = 'filter' in CanvasRenderingContext2D.prototype;
+
 interface ToolbarControlsProps {
 	onInsert: ( url?: string ) => void;
 }
@@ -141,7 +144,7 @@ function ToolbarControls( { onInsert }: ToolbarControlsProps ) {
 			<BlockControls group="block">
 				<InputControls />
 			</BlockControls>
-			{ 'audio' !== recordingType && (
+			{ supportsCanvasBlur && 'audio' !== recordingType && (
 				<BlockControls group="inline">
 					<ToolbarButton
 						onClick={ () => {
