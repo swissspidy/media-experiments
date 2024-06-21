@@ -1,6 +1,5 @@
 import type { Results } from '@mediapipe/selfie_segmentation';
 
-import { blur } from '../utils';
 import { BACKGROUND_BLUR_PX } from '../constants';
 import { type State, Type } from './types';
 
@@ -149,74 +148,37 @@ export function getMediaStream() {
 						return;
 					}
 
-					// See https://github.com/riju/backgroundBlur/blob/main/explainer.md
-					// See https://bugs.webkit.org/show_bug.cgi?id=198416
-					const canvasBlur =
-						'filter' in CanvasRenderingContext2D.prototype;
-
 					ctx.save();
 
-					// TODO: Remove fallback due to questionable license.
-					// Fallback for Safari
-					// See https://bugs.webkit.org/show_bug.cgi?id=198416
-					if ( ! canvasBlur ) {
-						ctx.drawImage(
-							results.image,
-							0,
-							0,
-							canvas.width,
-							canvas.height
-						);
+					ctx.globalCompositeOperation = 'copy';
+					ctx.filter = `blur(${ BACKGROUND_BLUR_PX }px)`;
+					ctx.drawImage(
+						results.segmentationMask,
+						0,
+						0,
+						canvas.width,
+						canvas.height
+					);
 
-						blur( ctx, BACKGROUND_BLUR_PX );
+					ctx.globalCompositeOperation = 'source-in';
+					ctx.filter = 'none';
+					ctx.drawImage(
+						results.image,
+						0,
+						0,
+						canvas.width,
+						canvas.height
+					);
 
-						ctx.globalCompositeOperation = 'destination-out';
-						ctx.drawImage(
-							results.segmentationMask,
-							0,
-							0,
-							canvas.width,
-							canvas.height
-						);
-						ctx.globalCompositeOperation = 'destination-over';
-						ctx.drawImage(
-							results.image,
-							0,
-							0,
-							canvas.width,
-							canvas.height
-						);
-					} else {
-						ctx.globalCompositeOperation = 'copy';
-						ctx.filter = `blur(${ BACKGROUND_BLUR_PX }px)`;
-						ctx.drawImage(
-							results.segmentationMask,
-							0,
-							0,
-							canvas.width,
-							canvas.height
-						);
-
-						ctx.globalCompositeOperation = 'source-in';
-						ctx.filter = 'none';
-						ctx.drawImage(
-							results.image,
-							0,
-							0,
-							canvas.width,
-							canvas.height
-						);
-
-						ctx.globalCompositeOperation = 'destination-over';
-						ctx.filter = `blur(${ BACKGROUND_BLUR_PX }px)`;
-						ctx.drawImage(
-							results.image,
-							0,
-							0,
-							canvas.width,
-							canvas.height
-						);
-					}
+					ctx.globalCompositeOperation = 'destination-over';
+					ctx.filter = `blur(${ BACKGROUND_BLUR_PX }px)`;
+					ctx.drawImage(
+						results.image,
+						0,
+						0,
+						canvas.width,
+						canvas.height
+					);
 
 					ctx.restore();
 				};
