@@ -300,7 +300,36 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		}
 		// @codeCoverageIgnoreEnd
 
+		$filter_upload_mimes = null;
+
+		if ( $upload_request ) {
+			$allowed_types = get_post_meta( $upload_request->ID, 'mexp_allowed_types', true );
+
+			/**
+			 * Filters list of mime types based on upload request restrictions.
+			 *
+			 * @param array $types Mime types keyed by the file extension regex corresponding to those types.
+			 *
+			 * @return array Filtered list of mime types.
+			 */
+			$filter_upload_mimes = static function ( array $types ) use ( $allowed_types ) {
+				return array_filter(
+					$types,
+					static function ( $mime_type ) use ( $allowed_types ) {
+						$file_type = explode( '/', $mime_type )[0];
+						return in_array( $file_type, $allowed_types, true );
+					}
+				);
+			};
+
+			add_filter( 'upload_mimes', $filter_upload_mimes );
+		}
+
 		$response = parent::create_item( $request );
+
+		if ( $upload_request ) {
+			remove_filter( 'upload_mimes', $filter_upload_mimes );
+		}
 
 		// @codeCoverageIgnoreStart
 		if ( function_exists( 'perflab_server_timing_register_metric' ) && ! empty( $before_metadata ) ) {

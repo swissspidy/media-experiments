@@ -40,6 +40,27 @@ if ( $post instanceof WP_Post ) {
 	$allowed_types = get_post_meta( $post->ID, 'mexp_allowed_types', true );
 	$accept        = get_post_meta( $post->ID, 'mexp_accept', true );
 	$multiple      = (bool) get_post_meta( $post->ID, 'mexp_multiple', true );
+
+	add_filter(
+		'upload_mimes',
+		/**
+		 * Filters list of mime types based on upload request restrictions.
+		 *
+		 * @param array $types Mime types keyed by the file extension regex corresponding to those types.
+		 *
+		 * @return array Filtered list of mime types.
+		 */
+		static function ( array $types ) use ( $allowed_types ) {
+			return array_filter(
+				$types,
+				static function ( $mime_type ) use ( $allowed_types ) {
+					$file_type = explode( '/', $mime_type )[0];
+					return in_array( $file_type, $allowed_types, true );
+				}
+			);
+		}
+	);
+
 	// phpcs:enable WordPress.NamingConventions.PrefixAllGlobals
 
 	wp_add_inline_script(
@@ -51,7 +72,6 @@ if ( $post instanceof WP_Post ) {
 			window.mediaExperiments.allowedTypes = %3$s;
 			window.mediaExperiments.accept = %4$s;
 			window.mediaExperiments.multiple = %5$s;',
-			// TODO: Only provide mime types allowed for this upload request.
 			wp_json_encode( get_allowed_mime_types() ),
 			wp_json_encode( $post->post_name ),
 			wp_json_encode( $allowed_types ? (array) $allowed_types : null ),
