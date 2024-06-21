@@ -152,6 +152,10 @@ jobs:
                       wp: 'trunk'
                       experimental: true
 
+                    - php: '8.4'
+                      wp: 'trunk'
+                      experimental: true
+
         steps:
             - name: Checkout
               uses: actions/checkout@v4
