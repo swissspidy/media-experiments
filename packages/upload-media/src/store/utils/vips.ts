@@ -23,14 +23,16 @@ export async function vipsConvertImageFormat(
 		| 'image/webp'
 		| 'image/avif'
 		| 'image/gif',
-	quality: number
+	quality: number,
+	interlaced?: boolean
 ) {
 	const buffer = await vipsWorker.convertImageFormat(
 		id,
 		await file.arrayBuffer(),
 		file.type,
 		type,
-		quality
+		quality,
+		interlaced
 	);
 	const ext = getExtensionFromMimeType( type );
 	const fileName = `${ getFileBasename( file.name ) }.${ ext }`;
@@ -40,13 +42,15 @@ export async function vipsConvertImageFormat(
 export async function vipsCompressImage(
 	id: QueueItemId,
 	file: File,
-	quality: number
+	quality: number,
+	interlaced?: boolean
 ) {
 	const buffer = await vipsWorker.compressImage(
 		id,
 		await file.arrayBuffer(),
 		file.type,
-		quality
+		quality,
+		interlaced
 	);
 	return blobToFile(
 		new Blob( [ buffer ], { type: file.type } ),

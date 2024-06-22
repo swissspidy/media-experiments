@@ -10,6 +10,13 @@ import { EnableFeature } from './enableFeature';
 import { PreferencesModal } from './preferences-modal';
 import { PreferencesModalSection } from './preferences-modal-section';
 import { PreferencesModalTabs } from './preferences-modal-tabs';
+import {
+	__experimentalHStack as HStack, // eslint-disable-line @wordpress/no-unsafe-wp-apis
+	FlexItem,
+} from '@wordpress/components';
+import { store as preferencesStore } from '@wordpress/preferences';
+import { PREFERENCES_NAME } from './constants';
+import type { MediaPreferences } from '../types';
 
 type InputFormat = 'jpeg' | 'webp' | 'avif' | 'png' | 'heic' | 'gif';
 type InputFormatLabel = 'JPEG' | 'PNG' | 'WebP' | 'AVIF' | 'HEIC' | 'GIF';
@@ -53,6 +60,222 @@ if ( window.crossOriginIsolated ) {
 }
 
 const EMPTY_ARRAY: never[] = [];
+
+type ImageFormatSectionProps = {
+	inputFormat: InputFormatLabel;
+};
+
+function DefaultFormatSection() {
+	const outputFormat = useSelect(
+		( select ) =>
+			( select( preferencesStore ).get(
+				PREFERENCES_NAME,
+				'default_outputFormat'
+			) as string ) || undefined,
+		[]
+	);
+
+	const supportsInterlaced =
+		outputFormat && [ 'jpeg', 'png', 'gif' ].includes( outputFormat );
+	return (
+		<PreferencesModalSection
+			title={ _x( 'General', 'image format', 'media-experiments' ) }
+			description={ __(
+				'Specify the default settings for images.',
+				'media-experiments'
+			) }
+		>
+			<HStack justify="start" alignment="start">
+				<FlexItem style={ { width: 'calc( 100% - 4px)' } }>
+					<SelectFeature
+						featureName="default_outputFormat"
+						help={ __(
+							'Default file type for new images, such as poster images.',
+							'media-experiments'
+						) }
+						label={ __(
+							'Default image format',
+							'media-experiments'
+						) }
+						options={ outputFormatOptions }
+					/>
+				</FlexItem>
+				<FlexItem style={ { width: 'calc( 100% - 4px)' } }>
+					<FeatureNumberControl
+						className="interface-preferences-modal__option interface-preferences-modal__option--number"
+						label={ __(
+							'Default image quality',
+							'media-experiments'
+						) }
+						isShiftStepEnabled={ true }
+						featureName="default_quality"
+						shiftStep={ 5 }
+						max={ 100 }
+						min={ 1 }
+						units={ [
+							{
+								value: '%',
+								label: '%',
+								a11yLabel: __(
+									'Percent (%)',
+									'media-experiments'
+								),
+								step: 1,
+							},
+						] }
+					/>
+				</FlexItem>
+			</HStack>
+			{ supportsInterlaced ? (
+				<EnableFeature
+					featureName="default_interlaced"
+					help={ __(
+						'Whether to use progressive (interlaced) image output',
+						'media-experiments'
+					) }
+					label={ __(
+						'Use progressive output',
+						'media-experiments'
+					) }
+				/>
+			) : null }
+			<FeatureNumberControl
+				className="interface-preferences-modal__option interface-preferences-modal__option--number"
+				label={ __( 'Big image size threshold', 'media-experiments' ) }
+				help={ __(
+					'If the original image width or height is above the threshold, it will be scaled down. Aspect ratio is preserved.',
+					'media-experiments'
+				) }
+				isShiftStepEnabled={ true }
+				featureName="bigImageSizeThreshold"
+				shiftStep={ 10 }
+				max={ 10000 }
+				min={ 0 }
+				units={ [
+					{
+						value: 'px',
+						label: 'px',
+						a11yLabel: __( 'Pixels (px)', 'media-experiments' ),
+						step: 1,
+					},
+				] }
+			/>
+			<EnableFeature
+				featureName="keepOriginal"
+				help={ __(
+					'Retain the original image as backup if it exceeds the threshold.',
+					'media-experiments'
+				) }
+				label={ __( 'Keep original', 'media-experiments' ) }
+			/>
+		</PreferencesModalSection>
+	);
+}
+
+function ImageFormatSection( { inputFormat }: ImageFormatSectionProps ) {
+	const outputFormatPreference: keyof MediaPreferences = `${
+		inputFormat.toLowerCase() as InputFormat
+	}_outputFormat`;
+	const outputFormat = useSelect(
+		( select ) =>
+			( select( preferencesStore ).get(
+				PREFERENCES_NAME,
+				outputFormatPreference
+			) as string ) || undefined,
+		[ outputFormatPreference ]
+	);
+
+	const supportsInterlaced =
+		outputFormat && [ 'jpeg', 'png', 'gif' ].includes( outputFormat );
+
+	return (
+		<PreferencesModalSection
+			title={ inputFormat }
+			description={ sprintf(
+				/* translators: %s: image format. */
+				__( 'Tweak the behavior for %s images.', 'media-experiments' ),
+				inputFormat
+			) }
+		>
+			<HStack justify="start" alignment="start">
+				<FlexItem style={ { width: 'calc( 100% - 4px)' } }>
+					<SelectFeature
+						featureName={ outputFormatPreference }
+						help={ __(
+							'Preferred file type to convert images to.',
+							'media-experiments'
+						) }
+						label={ __( 'Image format', 'media-experiments' ) }
+						options={ structuredClone( outputFormatOptions ).map(
+							( option ) => {
+								if ( inputFormat === option.label ) {
+									option.label = sprintf(
+										/* translators: %s: image format */
+										__(
+											'%s (unchanged)',
+											'media-experiments'
+										),
+										inputFormat
+									);
+								}
+								return option;
+							}
+						) }
+					/>
+				</FlexItem>
+				<FlexItem style={ { width: 'calc( 100% - 4px)' } }>
+					<FeatureNumberControl
+						className="interface-preferences-modal__option interface-preferences-modal__option--number"
+						label={ __( 'Image quality', 'media-experiments' ) }
+						isShiftStepEnabled={ true }
+						featureName={ `${
+							inputFormat.toLowerCase() as InputFormat
+						}_quality` }
+						shiftStep={ 5 }
+						max={ 100 }
+						min={ 1 }
+						units={ [
+							{
+								value: '%',
+								label: '%',
+								a11yLabel: __(
+									'Percent (%)',
+									'media-experiments'
+								),
+								step: 1,
+							},
+						] }
+					/>
+				</FlexItem>
+			</HStack>
+			{ supportsInterlaced ? (
+				<EnableFeature
+					featureName={ `${
+						inputFormat.toLowerCase() as InputFormat
+					}_interlaced` }
+					help={ __(
+						'Whether to use progressive (interlaced) image output',
+						'media-experiments'
+					) }
+					label={ __(
+						'Use progressive output',
+						'media-experiments'
+					) }
+				/>
+			) : null }
+			{ 'GIF' === inputFormat ? (
+				<EnableFeature
+					featureName="gif_convert"
+					help={ __(
+						'Convert animated GIFs to videos.',
+						'media-experiments'
+					) }
+					label={ __( 'Convert animated GIFs', 'media-experiments' ) }
+				/>
+			) : null }
+		</PreferencesModalSection>
+	);
+}
 
 export function Modal() {
 	const { closeModal } = useDispatch( interfaceStore );
@@ -166,149 +389,12 @@ export function Modal() {
 				tabLabel: __( 'Images', 'media-experiments' ),
 				content: (
 					<>
-						<PreferencesModalSection
-							title={ _x(
-								'General',
-								'image format',
-								'media-experiments'
-							) }
-							description={ __(
-								'Specify the default settings for images.',
-								'media-experiments'
-							) }
-						>
-							<SelectFeature
-								featureName="default_outputFormat"
-								help={ __(
-									'Default file type for new images, such as poster images.',
-									'media-experiments'
-								) }
-								label={ __(
-									'Default image format',
-									'media-experiments'
-								) }
-								options={ outputFormatOptions }
-							/>
-							<FeatureNumberControl
-								className="interface-preferences-modal__option interface-preferences-modal__option--number"
-								label={ __(
-									'Big image size threshold',
-									'media-experiments'
-								) }
-								help={ __(
-									'If the original image width or height is above the threshold, it will be scaled down. Aspect ratio is preserved.',
-									'media-experiments'
-								) }
-								isShiftStepEnabled={ true }
-								featureName="bigImageSizeThreshold"
-								shiftStep={ 10 }
-								max={ 10000 }
-								min={ 0 }
-								units={ [
-									{
-										value: 'px',
-										label: 'px',
-										a11yLabel: __(
-											'Pixels (px)',
-											'media-experiments'
-										),
-										step: 1,
-									},
-								] }
-							/>
-							<EnableFeature
-								featureName="keepOriginal"
-								help={ __(
-									'Retain the original image as backup if it exceeds the threshold.',
-									'media-experiments'
-								) }
-								label={ __(
-									'Keep original',
-									'media-experiments'
-								) }
-							/>
-						</PreferencesModalSection>
+						<DefaultFormatSection />
 						{ inputFormats.map( ( inputFormat ) => (
-							<PreferencesModalSection
+							<ImageFormatSection
 								key={ inputFormat }
-								title={ inputFormat }
-								description={ sprintf(
-									/* translators: %s: image format. */
-									__(
-										'Tweak the behavior for %s images.',
-										'media-experiments'
-									),
-									inputFormat
-								) }
-							>
-								<SelectFeature
-									featureName={ `${
-										inputFormat.toLowerCase() as InputFormat
-									}_outputFormat` }
-									help={ __(
-										'Preferred file type to convert images to.',
-										'media-experiments'
-									) }
-									label={ __(
-										'Image format',
-										'media-experiments'
-									) }
-									options={ structuredClone(
-										outputFormatOptions
-									).map( ( option ) => {
-										if ( inputFormat === option.label ) {
-											option.label = sprintf(
-												/* translators: %s: image format */
-												__(
-													'%s (unchanged)',
-													'media-experiments'
-												),
-												inputFormat
-											);
-										}
-										return option;
-									} ) }
-								/>
-								{ /* default for jpeg: 82, for webp: 86 */ }
-								<FeatureNumberControl
-									className="interface-preferences-modal__option interface-preferences-modal__option--number"
-									label={ __(
-										'Image Quality',
-										'media-experiments'
-									) }
-									isShiftStepEnabled={ true }
-									featureName={ `${
-										inputFormat.toLowerCase() as InputFormat
-									}_quality` }
-									shiftStep={ 5 }
-									max={ 100 }
-									min={ 1 }
-									units={ [
-										{
-											value: '%',
-											label: '%',
-											a11yLabel: __(
-												'Percent (%)',
-												'media-experiments'
-											),
-											step: 1,
-										},
-									] }
-								/>
-								{ 'GIF' === inputFormat ? (
-									<EnableFeature
-										featureName="gif_convert"
-										help={ __(
-											'Convert animated GIFs to videos.',
-											'media-experiments'
-										) }
-										label={ __(
-											'Convert animated GIFs',
-											'media-experiments'
-										) }
-									/>
-								) : null }
-							</PreferencesModalSection>
+								inputFormat={ inputFormat }
+							/>
 						) ) }
 					</>
 				),

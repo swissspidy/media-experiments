@@ -93,4 +93,20 @@ export class MediaUtils {
 
 		return frames > 1;
 	}
+
+	/**
+	 * Determines whether a PNG is interlaced.
+	 *
+	 * @todo Refactor to support other file types as well
+	 *
+	 * @param buffer The PNG ArrayBuffer instance.
+	 * @return Whether this is an interlaced (progressive) PNG.
+	 */
+	isInterlacedPng( buffer: ArrayBuffer ) {
+		// See https://www.w3.org/TR/png/#5PNG-file-signature.
+
+		const arr = new Uint8Array( buffer );
+
+		return arr[ 28 ] === 1;
+	}
 }

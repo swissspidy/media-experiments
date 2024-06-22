@@ -63,36 +63,44 @@ const defaultPreferences: MediaPreferences = {
 	keepOriginal: false,
 	// Formats.
 	default_outputFormat: 'jpeg',
+	default_quality: 82,
+	default_interlaced: window.mediaExperiments.jpegInterlaced,
 	jpeg_outputFormat: getExtension(
 		window.mediaExperiments.defaultImageOutputFormats[ 'image/jpeg' ] ||
 			'image/jpeg'
 	),
 	jpeg_quality: 82,
+	jpeg_interlaced: window.mediaExperiments.jpegInterlaced,
 	png_outputFormat: getExtension(
 		window.mediaExperiments.defaultImageOutputFormats[ 'image/png' ] ||
 			'image/png'
 	),
 	png_quality: 82,
+	png_interlaced: window.mediaExperiments.pngInterlaced,
 	webp_outputFormat: getExtension(
 		window.mediaExperiments.defaultImageOutputFormats[ 'image/webp' ] ||
 			'image/webp'
 	),
 	webp_quality: 86,
+	webp_interlaced: false,
 	avif_outputFormat: getExtension(
 		window.mediaExperiments.defaultImageOutputFormats[ 'image/avif' ] ||
 			'image/avif'
 	),
 	avif_quality: 80,
+	avif_interlaced: false,
 	heic_outputFormat: getExtension(
 		window.mediaExperiments.defaultImageOutputFormats[ 'image/heic' ] ||
 			'image/jpeg'
 	),
 	heic_quality: 80,
+	heic_interlaced: window.mediaExperiments.jpegInterlaced,
 	gif_outputFormat: getExtension(
 		window.mediaExperiments.defaultImageOutputFormats[ 'image/gif' ] ||
 			'image/webp'
 	),
 	gif_quality: 80,
+	gif_interlaced: window.mediaExperiments.gifInterlaced,
 	gif_convert: true,
 	video_outputFormat: 'mp4',
 	audio_outputFormat: 'mp3',

@@ -1051,12 +1051,23 @@ export function uploadPoster( id: QueueItemId ) {
 					] );
 				}
 
-				const outputFormat = registry
+				const outputFormat: ImageFormat = registry
 					.select( preferencesStore )
 					.get( PREFERENCES_NAME, 'default_outputFormat' );
 
+				const outputQuality: number = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'default_quality' );
+
+				const interlaced: boolean = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'default_interlaced' );
+
 				operations.push(
-					[ OperationType.TranscodeImage, { outputFormat } ],
+					[
+						OperationType.TranscodeImage,
+						{ outputFormat, outputQuality, interlaced },
+					],
 					OperationType.Upload,
 					OperationType.ThumbnailGeneration,
 					OperationType.UploadOriginal
@@ -1150,9 +1161,17 @@ export function generateThumbnails( id: QueueItemId ) {
 			if ( 'pdf' === mediaType && item.poster ) {
 				file = item.poster;
 
-				const outputFormat = registry
+				const outputFormat: ImageFormat = registry
 					.select( preferencesStore )
 					.get( PREFERENCES_NAME, 'default_outputFormat' );
+
+				const outputQuality: number = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'default_quality' );
+
+				const interlaced: boolean = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'default_interlaced' );
 
 				// Upload the "full" version without a resize param.
 				dispatch.addSideloadItem( {
@@ -1164,7 +1183,10 @@ export function generateThumbnails( id: QueueItemId ) {
 						image_size: 'full',
 					},
 					operations: [
-						[ OperationType.TranscodeImage, { outputFormat } ],
+						[
+							OperationType.TranscodeImage,
+							{ outputFormat, outputQuality, interlaced },
+						],
 						OperationType.Upload,
 					],
 					parentId: item.id,
@@ -1378,11 +1400,19 @@ export function optimizeImageItem(
 					.get( PREFERENCES_NAME, `${ inputFormat }_outputFormat` ) ||
 				inputFormat;
 
-			// TODO: Pass quality to all the different encoders.
 			const outputQuality: number =
+				args?.outputQuality ||
 				registry
 					.select( preferencesStore )
-					.get( PREFERENCES_NAME, `${ inputFormat }_quality` ) || 80;
+					.get( PREFERENCES_NAME, `${ inputFormat }_quality` ) ||
+				80;
+
+			const interlaced: boolean =
+				args?.interlaced ||
+				registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, `${ inputFormat }_interlaced` ) ||
+				false;
 
 			stop = start(
 				`Optimize Item: ${ item.file.name } | ${ imageLibrary } | ${ inputFormat } | ${ outputFormat } | ${ outputQuality }`
@@ -1400,7 +1430,8 @@ export function optimizeImageItem(
 						file = await vipsCompressImage(
 							item.id,
 							item.file,
-							outputQuality / 100
+							outputQuality / 100,
+							interlaced
 						);
 					}
 					break;
@@ -1442,7 +1473,8 @@ export function optimizeImageItem(
 						item.id,
 						item.file,
 						'image/avif',
-						outputQuality / 100
+						outputQuality / 100,
+						interlaced
 					);
 					break;
 
@@ -1459,7 +1491,8 @@ export function optimizeImageItem(
 							item.id,
 							item.file,
 							`image/${ outputFormat }`,
-							outputQuality / 100
+							outputQuality / 100,
+							interlaced
 						);
 					}
 			}
