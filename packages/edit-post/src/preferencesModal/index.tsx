@@ -63,6 +63,7 @@ const defaultPreferences: MediaPreferences = {
 	keepOriginal: false,
 	// Formats.
 	default_outputFormat: 'jpeg',
+	default_quality: 82,
 	jpeg_outputFormat: getExtension(
 		window.mediaExperiments.defaultImageOutputFormats[ 'image/jpeg' ] ||
 			'image/jpeg'

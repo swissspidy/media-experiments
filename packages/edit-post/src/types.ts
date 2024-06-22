@@ -31,6 +31,7 @@ export type MediaPreferences = {
 	keepOriginal: boolean;
 	// Formats.
 	default_outputFormat: ImageFormat;
+	default_quality: number;
 	jpeg_outputFormat: ImageFormat;
 	jpeg_quality: number;
 	png_outputFormat: ImageFormat;

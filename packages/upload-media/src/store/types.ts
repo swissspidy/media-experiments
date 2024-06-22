@@ -187,6 +187,7 @@ export type OperationArgs = {
 	[ OperationType.TranscodeImage ]: {
 		requireApproval?: boolean;
 		outputFormat?: ImageFormat;
+		outputQuality?: number;
 	};
 	[ OperationType.TranscodeResizeCrop ]: { resize?: ImageSizeCrop };
 };

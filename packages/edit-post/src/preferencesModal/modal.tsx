@@ -192,6 +192,29 @@ export function Modal() {
 							<FeatureNumberControl
 								className="interface-preferences-modal__option interface-preferences-modal__option--number"
 								label={ __(
+									'Default image quality',
+									'media-experiments'
+								) }
+								isShiftStepEnabled={ true }
+								featureName="default_quality"
+								shiftStep={ 5 }
+								max={ 100 }
+								min={ 1 }
+								units={ [
+									{
+										value: '%',
+										label: '%',
+										a11yLabel: __(
+											'Percent (%)',
+											'media-experiments'
+										),
+										step: 1,
+									},
+								] }
+							/>
+							<FeatureNumberControl
+								className="interface-preferences-modal__option interface-preferences-modal__option--number"
+								label={ __(
 									'Big image size threshold',
 									'media-experiments'
 								) }
@@ -269,11 +292,10 @@ export function Modal() {
 										return option;
 									} ) }
 								/>
-								{ /* default for jpeg: 82, for webp: 86 */ }
 								<FeatureNumberControl
 									className="interface-preferences-modal__option interface-preferences-modal__option--number"
 									label={ __(
-										'Image Quality',
+										'Image quality',
 										'media-experiments'
 									) }
 									isShiftStepEnabled={ true }

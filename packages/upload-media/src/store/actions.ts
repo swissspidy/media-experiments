@@ -1055,8 +1055,15 @@ export function uploadPoster( id: QueueItemId ) {
 					.select( preferencesStore )
 					.get( PREFERENCES_NAME, 'default_outputFormat' );
 
+				const outputQuality = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'default_quality' );
+
 				operations.push(
-					[ OperationType.TranscodeImage, { outputFormat } ],
+					[
+						OperationType.TranscodeImage,
+						{ outputFormat, outputQuality },
+					],
 					OperationType.Upload,
 					OperationType.ThumbnailGeneration,
 					OperationType.UploadOriginal
@@ -1154,6 +1161,10 @@ export function generateThumbnails( id: QueueItemId ) {
 					.select( preferencesStore )
 					.get( PREFERENCES_NAME, 'default_outputFormat' );
 
+				const outputQuality = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'default_quality' );
+
 				// Upload the "full" version without a resize param.
 				dispatch.addSideloadItem( {
 					file: item.poster,
@@ -1164,7 +1175,10 @@ export function generateThumbnails( id: QueueItemId ) {
 						image_size: 'full',
 					},
 					operations: [
-						[ OperationType.TranscodeImage, { outputFormat } ],
+						[
+							OperationType.TranscodeImage,
+							{ outputFormat, outputQuality },
+						],
 						OperationType.Upload,
 					],
 					parentId: item.id,
@@ -1378,11 +1392,12 @@ export function optimizeImageItem(
 					.get( PREFERENCES_NAME, `${ inputFormat }_outputFormat` ) ||
 				inputFormat;
 
-			// TODO: Pass quality to all the different encoders.
 			const outputQuality: number =
+				args?.outputQuality ||
 				registry
 					.select( preferencesStore )
-					.get( PREFERENCES_NAME, `${ inputFormat }_quality` ) || 80;
+					.get( PREFERENCES_NAME, `${ inputFormat }_quality` ) ||
+				80;
 
 			stop = start(
 				`Optimize Item: ${ item.file.name } | ${ imageLibrary } | ${ inputFormat } | ${ outputFormat } | ${ outputQuality }`
