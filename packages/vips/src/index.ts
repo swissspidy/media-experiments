@@ -59,9 +59,17 @@ function supportsQuality(
 		type
 	);
 }
+
 // TODO: Make this smarter.
 function supportsAnimation( type: string ): type is 'image/webp' | 'image/gif' {
 	return [ 'image/webp', 'image/gif' ].includes( type );
+}
+
+// TODO: Make this smarter.
+function supportsInterlace(
+	type: string
+): type is 'image/jpeg' | 'image/gif' | 'image/png' {
+	return [ 'image/jpeg', 'image/gif', 'image/png' ].includes( type );
 }
 
 export async function convertImageFormat(
@@ -69,7 +77,8 @@ export async function convertImageFormat(
 	buffer: ArrayBuffer,
 	inputType: string,
 	outputType: string,
-	quality = 0.82
+	quality = 0.82,
+	interlaced = false
 ) {
 	const ext = getExtensionFromMimeType( outputType );
 
@@ -104,6 +113,10 @@ export async function convertImageFormat(
 		saveOptions.Q = quality * 100;
 	}
 
+	if ( interlaced && supportsInterlace( outputType ) ) {
+		saveOptions.interlace = interlaced;
+	}
+
 	const outBuffer = image.writeToBuffer( `.${ ext }`, saveOptions );
 	const result = outBuffer.buffer;
 
@@ -133,12 +146,13 @@ export async function compressImage(
 	id: ItemId,
 	buffer: ArrayBuffer,
 	type: string,
-	quality = 0.82
+	quality = 0.82,
+	interlaced = false
 ) {
 	if ( ! isFileTypeSupported( type ) ) {
 		throw new Error( 'Unsupported file type' );
 	}
-	return convertImageFormat( id, buffer, type, type, quality );
+	return convertImageFormat( id, buffer, type, type, quality, interlaced );
 }
 
 /**

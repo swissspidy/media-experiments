@@ -49,6 +49,7 @@
 					"upload_request",
 					"[a-z]+_outputFormat",
 					"[a-z]+_quality",
+					"[a-z]+_interlaced",
 					"gif_convert",
 					"media_details",
 					"option_string"

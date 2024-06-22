@@ -112,6 +112,31 @@ function filter_big_image_size_threshold( $threshold ) {
 }
 
 /**
+ * Filters whether to output progressive images (if available).
+ *
+ * @param bool   $interlace Whether to use progressive images for output if available. Default false.
+ * @param string $mime_type The mime type being saved.
+ * @return bool Whether to use progressive images
+ */
+function filter_image_save_progressive( $interlace, $mime_type ) {
+	$user_id = get_current_user_id();
+
+	if ( ! $user_id ) {
+		return $interlace;
+	}
+
+	$preferences = get_user_media_preferences( $user_id );
+
+	$ext = explode( '/', $mime_type )[1];
+
+	if ( isset( $preferences[ "${ext}_interlaced" ] ) ) {
+		return (bool) $preferences[ "${ext}_interlaced" ];
+	}
+
+	return $interlace;
+}
+
+/**
  * Register assets used by editor integration and others.
  *
  * @return void
@@ -166,6 +191,13 @@ function register_assets(): void {
 		)
 	);
 
+	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
+	$jpeg_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/jpeg' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
+	$png_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/png' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
+	$gif_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/gif' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+
 	wp_add_inline_script(
 		'media-experiments-view-upload-request',
 		sprintf(
@@ -176,6 +208,9 @@ function register_assets(): void {
 					'bigImageSizeThreshold'     => $image_size_threshold,
 					'bigVideoSizeThreshold'     => $video_size_threshold,
 					'defaultImageOutputFormats' => (object) $default_image_output_formats,
+					'jpegInterlaced'            => $jpeg_interlaced,
+					'pngInterlaced'             => $png_interlaced,
+					'gifInterlaced'             => $gif_interlaced,
 					'mediaSourceTerms'          => $media_source_terms,
 				]
 			)
@@ -265,6 +300,13 @@ function enqueue_block_editor_assets(): void {
 		)
 	);
 
+	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
+	$jpeg_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/jpeg' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
+	$png_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/png' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
+	$gif_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/gif' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+
 	wp_add_inline_script(
 		'media-experiments',
 		sprintf(
@@ -275,6 +317,9 @@ function enqueue_block_editor_assets(): void {
 					'bigImageSizeThreshold'     => $image_size_threshold,
 					'bigVideoSizeThreshold'     => $video_size_threshold,
 					'defaultImageOutputFormats' => (object) $default_image_output_formats,
+					'jpegInterlaced'            => $jpeg_interlaced,
+					'pngInterlaced'             => $png_interlaced,
+					'gifInterlaced'             => $gif_interlaced,
 					'mediaSourceTerms'          => $media_source_terms,
 				]
 			)

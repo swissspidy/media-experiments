@@ -22,6 +22,7 @@ add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_fields' );
 add_action( 'init', __NAMESPACE__ . '\register_attachment_post_meta' );
 
 add_filter( 'big_image_size_threshold', __NAMESPACE__ . '\filter_big_image_size_threshold' );
+add_filter( 'image_save_progressive', __NAMESPACE__ . '\filter_image_save_progressive', 10, 2 );
 
 add_action( 'rest_after_insert_attachment', __NAMESPACE__ . '\rest_after_insert_attachment_handle_pdf_poster', 10, 2 );
 add_action( 'rest_after_insert_attachment', __NAMESPACE__ . '\rest_after_insert_attachment_copy_metadata', 10, 2 );
