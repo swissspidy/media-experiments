@@ -38,8 +38,7 @@ You can [download the latest nightly build](https://github.com/swissspidy/media-
 
 Reminder: this is an experimental WordPress plugin. While you can totally install it on your website, it is recommended to try it on a development environment first.
 
-Afterwards, you should be able to use a plugin like [Git Updater](https://git-updater.com/) to receive updates.
-Alternatively, simply download the nightly build again every once in a while.
+Afterwards, updates will be available automatically in your WordPress admin.
 
 **Important:** If you clone this repository, you will first need to build the assets.
 
