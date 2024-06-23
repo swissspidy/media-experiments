@@ -248,6 +248,18 @@ export function isUploadingByBatchId( state: State, batchId: BatchId ) {
 }
 
 /**
+ * Determines whether an upload is currently in progress given a parent ID.
+ *
+ * @param state    Upload state.
+ * @param parentId Parent ID.
+ *
+ * @return Whether upload is currently in progress for the given parent ID.
+ */
+export function isUploadingByParentId( state: State, parentId: QueueItemId ) {
+	return state.queue.some( ( item ) => item.parentId === parentId );
+}
+
+/**
  * Determines whether uploading is currently paused.
  *
  * @param state Upload state.

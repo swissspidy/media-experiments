@@ -591,8 +591,14 @@ export function processItem( id: QueueItemId ) {
 
 		const item = select.getItem( id ) as QueueItem;
 
-		const { attachment, onChange, onSuccess, onBatchSuccess, batchId } =
-			item;
+		const {
+			attachment,
+			onChange,
+			onSuccess,
+			onBatchSuccess,
+			batchId,
+			parentId,
+		} = item;
 
 		const operation = Array.isArray( item.operations?.[ 0 ] )
 			? item.operations[ 0 ][ 0 ]
@@ -634,19 +640,60 @@ export function processItem( id: QueueItemId ) {
 			onChange?.( [ media ] );
 		}
 
+		/*
+		 If there are no more operations, the item can be removed from the queue,
+		 but only if there are no thumbnails still being side-loaded,
+		 or if itself is a side-loaded item.
+		*/
+
 		if ( ! item.operations || ! item.operations[ 0 ] ) {
-			if ( attachment ) {
-				onSuccess?.( [ attachment ] );
-			}
-			if ( batchId && select.isBatchUploaded( batchId ) ) {
-				onBatchSuccess?.();
+			const isBatchUploaded =
+				batchId && select.isBatchUploaded( batchId );
+
+			if (
+				parentId ||
+				( ! parentId && ! select.isUploadingByParentId( id ) )
+			) {
+				if ( attachment ) {
+					onSuccess?.( [ attachment ] );
+				}
+				if ( isBatchUploaded ) {
+					onBatchSuccess?.();
+				}
+
+				dispatch< RemoveAction >( {
+					type: Type.Remove,
+					id,
+				} );
+				dispatch.revokeBlobUrls( id );
 			}
 
-			dispatch< RemoveAction >( {
-				type: Type.Remove,
-				id,
-			} );
-			dispatch.revokeBlobUrls( id );
+			// All other side-loaded items have been removed, so remove the parent too.
+			if ( parentId && isBatchUploaded ) {
+				const parentItem = select.getItem( parentId ) as QueueItem;
+
+				if ( attachment ) {
+					parentItem.onSuccess?.( [ attachment ] );
+				}
+
+				if (
+					parentItem.batchId &&
+					select.isBatchUploaded( parentItem.batchId )
+				) {
+					parentItem.onBatchSuccess?.();
+				}
+
+				dispatch< RemoveAction >( {
+					type: Type.Remove,
+					id: parentId,
+				} );
+				dispatch.revokeBlobUrls( parentId );
+			}
+
+			/*
+			 At this point we are dealing with a parent whose children haven't fully uploaded yet.
+			 Do nothing and let the removal happen once the last side-loaded item finishes.
+			 */
 
 			return;
 		}
