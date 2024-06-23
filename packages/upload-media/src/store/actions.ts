@@ -1385,6 +1385,13 @@ export function cancelItem( id: QueueItemId, error: Error ) {
 			return;
 		}
 
+		// When cancelling a parent item, cancel all the children too.
+		for ( const child of select
+			.getItems()
+			.filter( ( _item ) => _item.parentId === id ) ) {
+			dispatch.cancelItem( child.id, error );
+		}
+
 		const imageLibrary: ImageLibrary =
 			registry
 				.select( preferencesStore )
@@ -1396,6 +1403,7 @@ export function cancelItem( id: QueueItemId, error: Error ) {
 
 		item.abortController?.abort();
 
+		// TODO: Do not log error for children if cancelling a parent and all its children.
 		const { onError } = item;
 		onError?.( error ?? new Error( 'Upload cancelled' ) );
 		if ( ! onError && error ) {
