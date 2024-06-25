@@ -10,7 +10,6 @@ import { store as preferencesStore } from '@wordpress/preferences';
  */
 import { store as uploadStore } from '..';
 import { ItemStatus, OperationType, type QueueItem } from '../types';
-import { StubFile } from '../../stubFile';
 
 jest.mock( '@wordpress/blob', () => ( {
 	__esModule: true,
