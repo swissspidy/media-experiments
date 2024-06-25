@@ -187,7 +187,7 @@ describe( 'actions', () => {
 						url: 'https://example.com/awesome-video.mp4',
 					},
 					operations: [
-						OperationType.TranscodeMuteVideo,
+						OperationType.MuteVideo,
 						OperationType.Upload,
 					],
 				} )
@@ -237,7 +237,7 @@ describe( 'actions', () => {
 					mediaSourceTerms: [ 'media-optimization' ],
 					operations: [
 						[
-							OperationType.TranscodeCompress,
+							OperationType.Compress,
 							{ requireApproval: undefined },
 						],
 						OperationType.Upload,

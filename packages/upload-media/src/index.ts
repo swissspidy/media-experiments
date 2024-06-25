@@ -17,7 +17,7 @@ import type {
 import { UploadError } from './uploadError';
 
 export { uploadMedia } from './uploadMedia';
-export { fetchRemoteFile, transformAttachment } from './utils';
+export { fetchFile, transformAttachment } from './utils';
 
 export type {
 	AdditionalData,

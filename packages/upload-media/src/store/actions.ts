@@ -6,11 +6,11 @@ import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as preferencesStore } from '@wordpress/preferences';
 
 import {
-	ImageFile,
 	cloneFile,
 	getExtensionFromMimeType,
 	getFileBasename,
 	getMediaTypeFromMimeType,
+	ImageFile,
 	renameFile,
 } from '@mexp/media-utils';
 import { start } from '@mexp/log';
@@ -18,7 +18,7 @@ import { start } from '@mexp/log';
 import { UploadError } from '../uploadError';
 import {
 	canTranscodeFile,
-	fetchRemoteFile,
+	fetchFile,
 	getFileNameFromUrl,
 	getPosterFromVideo,
 	isAnimatedGif,
@@ -42,8 +42,8 @@ import {
 } from './utils/canvas';
 import type {
 	AddAction,
-	AddOperationsAction,
 	AdditionalData,
+	AddOperationsAction,
 	ApproveUploadAction,
 	Attachment,
 	AudioFormat,
@@ -79,6 +79,7 @@ import type {
 	VideoFormat,
 } from './types';
 import { ItemStatus, OperationType, Type } from './types';
+import { StubFile } from '../stubFile';
 
 const createDominantColorWorker = createWorkerFactory(
 	() =>
@@ -131,6 +132,8 @@ type ActionCreators = {
 	uploadOriginal: typeof uploadOriginal;
 	uploadPoster: typeof uploadPoster;
 	revokeBlobUrls: typeof revokeBlobUrls;
+	fetchRemoteFile: typeof fetchRemoteFile;
+	generateSubtitles: typeof generateSubtitles;
 	< T = Record< string, unknown > >( args: T ): void;
 };
 
@@ -283,16 +286,20 @@ export function addItemFromUrl( {
 	additionalData,
 }: AddItemFromUrlArgs ) {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
-		const file = await fetchRemoteFile( url );
+		const fileName = getFileNameFromUrl( url );
 
 		dispatch.addItem( {
-			file,
+			file: new StubFile(),
 			onChange,
 			onSuccess,
 			onError,
 			additionalData,
 			sourceUrl: url,
 			mediaSourceTerms: [ 'media-import' ],
+			operations: [
+				[ OperationType.FetchRemoteFile, { url, fileName } ],
+				OperationType.Upload,
+			],
 		} );
 	};
 }
@@ -342,6 +349,7 @@ export function addSideloadItem( {
 interface MuteExistingVideoArgs {
 	id: number;
 	url: string;
+	fileName?: string;
 	poster?: string;
 	onChange?: OnChangeHandler;
 	onSuccess?: OnSuccessHandler;
@@ -355,6 +363,7 @@ interface MuteExistingVideoArgs {
 export function muteExistingVideo( {
 	id,
 	url,
+	fileName,
 	poster,
 	onChange,
 	onSuccess,
@@ -365,14 +374,9 @@ export function muteExistingVideo( {
 	generatedPosterId,
 }: MuteExistingVideoArgs ) {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
-		const fileName = getFileNameFromUrl( url );
+		fileName = fileName || getFileNameFromUrl( url );
 		const baseName = getFileBasename( fileName );
-		const sourceFile = await fetchRemoteFile( url, fileName );
-		const file = new File(
-			[ sourceFile ],
-			sourceFile.name.replace( baseName, `${ baseName }-muted` ),
-			{ type: sourceFile.type }
-		);
+		const newFileName = fileName.replace( baseName, `${ baseName }-muted` );
 
 		// TODO: Somehow add relation between original and muted video in db.
 
@@ -391,8 +395,8 @@ export function muteExistingVideo( {
 			item: {
 				id: itemId,
 				status: ItemStatus.Processing,
-				sourceFile,
-				file,
+				sourceFile: new StubFile(),
+				file: new StubFile(),
 				attachment: {
 					url,
 					poster,
@@ -407,7 +411,11 @@ export function muteExistingVideo( {
 				blurHash,
 				dominantColor,
 				operations: [
-					OperationType.TranscodeMuteVideo,
+					[
+						OperationType.FetchRemoteFile,
+						{ url, fileName, newFileName },
+					],
+					OperationType.MuteVideo,
 					OperationType.Upload,
 				],
 				generatedPosterId,
@@ -422,6 +430,7 @@ export function muteExistingVideo( {
 interface AddSubtitlesForExistingVideoArgs {
 	id?: number;
 	url: string;
+	fileName?: string;
 	onChange?: OnChangeHandler;
 	onSuccess?: OnSuccessHandler;
 	onError?: OnErrorHandler;
@@ -431,21 +440,14 @@ interface AddSubtitlesForExistingVideoArgs {
 export function addSubtitlesForExistingVideo( {
 	id,
 	url,
+	fileName,
 	onChange,
 	onSuccess,
 	onError,
 	additionalData = {} as AdditionalData,
 }: AddSubtitlesForExistingVideoArgs ) {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
-		const fileName = getFileNameFromUrl( url );
-		const sourceFile = await fetchRemoteFile( url, fileName );
-
-		// TODO: Do this *after* adding to the queue so that we can disable the button quickly.
-		// Plus, this way we can display proper error notice on failure.
-		const { generateSubtitles } = await import(
-			/* webpackChunkName: 'subtitles' */ '@mexp/subtitles'
-		);
-		const vttFile = await generateSubtitles( sourceFile );
+		fileName = fileName || getFileNameFromUrl( url );
 
 		const itemId = uuidv4();
 
@@ -454,8 +456,8 @@ export function addSubtitlesForExistingVideo( {
 			item: {
 				id: itemId,
 				status: ItemStatus.Processing,
-				sourceFile,
-				file: vttFile,
+				file: new StubFile(),
+				sourceFile: new StubFile(),
 				onChange,
 				onSuccess,
 				onError,
@@ -464,6 +466,11 @@ export function addSubtitlesForExistingVideo( {
 				mediaSourceTerms: [ 'subtitles-generation' ],
 				additionalData,
 				abortController: new AbortController(),
+				operations: [
+					[ OperationType.FetchRemoteFile, { url, fileName } ],
+					OperationType.GenerateSubtitles,
+					OperationType.Upload,
+				],
 			},
 		} );
 
@@ -511,11 +518,9 @@ export function optimizeExistingItem( {
 	} ) => {
 		fileName = fileName || getFileNameFromUrl( url );
 		const baseName = getFileBasename( fileName );
-		const sourceFile = await fetchRemoteFile( url, fileName );
-		const file = new File(
-			[ sourceFile ],
-			sourceFile.name.replace( baseName, `${ baseName }-optimized` ),
-			{ type: sourceFile.type }
+		const newFileName = fileName.replace(
+			baseName,
+			`${ baseName }-optimized`
 		);
 
 		const requireApproval = registry
@@ -538,8 +543,8 @@ export function optimizeExistingItem( {
 				id: itemId,
 				batchId,
 				status: ItemStatus.Processing,
-				sourceFile,
-				file,
+				sourceFile: new StubFile(),
+				file: new StubFile(),
 				attachment: {
 					url,
 					poster,
@@ -571,7 +576,11 @@ export function optimizeExistingItem( {
 				blurHash,
 				dominantColor,
 				operations: [
-					[ OperationType.TranscodeCompress, { requireApproval } ],
+					[
+						OperationType.FetchRemoteFile,
+						{ url, fileName, newFileName },
+					],
+					[ OperationType.Compress, { requireApproval } ],
 					OperationType.Upload,
 				],
 				generatedPosterId,
@@ -704,10 +713,10 @@ export function processItem( id: QueueItemId ) {
 		} );
 
 		switch ( operation ) {
-			case OperationType.TranscodeResizeCrop:
+			case OperationType.ResizeCrop:
 				dispatch.resizeCropItem(
 					item.id,
-					operationArgs as OperationArgs[ OperationType.TranscodeResizeCrop ]
+					operationArgs as OperationArgs[ OperationType.ResizeCrop ]
 				);
 				break;
 
@@ -727,7 +736,7 @@ export function processItem( id: QueueItemId ) {
 				dispatch.optimizeVideoItem( item.id );
 				break;
 
-			case OperationType.TranscodeMuteVideo:
+			case OperationType.MuteVideo:
 				dispatch.muteVideoItem( item.id );
 				break;
 
@@ -739,7 +748,7 @@ export function processItem( id: QueueItemId ) {
 				break;
 
 			// TODO: Right now only handles images, but should support other types too.
-			case OperationType.TranscodeCompress:
+			case OperationType.Compress:
 				dispatch.optimizeImageItem(
 					item.id,
 					operationArgs as OperationArgs[ OperationType.TranscodeImage ]
@@ -768,6 +777,17 @@ export function processItem( id: QueueItemId ) {
 
 			case OperationType.UploadPoster:
 				dispatch.uploadPoster( id );
+				break;
+
+			case OperationType.FetchRemoteFile:
+				dispatch.fetchRemoteFile(
+					id,
+					operationArgs as OperationArgs[ OperationType.FetchRemoteFile ]
+				);
+				break;
+
+			case OperationType.GenerateSubtitles:
+				dispatch.generateSubtitles( id );
 				break;
 
 			default:
@@ -981,7 +1001,7 @@ export function prepareItem( id: QueueItemId ) {
 
 				if ( imageSizeThreshold ) {
 					operations.push( [
-						OperationType.TranscodeResizeCrop,
+						OperationType.ResizeCrop,
 						{
 							resize: {
 								width: imageSizeThreshold,
@@ -1088,7 +1108,7 @@ export function uploadPoster( id: QueueItemId ) {
 
 				if ( imageSizeThreshold ) {
 					operations.push( [
-						OperationType.TranscodeResizeCrop,
+						OperationType.ResizeCrop,
 						{
 							resize: {
 								width: imageSizeThreshold,
@@ -1266,10 +1286,7 @@ export function generateThumbnails( id: QueueItemId ) {
 							image_size: name,
 						},
 						operations: [
-							[
-								OperationType.TranscodeResizeCrop,
-								{ resize: imageSize },
-							],
+							[ OperationType.ResizeCrop, { resize: imageSize } ],
 							OperationType.Upload,
 						],
 					} );
@@ -1870,7 +1887,7 @@ export function convertHeifItem( id: QueueItemId ) {
 
 export function resizeCropItem(
 	id: QueueItemId,
-	args?: OperationArgs[ OperationType.TranscodeResizeCrop ]
+	args?: OperationArgs[ OperationType.ResizeCrop ]
 ) {
 	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
@@ -2135,6 +2152,88 @@ export function sideloadItem( id: QueueItemId ) {
 		} finally {
 			// Avoid race conditions by uploading items sequentially.
 			dispatch.resumeItem( post );
+		}
+	};
+}
+
+export function fetchRemoteFile(
+	id: QueueItemId,
+	args: OperationArgs[ OperationType.FetchRemoteFile ]
+) {
+	return async ( { select, dispatch }: ThunkArgs ) => {
+		const item = select.getItem( id ) as QueueItem;
+
+		try {
+			const sourceFile = await fetchFile( args.url, args.fileName );
+
+			const file = args.newFileName
+				? renameFile( cloneFile( sourceFile ), args.newFileName )
+				: cloneFile( sourceFile );
+
+			const blobUrl = createBlobURL( sourceFile );
+			dispatch< CacheBlobUrlAction >( {
+				type: Type.CacheBlobUrl,
+				id,
+				blobUrl,
+			} );
+
+			dispatch.finishOperation( id, {
+				sourceFile,
+				file,
+				attachment: {
+					url: blobUrl,
+				},
+			} );
+		} catch ( error ) {
+			dispatch.cancelItem(
+				id,
+				error instanceof Error
+					? error
+					: new UploadError( {
+							code: 'FETCH_REMOTE_FILE_ERROR',
+							message: 'Remote file could not be downloaded',
+							file: item.file,
+					  } )
+			);
+		}
+	};
+}
+
+export function generateSubtitles( id: QueueItemId ) {
+	return async ( { select, dispatch }: ThunkArgs ) => {
+		const item = select.getItem( id ) as QueueItem;
+
+		try {
+			const { generateSubtitles: _generateSubtitles } = await import(
+				/* webpackChunkName: 'subtitles' */ '@mexp/subtitles'
+			);
+
+			const file = await _generateSubtitles( item.sourceFile );
+
+			const blobUrl = createBlobURL( file );
+			dispatch< CacheBlobUrlAction >( {
+				type: Type.CacheBlobUrl,
+				id,
+				blobUrl,
+			} );
+
+			dispatch.finishOperation( id, {
+				file,
+				attachment: {
+					url: blobUrl,
+				},
+			} );
+		} catch ( error ) {
+			dispatch.cancelItem(
+				id,
+				error instanceof Error
+					? error
+					: new UploadError( {
+							code: 'FETCH_REMOTE_FILE_ERROR',
+							message: 'Remote file could not be downloaded',
+							file: item.file,
+					  } )
+			);
 		}
 	};
 }
