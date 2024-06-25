@@ -38,12 +38,23 @@ test.describe( 'Videos', () => {
 			page.getByRole( 'button', { name: 'Remove audio channel' } )
 		).toBeHidden();
 
+		await page.waitForFunction(
+			() =>
+				window.wp.data.select( 'media-experiments/upload' ).getItems()
+					.length === 0,
+			undefined,
+			{
+				timeout: 30_000, // Transcoding might take longer
+			}
+		);
+
 		const vttUrl = await page.evaluate(
 			() =>
 				window.wp.data.select( 'core/block-editor' ).getSelectedBlock()
 					?.attributes?.tracks?.[ 0 ]?.src
 		);
 		await expect( vttUrl ).not.toBeNull();
+		await expect( vttUrl ).toMatch( /\.vtt$/ );
 
 		const vttContents = await ( await fetch( vttUrl ) ).text();
 		expect( vttContents ).toContain( 'WEBVTT' );

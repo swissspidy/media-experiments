@@ -467,6 +467,7 @@ export function addSubtitlesForExistingVideo( {
 				additionalData,
 				abortController: new AbortController(),
 				operations: [
+					// After FetchRemoteFile, item.file will be a video file first, not a VTT.
 					[ OperationType.FetchRemoteFile, { url, fileName } ],
 					OperationType.GenerateSubtitles,
 					OperationType.Upload,
