@@ -162,18 +162,24 @@ function reducer(
 						? item.operations.slice( 1 )
 						: [];
 
+					// Prevent an empty object if there's no attachment data.
+					const attachment =
+						item.attachment || action.item.attachment
+							? {
+									...item.attachment,
+									...action.item.attachment,
+									// TODO: Update to pass this correctly.
+									// url: action.item?.url,
+									// mimeType: action.item?.file?.type,
+							  }
+							: undefined;
+
 					return {
 						...item,
 						currentOperation: null,
 						operations,
 						...action.item,
-						attachment: {
-							...item.attachment,
-							...action.item.attachment,
-							// TODO: Update to pass this correctly.
-							// url: action.item?.url,
-							// mimeType: action.item?.file?.type,
-						},
+						attachment,
 						additionalData: {
 							...item.additionalData,
 							...action.item.additionalData,

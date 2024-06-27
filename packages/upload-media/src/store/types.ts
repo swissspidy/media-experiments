@@ -190,6 +190,7 @@ export type OperationArgs = {
 		url: string;
 		fileName: string;
 		newFileName?: string;
+		skipAttachment?: boolean;
 	};
 	[ OperationType.TranscodeImage ]: {
 		requireApproval?: boolean;

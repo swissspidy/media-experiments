@@ -467,8 +467,14 @@ export function addSubtitlesForExistingVideo( {
 				additionalData,
 				abortController: new AbortController(),
 				operations: [
-					// After FetchRemoteFile, item.file will be a video file first, not a VTT.
-					[ OperationType.FetchRemoteFile, { url, fileName } ],
+					/*
+					 After FetchRemoteFile, item.file will be a video file first, not a VTT,
+					 so do not create an attachment for it.
+					*/
+					[
+						OperationType.FetchRemoteFile,
+						{ url, fileName, skipAttachment: true },
+					],
 					OperationType.GenerateSubtitles,
 					OperationType.Upload,
 				],
@@ -2167,24 +2173,30 @@ export function fetchRemoteFile(
 		try {
 			const sourceFile = await fetchFile( args.url, args.fileName );
 
-			const file = args.newFileName
-				? renameFile( cloneFile( sourceFile ), args.newFileName )
-				: cloneFile( sourceFile );
+			if ( args.skipAttachment ) {
+				dispatch.finishOperation( id, {
+					sourceFile,
+				} );
+			} else {
+				const file = args.newFileName
+					? renameFile( cloneFile( sourceFile ), args.newFileName )
+					: cloneFile( sourceFile );
 
-			const blobUrl = createBlobURL( sourceFile );
-			dispatch< CacheBlobUrlAction >( {
-				type: Type.CacheBlobUrl,
-				id,
-				blobUrl,
-			} );
+				const blobUrl = createBlobURL( sourceFile );
+				dispatch< CacheBlobUrlAction >( {
+					type: Type.CacheBlobUrl,
+					id,
+					blobUrl,
+				} );
 
-			dispatch.finishOperation( id, {
-				sourceFile,
-				file,
-				attachment: {
-					url: blobUrl,
-				},
-			} );
+				dispatch.finishOperation( id, {
+					sourceFile,
+					file,
+					attachment: {
+						url: blobUrl,
+					},
+				} );
+			}
 		} catch ( error ) {
 			dispatch.cancelItem(
 				id,
