@@ -35,6 +35,7 @@ export function MuteVideo( { id, url, poster, onChange }: MuteVideoProps ) {
 			id: post.id,
 			url,
 			poster,
+			fileName: post.mexp_filename || undefined,
 			onChange: ( [ media ] ) => onChange( media ),
 			onSuccess: ( [ media ] ) => onChange( media ),
 			blurHash: post?.mexp_blurhash,

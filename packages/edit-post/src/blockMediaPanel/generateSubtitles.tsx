@@ -36,6 +36,7 @@ export function GenerateSubtitles( {
 		void addSubtitlesForExistingVideo( {
 			id: post?.id || undefined,
 			url: attributes.src,
+			fileName: post?.mexp_filename || undefined,
 			onChange: ( [ media ] ) =>
 				setAttributes( {
 					tracks: [

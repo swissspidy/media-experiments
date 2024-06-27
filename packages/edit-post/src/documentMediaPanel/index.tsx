@@ -99,7 +99,7 @@ function useMediaBlockAttachments() {
 						attachment.isOptimized =
 							media.mexp_media_source.length > 0;
 
-						// TODO: Use fetchRemoteFile() as fallback.
+						// TODO: Use fetchFile() as fallback.
 						if ( media.mexp_filesize ) {
 							attachment.fileSize = media.mexp_filesize;
 						}

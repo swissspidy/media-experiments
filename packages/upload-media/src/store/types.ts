@@ -169,20 +169,28 @@ export enum OperationType {
 	UploadPoster = 'UPLOAD_POSTER',
 	UploadOriginal = 'UPLOAD_ORIGINAL',
 	ThumbnailGeneration = 'THUMBNAIL_GENERATION',
-	TranscodeResizeCrop = 'RESIZE_CROP',
+	ResizeCrop = 'RESIZE_CROP',
 	TranscodeHeif = 'TRANSCODE_HEIF',
 	TranscodeGif = 'TRANSCODE_GIF',
 	TranscodeAudio = 'TRANSCODE_AUDIO',
 	TranscodeVideo = 'TRANSCODE_VIDEO',
 	TranscodeImage = 'TRANSCODE_IMAGE',
-	TranscodeMuteVideo = 'TRANSCODE_MUTE_VIDEO',
-	TranscodeCompress = 'TRANSCODE_COMPRESS',
+	MuteVideo = 'TRANSCODE_MUTE_VIDEO',
+	Compress = 'TRANSCODE_COMPRESS',
+	FetchRemoteFile = 'FETCH_REMOTE_FILE',
+	GenerateSubtitles = 'GENERATE_SUBTITLES',
 	Upload = 'UPLOAD',
 }
 
 export type OperationArgs = {
-	[ OperationType.TranscodeCompress ]: {
+	[ OperationType.Compress ]: {
 		requireApproval?: boolean;
+	};
+	[ OperationType.FetchRemoteFile ]: {
+		url: string;
+		fileName: string;
+		newFileName?: string;
+		skipAttachment?: boolean;
 	};
 	[ OperationType.TranscodeImage ]: {
 		requireApproval?: boolean;
@@ -190,7 +198,7 @@ export type OperationArgs = {
 		outputQuality?: number;
 		interlaced?: boolean;
 	};
-	[ OperationType.TranscodeResizeCrop ]: { resize?: ImageSizeCrop };
+	[ OperationType.ResizeCrop ]: { resize?: ImageSizeCrop };
 };
 
 type OperationWithArgs< T extends keyof OperationArgs = keyof OperationArgs > =

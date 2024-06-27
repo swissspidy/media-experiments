@@ -120,14 +120,7 @@ describe( 'actions', () => {
 	} );
 
 	describe( 'addItemFromUrl', () => {
-		it( 'downloads file and adds it to the queue', async () => {
-			window.fetch = jest.fn( () =>
-				Promise.resolve( {
-					ok: true,
-					blob: jest.fn( () => Promise.resolve( jpegFile ) ),
-				} )
-			) as jest.Mock;
-
+		it( 'adds an item to the queue for download', async () => {
 			await registry.dispatch( uploadStore ).addItemFromUrl( {
 				url: 'https://example.com/example.jpg',
 			} );
@@ -141,27 +134,30 @@ describe( 'actions', () => {
 				expect.objectContaining( {
 					id: expect.any( String ),
 					sourceUrl: 'https://example.com/example.jpg',
-					file: jpegFile,
-					sourceFile: jpegFile,
+					file: expect.any( File ),
+					sourceFile: expect.any( File ),
 					status: ItemStatus.Processing,
 					attachment: {
 						url: expect.stringMatching( /^blob:/ ),
 					},
 					mediaSourceTerms: [ 'media-import' ],
+					operations: [
+						[
+							OperationType.FetchRemoteFile,
+							{
+								url: 'https://example.com/example.jpg',
+								fileName: 'example.jpg',
+							},
+						],
+						OperationType.Upload,
+					],
 				} )
 			);
 		} );
 	} );
 
 	describe( 'muteExistingVideo', () => {
-		it( 'downloads file and adds it to the queue for transcoding', async () => {
-			window.fetch = jest.fn( () =>
-				Promise.resolve( {
-					ok: true,
-					blob: jest.fn( () => Promise.resolve( mp4File ) ),
-				} )
-			) as jest.Mock;
-
+		it( 'adds an item to the queue for downloading', async () => {
 			await registry.dispatch( uploadStore ).muteExistingVideo( {
 				id: 1234,
 				url: 'https://example.com/awesome-video.mp4',
@@ -187,24 +183,24 @@ describe( 'actions', () => {
 						url: 'https://example.com/awesome-video.mp4',
 					},
 					operations: [
-						OperationType.TranscodeMuteVideo,
+						[
+							OperationType.FetchRemoteFile,
+							{
+								fileName: 'awesome-video.mp4',
+								newFileName: 'awesome-video-muted.mp4',
+								url: 'https://example.com/awesome-video.mp4',
+							},
+						],
+						OperationType.MuteVideo,
 						OperationType.Upload,
 					],
 				} )
 			);
-			expect( item.file.name ).toBe( 'awesome-video-muted.mp4' );
 		} );
 	} );
 
 	describe( 'optimizeExistingItem', () => {
-		it( 'downloads video file and adds it to the queue for transcoding', async () => {
-			window.fetch = jest.fn( () =>
-				Promise.resolve( {
-					ok: true,
-					blob: jest.fn( () => Promise.resolve( mp4File ) ),
-				} )
-			) as jest.Mock;
-
+		it( 'adds an item to the queue for downloading', async () => {
 			await registry.dispatch( uploadStore ).optimizeExistingItem( {
 				id: 1234,
 				url: 'https://example.com/awesome-video.mp4',
@@ -237,14 +233,21 @@ describe( 'actions', () => {
 					mediaSourceTerms: [ 'media-optimization' ],
 					operations: [
 						[
-							OperationType.TranscodeCompress,
+							OperationType.FetchRemoteFile,
+							{
+								url: 'https://example.com/awesome-video.mp4',
+								fileName: 'awesome-video.mp4',
+								newFileName: 'awesome-video-optimized.mp4',
+							},
+						],
+						[
+							OperationType.Compress,
 							{ requireApproval: undefined },
 						],
 						OperationType.Upload,
 					],
 				} )
 			);
-			expect( item.file.name ).toBe( 'awesome-video-optimized.mp4' );
 		} );
 	} );
 

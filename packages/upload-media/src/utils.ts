@@ -83,7 +83,7 @@ export function getFileNameFromUrl( url: string ) {
  * @param url          URL.
  * @param nameOverride File name to use, instead of deriving it from the URL.
  */
-export async function fetchRemoteFile( url: string, nameOverride?: string ) {
+export async function fetchFile( url: string, nameOverride?: string ) {
 	const response = await fetch( url );
 	if ( ! response.ok ) {
 		throw new Error( `Could not fetch remote file: ${ response.status }` );

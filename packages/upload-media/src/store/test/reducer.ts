@@ -234,10 +234,7 @@ describe( 'reducer', () => {
 			const state = reducer( initialState, {
 				type: Type.AddOperations,
 				id: '1',
-				operations: [
-					OperationType.TranscodeCompress,
-					OperationType.AddPoster,
-				],
+				operations: [ OperationType.Compress, OperationType.AddPoster ],
 			} );
 
 			expect( state ).toEqual( {
@@ -250,7 +247,7 @@ describe( 'reducer', () => {
 						id: '1',
 						status: ItemStatus.Processing,
 						operations: [
-							OperationType.TranscodeCompress,
+							OperationType.Compress,
 							OperationType.AddPoster,
 							OperationType.Upload,
 						],
