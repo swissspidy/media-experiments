@@ -46,7 +46,7 @@
 		"@wordpress/scripts": "^27.9.0",
 		"@wp-now/wp-now": "^0.1.72",
 		"blob-polyfill": "^7.0.20220408",
-		"eslint": "^8.57.0",
+		"eslint": "^9.6.0",
 		"eslint-plugin-oxlint": "^0.5.0",
 		"mini-css-extract-plugin": "^2.9.0",
 		"monocart-reporter": "^2.5.2",
