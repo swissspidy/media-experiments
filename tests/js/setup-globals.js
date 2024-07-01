@@ -1,5 +1,5 @@
-import { Blob as BlobPolyfill, File as FilePolyfill } from 'blob-polyfill';
-// https://github.com/jsdom/jsdom/issues/2555
+import { Blob as BlobPolyfill, File as FilePolyfill } from 'node:buffer';
+
 global.Blob = BlobPolyfill;
 global.File = FilePolyfill;
 
