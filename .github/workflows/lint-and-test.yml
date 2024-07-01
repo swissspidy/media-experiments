@@ -267,7 +267,7 @@ jobs:
                   unzip media-experiments.zip -d tmp-build
 
             - name: Run plugin check
-              uses: WordPress/plugin-check-action@main
+              uses: WordPress/plugin-check-action@v1
               with:
                   build-dir: './tmp-build/media-experiments'
                   wp-version: 'trunk'
