@@ -1,3 +1,10 @@
+/**
+ * ImageFile class.
+ *
+ * Small wrapper around the `File` class to hold
+ * information about current dimensions and original
+ * dimensions, in case the image was resized.
+ */
 export class ImageFile extends File {
 	width = 0;
 	height = 0;

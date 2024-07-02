@@ -168,6 +168,27 @@ interface AddItemArgs {
 	operations?: Operation[];
 }
 
+/**
+ * Adds a new item to the upload queue.
+ *
+ * @todo Revisit blurHash and dominantColor fields.
+ *
+ * @param $0
+ * @param $0.file                 File
+ * @param [$0.batchId]            Batch ID.
+ * @param [$0.onChange]           Function called each time a file or a temporary representation of the file is available.
+ * @param [$0.onSuccess]          Function called after the file is uploaded.
+ * @param [$0.onBatchSuccess]     Function called after a batch of files is uploaded.
+ * @param [$0.onError]            Function called when an error happens.
+ * @param [$0.additionalData]     Additional data to include in the request.
+ * @param [$0.sourceUrl]          Source URL. Used when importing a file from a URL or optimizing an existing file.
+ * @param [$0.sourceAttachmentId] Source attachment ID. Used when optimizing an existing file for example.
+ * @param [$0.mediaSourceTerms]   List of term slugs in the media source taxonomy. Used to identify files later on in the media library.
+ * @param [$0.blurHash]           Item's BlurHash.
+ * @param [$0.dominantColor]      Item's dominant color.
+ * @param [$0.abortController]    Abort controller for upload cancellation.
+ * @param [$0.operations]         List of operations to perform. Defaults to automatically determined list, based on the file.
+ */
 export function addItem( {
 	file,
 	batchId,
@@ -246,6 +267,17 @@ interface AddItemsArgs {
 	additionalData?: AdditionalData;
 }
 
+/**
+ * Adds a new item to the upload queue.
+ *
+ * @param $0
+ * @param $0.files            Files
+ * @param [$0.onChange]       Function called each time a file or a temporary representation of the file is available.
+ * @param [$0.onSuccess]      Function called after the file is uploaded.
+ * @param [$0.onBatchSuccess] Function called after a batch of files is uploaded.
+ * @param [$0.onError]        Function called when an error happens.
+ * @param [$0.additionalData] Additional data to include in the request.
+ */
 export function addItems( {
 	files,
 	onChange,
@@ -278,6 +310,16 @@ interface AddItemFromUrlArgs {
 	additionalData?: AdditionalData;
 }
 
+/**
+ * Adds a new item to the upload queue.
+ *
+ * @param $0
+ * @param $0.url              URL
+ * @param [$0.onChange]       Function called each time a file or a temporary representation of the file is available.
+ * @param [$0.onSuccess]      Function called after the file is uploaded.
+ * @param [$0.onError]        Function called when an error happens.
+ * @param [$0.additionalData] Additional data to include in the request.
+ */
 export function addItemFromUrl( {
 	url,
 	onChange,
@@ -313,6 +355,19 @@ interface AddSideloadItemArgs {
 	parentId?: QueueItemId;
 }
 
+/**
+ * Adds a new item to the upload queue for sideloading.
+ *
+ * This is typically a poster image or a client-side generated thumbnail.
+ *
+ * @param $0
+ * @param $0.file             File
+ * @param [$0.batchId]        Batch ID.
+ * @param [$0.parentId]       Parent ID.
+ * @param [$0.onChange]       Function called each time a file or a temporary representation of the file is available.
+ * @param [$0.additionalData] Additional data to include in the request.
+ * @param [$0.operations]     List of operations to perform. Defaults to automatically determined list, based on the file.
+ */
 export function addSideloadItem( {
 	file,
 	onChange,
@@ -360,6 +415,24 @@ interface MuteExistingVideoArgs {
 	generatedPosterId?: number;
 }
 
+/**
+ * Adds a new item to the upload queue for muting an existing video.
+ *
+ * @todo Rename id to sourceAttachmentId for consistency
+ *
+ * @param $0
+ * @param $0.id                  Attachment ID.
+ * @param $0.url                 Video URL.
+ * @param [$0.fileName]          Video file name.
+ * @param [$0.poster]            Poster URL.
+ * @param [$0.onChange]          Function called each time a file or a temporary representation of the file is available.
+ * @param [$0.onSuccess]         Function called after the file is uploaded.
+ * @param [$0.onError]           Function called when an error happens.
+ * @param [$0.additionalData]    Additional data to include in the request.
+ * @param [$0.blurHash]          Item's BlurHash.
+ * @param [$0.dominantColor]     Item's dominant color.
+ * @param [$0.generatedPosterId] Attachment ID of the generated poster image, if it exists.
+ */
 export function muteExistingVideo( {
 	id,
 	url,
@@ -437,6 +510,20 @@ interface AddSubtitlesForExistingVideoArgs {
 	additionalData: AdditionalData;
 }
 
+/**
+ * Adds a new item to the upload queue to generate subtitles for an existing video.
+ *
+ * @todo Rename id to sourceAttachmentId for consistency
+ *
+ * @param $0
+ * @param $0.id               Attachment ID.
+ * @param $0.url              URL.
+ * @param [$0.fileName]       File name.
+ * @param [$0.onChange]       Function called each time a file or a temporary representation of the file is available.
+ * @param [$0.onSuccess]      Function called after the file is uploaded.
+ * @param [$0.onError]        Function called when an error happens.
+ * @param [$0.additionalData] Additional data to include in the request.
+ */
 export function addSubtitlesForExistingVideo( {
 	id,
 	url,
@@ -501,6 +588,26 @@ interface OptimizexistingItemArgs {
 	generatedPosterId?: number;
 }
 
+/**
+ * Adds a new item to the upload queue for optimizing (compressing) an existing item.
+ *
+ * @todo Rename id to sourceAttachmentId for consistency
+ *
+ * @param $0
+ * @param $0.id                  Attachment ID.
+ * @param $0.url                 URL.
+ * @param [$0.fileName]          File name.
+ * @param [$0.poster]            Poster URL.
+ * @param [$0.batchId]           Batch ID.
+ * @param [$0.onChange]          Function called each time a file or a temporary representation of the file is available.
+ * @param [$0.onSuccess]         Function called after the file is uploaded.
+ * @param [$0.onBatchSuccess]    Function called after a batch of files is uploaded.
+ * @param [$0.onError]           Function called when an error happens.
+ * @param [$0.additionalData]    Additional data to include in the request.
+ * @param [$0.blurHash]          Item's BlurHash.
+ * @param [$0.dominantColor]     Item's dominant color.
+ * @param [$0.generatedPosterId] Attachment ID of the generated poster image, if it exists.
+ */
 export function optimizeExistingItem( {
 	id,
 	url,
@@ -599,6 +706,13 @@ export function optimizeExistingItem( {
 	};
 }
 
+/**
+ * Processes a single item in the queue.
+ *
+ * Runs the next operation in line and invokes any callbacks.
+ *
+ * @param id Item ID.
+ */
 export function processItem( id: QueueItemId ) {
 	return async ( { select, dispatch }: ThunkArgs ) => {
 		if ( select.isPaused() ) {
@@ -803,6 +917,11 @@ export function processItem( id: QueueItemId ) {
 	};
 }
 
+/**
+ * Resumes processing for a given post/attachment ID.
+ *
+ * @param postOrAttachmentId Post or attachment ID.
+ */
 export function resumeItem( postOrAttachmentId: number ) {
 	return async ( { select, dispatch }: ThunkArgs ) => {
 		const item = select.getPausedUploadForPost( postOrAttachmentId );
@@ -816,12 +935,23 @@ export function resumeItem( postOrAttachmentId: number ) {
 	};
 }
 
+/**
+ * Returns an action object that pauses all processing in the queue.
+ *
+ * Useful for testing purposes.
+ */
 export function pauseQueue(): PauseQueueAction {
 	return {
 		type: Type.PauseQueue,
 	};
 }
 
+/**
+ * Resumes all processing in the queue.
+ *
+ * Dispatches an action object for resuming the queue itself,
+ * and triggers processing for each remaining item in the queue individually.
+ */
 export function resumeQueue() {
 	return async ( { select, dispatch }: ThunkArgs ) => {
 		dispatch< ResumeQueueAction >( {
@@ -834,6 +964,12 @@ export function resumeQueue() {
 	};
 }
 
+/**
+ * Finishes an operation for a given item ID and immediately triggers processing the next one.
+ *
+ * @param id      Item ID.
+ * @param updates Updated item data.
+ */
 export function finishOperation(
 	id: QueueItemId,
 	updates: Partial< QueueItem >
@@ -849,6 +985,11 @@ export function finishOperation(
 	};
 }
 
+/**
+ * Triggers poster image generation for an item.
+ *
+ * @param id Item ID.
+ */
 export function addPosterForItem( id: QueueItemId ) {
 	return async ( {
 		select,
@@ -947,6 +1088,20 @@ export function addPosterForItem( id: QueueItemId ) {
 	};
 }
 
+/**
+ * Prepares an item for initial processing.
+ *
+ * Determines the list of operations to perform for a given image,
+ * depending on its media type.
+ *
+ * For example, HEIF images first need to be converted, resized,
+ * compressed, and then uploaded.
+ *
+ * Or videos need to be compressed, and then need poster generation
+ * before upload.
+ *
+ * @param id Item ID.
+ */
 export function prepareItem( id: QueueItemId ) {
 	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
@@ -1090,6 +1245,11 @@ export function prepareItem( id: QueueItemId ) {
 	};
 }
 
+/**
+ * Adds an item's poster image to the queue for uploading.
+ *
+ * @param id Item ID.
+ */
 export function uploadPoster( id: QueueItemId ) {
 	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
@@ -1207,6 +1367,11 @@ export function uploadPoster( id: QueueItemId ) {
 	};
 }
 
+/**
+ * Adds thumbnail versions to the queue for sideloading.
+ *
+ * @param id Item ID.
+ */
 export function generateThumbnails( id: QueueItemId ) {
 	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
@@ -1304,6 +1469,15 @@ export function generateThumbnails( id: QueueItemId ) {
 		dispatch.finishOperation( id, {} );
 	};
 }
+
+/**
+ * Adds the original file to the queue for sideloading.
+ *
+ * If an item was downsized due to the big image size threshold,
+ * this adds the original file for storing.
+ *
+ * @param id Item ID.
+ */
 export function uploadOriginal( id: QueueItemId ) {
 	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
@@ -1358,6 +1532,12 @@ export function uploadOriginal( id: QueueItemId ) {
 	};
 }
 
+/**
+ * Rejects a proposed optimized/converted version of a file
+ * by essentially cancelling its further processing.
+ *
+ * @param id Item ID.
+ */
 export function rejectApproval( id: number ) {
 	return async ( { select, dispatch }: ThunkArgs ) => {
 		const item = select.getItemByAttachmentId( id );
@@ -1376,6 +1556,12 @@ export function rejectApproval( id: number ) {
 	};
 }
 
+/**
+ * Approves a proposed optimized/converted version of a file
+ * so it can continue being processed and uploaded.
+ *
+ * @param id Item ID.
+ */
 export function grantApproval( id: number ) {
 	return async ( { select, dispatch }: ThunkArgs ) => {
 		const item = select.getItemByAttachmentId( id );
@@ -1394,6 +1580,12 @@ export function grantApproval( id: number ) {
 	};
 }
 
+/**
+ * Cancels an item in the queue based on an error.
+ *
+ * @param id    Item ID.
+ * @param error Error instance.
+ */
 export function cancelItem( id: QueueItemId, error: Error ) {
 	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id );
@@ -1449,9 +1641,17 @@ export function cancelItem( id: QueueItemId, error: Error ) {
 	};
 }
 
+type OptimizeImageItemArgs = OperationArgs[ OperationType.TranscodeImage ];
+
+/**
+ * Optimizes/Compresses an existing image item.
+ *
+ * @param id     Item ID.
+ * @param [args] Additional arguments for the operation.
+ */
 export function optimizeImageItem(
 	id: QueueItemId,
-	args?: OperationArgs[ OperationType.TranscodeImage ]
+	args?: OptimizeImageItemArgs
 ) {
 	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
@@ -1625,6 +1825,11 @@ export function optimizeImageItem(
 	};
 }
 
+/**
+ * Optimizes/Compresses an existing video item.
+ *
+ * @param id Item ID.
+ */
 export function optimizeVideoItem( id: QueueItemId ) {
 	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
@@ -1693,6 +1898,11 @@ export function optimizeVideoItem( id: QueueItemId ) {
 	};
 }
 
+/**
+ * Mutes an existing video item.
+ *
+ * @param id Item ID.
+ */
 export function muteVideoItem( id: QueueItemId ) {
 	return async ( { select, dispatch }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
@@ -1734,6 +1944,11 @@ export function muteVideoItem( id: QueueItemId ) {
 	};
 }
 
+/**
+ * Optimizes/Compresses an existing audio item.
+ *
+ * @param id Item ID.
+ */
 export function optimizeAudioItem( id: QueueItemId ) {
 	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
@@ -1789,6 +2004,11 @@ export function optimizeAudioItem( id: QueueItemId ) {
 	};
 }
 
+/**
+ * Converts an existing GIF item to a video.
+ *
+ * @param id Item ID.
+ */
 export function convertGifItem( id: QueueItemId ) {
 	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
@@ -1857,6 +2077,11 @@ export function convertGifItem( id: QueueItemId ) {
 	};
 }
 
+/**
+ * Converts an existing HEIF image item to another format.
+ *
+ * @param id Item ID.
+ */
 export function convertHeifItem( id: QueueItemId ) {
 	return async ( { select, dispatch }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
@@ -1892,10 +2117,15 @@ export function convertHeifItem( id: QueueItemId ) {
 	};
 }
 
-export function resizeCropItem(
-	id: QueueItemId,
-	args?: OperationArgs[ OperationType.ResizeCrop ]
-) {
+type ResizeCropItemArgs = OperationArgs[ OperationType.ResizeCrop ];
+
+/**
+ * Resizes and crops an existing image item.
+ *
+ * @param id     Item ID.
+ * @param [args] Additional arguments for the operation.
+ */
+export function resizeCropItem( id: QueueItemId, args?: ResizeCropItemArgs ) {
 	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
 
@@ -1979,6 +2209,11 @@ export function resizeCropItem(
 	};
 }
 
+/**
+ * Uploads an item to the server.
+ *
+ * @param id Item ID.
+ */
 export function uploadItem( id: QueueItemId ) {
 	return async ( { select, dispatch }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
@@ -2129,6 +2364,11 @@ export function uploadItem( id: QueueItemId ) {
 	};
 }
 
+/**
+ * Sideloads an item to the server.
+ *
+ * @param id Item ID.
+ */
 export function sideloadItem( id: QueueItemId ) {
 	return async ( { select, dispatch }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
@@ -2163,10 +2403,15 @@ export function sideloadItem( id: QueueItemId ) {
 	};
 }
 
-export function fetchRemoteFile(
-	id: QueueItemId,
-	args: OperationArgs[ OperationType.FetchRemoteFile ]
-) {
+type FetchRemoteFileArgs = OperationArgs[ OperationType.FetchRemoteFile ];
+
+/**
+ * Fetches a remote file from another server and adds it to the item.
+ *
+ * @param id   Item ID.
+ * @param args Additional arguments for the operation.
+ */
+export function fetchRemoteFile( id: QueueItemId, args: FetchRemoteFileArgs ) {
 	return async ( { select, dispatch }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
 
@@ -2212,6 +2457,11 @@ export function fetchRemoteFile(
 	};
 }
 
+/**
+ * Generates subtitles for the video item.
+ *
+ * @param id Item ID.
+ */
 export function generateSubtitles( id: QueueItemId ) {
 	return async ( { select, dispatch }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
@@ -2251,6 +2501,11 @@ export function generateSubtitles( id: QueueItemId ) {
 	};
 }
 
+/**
+ * Returns an action object that sets the media source term slugs and IDs.
+ *
+ * @param terms Map of term slugs to IDs.
+ */
 export function setMediaSourceTerms(
 	terms: Record< string, number >
 ): SetMediaSourceTermsAction {
@@ -2260,6 +2515,11 @@ export function setMediaSourceTerms(
 	};
 }
 
+/**
+ * Returns an action object that sets all image sub-sizes and their cropping information.
+ *
+ * @param imageSizes Map of image size names and their cropping information.
+ */
 export function setImageSizes(
 	imageSizes: Record< string, ImageSizeCrop >
 ): SetImageSizesAction {
@@ -2269,6 +2529,11 @@ export function setImageSizes(
 	};
 }
 
+/**
+ * Revokes all blob URLs for a given item, freeing up memory.
+ *
+ * @param id Item ID.
+ */
 export function revokeBlobUrls( id: QueueItemId ) {
 	return async ( { select, dispatch }: ThunkArgs ) => {
 		const blobUrls = select.getBlobUrls( id );

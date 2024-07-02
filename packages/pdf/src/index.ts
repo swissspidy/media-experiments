@@ -9,12 +9,21 @@ import {
 // Setting worker path to worker bundle.
 GlobalWorkerOptions.workerSrc = PDFJS_CDN_URL;
 
+/**
+ * Returns an image file for a given PDF.
+ *
+ * @param url      PDF URL.
+ * @param basename File base name to use for the thumbnail file.
+ * @param type     Mime type to use for the image.
+ * @param quality  Desired image quality.
+ * @return Image file.
+ */
 export async function getImageFromPdf(
 	url: string,
 	basename: string,
 	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/jpeg',
 	quality = 0.82
-) {
+): Promise< File > {
 	const pdf = await getDocument( url ).promise;
 	const pdfPage = await pdf.getPage( 1 );
 

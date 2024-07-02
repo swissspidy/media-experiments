@@ -30,10 +30,10 @@ updates:
                   - 'oxlint'
                   - 'eslint-plugin-oxlint'
       ignore:
-      # ESLint v9 requires manual upgrade
-      - dependency-name: 'eslint'
-        versions:
-        - '>= 9'
+          # ESLint v9 requires manual upgrade
+          - dependency-name: 'eslint'
+            versions:
+                - '>= 9'
 
     - package-ecosystem: composer
       directory: '/'

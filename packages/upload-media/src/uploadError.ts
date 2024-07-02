@@ -4,6 +4,12 @@ interface UploadErrorArgs {
 	file: File;
 }
 
+/**
+ * UploadError class.
+ *
+ * Small wrapper around the `Error` class
+ * to hold an error code and a reference to a file object.
+ */
 export class UploadError extends Error {
 	code: string;
 	file: File;

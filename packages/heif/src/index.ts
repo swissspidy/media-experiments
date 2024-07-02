@@ -1,7 +1,13 @@
 import type { DecodeResult } from 'libheif-js';
 const libheif = require( 'libheif-js/wasm-bundle' );
 
-export function isHeifImage( buffer: ArrayBuffer ) {
+/**
+ * Determines whether a given image is an HEIF image.
+ *
+ * @param buffer File array buffer.
+ * @return Whether it is an HEIF image.
+ */
+export function isHeifImage( buffer: ArrayBuffer ): boolean {
 	const fourCC = String.fromCharCode(
 		...Array.from( new Uint8Array( buffer.slice( 8, 12 ) ) )
 	);
@@ -18,13 +24,26 @@ export function isHeifImage( buffer: ArrayBuffer ) {
 	return validFourCC.includes( fourCC );
 }
 
-function getDimensions( image: DecodeResult ) {
+/**
+ * Returns dimensions from a decoder result as a simple object.
+ *
+ * @param image
+ */
+function getDimensions( image: DecodeResult ): {
+	width: number;
+	height: number;
+} {
 	const width = image.get_width();
 	const height = image.get_height();
 
 	return { width, height };
 }
 
+/**
+ * Decodes a given HEIF image.
+ *
+ * @param image Decode result.
+ */
 async function decodeImage( image: DecodeResult ) {
 	const dimensions = getDimensions( image );
 	const { width, height } = dimensions;
@@ -48,7 +67,19 @@ async function decodeImage( image: DecodeResult ) {
 	} );
 }
 
-export async function transcodeHeifImage( buffer: ArrayBuffer ) {
+/**
+ * Decodes a given HEIF file and returns the raw image data.
+ *
+ * @todo Find better function name?
+ *
+ * @param buffer File buffer.
+ * @return Decoded image buffer plus dimensions.
+ */
+export async function transcodeHeifImage( buffer: ArrayBuffer ): Promise< {
+	buffer: ArrayBuffer;
+	width: number;
+	height: number;
+} > {
 	if ( ! isHeifImage( buffer ) ) {
 		throw new TypeError( 'Not a valid HEIF image' );
 	}

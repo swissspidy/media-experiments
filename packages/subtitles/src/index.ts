@@ -88,7 +88,13 @@ function createWebVttFromResults( results: Result[] ) {
 	return vtt.toString();
 }
 
-export async function generateSubtitles( file: File ) {
+/**
+ * Generates subtitles for a given video file.
+ *
+ * @param file Video file.
+ * @return VTT file.
+ */
+export async function generateSubtitles( file: File ): Promise< File > {
 	const results: Result[] = [];
 
 	const arrayBuffer = await file.arrayBuffer();

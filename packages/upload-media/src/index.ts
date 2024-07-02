@@ -2,14 +2,11 @@ import { dispatch } from '@wordpress/data';
 
 import { store as uploadStore } from './store';
 import type {
-	AdditionalData,
 	Attachment,
 	AudioFormat,
 	ImageFormat,
 	ImageLibrary,
 	ImageSizeCrop,
-	OnChangeHandler,
-	OnErrorHandler,
 	RestAttachment,
 	ThumbnailGeneration,
 	VideoFormat,
@@ -17,12 +14,9 @@ import type {
 import { UploadError } from './uploadError';
 
 export { uploadMedia } from './uploadMedia';
-export { fetchFile, transformAttachment } from './utils';
+export { transformAttachment } from './utils';
 
 export type {
-	AdditionalData,
-	OnChangeHandler,
-	OnErrorHandler,
 	Attachment,
 	RestAttachment,
 	ImageFormat,
