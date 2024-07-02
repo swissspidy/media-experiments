@@ -1,8 +1,4 @@
-import {
-	type AdditionalData,
-	type OnChangeHandler,
-	uploadMedia as originalUploadMedia,
-} from '@mexp/upload-media';
+import { uploadMedia as originalUploadMedia } from '@mexp/upload-media';
 
 import { dispatch, select, subscribe } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
@@ -10,20 +6,9 @@ import { store as editorStore } from '@wordpress/editor';
 
 type OnErrorHandler = ( message: string ) => void;
 
-interface UploadMediaArgs {
-	// Additional data to include in the request.
-	additionalData?: AdditionalData;
-	// Array with the types of media that can be uploaded, if unset all types are allowed.
-	allowedTypes?: string[];
-	// List of files.
-	filesList: File[];
-	// Maximum upload size in bytes allowed for the site.
-	maxUploadFileSize?: number;
-	// Function called when an error happens.
+type UploadMediaArgs = Parameters< typeof originalUploadMedia >[ 0 ] & {
 	onError?: OnErrorHandler;
-	// Function called each time a file or a temporary representation of the file is available.
-	onFileChange?: OnChangeHandler;
-}
+};
 
 const noop = () => {};
 

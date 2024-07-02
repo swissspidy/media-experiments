@@ -21,12 +21,11 @@ let vipsInstance: typeof VipsInstance;
 
 type ItemId = string;
 
-const inProgressOperations = new Set< ItemId >();
-
-export async function cancelOperations( id: ItemId ) {
-	return inProgressOperations.delete( id );
-}
-
+/**
+ * Instantiates and returns a new vips instance.
+ *
+ * Reuses any existing instance.
+ */
 async function getVips(): Promise< typeof VipsInstance > {
 	if ( vipsInstance ) {
 		return vipsInstance;
@@ -51,7 +50,14 @@ async function getVips(): Promise< typeof VipsInstance > {
 	return vipsInstance;
 }
 
-// TODO: Make this smarter.
+/**
+ * Determines whether a given file type supports a quality setting,
+ *
+ * @todo Make this smarter.
+ *
+ * @param type Mime type.
+ * @return Whether the file supports a quality setting.
+ */
 function supportsQuality(
 	type: string
 ): type is 'image/jpeg' | 'image/png' | 'image/webp' | 'image/avif' {
@@ -60,18 +66,53 @@ function supportsQuality(
 	);
 }
 
-// TODO: Make this smarter.
+/**
+ * Determines whether a given file type supports animation,
+ *
+ * @todo Make this smarter.
+ *
+ * @param type Mime type.
+ * @return Whether the file supports animation.
+ */
 function supportsAnimation( type: string ): type is 'image/webp' | 'image/gif' {
 	return [ 'image/webp', 'image/gif' ].includes( type );
 }
 
-// TODO: Make this smarter.
+/**
+ * Determines whether a given file type supports interlaced/progressive output.
+ *
+ * @todo Make this smarter.
+ *
+ * @param type Mime type.
+ * @return Whether the file supports interlaced/progressive output.
+ */
 function supportsInterlace(
 	type: string
 ): type is 'image/jpeg' | 'image/gif' | 'image/png' {
 	return [ 'image/jpeg', 'image/gif', 'image/png' ].includes( type );
 }
 
+const inProgressOperations = new Set< ItemId >();
+
+/**
+ * Cancels all ongoing image operations for a given item ID.
+ * @param id Item ID.
+ * @return boolean Whether any operation was cancelled.
+ */
+export async function cancelOperations( id: ItemId ) {
+	return inProgressOperations.delete( id );
+}
+
+/**
+ * Converts an image to a different format using vips.
+ *
+ * @param id         Item ID.
+ * @param buffer     Original file buffer.
+ * @param inputType  Input mime type.
+ * @param outputType Output mime type.
+ * @param quality    Desired quality.
+ * @param interlaced Whether to use interlaced/progressive mode.
+ */
 export async function convertImageFormat(
 	id: ItemId,
 	buffer: ArrayBuffer,
@@ -79,7 +120,7 @@ export async function convertImageFormat(
 	outputType: string,
 	quality = 0.82,
 	interlaced = false
-) {
+): Promise< ArrayBuffer > {
 	const ext = getExtensionFromMimeType( outputType );
 
 	if ( ! ext ) {
@@ -125,6 +166,12 @@ export async function convertImageFormat(
 	return result;
 }
 
+/**
+ * Determines whether a given file type is supported by vips.
+ *
+ * @param type Mime type.
+ * @return Whether the file type is supported.
+ */
 function isFileTypeSupported(
 	type: string
 ): type is
@@ -142,13 +189,23 @@ function isFileTypeSupported(
 	].includes( type );
 }
 
+/**
+ * Compresses an existing image using vips.
+ *
+ * @param id         Item ID.
+ * @param buffer     Original file buffer.
+ * @param type       Mime type.
+ * @param quality    Desired quality.
+ * @param interlaced Whether to use interlaced/progressive mode.
+ * @return Compressed file data.
+ */
 export async function compressImage(
 	id: ItemId,
 	buffer: ArrayBuffer,
 	type: string,
 	quality = 0.82,
 	interlaced = false
-) {
+): Promise< ArrayBuffer > {
 	if ( ! isFileTypeSupported( type ) ) {
 		throw new Error( 'Unsupported file type' );
 	}
@@ -159,11 +216,11 @@ export async function compressImage(
  * Resizes an image using vips.
  *
  * @param id        Item ID.
- * @param buffer    Original file object.
+ * @param buffer    Original file buffer.
  * @param type      Mime type.
  * @param resize    Resize options.
  * @param smartCrop Whether to use smart cropping (i.e. saliency-aware).
- * @return Processed file object.
+ * @return Processed file data plus the old and new dimensions.
  */
 export async function resizeImage(
 	id: ItemId,
@@ -171,7 +228,13 @@ export async function resizeImage(
 	type: string,
 	resize: ImageSizeCrop,
 	smartCrop = false
-) {
+): Promise< {
+	buffer: ArrayBuffer;
+	width: number;
+	height: number;
+	originalWidth: number;
+	originalHeight: number;
+} > {
 	const ext = getExtensionFromMimeType( type );
 
 	if ( ! ext ) {
@@ -316,7 +379,9 @@ export async function resizeImage(
  * @param buffer Original file object.
  * @return Whether the image has an alpha channel.
  */
-export async function hasTransparency( buffer: ArrayBuffer ) {
+export async function hasTransparency(
+	buffer: ArrayBuffer
+): Promise< boolean > {
 	const vips = await getVips();
 	const image = vips.Image.newFromBuffer( buffer );
 	const hasAlpha = image.hasAlpha();

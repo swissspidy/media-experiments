@@ -66,6 +66,8 @@ export function getMimeTypesArray(
 /**
  * Returns the file name including extension from a URL.
  *
+ * @todo Move to media-utils?
+ *
  * @param url File URL.
  * @return File name.
  */
@@ -79,6 +81,8 @@ export function getFileNameFromUrl( url: string ) {
 
 /**
  * Fetches a remote file and returns a File instance.
+ *
+ * @todo Move to media-utils?
  *
  * @param url          URL.
  * @param nameOverride File name to use, instead of deriving it from the URL.
@@ -318,6 +322,12 @@ export function isAnimatedGif( buffer: ArrayBuffer ) {
 	return frames > 1;
 }
 
+/**
+ * Determines whether a given image is an HEIF image.
+ *
+ * @param buffer File array buffer.
+ * @return Whether it is an HEIF image.
+ */
 export function isHeifImage( buffer: ArrayBuffer ) {
 	const fourCC = String.fromCharCode(
 		...Array.from( new Uint8Array( buffer.slice( 8, 12 ) ) )
