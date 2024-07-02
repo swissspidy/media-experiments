@@ -51,7 +51,7 @@
 		"mini-css-extract-plugin": "^2.9.0",
 		"monocart-reporter": "^2.5.2",
 		"npm-run-all": "^4.1.5",
-		"oxlint": "^0.5.1",
+		"oxlint": "^0.5.2",
 		"patch-package": "^8.0.0",
 		"prettier": "npm:wp-prettier@3.0.3",
 		"typescript": "^5.5.2",
