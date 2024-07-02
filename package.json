@@ -44,7 +44,7 @@
 		"@wordpress/docgen": "^2.2.0",
 		"@wordpress/env": "^10.0.0",
 		"@wordpress/eslint-plugin": "^19.0.0",
-		"@wordpress/scripts": "^27.9.0",
+		"@wordpress/scripts": "^28.2.0",
 		"@wp-now/wp-now": "^0.1.72",
 		"eslint": "^8.57.0",
 		"eslint-plugin-oxlint": "^0.5.0",
