@@ -20,8 +20,7 @@ import apiFetch from '@wordpress/api-fetch';
 
 import type { Attachment, RestAttachment } from '@mexp/upload-media';
 import { transformAttachment } from '@mexp/upload-media';
-
-import { store as interfaceStore } from '../interface/store';
+import { store as interfaceStore } from '@mexp/interface';
 
 interface UploadRequestControlsProps {
 	onInsert: ( media: Partial< Attachment >[] ) => void;

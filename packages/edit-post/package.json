@@ -34,6 +34,8 @@
 	},
 	"dependencies": {
 		"@mediapipe/selfie_segmentation": "^0.1.1675465747",
+		"@mexp/interface": "../interface",
+		"@mexp/media-recording": "../media-recording",
 		"@mexp/media-utils": "../media-utils",
 		"@mexp/upload-media": "../upload-media",
 		"@mexp/upload-requests": "../upload-requests",
@@ -55,7 +57,6 @@
 		"@wordpress/notices": "^5.0.0",
 		"@wordpress/plugins": "^7.0.0",
 		"@wordpress/preferences": "^4.0.0",
-		"image-capture": "^0.4.0",
 		"react-blurhash": "^0.3.0",
 		"react-compare-slider": "^3.1.0",
 		"uuid": "^10.0.0"

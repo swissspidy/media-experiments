@@ -9,8 +9,6 @@ declare global {
 			gifInterlaced: boolean;
 		};
 	}
-
-	const MEDIAPIPE_CDN_URL: string;
 }
 
 export type {};

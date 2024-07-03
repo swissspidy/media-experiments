@@ -5,11 +5,7 @@
 		"declarationDir": "dist-types"
 	},
 	"references": [
-		{ "path": "../interface" },
-		{ "path": "../media-recording" },
-		{ "path": "../media-utils" },
-		{ "path": "../upload-media" },
-		{ "path": "../upload-requests" }
+		{ "path": "../media-utils" }
 	],
 	"include": [ "src/**/*" ]
 }

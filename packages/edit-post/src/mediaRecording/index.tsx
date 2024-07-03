@@ -6,8 +6,8 @@ import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 import { getMediaTypeFromMimeType } from '@mexp/media-utils';
+import { store as recordingStore } from '@mexp/media-recording';
 
-import { store as recordingStore } from './store';
 import AudioAnalyzer from './audioAnalyzer';
 
 import './blocks.css';
