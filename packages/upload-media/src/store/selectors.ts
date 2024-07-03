@@ -1,8 +1,10 @@
 import {
 	type BatchId,
+	type ImageSizeCrop,
 	ItemStatus,
 	type MediaSourceTerm,
 	OperationType,
+	type QueueItem,
 	type QueueItemId,
 	type State,
 } from './types';
@@ -15,7 +17,7 @@ import {
  *
  * @return Queue items.
  */
-export function getItems( state: State, status?: ItemStatus ) {
+export function getItems( state: State, status?: ItemStatus ): QueueItem[] {
 	if ( status ) {
 		return state.queue.filter( ( item ) => item.status === status );
 	}
@@ -31,7 +33,10 @@ export function getItems( state: State, status?: ItemStatus ) {
  *
  * @return Queue item.
  */
-export function getItem( state: State, id: QueueItemId ) {
+export function getItem(
+	state: State,
+	id: QueueItemId
+): QueueItem | undefined {
 	return state.queue.find( ( item ) => item.id === id );
 }
 
@@ -42,7 +47,7 @@ export function getItem( state: State, id: QueueItemId ) {
  *
  * @return Whether there is an item pending approval.
  */
-export function isPendingApproval( state: State ) {
+export function isPendingApproval( state: State ): boolean {
 	return state.queue.some(
 		( item ) => item.status === ItemStatus.PendingApproval
 	);
@@ -56,7 +61,10 @@ export function isPendingApproval( state: State ) {
  *
  * @return Queue item.
  */
-export function getItemByAttachmentId( state: State, attachmentId: number ) {
+export function getItemByAttachmentId(
+	state: State,
+	attachmentId: number
+): QueueItem | undefined {
 	return state.queue.find(
 		( item ) =>
 			item.attachment?.id === attachmentId ||
@@ -75,7 +83,7 @@ export function getItemByAttachmentId( state: State, attachmentId: number ) {
 export function isPendingApprovalByAttachmentId(
 	state: State,
 	attachmentId: number
-) {
+): boolean {
 	return state.queue.some(
 		( item ) =>
 			( item.attachment?.id === attachmentId ||
@@ -95,15 +103,18 @@ export function isPendingApprovalByAttachmentId(
 export function isFirstPendingApprovalByAttachmentId(
 	state: State,
 	attachmentId: number
-) {
+): boolean {
 	const foundItem = state.queue.find(
 		( item ) => item.status === ItemStatus.PendingApproval
 	);
 
+	if ( ! foundItem ) {
+		return false;
+	}
+
 	return (
-		foundItem &&
-		( foundItem.attachment?.id === attachmentId ||
-			foundItem.sourceAttachmentId === attachmentId )
+		foundItem.attachment?.id === attachmentId ||
+		foundItem.sourceAttachmentId === attachmentId
 	);
 }
 
@@ -120,7 +131,13 @@ export function isFirstPendingApprovalByAttachmentId(
 export function getComparisonDataForApproval(
 	state: State,
 	attachmentId: number
-) {
+): {
+	oldUrl: string | undefined;
+	oldSize: number;
+	newSize: number;
+	newUrl: string | undefined;
+	sizeDiff: number;
+} | null {
 	const foundItem = state.queue.find(
 		( item ) =>
 			( item.attachment?.id === attachmentId ||
@@ -149,7 +166,7 @@ export function getComparisonDataForApproval(
  *
  * @return Whether a batch has been uploaded.
  */
-export function isBatchUploaded( state: State, batchId: BatchId ) {
+export function isBatchUploaded( state: State, batchId: BatchId ): boolean {
 	const batchItems = state.queue.filter(
 		( item ) => batchId === item.batchId
 	);
@@ -166,7 +183,7 @@ export function isBatchUploaded( state: State, batchId: BatchId ) {
  *
  * @return Whether any upload is currently in progress.
  */
-export function isUploading( state: State ) {
+export function isUploading( state: State ): boolean {
 	return state.queue.length >= 1;
 }
 
@@ -178,7 +195,7 @@ export function isUploading( state: State ) {
  *
  * @return Whether upload is currently in progress for the given attachment.
  */
-export function isUploadingByUrl( state: State, url: string ) {
+export function isUploadingByUrl( state: State, url: string ): boolean {
 	return state.queue.some(
 		( item ) => item.attachment?.url === url || item.sourceUrl === url
 	);
@@ -192,7 +209,7 @@ export function isUploadingByUrl( state: State, url: string ) {
  *
  * @return Whether upload is currently in progress for the given attachment.
  */
-export function isUploadingById( state: State, attachmentId: number ) {
+export function isUploadingById( state: State, attachmentId: number ): boolean {
 	return state.queue.some(
 		( item ) =>
 			item.attachment?.id === attachmentId ||
@@ -208,7 +225,10 @@ export function isUploadingById( state: State, attachmentId: number ) {
  *
  * @return Whether upload is currently in progress for the given post or attachment.
  */
-export function isUploadingToPost( state: State, postOrAttachmentId: number ) {
+export function isUploadingToPost(
+	state: State,
+	postOrAttachmentId: number
+): boolean {
 	return state.queue.some(
 		( item ) =>
 			item.currentOperation === OperationType.Upload &&
@@ -227,7 +247,7 @@ export function isUploadingToPost( state: State, postOrAttachmentId: number ) {
 export function getPausedUploadForPost(
 	state: State,
 	postOrAttachmentId: number
-) {
+): QueueItem | undefined {
 	return state.queue.find(
 		( item ) =>
 			item.status === ItemStatus.Paused &&
@@ -243,7 +263,10 @@ export function getPausedUploadForPost(
  *
  * @return Whether upload is currently in progress for the given batch ID.
  */
-export function isUploadingByBatchId( state: State, batchId: BatchId ) {
+export function isUploadingByBatchId(
+	state: State,
+	batchId: BatchId
+): boolean {
 	return state.queue.some( ( item ) => item.batchId === batchId );
 }
 
@@ -255,7 +278,10 @@ export function isUploadingByBatchId( state: State, batchId: BatchId ) {
  *
  * @return Whether upload is currently in progress for the given parent ID.
  */
-export function isUploadingByParentId( state: State, parentId: QueueItemId ) {
+export function isUploadingByParentId(
+	state: State,
+	parentId: QueueItemId
+): boolean {
 	return state.queue.some( ( item ) => item.parentId === parentId );
 }
 
@@ -266,7 +292,7 @@ export function isUploadingByParentId( state: State, parentId: QueueItemId ) {
  *
  * @return Whether uploading is currently paused.
  */
-export function isPaused( state: State ) {
+export function isPaused( state: State ): boolean {
 	return state.queueStatus === 'paused';
 }
 
@@ -278,7 +304,10 @@ export function isPaused( state: State ) {
  *
  * @return Term ID.
  */
-export function getMediaSourceTermId( state: State, slug: MediaSourceTerm ) {
+export function getMediaSourceTermId(
+	state: State,
+	slug: MediaSourceTerm
+): number | undefined {
 	return state.mediaSourceTerms[ slug ];
 }
 
@@ -290,7 +319,7 @@ export function getMediaSourceTermId( state: State, slug: MediaSourceTerm ) {
  *
  * @return Image size data.
  */
-export function getImageSize( state: State, name: string ) {
+export function getImageSize( state: State, name: string ): ImageSizeCrop {
 	return state.imageSizes[ name ];
 }
 
@@ -302,6 +331,6 @@ export function getImageSize( state: State, name: string ) {
  *
  * @return List of blob URLs.
  */
-export function getBlobUrls( state: State, id: QueueItemId ) {
+export function getBlobUrls( state: State, id: QueueItemId ): string[] {
 	return state.blobUrls[ id ] || [];
 }
