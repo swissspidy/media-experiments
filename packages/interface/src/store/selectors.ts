@@ -8,6 +8,6 @@ import type { State } from './types';
  *
  * @return {boolean} Whether the modal is active.
  */
-export function isModalActive( state: State, modalName: string ) {
+export function isModalActive( state: State, modalName: string ): boolean {
 	return state.activeModal === modalName;
 }
