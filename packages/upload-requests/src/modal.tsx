@@ -20,6 +20,16 @@ interface ModalProps {
 	onRequestClose: () => void;
 	uploadRequest: Post | null;
 }
+
+/**
+ * Renders an upload request modal.
+ *
+ * Displays a QR code and an input field to copy the upload request URL.
+ *
+ * @param $0
+ * @param $0.onRequestClose Callback for when the modal is closed.
+ * @param $0.uploadRequest  The current upload request.
+ */
 export function Modal( { onRequestClose, uploadRequest }: ModalProps ) {
 	const { createNotice } = useDispatch( noticesStore );
 	const copyRef = useCopyToClipboard( uploadRequest?.link || '', () => {
