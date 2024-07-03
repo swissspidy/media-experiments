@@ -11,7 +11,7 @@ import { blobToFile, getExtensionFromMimeType } from '@mexp/media-utils';
 import {
 	COUNTDOWN_TIME_IN_SECONDS,
 	MAX_RECORDING_DURATION_IN_SECONDS,
-} from '../constants';
+} from './constants';
 import { Type, type VideoEffect } from './types';
 
 type AllSelectors = typeof import('./selectors');

@@ -1,6 +1,6 @@
 import type { Results } from '@mediapipe/selfie_segmentation';
 
-import { BACKGROUND_BLUR_PX } from '../constants';
+import { BACKGROUND_BLUR_PX } from './constants';
 import { type State, Type } from './types';
 
 type AllSelectors = typeof import('./selectors');
