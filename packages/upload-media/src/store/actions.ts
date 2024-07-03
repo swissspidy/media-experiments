@@ -1183,9 +1183,12 @@ export function prepareItem( id: QueueItemId ) {
 
 				operations.push(
 					OperationType.Upload,
-					OperationType.ThumbnailGeneration,
-					OperationType.UploadOriginal
+					OperationType.ThumbnailGeneration
 				);
+
+				if ( imageSizeThreshold ) {
+					operations.push( OperationType.UploadOriginal );
+				}
 
 				break;
 
