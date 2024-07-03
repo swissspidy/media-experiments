@@ -1,4 +1,4 @@
-# `@mexp/vips`
+# `@mexp/upload-media`
 
 Core media upload logic implemented with a custom `@wordpress/data` store.
 
