@@ -30,6 +30,7 @@
 		}
 	},
 	"dependencies": {
+		"@mediapipe/selfie_segmentation": "^0.1.1675465747",
 		"@mexp/media-utils": "../media-utils",
 		"@wordpress/blob": "^4.0.0",
 		"@wordpress/data": "^10.0.0",

@@ -26,11 +26,8 @@
 			"packages/*"
 		]
 	},
-	"dependencies": {
-		"@mexp/edit-post": "*"
-	},
+	"dependencies": {},
 	"devDependencies": {
-		"@mexp/eslint-import-resolver": "*",
 		"@playwright/test": "^1.45.1",
 		"@shopify/web-worker": "^6.2.0",
 		"@testing-library/jest-dom": "^6.4.6",

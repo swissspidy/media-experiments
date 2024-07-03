@@ -33,7 +33,6 @@
 		}
 	},
 	"dependencies": {
-		"@mediapipe/selfie_segmentation": "^0.1.1675465747",
 		"@mexp/interface": "../interface",
 		"@mexp/media-recording": "../media-recording",
 		"@mexp/media-utils": "../media-utils",
