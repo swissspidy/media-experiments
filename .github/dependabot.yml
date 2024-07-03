@@ -34,6 +34,10 @@ updates:
           - dependency-name: 'eslint'
             versions:
                 - '>= 9'
+          # v28+ requires WordPress 6.6+
+          - dependency-name: '@wordpress/scripts'
+            versions:
+                - '>= 28'
 
     - package-ecosystem: composer
       directory: '/'
