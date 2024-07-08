@@ -13,7 +13,7 @@ import { RestorePoster } from './restorePoster';
 import { DebugInfo } from './debugInfo';
 import type { VideoBlock } from './types';
 import { isBlobURL } from '@wordpress/blob';
-import { UploadRequestControls } from './uploadRequestControls';
+import { UploadRequestControls } from './uploadRequests/controls';
 
 type VideoControlsProps = VideoBlock &
 	Pick< BlockEditProps< VideoBlock[ 'attributes' ] >, 'setAttributes' >;

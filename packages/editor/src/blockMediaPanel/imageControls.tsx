@@ -10,7 +10,7 @@ import { OptimizeMedia } from './optimizeMedia';
 import { DebugInfo } from './debugInfo';
 import type { ImageBlock } from './types';
 import { AnimatedGifConverter } from './animatedGifConverter';
-import { UploadRequestControls } from './uploadRequestControls';
+import { UploadRequestControls } from './uploadRequests/controls';
 import { isBlobURL } from '@wordpress/blob';
 
 type ImageControlsProps = ImageBlock &

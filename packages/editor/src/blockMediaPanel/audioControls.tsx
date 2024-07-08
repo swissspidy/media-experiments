@@ -9,7 +9,7 @@ import { ImportMedia } from './importMedia';
 import type { AudioBlock } from './types';
 import { DebugInfo } from './debugInfo';
 import { isBlobURL } from '@wordpress/blob';
-import { UploadRequestControls } from './uploadRequestControls';
+import { UploadRequestControls } from './uploadRequests/controls';
 
 type AudioControlsProps = AudioBlock &
 	Pick< BlockEditProps< AudioBlock[ 'attributes' ] >, 'setAttributes' >;

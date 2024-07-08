@@ -14,7 +14,7 @@ import {
 import { BulkOptimization } from '../components/bulkOptimization';
 import type { BulkOptimizationAttachmentData } from '../types';
 import type { GalleryBlock, ImageBlock } from './types';
-import { UploadRequestControls } from './uploadRequestControls';
+import { UploadRequestControls } from './uploadRequests/controls';
 
 type GalleryControlsProps = GalleryBlock &
 	Pick< BlockEditProps< GalleryBlock[ 'attributes' ] >, 'setAttributes' >;

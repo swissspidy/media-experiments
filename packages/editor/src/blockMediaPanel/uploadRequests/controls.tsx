@@ -6,13 +6,7 @@ import {
 import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { type Post, store as coreStore } from '@wordpress/core-data';
-import {
-	Suspense,
-	lazy,
-	useCallback,
-	useEffect,
-	useState,
-} from '@wordpress/element';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as editorStore } from '@wordpress/editor';
 import { store as noticesStore } from '@wordpress/notices';
@@ -21,6 +15,8 @@ import apiFetch from '@wordpress/api-fetch';
 import type { Attachment, RestAttachment } from '@mexp/upload-media';
 import { transformAttachment } from '@mexp/upload-media';
 import { store as interfaceStore } from '@mexp/interface';
+
+import { Modal } from './modal';
 
 interface UploadRequestControlsProps {
 	onInsert: ( media: Partial< Attachment >[] ) => void;
@@ -207,12 +203,6 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 		return null;
 	}
 
-	const Modal = lazy( () =>
-		import(
-			/* webpackChunkName: 'upload-requests-modal' */ '@mexp/upload-requests'
-		).then( ( module ) => ( { default: module.Modal } ) )
-	);
-
 	return (
 		<BaseControl { ...baseControlProps }>
 			<BaseControl.VisualLabel>
@@ -229,12 +219,10 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 			</Button>
 
 			{ isModalActive && (
-				<Suspense>
-					<Modal
-						onRequestClose={ onClose }
-						uploadRequest={ uploadRequest }
-					/>
-				</Suspense>
+				<Modal
+					onRequestClose={ onClose }
+					uploadRequest={ uploadRequest }
+				/>
 			) }
 		</BaseControl>
 	);

@@ -31,9 +31,6 @@
 			"path": "packages/upload-media"
 		},
 		{
-			"path": "packages/upload-requests"
-		},
-		{
 			"path": "packages/view-upload-request"
 		},
 		{
