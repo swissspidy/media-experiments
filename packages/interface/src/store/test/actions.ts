@@ -1,6 +1,5 @@
 import { createRegistry } from '@wordpress/data';
 import { type WPDataRegistry } from '@wordpress/data/build-types/registry';
-import { store as blockEditorStore } from '@wordpress/block-editor';
 
 import { store as interfaceStore } from '../';
 import { Type } from '../types';
@@ -9,7 +8,7 @@ function createRegistryWithStores() {
 	// Create a registry and register used stores.
 	const registry = createRegistry();
 	// @ts-ignore
-	[ interfaceStore, blockEditorStore ].forEach( registry.register );
+	[ interfaceStore ].forEach( registry.register );
 	return registry;
 }
 

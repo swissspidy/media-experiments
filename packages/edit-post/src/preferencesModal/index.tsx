@@ -12,9 +12,9 @@ import { store as preferencesStore } from '@wordpress/preferences';
 
 import type { ImageFormat } from '@mexp/upload-media';
 import { getExtensionFromMimeType } from '@mexp/media-utils';
+import { store as interfaceStore } from '@mexp/interface';
 
 import type { MediaPreferences } from '../types';
-import { store as interfaceStore } from '../interface/store';
 import { Modal } from './modal';
 import { PREFERENCES_NAME } from './constants';
 

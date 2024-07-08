@@ -6,8 +6,8 @@ import type { State } from './types';
  * @param {Object} state     Global application state.
  * @param {string} modalName A string that uniquely identifies the modal.
  *
- * @return {boolean} Whether the modal is active.
+ * @return Whether the modal is active.
  */
-export function isModalActive( state: State, modalName: string ) {
+export function isModalActive( state: State, modalName: string ): boolean {
 	return state.activeModal === modalName;
 }

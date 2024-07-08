@@ -10,7 +10,13 @@
 			"path": "packages/heif"
 		},
 		{
+			"path": "packages/interface"
+		},
+		{
 			"path": "packages/log"
+		},
+		{
+			"path": "packages/media-recording"
 		},
 		{
 			"path": "packages/media-utils"
@@ -24,11 +30,9 @@
 		{
 			"path": "packages/upload-media"
 		},
-
 		{
 			"path": "packages/upload-requests"
 		},
-
 		{
 			"path": "packages/view-upload-request"
 		},

@@ -1,0 +1,35 @@
+{
+	"name": "@mexp/interface",
+	"version": "0.0.1",
+	"description": "Interface package",
+	"private": true,
+	"author": "",
+	"license": "GPL-2.0-or-later",
+	"keywords": [
+		"wordpress",
+		"media"
+	],
+	"homepage": "https://github.com/swissspidy/media-experiments/tree/HEAD/packages/interface/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/swissspidy/media-experiments.git",
+		"directory": "packages/interface"
+	},
+	"bugs": {
+		"url": "https://github.com/swissspidy/media-experiments/issues"
+	},
+	"engines": {
+		"node": ">=20"
+	},
+	"main": "dist/index.js",
+	"types": "dist-types/index.d.ts",
+	"source": "src/index.ts",
+	"exports": {
+		".": {
+			"default": "./src/index.ts"
+		}
+	},
+	"dependencies": {
+		"@wordpress/data": "^10.0.0"
+	}
+}

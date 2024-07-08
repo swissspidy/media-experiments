@@ -244,6 +244,10 @@ Returns an action object that pauses all processing in the queue.
 
 Useful for testing purposes.
 
+_Returns_
+
+-   `PauseQueueAction`: Action object.
+
 #### prepareItem
 
 Prepares an item for initial processing.
@@ -315,6 +319,10 @@ _Parameters_
 
 -   _imageSizes_ `Record< string, ImageSizeCrop >`: Map of image size names and their cropping information.
 
+_Returns_
+
+-   `SetImageSizesAction`: Action object.
+
 #### setMediaSourceTerms
 
 Returns an action object that sets the media source term slugs and IDs.
@@ -322,6 +330,10 @@ Returns an action object that sets the media source term slugs and IDs.
 _Parameters_
 
 -   _terms_ `Record< string, number >`: Map of term slugs to IDs.
+
+_Returns_
+
+-   `SetMediaSourceTermsAction`: Action object.
 
 #### sideloadItem
 

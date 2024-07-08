@@ -11,7 +11,6 @@ import type {
 	LeaveRecordingModeAction,
 	PauseRecordingAction,
 	ResetStateAction,
-	ResetVideoInputAction,
 	ResumeRecordingAction,
 	SetCountdownAction,
 	SetDurationAction,
@@ -54,7 +53,6 @@ type Action =
 	| SetMediaDevicesAction
 	| ChangeVideoInputAction
 	| ChangeAudioInputAction
-	| ResetVideoInputAction
 	| ChangeVideoEffectAction
 	| ToggleBlurVideoEffectAction
 	| StartRecordingAction
@@ -230,12 +228,6 @@ function reducer(
 			return {
 				...state,
 				hasAudio: ! state.hasAudio,
-			};
-
-		case Type.ResetVideoInput:
-			return {
-				...state,
-				videoInput: undefined,
 			};
 
 		case Type.SetFile:

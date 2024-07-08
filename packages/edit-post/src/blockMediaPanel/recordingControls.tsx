@@ -7,11 +7,11 @@ import {
 } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-
-import { store as recordingStore } from '../mediaRecording/store';
 import { Fragment } from '@wordpress/element';
 import { BlockControls } from '@wordpress/block-editor';
 import { capturePhoto, check } from '@wordpress/icons';
+
+import { store as recordingStore } from '@mexp/media-recording';
 
 import { ReactComponent as BlurOn } from '../icons/blurOn.svg';
 import { ReactComponent as BlurOff } from '../icons/blurOff.svg';

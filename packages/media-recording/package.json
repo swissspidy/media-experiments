@@ -1,0 +1,40 @@
+{
+	"name": "@mexp/media-recording",
+	"version": "0.0.1",
+	"description": "Media recording capabilities",
+	"private": true,
+	"author": "",
+	"license": "GPL-2.0-or-later",
+	"keywords": [
+		"wordpress",
+		"media"
+	],
+	"homepage": "https://github.com/swissspidy/media-experiments/tree/HEAD/packages/media-recording/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/swissspidy/media-experiments.git",
+		"directory": "packages/media-recording"
+	},
+	"bugs": {
+		"url": "https://github.com/swissspidy/media-experiments/issues"
+	},
+	"engines": {
+		"node": ">=20"
+	},
+	"main": "dist/index.js",
+	"types": "dist-types/index.d.ts",
+	"source": "src/index.ts",
+	"exports": {
+		".": {
+			"default": "./src/index.ts"
+		}
+	},
+	"dependencies": {
+		"@mediapipe/selfie_segmentation": "^0.1.1675465747",
+		"@mexp/media-utils": "../media-utils",
+		"@wordpress/blob": "^4.0.0",
+		"@wordpress/data": "^10.0.0",
+		"@wordpress/date": "^5.0.0",
+		"image-capture": "^0.4.0"
+	}
+}
