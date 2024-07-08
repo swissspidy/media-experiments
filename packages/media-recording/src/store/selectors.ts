@@ -17,7 +17,7 @@ export function isInRecordingMode( state: State ): boolean {
 /**
  * Whether the given block is currently in recording mode.
  *
- * @param state Recording state.
+ * @param state    Recording state.
  * @param clientId Block client ID.
  */
 export function isBlockInRecordingMode(
