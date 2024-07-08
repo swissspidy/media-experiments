@@ -397,6 +397,12 @@ export function isEditedPostPublishable(): boolean;
 export function isEditedPostSaveable(): boolean;
 
 /**
+ * Returns true if there are unsaved edits for entities other than
+ * the editor's post, and false otherwise.
+ */
+export function hasNonPostEntityChanges(): boolean;
+
+/**
  * Returns whether the permalink is editable or not.
  */
 export function isPermalinkEditable(): boolean;

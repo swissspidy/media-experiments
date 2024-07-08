@@ -1,4 +1,9 @@
-import { createPortal, useLayoutEffect, useRef } from '@wordpress/element';
+import {
+	createPortal,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { registerPlugin } from '@wordpress/plugins';
 import { store as coreStore } from '@wordpress/core-data';
@@ -10,9 +15,13 @@ function WrappedUploadStatusIndicator() {
 	const root = useRef< HTMLDivElement | null >( null );
 	const referenceNode = useRef< HTMLDivElement | null >( null );
 
-	const { isEditedPostSaveable, isViewable } = useSelect( ( select ) => {
+	const [ , setHasNode ] = useState( false );
+
+	const { isSaveable, isViewable } = useSelect( ( select ) => {
 		return {
-			isEditedPostSaveable: select( editorStore ).isEditedPostSaveable(),
+			isSaveable:
+				select( editorStore ).isEditedPostSaveable() ||
+				select( editorStore ).hasNonPostEntityChanges(),
 			isViewable: Boolean(
 				select( coreStore ).getPostType(
 					select( editorStore ).getCurrentPostType()
@@ -24,7 +33,7 @@ function WrappedUploadStatusIndicator() {
 	useLayoutEffect( () => {
 		// The upload status indicator should always be inserted right before any other buttons.
 		referenceNode.current = document.querySelector(
-			'.editor-header__settings, .edit-post-header__settings'
+			'.editor-header__settings, .edit-post-header__settings, .edit-widgets-header__actions'
 		);
 
 		if ( referenceNode.current ) {
@@ -34,20 +43,23 @@ function WrappedUploadStatusIndicator() {
 			}
 
 			referenceNode.current.prepend( root.current );
+
+			setHasNode( true );
 		}
 
 		return () => {
 			if ( referenceNode.current && root.current ) {
 				referenceNode.current.removeChild( root.current );
 				referenceNode.current = null;
+				setHasNode( false );
 			}
 		};
 
-		// The button should be "refreshed" whenever settings in the post editor header are re-rendered.
+		// The button should be "refreshed" whenever settings in the editor header are re-rendered.
 		// The following properties may indicate a change in the toolbar layout:
 		// - Viewable property gets defined once the toolbar has been rendered.
 		// - When saveable property changes, the toolbar is reshuffled heavily.
-	}, [ isEditedPostSaveable, isViewable ] );
+	}, [ isSaveable, isViewable ] );
 
 	return root.current
 		? createPortal( <UploadStatusIndicator />, root.current )

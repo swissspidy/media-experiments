@@ -20,6 +20,8 @@ class Cross_Origin_Isolation {
 	public function register(): void {
 		add_action( 'load-post.php', [ $this, 'send_headers' ] );
 		add_action( 'load-post-new.php', [ $this, 'send_headers' ] );
+		add_action( 'load-site-editor.php', [ $this, 'send_headers' ] );
+		add_action( 'load-widgets.php', [ $this, 'send_headers' ] );
 		add_filter( 'style_loader_tag', [ $this, 'filter_style_loader_tag' ], 10, 3 );
 		add_filter( 'script_loader_tag', [ $this, 'filter_script_loader_tag' ], 10, 3 );
 		add_filter( 'get_avatar', [ $this, 'filter_get_avatar' ], 10, 6 );

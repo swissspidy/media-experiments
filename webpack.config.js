@@ -43,7 +43,7 @@ module.exports = {
 	entry: {
 		'media-experiments': resolve(
 			__dirname,
-			'packages/edit-post/src/index.ts'
+			'packages/editor/src/index.ts'
 		),
 		'view-upload-request': resolve(
 			__dirname,

@@ -1,7 +1,7 @@
 {
 	"references": [
 		{
-			"path": "packages/edit-post"
+			"path": "packages/editor"
 		},
 		{
 			"path": "packages/ffmpeg"

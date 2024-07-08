@@ -59,7 +59,7 @@ function filter_update_plugins( $update, $plugin_data, string $plugin_file ) {
  * @return void
  */
 function set_up_cross_origin_isolation_editor( WP_Screen $screen ): void {
-	if ( ! $screen->is_block_editor() ) {
+	if ( ! $screen->is_block_editor() && 'site-editor' !== $screen->id && ! ( 'widgets' === $screen->id && wp_use_widgets_block_editor() ) ) {
 		return;
 	}
 

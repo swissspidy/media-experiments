@@ -1,5 +1,5 @@
 {
-	"name": "@mexp/edit-post",
+	"name": "@mexp/editor",
 	"version": "0.0.1",
 	"description": "Main WordPress post editor integration",
 	"private": true,
@@ -12,11 +12,11 @@
 		"editor",
 		"post"
 	],
-	"homepage": "https://github.com/swissspidy/media-experiments/tree/HEAD/packages/edit-post/README.md",
+	"homepage": "https://github.com/swissspidy/media-experiments/tree/HEAD/packages/editor/README.md",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/swissspidy/media-experiments.git",
-		"directory": "packages/edit-post"
+		"directory": "packages/editor"
 	},
 	"bugs": {
 		"url": "https://github.com/swissspidy/media-experiments/issues"
@@ -46,7 +46,7 @@
 		"@wordpress/core-data": "^7.0.0",
 		"@wordpress/data": "^10.0.0",
 		"@wordpress/dom-ready": "^4.0.0",
-		"@wordpress/edit-post": "^8.0.0",
+		"@wordpress/editor": "^8.0.0",
 		"@wordpress/editor": "^14.0.0",
 		"@wordpress/element": "^6.0.0",
 		"@wordpress/hooks": "^4.0.0",
