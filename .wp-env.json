@@ -9,7 +9,7 @@
 			"mysqlPort": 3306
 		},
 		"tests": {
-			"mysqlPort": 3306
+			"mysqlPort": 3307
 		}
 	}
 }
