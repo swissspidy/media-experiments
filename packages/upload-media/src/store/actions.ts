@@ -939,6 +939,8 @@ export function resumeItem( postOrAttachmentId: number ) {
  * Returns an action object that pauses all processing in the queue.
  *
  * Useful for testing purposes.
+ *
+ * @return Action object.
  */
 export function pauseQueue(): PauseQueueAction {
 	return {
@@ -2508,6 +2510,8 @@ export function generateSubtitles( id: QueueItemId ) {
  * Returns an action object that sets the media source term slugs and IDs.
  *
  * @param terms Map of term slugs to IDs.
+ *
+ * @return Action object.
  */
 export function setMediaSourceTerms(
 	terms: Record< string, number >
@@ -2522,6 +2526,8 @@ export function setMediaSourceTerms(
  * Returns an action object that sets all image sub-sizes and their cropping information.
  *
  * @param imageSizes Map of image size names and their cropping information.
+ *
+ * @return Action object.
  */
 export function setImageSizes(
 	imageSizes: Record< string, ImageSizeCrop >

@@ -48,7 +48,6 @@ export enum Type {
 	LeaveRecordingMode = 'LEAVE_RECORDING_MODE',
 	ChangeVideoInput = 'CHANGE_VIDEO_INPUT',
 	ChangeAudioInput = 'CHANGE_AUDIO_INPUT',
-	ResetVideoInput = 'RESET_VIDEO_INPUT',
 	ChangeVideoEffect = 'CHANGE_VIDEO_EFFECT',
 	ToggleBlurVideoEffect = 'TOGGLE_BLUR_VIDEO_EFFECT',
 	StartRecording = 'START_RECORDING',
@@ -88,7 +87,6 @@ export type ChangeVideoInputAction = Action<
 	Type.ChangeVideoInput,
 	{ deviceId: string }
 >;
-export type ResetVideoInputAction = Action< Type.ResetVideoInput >;
 export type ChangeAudioInputAction = Action<
 	Type.ChangeAudioInput,
 	{ deviceId: string }

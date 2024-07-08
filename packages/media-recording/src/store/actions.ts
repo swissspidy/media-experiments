@@ -12,7 +12,15 @@ import {
 	COUNTDOWN_TIME_IN_SECONDS,
 	MAX_RECORDING_DURATION_IN_SECONDS,
 } from './constants';
-import { Type, type VideoEffect } from './types';
+import {
+	type LeaveRecordingModeAction,
+	type SetGifModeAction,
+	type SetHasAudioAction,
+	type ToggleGifModeAction,
+	type ToggleHasAudioAction,
+	Type,
+	type VideoEffect,
+} from './types';
 
 type AllSelectors = typeof import('./selectors');
 type CurriedState< F > = F extends ( state: any, ...args: infer P ) => infer R
@@ -32,6 +40,11 @@ type ActionCreators = {
 	( args: Record< string, unknown > ): void;
 };
 
+/**
+ * Sets the active video input and triggers a media stream update.
+ *
+ * @param deviceId Device ID.
+ */
 export function setVideoInput( deviceId: string ) {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
 		dispatch( {
@@ -43,6 +56,11 @@ export function setVideoInput( deviceId: string ) {
 	};
 }
 
+/**
+ * Sets the active audio input and triggers a media stream update.
+ *
+ * @param deviceId Device ID.
+ */
 export function setAudioInput( deviceId: string ) {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
 		dispatch( {
@@ -54,6 +72,11 @@ export function setAudioInput( deviceId: string ) {
 	};
 }
 
+/**
+ * Sets the active video effect and triggers a media stream update.
+ *
+ * @param videoEffect Video effect.
+ */
 export function setVideoEffect( videoEffect: VideoEffect ) {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
 		dispatch( {
@@ -65,6 +88,9 @@ export function setVideoEffect( videoEffect: VideoEffect ) {
 	};
 }
 
+/**
+ * Toggles the blur video effect and triggers a media stream update.
+ */
 export function toggleBlurEffect() {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
 		dispatch( {
@@ -75,38 +101,56 @@ export function toggleBlurEffect() {
 	};
 }
 
-export function setGifMode( value: boolean ) {
+/**
+ * Returns an action object signalling the new value for the GIF mode.
+ *
+ * @param value New value.
+ */
+export function setGifMode( value: boolean ): SetGifModeAction {
 	return {
 		type: Type.SetGifMode,
 		value,
 	};
 }
-export function toggleGifMode() {
+
+/**
+ * Returns an action object signalling that GIF mode should be toggled.
+ */
+export function toggleGifMode(): ToggleGifModeAction {
 	return {
 		type: Type.ToggleGifMode,
 	};
 }
 
-export function setHasAudio( value: boolean ) {
+/**
+ * Returns an action object signalling the new value for whether audio should be recorded.
+ *
+ * @param value New value.
+ */
+export function setHasAudio( value: boolean ): SetHasAudioAction {
 	return {
 		type: Type.SetHasAudio,
 		value,
 	};
 }
 
-export function toggleHasAudio() {
+/**
+ * Returns an action object signalling that audio mode should be toggled.
+ */
+export function toggleHasAudio(): ToggleHasAudioAction {
 	return {
 		type: Type.ToggleHasAudio,
 	};
 }
 
-export function resetVideoInput() {
-	return {
-		type: Type.ResetVideoInput,
-	};
-}
-
-// TODO(#230): Allow passing an array for recordingType.
+/**
+ * Enters recording mode for a given block and recording type.
+ *
+ * @todo Allow passing an array for recordingType. (#230)
+ *
+ * @param clientId      Block client ID.
+ * @param recordingType Recording type.
+ */
 export function enterRecordingMode(
 	clientId: string,
 	recordingType = 'video'
@@ -122,12 +166,18 @@ export function enterRecordingMode(
 	};
 }
 
-export function leaveRecordingMode() {
+/**
+ * Returns an action object signalling that recording mode should be left.
+ */
+export function leaveRecordingMode(): LeaveRecordingModeAction {
 	return {
 		type: Type.LeaveRecordingMode,
 	};
 }
 
+/**
+ * Updates the list of available media devices.
+ */
 export function updateMediaDevices() {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
 		try {
@@ -146,6 +196,9 @@ export function updateMediaDevices() {
 	};
 }
 
+/**
+ * Counts the recording duration in seconds.
+ */
 export function countDuration() {
 	return async ( {
 		select,
@@ -179,6 +232,9 @@ export function countDuration() {
 	};
 }
 
+/**
+ * Partially resets state to allow retrying recording.
+ */
 export function retryRecording() {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
 		// retry means getting a new stream (if missing)
@@ -191,6 +247,9 @@ export function retryRecording() {
 	};
 }
 
+/**
+ * Starts recording after an initial countdown.
+ */
 export function startRecording() {
 	return async ( {
 		select,
@@ -323,6 +382,9 @@ export function startRecording() {
 	};
 }
 
+/**
+ * Stops recording.
+ */
 export function stopRecording() {
 	return async ( {
 		select,
@@ -343,6 +405,9 @@ export function stopRecording() {
 	};
 }
 
+/**
+ * Pauses recording.
+ */
 export function pauseRecording() {
 	return async ( {
 		select,
@@ -363,7 +428,11 @@ export function pauseRecording() {
 	};
 }
 
-// TODO: Deduplicate setInterval logic with startRecording.
+/**
+ * Resumes recording after an initial countdown.
+ *
+ * @todo Deduplicate setInterval logic with startRecording.
+ */
 export function resumeRecording() {
 	return async ( {
 		select,
@@ -402,7 +471,11 @@ export function resumeRecording() {
 	};
 }
 
-// TODO: Deduplicate setInterval logic with startRecording.
+/**
+ * Captures a single image after an initial countdown.
+ *
+ * @todo Deduplicate setInterval logic with startRecording.
+ */
 export function captureImage() {
 	return async ( {
 		select,

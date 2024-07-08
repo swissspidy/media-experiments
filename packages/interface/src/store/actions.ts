@@ -1,13 +1,15 @@
+import { type OpenModalAction, type CloseModalAction, Type } from './types';
+
 /**
  * Returns an action object used in signalling that the user opened a modal.
  *
  * @param {string} name A string that uniquely identifies the modal.
  *
- * @return {Object} Action object.
+ * @return Action object.
  */
-export function openModal( name: string ) {
+export function openModal( name: string ): OpenModalAction {
 	return {
-		type: 'OPEN_MODAL',
+		type: Type.OpenModal,
 		name,
 	};
 }
@@ -15,10 +17,10 @@ export function openModal( name: string ) {
 /**
  * Returns an action object signalling that the user closed a modal.
  *
- * @return {Object} Action object.
+ * @return Action object.
  */
-export function closeModal() {
+export function closeModal(): CloseModalAction {
 	return {
-		type: 'CLOSE_MODAL',
+		type: Type.CloseModal,
 	};
 }
