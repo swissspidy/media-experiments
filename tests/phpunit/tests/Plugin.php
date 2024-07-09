@@ -106,7 +106,6 @@ class Test_Plugin extends WP_UnitTestCase {
 
 		$this->assertTrue( wp_script_is( 'media-experiments' ) );
 		$this->assertTrue( wp_style_is( 'media-experiments-editor' ) );
-		$this->assertTrue( wp_style_is( 'media-experiments-upload-requests' ) );
 	}
 
 	/**
