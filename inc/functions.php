@@ -335,15 +335,6 @@ function enqueue_block_editor_assets(): void {
 	);
 
 	wp_style_add_data( 'media-experiments-editor', 'rtl', 'replace' );
-
-	wp_enqueue_style(
-		'media-experiments-upload-requests',
-		plugins_url( 'build/upload-requests-modal.css', __DIR__ ),
-		array( 'wp-components' ),
-		$asset['version']
-	);
-
-	wp_style_add_data( 'media-experiments-upload-requests', 'rtl', 'replace' );
 }
 
 /**
