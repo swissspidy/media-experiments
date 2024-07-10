@@ -44,7 +44,7 @@ Afterwards, updates will be available automatically in your WordPress admin.
 
 ## Contributing
 
-Run `npm install` and `npm run build` to build all the JavaScript and CSS.
+See [contributing guide](./CONTRIBUTING.md) for details.
 
 ## Features
 

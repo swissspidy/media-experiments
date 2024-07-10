@@ -5,6 +5,7 @@
 artifacts
 bin
 blueprints
+docs
 node_modules
 packages
 patches
