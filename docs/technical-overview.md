@@ -66,3 +66,7 @@ flowchart TD
     L -- No --> N[Remove item from queue]
     M --> N
 ```
+
+## Web Workers
+
+All the heavy image processing is offloaded to web workers using the [`@shopify/web-worker`](https://www.npmjs.com/package/@shopify/web-worker) package, which makes it easy to load any code in a web worker in a type-safe way.
