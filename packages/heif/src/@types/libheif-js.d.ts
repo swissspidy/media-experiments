@@ -1,5 +1,5 @@
-declare module 'libheif-js' {
-	interface DecodeResult {
+declare module 'libheif-js/libheif-wasm/libheif-bundle.js' {
+	type DecodeResult = {
 		img: {
 			is_primary: boolean;
 			thumbnails: number;
@@ -13,12 +13,20 @@ declare module 'libheif-js' {
 			base: ImageData,
 			callback: ( result: ImageData | null ) => void
 		) => void;
-	}
+	};
 
 	type DecodeResultType = DecodeResult[];
 
-	class HeifDecoder implements HeifDecoder {
+	class HeifDecoder {
+		decoder: unknown;
+
 		constructor();
 		decode( buffer: ArrayBuffer | Uint8Array ): DecodeResultType;
 	}
+
+	type Class< T = any > = new ( ...args: any[] ) => T;
+
+	function libheif(): { HeifDecoder: Class< HeifDecoder > };
+
+	export = libheif;
 }

@@ -1,5 +1,20 @@
-import type { DecodeResult } from 'libheif-js';
-const libheif = require( 'libheif-js/wasm-bundle' );
+import libheif from 'libheif-js/libheif-wasm/libheif-bundle.js';
+
+type DecodeResult = {
+	img: {
+		is_primary: boolean;
+		thumbnails: number;
+		width: number;
+		height: number;
+	} | null;
+	get_width: () => number;
+	get_height: () => number;
+	is_primary: () => boolean;
+	display: (
+		base: ImageData,
+		callback: ( result: ImageData | null ) => void
+	) => void;
+};
 
 /**
  * Determines whether a given image is an HEIF image.
@@ -84,7 +99,7 @@ export async function transcodeHeifImage( buffer: ArrayBuffer ): Promise< {
 		throw new TypeError( 'Not a valid HEIF image' );
 	}
 
-	const decoder = new libheif.HeifDecoder();
+	const decoder = new ( libheif().HeifDecoder )();
 
 	const imagesArr = decoder.decode( new Uint8Array( buffer ) );
 
