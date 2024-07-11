@@ -1,5 +1,28 @@
 # Technical Overview
 
+## Why client-side media processing
+
+Current image processing in WordPress relies on server-side resources and older image libraries, leading to potential performance issues and limited support for modern image formats such as AVIF.
+This results in a subpar user experience, particularly with resource-intensive tasks like resizing and compressing images.
+Additionally, the lack of modern compression tools like MozJPEG further hinders optimization efforts.
+
+Client-side media processing offers a solution by leveraging the browser's capabilities to handle tasks like image resizing and compression.
+This approach not only alleviates the strain on server resources but also enables the use of more advanced image formats and compression techniques, ultimately improving website performance and user experience.
+By tapping into technologies like WebAssembly, WordPress can provide a more efficient and seamless media handling process for both new and existing content.
+
+### Why WebAssembly
+
+This plugin implements client-side media processing through technologies such as [`wasm-vips`](https://github.com/kleisauke/wasm-vips).
+
+Using WebAssembly for client-side media processing provides significant benefits over using the browser's native capabilities of doing image manipulation through `<canvas>`.
+Not only is WASM an order of magnitude faster than `<canvas>`, it is also more feature rich and ensures a consistent user experience across all browsers.
+
+`<canvas>` only supports PNG, JPEG, and WebP (except in Safari) and a image quality setting, nothing else.
+Not only does this API take longer to create images, the resulting files will be much larger too.
+
+For **testing purposes**, this plugin does support both a WebAssembly and a `<canvas>` implementation, particularly because the former [is not yet supported in Playground](https://github.com/WordPress/wordpress-playground/issues/952).
+This way you can see for yourself how superior the WASM approach is.
+
 ## Packages
 
 The two main packages:
@@ -8,8 +31,6 @@ The two main packages:
 * `upload-media` - Core upload logic with a queue-like system, implemented using a custom `@wordpress/data` store.
 
 ## Cross-origin isolation / `SharedArrayBuffer`
-
-This plugin implements client-side media processing through technologies such as [`wasm-vips`](https://github.com/kleisauke/wasm-vips).
 
 WASM-based image optimization requires `SharedArrayBuffer` support, which in turn requires [cross-origin isolation](https://web.dev/articles/cross-origin-isolation-guide).
 Implementing that in a robust way without breaking other parts of the editor is challenging. There are currently [some known issues](https://github.com/swissspidy/media-experiments/issues/294) in Firefox and Safari due to these browsers not supporting `credentialless` iframe embeds.
