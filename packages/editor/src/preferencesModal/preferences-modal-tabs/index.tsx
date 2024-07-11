@@ -77,7 +77,7 @@ export function PreferencesModalTabs( {
 		return mappedTabs;
 	}, [ sections ] );
 
-	let modalContent;
+	let modalContent: ReactNode;
 	// We render different components based on the viewport size.
 	if ( isLargeViewport ) {
 		modalContent = (

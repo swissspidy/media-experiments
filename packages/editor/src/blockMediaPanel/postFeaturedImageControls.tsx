@@ -21,7 +21,7 @@ export function PostFeaturedImageControls() {
 		postType,
 		'featured_media',
 		postId
-	);
+	) as [ number | undefined, ( id: number ) => void, unknown ];
 
 	const attachment = useAttachment( featuredImage );
 

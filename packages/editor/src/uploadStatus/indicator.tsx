@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import { file, image, upload, video } from '@wordpress/icons';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __, _n, sprintf } from '@wordpress/i18n';
@@ -13,7 +15,7 @@ import { UnfinishedUploadsWarning } from './unfinishedUploadsWarning';
 const EMPTY_ARRAY: never[] = [];
 
 function getIconForMimeType( mimeType: string ) {
-	let icon;
+	let icon: ReactNode;
 	const mediaType = getMediaTypeFromMimeType( mimeType );
 	switch ( mediaType ) {
 		case 'image':
