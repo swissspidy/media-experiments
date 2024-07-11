@@ -40,7 +40,7 @@
 		"@wordpress/dependency-extraction-webpack-plugin": "^6.0.0",
 		"@wordpress/docgen": "^2.2.0",
 		"@wordpress/env": "^10.0.0",
-		"@wordpress/eslint-plugin": "^19.0.0",
+		"@wordpress/eslint-plugin": "^20.0.0",
 		"@wordpress/scripts": "^27.9.0",
 		"@wp-now/wp-now": "^0.1.72",
 		"eslint": "^8.57.0",
@@ -58,7 +58,8 @@
 		"webpack-virtual-modules": "^0.6.2"
 	},
 	"overrides": {
-		"@wordpress/components": "^28.0.0",
+		"@wordpress/components": "^28.3.0",
+		"@wordpress/data": "^10.3.0",
 		"playwright-core": "^1.44.0",
 		"@playwright/test": "$@playwright/test"
 	},

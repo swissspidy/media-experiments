@@ -15,6 +15,7 @@ type E2EFixture = {
 	secondPage: Page;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getSourceMapForEntry( entry: V8CoverageEntry, index: number ) {
 	if ( entry.sourceMap ) {
 		return entry;

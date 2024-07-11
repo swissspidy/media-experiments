@@ -51,7 +51,7 @@ export function ApprovalDialog( { id }: ApprovalDialogProps ) {
 	);
 
 	const { rejectApproval, grantApproval } = useDispatch( uploadStore );
-	const [ _, setOpen ] = useState( false );
+	const [ , setOpen ] = useState( false );
 	const closeModal = () => setOpen( false );
 	const onApprove = () => {
 		closeModal();

@@ -7,7 +7,7 @@ import './editor.css';
 
 interface PreferencesModalProps {
 	children: ReactNode;
-	closeModal(): void;
+	closeModal: () => void;
 }
 
 export function PreferencesModal( {
