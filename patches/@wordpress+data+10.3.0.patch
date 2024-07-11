@@ -1,0 +1,13 @@
+diff --git a/node_modules/@wordpress/data/build-types/index.d.ts b/node_modules/@wordpress/data/build-types/index.d.ts
+index db195ec..9ef81fa 100644
+--- a/node_modules/@wordpress/data/build-types/index.d.ts
++++ b/node_modules/@wordpress/data/build-types/index.d.ts
+@@ -153,7 +153,7 @@ export const use: any;
+  *
+  * @param {StoreDescriptor} store Store descriptor.
+  */
+-export const register: any;
++export const register: (store: import("./types").StoreDescriptor<any>) => void;
+ export type StoreDescriptor = import("./types").StoreDescriptor<any>;
+ import * as plugins from './plugins';
+ export { RegistryProvider, RegistryConsumer, useRegistry } from "./components/registry-provider";
