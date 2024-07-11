@@ -1,6 +1,8 @@
-import type { BlockAttributes } from '@wordpress/blocks';
+import type { VideoBlock } from '../blockMediaPanel/types';
 
-export function isGifVariation( blockAttributes: BlockAttributes ): boolean {
+export function isGifVariation(
+	blockAttributes: VideoBlock[ 'attributes' ]
+): boolean {
 	const { controls, loop, autoplay, muted, playsInline } = blockAttributes;
 	return ! controls && loop && autoplay && muted && playsInline;
 }

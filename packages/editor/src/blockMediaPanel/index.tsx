@@ -2,7 +2,6 @@ import { Fragment } from '@wordpress/element';
 import { addFilter } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import type { BlockEditProps } from '@wordpress/blocks';
 import { InspectorControls } from '@wordpress/block-editor';
 import { PanelBody } from '@wordpress/components';
 import { media } from '@wordpress/icons';
@@ -16,16 +15,7 @@ import { GalleryControls } from './galleryControls';
 import { MediaTextControls } from './mediaTextControls';
 import { PostFeaturedImageControls } from './postFeaturedImageControls';
 import { SiteLogoControls } from './siteLogoControls';
-import type {
-	AudioBlock,
-	CoverBlock,
-	GalleryBlock,
-	ImageBlock,
-	MediaTextBlock,
-	PostFeaturedImageBlock,
-	SiteLogoBlock,
-	VideoBlock,
-} from './types';
+import type { MediaPanelProps } from './types';
 
 import './editor.css';
 
@@ -72,50 +62,8 @@ function PerBlockControls( props: PerBlockControlsProps ) {
 	}
 }
 
-type MediaPanelProps =
-	| ( ImageBlock &
-			Pick<
-				BlockEditProps< ImageBlock[ 'attributes' ] >,
-				'setAttributes'
-			> )
-	| ( VideoBlock &
-			Pick<
-				BlockEditProps< VideoBlock[ 'attributes' ] >,
-				'setAttributes'
-			> )
-	| ( AudioBlock &
-			Pick<
-				BlockEditProps< AudioBlock[ 'attributes' ] >,
-				'setAttributes'
-			> )
-	| ( GalleryBlock &
-			Pick<
-				BlockEditProps< GalleryBlock[ 'attributes' ] >,
-				'setAttributes'
-			> )
-	| ( MediaTextBlock &
-			Pick<
-				BlockEditProps< MediaTextBlock[ 'attributes' ] >,
-				'setAttributes'
-			> )
-	| ( CoverBlock &
-			Pick<
-				BlockEditProps< CoverBlock[ 'attributes' ] >,
-				'setAttributes'
-			> )
-	| ( PostFeaturedImageBlock &
-			Pick<
-				BlockEditProps< PostFeaturedImageBlock[ 'attributes' ] >,
-				'setAttributes'
-			> )
-	| ( SiteLogoBlock &
-			Pick<
-				BlockEditProps< SiteLogoBlock[ 'attributes' ] >,
-				'setAttributes'
-			> );
-
 const addMediaPanel = createHigherOrderComponent(
-	( BlockEdit ) => ( props ) => {
+	( BlockEdit ) => ( props: PerBlockControlsProps ) => {
 		if ( ! SUPPORTED_BLOCKS.includes( props.name ) ) {
 			return <BlockEdit { ...props } />;
 		}

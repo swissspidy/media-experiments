@@ -16,6 +16,7 @@ import {
 	type LeaveRecordingModeAction,
 	type SetGifModeAction,
 	type SetHasAudioAction,
+	type State,
 	type ToggleGifModeAction,
 	type ToggleHasAudioAction,
 	Type,
@@ -23,7 +24,7 @@ import {
 } from './types';
 
 type AllSelectors = typeof import('./selectors');
-type CurriedState< F > = F extends ( state: any, ...args: infer P ) => infer R
+type CurriedState< F > = F extends ( state: State, ...args: infer P ) => infer R
 	? ( ...args: P ) => R
 	: F;
 type Selectors = {

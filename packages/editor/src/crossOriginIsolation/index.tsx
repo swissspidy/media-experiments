@@ -1,6 +1,8 @@
 import { addFilter } from '@wordpress/hooks';
 import { createHigherOrderComponent } from '@wordpress/compose';
 
+import type { MediaPanelProps } from '../blockMediaPanel/types';
+
 type CrossOriginValue = 'anonymous' | 'use-credentials' | '' | undefined;
 
 function forceCrossOrigin( _imgCrossOrigin: CrossOriginValue, _url: string ) {
@@ -117,7 +119,7 @@ const supportsCredentialless =
 	'credentialless' in HTMLIFrameElement.prototype;
 
 const disableEmbedPreviews = createHigherOrderComponent(
-	( BlockEdit ) => ( props ) => {
+	( BlockEdit ) => ( props: MediaPanelProps ) => {
 		if ( 'core/embed' !== props.name ) {
 			return <BlockEdit { ...props } />;
 		}

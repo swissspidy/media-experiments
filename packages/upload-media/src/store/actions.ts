@@ -75,6 +75,7 @@ import type {
 	SetImageSizesAction,
 	SetMediaSourceTermsAction,
 	SideloadAdditionalData,
+	State,
 	ThumbnailGeneration,
 	VideoFormat,
 } from './types';
@@ -138,7 +139,7 @@ type ActionCreators = {
 };
 
 type AllSelectors = typeof import('./selectors');
-type CurriedState< F > = F extends ( state: any, ...args: infer P ) => infer R
+type CurriedState< F > = F extends ( state: State, ...args: infer P ) => infer R
 	? ( ...args: P ) => R
 	: F;
 type Selectors = {
@@ -1666,7 +1667,7 @@ export function optimizeImageItem(
 				.select( preferencesStore )
 				.get( PREFERENCES_NAME, 'imageLibrary' ) || 'vips';
 
-		let stop;
+		let stop: undefined | ( () => void );
 
 		try {
 			let file: File;

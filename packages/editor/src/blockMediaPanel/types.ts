@@ -1,4 +1,4 @@
-import type { BlockInstance } from '@wordpress/blocks';
+import type { BlockInstance, BlockEditProps } from '@wordpress/blocks';
 
 export type ImageBlock = BlockInstance< {
 	id: number;
@@ -23,6 +23,10 @@ export type VideoBlock = BlockInstance< {
 		srcLang?: string;
 		kind: 'subtitles' | 'captions';
 	} >;
+	controls: boolean;
+	loop: boolean;
+	autoplay: boolean;
+	playsInline: boolean;
 } > & { name: 'core/video' };
 
 export type MediaTextBlock = BlockInstance< {
@@ -56,3 +60,56 @@ export type SiteLogoBlock = BlockInstance< {
 } > & {
 	name: 'core/site-logo';
 };
+export type EmbedBlock = BlockInstance< {
+	url: string;
+	providerNameSlug: string;
+} > & {
+	name: 'core/embed';
+};
+
+export type MediaPanelProps =
+	| ( ImageBlock &
+			Pick<
+				BlockEditProps< ImageBlock[ 'attributes' ] >,
+				'setAttributes' | 'className'
+			> )
+	| ( VideoBlock &
+			Pick<
+				BlockEditProps< VideoBlock[ 'attributes' ] >,
+				'setAttributes' | 'className'
+			> )
+	| ( AudioBlock &
+			Pick<
+				BlockEditProps< AudioBlock[ 'attributes' ] >,
+				'setAttributes' | 'className'
+			> )
+	| ( GalleryBlock &
+			Pick<
+				BlockEditProps< GalleryBlock[ 'attributes' ] >,
+				'setAttributes' | 'className'
+			> )
+	| ( MediaTextBlock &
+			Pick<
+				BlockEditProps< MediaTextBlock[ 'attributes' ] >,
+				'setAttributes' | 'className'
+			> )
+	| ( CoverBlock &
+			Pick<
+				BlockEditProps< CoverBlock[ 'attributes' ] >,
+				'setAttributes' | 'className'
+			> )
+	| ( PostFeaturedImageBlock &
+			Pick<
+				BlockEditProps< PostFeaturedImageBlock[ 'attributes' ] >,
+				'setAttributes' | 'className'
+			> )
+	| ( SiteLogoBlock &
+			Pick<
+				BlockEditProps< SiteLogoBlock[ 'attributes' ] >,
+				'setAttributes' | 'className'
+			> )
+	| ( EmbedBlock &
+			Pick<
+				BlockEditProps< EmbedBlock[ 'attributes' ] >,
+				'setAttributes' | 'className'
+			> );

@@ -8,11 +8,11 @@ import { __ } from '@wordpress/i18n';
 import { getMediaTypeFromMimeType } from '@mexp/media-utils';
 import { store as recordingStore } from '@mexp/media-recording';
 
-import AudioAnalyzer from './audioAnalyzer';
-
+import type { MediaPanelProps } from '../blockMediaPanel/types';
 import './blocks.css';
 import { formatSecondsToMinutesSeconds } from './utils';
 import { UnfinishedRecordingWarning } from './unfinishedRecordingWarning';
+import AudioAnalyzer from './audioAnalyzer';
 
 const SUPPORTED_BLOCKS = [
 	'core/image',
@@ -227,7 +227,7 @@ function Recorder() {
 }
 
 const addMediaRecorder = createHigherOrderComponent(
-	( BlockEdit ) => ( props ) => {
+	( BlockEdit ) => ( props: MediaPanelProps ) => {
 		const { updateMediaDevices } = useDispatch( recordingStore );
 		const isInRecordingMode = useSelect(
 			( select ) => {

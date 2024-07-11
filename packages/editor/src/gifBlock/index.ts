@@ -1,7 +1,8 @@
 import { addFilter } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
-import type { Block, BlockAttributes } from '@wordpress/blocks';
+import type { Block } from '@wordpress/blocks';
 
+import type { VideoBlock } from '../blockMediaPanel/types';
 import { isGifVariation } from './utils';
 
 type Writable< T > = { -readonly [ P in keyof T ]: Writable< T[ P ] > };
@@ -32,7 +33,7 @@ function addGifBlockVariationToVideoBlock(
 			muted: true,
 			playsInline: true,
 		},
-		isActive( blockAttributes: BlockAttributes ) {
+		isActive( blockAttributes: VideoBlock[ 'attributes' ] ) {
 			return isGifVariation( blockAttributes );
 		},
 	} );
@@ -48,7 +49,7 @@ function addGifBlockVariationToVideoBlock(
 		attributes: {
 			controls: true,
 		},
-		isActive( blockAttributes: BlockAttributes ) {
+		isActive( blockAttributes: VideoBlock[ 'attributes' ] ) {
 			return ! isGifVariation( blockAttributes );
 		},
 	} );

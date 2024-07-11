@@ -37,7 +37,7 @@ interface HideOnErrorState {
 class HideOnError extends Component< PropsWithChildren< {} > > {
 	state: HideOnErrorState;
 
-	constructor( props: any ) {
+	constructor( props: PropsWithChildren< {} > ) {
 		super( props );
 
 		this.state = {
