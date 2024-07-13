@@ -39,17 +39,25 @@ function uploadMedia( {
 	onError = noop,
 	onFileChange,
 }: UploadMediaArgs ) {
-	const { getCurrentPostId, getEditorSettings } = select( editorStore );
+	const { getCurrentPost, getEditorSettings } = select( editorStore );
 	const wpAllowedMimeTypes = getEditorSettings().allowedMimeTypes;
 	maxUploadFileSize =
 		maxUploadFileSize || getEditorSettings().maxUploadFileSize;
+
+	const currentPost = getCurrentPost();
+	// Templates and template parts' numerical ID is stored in `wp_id`.
+	const currentPostId =
+		currentPost && 'wp_id' in currentPost
+			? currentPost.wp_id
+			: currentPost?.id;
+	const postData = currentPostId ? { post: currentPostId } : {};
 
 	originalUploadMedia( {
 		allowedTypes,
 		filesList,
 		onFileChange,
 		additionalData: {
-			post: getCurrentPostId(),
+			...postData,
 			...additionalData,
 		},
 		maxUploadFileSize,

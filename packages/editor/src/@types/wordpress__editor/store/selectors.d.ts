@@ -1,5 +1,12 @@
 import type { BlockInstance } from '@wordpress/blocks';
-import type { EntityRecord, Page, Post, User } from '@wordpress/core-data';
+import type {
+	EntityRecord,
+	Page,
+	Post,
+	User,
+	WpTemplate,
+	WpTemplatePart,
+} from '@wordpress/core-data';
 
 /**
  * Returns whether or not the user has the unfiltered_html capability.
@@ -46,7 +53,7 @@ export function getAutosaveAttribute(
  * edits. Returns an object containing relevant default post values if the post has not yet been
  * saved.
  */
-export function getCurrentPost(): Page | Post;
+export function getCurrentPost(): Page | Post | WpTemplate | WpTemplatePart;
 
 /**
  * Returns an attribute value of the saved post.
