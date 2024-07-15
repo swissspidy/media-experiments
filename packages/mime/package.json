@@ -1,22 +1,20 @@
 {
-	"name": "@mexp/subtitles",
+	"name": "@mexp/mime",
 	"version": "0.0.1",
-	"description": "Subtitles generation",
+	"description": "Mime type related utils",
 	"private": true,
 	"author": "",
 	"license": "GPL-2.0-or-later",
 	"keywords": [
 		"wordpress",
 		"media",
-		"subtitles",
-		"webvtt",
-		"vosk"
+		"mimetype"
 	],
-	"homepage": "https://github.com/swissspidy/media-experiments/tree/HEAD/packages/subtitles/README.md",
+	"homepage": "https://github.com/swissspidy/media-experiments/tree/HEAD/packages/mime/README.md",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/swissspidy/media-experiments.git",
-		"directory": "packages/subtitles"
+		"directory": "packages/mime"
 	},
 	"bugs": {
 		"url": "https://github.com/swissspidy/media-experiments/issues"
@@ -33,7 +31,6 @@
 		}
 	},
 	"dependencies": {
-		"@audapolis/webvtt-writer": "^1.0.6",
-		"vosk-browser": "^0.0.8"
+		"mime": "^3.0.0"
 	}
 }

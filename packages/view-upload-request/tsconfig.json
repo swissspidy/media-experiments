@@ -4,9 +4,6 @@
 		"rootDir": "src",
 		"declarationDir": "dist-types"
 	},
-	"references": [
-		{ "path": "../media-utils" },
-		{ "path": "../upload-media" }
-	],
+	"references": [ { "path": "../upload-media" } ],
 	"include": [ "src/**/*" ]
 }

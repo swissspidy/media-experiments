@@ -2,8 +2,6 @@ import { VttComment, VttCue, WebVtt } from '@audapolis/webvtt-writer';
 import { createModel } from 'vosk-browser';
 import type { ServerMessageResult } from 'vosk-browser/dist/interfaces';
 
-import { getFileBasename } from '@mexp/media-utils';
-
 type Result = ServerMessageResult[ 'result' ][ 'result' ][ 0 ];
 
 // TODO: Load them from CDN supporting CORS.
@@ -91,10 +89,14 @@ function createWebVttFromResults( results: Result[] ) {
 /**
  * Generates subtitles for a given video file.
  *
- * @param file Video file.
+ * @param file     Video file.
+ * @param basename Video file name without extension.
  * @return VTT file.
  */
-export async function generateSubtitles( file: File ): Promise< File > {
+export async function generateSubtitles(
+	file: File,
+	basename: string
+): Promise< File > {
 	const results: Result[] = [];
 
 	const arrayBuffer = await file.arrayBuffer();
@@ -125,7 +127,7 @@ export async function generateSubtitles( file: File ): Promise< File > {
 
 				const vttFile = new File(
 					[ vtt ],
-					`${ getFileBasename( file.name ) }-captions.vtt`,
+					`${ basename }-captions.vtt`,
 					{
 						lastModified: 1234567891,
 						type: 'text/vtt',

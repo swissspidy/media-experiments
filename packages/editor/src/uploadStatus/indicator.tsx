@@ -8,7 +8,7 @@ import { useEffect } from '@wordpress/element';
 import { store as editorStore } from '@wordpress/editor';
 
 import { UploadError, store as uploadStore } from '@mexp/upload-media';
-import { getMediaTypeFromMimeType } from '@mexp/media-utils';
+import { getMediaTypeFromMimeType } from '@mexp/mime';
 
 import { UnfinishedUploadsWarning } from './unfinishedUploadsWarning';
 

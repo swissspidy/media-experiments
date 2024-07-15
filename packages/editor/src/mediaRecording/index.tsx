@@ -5,7 +5,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
-import { getMediaTypeFromMimeType } from '@mexp/media-utils';
+import { getMediaTypeFromMimeType } from '@mexp/mime';
 import { store as recordingStore } from '@mexp/media-recording';
 
 import type { MediaPanelProps } from '../blockMediaPanel/types';

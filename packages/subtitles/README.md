@@ -13,6 +13,7 @@ Generates subtitles for a given video file.
 _Parameters_
 
 -   _file_ `File`: Video file.
+-   _basename_ `string`: Video file name without extension.
 
 _Returns_
 

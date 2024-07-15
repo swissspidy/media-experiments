@@ -5,16 +5,10 @@ import { createBlobURL, isBlobURL, revokeBlobURL } from '@wordpress/blob';
 import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as preferencesStore } from '@wordpress/preferences';
 
-import {
-	cloneFile,
-	getExtensionFromMimeType,
-	getFileBasename,
-	getMediaTypeFromMimeType,
-	ImageFile,
-	renameFile,
-} from '@mexp/media-utils';
+import { getExtensionFromMimeType, getMediaTypeFromMimeType } from '@mexp/mime';
 import { start } from '@mexp/log';
 
+import { ImageFile } from '../imageFile';
 import { UploadError } from '../uploadError';
 import {
 	canTranscodeFile,
@@ -24,6 +18,9 @@ import {
 	isAnimatedGif,
 	isHeifImage,
 	videoHasAudio,
+	cloneFile,
+	renameFile,
+	getFileBasename,
 } from '../utils';
 import { sideloadFile, updateMediaItem, uploadToServer } from '../api';
 import { PREFERENCES_NAME } from '../constants';
@@ -1859,6 +1856,7 @@ export function optimizeVideoItem( id: QueueItemId ) {
 				case 'ogg':
 					file = await transcodeVideo(
 						item.file,
+						getFileBasename( item.file.name ),
 						'video/ogg',
 						videoSizeThreshold
 					);
@@ -1869,6 +1867,7 @@ export function optimizeVideoItem( id: QueueItemId ) {
 				default:
 					file = await transcodeVideo(
 						item.file,
+						getFileBasename( item.file.name ),
 						`video/${ outputFormat }`,
 						videoSizeThreshold
 					);
@@ -1972,12 +1971,20 @@ export function optimizeAudioItem( id: QueueItemId ) {
 
 			switch ( outputFormat ) {
 				case 'ogg':
-					file = await transcodeAudio( item.file, 'audio/ogg' );
+					file = await transcodeAudio(
+						item.file,
+						getFileBasename( item.file.name ),
+						'audio/ogg'
+					);
 					break;
 
 				case 'mp3':
 				default:
-					file = await transcodeAudio( item.file, 'audio/mp3' );
+					file = await transcodeAudio(
+						item.file,
+						getFileBasename( item.file.name ),
+						'audio/mp3'
+					);
 					break;
 			}
 
@@ -2038,6 +2045,7 @@ export function convertGifItem( id: QueueItemId ) {
 				case 'ogg':
 					file = await convertGifToVideo(
 						item.file,
+						getFileBasename( item.file.name ),
 						'video/ogg',
 						videoSizeThreshold
 					);
@@ -2048,6 +2056,7 @@ export function convertGifItem( id: QueueItemId ) {
 				default:
 					file = await convertGifToVideo(
 						item.file,
+						getFileBasename( item.file.name ),
 						`video/${ outputFormat }`,
 						videoSizeThreshold
 					);
@@ -2477,7 +2486,10 @@ export function generateSubtitles( id: QueueItemId ) {
 				/* webpackChunkName: 'subtitles' */ '@mexp/subtitles'
 			);
 
-			const file = await _generateSubtitles( item.sourceFile );
+			const file = await _generateSubtitles(
+				item.sourceFile,
+				getFileBasename( item.sourceFile.name )
+			);
 
 			const blobUrl = createBlobURL( file );
 			dispatch< CacheBlobUrlAction >( {

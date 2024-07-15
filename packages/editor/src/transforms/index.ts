@@ -2,7 +2,7 @@ import { addFilter } from '@wordpress/hooks';
 import { createBlobURL } from '@wordpress/blob';
 import { type Block, type BlockInstance, createBlock } from '@wordpress/blocks';
 
-import { getMediaTypeFromMimeType } from '@mexp/media-utils';
+import { getMediaTypeFromMimeType } from '@mexp/mime';
 
 type Writable< T > = { -readonly [ P in keyof T ]: Writable< T[ P ] > };
 

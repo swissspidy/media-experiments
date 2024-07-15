@@ -3,7 +3,7 @@ const Vips = require( 'wasm-vips' ) as (
 ) => Promise< NonNullable< typeof VipsInstance > >;
 import type VipsInstance from 'wasm-vips';
 
-import { getExtensionFromMimeType } from '@mexp/media-utils';
+import { getExtensionFromMimeType } from '@mexp/mime';
 
 import type {
 	ImageSizeCrop,

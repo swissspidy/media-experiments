@@ -1,4 +1,4 @@
-import { getFileExtension } from '../';
+import { getFileExtension } from '../utils';
 
 describe( 'getFileExtension', () => {
 	it.each( [

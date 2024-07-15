@@ -1,9 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import {
-	blobToFile,
-	getExtensionFromMimeType,
-	getFileBasename,
-} from '@mexp/media-utils';
+import { getExtensionFromMimeType } from '@mexp/mime';
 import type { FFmpeg } from '@ffmpeg/ffmpeg';
 
 const VIDEO_CODEC: Record< string, string > = {
@@ -128,10 +124,10 @@ async function runFFmpegWithConfig(
 		// Delete file in MEMFS to free memory.
 		ffmpeg.FS( 'unlink', tempFileName );
 
-		return blobToFile(
-			new Blob( [ data.buffer ], { type: mimeType } ),
+		return new File(
+			[ new Blob( [ data.buffer ], { type: mimeType } ) ],
 			fileName,
-			mimeType
+			{ type: mimeType }
 		);
 	} catch ( err ) {
 		// eslint-disable-next-line no-console -- We want to surface this error.
@@ -171,18 +167,20 @@ function getScaleArg( threshold: number ) {
  * Transcodes a video using FFmpeg.
  *
  * @param file      Original video file object.
+ * @param basename  Video file name without extension.
  * @param mimeType  Mime type.
  * @param threshold Big video size threshold.
  * @return Processed video file object.
  */
 export async function transcodeVideo(
 	file: File,
+	basename: string,
 	mimeType: string,
 	threshold: number
 ): Promise< File > {
-	const outputFileName = `${ getFileBasename(
-		file.name
-	) }.${ getExtensionFromMimeType( mimeType ) }`;
+	const outputFileName = `${ basename }.${ getExtensionFromMimeType(
+		mimeType
+	) }`;
 	return runFFmpegWithConfig(
 		file,
 		[
@@ -231,16 +229,18 @@ export async function muteVideo( file: File ): Promise< File > {
  * Transcodes an audio file using FFmpeg.
  *
  * @param file     Original audio file object.
+ * @param basename Audio file name without extension.
  * @param mimeType Desired mime type.
  * @return Processed audio file object.
  */
 export async function transcodeAudio(
 	file: File,
+	basename: string,
 	mimeType: string
 ): Promise< File > {
-	const outputFileName = `${ getFileBasename(
-		file.name
-	) }.${ getExtensionFromMimeType( mimeType ) }`;
+	const outputFileName = `${ basename }.${ getExtensionFromMimeType(
+		mimeType
+	) }`;
 	return runFFmpegWithConfig(
 		file,
 		[
@@ -266,14 +266,16 @@ export async function transcodeAudio(
  * @todo Remove? Currently unused.
  *
  * @param file      Original video file object.
+ * @param basename  Video file name without extension.
  * @param threshold Big video size threshold.
  * @return File object for the video frame.
  */
 export async function getFirstFrameOfVideo(
 	file: File,
+	basename: string,
 	threshold: number
 ): Promise< File > {
-	const outputFileName = `${ getFileBasename( file.name ) }-poster.jpeg`;
+	const outputFileName = `${ basename }-poster.jpeg`;
 	return runFFmpegWithConfig(
 		file,
 		[
@@ -295,14 +297,16 @@ export async function getFirstFrameOfVideo(
  * Converts an animated GIF to a video using FFmpeg.
  *
  * @param file      Original GIF file object.
+ * @param basename  GIF file name without extension.
  * @param mimeType  Desired mime type.
  * @param threshold Big video size threshold.
  * @return Converted video file object.
  */
 export async function convertGifToVideo(
 	file: File,
+	basename: string,
 	mimeType: string,
 	threshold: number
 ): Promise< File > {
-	return transcodeVideo( file, mimeType, threshold );
+	return transcodeVideo( file, basename, mimeType, threshold );
 }
