@@ -1,4 +1,6 @@
 import { getExtensionFromMimeType, getMimeTypeFromExtension } from '@mexp/mime';
+import { getFilename } from '@wordpress/url';
+import { _x } from '@wordpress/i18n';
 
 import {
 	MEDIA_TRANSCODING_MAX_FILE_SIZE,
@@ -97,17 +99,11 @@ export function getMimeTypesArray(
 /**
  * Returns the file name including extension from a URL.
  *
- * @todo Move to media-utils?
- *
  * @param url File URL.
  * @return File name.
  */
 export function getFileNameFromUrl( url: string ) {
-	const tail = url.split( '/' ).at( -1 );
-	if ( ! tail ) {
-		return 'unnamed'; // TODO: Better fallback needed?
-	}
-	return tail.split( /[#?]/ ).at( 0 ) ?? tail;
+	return getFilename( url ) || _x( 'unnamed', 'file name', 'media-experiments' ); // TODO: Better fallback needed?
 }
 
 /**
