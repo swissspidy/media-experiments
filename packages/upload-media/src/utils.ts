@@ -1,5 +1,4 @@
 import {
-	blobToFile,
 	getExtensionFromMimeType,
 	getFileExtension,
 	getMimeTypeFromExtension,
@@ -100,7 +99,7 @@ export async function fetchFile( url: string, nameOverride?: string ) {
 	const mimeType =
 		blob.type || getMimeTypeFromExtension( getFileExtension( name ) || '' );
 
-	const file = blobToFile( blob, name, mimeType || '' );
+	const file = new File( [ blob ], name, { type: mimeType || '' } );
 
 	if ( ! mimeType ) {
 		throw new UploadError( {
@@ -221,10 +220,10 @@ export async function getPosterFromVideo(
 		blob = await getFirstFrameOfVideo( src, 'image/jpeg', quality );
 	}
 
-	return blobToFile(
-		blob,
+	return new File(
+		[ blob ],
 		`${ basename }.${ getExtensionFromMimeType( blob.type ) }`,
-		blob.type
+		{ type: blob.type }
 	);
 }
 

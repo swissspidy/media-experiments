@@ -6,7 +6,7 @@ import { ImageCapture } from 'image-capture';
 import { createBlobURL, revokeBlobURL } from '@wordpress/blob';
 import { dateI18n } from '@wordpress/date';
 
-import { blobToFile, getExtensionFromMimeType } from '@mexp/media-utils';
+import { getExtensionFromMimeType } from '@mexp/media-utils';
 
 import {
 	COUNTDOWN_TIME_IN_SECONDS,
@@ -314,23 +314,23 @@ export function startRecording() {
 
 					const blob = new Blob( mediaChunks, { type } );
 					const file = hasVideo
-						? blobToFile(
-								blob,
+						? new File(
+								[ blob ],
 								`capture-${ dateI18n(
 									'Y-m-d-H-i',
 									new Date(),
 									undefined
 								) }.mp4`,
-								'video/mp4'
+								{ type: 'video/mp4' }
 						  )
-						: blobToFile(
-								blob,
+						: new File(
+								[ blob ],
 								`capture-${ dateI18n(
 									'Y-m-d-H-i',
 									new Date(),
 									undefined
 								) }.mp3`,
-								'audio/mp3'
+								{ type: 'audio/mp3' }
 						  );
 
 					const url = createBlobURL( file );
@@ -543,14 +543,14 @@ export function captureImage() {
 					const { type } = blob;
 					const ext = getExtensionFromMimeType( type );
 
-					const file = blobToFile(
-						blob,
+					const file = new File(
+						[ blob ],
 						`capture-${ dateI18n(
 							'Y-m-d-H-i',
 							new Date(),
 							undefined
 						) }.${ ext }`,
-						type
+						{ type },
 					);
 					const url = createBlobURL( file );
 

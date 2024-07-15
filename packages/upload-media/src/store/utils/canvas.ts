@@ -2,7 +2,6 @@ import { createWorkerFactory } from '@shopify/web-worker';
 
 import {
 	ImageFile,
-	blobToFile,
 	getExtensionFromMimeType,
 	getFileBasename,
 } from '@mexp/media-utils';
@@ -15,19 +14,21 @@ const createCanvasWorker = createWorkerFactory(
 const canvasWorker = createCanvasWorker();
 
 export async function compressImage( file: File, quality = 0.82 ) {
-	return blobToFile(
-		new Blob(
-			[
-				await canvasWorker.compressImage(
-					await file.arrayBuffer(),
-					file.type,
-					quality
-				),
-			],
-			{ type: file.type }
-		),
+	return new File(
+		[
+			new Blob(
+				[
+					await canvasWorker.compressImage(
+						await file.arrayBuffer(),
+						file.type,
+						quality
+					),
+				],
+				{ type: file.type }
+			),
+		],
 		file.name,
-		file.type
+		{ type: file.type }
 	);
 }
 
@@ -36,20 +37,22 @@ export async function convertImageFormat(
 	mimeType: string,
 	quality = 0.82
 ) {
-	return blobToFile(
-		new Blob(
-			[
-				await canvasWorker.convertImageFormat(
-					await file.arrayBuffer(),
-					file.type,
-					mimeType,
-					quality
-				),
-			],
-			{ type: mimeType }
-		),
+	return new File(
+		[
+			new Blob(
+				[
+					await canvasWorker.convertImageFormat(
+						await file.arrayBuffer(),
+						file.type,
+						mimeType,
+						quality
+					),
+				],
+				{ type: mimeType }
+			),
+		],
 		file.name,
-		mimeType
+		{ type: mimeType }
 	);
 }
 
@@ -78,10 +81,10 @@ export async function resizeImage(
 	}
 
 	return new ImageFile(
-		blobToFile(
-			new Blob( [ result.buffer ], { type: file.type } ),
+		new File(
+			[ new Blob( [ result.buffer ], { type: file.type } ) ],
 			fileName,
-			file.type
+			{ type: file.type }
 		),
 		result.width,
 		result.height,

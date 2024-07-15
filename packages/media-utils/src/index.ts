@@ -90,18 +90,6 @@ export function getFileExtension( file: string ): string | null {
 }
 
 /**
- * Wraps a Blob instance in a File instance.
- *
- * @param blob     Blob instance.
- * @param filename File name.
- * @param type     Mime type.
- * @return File object.
- */
-export function blobToFile( blob: Blob, filename: string, type: string ): File {
-	return new File( [ blob ], filename, { type } );
-}
-
-/**
  * Renames a given file and returns a new file.
  *
  * Copies over the last modified time.

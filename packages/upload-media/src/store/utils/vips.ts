@@ -2,7 +2,6 @@ import { createWorkerFactory } from '@shopify/web-worker';
 
 import {
 	ImageFile,
-	blobToFile,
 	getExtensionFromMimeType,
 	getFileBasename,
 } from '@mexp/media-utils';
@@ -36,7 +35,7 @@ export async function vipsConvertImageFormat(
 	);
 	const ext = getExtensionFromMimeType( type );
 	const fileName = `${ getFileBasename( file.name ) }.${ ext }`;
-	return blobToFile( new Blob( [ buffer ], { type } ), fileName, type );
+	return new File( [ new Blob( [ buffer ] ) ], fileName, { type } );
 }
 
 export async function vipsCompressImage(
@@ -52,10 +51,10 @@ export async function vipsCompressImage(
 		quality,
 		interlaced
 	);
-	return blobToFile(
-		new Blob( [ buffer ], { type: file.type } ),
+	return new File(
+		[ new Blob( [ buffer ], { type: file.type } ) ],
 		file.name,
-		file.type
+		{ type: file.type }
 	);
 }
 
@@ -92,11 +91,9 @@ export async function vipsResizeImage(
 	}
 
 	return new ImageFile(
-		blobToFile(
-			new Blob( [ buffer ], { type: file.type } ),
-			fileName,
-			file.type
-		),
+		new File( [ new Blob( [ buffer ], { type: file.type } ) ], fileName, {
+			type: file.type,
+		} ),
 		width,
 		height,
 		originalWidth,

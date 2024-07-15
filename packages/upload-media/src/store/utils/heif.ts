@@ -1,7 +1,6 @@
 import { createWorkerFactory } from '@shopify/web-worker';
 
 import {
-	blobToFile,
 	bufferToBlob,
 	getExtensionFromMimeType,
 	getFileBasename,
@@ -24,11 +23,11 @@ export async function transcodeHeifImage(
 
 	const blob = await bufferToBlob( buffer, width, height, type, quality );
 
-	return blobToFile(
-		blob,
+	return new File(
+		[ blob ],
 		`${ getFileBasename( file.name ) }.${ getExtensionFromMimeType(
 			type
 		) }`,
-		type
+		{ type }
 	);
 }

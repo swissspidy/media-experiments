@@ -1,9 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import {
-	blobToFile,
-	getExtensionFromMimeType,
-	getFileBasename,
-} from '@mexp/media-utils';
+import { getExtensionFromMimeType, getFileBasename } from '@mexp/media-utils';
 import type { FFmpeg } from '@ffmpeg/ffmpeg';
 
 const VIDEO_CODEC: Record< string, string > = {
@@ -128,10 +124,10 @@ async function runFFmpegWithConfig(
 		// Delete file in MEMFS to free memory.
 		ffmpeg.FS( 'unlink', tempFileName );
 
-		return blobToFile(
-			new Blob( [ data.buffer ], { type: mimeType } ),
+		return new File(
+			[ new Blob( [ data.buffer ], { type: mimeType } ) ],
 			fileName,
-			mimeType
+			{ type: mimeType }
 		);
 	} catch ( err ) {
 		// eslint-disable-next-line no-console -- We want to surface this error.

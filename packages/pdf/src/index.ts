@@ -1,10 +1,6 @@
 import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist';
 
-import {
-	blobToFile,
-	getCanvasBlob,
-	getExtensionFromMimeType,
-} from '@mexp/media-utils';
+import { getCanvasBlob, getExtensionFromMimeType } from '@mexp/media-utils';
 
 // Setting worker path to worker bundle.
 GlobalWorkerOptions.workerSrc = PDFJS_CDN_URL;
@@ -54,9 +50,9 @@ export async function getImageFromPdf(
 
 	const blob = await getCanvasBlob( canvas, type, quality );
 
-	return blobToFile(
-		blob,
+	return new File(
+		[ blob ],
 		`${ basename }.${ getExtensionFromMimeType( blob.type ) }`,
-		blob.type
+		{ type: blob.type }
 	);
 }
