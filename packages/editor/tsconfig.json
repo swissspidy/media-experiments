@@ -7,6 +7,7 @@
 	"references": [
 		{ "path": "../interface" },
 		{ "path": "../media-recording" },
+		{ "path": "../media-utils" },
 		{ "path": "../mime" },
 		{ "path": "../upload-media" }
 	],
