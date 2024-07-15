@@ -13,6 +13,7 @@ Converts an animated GIF to a video using FFmpeg.
 _Parameters_
 
 -   _file_ `File`: Original GIF file object.
+-   _basename_ `string`: GIF file name without extension.
 -   _mimeType_ `string`: Desired mime type.
 -   _threshold_ `number`: Big video size threshold.
 
@@ -29,6 +30,7 @@ Note: Exact seeking is not possible in most formats.
 _Parameters_
 
 -   _file_ `File`: Original video file object.
+-   _basename_ `string`: Video file name without extension.
 -   _threshold_ `number`: Big video size threshold.
 
 _Returns_
@@ -54,6 +56,7 @@ Transcodes an audio file using FFmpeg.
 _Parameters_
 
 -   _file_ `File`: Original audio file object.
+-   _basename_ `string`: Audio file name without extension.
 -   _mimeType_ `string`: Desired mime type.
 
 _Returns_
@@ -67,6 +70,7 @@ Transcodes a video using FFmpeg.
 _Parameters_
 
 -   _file_ `File`: Original video file object.
+-   _basename_ `string`: Video file name without extension.
 -   _mimeType_ `string`: Mime type.
 -   _threshold_ `number`: Big video size threshold.
 
