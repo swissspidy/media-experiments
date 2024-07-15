@@ -1,8 +1,9 @@
 import { createWorkerFactory } from '@shopify/web-worker';
 
-import { ImageFile, getFileBasename } from '@mexp/media-utils';
+import { getFileBasename } from '@mexp/media-utils';
 import { getExtensionFromMimeType } from '@mexp/mime';
 
+import { ImageFile } from '../../imageFile';
 import type { ImageSizeCrop } from '../types';
 
 const createCanvasWorker = createWorkerFactory(

@@ -1,5 +1,3 @@
-export { ImageFile } from './imageFile';
-
 /**
  * Returns file basename without extension.
  *
