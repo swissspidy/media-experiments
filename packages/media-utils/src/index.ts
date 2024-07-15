@@ -149,30 +149,3 @@ export function preloadImage(
 	} );
 }
 
-/**
- * Returns a Blob object from a canvas element.
- *
- * Simple, promise-ified version of `HTMLCanvasElement.toBlob()`.
- *
- * @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
- *
- * @param canvas  Canvas element
- * @param type    Desired image format.
- * @param quality Desired image quality.
- */
-export function getCanvasBlob(
-	canvas: HTMLCanvasElement,
-	type = 'image/jpeg',
-	quality = 0.82
-): Promise< Blob > {
-	return new Promise< Blob >( ( resolve, reject ) => {
-		canvas.toBlob(
-			( blob ) =>
-				blob
-					? resolve( blob )
-					: reject( new Error( 'Could not get canvas blob' ) ),
-			type,
-			quality
-		);
-	} );
-}

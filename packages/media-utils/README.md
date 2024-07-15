@@ -18,22 +18,6 @@ _Returns_
 
 -   `File`: New file object.
 
-### getCanvasBlob
-
-Returns a Blob object from a canvas element.
-
-Simple, promise-ified version of `HTMLCanvasElement.toBlob()`.
-
-_Related_
-
--   <https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob>
-
-_Parameters_
-
--   _canvas_ `HTMLCanvasElement`: Canvas element
--   _type_ Desired image format.
--   _quality_ Desired image quality.
-
 ### getExtensionFromMimeType
 
 Returns the file extension for a given mime type.
