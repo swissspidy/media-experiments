@@ -89,7 +89,7 @@ function createWebVttFromResults( results: Result[] ) {
 /**
  * Generates subtitles for a given video file.
  *
- * @param file Video file.
+ * @param file     Video file.
  * @param basename Video file name without extension.
  * @return VTT file.
  */
