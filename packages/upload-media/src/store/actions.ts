@@ -5,12 +5,7 @@ import { createBlobURL, isBlobURL, revokeBlobURL } from '@wordpress/blob';
 import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as preferencesStore } from '@wordpress/preferences';
 
-import {
-	cloneFile,
-	getFileBasename,
-	ImageFile,
-	renameFile,
-} from '@mexp/media-utils';
+import { getFileBasename, ImageFile } from '@mexp/media-utils';
 import { getExtensionFromMimeType, getMediaTypeFromMimeType } from '@mexp/mime';
 import { start } from '@mexp/log';
 
@@ -23,6 +18,8 @@ import {
 	isAnimatedGif,
 	isHeifImage,
 	videoHasAudio,
+	cloneFile,
+	renameFile,
 } from '../utils';
 import { sideloadFile, updateMediaItem, uploadToServer } from '../api';
 import { PREFERENCES_NAME } from '../constants';

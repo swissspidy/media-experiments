@@ -9,6 +9,33 @@ import { UploadError } from './uploadError';
 import type { Attachment, RestAttachment } from './store/types';
 
 /**
+ * Renames a given file and returns a new file.
+ *
+ * Copies over the last modified time.
+ *
+ * @param file File object.
+ * @param name File name.
+ * @return Renamed file object.
+ */
+export function renameFile( file: File, name: string ): File {
+	return new File( [ file ], name, {
+		type: file.type,
+		lastModified: file.lastModified,
+	} );
+}
+
+/**
+ * Clones a given file object.
+ *
+ * @param file File object.
+ * @return New file object.
+ */
+export function cloneFile( file: File ): File {
+	return renameFile( file, file.name );
+}
+
+
+/**
  * Determines whether a file can be possible transcoded in the browser.
  *
  * Takes into account cross-origin isolation, a hardcoded list of mime types,
