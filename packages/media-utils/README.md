@@ -54,22 +54,6 @@ _Type_
 
 -   `ImageFile`
 
-### preloadImage
-
-Preloads a given image using the `Image()` constructor.
-
-Useful for further processing of the image, like saving it or extracting its dominant color.
-
-_Related_
-
--   <https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/Image>
-
-_Parameters_
-
--   _src_ `string`: Image URL.
--   _width_ `number`: Desired width.
--   _height_ `number`: Desired height.
-
 ### renameFile
 
 Renames a given file and returns a new file.
