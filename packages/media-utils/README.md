@@ -20,18 +20,6 @@ _Returns_
 
 -   `string`: File basename.
 
-### getFileExtension
-
-Returns the file extension from a given file name or URL.
-
-_Parameters_
-
--   _file_ `string`: File URL.
-
-_Returns_
-
--   `string | null`: File extension or null if it does not have one.
-
 ### ImageFile
 
 ImageFile class.

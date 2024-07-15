@@ -1,4 +1,3 @@
-import { getFileExtension } from '@mexp/media-utils';
 import { getExtensionFromMimeType, getMimeTypeFromExtension } from '@mexp/mime';
 
 import {
@@ -34,6 +33,15 @@ export function cloneFile( file: File ): File {
 	return renameFile( file, file.name );
 }
 
+/**
+ * Returns the file extension from a given file name or URL.
+ *
+ * @param file File URL.
+ * @return File extension or null if it does not have one.
+ */
+export function getFileExtension( file: string ): string | null {
+	return file.includes( '.' ) ? file.split( '.' ).pop() || null : null;
+}
 
 /**
  * Determines whether a file can be possible transcoded in the browser.
