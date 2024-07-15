@@ -117,13 +117,13 @@ export function getMimeTypesArray(
  * @return File name.
  */
 export function getFileNameFromUrl( url: string ) {
-	return getFilename( url ) || _x( 'unnamed', 'file name', 'media-experiments' ); // TODO: Better fallback needed?
+	return (
+		getFilename( url ) || _x( 'unnamed', 'file name', 'media-experiments' )
+	); // TODO: Better fallback needed?
 }
 
 /**
  * Fetches a remote file and returns a File instance.
- *
- * @todo Move to media-utils?
  *
  * @param url          URL.
  * @param nameOverride File name to use, instead of deriving it from the URL.

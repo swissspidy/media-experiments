@@ -33,7 +33,6 @@
 		"@mexp/ffmpeg": "../ffmpeg",
 		"@mexp/heif": "../heif",
 		"@mexp/log": "../log",
-		"@mexp/media-utils": "../media-utils",
 		"@mexp/mime": "../mime",
 		"@mexp/pdf": "../pdf",
 		"@mexp/subtitles": "../subtitles",

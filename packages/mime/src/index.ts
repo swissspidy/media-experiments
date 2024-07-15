@@ -8,7 +8,7 @@ import mime from 'mime/lite';
  *
  * @example
  * ```js
- * import { getMediaTypeFromMimeType } from '@mexp/media-utils';
+ * import { getMediaTypeFromMimeType } from '@mexp/mime';
  *
  * getMediaTypeFromMimeType( 'image/jpeg' ) // Returns 'image'
  * getMediaTypeFromMimeType( 'video/mpeg' ) // Returns 'video'
@@ -31,7 +31,7 @@ export function getMediaTypeFromMimeType( mimeType: string ): string {
  *
  * @example
  * ```js
- * import { getExtensionFromMimeType } from '@mexp/media-utils';
+ * import { getExtensionFromMimeType } from '@mexp/mime';
  *
  * getExtensionFromMimeType( 'image/jpeg' ) // Returns '.jpeg'
  * getExtensionFromMimeType( 'video/mp4' ) // Returns '.mp4'
@@ -51,7 +51,7 @@ export function getExtensionFromMimeType( mimeType: string ): string | null {
  *
  * @example
  * ```js
- * import { getMimeTypeFromExtension } from '@mexp/media-utils';
+ * import { getMimeTypeFromExtension } from '@mexp/mime';
  *
  * getMimeTypeFromExtension( '.jpeg' ) // Returns 'image/jpeg'
  * getMimeTypeFromExtension( '.mp4' ) // Returns 'video/mp4'

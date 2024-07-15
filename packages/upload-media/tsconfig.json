@@ -8,7 +8,6 @@
 		{ "path": "../ffmpeg" },
 		{ "path": "../heif" },
 		{ "path": "../log" },
-		{ "path": "../media-utils" },
 		{ "path": "../mime" },
 		{ "path": "../pdf" },
 		{ "path": "../subtitles" },

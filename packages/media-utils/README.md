@@ -1,6 +1,9 @@
 # `@mexp/media-utils`
 
-A set of media-related helper utilities.
+The media utils package provides a set of artifacts to abstract media functionality that may be useful in situations where there is a need to deal with media uploads or with the media library, e.g., artifacts that extend or implement a block-editor.
+This package is meant to be used by the WordPress core. It may not work as expected outside WordPress usages.
+
+**Replacement for `@wordpress/media-utils`.**
 
 ## API Reference
 

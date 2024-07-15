@@ -93,7 +93,10 @@ function createWebVttFromResults( results: Result[] ) {
  * @param basename Video file name without extension.
  * @return VTT file.
  */
-export async function generateSubtitles( file: File, basename: string ): Promise< File > {
+export async function generateSubtitles(
+	file: File,
+	basename: string
+): Promise< File > {
 	const results: Result[] = [];
 
 	const arrayBuffer = await file.arrayBuffer();

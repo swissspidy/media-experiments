@@ -13,7 +13,7 @@ Returns the file extension for a given mime type.
 _Usage_
 
 ```js
-import { getExtensionFromMimeType } from '@mexp/media-utils';
+import { getExtensionFromMimeType } from '@mexp/mime';
 
 getExtensionFromMimeType( 'image/jpeg' ) // Returns '.jpeg'
 getExtensionFromMimeType( 'video/mp4' ) // Returns '.mp4'
@@ -36,7 +36,7 @@ Returns the media type from a given mime type.
 _Usage_
 
 ```js
-import { getMediaTypeFromMimeType } from '@mexp/media-utils';
+import { getMediaTypeFromMimeType } from '@mexp/mime';
 
 getMediaTypeFromMimeType( 'image/jpeg' ) // Returns 'image'
 getMediaTypeFromMimeType( 'video/mpeg' ) // Returns 'video'
@@ -59,7 +59,7 @@ Get the mime type for a given file extension.
 _Usage_
 
 ```js
-import { getMimeTypeFromExtension } from '@mexp/media-utils';
+import { getMimeTypeFromExtension } from '@mexp/mime';
 
 getMimeTypeFromExtension( '.jpeg' ) // Returns 'image/jpeg'
 getMimeTypeFromExtension( '.mp4' ) // Returns 'video/mp4'
