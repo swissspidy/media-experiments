@@ -6,6 +6,7 @@ import {
 	OperationType,
 	type QueueItem,
 	type QueueItemId,
+	type Settings,
 	type State,
 } from './types';
 
@@ -333,4 +334,15 @@ export function getImageSize( state: State, name: string ): ImageSizeCrop {
  */
 export function getBlobUrls( state: State, id: QueueItemId ): string[] {
 	return state.blobUrls[ id ] || [];
+}
+
+/**
+ * Returns the media upload settings.
+ *
+ * @param state Upload state.
+ *
+ * @return Settings
+ */
+export function getSettings( state: State ): Settings {
+	return state.settings;
 }

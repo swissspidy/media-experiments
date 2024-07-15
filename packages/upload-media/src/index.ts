@@ -2,23 +2,16 @@ import { dispatch } from '@wordpress/data';
 
 import { store as uploadStore } from './store';
 import type {
-	Attachment,
 	AudioFormat,
 	ImageFormat,
 	ImageLibrary,
 	ImageSizeCrop,
-	RestAttachment,
 	ThumbnailGeneration,
 	VideoFormat,
 } from './store/types';
-import { UploadError } from './uploadError';
-
-export { uploadMedia } from './uploadMedia';
-export { transformAttachment } from './utils';
+import { MediaError } from './mediaError';
 
 export type {
-	Attachment,
-	RestAttachment,
 	ImageFormat,
 	ImageLibrary,
 	ImageSizeCrop,
@@ -27,7 +20,7 @@ export type {
 	AudioFormat,
 };
 
-export { uploadStore as store, UploadError };
+export { uploadStore as store, MediaError };
 
 /*
  The WordPress REST API requires passing term IDs instead of slugs.

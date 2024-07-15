@@ -1,6 +1,7 @@
 import type { BlockEditProps } from '@wordpress/blocks';
-import type { Attachment } from '@mexp/upload-media';
 import { Fragment } from '@wordpress/element';
+
+import type { Attachment } from '@mexp/media-utils';
 
 import { DebugInfo } from './debugInfo';
 import { MuteVideo } from './muteVideo';

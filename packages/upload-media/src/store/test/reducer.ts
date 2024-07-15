@@ -16,6 +16,10 @@ describe( 'reducer', () => {
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
+				settings: {
+					mediaUpload: jest.fn(),
+					mediaSideload: jest.fn(),
+				},
 				queue: [
 					{
 						id: '1',
@@ -36,6 +40,10 @@ describe( 'reducer', () => {
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
+				settings: {
+					mediaUpload: jest.fn(),
+					mediaSideload: jest.fn(),
+				},
 				queue: [
 					{
 						id: '1',
@@ -57,6 +65,10 @@ describe( 'reducer', () => {
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
+				settings: {
+					mediaUpload: jest.fn(),
+					mediaSideload: jest.fn(),
+				},
 				queue: [
 					{
 						id: '1',
@@ -79,6 +91,10 @@ describe( 'reducer', () => {
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
+				settings: {
+					mediaUpload: jest.fn(),
+					mediaSideload: jest.fn(),
+				},
 				queue: [
 					{
 						id: '1',
@@ -101,6 +117,10 @@ describe( 'reducer', () => {
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
+				settings: {
+					mediaUpload: jest.fn(),
+					mediaSideload: jest.fn(),
+				},
 				queue: [
 					{
 						id: '1',
@@ -139,6 +159,10 @@ describe( 'reducer', () => {
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
+				settings: {
+					mediaUpload: jest.fn(),
+					mediaSideload: jest.fn(),
+				},
 				queue: [
 					{
 						id: '1',
@@ -181,6 +205,10 @@ describe( 'reducer', () => {
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
+				settings: {
+					mediaUpload: jest.fn(),
+					mediaSideload: jest.fn(),
+				},
 				queue: [
 					{
 						id: '1',
@@ -223,6 +251,10 @@ describe( 'reducer', () => {
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
+				settings: {
+					mediaUpload: jest.fn(),
+					mediaSideload: jest.fn(),
+				},
 				queue: [
 					{
 						id: '1',
@@ -264,6 +296,10 @@ describe( 'reducer', () => {
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
+				settings: {
+					mediaUpload: jest.fn(),
+					mediaSideload: jest.fn(),
+				},
 				queue: [
 					{
 						id: '1',
@@ -323,6 +359,10 @@ describe( 'reducer', () => {
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
+				settings: {
+					mediaUpload: jest.fn(),
+					mediaSideload: jest.fn(),
+				},
 				queue: [
 					{
 						id: '1',

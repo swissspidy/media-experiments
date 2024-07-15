@@ -14,6 +14,7 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { __, sprintf } from '@wordpress/i18n';
 import { filterURLForDisplay } from '@wordpress/url';
 import { store as noticesStore } from '@wordpress/notices';
+import apiFetch from '@wordpress/api-fetch';
 
 import { store as uploadStore } from '@mexp/upload-media';
 
@@ -51,6 +52,17 @@ function Row( props: BulkOptimizationAttachmentData ) {
 					id: media.id,
 					url: media.url,
 				} );
+
+				void apiFetch( {
+					path: `/wp/v2/media/${ props.id }`,
+					data: {
+						meta: {
+							mexp_optimized_id: media.id,
+						},
+					},
+					method: 'POST',
+				} );
+
 				void createSuccessNotice(
 					__( 'File successfully optimized.', 'media-experiments' ),
 					{
@@ -144,6 +156,16 @@ function CompressAll( props: {
 					void updateBlockAttributes( attachment.clientId, {
 						id: media.id,
 						url: media.url,
+					} );
+
+					void apiFetch( {
+						path: `/wp/v2/media/${ attachment.id }`,
+						data: {
+							meta: {
+								mexp_optimized_id: media.id,
+							},
+						},
+						method: 'POST',
 					} );
 				},
 				onError: ( err: Error ) => {

@@ -6,8 +6,7 @@ import {
 	MEDIA_TRANSCODING_MAX_FILE_SIZE,
 	TRANSCODABLE_MIME_TYPES,
 } from './constants';
-import { UploadError } from './uploadError';
-import type { Attachment, RestAttachment } from './store/types';
+import { MediaError } from './mediaError';
 
 /**
  * Renames a given file and returns a new file.
@@ -81,9 +80,6 @@ export function canTranscodeFile( file: File ) {
  * Browsers may use unexpected mime types, and they differ from browser to browser.
  * This function computes a flexible array of mime types from the mime type structured provided by the server.
  * Converts { jpg|jpeg|jpe: "image/jpeg" } into [ "image/jpeg", "image/jpg", "image/jpeg", "image/jpe" ]
- * The computation of this array instead of directly using the object,
- * solves the problem in chrome where mp3 files have audio/mp3 as mime type instead of audio/mpeg.
- * https://bugs.chromium.org/p/chromium/issues/detail?id=227004
  *
  * @param {?Object} wpMimeTypesObject Mime type object received from the server.
  *                                    Extensions are keys separated by '|' and values are mime types associated with an extension.
@@ -144,7 +140,7 @@ export async function fetchFile( url: string, nameOverride?: string ) {
 	const file = new File( [ blob ], name, { type: mimeType || '' } );
 
 	if ( ! mimeType ) {
-		throw new UploadError( {
+		throw new MediaError( {
 			code: 'FETCH_REMOTE_FILE_ERROR',
 			message: 'File could not be uploaded',
 			file,
@@ -420,21 +416,4 @@ export function isHeifImage( buffer: ArrayBuffer ) {
 	];
 
 	return validFourCC.includes( fourCC );
-}
-
-export function transformAttachment( attachment: RestAttachment ): Attachment {
-	return {
-		id: attachment.id,
-		alt: attachment.alt_text,
-		caption: attachment.caption?.raw ?? '',
-		title: attachment.title.raw,
-		url: attachment.source_url,
-		mimeType: attachment.mime_type,
-		blurHash: attachment.mexp_blurhash,
-		dominantColor: attachment.mexp_dominant_color,
-		posterId: attachment.featured_media,
-		missingImageSizes: attachment.missing_image_sizes,
-		fileName: attachment.mexp_filename,
-		media_details: attachment.media_details,
-	} as Attachment;
 }

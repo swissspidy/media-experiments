@@ -1,14 +1,9 @@
 import { __, sprintf } from '@wordpress/i18n';
-import { dispatch } from '@wordpress/data';
 
-import { store as uploadStore } from './store';
-import type {
-	AdditionalData,
-	OnChangeHandler,
-	OnErrorHandler,
-} from './store/types';
+import type { AdditionalData, OnChangeHandler, OnErrorHandler } from './types';
 import { UploadError } from './uploadError';
-import { canTranscodeFile, getMimeTypesArray } from './utils';
+import { uploadToServer } from './uploadToServer';
+import { getMimeTypesArray } from './getMimeTypesArray';
 
 const noop = () => {};
 
@@ -36,9 +31,7 @@ interface UploadMediaArgs {
  * Performs some client-side file processing before eventually
  * uploading the media to WordPress.
  *
- * Similar to the mediaUpload() function from @wordpress/editor,
- * this is a wrapper around uploadMedia() from @wordpress/media-utils
- * that injects the current post ID.
+ * Similar to the mediaUpload() function from @wordpress/editor.
  *
  * @param {Object}   $0                    Parameters object passed to the function.
  * @param {?Array}   $0.allowedTypes       Array with the types of media that can be uploaded, if unset all types are allowed.
@@ -85,11 +78,11 @@ export function uploadMedia( {
 	for ( const mediaFile of filesList ) {
 		// Verify if user is allowed to upload this mime type.
 		// Defer to the server when type not detected.
+		// TODO: Call canTranscodeFile( mediaFile )
 		if (
 			allowedMimeTypesForUser &&
 			mediaFile.type &&
-			! isAllowedMimeTypeForUser( mediaFile.type ) &&
-			! canTranscodeFile( mediaFile )
+			! isAllowedMimeTypeForUser( mediaFile.type )
 		) {
 			onError(
 				new UploadError( {
@@ -169,14 +162,11 @@ export function uploadMedia( {
 
 	// TODO: why exactly is HEIF slipping through here?
 
-	if ( validFiles.length > 0 ) {
-		void dispatch( uploadStore ).addItems( {
-			files: validFiles,
-			onChange: onFileChange,
-			onError,
-			additionalData: {
-				...additionalData,
-			},
-		} );
-	}
+	// TODO: Pass AbortController signal.
+	// TODO: Call onSuccess.
+
+	validFiles.map( async ( file ) => {
+		const attachment = await uploadToServer( file, additionalData );
+		return onFileChange?.( [ attachment ] );
+	} );
 }

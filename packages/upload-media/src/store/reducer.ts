@@ -19,7 +19,10 @@ import {
 	type State,
 	Type,
 	type UnknownAction,
+	type UpdateSettingsAction,
 } from './types';
+
+const noop = () => {};
 
 const DEFAULT_STATE: State = {
 	queue: [],
@@ -27,6 +30,10 @@ const DEFAULT_STATE: State = {
 	imageSizes: {},
 	queueStatus: 'active',
 	blobUrls: {},
+	settings: {
+		mediaUpload: noop,
+		mediaSideload: noop,
+	},
 };
 
 type Action =
@@ -46,6 +53,7 @@ type Action =
 	| SetMediaSourceTermsAction
 	| CacheBlobUrlAction
 	| RevokeBlobUrlsAction
+	| UpdateSettingsAction
 	| UnknownAction;
 
 function reducer(
@@ -256,6 +264,16 @@ function reducer(
 			return {
 				...state,
 				blobUrls: newBlobUrls,
+			};
+		}
+
+		case Type.UpdateSettings: {
+			return {
+				...state,
+				settings: {
+					...state.settings,
+					...action.settings,
+				},
 			};
 		}
 	}

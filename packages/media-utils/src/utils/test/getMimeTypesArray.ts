@@ -1,4 +1,4 @@
-import { getMimeTypesArray } from '../utils';
+import { getMimeTypesArray } from '../getMimeTypesArray';
 
 describe( 'getMimeTypesArray', () => {
 	it( 'should return an empty array if it is "falsy" e.g: undefined or null', () => {

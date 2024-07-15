@@ -1,9 +1,11 @@
-import { type Attachment, store as uploadStore } from '@mexp/upload-media';
 import { isBlobURL } from '@wordpress/blob';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
 import { Button, PanelRow } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+
+import type { Attachment } from '@mexp/media-utils';
+import { store as uploadStore } from '@mexp/upload-media';
 
 import { useAttachment, useIsUploadingByUrl } from '../utils/hooks';
 

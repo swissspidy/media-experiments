@@ -9,7 +9,7 @@ import { getExtensionFromMimeType, getMediaTypeFromMimeType } from '@mexp/mime';
 import { start } from '@mexp/log';
 
 import { ImageFile } from '../imageFile';
-import { UploadError } from '../uploadError';
+import { MediaError } from '../mediaError';
 import {
 	canTranscodeFile,
 	fetchFile,
@@ -22,7 +22,6 @@ import {
 	renameFile,
 	getFileBasename,
 } from '../utils';
-import { sideloadFile, updateMediaItem, uploadToServer } from '../api';
 import { PREFERENCES_NAME } from '../constants';
 import { transcodeHeifImage } from './utils/heif';
 import {
@@ -47,7 +46,6 @@ import type {
 	BatchId,
 	CacheBlobUrlAction,
 	CancelAction,
-	CreateRestAttachment,
 	ImageFormat,
 	ImageLibrary,
 	ImageSizeCrop,
@@ -71,9 +69,11 @@ import type {
 	RevokeBlobUrlsAction,
 	SetImageSizesAction,
 	SetMediaSourceTermsAction,
+	Settings,
 	SideloadAdditionalData,
 	State,
 	ThumbnailGeneration,
+	UpdateSettingsAction,
 	VideoFormat,
 } from './types';
 import { ItemStatus, OperationType, Type } from './types';
@@ -148,6 +148,23 @@ type ThunkArgs = {
 	dispatch: ActionCreators;
 	registry: WPDataRegistry;
 };
+
+/**
+ * Returns an action object that pauses all processing in the queue.
+ *
+ * Useful for testing purposes.
+ *
+ * @param settings
+ * @return Action object.
+ */
+export function updateSettings(
+	settings: Partial< Settings >
+): UpdateSettingsAction {
+	return {
+		type: Type.UpdateSettings,
+		settings,
+	};
+}
 
 interface AddItemArgs {
 	file: File;
@@ -666,20 +683,7 @@ export function optimizeExistingItem( {
 					...additionalData,
 				},
 				onChange,
-				onSuccess: async ( [ attachment ] ) => {
-					onSuccess?.( [ attachment ] );
-					// Update the original attachment in the DB to have
-					// a reference to the optimized version.
-					void updateMediaItem(
-						id,
-						{
-							meta: {
-								mexp_optimized_id: attachment.id,
-							},
-						},
-						abortController.signal
-					);
-				},
+				onSuccess,
 				onBatchSuccess,
 				onError,
 				sourceUrl: url,
@@ -738,13 +742,14 @@ export function processItem( id: QueueItemId ) {
 
 		// If we're sideloading a thumbnail, pause upload to avoid race conditions.
 		// It will be resumed after the previous upload finishes.
+		// TODO: Do this in the WP layer instead.
 		if (
 			operation === OperationType.Upload &&
 			item.parentId &&
 			item.additionalData.post
 		) {
 			const isAlreadyUploading = select.isUploadingToPost(
-				item.additionalData.post
+				item.additionalData.post as number
 			);
 			if ( isAlreadyUploading ) {
 				dispatch< PauseItemAction >( {
@@ -1334,10 +1339,12 @@ export function uploadPoster( id: QueueItemId ) {
 						// video item in the editor with the newly uploaded poster.
 						item.onChange?.( [ updatedAttachment ] );
 					},
+					/*
 					onSuccess: async ( [ posterAttachment ] ) => {
 						// Similarly, update the original video in the DB to have the
 						// poster as the featured image.
-						// TODO: Do this server-side instead.
+						// TODO: Do this server-side instead?
+						// TODO: Move to WP specific package.
 						void updateMediaItem(
 							attachment.id,
 							{
@@ -1350,6 +1357,7 @@ export function uploadPoster( id: QueueItemId ) {
 							abortController.signal
 						);
 					},
+					*/
 					additionalData: {
 						// Reminder: Parent post ID might not be set, depending on context,
 						// but should be carried over if it does.
@@ -1550,7 +1558,7 @@ export function rejectApproval( id: number ) {
 
 		dispatch.cancelItem(
 			item.id,
-			new UploadError( {
+			new MediaError( {
 				code: 'UPLOAD_CANCELLED',
 				message: 'File upload was cancelled',
 				file: item.file,
@@ -1816,7 +1824,7 @@ export function optimizeImageItem(
 				id,
 				error instanceof Error
 					? error
-					: new UploadError( {
+					: new MediaError( {
 							code: 'MEDIA_TRANSCODING_ERROR',
 							message: 'File could not be uploaded',
 							file: item.file,
@@ -1893,7 +1901,7 @@ export function optimizeVideoItem( id: QueueItemId ) {
 				id,
 				error instanceof Error
 					? error
-					: new UploadError( {
+					: new MediaError( {
 							code: 'VIDEO_TRANSCODING_ERROR',
 							message: 'File could not be uploaded',
 							file: item.file,
@@ -1939,7 +1947,7 @@ export function muteVideoItem( id: QueueItemId ) {
 				id,
 				error instanceof Error
 					? error
-					: new UploadError( {
+					: new MediaError( {
 							code: 'VIDEO_MUTING_ERROR',
 							message: 'File could not be uploaded',
 							file: item.file,
@@ -2007,7 +2015,7 @@ export function optimizeAudioItem( id: QueueItemId ) {
 				id,
 				error instanceof Error
 					? error
-					: new UploadError( {
+					: new MediaError( {
 							code: 'AUDIO_TRANSCODING_ERROR',
 							message: 'File could not be uploaded',
 							file: item.file,
@@ -2082,7 +2090,7 @@ export function convertGifItem( id: QueueItemId ) {
 				id,
 				error instanceof Error
 					? error
-					: new UploadError( {
+					: new MediaError( {
 							code: 'VIDEO_TRANSCODING_ERROR',
 							message: 'File could not be uploaded',
 							file: item.file,
@@ -2122,7 +2130,7 @@ export function convertHeifItem( id: QueueItemId ) {
 				id,
 				error instanceof Error
 					? error
-					: new UploadError( {
+					: new MediaError( {
 							code: 'IMAGE_TRANSCODING_ERROR',
 							message: 'File could not be uploaded',
 							file: item.file,
@@ -2212,7 +2220,7 @@ export function resizeCropItem( id: QueueItemId, args?: ResizeCropItemArgs ) {
 				id,
 				error instanceof Error
 					? error
-					: new UploadError( {
+					: new MediaError( {
 							code: 'IMAGE_TRANSCODING_ERROR',
 							message: 'File could not be uploaded',
 							file: item.file,
@@ -2235,7 +2243,7 @@ export function uploadItem( id: QueueItemId ) {
 
 		const { poster } = item;
 
-		const additionalData: Partial< CreateRestAttachment > = {
+		const additionalData: Record< string, unknown > = {
 			...item.additionalData,
 			mexp_media_source: item.mediaSourceTerms
 				?.map( ( slug ) => select.getMediaSourceTermId( slug ) )
@@ -2334,48 +2342,39 @@ export function uploadItem( id: QueueItemId ) {
 			}
 		}
 
-		try {
-			const attachment = await uploadToServer(
-				item.file,
-				additionalData,
-				item.abortController?.signal
-			);
+		select.getSettings().mediaUpload( {
+			filesList: [ item.file ],
+			additionalData,
+			signal: item.abortController?.signal,
+			onFileChange: ( [ attachment ] ) => {
+				// TODO: Check if a poster happened to be generated on the server side already (check attachment.posterId !== 0).
+				// In that case there is no need for client-side generation.
+				// Instead, get the poster URL from the ID. Maybe async within the finishUploading() action?
+				if ( 'video' === mediaType ) {
+					// The newly uploaded file won't have a poster yet.
+					// However, we'll likely still have one on file.
+					// Add it back so we're never without one.
+					if ( item.attachment?.poster ) {
+						attachment.poster = item.attachment.poster;
+					} else if ( poster ) {
+						attachment.poster = createBlobURL( poster );
 
-			// TODO: Check if a poster happened to be generated on the server side already (check attachment.posterId !== 0).
-			// In that case there is no need for client-side generation.
-			// Instead, get the poster URL from the ID. Maybe async within the finishUploading() action?
-			if ( 'video' === mediaType ) {
-				// The newly uploaded file won't have a poster yet.
-				// However, we'll likely still have one on file.
-				// Add it back so we're never without one.
-				if ( item.attachment?.poster ) {
-					attachment.poster = item.attachment.poster;
-				} else if ( poster ) {
-					attachment.poster = createBlobURL( poster );
-
-					dispatch< CacheBlobUrlAction >( {
-						type: Type.CacheBlobUrl,
-						id,
-						blobUrl: attachment.poster,
-					} );
+						dispatch< CacheBlobUrlAction >( {
+							type: Type.CacheBlobUrl,
+							id,
+							blobUrl: attachment.poster,
+						} );
+					}
 				}
-			}
 
-			dispatch.finishOperation( id, {
-				attachment,
-			} );
-		} catch ( err ) {
-			const error =
-				err instanceof Error
-					? err
-					: new UploadError( {
-							code: 'UNKNOWN_UPLOAD_ERROR',
-							message: 'File could not be uploaded',
-							file: item.file,
-					  } );
-
-			dispatch.cancelItem( id, error );
-		}
+				dispatch.finishOperation( id, {
+					attachment,
+				} );
+			},
+			onError: ( error ) => {
+				dispatch.cancelItem( id, error );
+			},
+		} );
 	};
 }
 
@@ -2391,30 +2390,20 @@ export function sideloadItem( id: QueueItemId ) {
 		const { post, ...additionalData } =
 			item.additionalData as SideloadAdditionalData;
 
-		try {
-			const attachment = await sideloadFile(
-				item.file,
-				post,
-				additionalData,
-				item.abortController?.signal
-			);
-
-			dispatch.finishOperation( id, { attachment } );
-		} catch ( err ) {
-			const error =
-				err instanceof Error
-					? err
-					: new UploadError( {
-							code: 'UNKNOWN_UPLOAD_ERROR',
-							message: 'File could not be uploaded',
-							file: item.file,
-					  } );
-
-			dispatch.cancelItem( id, error );
-		} finally {
-			// Avoid race conditions by uploading items sequentially.
-			dispatch.resumeItem( post );
-		}
+		select.getSettings().mediaSideload( {
+			file: item.file,
+			attachmentId: post as number,
+			additionalData,
+			signal: item.abortController?.signal,
+			onFileChange: ( [ attachment ] ) => {
+				dispatch.finishOperation( id, { attachment } );
+				dispatch.resumeItem( post as number );
+			},
+			onError: ( error ) => {
+				dispatch.cancelItem( id, error );
+				dispatch.resumeItem( post as number );
+			},
+		} );
 	};
 }
 
@@ -2462,7 +2451,7 @@ export function fetchRemoteFile( id: QueueItemId, args: FetchRemoteFileArgs ) {
 				id,
 				error instanceof Error
 					? error
-					: new UploadError( {
+					: new MediaError( {
 							code: 'FETCH_REMOTE_FILE_ERROR',
 							message: 'Remote file could not be downloaded',
 							file: item.file,
@@ -2509,7 +2498,7 @@ export function generateSubtitles( id: QueueItemId ) {
 				id,
 				error instanceof Error
 					? error
-					: new UploadError( {
+					: new MediaError( {
 							code: 'FETCH_REMOTE_FILE_ERROR',
 							message: 'Remote file could not be downloaded',
 							file: item.file,

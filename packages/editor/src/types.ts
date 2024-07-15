@@ -1,7 +1,7 @@
 import type { BlockInstance } from '@wordpress/blocks';
 
+import type { Attachment } from '@mexp/media-utils';
 import type {
-	Attachment,
 	AudioFormat,
 	ImageFormat,
 	ImageLibrary,

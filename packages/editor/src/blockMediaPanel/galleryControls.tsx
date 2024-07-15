@@ -5,11 +5,8 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as coreStore } from '@wordpress/core-data';
 import { createBlock } from '@wordpress/blocks';
 
-import {
-	type Attachment,
-	type RestAttachment,
-	store as uploadStore,
-} from '@mexp/upload-media';
+import type { Attachment, RestAttachment } from '@mexp/media-utils';
+import { store as uploadStore } from '@mexp/upload-media';
 
 import { BulkOptimization } from '../components/bulkOptimization';
 import type { BulkOptimizationAttachmentData } from '../types';

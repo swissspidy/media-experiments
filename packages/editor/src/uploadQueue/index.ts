@@ -1,14 +1,12 @@
-import { uploadMedia as originalUploadMedia } from '@mexp/upload-media';
-
 import { dispatch, select, subscribe } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as editorStore } from '@wordpress/editor';
 
-type OnErrorHandler = ( message: string ) => void;
-
-type UploadMediaArgs = Parameters< typeof originalUploadMedia >[ 0 ] & {
-	onError?: OnErrorHandler;
-};
+import {
+	uploadMedia as originalUploadMedia,
+	sideloadMedia as originalSideloadMedia,
+} from '@mexp/media-utils';
+import { store as uploadStore } from '@mexp/upload-media';
 
 const noop = () => {};
 
@@ -16,11 +14,8 @@ const noop = () => {};
  * Upload a media file when the file upload button is activated
  * or when adding a file to the editor via drag & drop.
  *
- * Performs some client-side file processing before eventually
- * uploading the media to WordPress.
- *
  * Similar to the mediaUpload() function from @wordpress/editor,
- * this is a wrapper around uploadMedia() from @wordpress/media-utils
+ * this is a wrapper around uploadMedia() from @mexp/media-utils
  * that injects the current post ID.
  *
  * @param args
@@ -31,14 +26,14 @@ const noop = () => {};
  * @param args.onError
  * @param args.onFileChange
  */
-function uploadMedia( {
+function editorUploadMedia( {
 	allowedTypes,
 	additionalData = {},
 	filesList,
 	maxUploadFileSize,
 	onError = noop,
 	onFileChange,
-}: UploadMediaArgs ) {
+}: Parameters< typeof originalUploadMedia >[ 0 ] ) {
 	const { getCurrentPost, getEditorSettings } = select( editorStore );
 	const wpAllowedMimeTypes = getEditorSettings().allowedMimeTypes;
 	maxUploadFileSize =
@@ -61,8 +56,43 @@ function uploadMedia( {
 			...additionalData,
 		},
 		maxUploadFileSize,
-		onError: ( { message }: Error ) => onError( message ),
+		onError,
 		wpAllowedMimeTypes,
+	} );
+}
+
+/**
+ * Upload a media file when the file upload button is activated
+ * or when adding a file to the editor via drag & drop.
+ *
+ * This function is intended to eventually live
+ * in the @wordpress/block-editor package, allowing
+ * to perform the client-side file processing before eventually
+ * uploading the media to WordPress.
+ *
+ * @param args
+ * @param args.allowedTypes
+ * @param args.additionalData
+ * @param args.filesList
+ * @param args.maxUploadFileSize
+ * @param args.onError
+ * @param args.onFileChange
+ */
+function blockEditorUploadMedia( {
+	// allowedTypes,
+	additionalData = {},
+	filesList,
+	// maxUploadFileSize,
+	onError = noop,
+	onFileChange,
+}: Parameters< typeof originalUploadMedia >[ 0 ] & {
+	onError?: ( message: string ) => void;
+} ) {
+	void dispatch( uploadStore ).addItems( {
+		files: filesList,
+		onChange: onFileChange,
+		onError: ( { message }: Error ) => onError( message ),
+		additionalData,
 	} );
 }
 
@@ -77,14 +107,24 @@ subscribe( () => {
 	}
 
 	if (
-		select( blockEditorStore ).getSettings().mediaUpload === uploadMedia
+		select( blockEditorStore ).getSettings().mediaUpload ===
+		blockEditorUploadMedia
 	) {
 		return;
 	}
 
-	void dispatch( blockEditorStore ).updateSettings( {
-		mediaUpload: uploadMedia,
+	// Make the upload queue aware of the function for uploading to the server.
+	void dispatch( uploadStore ).updateSettings( {
+		mediaUpload: editorUploadMedia,
+		mediaSideload: originalSideloadMedia,
 	} );
+
+	// Update block-editor with the new function that moves everything through a queue.
+	void dispatch( blockEditorStore ).updateSettings( {
+		mediaUpload: blockEditorUploadMedia,
+	} );
+
+	// TODO: Pass `uploadMedia` to uploadStore
 
 	// addFilter(
 	// 	'editor.MediaUpload',

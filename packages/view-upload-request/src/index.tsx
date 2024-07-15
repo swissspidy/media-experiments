@@ -19,11 +19,8 @@ import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 
-import {
-	type Attachment,
-	uploadMedia,
-	store as uploadStore,
-} from '@mexp/upload-media';
+import { type Attachment, uploadMedia } from '@mexp/media-utils';
+import { store as uploadStore } from '@mexp/upload-media';
 
 import './view.css';
 
