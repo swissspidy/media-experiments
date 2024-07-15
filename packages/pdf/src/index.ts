@@ -1,6 +1,6 @@
 import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist';
 
-import { getExtensionFromMimeType } from '@mexp/media-utils';
+import { getExtensionFromMimeType } from '@mexp/mime';
 
 // Setting worker path to worker bundle.
 GlobalWorkerOptions.workerSrc = PDFJS_CDN_URL;

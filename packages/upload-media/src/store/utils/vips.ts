@@ -1,10 +1,7 @@
 import { createWorkerFactory } from '@shopify/web-worker';
 
-import {
-	ImageFile,
-	getExtensionFromMimeType,
-	getFileBasename,
-} from '@mexp/media-utils';
+import { ImageFile, getFileBasename } from '@mexp/media-utils';
+import { getExtensionFromMimeType } from '@mexp/mime';
 
 import type { ImageSizeCrop, QueueItemId } from '../types';
 

@@ -7,12 +7,11 @@ import { store as preferencesStore } from '@wordpress/preferences';
 
 import {
 	cloneFile,
-	getExtensionFromMimeType,
 	getFileBasename,
-	getMediaTypeFromMimeType,
 	ImageFile,
 	renameFile,
 } from '@mexp/media-utils';
+import { getExtensionFromMimeType, getMediaTypeFromMimeType } from '@mexp/mime';
 import { start } from '@mexp/log';
 
 import { UploadError } from '../uploadError';

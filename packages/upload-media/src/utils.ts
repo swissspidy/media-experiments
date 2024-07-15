@@ -1,8 +1,5 @@
-import {
-	getExtensionFromMimeType,
-	getFileExtension,
-	getMimeTypeFromExtension,
-} from '@mexp/media-utils';
+import { getFileExtension } from '@mexp/media-utils';
+import { getExtensionFromMimeType, getMimeTypeFromExtension } from '@mexp/mime';
 
 import {
 	MEDIA_TRANSCODING_MAX_FILE_SIZE,

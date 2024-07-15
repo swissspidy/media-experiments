@@ -6,7 +6,7 @@ import { ImageCapture } from 'image-capture';
 import { createBlobURL, revokeBlobURL } from '@wordpress/blob';
 import { dateI18n } from '@wordpress/date';
 
-import { getExtensionFromMimeType } from '@mexp/media-utils';
+import { getExtensionFromMimeType } from '@mexp/mime';
 
 import {
 	COUNTDOWN_TIME_IN_SECONDS,
@@ -550,7 +550,7 @@ export function captureImage() {
 							new Date(),
 							undefined
 						) }.${ ext }`,
-						{ type },
+						{ type }
 					);
 					const url = createBlobURL( file );
 

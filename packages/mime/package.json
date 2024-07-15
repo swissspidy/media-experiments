@@ -1,21 +1,20 @@
 {
-	"name": "@mexp/pdf",
+	"name": "@mexp/mime",
 	"version": "0.0.1",
-	"description": "PDF utils",
+	"description": "Mime type related utils",
 	"private": true,
 	"author": "",
 	"license": "GPL-2.0-or-later",
 	"keywords": [
 		"wordpress",
 		"media",
-		"pdf",
-		"pdf.js"
+		"mimetype"
 	],
-	"homepage": "https://github.com/swissspidy/media-experiments/tree/HEAD/packages/pdf/README.md",
+	"homepage": "https://github.com/swissspidy/media-experiments/tree/HEAD/packages/mime/README.md",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/swissspidy/media-experiments.git",
-		"directory": "packages/pdf"
+		"directory": "packages/mime"
 	},
 	"bugs": {
 		"url": "https://github.com/swissspidy/media-experiments/issues"
@@ -32,7 +31,6 @@
 		}
 	},
 	"dependencies": {
-		"@mexp/mime": "../mime",
-		"pdfjs-dist": "^4.4.168"
+		"mime": "^3.0.0"
 	}
 }

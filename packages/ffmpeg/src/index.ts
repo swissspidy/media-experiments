@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
-import { getExtensionFromMimeType, getFileBasename } from '@mexp/media-utils';
+import { getFileBasename } from '@mexp/media-utils';
+import { getExtensionFromMimeType } from '@mexp/mime';
 import type { FFmpeg } from '@ffmpeg/ffmpeg';
 
 const VIDEO_CODEC: Record< string, string > = {

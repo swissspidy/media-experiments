@@ -1,6 +1,7 @@
 import { createWorkerFactory } from '@shopify/web-worker';
 
-import { getExtensionFromMimeType, getFileBasename } from '@mexp/media-utils';
+import { getFileBasename } from '@mexp/media-utils';
+import { getExtensionFromMimeType } from '@mexp/mime';
 
 const createHeifWorker = createWorkerFactory(
 	() => import( /* webpackChunkName: 'heif' */ '@mexp/heif' )

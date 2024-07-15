@@ -18,29 +18,6 @@ _Returns_
 
 -   `File`: New file object.
 
-### getExtensionFromMimeType
-
-Returns the file extension for a given mime type.
-
-_Usage_
-
-```js
-import { getExtensionFromMimeType } from '@mexp/media-utils';
-
-getExtensionFromMimeType( 'image/jpeg' ) // Returns '.jpeg'
-getExtensionFromMimeType( 'video/mp4' ) // Returns '.mp4'
-getExtensionFromMimeType( 'audio/mp3' ) // Returns '.mp3'
-getExtensionFromMimeType( 'application/pdf' ) // Returns '.pdf'
-```
-
-_Parameters_
-
--   _mimeType_ `string`: Mime type.
-
-_Returns_
-
--   `string | null`: File extension or null if it could not be found.
-
 ### getFileBasename
 
 Returns file basename without extension.
@@ -66,52 +43,6 @@ _Parameters_
 _Returns_
 
 -   `string | null`: File extension or null if it does not have one.
-
-### getMediaTypeFromMimeType
-
-Returns the media type from a given mime type.
-
-_Usage_
-
-```js
-import { getMediaTypeFromMimeType } from '@mexp/media-utils';
-
-getMediaTypeFromMimeType( 'image/jpeg' ) // Returns 'image'
-getMediaTypeFromMimeType( 'video/mpeg' ) // Returns 'video'
-getMediaTypeFromMimeType( 'audio/mpeg' ) // Returns 'audio'
-getMediaTypeFromMimeType( 'application/pdf' ) // Returns 'pdf'
-```
-
-_Parameters_
-
--   _mimeType_ `string`: Mime type.
-
-_Returns_
-
--   `string`: Media type.
-
-### getMimeTypeFromExtension
-
-Get the mime type for a given file extension.
-
-_Usage_
-
-```js
-import { getMimeTypeFromExtension } from '@mexp/media-utils';
-
-getMimeTypeFromExtension( '.jpeg' ) // Returns 'image/jpeg'
-getMimeTypeFromExtension( '.mp4' ) // Returns 'video/mp4'
-getMimeTypeFromExtension( '.mp3' ) // Returns 'video/mp3'
-getMimeTypeFromExtension( '.pdf' ) // Returns 'application/pdf'
-```
-
-_Parameters_
-
--   _ext_ `string`: File extension.
-
-_Returns_
-
--   `string | null`: Mime type or null if it could not be found.
 
 ### ImageFile
 

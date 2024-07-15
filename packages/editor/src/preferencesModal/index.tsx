@@ -11,7 +11,7 @@ import {
 import { store as preferencesStore } from '@wordpress/preferences';
 
 import type { ImageFormat } from '@mexp/upload-media';
-import { getExtensionFromMimeType } from '@mexp/media-utils';
+import { getExtensionFromMimeType } from '@mexp/mime';
 import { store as interfaceStore } from '@mexp/interface';
 
 import type { MediaPreferences } from '../types';
