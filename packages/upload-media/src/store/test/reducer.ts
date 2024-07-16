@@ -41,8 +41,8 @@ describe( 'reducer', () => {
 				queueStatus: 'active',
 				blobUrls: {},
 				settings: {
-					mediaUpload: jest.fn(),
-					mediaSideload: jest.fn(),
+					mediaUpload: expect.any( Function ),
+					mediaSideload: expect.any( Function ),
 				},
 				queue: [
 					{
@@ -92,8 +92,8 @@ describe( 'reducer', () => {
 				queueStatus: 'active',
 				blobUrls: {},
 				settings: {
-					mediaUpload: jest.fn(),
-					mediaSideload: jest.fn(),
+					mediaUpload: expect.any( Function ),
+					mediaSideload: expect.any( Function ),
 				},
 				queue: [
 					{
@@ -142,6 +142,10 @@ describe( 'reducer', () => {
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
+				settings: {
+					mediaUpload: expect.any( Function ),
+					mediaSideload: expect.any( Function ),
+				},
 				queue: [
 					{
 						id: '2',
@@ -184,6 +188,10 @@ describe( 'reducer', () => {
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
+				settings: {
+					mediaUpload: expect.any( Function ),
+					mediaSideload: expect.any( Function ),
+				},
 				queue: [
 					{
 						id: '1',
@@ -230,6 +238,10 @@ describe( 'reducer', () => {
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
+				settings: {
+					mediaUpload: expect.any( Function ),
+					mediaSideload: expect.any( Function ),
+				},
 				queue: [
 					{
 						id: '1',
@@ -274,6 +286,10 @@ describe( 'reducer', () => {
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
+				settings: {
+					mediaUpload: expect.any( Function ),
+					mediaSideload: expect.any( Function ),
+				},
 				queue: [
 					{
 						id: '1',
@@ -329,6 +345,10 @@ describe( 'reducer', () => {
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
+				settings: {
+					mediaUpload: expect.any( Function ),
+					mediaSideload: expect.any( Function ),
+				},
 				queue: [
 					{
 						id: '1',
@@ -389,6 +409,10 @@ describe( 'reducer', () => {
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
+				settings: {
+					mediaUpload: expect.any( Function ),
+					mediaSideload: expect.any( Function ),
+				},
 				queue: [
 					{
 						id: '1',
