@@ -16,13 +16,19 @@ import {
 	__experimentalText as Text,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { dispatch, useDispatch, useSelect } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 
-import { type Attachment, uploadMedia } from '@mexp/media-utils';
+import { type Attachment, uploadMedia, sideloadMedia } from '@mexp/media-utils';
 import { store as uploadStore } from '@mexp/upload-media';
 
 import './view.css';
+
+// Make the upload queue aware of the function for uploading to the server.
+void dispatch( uploadStore ).updateSettings( {
+	mediaUpload: uploadMedia,
+	mediaSideload: sideloadMedia,
+} );
 
 function App() {
 	const { createErrorNotice, createSuccessNotice, removeNotice } =
