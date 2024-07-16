@@ -19,15 +19,107 @@ import { __ } from '@wordpress/i18n';
 import { dispatch, useDispatch, useSelect } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 
-import { type Attachment, uploadMedia, sideloadMedia } from '@mexp/media-utils';
-import { store as uploadStore } from '@mexp/upload-media';
+import {
+	type Attachment,
+	uploadMedia as originalUploadMedia,
+	sideloadMedia as originalSideloadMedia,
+	validateFileSize,
+	validateMimeType,
+} from '@mexp/media-utils';
+import { store as uploadStore, canTranscodeFile } from '@mexp/upload-media';
 
 import './view.css';
+
+/**
+ * Upload a media file when the file upload button is activated.
+ *
+ * Similar to the mediaUpload() function from @wordpress/editor,
+ * this is a wrapper around uploadMedia() from @mexp/media-utils.
+ *
+ * @param $0
+ * @param $0.additionalData
+ * @param $0.filesList
+ * @param $0.onError
+ * @param $0.onFileChange
+ */
+function uploadMedia( {
+	additionalData = {},
+	filesList,
+	onError = noop,
+	onFileChange,
+}: Parameters< typeof originalUploadMedia >[ 0 ] ) {
+	originalUploadMedia( {
+		allowedTypes: window.mediaExperiments.allowedTypes,
+		wpAllowedMimeTypes: window.mediaExperiments.allowedMimeTypes,
+		maxUploadFileSize: window.mediaExperiments.maxUploadFileSize,
+		filesList,
+		additionalData,
+		onFileChange,
+		onError,
+	} );
+}
+
+const noop = () => {};
+
+/**
+ * Upload a media file when the file upload button is activated.
+ *
+ * @param $0
+ * @param $0.allowedTypes
+ * @param $0.additionalData
+ * @param $0.filesList
+ * @param $0.maxUploadFileSize
+ * @param $0.onError
+ * @param $0.onFileChange
+ */
+function uploadRequestUploadMedia( {
+	allowedTypes,
+	additionalData = {},
+	filesList,
+	maxUploadFileSize,
+	onError = noop,
+	onFileChange,
+}: Parameters< typeof originalUploadMedia >[ 0 ] ) {
+	const validFiles = [];
+
+	for ( const mediaFile of filesList ) {
+		// Check if the caller (e.g. a block) supports this mime type.
+		// Defer to the server when type not detected.
+		if ( ! canTranscodeFile( mediaFile ) ) {
+			try {
+				validateMimeType( mediaFile, allowedTypes );
+			} catch ( error: unknown ) {
+				onError( error as Error );
+				continue;
+			}
+		}
+
+		// Verify if file is greater than the maximum file upload size allowed for the site.
+		// TODO: Consider removing, as file could potentially be compressed first.
+		try {
+			validateFileSize( mediaFile, maxUploadFileSize );
+		} catch ( error: unknown ) {
+			onError( error as Error );
+			continue;
+		}
+
+		validFiles.push( mediaFile );
+	}
+
+	void dispatch( uploadStore ).addItems( {
+		files: validFiles,
+		onChange: onFileChange,
+		onError,
+		additionalData,
+	} );
+}
 
 // Make the upload queue aware of the function for uploading to the server.
 void dispatch( uploadStore ).updateSettings( {
 	mediaUpload: uploadMedia,
-	mediaSideload: sideloadMedia,
+	mediaSideload: originalSideloadMedia,
+	validateFileSize,
+	validateMimeType,
 } );
 
 function App() {
@@ -67,12 +159,10 @@ function App() {
 	);
 
 	const onUpload = ( event: ChangeEvent< HTMLInputElement > ) => {
-		uploadMedia( {
-			allowedTypes: window.mediaExperiments.allowedTypes,
+		uploadRequestUploadMedia( {
 			filesList: event.target.files ? [ ...event.target.files ] : [],
-			wpAllowedMimeTypes: window.mediaExperiments.allowedMimeTypes,
-			onError: ( message ) => {
-				void createErrorNotice( message.message, { type: 'snackbar' } );
+			onError: ( error ) => {
+				void createErrorNotice( error.message, { type: 'snackbar' } );
 			},
 			additionalData: {
 				upload_request: window.mediaExperiments.uploadRequest,

@@ -5,8 +5,10 @@ import { store as editorStore } from '@wordpress/editor';
 import {
 	uploadMedia as originalUploadMedia,
 	sideloadMedia as originalSideloadMedia,
+	validateFileSize,
+	validateMimeType,
 } from '@mexp/media-utils';
-import { store as uploadStore } from '@mexp/upload-media';
+import { store as uploadStore, canTranscodeFile } from '@mexp/upload-media';
 
 const noop = () => {};
 
@@ -18,13 +20,13 @@ const noop = () => {};
  * this is a wrapper around uploadMedia() from @mexp/media-utils
  * that injects the current post ID.
  *
- * @param args
- * @param args.allowedTypes
- * @param args.additionalData
- * @param args.filesList
- * @param args.maxUploadFileSize
- * @param args.onError
- * @param args.onFileChange
+ * @param $0
+ * @param $0.allowedTypes
+ * @param $0.additionalData
+ * @param $0.filesList
+ * @param $0.maxUploadFileSize
+ * @param $0.onError
+ * @param $0.onFileChange
  */
 function editorUploadMedia( {
 	allowedTypes,
@@ -70,26 +72,60 @@ function editorUploadMedia( {
  * to perform the client-side file processing before eventually
  * uploading the media to WordPress.
  *
- * @param args
- * @param args.allowedTypes
- * @param args.additionalData
- * @param args.filesList
- * @param args.maxUploadFileSize
- * @param args.onError
- * @param args.onFileChange
+ * @param $0
+ * @param $0.allowedTypes
+ * @param $0.additionalData
+ * @param $0.filesList
+ * @param $0.maxUploadFileSize
+ * @param $0.onError
+ * @param $0.onFileChange
  */
 function blockEditorUploadMedia( {
-	// allowedTypes,
+	allowedTypes,
 	additionalData = {},
 	filesList,
-	// maxUploadFileSize,
+	maxUploadFileSize,
 	onError = noop,
 	onFileChange,
 }: Parameters< typeof originalUploadMedia >[ 0 ] & {
 	onError?: ( message: string ) => void;
 } ) {
+	const validFiles = [];
+
+	const _validateMimeType = select( blockEditorStore ).getSettings()
+		.validateMimeType as undefined | typeof validateMimeType;
+
+	const _validateFileSize = select( blockEditorStore ).getSettings()
+		.validateFileSize as undefined | typeof validateFileSize;
+
+	for ( const mediaFile of filesList ) {
+		// Check if the caller (e.g. a block) supports this mime type.
+		// Defer to the server when type not detected.
+		if ( _validateMimeType && ! canTranscodeFile( mediaFile ) ) {
+			try {
+				_validateMimeType( mediaFile, allowedTypes );
+			} catch ( error: unknown ) {
+				onError( error as Error );
+				continue;
+			}
+		}
+
+		// Verify if file is greater than the maximum file upload size allowed for the site.
+		// TODO: Consider removing, as file could potentially be compressed first.
+		if ( _validateFileSize ) {
+			try {
+				_validateFileSize( mediaFile, maxUploadFileSize );
+			} catch ( error: unknown ) {
+				onError( error as Error );
+				continue;
+			}
+		}
+
+		validFiles.push( mediaFile );
+	}
+
 	void dispatch( uploadStore ).addItems( {
-		files: filesList,
+		files: validFiles,
 		onChange: onFileChange,
 		onError: ( { message }: Error ) => onError( message ),
 		additionalData,
@@ -117,6 +153,8 @@ subscribe( () => {
 	void dispatch( uploadStore ).updateSettings( {
 		mediaUpload: editorUploadMedia,
 		mediaSideload: originalSideloadMedia,
+		validateFileSize,
+		validateMimeType,
 	} );
 
 	// Update block-editor with the new function that moves everything through a queue.

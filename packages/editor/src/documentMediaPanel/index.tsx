@@ -79,7 +79,8 @@ function useMediaBlockAttachments() {
 							'src' in block.attributes
 								? block.attributes.poster
 								: block.attributes.url,
-						fileSize: 0,
+						mexp_filesize: 0,
+						mexp_filename: '',
 						isUploading: select( uploadStore ).isUploadingById(
 							block.attributes.id
 						),
@@ -102,11 +103,11 @@ function useMediaBlockAttachments() {
 
 						// TODO: Use fetchFile() as fallback.
 						if ( media.mexp_filesize ) {
-							attachment.fileSize = media.mexp_filesize;
+							attachment.mexp_filesize = media.mexp_filesize;
 						}
 
 						if ( media.mexp_filename ) {
-							attachment.fileName = media.mexp_filename;
+							attachment.mexp_filename = media.mexp_filename;
 						}
 					}
 

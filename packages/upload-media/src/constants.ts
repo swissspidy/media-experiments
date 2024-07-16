@@ -9,6 +9,7 @@ export const TRANSCODABLE_MIME_TYPES = [
 	'audio/mpeg',
 	'audio/ogg',
 	'audio/wav',
+	'image/avif',
 	'image/gif',
 	'image/heic',
 	'image/heif',

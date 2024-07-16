@@ -46,7 +46,7 @@ function Row( props: BulkOptimizationAttachmentData ) {
 		void optimizeExistingItem( {
 			id: props.id,
 			url: props.url,
-			fileName: props.fileName,
+			fileName: props.mexp_filename || undefined,
 			onSuccess: ( [ media ] ) => {
 				void updateBlockAttributes( props.clientId, {
 					id: media.id,
@@ -109,8 +109,8 @@ function Row( props: BulkOptimizationAttachmentData ) {
 					</Text>
 				</Tooltip>
 				<Text variant="muted">
-					{ props.fileSize
-						? numberFormatter.format( props.fileSize )
+					{ props.mexp_filesize
+						? numberFormatter.format( props.mexp_filesize )
 						: /* translators: unknown file size */
 						  __( '? KB', 'media-experiments' ) }
 				</Text>
@@ -151,7 +151,7 @@ function CompressAll( props: {
 				batchId,
 				id: attachment.id,
 				url: attachment.url,
-				fileName: attachment.fileName,
+				fileName: attachment.mexp_filename || undefined,
 				onSuccess: ( [ media ] ) => {
 					void updateBlockAttributes( attachment.clientId, {
 						id: media.id,

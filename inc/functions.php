@@ -385,6 +385,8 @@ function get_all_image_sizes(): array {
 /**
  * Register additional REST fields for attachments.
  *
+ * @todo Expose these in embed context as well?
+ *
  * @uses rest_get_attachment_filename
  * @uses rest_get_attachment_filesize
  */

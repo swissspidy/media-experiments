@@ -41,6 +41,11 @@ if ( $post instanceof WP_Post ) {
 	$accept        = get_post_meta( $post->ID, 'mexp_accept', true );
 	$multiple      = (bool) get_post_meta( $post->ID, 'mexp_multiple', true );
 
+	$max_upload_size = wp_max_upload_size();
+	if ( ! $max_upload_size ) {
+		$max_upload_size = 0;
+	}
+
 	add_filter(
 		'upload_mimes',
 		/**
@@ -71,12 +76,14 @@ if ( $post instanceof WP_Post ) {
 			window.mediaExperiments.uploadRequest = %2$s;
 			window.mediaExperiments.allowedTypes = %3$s;
 			window.mediaExperiments.accept = %4$s;
-			window.mediaExperiments.multiple = %5$s;',
+			window.mediaExperiments.multiple = %5$s;
+			window.mediaExperiments.maxUploadFileSize = %6$s;',
 			wp_json_encode( get_allowed_mime_types() ),
 			wp_json_encode( $post->post_name ),
 			wp_json_encode( $allowed_types ? (array) $allowed_types : null ),
 			wp_json_encode( $accept ? (array) $accept : null ),
 			wp_json_encode( $multiple ),
+			wp_json_encode( $max_upload_size )
 		),
 		'before'
 	);

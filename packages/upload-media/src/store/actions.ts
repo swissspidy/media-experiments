@@ -761,16 +761,7 @@ export function processItem( id: QueueItemId ) {
 		}
 
 		if ( attachment ) {
-			const { poster, ...media } = attachment;
-			// Video block expects such a structure for the poster.
-			// https://github.com/WordPress/gutenberg/blob/e0a413d213a2a829ece52c6728515b10b0154d8d/packages/block-library/src/video/edit.js#L154
-			if ( poster ) {
-				media.image = {
-					src: poster,
-				};
-			}
-
-			onChange?.( [ media ] );
+			onChange?.( [ attachment ] );
 		}
 
 		/*
@@ -1400,11 +1391,11 @@ export function generateThumbnails( id: QueueItemId ) {
 
 		if (
 			! item.parentId &&
-			attachment.missingImageSizes &&
+			attachment.missing_image_sizes &&
 			'server' !== thumbnailGeneration
 		) {
-			let file = attachment.fileName
-				? renameFile( item.file, attachment.fileName )
+			let file = attachment.mexp_filename
+				? renameFile( item.file, attachment.mexp_filename )
 				: item.file;
 			const batchId = uuidv4();
 
@@ -1443,7 +1434,7 @@ export function generateThumbnails( id: QueueItemId ) {
 				} );
 			}
 
-			for ( const name of attachment.missingImageSizes ) {
+			for ( const name of attachment.missing_image_sizes ) {
 				const imageSize = select.getImageSize( name );
 				if ( imageSize ) {
 					// Force thumbnails to be soft crops, see wp_generate_attachment_metadata().
@@ -1510,7 +1501,7 @@ export function uploadOriginal( id: QueueItemId ) {
 				item.file.wasResized &&
 				keepOriginal
 			) {
-				const originalName = attachment.fileName || item.file.name;
+				const originalName = attachment.mexp_filename || item.file.name;
 				const originalBaseName = getFileBasename( originalName );
 
 				// TODO: What if sourceFile is of type HEIC/HEIF?

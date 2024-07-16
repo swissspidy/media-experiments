@@ -171,27 +171,38 @@ interface SideloadMediaArgs {
 export type Settings = {
 	mediaUpload: ( args: UploadMediaArgs ) => void;
 	mediaSideload: ( args: SideloadMediaArgs ) => void;
+	validateFileSize?: ( file: File, maxUploadFileSize?: number ) => void;
+	validateMimeType?: ( file: File, allowedTypes?: string[] ) => void;
 };
 
+// Must match the Attachment type from the media-utils package.
 export type Attachment = {
 	id: number;
-	url: string;
 	alt: string;
-	caption?: string;
+	caption: string;
 	title: string;
-	mimeType: string;
+	url: string;
+	mexp_filename: string | null;
+	mexp_filesize: number | null;
+	mexp_media_source: number[];
+	meta: {
+		mexp_generated_poster_id?: number;
+		mexp_original_id?: number;
+		mexp_optimized_id?: number;
+	};
+	mexp_blurhash?: string;
+	mexp_dominant_color?: string;
+	mexp_is_muted?: boolean;
+	mexp_has_transparency?: boolean;
+	media_type: 'image' | 'file';
+	mime_type: string;
+	featured_media: number;
+	missing_image_sizes?: string[];
+
 	poster?: string;
 	blurHash?: string;
 	dominantColor?: string;
 	posterId?: number;
-	// Video block expects such a structure for the poster.
-	// https://github.com/WordPress/gutenberg/blob/e0a413d213a2a829ece52c6728515b10b0154d8d/packages/block-library/src/video/edit.js#L154
-	image?: {
-		src: string;
-	};
-	missingImageSizes?: string[];
-	fileName?: string;
-	fileSize?: number;
 };
 
 export type OnChangeHandler = ( attachments: Partial< Attachment >[] ) => void;

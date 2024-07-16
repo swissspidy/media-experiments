@@ -29,8 +29,5 @@
 		".": {
 			"default": "./src/index.ts"
 		}
-	},
-	"dependencies": {
-		"wp-types": "^3.66.0"
 	}
 }

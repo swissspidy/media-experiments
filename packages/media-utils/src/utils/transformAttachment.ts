@@ -1,23 +1,18 @@
 import type { Attachment, RestAttachment } from './types';
 
 /**
- * Transforms an attachment object from the REST API shape into the shape expected by the block editor.
+ * Transforms an attachment object from the REST API shape into the shape expected by the block editor and other consumers.
  *
- * @param attachment Attachment object.
+ * @param attachment REST API attachment object.
  */
 export function transformAttachment( attachment: RestAttachment ): Attachment {
+	// eslint-disable-next-line camelcase
+	const { alt_text, source_url, ...savedMediaProps } = attachment;
 	return {
-		id: attachment.id,
+		...savedMediaProps,
 		alt: attachment.alt_text,
 		caption: attachment.caption?.raw ?? '',
 		title: attachment.title.raw,
 		url: attachment.source_url,
-		mimeType: attachment.mime_type,
-		blurHash: attachment.mexp_blurhash,
-		dominantColor: attachment.mexp_dominant_color,
-		posterId: attachment.featured_media,
-		missingImageSizes: attachment.missing_image_sizes,
-		fileName: attachment.mexp_filename,
-		media_details: attachment.media_details,
-	} as Attachment;
+	};
 }

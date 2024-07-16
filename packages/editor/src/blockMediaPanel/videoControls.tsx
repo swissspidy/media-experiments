@@ -28,9 +28,7 @@ export function VideoControls( props: VideoControlsProps ) {
 		props.setAttributes( {
 			src: media.url,
 			id: media.id,
-			poster: media.image?.src,
-			// TODO: Check why Gutenberg does the following:
-			// poster: media.image?.src !== media.icon ? media.image?.src : undefined,
+			poster: media._embedded?.[ 'wp:featuredmedia' ]?.[ 0 ]?.source_url,
 			caption: media.caption,
 		} );
 	}
