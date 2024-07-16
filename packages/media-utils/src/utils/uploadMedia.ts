@@ -1,9 +1,9 @@
-import { __, sprintf } from '@wordpress/i18n';
-
 import type { AdditionalData, OnChangeHandler, OnErrorHandler } from './types';
-import { UploadError } from './uploadError';
 import { uploadToServer } from './uploadToServer';
 import { getMimeTypesArray } from './getMimeTypesArray';
+import { validateMimeType } from './validateMimeType';
+import { validateMimeTypeForUser } from './validateMimeTypeForUser';
+import { validateFileSize } from './validateFileSize';
 
 const noop = () => {};
 
@@ -51,109 +51,37 @@ export function uploadMedia( {
 	onFileChange,
 	wpAllowedMimeTypes = null,
 }: UploadMediaArgs ) {
-	// Allowed type specified by consumer.
-	const isAllowedType = ( fileType: string ) => {
-		if ( ! allowedTypes ) {
-			return true;
-		}
-
-		return allowedTypes.some( ( allowedType ) => {
-			// If a complete mimetype is specified verify if it matches exactly the mime type of the file.
-			if ( allowedType.includes( '/' ) ) {
-				return allowedType === fileType;
-			}
-			// Otherwise a general mime type is used, and we should verify if the file mimetype starts with it.
-			return fileType.startsWith( `${ allowedType }/` );
-		} );
-	};
-
 	// Allowed types for the current WP_User.
 	const allowedMimeTypesForUser = getMimeTypesArray( wpAllowedMimeTypes );
-	const isAllowedMimeTypeForUser = ( fileType: string ) => {
-		return allowedMimeTypesForUser.includes( fileType );
-	};
 
 	const validFiles = [];
 
 	for ( const mediaFile of filesList ) {
 		// Verify if user is allowed to upload this mime type.
 		// Defer to the server when type not detected.
-		// TODO: Call canTranscodeFile( mediaFile )
-		if (
-			allowedMimeTypesForUser &&
-			mediaFile.type &&
-			! isAllowedMimeTypeForUser( mediaFile.type )
-		) {
-			onError(
-				new UploadError( {
-					code: 'MIME_TYPE_NOT_ALLOWED_FOR_USER',
-					message: sprintf(
-						// translators: %s: file name.
-						__(
-							'%s: Sorry, you are not allowed to upload this file type.',
-							'media-experiments'
-						),
-						mediaFile.name
-					),
-					file: mediaFile,
-				} )
-			);
-			continue;
+		if ( allowedMimeTypesForUser ) {
+			try {
+				validateMimeTypeForUser( mediaFile, allowedMimeTypesForUser );
+			} catch ( error: unknown ) {
+				onError( error as Error );
+				continue;
+			}
 		}
 
-		// Check if the block supports this mime type.
+		// Check if the caller (e.g. a block) supports this mime type.
 		// Defer to the server when type not detected.
-		if ( mediaFile.type && ! isAllowedType( mediaFile.type ) ) {
-			onError(
-				new UploadError( {
-					code: 'MIME_TYPE_NOT_SUPPORTED',
-					message: sprintf(
-						// translators: %s: file name.
-						__(
-							'%s: Sorry, this file type is not supported here.',
-							'media-experiments'
-						),
-						mediaFile.name
-					),
-					file: mediaFile,
-				} )
-			);
+		try {
+			validateMimeType( mediaFile, allowedTypes );
+		} catch ( error: unknown ) {
+			onError( error as Error );
 			continue;
 		}
 
 		// Verify if file is greater than the maximum file upload size allowed for the site.
-		// TODO: Check if file can be compressed via FFmpeg
-		if ( maxUploadFileSize && mediaFile.size > maxUploadFileSize ) {
-			onError(
-				new UploadError( {
-					code: 'SIZE_ABOVE_LIMIT',
-					message: sprintf(
-						// translators: %s: file name.
-						__(
-							'%s: This file exceeds the maximum upload size for this site.',
-							'media-experiments'
-						),
-						mediaFile.name
-					),
-					file: mediaFile,
-				} )
-			);
-			continue;
-		}
-
-		// Don't allow empty files to be uploaded.
-		if ( mediaFile.size <= 0 ) {
-			onError(
-				new UploadError( {
-					code: 'EMPTY_FILE',
-					message: sprintf(
-						// translators: %s: file name.
-						__( '%s: This file is empty.', 'media-experiments' ),
-						mediaFile.name
-					),
-					file: mediaFile,
-				} )
-			);
+		try {
+			validateFileSize( mediaFile, maxUploadFileSize );
+		} catch ( error: unknown ) {
+			onError( error as Error );
 			continue;
 		}
 

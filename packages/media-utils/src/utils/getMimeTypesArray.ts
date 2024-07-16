@@ -6,13 +6,13 @@
  * @param {?Object} wpMimeTypesObject Mime type object received from the server.
  *                                    Extensions are keys separated by '|' and values are mime types associated with an extension.
  *
- * @return {?Array} An array of mime types.
+ * @return An array of mime types or null
  */
 export function getMimeTypesArray(
 	wpMimeTypesObject?: Record< string, string > | null
 ) {
 	if ( ! wpMimeTypesObject ) {
-		return [];
+		return null;
 	}
 	return Object.entries( wpMimeTypesObject ).flatMap(
 		( [ extensionsString, mime ] ) => {
