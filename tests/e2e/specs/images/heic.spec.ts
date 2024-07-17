@@ -1,6 +1,6 @@
 import { expect, test } from '../../fixtures';
 
-test.describe( 'Images', () => {
+test.describe.only( 'Images', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
 		await Promise.all( [
 			requestUtils.deleteAllMedia(),

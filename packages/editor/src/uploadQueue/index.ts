@@ -92,6 +92,8 @@ function editorValidateMimeType( file: File, allowedTypes?: string[] ) {
 	const { getEditorSettings } = select( editorStore );
 	const wpAllowedMimeTypes = getEditorSettings().allowedMimeTypes;
 
+	console.log('editorValidateMimeType', wpAllowedMimeTypes, allowedTypes );
+
 	validateMimeTypeForUser( file, wpAllowedMimeTypes );
 	validateMimeType( file, allowedTypes );
 }
