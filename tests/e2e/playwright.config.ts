@@ -10,6 +10,7 @@ import baseConfig from '@wordpress/scripts/config/playwright.config';
 
 const config = defineConfig( {
 	...baseConfig,
+	forbidOnly: false,
 	reporter: [
 		...baseConfig.reporter,
 		process.env.COLLECT_COVERAGE === 'true' && [
