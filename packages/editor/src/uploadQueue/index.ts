@@ -92,13 +92,6 @@ function editorValidateMimeType( file: File, allowedTypes?: string[] ) {
 	const { getEditorSettings } = select( editorStore );
 	const wpAllowedMimeTypes = getEditorSettings().allowedMimeTypes;
 
-	console.log(
-		'editorValidateMimeType',
-		wpAllowedMimeTypes,
-		wpAllowedMimeTypes?.[ 'image/heic' ],
-		allowedTypes
-	);
-
 	validateMimeTypeForUser( file, wpAllowedMimeTypes );
 	validateMimeType( file, allowedTypes );
 }
@@ -137,8 +130,6 @@ function blockEditorUploadMedia( {
 		select( uploadStore ).getSettings().validateFileSize;
 
 	for ( const mediaFile of filesList ) {
-		console.log( 'mediaFile', mediaFile.type );
-
 		// TODO: Consider using the *async* isHeifImage() function from `@mexp/upload-media`
 		const isHeifImage = [ 'image/heic', 'image/heif' ].includes(
 			mediaFile.type
@@ -146,7 +137,7 @@ function blockEditorUploadMedia( {
 
 		/*
 		 Check if the caller (e.g. a block) supports this mime type.
-		 Special case for file types such as HEIC which will be converted anyway.
+		 Special case for file types such as HEIC which will be converted before upload anyway.
 		 Another check will be done before upload.
 		*/
 		if ( _validateMimeType && ! isHeifImage ) {
