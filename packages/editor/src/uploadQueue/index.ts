@@ -139,7 +139,8 @@ function blockEditorUploadMedia( {
 	for ( const mediaFile of filesList ) {
 		console.log( 'mediaFile', mediaFile.type );
 
-		const fileWillBeConvertedBeforeUpload = [ 'image/heic' ].includes(
+		// TODO: Consider using the *async* isHeifImage() function from `@mexp/upload-media`
+		const isHeifImage = [ 'image/heic', 'image/heif' ].includes(
 			mediaFile.type
 		);
 
@@ -148,7 +149,7 @@ function blockEditorUploadMedia( {
 		 Special case for file types such as HEIC which will be converted anyway.
 		 Another check will be done before upload.
 		*/
-		if ( ! fileWillBeConvertedBeforeUpload && _validateMimeType ) {
+		if ( _validateMimeType && ! isHeifImage ) {
 			try {
 				_validateMimeType( mediaFile, allowedTypes );
 			} catch ( error: unknown ) {
