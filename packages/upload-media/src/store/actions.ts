@@ -1134,12 +1134,8 @@ export function prepareItem( id: QueueItemId ) {
 					break;
 				}
 
-				const isHeif = await isHeifImage( fileBuffer );
+				const isHeif = isHeifImage( fileBuffer );
 
-				// TODO: Do we need a placeholder for a HEIF image?
-				// Maybe a base64 encoded 1x1 gray PNG?
-				// Use preloadImage() and getImageDimensions() so see if browser can render it.
-				// Image/Video block already have a placeholder state.
 				if ( isHeif ) {
 					operations.push( OperationType.TranscodeHeif );
 				}
