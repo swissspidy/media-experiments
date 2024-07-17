@@ -21,13 +21,14 @@ const noop = () => {};
  * this is a wrapper around uploadMedia() from @mexp/media-utils
  * that injects the current post ID.
  *
- * @param $0
- * @param $0.allowedTypes
- * @param $0.additionalData
- * @param $0.filesList
- * @param $0.maxUploadFileSize
- * @param $0.onError
- * @param $0.onFileChange
+ * @param $0                   Parameters object passed to the function.
+ * @param $0.allowedTypes      Array with the types of media that can be uploaded, if unset all types are allowed.
+ * @param $0.additionalData    Additional data to include in the request.
+ * @param $0.filesList         List of files.
+ * @param $0.maxUploadFileSize Maximum upload size in bytes allowed for the site.
+ * @param $0.onError           Function called when an error happens.
+ * @param $0.onFileChange      Function called each time a file or a temporary representation of the file is available.
+ * @param $0.signal            Abort signal.
  */
 function editorUploadMedia( {
 	allowedTypes,
@@ -36,6 +37,7 @@ function editorUploadMedia( {
 	maxUploadFileSize,
 	onError = noop,
 	onFileChange,
+	signal,
 }: Parameters< typeof originalUploadMedia >[ 0 ] ) {
 	const { getCurrentPost, getEditorSettings } = select( editorStore );
 	const wpAllowedMimeTypes = getEditorSettings().allowedMimeTypes;
@@ -61,6 +63,7 @@ function editorUploadMedia( {
 		maxUploadFileSize,
 		onError,
 		wpAllowedMimeTypes,
+		signal,
 	} );
 }
 
@@ -105,21 +108,26 @@ function editorValidateMimeType( file: File, allowedTypes?: string[] ) {
  * to perform the client-side file processing before eventually
  * uploading the media to WordPress.
  *
- * @param $0
- * @param $0.allowedTypes
- * @param $0.additionalData
- * @param $0.filesList
- * @param $0.onError
- * @param $0.onFileChange
+ * @param $0                Parameters object passed to the function.
+ * @param $0.allowedTypes   Array with the types of media that can be uploaded, if unset all types are allowed.
+ * @param $0.additionalData Additional data to include in the request.
+ * @param $0.filesList      List of files.
+ * @param $0.onError        Function called when an error happens.
+ * @param $0.onFileChange   Function called each time a file or a temporary representation of the file is available.
+ * @param $0.onSuccess      Function called once a file has completely finished uploading, including thumbnails.
+ * @param $0.onBatchSuccess Function called once all files in a group have completely finished uploading, including thumbnails.
  */
-function blockEditorUploadMedia( {
+export default function blockEditorUploadMedia( {
 	allowedTypes,
 	additionalData = {},
 	filesList,
 	onError = noop,
 	onFileChange,
+	onSuccess,
+	onBatchSuccess,
 }: Parameters< typeof originalUploadMedia >[ 0 ] & {
 	onError?: ( message: string ) => void;
+	onBatchSuccess: () => void;
 } ) {
 	const validFiles = [];
 
@@ -166,6 +174,8 @@ function blockEditorUploadMedia( {
 	void dispatch( uploadStore ).addItems( {
 		files: validFiles,
 		onChange: onFileChange,
+		onSuccess,
+		onBatchSuccess,
 		onError: ( { message }: Error ) => onError( message ),
 		additionalData,
 	} );
@@ -208,8 +218,6 @@ subscribe( () => {
 	void dispatch( blockEditorStore ).updateSettings( {
 		mediaUpload: blockEditorUploadMedia,
 	} );
-
-	// TODO: Pass `uploadMedia` to uploadStore
 
 	// addFilter(
 	// 	'editor.MediaUpload',

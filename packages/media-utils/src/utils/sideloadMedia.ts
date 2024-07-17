@@ -38,7 +38,7 @@ export async function sideloadMedia( {
 	signal,
 	onFileChange,
 }: SideloadMediaArgs ) {
-	// TODO: File validation etc.
+	// TODO: Also do file validation here?
 
 	const attachment = await sideloadToServer(
 		file,

@@ -1,4 +1,9 @@
-import type { AdditionalData, OnChangeHandler, OnErrorHandler } from './types';
+import type {
+	AdditionalData,
+	OnChangeHandler,
+	OnErrorHandler,
+	OnSuccessHandler,
+} from './types';
 import { uploadToServer } from './uploadToServer';
 import { validateMimeType } from './validateMimeType';
 import { validateMimeTypeForUser } from './validateMimeTypeForUser';
@@ -19,8 +24,12 @@ interface UploadMediaArgs {
 	onError?: OnErrorHandler;
 	// Function called each time a file or a temporary representation of the file is available.
 	onFileChange?: OnChangeHandler;
+	// Function called once a file has completely finished uploading, including thumbnails.
+	onSuccess?: OnSuccessHandler;
 	// List of allowed mime types and file extensions.
 	wpAllowedMimeTypes?: Record< string, string > | null;
+	// Abort signal.
+	signal?: AbortSignal;
 }
 
 /**
@@ -39,16 +48,20 @@ interface UploadMediaArgs {
  * @param $0.maxUploadFileSize  Maximum upload size in bytes allowed for the site.
  * @param $0.onError            Function called when an error happens.
  * @param $0.onFileChange       Function called each time a file or a temporary representation of the file is available.
+ * @param $0.onSuccess          Function called once a file has completely finished uploading, including thumbnails.
  * @param $0.wpAllowedMimeTypes List of allowed mime types and file extensions.
+ * @param $0.signal             Abort signal.
  */
 export function uploadMedia( {
+	wpAllowedMimeTypes,
 	allowedTypes,
 	additionalData = {},
 	filesList,
 	maxUploadFileSize,
 	onError = noop,
 	onFileChange,
-	wpAllowedMimeTypes,
+	onSuccess,
+	signal,
 }: UploadMediaArgs ) {
 	const validFiles = [];
 
@@ -82,13 +95,9 @@ export function uploadMedia( {
 		validFiles.push( mediaFile );
 	}
 
-	// TODO: why exactly is HEIF slipping through here?
-
-	// TODO: Pass AbortController signal.
-	// TODO: Call onSuccess.
-
 	validFiles.map( async ( file ) => {
-		const attachment = await uploadToServer( file, additionalData );
-		return onFileChange?.( [ attachment ] );
+		const attachment = await uploadToServer( file, additionalData, signal );
+		onFileChange?.( [ attachment ] );
+		onSuccess?.( [ attachment ] );
 	} );
 }
