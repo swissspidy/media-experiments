@@ -463,19 +463,6 @@ _Returns_
 
 -   `QueueItem[]`: Queue items.
 
-#### getMediaSourceTermId
-
-Returns a media source term ID given its slug.
-
-_Parameters_
-
--   _state_ `State`: Upload state.
--   _slug_ `MediaSourceTerm`: Term slug.
-
-_Returns_
-
--   `number | undefined`: Term ID.
-
 #### getPausedUploadForPost
 
 Returns the next paused upload for a given post or attachment ID.
@@ -488,6 +475,18 @@ _Parameters_
 _Returns_
 
 -   `QueueItem | undefined`: Paused item.
+
+#### getSettings
+
+Returns the media upload settings.
+
+_Parameters_
+
+-   _state_ `State`: Upload state.
+
+_Returns_
+
+-   `Settings`: Settings
 
 #### isBatchUploaded
 

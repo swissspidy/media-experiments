@@ -83,13 +83,23 @@ function uploadRequestUploadMedia( {
 	const validFiles = [];
 
 	for ( const mediaFile of filesList ) {
-		// Check if the caller (e.g. a block) supports this mime type.
-		// Defer to the server when type not detected.
-		try {
-			validateMimeType( mediaFile, allowedTypes );
-		} catch ( error: unknown ) {
-			onError( error as Error );
-			continue;
+		// TODO: Consider using the _async_ isHeifImage() function from `@mexp/upload-media`
+		const isHeifImage = [ 'image/heic', 'image/heif' ].includes(
+			mediaFile.type
+		);
+
+		/*
+		 Check if the caller (e.g. a block) supports this mime type.
+		 Special case for file types such as HEIC which will be converted before upload anyway.
+		 Another check will be done before upload.
+		*/
+		if ( ! isHeifImage ) {
+			try {
+				validateMimeType( mediaFile, allowedTypes );
+			} catch ( error: unknown ) {
+				onError( error as Error );
+				continue;
+			}
 		}
 
 		// Verify if file is greater than the maximum file upload size allowed for the site.
@@ -124,8 +134,6 @@ void dispatch( uploadStore ).setImageSizes(
 void dispatch( uploadStore ).updateSettings( {
 	mediaUpload: uploadMedia,
 	mediaSideload: originalSideloadMedia,
-	validateFileSize,
-	validateMimeType,
 } );
 
 function App() {

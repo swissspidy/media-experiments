@@ -131,14 +131,8 @@ export default function blockEditorUploadMedia( {
 } ) {
 	const validFiles = [];
 
-	const _validateMimeType =
-		select( uploadStore ).getSettings().validateMimeType;
-
-	const _validateFileSize =
-		select( uploadStore ).getSettings().validateFileSize;
-
 	for ( const mediaFile of filesList ) {
-		// TODO: Consider using the *async* isHeifImage() function from `@mexp/upload-media`
+		// TODO: Consider using the _async_ isHeifImage() function from `@mexp/upload-media`
 		const isHeifImage = [ 'image/heic', 'image/heif' ].includes(
 			mediaFile.type
 		);
@@ -148,9 +142,9 @@ export default function blockEditorUploadMedia( {
 		 Special case for file types such as HEIC which will be converted before upload anyway.
 		 Another check will be done before upload.
 		*/
-		if ( _validateMimeType && ! isHeifImage ) {
+		if ( ! isHeifImage ) {
 			try {
-				_validateMimeType( mediaFile, allowedTypes );
+				editorValidateMimeType( mediaFile, allowedTypes );
 			} catch ( error: unknown ) {
 				onError( error as Error );
 				continue;
@@ -159,13 +153,11 @@ export default function blockEditorUploadMedia( {
 
 		// Verify if file is greater than the maximum file upload size allowed for the site.
 		// TODO: Consider removing, as file could potentially be compressed first.
-		if ( _validateFileSize ) {
-			try {
-				_validateFileSize( mediaFile );
-			} catch ( error: unknown ) {
-				onError( error as Error );
-				continue;
-			}
+		try {
+			editorValidateFileSize( mediaFile );
+		} catch ( error: unknown ) {
+			onError( error as Error );
+			continue;
 		}
 
 		validFiles.push( mediaFile );
@@ -193,8 +185,6 @@ void dispatch( uploadStore ).setImageSizes(
 void dispatch( uploadStore ).updateSettings( {
 	mediaUpload: editorUploadMedia,
 	mediaSideload: originalSideloadMedia,
-	validateFileSize: editorValidateFileSize,
-	validateMimeType: editorValidateMimeType,
 } );
 
 // Subscribe to state updates so that we can override the mediaUpload() function at the right time.

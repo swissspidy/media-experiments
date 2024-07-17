@@ -158,8 +158,6 @@ interface SideloadMediaArgs {
 export type Settings = {
 	mediaUpload: ( args: UploadMediaArgs ) => void;
 	mediaSideload: ( args: SideloadMediaArgs ) => void;
-	validateFileSize?: ( file: File, maxUploadFileSize?: number ) => void;
-	validateMimeType?: ( file: File, allowedTypes?: string[] ) => void;
 };
 
 // Must match the Attachment type from the media-utils package.
