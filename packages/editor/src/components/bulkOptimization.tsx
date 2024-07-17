@@ -87,6 +87,10 @@ function Row( props: BulkOptimizationAttachmentData ) {
 			},
 			additionalData: {
 				post: currentPostId,
+				mexp_media_source:
+					window.mediaExperiments.mediaSourceTerms[
+						'media-optimization'
+					],
 			},
 		} );
 	};
@@ -196,6 +200,10 @@ function CompressAll( props: {
 				},
 				additionalData: {
 					post: currentPostId,
+					mexp_media_source:
+						window.mediaExperiments.mediaSourceTerms[
+							'media-optimization'
+						],
 				},
 			} );
 		}

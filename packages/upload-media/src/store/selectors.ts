@@ -2,7 +2,6 @@ import {
 	type BatchId,
 	type ImageSizeCrop,
 	ItemStatus,
-	type MediaSourceTerm,
 	OperationType,
 	type QueueItem,
 	type QueueItemId,
@@ -295,21 +294,6 @@ export function isUploadingByParentId(
  */
 export function isPaused( state: State ): boolean {
 	return state.queueStatus === 'paused';
-}
-
-/**
- * Returns a media source term ID given its slug.
- *
- * @param state Upload state.
- * @param slug  Term slug.
- *
- * @return Term ID.
- */
-export function getMediaSourceTermId(
-	state: State,
-	slug: MediaSourceTerm
-): number | undefined {
-	return state.mediaSourceTerms[ slug ];
 }
 
 /**

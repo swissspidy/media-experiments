@@ -54,6 +54,8 @@ export function GenerateSubtitles( {
 				} ),
 			additionalData: {
 				post: currentPostId,
+				mexp_media_source:
+					window.mediaExperiments.mediaSourceTerms[ 'subtitles-generation' ],
 			},
 		} );
 	};

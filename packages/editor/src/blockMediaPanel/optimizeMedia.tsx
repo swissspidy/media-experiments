@@ -95,6 +95,10 @@ export function OptimizeMedia( {
 			generatedPosterId: attachment.meta.mexp_generated_poster_id,
 			additionalData: {
 				post: currentPostId,
+				mexp_media_source:
+					window.mediaExperiments.mediaSourceTerms[
+						'media-optimization'
+					],
 			},
 		} );
 	};

@@ -1,7 +1,6 @@
 import reducer from '../reducer';
 import {
 	ItemStatus,
-	type MediaSourceTerm,
 	OperationType,
 	type QueueItem,
 	type State,
@@ -12,7 +11,6 @@ describe( 'reducer', () => {
 	describe( `${ Type.Add }`, () => {
 		it( 'adds an item to the queue', () => {
 			const initialState: State = {
-				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
@@ -36,7 +34,6 @@ describe( 'reducer', () => {
 			} );
 
 			expect( state ).toEqual( {
-				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
@@ -61,7 +58,6 @@ describe( 'reducer', () => {
 	describe( `${ Type.Cancel }`, () => {
 		it( 'removes an item from the queue', () => {
 			const initialState: State = {
-				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
@@ -87,7 +83,6 @@ describe( 'reducer', () => {
 			} );
 
 			expect( state ).toEqual( {
-				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
@@ -113,7 +108,6 @@ describe( 'reducer', () => {
 	describe( `${ Type.Remove }`, () => {
 		it( 'removes an item from the queue', () => {
 			const initialState: State = {
-				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
@@ -138,7 +132,6 @@ describe( 'reducer', () => {
 			} );
 
 			expect( state ).toEqual( {
-				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
@@ -159,7 +152,6 @@ describe( 'reducer', () => {
 	describe( `${ Type.PauseItem }`, () => {
 		it( 'marks an item as paused', () => {
 			const initialState: State = {
-				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
@@ -184,7 +176,6 @@ describe( 'reducer', () => {
 			} );
 
 			expect( state ).toEqual( {
-				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
@@ -209,7 +200,6 @@ describe( 'reducer', () => {
 	describe( `${ Type.ResumeItem }`, () => {
 		it( 'marks an item as processing', () => {
 			const initialState: State = {
-				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
@@ -234,7 +224,6 @@ describe( 'reducer', () => {
 			} );
 
 			expect( state ).toEqual( {
-				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
@@ -259,7 +248,6 @@ describe( 'reducer', () => {
 	describe( `${ Type.AddOperations }`, () => {
 		it( 'prepends operations to the list', () => {
 			const initialState: State = {
-				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
@@ -282,7 +270,6 @@ describe( 'reducer', () => {
 			} );
 
 			expect( state ).toEqual( {
-				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
@@ -308,7 +295,6 @@ describe( 'reducer', () => {
 	describe( `${ Type.OperationStart }`, () => {
 		it( 'marks an item as processing', () => {
 			const initialState: State = {
-				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
@@ -341,7 +327,6 @@ describe( 'reducer', () => {
 			} );
 
 			expect( state ).toEqual( {
-				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
@@ -375,7 +360,6 @@ describe( 'reducer', () => {
 	describe( `${ Type.OperationFinish }`, () => {
 		it( 'marks an item as processing', () => {
 			const initialState: State = {
-				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
@@ -388,7 +372,6 @@ describe( 'reducer', () => {
 						id: '1',
 						additionalData: {},
 						attachment: {},
-						mediaSourceTerms: [] as MediaSourceTerm[],
 						status: ItemStatus.Processing,
 						operations: [
 							OperationType.AddPoster,
@@ -405,7 +388,6 @@ describe( 'reducer', () => {
 			} );
 
 			expect( state ).toEqual( {
-				mediaSourceTerms: {},
 				imageSizes: {},
 				queueStatus: 'active',
 				blobUrls: {},
@@ -418,7 +400,6 @@ describe( 'reducer', () => {
 						id: '1',
 						additionalData: {},
 						attachment: {},
-						mediaSourceTerms: [] as MediaSourceTerm[],
 						status: ItemStatus.Processing,
 						currentOperation: null,
 						operations: [ OperationType.Upload ],

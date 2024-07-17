@@ -49,7 +49,6 @@ import type {
 	ImageFormat,
 	ImageLibrary,
 	ImageSizeCrop,
-	MediaSourceTerm,
 	OnBatchSuccessHandler,
 	OnChangeHandler,
 	OnErrorHandler,
@@ -68,7 +67,6 @@ import type {
 	ResumeQueueAction,
 	RevokeBlobUrlsAction,
 	SetImageSizesAction,
-	SetMediaSourceTermsAction,
 	Settings,
 	SideloadAdditionalData,
 	State,
@@ -176,7 +174,6 @@ interface AddItemArgs {
 	additionalData?: AdditionalData;
 	sourceUrl?: string;
 	sourceAttachmentId?: number;
-	mediaSourceTerms?: MediaSourceTerm[];
 	blurHash?: string;
 	dominantColor?: string;
 	abortController?: AbortController;
@@ -198,7 +195,6 @@ interface AddItemArgs {
  * @param [$0.additionalData]     Additional data to include in the request.
  * @param [$0.sourceUrl]          Source URL. Used when importing a file from a URL or optimizing an existing file.
  * @param [$0.sourceAttachmentId] Source attachment ID. Used when optimizing an existing file for example.
- * @param [$0.mediaSourceTerms]   List of term slugs in the media source taxonomy. Used to identify files later on in the media library.
  * @param [$0.blurHash]           Item's BlurHash.
  * @param [$0.dominantColor]      Item's dominant color.
  * @param [$0.abortController]    Abort controller for upload cancellation.
@@ -214,7 +210,6 @@ export function addItem( {
 	additionalData = {} as AdditionalData,
 	sourceUrl,
 	sourceAttachmentId,
-	mediaSourceTerms = [],
 	blurHash,
 	dominantColor,
 	abortController,
@@ -261,7 +256,6 @@ export function addItem( {
 				onError,
 				sourceUrl,
 				sourceAttachmentId,
-				mediaSourceTerms,
 				blurHash,
 				dominantColor,
 				abortController: abortController || new AbortController(),
@@ -352,7 +346,6 @@ export function addItemFromUrl( {
 			onError,
 			additionalData,
 			sourceUrl: url,
-			mediaSourceTerms: [ 'media-import' ],
 			operations: [
 				[ OperationType.FetchRemoteFile, { url, fileName } ],
 				OperationType.Upload,
@@ -495,7 +488,6 @@ export function muteExistingVideo( {
 				onError,
 				sourceUrl: url,
 				sourceAttachmentId: id,
-				mediaSourceTerms: [],
 				blurHash,
 				dominantColor,
 				operations: [
@@ -565,7 +557,6 @@ export function addSubtitlesForExistingVideo( {
 				onError,
 				sourceUrl: url,
 				sourceAttachmentId: id,
-				mediaSourceTerms: [ 'subtitles-generation' ],
 				additionalData,
 				abortController: new AbortController(),
 				operations: [
@@ -688,7 +679,6 @@ export function optimizeExistingItem( {
 				onError,
 				sourceUrl: url,
 				sourceAttachmentId: id,
-				mediaSourceTerms: [ 'media-optimization' ],
 				blurHash,
 				dominantColor,
 				operations: [
@@ -1354,7 +1344,6 @@ export function uploadPoster( id: QueueItemId ) {
 						// but should be carried over if it does.
 						post: item.additionalData.post,
 					},
-					mediaSourceTerms: [ 'poster-generation' ],
 					blurHash: item.blurHash,
 					dominantColor: item.dominantColor,
 					abortController,
@@ -1576,9 +1565,7 @@ export function grantApproval( id: number ) {
 			id: item.id,
 		} );
 
-		dispatch.finishOperation( item.id, {
-			mediaSourceTerms: [ 'media-optimization' ],
-		} );
+		dispatch.finishOperation( item.id, {} );
 	};
 }
 
@@ -1885,7 +1872,6 @@ export function optimizeVideoItem( id: QueueItemId ) {
 				attachment: {
 					url: blobUrl,
 				},
-				mediaSourceTerms: [ 'media-optimization' ],
 			} );
 		} catch ( error ) {
 			dispatch.cancelItem(
@@ -1999,7 +1985,6 @@ export function optimizeAudioItem( id: QueueItemId ) {
 				attachment: {
 					url: blobUrl,
 				},
-				mediaSourceTerms: [ 'media-optimization' ],
 			} );
 		} catch ( error ) {
 			dispatch.cancelItem(
@@ -2074,7 +2059,6 @@ export function convertGifItem( id: QueueItemId ) {
 				attachment: {
 					url: blobUrl,
 				},
-				mediaSourceTerms: [ 'gif-conversion' ],
 			} );
 		} catch ( error ) {
 			dispatch.cancelItem(
@@ -2236,9 +2220,6 @@ export function uploadItem( id: QueueItemId ) {
 
 		const additionalData: Record< string, unknown > = {
 			...item.additionalData,
-			mexp_media_source: item.mediaSourceTerms
-				?.map( ( slug ) => select.getMediaSourceTermId( slug ) )
-				.filter( Boolean ) as number[],
 			// generatedPosterId is set when using muteExistingVideo() for example.
 			meta: {
 				mexp_generated_poster_id: item.generatedPosterId || undefined,
@@ -2496,22 +2477,6 @@ export function generateSubtitles( id: QueueItemId ) {
 					  } )
 			);
 		}
-	};
-}
-
-/**
- * Returns an action object that sets the media source term slugs and IDs.
- *
- * @param terms Map of term slugs to IDs.
- *
- * @return Action object.
- */
-export function setMediaSourceTerms(
-	terms: Record< string, number >
-): SetMediaSourceTermsAction {
-	return {
-		type: Type.SetMediaSourceTerms,
-		terms,
 	};
 }
 

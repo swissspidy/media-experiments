@@ -38,6 +38,10 @@ export function ImportMedia( { url, onChange }: ImportMediaProps ) {
 			onChange: ( [ media ] ) => onChange( media ),
 			additionalData: {
 				post: currentPostId,
+				mexp_media_source:
+					window.mediaExperiments.mediaSourceTerms[
+						'subtitles-generation'
+					],
 			},
 		} );
 	};

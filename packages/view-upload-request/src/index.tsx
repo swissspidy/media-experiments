@@ -114,6 +114,14 @@ function uploadRequestUploadMedia( {
 	} );
 }
 
+/*
+ The list of available image sizes is passed via an inline script
+ and needs to be saved in the store first.
+*/
+void dispatch( uploadStore ).setImageSizes(
+	window.mediaExperiments.availableImageSizes
+);
+
 // Make the upload queue aware of the function for uploading to the server.
 void dispatch( uploadStore ).updateSettings( {
 	mediaUpload: uploadMedia,

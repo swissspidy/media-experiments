@@ -4,14 +4,6 @@ export type QueueStatus = 'active' | 'paused';
 
 export type BatchId = string;
 
-// Keep in sync with PHP.
-export type MediaSourceTerm =
-	| 'media-optimization'
-	| 'poster-generation'
-	| 'media-import'
-	| 'gif-conversion'
-	| 'subtitles-generation';
-
 export type QueueItem = {
 	id: QueueItemId;
 	sourceFile: File;
@@ -30,7 +22,6 @@ export type QueueItem = {
 	batchId?: string;
 	sourceUrl?: string;
 	sourceAttachmentId?: number; // TODO: implement.
-	mediaSourceTerms?: MediaSourceTerm[];
 	blurHash?: string;
 	dominantColor?: string;
 	generatedPosterId?: number;
@@ -40,7 +31,6 @@ export type QueueItem = {
 
 export interface State {
 	queue: QueueItem[];
-	mediaSourceTerms: Partial< Record< MediaSourceTerm, number > >;
 	imageSizes: Record< string, ImageSizeCrop >;
 	queueStatus: QueueStatus;
 	blobUrls: Record< QueueItemId, string[] >;
@@ -57,7 +47,6 @@ export enum Type {
 	ResumeItem = 'RESUME_ITEM',
 	PauseQueue = 'PAUSE_QUEUE',
 	ResumeQueue = 'RESUME_QUEUE',
-	SetMediaSourceTerms = 'ADD_MEDIA_SOURCE_TERMS',
 	SetImageSizes = 'ADD_IMAGE_SIZES',
 	RequestApproval = 'REQUEST_APPROVAL',
 	ApproveUpload = 'APPROVE_UPLOAD',
@@ -113,10 +102,6 @@ export type ResumeItemAction = Action< Type.ResumeItem, { id: QueueItemId } >;
 export type PauseQueueAction = Action< Type.PauseQueue >;
 export type ResumeQueueAction = Action< Type.ResumeQueue >;
 export type RemoveAction = Action< Type.Remove, { id: QueueItemId } >;
-export type SetMediaSourceTermsAction = Action<
-	Type.SetMediaSourceTerms,
-	{ terms: Record< MediaSourceTerm, number > }
->;
 export type SetImageSizesAction = Action<
 	Type.SetImageSizes,
 	{ imageSizes: Record< string, ImageSizeCrop > }

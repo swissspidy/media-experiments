@@ -132,6 +132,22 @@ function blockEditorUploadMedia( {
 	} );
 }
 
+/*
+ The list of available image sizes is passed via an inline script
+ and needs to be saved in the store first.
+*/
+void dispatch( uploadStore ).setImageSizes(
+	window.mediaExperiments.availableImageSizes
+);
+
+// Make the upload queue aware of the function for uploading to the server.
+void dispatch( uploadStore ).updateSettings( {
+	mediaUpload: editorUploadMedia,
+	mediaSideload: originalSideloadMedia,
+	validateFileSize,
+	validateMimeType,
+} );
+
 // Subscribe to state updates so that we can override the mediaUpload() function at the right time.
 subscribe( () => {
 	if ( ! select( editorStore ).getEditorSettings().maxUploadFileSize ) {
@@ -148,14 +164,6 @@ subscribe( () => {
 	) {
 		return;
 	}
-
-	// Make the upload queue aware of the function for uploading to the server.
-	void dispatch( uploadStore ).updateSettings( {
-		mediaUpload: editorUploadMedia,
-		mediaSideload: originalSideloadMedia,
-		validateFileSize,
-		validateMimeType,
-	} );
 
 	// Update block-editor with the new function that moves everything through a queue.
 	void dispatch( blockEditorStore ).updateSettings( {

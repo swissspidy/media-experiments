@@ -15,7 +15,6 @@ import {
 	type ResumeQueueAction,
 	type RevokeBlobUrlsAction,
 	type SetImageSizesAction,
-	type SetMediaSourceTermsAction,
 	type State,
 	Type,
 	type UnknownAction,
@@ -26,7 +25,6 @@ const noop = () => {};
 
 const DEFAULT_STATE: State = {
 	queue: [],
-	mediaSourceTerms: {},
 	imageSizes: {},
 	queueStatus: 'active',
 	blobUrls: {},
@@ -50,7 +48,6 @@ type Action =
 	| OperationStartAction
 	| RequestApprovalAction
 	| SetImageSizesAction
-	| SetMediaSourceTermsAction
 	| CacheBlobUrlAction
 	| RevokeBlobUrlsAction
 	| UpdateSettingsAction
@@ -192,10 +189,6 @@ function reducer(
 							...item.additionalData,
 							...action.item.additionalData,
 						},
-						mediaSourceTerms: [
-							...( item.mediaSourceTerms || [] ),
-							...( action.item.mediaSourceTerms || [] ),
-						],
 					};
 				} ),
 			};
@@ -231,13 +224,6 @@ function reducer(
 						: item
 				),
 			};
-
-		case Type.SetMediaSourceTerms: {
-			return {
-				...state,
-				mediaSourceTerms: action.terms,
-			};
-		}
 
 		case Type.SetImageSizes: {
 			return {
