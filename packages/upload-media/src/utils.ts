@@ -3,8 +3,8 @@ import { getFilename } from '@wordpress/url';
 import { _x } from '@wordpress/i18n';
 
 import {
-	MEDIA_TRANSCODING_MAX_FILE_SIZE,
-	TRANSCODABLE_MIME_TYPES,
+	WASM_MEMORY_LIMIT,
+	FFMPEG_SUPPORTED_AUDIO_VIDEO_MIME_TYPES,
 } from './constants';
 import { MediaError } from './mediaError';
 
@@ -59,20 +59,17 @@ export function getFileBasename( name: string ): string {
 }
 
 /**
- * Determines whether a file can be possible transcoded in the browser.
+ * Determines whether a video file can be processed in the browser.
  *
- * Takes into account cross-origin isolation, a hardcoded list of mime types,
+ * Takes into account a hardcoded list of mime types,
  * and WebAssembly memory limits.
- *
- * @todo Make work for HEIF, GIF and audio as well.
  *
  * @param file File object.
  */
-export function canTranscodeFile( file: File ) {
+export function canProcessWithFFmpeg( file: File ) {
 	return (
-		window?.crossOriginIsolated &&
-		TRANSCODABLE_MIME_TYPES.includes( file.type ) &&
-		file.size <= MEDIA_TRANSCODING_MAX_FILE_SIZE
+		FFMPEG_SUPPORTED_AUDIO_VIDEO_MIME_TYPES.includes( file.type ) &&
+		file.size <= WASM_MEMORY_LIMIT
 	);
 }
 

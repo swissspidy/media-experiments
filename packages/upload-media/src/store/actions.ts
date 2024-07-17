@@ -11,7 +11,7 @@ import { start } from '@mexp/log';
 import { ImageFile } from '../imageFile';
 import { MediaError } from '../mediaError';
 import {
-	canTranscodeFile,
+	canProcessWithFFmpeg,
 	fetchFile,
 	getFileNameFromUrl,
 	getPosterFromVideo,
@@ -461,7 +461,7 @@ export function muteExistingVideo( {
 
 		// TODO: Somehow add relation between original and muted video in db.
 
-		// TODO: Check canTranscodeFile(file) here to bail early? Or ideally already in the UI.
+		// TODO: Check file size here to bail early? Or ideally already in the UI.
 
 		// TODO: Copy over the auto-generated poster image.
 		// What if the original attachment gets deleted though?
@@ -1103,9 +1103,6 @@ export function prepareItem( id: QueueItemId ) {
 			return;
 		}
 
-		// eslint-disable-next-line @wordpress/no-unused-vars-before-return
-		const canTranscode = canTranscodeFile( file );
-
 		const mediaType = getMediaTypeFromMimeType( file.type );
 
 		const operations: Operation[] = [];
@@ -1120,7 +1117,11 @@ export function prepareItem( id: QueueItemId ) {
 					.select( preferencesStore )
 					.get( PREFERENCES_NAME, 'gif_convert' );
 
-				if ( isGif && canTranscode && convertAnimatedGifs ) {
+				if (
+					isGif &&
+					window.crossOriginIsolated &&
+					convertAnimatedGifs
+				) {
 					operations.push(
 						OperationType.TranscodeGif,
 						OperationType.AddPoster,
@@ -1187,7 +1188,10 @@ export function prepareItem( id: QueueItemId ) {
 				// TODO: First check if video already meets criteria, e.g. with mediainfo.js.
 				// No need to compress a video that's already quite small.
 
-				if ( canTranscode ) {
+				if (
+					window.crossOriginIsolated &&
+					canProcessWithFFmpeg( file )
+				) {
 					operations.push( OperationType.TranscodeVideo );
 				}
 
@@ -1201,7 +1205,10 @@ export function prepareItem( id: QueueItemId ) {
 				break;
 
 			case 'audio':
-				if ( canTranscode ) {
+				if (
+					window.crossOriginIsolated &&
+					canProcessWithFFmpeg( file )
+				) {
 					operations.push( OperationType.TranscodeAudio );
 				}
 
