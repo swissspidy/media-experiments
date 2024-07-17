@@ -26,7 +26,7 @@ import {
 	validateFileSize,
 	validateMimeType,
 } from '@mexp/media-utils';
-import { store as uploadStore, canTranscodeFile } from '@mexp/upload-media';
+import { store as uploadStore } from '@mexp/upload-media';
 
 import './view.css';
 
@@ -85,13 +85,11 @@ function uploadRequestUploadMedia( {
 	for ( const mediaFile of filesList ) {
 		// Check if the caller (e.g. a block) supports this mime type.
 		// Defer to the server when type not detected.
-		if ( ! canTranscodeFile( mediaFile ) ) {
-			try {
-				validateMimeType( mediaFile, allowedTypes );
-			} catch ( error: unknown ) {
-				onError( error as Error );
-				continue;
-			}
+		try {
+			validateMimeType( mediaFile, allowedTypes );
+		} catch ( error: unknown ) {
+			onError( error as Error );
+			continue;
 		}
 
 		// Verify if file is greater than the maximum file upload size allowed for the site.

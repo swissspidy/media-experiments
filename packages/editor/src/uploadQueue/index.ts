@@ -7,8 +7,9 @@ import {
 	sideloadMedia as originalSideloadMedia,
 	validateFileSize,
 	validateMimeType,
+	validateMimeTypeForUser,
 } from '@mexp/media-utils';
-import { store as uploadStore, canTranscodeFile } from '@mexp/upload-media';
+import { store as uploadStore } from '@mexp/upload-media';
 
 const noop = () => {};
 
@@ -64,6 +65,38 @@ function editorUploadMedia( {
 }
 
 /**
+ * Verifies whether the file is within the file upload size limits for the site.
+ *
+ * Intended to live in @wordpress/editor as a wrapper around
+ * validateFileSize() from @mexp/media-utils
+ * that injects the current site's file size limit.
+ *
+ * @param file File object.
+ */
+function editorValidateFileSize( file: File ) {
+	const { getEditorSettings } = select( editorStore );
+	return validateFileSize( file, getEditorSettings().maxUploadFileSize );
+}
+
+/**
+ * Verifies if the caller (e.g. a block) supports this mime type.
+ *
+ * Intended to live in @wordpress/editor as a wrapper around
+ * validateMimeType() and validateMimeTypeForUser() from @mexp/media-utils
+ * that injects the current site's mime type limits.
+ *
+ * @param file         File object.
+ * @param allowedTypes Array with the types of media that can be uploaded, if unset all types are allowed.
+ */
+function editorValidateMimeType( file: File, allowedTypes?: string[] ) {
+	const { getEditorSettings } = select( editorStore );
+	const wpAllowedMimeTypes = getEditorSettings().allowedMimeTypes;
+
+	validateMimeTypeForUser( file, wpAllowedMimeTypes );
+	validateMimeType( file, allowedTypes );
+}
+
+/**
  * Upload a media file when the file upload button is activated
  * or when adding a file to the editor via drag & drop.
  *
@@ -76,7 +109,6 @@ function editorUploadMedia( {
  * @param $0.allowedTypes
  * @param $0.additionalData
  * @param $0.filesList
- * @param $0.maxUploadFileSize
  * @param $0.onError
  * @param $0.onFileChange
  */
@@ -84,7 +116,6 @@ function blockEditorUploadMedia( {
 	allowedTypes,
 	additionalData = {},
 	filesList,
-	maxUploadFileSize,
 	onError = noop,
 	onFileChange,
 }: Parameters< typeof originalUploadMedia >[ 0 ] & {
@@ -92,16 +123,16 @@ function blockEditorUploadMedia( {
 } ) {
 	const validFiles = [];
 
-	const _validateMimeType = select( blockEditorStore ).getSettings()
-		.validateMimeType as undefined | typeof validateMimeType;
+	const _validateMimeType =
+		select( uploadStore ).getSettings().validateMimeType;
 
-	const _validateFileSize = select( blockEditorStore ).getSettings()
-		.validateFileSize as undefined | typeof validateFileSize;
+	const _validateFileSize =
+		select( uploadStore ).getSettings().validateFileSize;
 
 	for ( const mediaFile of filesList ) {
 		// Check if the caller (e.g. a block) supports this mime type.
 		// Defer to the server when type not detected.
-		if ( _validateMimeType && ! canTranscodeFile( mediaFile ) ) {
+		if ( _validateMimeType ) {
 			try {
 				_validateMimeType( mediaFile, allowedTypes );
 			} catch ( error: unknown ) {
@@ -114,7 +145,7 @@ function blockEditorUploadMedia( {
 		// TODO: Consider removing, as file could potentially be compressed first.
 		if ( _validateFileSize ) {
 			try {
-				_validateFileSize( mediaFile, maxUploadFileSize );
+				_validateFileSize( mediaFile );
 			} catch ( error: unknown ) {
 				onError( error as Error );
 				continue;
@@ -144,8 +175,8 @@ void dispatch( uploadStore ).setImageSizes(
 void dispatch( uploadStore ).updateSettings( {
 	mediaUpload: editorUploadMedia,
 	mediaSideload: originalSideloadMedia,
-	validateFileSize,
-	validateMimeType,
+	validateFileSize: editorValidateFileSize,
+	validateMimeType: editorValidateMimeType,
 } );
 
 // Subscribe to state updates so that we can override the mediaUpload() function at the right time.

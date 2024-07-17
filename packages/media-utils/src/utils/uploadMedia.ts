@@ -1,6 +1,5 @@
 import type { AdditionalData, OnChangeHandler, OnErrorHandler } from './types';
 import { uploadToServer } from './uploadToServer';
-import { getMimeTypesArray } from './getMimeTypesArray';
 import { validateMimeType } from './validateMimeType';
 import { validateMimeTypeForUser } from './validateMimeTypeForUser';
 import { validateFileSize } from './validateFileSize';
@@ -33,14 +32,14 @@ interface UploadMediaArgs {
  *
  * Similar to the mediaUpload() function from @wordpress/editor.
  *
- * @param {Object}   $0                    Parameters object passed to the function.
- * @param {?Array}   $0.allowedTypes       Array with the types of media that can be uploaded, if unset all types are allowed.
- * @param {?Object}  $0.additionalData     Additional data to include in the request.
- * @param {Array}    $0.filesList          List of files.
- * @param {?number}  $0.maxUploadFileSize  Maximum upload size in bytes allowed for the site.
- * @param {Function} $0.onError            Function called when an error happens.
- * @param {Function} $0.onFileChange       Function called each time a file or a temporary representation of the file is available.
- * @param {?Object}  $0.wpAllowedMimeTypes List of allowed mime types and file extensions.
+ * @param $0                    Parameters object passed to the function.
+ * @param $0.allowedTypes       Array with the types of media that can be uploaded, if unset all types are allowed.
+ * @param $0.additionalData     Additional data to include in the request.
+ * @param $0.filesList          List of files.
+ * @param $0.maxUploadFileSize  Maximum upload size in bytes allowed for the site.
+ * @param $0.onError            Function called when an error happens.
+ * @param $0.onFileChange       Function called each time a file or a temporary representation of the file is available.
+ * @param $0.wpAllowedMimeTypes List of allowed mime types and file extensions.
  */
 export function uploadMedia( {
 	allowedTypes,
@@ -49,23 +48,18 @@ export function uploadMedia( {
 	maxUploadFileSize,
 	onError = noop,
 	onFileChange,
-	wpAllowedMimeTypes = null,
+	wpAllowedMimeTypes,
 }: UploadMediaArgs ) {
-	// Allowed types for the current WP_User.
-	const allowedMimeTypesForUser = getMimeTypesArray( wpAllowedMimeTypes );
-
 	const validFiles = [];
 
 	for ( const mediaFile of filesList ) {
 		// Verify if user is allowed to upload this mime type.
 		// Defer to the server when type not detected.
-		if ( allowedMimeTypesForUser ) {
-			try {
-				validateMimeTypeForUser( mediaFile, allowedMimeTypesForUser );
-			} catch ( error: unknown ) {
-				onError( error as Error );
-				continue;
-			}
+		try {
+			validateMimeTypeForUser( mediaFile, wpAllowedMimeTypes );
+		} catch ( error: unknown ) {
+			onError( error as Error );
+			continue;
 		}
 
 		// Check if the caller (e.g. a block) supports this mime type.

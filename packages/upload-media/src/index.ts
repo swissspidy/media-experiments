@@ -4,8 +4,6 @@ export { uploadStore as store };
 
 export { MediaError } from './mediaError';
 
-export { canTranscodeFile } from './utils';
-
 export type {
 	ImageFormat,
 	ImageLibrary,

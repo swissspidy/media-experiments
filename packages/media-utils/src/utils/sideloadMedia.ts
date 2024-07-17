@@ -24,12 +24,12 @@ interface SideloadMediaArgs {
 /**
  * Uploads a file to the server without creating an attachment.
  *
- * @param {Object} $0                Parameters object passed to the function.
- * @param          $0.file           Media File to Save.
- * @param          $0.attachmentId   Parent attachment ID.
- * @param          $0.additionalData Additional data to include in the request.
- * @param          $0.signal         Abort signal.
- * @param          $0.onFileChange
+ * @param $0                Parameters object passed to the function.
+ * @param $0.file           Media File to Save.
+ * @param $0.attachmentId   Parent attachment ID.
+ * @param $0.additionalData Additional data to include in the request.
+ * @param $0.signal         Abort signal.
+ * @param $0.onFileChange
  */
 export async function sideloadMedia( {
 	file,
