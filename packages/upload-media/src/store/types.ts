@@ -1,3 +1,5 @@
+import type { MeasureOptions } from '@mexp/log';
+
 export type QueueItemId = string;
 
 export type QueueStatus = 'active' | 'paused';
@@ -28,7 +30,7 @@ export type QueueItem = {
 	parentId?: QueueItemId;
 	abortController?: AbortController;
 	startTime?: number;
-	timings?: Array< { name: string; measure: PerformanceMeasureOptions } >;
+	timings?: MeasureOptions[];
 };
 
 export interface State {

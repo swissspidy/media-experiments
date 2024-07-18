@@ -6,7 +6,7 @@ import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as preferencesStore } from '@wordpress/preferences';
 
 import { getExtensionFromMimeType, getMediaTypeFromMimeType } from '@mexp/mime';
-import { start } from '@mexp/log';
+import { measure, start, type MeasureOptions } from '@mexp/log';
 
 import { ImageFile } from '../imageFile';
 import { MediaError } from '../mediaError';
@@ -660,27 +660,17 @@ export function optimizeExistingItem( {
 
 		const itemId = uuidv4();
 
-		const measure: PerformanceMeasureOptions = {
-			start: startTime || performance.now(),
-			detail: {
-				devtools: {
-					metadata: {
-						extensionName: 'Media Experiments',
-						dataType: 'track-entry',
-					},
-					color: 'primary',
-					track: 'An Extension Track',
-					hintText: 'This is a rendering task',
-					detailsPairs: [
-						[ 'Item ID', itemId ],
-						[ 'File name', fileName ],
-					],
-				},
-			},
+		const timing: MeasureOptions = {
+			measureName: `Optimize existing item ${ fileName }`,
+			startTime: startTime || performance.now(),
+			hintText: 'This is a rendering task',
+			detailsPairs: [
+				[ 'Item ID', itemId ],
+				[ 'File name', fileName ],
+			],
 		};
-		const timings = [
-			{ name: `Optimize existing item ${ fileName }`, measure },
-		];
+
+		const timings = [ timing ];
 
 		dispatch< AddAction >( {
 			type: Type.Add,
@@ -987,14 +977,7 @@ export function removeItem( id: QueueItemId ) {
 
 		if ( item.timings ) {
 			for ( const timing of item.timings ) {
-				console.log( 'performance.measure', timing.name, {
-					...timing.measure,
-					end: timing.measure.end || performance.now(),
-				} );
-				performance.measure( timing.name, {
-					...timing.measure,
-					end: timing.measure.end || performance.now(),
-				} );
+				measure( timing );
 			}
 		}
 
@@ -1840,33 +1823,22 @@ export function optimizeImageItem(
 
 			const endTime = performance.now();
 
-			const measure: PerformanceMeasureOptions = {
-				start: startTime,
-				end: endTime,
-				detail: {
-					devtools: {
-						metadata: {
-							extensionName: 'Media Experiments',
-							dataType: 'track-entry',
-						},
-						color: 'primary',
-						track: 'An Extension Track',
-						hintText: 'This is a rendering task',
-						detailsPairs: [
-							[ 'Item ID', item.id ],
-							[ 'File name', item.file.name ],
-							[ 'Image library', imageLibrary ],
-							[ 'Input format', inputFormat ],
-							[ 'Output format', outputFormat ],
-							[ 'Output quality', outputQuality ],
-						],
-					},
-				},
+			const timing: MeasureOptions = {
+				measureName: `Optimize image ${ item.file.name }`,
+				startTime,
+				endTime,
+				hintText: 'This is a rendering task',
+				detailsPairs: [
+					[ 'Item ID', item.id ],
+					[ 'File name', item.file.name ],
+					[ 'Image library', imageLibrary ],
+					[ 'Input format', inputFormat ],
+					[ 'Output format', outputFormat ],
+					[ 'Output quality', outputQuality ],
+				],
 			};
 
-			const timings = [
-				{ name: `Optimize image ${ item.file.name }`, measure },
-			];
+			const timings = [ timing ];
 
 			if ( args?.requireApproval ) {
 				dispatch.finishOperation( id, {
@@ -2407,29 +2379,18 @@ export function uploadItem( id: QueueItemId ) {
 			}
 		}
 
-		const measure: PerformanceMeasureOptions = {
-			start: startTime,
-			end: performance.now(),
-			detail: {
-				devtools: {
-					metadata: {
-						extensionName: 'Media Experiments',
-						dataType: 'track-entry',
-					},
-					color: 'primary',
-					track: 'An Extension Track',
-					hintText: 'This is a rendering task',
-					detailsPairs: [
-						[ 'Item ID', id ],
-						[ 'File name', item.file.name ],
-					],
-				},
-			},
+		const timing: MeasureOptions = {
+			measureName: `Upload item ${ item.file.name }`,
+			startTime,
+			endTime: performance.now(),
+			hintText: 'This is a rendering task',
+			detailsPairs: [
+				[ 'Item ID', id ],
+				[ 'File name', item.file.name ],
+			],
 		};
 
-		const timings = [
-			{ name: `Upload item ${ item.file.name }`, measure },
-		];
+		const timings = [ timing ];
 
 		select.getSettings().mediaUpload( {
 			filesList: [ item.file ],
