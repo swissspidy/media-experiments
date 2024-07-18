@@ -20,7 +20,7 @@ Want to see it in action? [Check out my demo tweet](https://twitter.com/swissspi
 
 Install and activate the latest nightly build on your WordPress website and then start dragging media files into a new post, or optimize images in an existing post.
 
-[![Download latest nightly build](https://img.shields.io/badge/Download%20latest%20nightly-24282D?style=for-the-badge&logo=Files&logoColor=ffffff)](https://github.com/swissspidy/media-experiments/releases/download/nightly/media-experiments.zip)
+[![Download latest nightly build](https://img.shields.io/badge/Download%20latest%20nightly-24282D?style=for-the-badge&logo=Files&logoColor=ffffff)](https://swissspidy.github.io/media-experiments/nightly.zip)
 
 Note: Requires **WordPress 6.5+** and **PHP 8.0+**.
 
@@ -34,7 +34,7 @@ Use [WordPress Playground](https://wordpress.org/playground/) to try this plugin
 
 ## Usage
 
-You can [download the latest nightly build](https://github.com/swissspidy/media-experiments/releases/download/nightly/media-experiments.zip) directly from GitHub.
+You can [download the latest nightly build](https://swissspidy.github.io/media-experiments/nightly.zip) directly from GitHub.
 
 Reminder: this is an experimental WordPress plugin. While you can totally install it on your website, it is recommended to try it on a development environment first.
 

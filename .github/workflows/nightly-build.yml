@@ -129,20 +129,6 @@ jobs:
                   git tag -f nightly
                   git push origin --tags
 
-            - name: Publish Release
-              uses: softprops/action-gh-release@a74c6b72af54cfa997e81df42d94703d6313a2d0
-              if: ${{ env.CURRENT_TAG != 'nightly' }}
-              with:
-                  tag_name: nightly
-                  name: Nightly Build
-                  target_commitish: ${{ github.ref }}
-                  draft: false
-                  prerelease: true
-                  generate_release_notes: true
-                  files: |
-                      media-experiments.zip
-                  fail_on_unmatched_files: true
-
     # Deployment job
     deploy:
         environment:
