@@ -1,3 +1,5 @@
+import type { MeasureOptions } from '@mexp/log';
+
 export type QueueItemId = string;
 
 export type QueueStatus = 'active' | 'paused';
@@ -27,6 +29,8 @@ export type QueueItem = {
 	generatedPosterId?: number;
 	parentId?: QueueItemId;
 	abortController?: AbortController;
+	startTime?: number;
+	timings?: MeasureOptions[];
 };
 
 export interface State {
@@ -48,7 +52,6 @@ export enum Type {
 	PauseQueue = 'PAUSE_QUEUE',
 	ResumeQueue = 'RESUME_QUEUE',
 	SetImageSizes = 'ADD_IMAGE_SIZES',
-	RequestApproval = 'REQUEST_APPROVAL',
 	ApproveUpload = 'APPROVE_UPLOAD',
 	OperationStart = 'OPERATION_START',
 	OperationFinish = 'OPERATION_FINISH',
@@ -72,7 +75,7 @@ export type AddAction = Action<
 >;
 export type OperationStartAction = Action<
 	Type.OperationStart,
-	{ id: QueueItemId }
+	{ id: QueueItemId; operation: OperationType }
 >;
 export type OperationFinishAction = Action<
 	Type.OperationFinish,
@@ -84,10 +87,6 @@ export type OperationFinishAction = Action<
 export type AddOperationsAction = Action<
 	Type.AddOperations,
 	{ id: QueueItemId; operations: Operation[] }
->;
-export type RequestApprovalAction = Action<
-	Type.RequestApproval,
-	{ id: QueueItemId; file: File; url: string }
 >;
 export type ApproveUploadAction = Action<
 	Type.ApproveUpload,
@@ -181,13 +180,9 @@ export type Attachment = {
 	mexp_has_transparency?: boolean;
 	media_type: 'image' | 'file';
 	mime_type: string;
-	featured_media: number;
+	featured_media?: number;
 	missing_image_sizes?: string[];
-
 	poster?: string;
-	blurHash?: string;
-	dominantColor?: string;
-	posterId?: number;
 };
 
 export type OnChangeHandler = ( attachments: Partial< Attachment >[] ) => void;

@@ -9,8 +9,8 @@ import {
 	type OperationStartAction,
 	type PauseItemAction,
 	type PauseQueueAction,
+	type QueueItem,
 	type RemoveAction,
-	type RequestApprovalAction,
 	type ResumeItemAction,
 	type ResumeQueueAction,
 	type RevokeBlobUrlsAction,
@@ -46,7 +46,6 @@ type Action =
 	| ApproveUploadAction
 	| OperationFinishAction
 	| OperationStartAction
-	| RequestApprovalAction
 	| SetImageSizesAction
 	| CacheBlobUrlAction
 	| RevokeBlobUrlsAction
@@ -81,13 +80,14 @@ function reducer(
 		case Type.Cancel:
 			return {
 				...state,
-				queue: state.queue.map( ( item ) =>
-					item.id === action.id
-						? {
-								...item,
-								error: action.error,
-						  }
-						: item
+				queue: state.queue.map(
+					( item ): QueueItem =>
+						item.id === action.id
+							? {
+									...item,
+									error: action.error,
+							  }
+							: item
 				),
 			};
 
@@ -100,39 +100,42 @@ function reducer(
 		case Type.PauseItem:
 			return {
 				...state,
-				queue: state.queue.map( ( item ) =>
-					item.id === action.id
-						? {
-								...item,
-								status: ItemStatus.Paused,
-						  }
-						: item
+				queue: state.queue.map(
+					( item ): QueueItem =>
+						item.id === action.id
+							? {
+									...item,
+									status: ItemStatus.Paused,
+							  }
+							: item
 				),
 			};
 
 		case Type.ResumeItem:
 			return {
 				...state,
-				queue: state.queue.map( ( item ) =>
-					item.id === action.id
-						? {
-								...item,
-								status: ItemStatus.Processing,
-						  }
-						: item
+				queue: state.queue.map(
+					( item ): QueueItem =>
+						item.id === action.id
+							? {
+									...item,
+									status: ItemStatus.Processing,
+							  }
+							: item
 				),
 			};
 
 		case Type.OperationStart: {
 			return {
 				...state,
-				queue: state.queue.map( ( item ) =>
-					item.id === action.id
-						? {
-								...item,
-								currentOperation: item.operations?.[ 0 ],
-						  }
-						: item
+				queue: state.queue.map(
+					( item ): QueueItem =>
+						item.id === action.id
+							? {
+									...item,
+									currentOperation: action.operation,
+							  }
+							: item
 				),
 			};
 		}
@@ -140,7 +143,7 @@ function reducer(
 		case Type.AddOperations:
 			return {
 				...state,
-				queue: state.queue.map( ( item ) => {
+				queue: state.queue.map( ( item ): QueueItem => {
 					if ( item.id !== action.id ) {
 						return item;
 					}
@@ -158,7 +161,7 @@ function reducer(
 		case Type.OperationFinish:
 			return {
 				...state,
-				queue: state.queue.map( ( item ) => {
+				queue: state.queue.map( ( item ): QueueItem => {
 					if ( item.id !== action.id ) {
 						return item;
 					}
@@ -181,7 +184,7 @@ function reducer(
 
 					return {
 						...item,
-						currentOperation: null,
+						currentOperation: undefined,
 						operations,
 						...action.item,
 						attachment,
@@ -189,39 +192,25 @@ function reducer(
 							...item.additionalData,
 							...action.item.additionalData,
 						},
+						timings: [
+							...( item.timings || [] ),
+							...( action.item.timings || [] ),
+						],
 					};
 				} ),
-			};
-
-		case Type.RequestApproval:
-			return {
-				...state,
-				queue: state.queue.map( ( item ) =>
-					item.id === action.id
-						? {
-								...item,
-								status: ItemStatus.PendingApproval,
-								file: action.file,
-								attachment: {
-									...item.attachment,
-									url: action.url,
-									mimeType: action.file.type,
-								},
-						  }
-						: item
-				),
 			};
 
 		case Type.ApproveUpload:
 			return {
 				...state,
-				queue: state.queue.map( ( item ) =>
-					item.id === action.id
-						? {
-								...item,
-								status: ItemStatus.Processing,
-						  }
-						: item
+				queue: state.queue.map(
+					( item ): QueueItem =>
+						item.id === action.id
+							? {
+									...item,
+									status: ItemStatus.Processing,
+							  }
+							: item
 				),
 			};
 

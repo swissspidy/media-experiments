@@ -33,8 +33,7 @@ export async function sideloadToServer(
 
 	return transformAttachment(
 		await apiFetch< RestAttachment >( {
-			// This allows the video block to directly get a video's the poster image.
-			path: `/wp/v2/media/${ attachmentId }/sideload?_embed=wp:featuredmedia`,
+			path: `/wp/v2/media/${ attachmentId }/sideload`,
 			body: data,
 			method: 'POST',
 			signal,

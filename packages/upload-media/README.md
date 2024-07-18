@@ -221,6 +221,7 @@ _Parameters_
 -   _$0.blurHash_ `[OptimizexistingItemArgs[ 'blurHash' ]]`: Item's BlurHash.
 -   _$0.dominantColor_ `[OptimizexistingItemArgs[ 'dominantColor' ]]`: Item's dominant color.
 -   _$0.generatedPosterId_ `[OptimizexistingItemArgs[ 'generatedPosterId' ]]`: Attachment ID of the generated poster image, if it exists.
+-   _$0.startTime_ `[OptimizexistingItemArgs[ 'startTime' ]]`: Time the action was initiated by the user (e.g. by clicking on a button).
 
 #### optimizeImageItem
 
@@ -280,6 +281,14 @@ Rejects a proposed optimized/converted version of a file by essentially cancelli
 _Parameters_
 
 -   _id_ `number`: Item ID.
+
+#### removeItem
+
+Removes a specific item from the queue.
+
+_Parameters_
+
+-   _id_ `QueueItemId`: Item ID.
 
 #### resizeCropItem
 

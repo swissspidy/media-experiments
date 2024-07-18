@@ -324,6 +324,7 @@ describe( 'reducer', () => {
 			const state = reducer( initialState, {
 				type: Type.OperationStart,
 				id: '2',
+				operation: OperationType.AddPoster,
 			} );
 
 			expect( state ).toEqual( {
@@ -401,8 +402,9 @@ describe( 'reducer', () => {
 						additionalData: {},
 						attachment: {},
 						status: ItemStatus.Processing,
-						currentOperation: null,
+						currentOperation: undefined,
 						operations: [ OperationType.Upload ],
+						timings: [],
 					},
 				],
 			} );

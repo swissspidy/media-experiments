@@ -3,6 +3,10 @@
  */
 import { logged } from './utils';
 
+import type { MarkOptions, MeasureOptions } from './types';
+
+export type { MeasureOptions };
+
 /**
  * Logs a message with `message` if environment is not `production`.
  *
@@ -110,6 +114,89 @@ export function start( message: string ): undefined | ( () => void ) {
 			// Do nothing.
 		}
 	};
+}
+
+export interface TimingObject {
+	name: string;
+	measure: PerformanceMeasureOptions;
+}
+
+export function createTiming(
+	measureName: string,
+	measureOptions: PerformanceMeasureOptions
+): TimingObject {
+	return {
+		name: measureName,
+		measure: measureOptions,
+	};
+}
+
+export function measure( {
+	measureName,
+	startTime,
+	endTime = performance.now(),
+	hintText,
+	detailsPairs = [],
+	color = 'primary',
+	track = 'Media Experiments',
+}: MeasureOptions ) {
+	if ( ! isDev() ) {
+		return;
+	}
+
+	performance.measure( measureName, {
+		start: startTime,
+		end: endTime,
+		detail: {
+			devtools: {
+				metadata: {
+					// An identifier for the data type contained in the payload
+					dataType: 'track-entry',
+					// An identifier for the extension. Not used / displayed.
+					extensionName: 'Media Experiments',
+				},
+				color,
+				// All entries will be grouped under this track.
+				track,
+				// A short description shown over the entry when hovered.
+				hintText,
+				// key-value pairs added to the details drawer when the entry is selected.
+				detailsPairs,
+			},
+		},
+	} );
+}
+
+export function mark( {
+	markName,
+	hintText,
+	detailsPairs = [],
+	color = 'primary',
+	track = 'Media Experiments',
+}: MarkOptions ) {
+	if ( ! isDev() ) {
+		return;
+	}
+
+	performance.mark( markName, {
+		detail: {
+			devtools: {
+				metadata: {
+					// An identifier for the data type contained in the payload
+					dataType: 'marker',
+					// An identifier for the extension. Not used / displayed.
+					extensionName: 'Media Experiments',
+				},
+				color,
+				// All entries will be grouped under this track.
+				track,
+				// A short description shown over the entry when hovered.
+				hintText,
+				// key-value pairs added to the details drawer when the entry is selected.
+				detailsPairs,
+			},
+		},
+	} );
 }
 
 function isDev() {

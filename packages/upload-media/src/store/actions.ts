@@ -6,22 +6,22 @@ import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as preferencesStore } from '@wordpress/preferences';
 
 import { getExtensionFromMimeType, getMediaTypeFromMimeType } from '@mexp/mime';
-import { start } from '@mexp/log';
+import { measure, type MeasureOptions, start } from '@mexp/log';
 
 import { ImageFile } from '../imageFile';
 import { MediaError } from '../mediaError';
 import {
 	canProcessWithFFmpeg,
+	cloneFile,
 	fetchFile,
+	getFileBasename,
+	getFileExtension,
 	getFileNameFromUrl,
 	getPosterFromVideo,
 	isAnimatedGif,
 	isHeifImage,
-	videoHasAudio,
-	cloneFile,
 	renameFile,
-	getFileBasename,
-	getFileExtension,
+	videoHasAudio,
 } from '../utils';
 import { PREFERENCES_NAME } from '../constants';
 import { transcodeHeifImage } from './utils/heif';
@@ -62,8 +62,6 @@ import type {
 	PauseQueueAction,
 	QueueItem,
 	QueueItemId,
-	RemoveAction,
-	RequestApprovalAction,
 	ResumeItemAction,
 	ResumeQueueAction,
 	RevokeBlobUrlsAction,
@@ -105,6 +103,7 @@ type ActionCreators = {
 	addItems: typeof addItems;
 	addItemFromUrl: typeof addItemFromUrl;
 	addSideloadItem: typeof addSideloadItem;
+	removeItem: typeof removeItem;
 	prepareItem: typeof prepareItem;
 	processItem: typeof processItem;
 	finishOperation: typeof finishOperation;
@@ -593,6 +592,7 @@ interface OptimizexistingItemArgs {
 	blurHash?: string;
 	dominantColor?: string;
 	generatedPosterId?: number;
+	startTime?: number;
 }
 
 /**
@@ -614,6 +614,7 @@ interface OptimizexistingItemArgs {
  * @param [$0.blurHash]          Item's BlurHash.
  * @param [$0.dominantColor]     Item's dominant color.
  * @param [$0.generatedPosterId] Attachment ID of the generated poster image, if it exists.
+ * @param [$0.startTime]         Time the action was initiated by the user (e.g. by clicking on a button).
  */
 export function optimizeExistingItem( {
 	id,
@@ -629,6 +630,7 @@ export function optimizeExistingItem( {
 	blurHash,
 	dominantColor,
 	generatedPosterId,
+	startTime,
 }: OptimizexistingItemArgs ) {
 	return async ( {
 		dispatch,
@@ -657,6 +659,18 @@ export function optimizeExistingItem( {
 		const abortController = new AbortController();
 
 		const itemId = uuidv4();
+
+		const timing: MeasureOptions = {
+			measureName: `Optimize existing item ${ fileName }`,
+			startTime: startTime || performance.now(),
+			hintText: 'This is a rendering task',
+			detailsPairs: [
+				[ 'Item ID', itemId ],
+				[ 'File name', fileName ],
+			],
+		};
+
+		const timings = [ timing ];
 
 		dispatch< AddAction >( {
 			type: Type.Add,
@@ -692,6 +706,7 @@ export function optimizeExistingItem( {
 				],
 				generatedPosterId,
 				abortController,
+				timings,
 			},
 		} );
 
@@ -714,6 +729,10 @@ export function processItem( id: QueueItemId ) {
 
 		const item = select.getItem( id ) as QueueItem;
 
+		if ( item.status === ItemStatus.PendingApproval ) {
+			return;
+		}
+
 		const {
 			attachment,
 			onChange,
@@ -733,7 +752,6 @@ export function processItem( id: QueueItemId ) {
 
 		// If we're sideloading a thumbnail, pause upload to avoid race conditions.
 		// It will be resumed after the previous upload finishes.
-		// TODO: Do this in the WP layer instead.
 		if (
 			operation === OperationType.Upload &&
 			item.parentId &&
@@ -761,7 +779,7 @@ export function processItem( id: QueueItemId ) {
 		 or if itself is a side-loaded item.
 		*/
 
-		if ( ! item.operations || ! item.operations[ 0 ] ) {
+		if ( ! operation ) {
 			const isBatchUploaded =
 				batchId && select.isBatchUploaded( batchId );
 
@@ -776,10 +794,7 @@ export function processItem( id: QueueItemId ) {
 					onBatchSuccess?.();
 				}
 
-				dispatch< RemoveAction >( {
-					type: Type.Remove,
-					id,
-				} );
+				dispatch.removeItem( id );
 				dispatch.revokeBlobUrls( id );
 			}
 
@@ -798,10 +813,7 @@ export function processItem( id: QueueItemId ) {
 					parentItem.onBatchSuccess?.();
 				}
 
-				dispatch< RemoveAction >( {
-					type: Type.Remove,
-					id: parentId,
-				} );
+				dispatch.removeItem( parentId );
 				dispatch.revokeBlobUrls( parentId );
 			}
 
@@ -813,9 +825,15 @@ export function processItem( id: QueueItemId ) {
 			return;
 		}
 
+		if ( ! operation ) {
+			// This shouldn't really happen.
+			return;
+		}
+
 		dispatch< OperationStartAction >( {
 			type: Type.OperationStart,
 			id,
+			operation,
 		} );
 
 		switch ( operation ) {
@@ -895,9 +913,6 @@ export function processItem( id: QueueItemId ) {
 			case OperationType.GenerateSubtitles:
 				dispatch.generateSubtitles( id );
 				break;
-
-			default:
-			// This shouldn't happen.
 		}
 	};
 }
@@ -948,6 +963,31 @@ export function resumeQueue() {
 		for ( const item of select.getItems() ) {
 			dispatch.processItem( item.id );
 		}
+	};
+}
+
+/**
+ * Removes a specific item from the queue.
+ *
+ * @param id Item ID.
+ */
+export function removeItem( id: QueueItemId ) {
+	return async ( { select, dispatch }: ThunkArgs ) => {
+		const item = select.getItem( id );
+		if ( ! item ) {
+			return;
+		}
+
+		if ( item.timings ) {
+			for ( const timing of item.timings ) {
+				measure( timing );
+			}
+		}
+
+		dispatch( {
+			type: Type.Remove,
+			id,
+		} );
 	};
 }
 
@@ -1568,7 +1608,7 @@ export function grantApproval( id: number ) {
 			id: item.id,
 		} );
 
-		dispatch.finishOperation( item.id, {} );
+		dispatch.processItem( item.id );
 	};
 }
 
@@ -1625,10 +1665,7 @@ export function cancelItem( id: QueueItemId, error: Error ) {
 			id,
 			error,
 		} );
-		dispatch< RemoveAction >( {
-			type: Type.Remove,
-			id,
-		} );
+		dispatch.removeItem( id );
 		dispatch.revokeBlobUrls( id );
 	};
 }
@@ -1647,6 +1684,8 @@ export function optimizeImageItem(
 ) {
 	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
+
+		const startTime = performance.now();
 
 		const imageLibrary: ImageLibrary =
 			registry
@@ -1785,12 +1824,34 @@ export function optimizeImageItem(
 				blobUrl,
 			} );
 
+			const endTime = performance.now();
+
+			const timing: MeasureOptions = {
+				measureName: `Optimize image ${ item.file.name }`,
+				startTime,
+				endTime,
+				hintText: 'This is a rendering task',
+				detailsPairs: [
+					[ 'Item ID', item.id ],
+					[ 'File name', item.file.name ],
+					[ 'Image library', imageLibrary ],
+					[ 'Input format', inputFormat ],
+					[ 'Output format', outputFormat ],
+					[ 'Output quality', outputQuality ],
+				],
+			};
+
+			const timings = [ timing ];
+
 			if ( args?.requireApproval ) {
-				dispatch< RequestApprovalAction >( {
-					type: Type.RequestApproval,
-					id,
+				dispatch.finishOperation( id, {
+					status: ItemStatus.PendingApproval,
 					file,
-					url: blobUrl,
+					attachment: {
+						url: blobUrl,
+						mime_type: file.type,
+					},
+					timings,
 				} );
 			} else {
 				dispatch.finishOperation( id, {
@@ -1798,6 +1859,7 @@ export function optimizeImageItem(
 					attachment: {
 						url: blobUrl,
 					},
+					timings,
 				} );
 			}
 		} catch ( error ) {
@@ -2219,6 +2281,8 @@ export function uploadItem( id: QueueItemId ) {
 	return async ( { select, dispatch }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
 
+		const startTime = performance.now();
+
 		const { poster } = item;
 
 		const additionalData: Record< string, unknown > = {
@@ -2317,18 +2381,31 @@ export function uploadItem( id: QueueItemId ) {
 			}
 		}
 
+		const timing: MeasureOptions = {
+			measureName: `Upload item ${ item.file.name }`,
+			startTime,
+			endTime: performance.now(),
+			hintText: 'This is a rendering task',
+			detailsPairs: [
+				[ 'Item ID', id ],
+				[ 'File name', item.file.name ],
+			],
+		};
+
+		const timings = [ timing ];
+
 		select.getSettings().mediaUpload( {
 			filesList: [ item.file ],
 			additionalData,
 			signal: item.abortController?.signal,
 			onFileChange: ( [ attachment ] ) => {
-				// TODO: Check if a poster happened to be generated on the server side already (check attachment.posterId !== 0).
-				// In that case there is no need for client-side generation.
-				// Instead, get the poster URL from the ID. Maybe async within the finishUploading() action?
-				if ( 'video' === mediaType ) {
-					// The newly uploaded file won't have a poster yet.
-					// However, we'll likely still have one on file.
-					// Add it back so we're never without one.
+				// TODO: Get the poster URL from the ID if one exists already.
+				if ( 'video' === mediaType && ! attachment.featured_media ) {
+					/*
+					 The newly uploaded file won't have a poster yet.
+					 However, we'll likely still have one on file.
+					 Add it back so we're never without one.
+					*/
 					if ( item.attachment?.poster ) {
 						attachment.poster = item.attachment.poster;
 					} else if ( poster ) {
@@ -2344,6 +2421,7 @@ export function uploadItem( id: QueueItemId ) {
 
 				dispatch.finishOperation( id, {
 					attachment,
+					timings,
 				} );
 			},
 			onError: ( error ) => {

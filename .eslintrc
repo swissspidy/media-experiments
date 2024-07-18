@@ -41,6 +41,9 @@
 				"allow": [
 					"WP_REST_API_.*",
 					"featured_media",
+					"alt_text",
+					"source_url",
+					"mime_type",
 					"mexp_.*",
 					"image_size",
 					"site_icon",
