@@ -1,0 +1,10 @@
+{
+	"settings": {
+		"jsdoc": {
+			"tagNamePreference": {
+				"returns": "return",
+				"yields": "yield"
+			}
+		}
+	}
+}

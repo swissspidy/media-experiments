@@ -24,7 +24,8 @@ describe( 'uploadToServer', () => {
 	 Test is skipped because of the following error:
 	 "TypeError: Failed to execute 'append' on 'FormData': parameter 2 is not of type 'Blob'."
 	 In setuo-globals.js we're using Node's Blob implementation
-	 because of https://github.com/jsdom/jsdom/issues/2555
+	 because of https://github.com/jsdom/jsdom/issues/2555,
+	 but jsdom expects its own implementation.
 	*/
 	it.skip( 'sends form data', async () => {
 		const jpegFile = new File( [], 'example.jpg', {

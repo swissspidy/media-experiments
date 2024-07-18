@@ -33,8 +33,8 @@ import './view.css';
 /**
  * Upload a media file when the file upload button is activated.
  *
- * Similar to the mediaUpload() function from @wordpress/editor,
- * this is a wrapper around uploadMedia() from @mexp/media-utils.
+ * Similar to the mediaUpload() function from `@wordpress/editor`,
+ * this is a wrapper around uploadMedia() from `@mexp/media-utils`.
  *
  * @param $0
  * @param $0.additionalData
@@ -64,13 +64,13 @@ const noop = () => {};
 /**
  * Upload a media file when the file upload button is activated.
  *
- * @param $0
- * @param $0.allowedTypes
- * @param $0.additionalData
- * @param $0.filesList
- * @param $0.maxUploadFileSize
- * @param $0.onError
- * @param $0.onFileChange
+ * @param $0                   Parameters object passed to the function.
+ * @param $0.allowedTypes      Array with the types of media that can be uploaded, if unset all types are allowed.
+ * @param $0.additionalData    Additional data to include in the request.
+ * @param $0.filesList         List of files.
+ * @param $0.maxUploadFileSize Maximum upload size in bytes allowed for the site.
+ * @param $0.onError           Function called when an error happens.
+ * @param $0.onFileChange      Function called each time a file or a temporary representation of the file is available.
  */
 function uploadRequestUploadMedia( {
 	allowedTypes,

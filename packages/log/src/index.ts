@@ -121,16 +121,20 @@ export interface TimingObject {
 	measure: PerformanceMeasureOptions;
 }
 
-export function createTiming(
-	measureName: string,
-	measureOptions: PerformanceMeasureOptions
-): TimingObject {
-	return {
-		name: measureName,
-		measure: measureOptions,
-	};
-}
-
+/**
+ * Small wrapper around `performance.measure`.
+ *
+ * Only works if not in production mode.
+ *
+ * @param $0              Parameters object passed to the function.
+ * @param $0.measureName  A string representing the name of the measure.
+ * @param $0.startTime    Start time.
+ * @param $0.endTime      End time. Defaults to `performance.now()`
+ * @param $0.hintText     A short description shown over the entry when hovered.
+ * @param $0.detailsPairs key-value pairs added to the details drawer when the entry is selected.
+ * @param $0.color        The color the entry will be displayed with in the timeline.
+ * @param $0.track        The name (and identifier) of the extension track the entry belongs to.
+ */
 export function measure( {
 	measureName,
 	startTime,

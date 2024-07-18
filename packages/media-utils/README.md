@@ -44,7 +44,7 @@ Upload a media file when the file upload button is activated or when adding a fi
 
 Performs some client-side file processing before eventually uploading the media to WordPress.
 
-Similar to the mediaUpload() function from @wordpress/editor.
+Similar to the mediaUpload() function from `@wordpress/editor`.
 
 _Parameters_
 

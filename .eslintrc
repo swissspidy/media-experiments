@@ -2,7 +2,8 @@
 	"root": true,
 	"extends": [
 		"plugin:@wordpress/eslint-plugin/recommended",
-		"plugin:@wordpress/eslint-plugin/i18n"
+		"plugin:@wordpress/eslint-plugin/i18n",
+		"plugin:oxlint/all"
 	],
 	"plugins": [ "oxlint" ],
 	"parserOptions": {

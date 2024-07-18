@@ -17,8 +17,8 @@ const noop = () => {};
  * Upload a media file when the file upload button is activated
  * or when adding a file to the editor via drag & drop.
  *
- * Similar to the mediaUpload() function from @wordpress/editor,
- * this is a wrapper around uploadMedia() from @mexp/media-utils
+ * Similar to the mediaUpload() function from `@wordpress/editor`,
+ * this is a wrapper around uploadMedia() from `@mexp/media-utils`
  * that injects the current post ID.
  *
  * @param $0                   Parameters object passed to the function.
@@ -70,8 +70,8 @@ function editorUploadMedia( {
 /**
  * Verifies whether the file is within the file upload size limits for the site.
  *
- * Intended to live in @wordpress/editor as a wrapper around
- * validateFileSize() from @mexp/media-utils
+ * Intended to live in `@wordpress/editor` as a wrapper around
+ * validateFileSize() from `@mexp/media-utils`
  * that injects the current site's file size limit.
  *
  * @param file File object.
@@ -84,8 +84,8 @@ function editorValidateFileSize( file: File ) {
 /**
  * Verifies if the caller (e.g. a block) supports this mime type.
  *
- * Intended to live in @wordpress/editor as a wrapper around
- * validateMimeType() and validateMimeTypeForUser() from @mexp/media-utils
+ * Intended to live in `@wordpress/editor` as a wrapper around
+ * validateMimeType() and validateMimeTypeForUser() from `@mexp/media-utils`
  * that injects the current site's mime type limits.
  *
  * @param file         File object.
@@ -104,7 +104,7 @@ function editorValidateMimeType( file: File, allowedTypes?: string[] ) {
  * or when adding a file to the editor via drag & drop.
  *
  * This function is intended to eventually live
- * in the @wordpress/block-editor package, allowing
+ * in the `@wordpress/block-editor` package, allowing
  * to perform the client-side file processing before eventually
  * uploading the media to WordPress.
  *
