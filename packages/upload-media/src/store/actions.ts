@@ -6,7 +6,7 @@ import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as preferencesStore } from '@wordpress/preferences';
 
 import { getExtensionFromMimeType, getMediaTypeFromMimeType } from '@mexp/mime';
-import { measure, start, type MeasureOptions } from '@mexp/log';
+import { measure, type MeasureOptions, start } from '@mexp/log';
 
 import { ImageFile } from '../imageFile';
 import { MediaError } from '../mediaError';
@@ -728,6 +728,10 @@ export function processItem( id: QueueItemId ) {
 		}
 
 		const item = select.getItem( id ) as QueueItem;
+
+		if ( item.status === ItemStatus.PendingApproval ) {
+			return;
+		}
 
 		const {
 			attachment,
@@ -1605,7 +1609,7 @@ export function grantApproval( id: number ) {
 			id: item.id,
 		} );
 
-		dispatch.finishOperation( item.id, {} );
+		dispatch.processItem( item.id );
 	};
 }
 
