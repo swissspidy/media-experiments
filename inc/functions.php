@@ -129,8 +129,8 @@ function filter_image_save_progressive( $interlace, $mime_type ) {
 
 	$ext = explode( '/', $mime_type )[1];
 
-	if ( isset( $preferences[ "${ext}_interlaced" ] ) ) {
-		return (bool) $preferences[ "${ext}_interlaced" ];
+	if ( isset( $preferences[ "{$ext}_interlaced" ] ) ) {
+		return (bool) $preferences[ "{$ext}_interlaced" ];
 	}
 
 	return $interlace;
