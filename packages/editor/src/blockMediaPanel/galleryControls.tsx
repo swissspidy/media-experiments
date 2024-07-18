@@ -5,11 +5,8 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as coreStore } from '@wordpress/core-data';
 import { createBlock } from '@wordpress/blocks';
 
-import {
-	type Attachment,
-	type RestAttachment,
-	store as uploadStore,
-} from '@mexp/upload-media';
+import type { Attachment, RestAttachment } from '@mexp/media-utils';
+import { store as uploadStore } from '@mexp/upload-media';
 
 import { BulkOptimization } from '../components/bulkOptimization';
 import type { BulkOptimizationAttachmentData } from '../types';
@@ -54,7 +51,8 @@ function useGalleryImageAttachments( clientId: BlockInstance[ 'clientId' ] ) {
 						id: block.attributes.id,
 						url: block.attributes.url,
 						posterUrl: block.attributes.url,
-						fileSize: 0,
+						mexp_filesize: 0,
+						mexp_filename: '',
 						isUploading: select( uploadStore ).isUploadingById(
 							block.attributes.id
 						),
@@ -77,7 +75,11 @@ function useGalleryImageAttachments( clientId: BlockInstance[ 'clientId' ] ) {
 
 						// TODO: Use fetchFile() as fallback.
 						if ( media.mexp_filesize ) {
-							attachment.fileSize = media.mexp_filesize;
+							attachment.mexp_filesize = media.mexp_filesize;
+						}
+
+						if ( media.mexp_filename ) {
+							attachment.mexp_filename = media.mexp_filename;
 						}
 					}
 

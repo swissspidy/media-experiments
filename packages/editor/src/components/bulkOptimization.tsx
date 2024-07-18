@@ -14,6 +14,7 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { __, sprintf } from '@wordpress/i18n';
 import { filterURLForDisplay } from '@wordpress/url';
 import { store as noticesStore } from '@wordpress/notices';
+import apiFetch from '@wordpress/api-fetch';
 
 import { store as uploadStore } from '@mexp/upload-media';
 
@@ -45,12 +46,23 @@ function Row( props: BulkOptimizationAttachmentData ) {
 		void optimizeExistingItem( {
 			id: props.id,
 			url: props.url,
-			fileName: props.fileName,
+			fileName: props.mexp_filename || undefined,
 			onSuccess: ( [ media ] ) => {
 				void updateBlockAttributes( props.clientId, {
 					id: media.id,
 					url: media.url,
 				} );
+
+				void apiFetch( {
+					path: `/wp/v2/media/${ props.id }`,
+					data: {
+						meta: {
+							mexp_optimized_id: media.id,
+						},
+					},
+					method: 'POST',
+				} );
+
 				void createSuccessNotice(
 					__( 'File successfully optimized.', 'media-experiments' ),
 					{
@@ -75,6 +87,10 @@ function Row( props: BulkOptimizationAttachmentData ) {
 			},
 			additionalData: {
 				post: currentPostId,
+				mexp_media_source:
+					window.mediaExperiments.mediaSourceTerms[
+						'media-optimization'
+					],
 			},
 		} );
 	};
@@ -97,8 +113,8 @@ function Row( props: BulkOptimizationAttachmentData ) {
 					</Text>
 				</Tooltip>
 				<Text variant="muted">
-					{ props.fileSize
-						? numberFormatter.format( props.fileSize )
+					{ props.mexp_filesize
+						? numberFormatter.format( props.mexp_filesize )
 						: /* translators: unknown file size */
 						  __( '? KB', 'media-experiments' ) }
 				</Text>
@@ -139,11 +155,21 @@ function CompressAll( props: {
 				batchId,
 				id: attachment.id,
 				url: attachment.url,
-				fileName: attachment.fileName,
+				fileName: attachment.mexp_filename || undefined,
 				onSuccess: ( [ media ] ) => {
 					void updateBlockAttributes( attachment.clientId, {
 						id: media.id,
 						url: media.url,
+					} );
+
+					void apiFetch( {
+						path: `/wp/v2/media/${ attachment.id }`,
+						data: {
+							meta: {
+								mexp_optimized_id: media.id,
+							},
+						},
+						method: 'POST',
 					} );
 				},
 				onError: ( err: Error ) => {
@@ -174,6 +200,10 @@ function CompressAll( props: {
 				},
 				additionalData: {
 					post: currentPostId,
+					mexp_media_source:
+						window.mediaExperiments.mediaSourceTerms[
+							'media-optimization'
+						],
 				},
 			} );
 		}

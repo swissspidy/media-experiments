@@ -1,7 +1,7 @@
 import type { BlockEditProps } from '@wordpress/blocks';
 import { Fragment } from '@wordpress/element';
 
-import type { Attachment } from '@mexp/upload-media';
+import type { Attachment } from '@mexp/media-utils';
 
 import { UploadIndicator } from './uploadIndicator';
 import { RecordingControls } from './recordingControls';

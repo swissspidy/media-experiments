@@ -12,8 +12,11 @@ import { store as editorStore } from '@wordpress/editor';
 import { store as noticesStore } from '@wordpress/notices';
 import apiFetch from '@wordpress/api-fetch';
 
-import type { Attachment, RestAttachment } from '@mexp/upload-media';
-import { transformAttachment } from '@mexp/upload-media';
+import {
+	transformAttachment,
+	type Attachment,
+	type RestAttachment,
+} from '@mexp/media-utils';
 import { store as interfaceStore } from '@mexp/interface';
 
 import { Modal } from './modal';

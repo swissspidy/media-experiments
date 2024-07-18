@@ -14,6 +14,7 @@ declare global {
 			allowedTypes: string[];
 			accept: string[];
 			multiple: boolean;
+			maxUploadFileSize: number;
 		};
 	}
 }

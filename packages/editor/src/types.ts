@@ -1,7 +1,7 @@
 import type { BlockInstance } from '@wordpress/blocks';
 
+import type { Attachment } from '@mexp/media-utils';
 import type {
-	Attachment,
 	AudioFormat,
 	ImageFormat,
 	ImageLibrary,
@@ -11,7 +11,7 @@ import type {
 
 export type BulkOptimizationAttachmentData = Pick<
 	Attachment,
-	'id' | 'url' | 'fileSize' | 'fileName'
+	'id' | 'url' | 'mexp_filesize' | 'mexp_filename'
 > & {
 	posterUrl: Attachment[ 'url' ];
 	clientId: BlockInstance[ 'clientId' ];

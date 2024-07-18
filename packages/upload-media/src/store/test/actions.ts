@@ -140,7 +140,6 @@ describe( 'actions', () => {
 					attachment: {
 						url: expect.stringMatching( /^blob:/ ),
 					},
-					mediaSourceTerms: [ 'media-import' ],
 					operations: [
 						[
 							OperationType.FetchRemoteFile,
@@ -230,7 +229,6 @@ describe( 'actions', () => {
 						url: 'https://example.com/awesome-video.mp4',
 						poster: undefined,
 					},
-					mediaSourceTerms: [ 'media-optimization' ],
 					operations: [
 						[
 							OperationType.FetchRemoteFile,
@@ -326,29 +324,6 @@ describe( 'actions', () => {
 			expect( registry.select( uploadStore ).getItems()[ 0 ] ).toBe(
 				item
 			);
-		} );
-	} );
-
-	describe( 'setMediaSourceTerms', () => {
-		it( 'adds media source terms to state', () => {
-			registry.dispatch( uploadStore ).setMediaSourceTerms( {
-				foo: 1,
-				bar: 2,
-				baz: 3,
-			} );
-
-			expect(
-				registry.select( uploadStore ).getMediaSourceTermId( 'foo' )
-			).toBe( 1 );
-			expect(
-				registry.select( uploadStore ).getMediaSourceTermId( 'bar' )
-			).toBe( 2 );
-			expect(
-				registry.select( uploadStore ).getMediaSourceTermId( 'baz' )
-			).toBe( 3 );
-			expect(
-				registry.select( uploadStore ).getMediaSourceTermId( 'unknown' )
-			).toBe( undefined );
 		} );
 	} );
 

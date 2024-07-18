@@ -8,8 +8,10 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
 import { isBlobURL } from '@wordpress/blob';
 import { __, sprintf } from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
 
-import { type Attachment, store as uploadStore } from '@mexp/upload-media';
+import type { Attachment } from '@mexp/media-utils';
+import { store as uploadStore } from '@mexp/upload-media';
 
 import { useAttachment, useIsUploadingById } from '../utils/hooks';
 import { ApprovalDialog } from '../components/approvalDialog';
@@ -62,6 +64,16 @@ export function OptimizeMedia( {
 						type: 'snackbar',
 					}
 				);
+
+				void apiFetch( {
+					path: `/wp/v2/media/${ attachment.id }`,
+					data: {
+						meta: {
+							mexp_optimized_id: media.id,
+						},
+					},
+					method: 'POST',
+				} );
 			},
 			onError: ( err: Error ) => {
 				void createErrorNotice(
@@ -83,6 +95,10 @@ export function OptimizeMedia( {
 			generatedPosterId: attachment.meta.mexp_generated_poster_id,
 			additionalData: {
 				post: currentPostId,
+				mexp_media_source:
+					window.mediaExperiments.mediaSourceTerms[
+						'media-optimization'
+					],
 			},
 		} );
 	};

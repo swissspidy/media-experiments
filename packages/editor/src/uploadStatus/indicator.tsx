@@ -7,7 +7,7 @@ import { DropdownMenu } from '@wordpress/components';
 import { useEffect } from '@wordpress/element';
 import { store as editorStore } from '@wordpress/editor';
 
-import { UploadError, store as uploadStore } from '@mexp/upload-media';
+import { store as uploadStore } from '@mexp/upload-media';
 import { getMediaTypeFromMimeType } from '@mexp/mime';
 
 import { UnfinishedUploadsWarning } from './unfinishedUploadsWarning';
@@ -56,12 +56,7 @@ export function UploadStatusIndicator() {
 								onClick: () =>
 									cancelItem(
 										item.id,
-										new UploadError( {
-											code: 'UPLOAD_CANCELLED_MANUALLY',
-											message:
-												'File upload was cancelled',
-											file: item.file,
-										} )
+										new Error( 'File upload was cancelled' )
 									),
 							};
 					  } )

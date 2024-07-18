@@ -1,20 +1,8 @@
-import type { WP_REST_API_Attachment, WP_REST_API_Term } from 'wp-types';
-
-export type { WP_REST_API_Term };
-
 export type QueueItemId = string;
 
 export type QueueStatus = 'active' | 'paused';
 
 export type BatchId = string;
-
-// Keep in sync with PHP.
-export type MediaSourceTerm =
-	| 'media-optimization'
-	| 'poster-generation'
-	| 'media-import'
-	| 'gif-conversion'
-	| 'subtitles-generation';
 
 export type QueueItem = {
 	id: QueueItemId;
@@ -34,7 +22,6 @@ export type QueueItem = {
 	batchId?: string;
 	sourceUrl?: string;
 	sourceAttachmentId?: number; // TODO: implement.
-	mediaSourceTerms?: MediaSourceTerm[];
 	blurHash?: string;
 	dominantColor?: string;
 	generatedPosterId?: number;
@@ -44,10 +31,10 @@ export type QueueItem = {
 
 export interface State {
 	queue: QueueItem[];
-	mediaSourceTerms: Partial< Record< MediaSourceTerm, number > >;
 	imageSizes: Record< string, ImageSizeCrop >;
 	queueStatus: QueueStatus;
 	blobUrls: Record< QueueItemId, string[] >;
+	settings: Settings;
 }
 
 export enum Type {
@@ -60,7 +47,6 @@ export enum Type {
 	ResumeItem = 'RESUME_ITEM',
 	PauseQueue = 'PAUSE_QUEUE',
 	ResumeQueue = 'RESUME_QUEUE',
-	SetMediaSourceTerms = 'ADD_MEDIA_SOURCE_TERMS',
 	SetImageSizes = 'ADD_IMAGE_SIZES',
 	RequestApproval = 'REQUEST_APPROVAL',
 	ApproveUpload = 'APPROVE_UPLOAD',
@@ -69,6 +55,7 @@ export enum Type {
 	AddOperations = 'ADD_OPERATIONS',
 	CacheBlobUrl = 'CACHE_BLOB_URL',
 	RevokeBlobUrls = 'REVOKE_BLOB_URLS',
+	UpdateSettings = 'UPDATE_SETTINGS',
 }
 
 type Action< T = Type, Payload = Record< string, unknown > > = {
@@ -115,10 +102,6 @@ export type ResumeItemAction = Action< Type.ResumeItem, { id: QueueItemId } >;
 export type PauseQueueAction = Action< Type.PauseQueue >;
 export type ResumeQueueAction = Action< Type.ResumeQueue >;
 export type RemoveAction = Action< Type.Remove, { id: QueueItemId } >;
-export type SetMediaSourceTermsAction = Action<
-	Type.SetMediaSourceTerms,
-	{ terms: Record< MediaSourceTerm, number > }
->;
 export type SetImageSizesAction = Action<
 	Type.SetImageSizes,
 	{ imageSizes: Record< string, ImageSizeCrop > }
@@ -131,26 +114,80 @@ export type RevokeBlobUrlsAction = Action<
 	Type.RevokeBlobUrls,
 	{ id: QueueItemId }
 >;
+export type UpdateSettingsAction = Action<
+	Type.UpdateSettings,
+	{ settings: Partial< Settings > }
+>;
 
+interface UploadMediaArgs {
+	// Additional data to include in the request.
+	additionalData?: AdditionalData;
+	// Array with the types of media that can be uploaded, if unset all types are allowed.
+	allowedTypes?: string[];
+	// List of files.
+	filesList: File[];
+	// Maximum upload size in bytes allowed for the site.
+	maxUploadFileSize?: number;
+	// Function called when an error happens.
+	onError?: OnErrorHandler;
+	// Function called each time a file or a temporary representation of the file is available.
+	onFileChange?: OnChangeHandler;
+	// Function called once a file has completely finished uploading, including thumbnails.
+	onSuccess?: OnSuccessHandler;
+	// List of allowed mime types and file extensions.
+	wpAllowedMimeTypes?: Record< string, string > | null;
+	// Abort signal.
+	signal?: AbortSignal;
+}
+
+interface SideloadMediaArgs {
+	// Additional data to include in the request.
+	additionalData?: SideloadAdditionalData;
+	// File to sideload.
+	file: File;
+	// Attachment ID.
+	attachmentId: number;
+	// Function called when an error happens.
+	onError?: OnErrorHandler;
+	// Function called each time a file or a temporary representation of the file is available.
+	onFileChange?: OnChangeHandler;
+	// Abort signal.
+	signal?: AbortSignal;
+}
+
+export type Settings = {
+	mediaUpload: ( args: UploadMediaArgs ) => void;
+	mediaSideload: ( args: SideloadMediaArgs ) => void;
+};
+
+// Must match the Attachment type from the media-utils package.
 export type Attachment = {
 	id: number;
-	url: string;
 	alt: string;
-	caption?: string;
+	caption: string;
 	title: string;
-	mimeType: string;
+	url: string;
+	mexp_filename: string | null;
+	mexp_filesize: number | null;
+	mexp_media_source: number[];
+	meta: {
+		mexp_generated_poster_id?: number;
+		mexp_original_id?: number;
+		mexp_optimized_id?: number;
+	};
+	mexp_blurhash?: string;
+	mexp_dominant_color?: string;
+	mexp_is_muted?: boolean;
+	mexp_has_transparency?: boolean;
+	media_type: 'image' | 'file';
+	mime_type: string;
+	featured_media: number;
+	missing_image_sizes?: string[];
+
 	poster?: string;
 	blurHash?: string;
 	dominantColor?: string;
 	posterId?: number;
-	// Video block expects such a structure for the poster.
-	// https://github.com/WordPress/gutenberg/blob/e0a413d213a2a829ece52c6728515b10b0154d8d/packages/block-library/src/video/edit.js#L154
-	image?: {
-		src: string;
-	};
-	missingImageSizes?: string[];
-	fileName?: string;
-	fileSize?: number;
 };
 
 export type OnChangeHandler = ( attachments: Partial< Attachment >[] ) => void;
@@ -206,47 +243,9 @@ type OperationWithArgs< T extends keyof OperationArgs = keyof OperationArgs > =
 
 export type Operation = OperationType | OperationWithArgs;
 
-export interface RestAttachment extends WP_REST_API_Attachment {
-	mexp_filename: string | null;
-	mexp_filesize: number | null;
-	mexp_media_source: number[];
-	meta: {
-		mexp_generated_poster_id?: number;
-		mexp_original_id?: number;
-		mexp_optimized_id?: number;
-	};
-	mexp_blurhash?: string;
-	mexp_dominant_color?: string;
-	mexp_is_muted?: boolean;
-	mexp_has_transparency?: boolean;
-}
+export type AdditionalData = Record< string, unknown >;
 
-export type CreateRestAttachment = Partial< RestAttachment > & {
-	generate_sub_sizes?: boolean;
-};
-
-export type AdditionalData = Omit<
-	CreateRestAttachment,
-	'meta' | 'mexp_media_source'
-> & {
-	/**
-	 * The ID for the associated post of the attachment.
-	 *
-	 * TODO: Figure out why it's not inherited from RestAttachment / WP_REST_API_Attachment type.
-	 */
-	post?: RestAttachment[ 'id' ];
-};
-
-export type CreateSideloadFile = {
-	image_size?: string;
-	upload_request?: string;
-};
-
-export type SideloadAdditionalData = {
-	post: RestAttachment[ 'id' ];
-	image_size?: string;
-	upload_request?: string;
-};
+export type SideloadAdditionalData = Record< string, unknown >;
 
 export type ImageSizeCrop = {
 	name?: string; // Only set if dealing with sub-sizes, not for general cropping.

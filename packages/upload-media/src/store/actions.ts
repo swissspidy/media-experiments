@@ -9,9 +9,9 @@ import { getExtensionFromMimeType, getMediaTypeFromMimeType } from '@mexp/mime';
 import { start } from '@mexp/log';
 
 import { ImageFile } from '../imageFile';
-import { UploadError } from '../uploadError';
+import { MediaError } from '../mediaError';
 import {
-	canTranscodeFile,
+	canProcessWithFFmpeg,
 	fetchFile,
 	getFileNameFromUrl,
 	getPosterFromVideo,
@@ -22,7 +22,6 @@ import {
 	renameFile,
 	getFileBasename,
 } from '../utils';
-import { sideloadFile, updateMediaItem, uploadToServer } from '../api';
 import { PREFERENCES_NAME } from '../constants';
 import { transcodeHeifImage } from './utils/heif';
 import {
@@ -47,11 +46,9 @@ import type {
 	BatchId,
 	CacheBlobUrlAction,
 	CancelAction,
-	CreateRestAttachment,
 	ImageFormat,
 	ImageLibrary,
 	ImageSizeCrop,
-	MediaSourceTerm,
 	OnBatchSuccessHandler,
 	OnChangeHandler,
 	OnErrorHandler,
@@ -70,10 +67,11 @@ import type {
 	ResumeQueueAction,
 	RevokeBlobUrlsAction,
 	SetImageSizesAction,
-	SetMediaSourceTermsAction,
+	Settings,
 	SideloadAdditionalData,
 	State,
 	ThumbnailGeneration,
+	UpdateSettingsAction,
 	VideoFormat,
 } from './types';
 import { ItemStatus, OperationType, Type } from './types';
@@ -149,6 +147,23 @@ type ThunkArgs = {
 	registry: WPDataRegistry;
 };
 
+/**
+ * Returns an action object that pauses all processing in the queue.
+ *
+ * Useful for testing purposes.
+ *
+ * @param settings
+ * @return Action object.
+ */
+export function updateSettings(
+	settings: Partial< Settings >
+): UpdateSettingsAction {
+	return {
+		type: Type.UpdateSettings,
+		settings,
+	};
+}
+
 interface AddItemArgs {
 	file: File;
 	batchId?: BatchId;
@@ -159,7 +174,6 @@ interface AddItemArgs {
 	additionalData?: AdditionalData;
 	sourceUrl?: string;
 	sourceAttachmentId?: number;
-	mediaSourceTerms?: MediaSourceTerm[];
 	blurHash?: string;
 	dominantColor?: string;
 	abortController?: AbortController;
@@ -181,7 +195,6 @@ interface AddItemArgs {
  * @param [$0.additionalData]     Additional data to include in the request.
  * @param [$0.sourceUrl]          Source URL. Used when importing a file from a URL or optimizing an existing file.
  * @param [$0.sourceAttachmentId] Source attachment ID. Used when optimizing an existing file for example.
- * @param [$0.mediaSourceTerms]   List of term slugs in the media source taxonomy. Used to identify files later on in the media library.
  * @param [$0.blurHash]           Item's BlurHash.
  * @param [$0.dominantColor]      Item's dominant color.
  * @param [$0.abortController]    Abort controller for upload cancellation.
@@ -197,7 +210,6 @@ export function addItem( {
 	additionalData = {} as AdditionalData,
 	sourceUrl,
 	sourceAttachmentId,
-	mediaSourceTerms = [],
 	blurHash,
 	dominantColor,
 	abortController,
@@ -244,7 +256,6 @@ export function addItem( {
 				onError,
 				sourceUrl,
 				sourceAttachmentId,
-				mediaSourceTerms,
 				blurHash,
 				dominantColor,
 				abortController: abortController || new AbortController(),
@@ -335,7 +346,6 @@ export function addItemFromUrl( {
 			onError,
 			additionalData,
 			sourceUrl: url,
-			mediaSourceTerms: [ 'media-import' ],
 			operations: [
 				[ OperationType.FetchRemoteFile, { url, fileName } ],
 				OperationType.Upload,
@@ -451,7 +461,7 @@ export function muteExistingVideo( {
 
 		// TODO: Somehow add relation between original and muted video in db.
 
-		// TODO: Check canTranscodeFile(file) here to bail early? Or ideally already in the UI.
+		// TODO: Check file size here to bail early? Or ideally already in the UI.
 
 		// TODO: Copy over the auto-generated poster image.
 		// What if the original attachment gets deleted though?
@@ -478,7 +488,6 @@ export function muteExistingVideo( {
 				onError,
 				sourceUrl: url,
 				sourceAttachmentId: id,
-				mediaSourceTerms: [],
 				blurHash,
 				dominantColor,
 				operations: [
@@ -548,7 +557,6 @@ export function addSubtitlesForExistingVideo( {
 				onError,
 				sourceUrl: url,
 				sourceAttachmentId: id,
-				mediaSourceTerms: [ 'subtitles-generation' ],
 				additionalData,
 				abortController: new AbortController(),
 				operations: [
@@ -666,25 +674,11 @@ export function optimizeExistingItem( {
 					...additionalData,
 				},
 				onChange,
-				onSuccess: async ( [ attachment ] ) => {
-					onSuccess?.( [ attachment ] );
-					// Update the original attachment in the DB to have
-					// a reference to the optimized version.
-					void updateMediaItem(
-						id,
-						{
-							meta: {
-								mexp_optimized_id: attachment.id,
-							},
-						},
-						abortController.signal
-					);
-				},
+				onSuccess,
 				onBatchSuccess,
 				onError,
 				sourceUrl: url,
 				sourceAttachmentId: id,
-				mediaSourceTerms: [ 'media-optimization' ],
 				blurHash,
 				dominantColor,
 				operations: [
@@ -738,13 +732,14 @@ export function processItem( id: QueueItemId ) {
 
 		// If we're sideloading a thumbnail, pause upload to avoid race conditions.
 		// It will be resumed after the previous upload finishes.
+		// TODO: Do this in the WP layer instead.
 		if (
 			operation === OperationType.Upload &&
 			item.parentId &&
 			item.additionalData.post
 		) {
 			const isAlreadyUploading = select.isUploadingToPost(
-				item.additionalData.post
+				item.additionalData.post as number
 			);
 			if ( isAlreadyUploading ) {
 				dispatch< PauseItemAction >( {
@@ -756,16 +751,7 @@ export function processItem( id: QueueItemId ) {
 		}
 
 		if ( attachment ) {
-			const { poster, ...media } = attachment;
-			// Video block expects such a structure for the poster.
-			// https://github.com/WordPress/gutenberg/blob/e0a413d213a2a829ece52c6728515b10b0154d8d/packages/block-library/src/video/edit.js#L154
-			if ( poster ) {
-				media.image = {
-					src: poster,
-				};
-			}
-
-			onChange?.( [ media ] );
+			onChange?.( [ attachment ] );
 		}
 
 		/*
@@ -1117,9 +1103,6 @@ export function prepareItem( id: QueueItemId ) {
 			return;
 		}
 
-		// eslint-disable-next-line @wordpress/no-unused-vars-before-return
-		const canTranscode = canTranscodeFile( file );
-
 		const mediaType = getMediaTypeFromMimeType( file.type );
 
 		const operations: Operation[] = [];
@@ -1134,7 +1117,11 @@ export function prepareItem( id: QueueItemId ) {
 					.select( preferencesStore )
 					.get( PREFERENCES_NAME, 'gif_convert' );
 
-				if ( isGif && canTranscode && convertAnimatedGifs ) {
+				if (
+					isGif &&
+					window.crossOriginIsolated &&
+					convertAnimatedGifs
+				) {
 					operations.push(
 						OperationType.TranscodeGif,
 						OperationType.AddPoster,
@@ -1147,12 +1134,8 @@ export function prepareItem( id: QueueItemId ) {
 					break;
 				}
 
-				const isHeif = await isHeifImage( fileBuffer );
+				const isHeif = isHeifImage( fileBuffer );
 
-				// TODO: Do we need a placeholder for a HEIF image?
-				// Maybe a base64 encoded 1x1 gray PNG?
-				// Use preloadImage() and getImageDimensions() so see if browser can render it.
-				// Image/Video block already have a placeholder state.
 				if ( isHeif ) {
 					operations.push( OperationType.TranscodeHeif );
 				}
@@ -1201,7 +1184,10 @@ export function prepareItem( id: QueueItemId ) {
 				// TODO: First check if video already meets criteria, e.g. with mediainfo.js.
 				// No need to compress a video that's already quite small.
 
-				if ( canTranscode ) {
+				if (
+					window.crossOriginIsolated &&
+					canProcessWithFFmpeg( file )
+				) {
 					operations.push( OperationType.TranscodeVideo );
 				}
 
@@ -1215,7 +1201,10 @@ export function prepareItem( id: QueueItemId ) {
 				break;
 
 			case 'audio':
-				if ( canTranscode ) {
+				if (
+					window.crossOriginIsolated &&
+					canProcessWithFFmpeg( file )
+				) {
 					operations.push( OperationType.TranscodeAudio );
 				}
 
@@ -1334,10 +1323,12 @@ export function uploadPoster( id: QueueItemId ) {
 						// video item in the editor with the newly uploaded poster.
 						item.onChange?.( [ updatedAttachment ] );
 					},
+					/*
 					onSuccess: async ( [ posterAttachment ] ) => {
 						// Similarly, update the original video in the DB to have the
 						// poster as the featured image.
-						// TODO: Do this server-side instead.
+						// TODO: Do this server-side instead?
+						// TODO: Move to WP specific package.
 						void updateMediaItem(
 							attachment.id,
 							{
@@ -1350,12 +1341,12 @@ export function uploadPoster( id: QueueItemId ) {
 							abortController.signal
 						);
 					},
+					*/
 					additionalData: {
 						// Reminder: Parent post ID might not be set, depending on context,
 						// but should be carried over if it does.
 						post: item.additionalData.post,
 					},
-					mediaSourceTerms: [ 'poster-generation' ],
 					blurHash: item.blurHash,
 					dominantColor: item.dominantColor,
 					abortController,
@@ -1392,11 +1383,11 @@ export function generateThumbnails( id: QueueItemId ) {
 
 		if (
 			! item.parentId &&
-			attachment.missingImageSizes &&
+			attachment.missing_image_sizes &&
 			'server' !== thumbnailGeneration
 		) {
-			let file = attachment.fileName
-				? renameFile( item.file, attachment.fileName )
+			let file = attachment.mexp_filename
+				? renameFile( item.file, attachment.mexp_filename )
 				: item.file;
 			const batchId = uuidv4();
 
@@ -1435,7 +1426,7 @@ export function generateThumbnails( id: QueueItemId ) {
 				} );
 			}
 
-			for ( const name of attachment.missingImageSizes ) {
+			for ( const name of attachment.missing_image_sizes ) {
 				const imageSize = select.getImageSize( name );
 				if ( imageSize ) {
 					// Force thumbnails to be soft crops, see wp_generate_attachment_metadata().
@@ -1502,7 +1493,7 @@ export function uploadOriginal( id: QueueItemId ) {
 				item.file.wasResized &&
 				keepOriginal
 			) {
-				const originalName = attachment.fileName || item.file.name;
+				const originalName = attachment.mexp_filename || item.file.name;
 				const originalBaseName = getFileBasename( originalName );
 
 				// TODO: What if sourceFile is of type HEIC/HEIF?
@@ -1550,7 +1541,7 @@ export function rejectApproval( id: number ) {
 
 		dispatch.cancelItem(
 			item.id,
-			new UploadError( {
+			new MediaError( {
 				code: 'UPLOAD_CANCELLED',
 				message: 'File upload was cancelled',
 				file: item.file,
@@ -1577,9 +1568,7 @@ export function grantApproval( id: number ) {
 			id: item.id,
 		} );
 
-		dispatch.finishOperation( item.id, {
-			mediaSourceTerms: [ 'media-optimization' ],
-		} );
+		dispatch.finishOperation( item.id, {} );
 	};
 }
 
@@ -1816,7 +1805,7 @@ export function optimizeImageItem(
 				id,
 				error instanceof Error
 					? error
-					: new UploadError( {
+					: new MediaError( {
 							code: 'MEDIA_TRANSCODING_ERROR',
 							message: 'File could not be uploaded',
 							file: item.file,
@@ -1886,14 +1875,13 @@ export function optimizeVideoItem( id: QueueItemId ) {
 				attachment: {
 					url: blobUrl,
 				},
-				mediaSourceTerms: [ 'media-optimization' ],
 			} );
 		} catch ( error ) {
 			dispatch.cancelItem(
 				id,
 				error instanceof Error
 					? error
-					: new UploadError( {
+					: new MediaError( {
 							code: 'VIDEO_TRANSCODING_ERROR',
 							message: 'File could not be uploaded',
 							file: item.file,
@@ -1939,7 +1927,7 @@ export function muteVideoItem( id: QueueItemId ) {
 				id,
 				error instanceof Error
 					? error
-					: new UploadError( {
+					: new MediaError( {
 							code: 'VIDEO_MUTING_ERROR',
 							message: 'File could not be uploaded',
 							file: item.file,
@@ -2000,14 +1988,13 @@ export function optimizeAudioItem( id: QueueItemId ) {
 				attachment: {
 					url: blobUrl,
 				},
-				mediaSourceTerms: [ 'media-optimization' ],
 			} );
 		} catch ( error ) {
 			dispatch.cancelItem(
 				id,
 				error instanceof Error
 					? error
-					: new UploadError( {
+					: new MediaError( {
 							code: 'AUDIO_TRANSCODING_ERROR',
 							message: 'File could not be uploaded',
 							file: item.file,
@@ -2075,14 +2062,13 @@ export function convertGifItem( id: QueueItemId ) {
 				attachment: {
 					url: blobUrl,
 				},
-				mediaSourceTerms: [ 'gif-conversion' ],
 			} );
 		} catch ( error ) {
 			dispatch.cancelItem(
 				id,
 				error instanceof Error
 					? error
-					: new UploadError( {
+					: new MediaError( {
 							code: 'VIDEO_TRANSCODING_ERROR',
 							message: 'File could not be uploaded',
 							file: item.file,
@@ -2122,7 +2108,7 @@ export function convertHeifItem( id: QueueItemId ) {
 				id,
 				error instanceof Error
 					? error
-					: new UploadError( {
+					: new MediaError( {
 							code: 'IMAGE_TRANSCODING_ERROR',
 							message: 'File could not be uploaded',
 							file: item.file,
@@ -2212,7 +2198,7 @@ export function resizeCropItem( id: QueueItemId, args?: ResizeCropItemArgs ) {
 				id,
 				error instanceof Error
 					? error
-					: new UploadError( {
+					: new MediaError( {
 							code: 'IMAGE_TRANSCODING_ERROR',
 							message: 'File could not be uploaded',
 							file: item.file,
@@ -2235,11 +2221,8 @@ export function uploadItem( id: QueueItemId ) {
 
 		const { poster } = item;
 
-		const additionalData: Partial< CreateRestAttachment > = {
+		const additionalData: Record< string, unknown > = {
 			...item.additionalData,
-			mexp_media_source: item.mediaSourceTerms
-				?.map( ( slug ) => select.getMediaSourceTermId( slug ) )
-				.filter( Boolean ) as number[],
 			// generatedPosterId is set when using muteExistingVideo() for example.
 			meta: {
 				mexp_generated_poster_id: item.generatedPosterId || undefined,
@@ -2334,48 +2317,39 @@ export function uploadItem( id: QueueItemId ) {
 			}
 		}
 
-		try {
-			const attachment = await uploadToServer(
-				item.file,
-				additionalData,
-				item.abortController?.signal
-			);
+		select.getSettings().mediaUpload( {
+			filesList: [ item.file ],
+			additionalData,
+			signal: item.abortController?.signal,
+			onFileChange: ( [ attachment ] ) => {
+				// TODO: Check if a poster happened to be generated on the server side already (check attachment.posterId !== 0).
+				// In that case there is no need for client-side generation.
+				// Instead, get the poster URL from the ID. Maybe async within the finishUploading() action?
+				if ( 'video' === mediaType ) {
+					// The newly uploaded file won't have a poster yet.
+					// However, we'll likely still have one on file.
+					// Add it back so we're never without one.
+					if ( item.attachment?.poster ) {
+						attachment.poster = item.attachment.poster;
+					} else if ( poster ) {
+						attachment.poster = createBlobURL( poster );
 
-			// TODO: Check if a poster happened to be generated on the server side already (check attachment.posterId !== 0).
-			// In that case there is no need for client-side generation.
-			// Instead, get the poster URL from the ID. Maybe async within the finishUploading() action?
-			if ( 'video' === mediaType ) {
-				// The newly uploaded file won't have a poster yet.
-				// However, we'll likely still have one on file.
-				// Add it back so we're never without one.
-				if ( item.attachment?.poster ) {
-					attachment.poster = item.attachment.poster;
-				} else if ( poster ) {
-					attachment.poster = createBlobURL( poster );
-
-					dispatch< CacheBlobUrlAction >( {
-						type: Type.CacheBlobUrl,
-						id,
-						blobUrl: attachment.poster,
-					} );
+						dispatch< CacheBlobUrlAction >( {
+							type: Type.CacheBlobUrl,
+							id,
+							blobUrl: attachment.poster,
+						} );
+					}
 				}
-			}
 
-			dispatch.finishOperation( id, {
-				attachment,
-			} );
-		} catch ( err ) {
-			const error =
-				err instanceof Error
-					? err
-					: new UploadError( {
-							code: 'UNKNOWN_UPLOAD_ERROR',
-							message: 'File could not be uploaded',
-							file: item.file,
-					  } );
-
-			dispatch.cancelItem( id, error );
-		}
+				dispatch.finishOperation( id, {
+					attachment,
+				} );
+			},
+			onError: ( error ) => {
+				dispatch.cancelItem( id, error );
+			},
+		} );
 	};
 }
 
@@ -2391,30 +2365,20 @@ export function sideloadItem( id: QueueItemId ) {
 		const { post, ...additionalData } =
 			item.additionalData as SideloadAdditionalData;
 
-		try {
-			const attachment = await sideloadFile(
-				item.file,
-				post,
-				additionalData,
-				item.abortController?.signal
-			);
-
-			dispatch.finishOperation( id, { attachment } );
-		} catch ( err ) {
-			const error =
-				err instanceof Error
-					? err
-					: new UploadError( {
-							code: 'UNKNOWN_UPLOAD_ERROR',
-							message: 'File could not be uploaded',
-							file: item.file,
-					  } );
-
-			dispatch.cancelItem( id, error );
-		} finally {
-			// Avoid race conditions by uploading items sequentially.
-			dispatch.resumeItem( post );
-		}
+		select.getSettings().mediaSideload( {
+			file: item.file,
+			attachmentId: post as number,
+			additionalData,
+			signal: item.abortController?.signal,
+			onFileChange: ( [ attachment ] ) => {
+				dispatch.finishOperation( id, { attachment } );
+				dispatch.resumeItem( post as number );
+			},
+			onError: ( error ) => {
+				dispatch.cancelItem( id, error );
+				dispatch.resumeItem( post as number );
+			},
+		} );
 	};
 }
 
@@ -2462,7 +2426,7 @@ export function fetchRemoteFile( id: QueueItemId, args: FetchRemoteFileArgs ) {
 				id,
 				error instanceof Error
 					? error
-					: new UploadError( {
+					: new MediaError( {
 							code: 'FETCH_REMOTE_FILE_ERROR',
 							message: 'Remote file could not be downloaded',
 							file: item.file,
@@ -2509,29 +2473,13 @@ export function generateSubtitles( id: QueueItemId ) {
 				id,
 				error instanceof Error
 					? error
-					: new UploadError( {
+					: new MediaError( {
 							code: 'FETCH_REMOTE_FILE_ERROR',
 							message: 'Remote file could not be downloaded',
 							file: item.file,
 					  } )
 			);
 		}
-	};
-}
-
-/**
- * Returns an action object that sets the media source term slugs and IDs.
- *
- * @param terms Map of term slugs to IDs.
- *
- * @return Action object.
- */
-export function setMediaSourceTerms(
-	terms: Record< string, number >
-): SetMediaSourceTermsAction {
-	return {
-		type: Type.SetMediaSourceTerms,
-		terms,
 	};
 }
 

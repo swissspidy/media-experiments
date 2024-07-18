@@ -28,7 +28,6 @@ _Parameters_
 -   _$0.additionalData_ `[AddItemArgs[ 'additionalData' ]]`: Additional data to include in the request.
 -   _$0.sourceUrl_ `[AddItemArgs[ 'sourceUrl' ]]`: Source URL. Used when importing a file from a URL or optimizing an existing file.
 -   _$0.sourceAttachmentId_ `[AddItemArgs[ 'sourceAttachmentId' ]]`: Source attachment ID. Used when optimizing an existing file for example.
--   _$0.mediaSourceTerms_ `[AddItemArgs[ 'mediaSourceTerms' ]]`: List of term slugs in the media source taxonomy. Used to identify files later on in the media library.
 -   _$0.blurHash_ `[AddItemArgs[ 'blurHash' ]]`: Item's BlurHash.
 -   _$0.dominantColor_ `[AddItemArgs[ 'dominantColor' ]]`: Item's dominant color.
 -   _$0.abortController_ `[AddItemArgs[ 'abortController' ]]`: Abort controller for upload cancellation.
@@ -325,18 +324,6 @@ _Returns_
 
 -   `SetImageSizesAction`: Action object.
 
-#### setMediaSourceTerms
-
-Returns an action object that sets the media source term slugs and IDs.
-
-_Parameters_
-
--   _terms_ `Record< string, number >`: Map of term slugs to IDs.
-
-_Returns_
-
--   `SetMediaSourceTermsAction`: Action object.
-
 #### sideloadItem
 
 Sideloads an item to the server.
@@ -344,6 +331,20 @@ Sideloads an item to the server.
 _Parameters_
 
 -   _id_ `QueueItemId`: Item ID.
+
+#### updateSettings
+
+Returns an action object that pauses all processing in the queue.
+
+Useful for testing purposes.
+
+_Parameters_
+
+-   _settings_ `Partial< Settings >`: 
+
+_Returns_
+
+-   `UpdateSettingsAction`: Action object.
 
 #### uploadItem
 
@@ -462,19 +463,6 @@ _Returns_
 
 -   `QueueItem[]`: Queue items.
 
-#### getMediaSourceTermId
-
-Returns a media source term ID given its slug.
-
-_Parameters_
-
--   _state_ `State`: Upload state.
--   _slug_ `MediaSourceTerm`: Term slug.
-
-_Returns_
-
--   `number | undefined`: Term ID.
-
 #### getPausedUploadForPost
 
 Returns the next paused upload for a given post or attachment ID.
@@ -487,6 +475,18 @@ _Parameters_
 _Returns_
 
 -   `QueueItem | undefined`: Paused item.
+
+#### getSettings
+
+Returns the media upload settings.
+
+_Parameters_
+
+-   _state_ `State`: Upload state.
+
+_Returns_
+
+-   `Settings`: Settings
 
 #### isBatchUploaded
 

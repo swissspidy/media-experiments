@@ -1,9 +1,9 @@
-import { getMimeTypesArray } from '../utils';
+import { getMimeTypesArray } from '../getMimeTypesArray';
 
 describe( 'getMimeTypesArray', () => {
-	it( 'should return an empty array if it is "falsy" e.g: undefined or null', () => {
-		expect( getMimeTypesArray( null ) ).toEqual( [] );
-		expect( getMimeTypesArray( undefined ) ).toEqual( [] );
+	it( 'should return null if it is "falsy" e.g: undefined or null', () => {
+		expect( getMimeTypesArray( null ) ).toEqual( null );
+		expect( getMimeTypesArray( undefined ) ).toEqual( null );
 	} );
 
 	it( 'should return an empty array if an empty object is passed', () => {

@@ -8,7 +8,8 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import type { BlockInstance } from '@wordpress/blocks';
 import { media as mediaIcon } from '@wordpress/icons';
 
-import { type RestAttachment, store as uploadStore } from '@mexp/upload-media';
+import { type RestAttachment } from '@mexp/media-utils';
+import { store as uploadStore } from '@mexp/upload-media';
 
 import { BulkOptimization } from '../components/bulkOptimization';
 import type { BulkOptimizationAttachmentData } from '../types';
@@ -78,7 +79,8 @@ function useMediaBlockAttachments() {
 							'src' in block.attributes
 								? block.attributes.poster
 								: block.attributes.url,
-						fileSize: 0,
+						mexp_filesize: 0,
+						mexp_filename: '',
 						isUploading: select( uploadStore ).isUploadingById(
 							block.attributes.id
 						),
@@ -101,11 +103,11 @@ function useMediaBlockAttachments() {
 
 						// TODO: Use fetchFile() as fallback.
 						if ( media.mexp_filesize ) {
-							attachment.fileSize = media.mexp_filesize;
+							attachment.mexp_filesize = media.mexp_filesize;
 						}
 
 						if ( media.mexp_filename ) {
-							attachment.fileName = media.mexp_filename;
+							attachment.mexp_filename = media.mexp_filename;
 						}
 					}
 

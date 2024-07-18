@@ -47,6 +47,15 @@ test.describe( 'Images', () => {
 			'hill-800x600.heic'
 		);
 
+		await expect(
+			page
+				.getByRole( 'button', { name: 'Dismiss this notice' } )
+				.filter( {
+					hasText:
+						/Sorry, you are not allowed to upload this file type/,
+				} )
+		).toBeHidden();
+
 		await page.waitForFunction(
 			() =>
 				window.wp.data.select( 'media-experiments/upload' ).getItems()

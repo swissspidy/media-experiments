@@ -2,10 +2,10 @@ import {
 	type BatchId,
 	type ImageSizeCrop,
 	ItemStatus,
-	type MediaSourceTerm,
 	OperationType,
 	type QueueItem,
 	type QueueItemId,
+	type Settings,
 	type State,
 } from './types';
 
@@ -297,21 +297,6 @@ export function isPaused( state: State ): boolean {
 }
 
 /**
- * Returns a media source term ID given its slug.
- *
- * @param state Upload state.
- * @param slug  Term slug.
- *
- * @return Term ID.
- */
-export function getMediaSourceTermId(
-	state: State,
-	slug: MediaSourceTerm
-): number | undefined {
-	return state.mediaSourceTerms[ slug ];
-}
-
-/**
  * Returns an image size given its name.
  *
  * @param state Upload state.
@@ -333,4 +318,15 @@ export function getImageSize( state: State, name: string ): ImageSizeCrop {
  */
 export function getBlobUrls( state: State, id: QueueItemId ): string[] {
 	return state.blobUrls[ id ] || [];
+}
+
+/**
+ * Returns the media upload settings.
+ *
+ * @param state Upload state.
+ *
+ * @return Settings
+ */
+export function getSettings( state: State ): Settings {
+	return state.settings;
 }

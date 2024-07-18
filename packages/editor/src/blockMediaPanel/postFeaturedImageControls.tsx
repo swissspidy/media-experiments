@@ -3,7 +3,7 @@ import { store as editorStore } from '@wordpress/editor';
 import { useEntityProp } from '@wordpress/core-data';
 import { Fragment } from '@wordpress/element';
 
-import type { Attachment } from '@mexp/upload-media';
+import type { Attachment } from '@mexp/media-utils';
 
 import { useAttachment } from '../utils/hooks';
 import { UploadIndicator } from './uploadIndicator';

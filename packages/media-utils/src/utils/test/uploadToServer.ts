@@ -1,5 +1,5 @@
 import apiFetch from '@wordpress/api-fetch';
-import { uploadToServer } from '../api';
+import { uploadToServer } from '../uploadToServer';
 
 jest.mock( '@wordpress/api-fetch', () => ( {
 	__esModule: true,

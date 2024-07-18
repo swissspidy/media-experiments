@@ -1,4 +1,4 @@
-import type { Attachment } from '@mexp/upload-media';
+import type { Attachment } from '@mexp/media-utils';
 
 import { Fragment } from '@wordpress/element';
 import type { BlockEditProps } from '@wordpress/blocks';

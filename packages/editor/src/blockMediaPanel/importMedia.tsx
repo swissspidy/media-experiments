@@ -8,7 +8,8 @@ import { store as editorStore } from '@wordpress/editor';
 import { isBlobURL } from '@wordpress/blob';
 import { __ } from '@wordpress/i18n';
 
-import { type Attachment, store as uploadStore } from '@mexp/upload-media';
+import type { Attachment } from '@mexp/media-utils';
+import { store as uploadStore } from '@mexp/upload-media';
 
 import { useIsUploadingByUrl } from '../utils/hooks';
 
@@ -37,6 +38,10 @@ export function ImportMedia( { url, onChange }: ImportMediaProps ) {
 			onChange: ( [ media ] ) => onChange( media ),
 			additionalData: {
 				post: currentPostId,
+				mexp_media_source:
+					window.mediaExperiments.mediaSourceTerms[
+						'subtitles-generation'
+					],
 			},
 		} );
 	};
