@@ -25,10 +25,11 @@ This way you can see for yourself how superior the WASM approach is.
 
 ## Packages
 
-The two main packages:
+The main packages:
 
-* `editor` - Main editor integration
-* `upload-media` - Core upload logic with a queue-like system, implemented using a custom `@wordpress/data` store.
+* [`media-utils`](../packages/media-utils/README.md) - Like `@wordpress/media-utils` but more advanced.
+* [`editor`](../packages/editor/README.md) - Main editor UI integration, plus hooking `media-utils` and `upload-media` into `@wordpress/block-editor`
+* [`upload-media`](../packages/upload-media/README.md) - Core upload logic with a queue-like system, implemented using a custom `@wordpress/data` store.
 
 ## Cross-origin isolation / `SharedArrayBuffer`
 
