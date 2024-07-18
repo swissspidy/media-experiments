@@ -21,6 +21,7 @@ import {
 	cloneFile,
 	renameFile,
 	getFileBasename,
+	getFileExtension,
 } from '../utils';
 import { PREFERENCES_NAME } from '../constants';
 import { transcodeHeifImage } from './utils/heif';
@@ -1169,7 +1170,11 @@ export function prepareItem( id: QueueItemId ) {
 					OperationType.ThumbnailGeneration
 				);
 
-				if ( imageSizeThreshold ) {
+				const keepOriginal: boolean = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'keepOriginal' );
+
+				if ( ( imageSizeThreshold && keepOriginal ) || isHeif ) {
 					operations.push( OperationType.UploadOriginal );
 				}
 
@@ -1473,39 +1478,34 @@ export function generateThumbnails( id: QueueItemId ) {
  * @param id Item ID.
  */
 export function uploadOriginal( id: QueueItemId ) {
-	return async ( { select, dispatch, registry }: ThunkArgs ) => {
+	return async ( { select, dispatch }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
 
 		const attachment: Attachment = item.attachment as Attachment;
 
 		const mediaType = getMediaTypeFromMimeType( item.file.type );
 
-		// Upload the original image file if it was resized because of the big image size threshold.
+		/*
+		 Upload the original image file if it was a HEIF image,
+		 or if it was resized because of the big image size threshold.
+		*/
 
 		if ( 'image' === mediaType ) {
-			const keepOriginal: boolean = registry
-				.select( preferencesStore )
-				.get( PREFERENCES_NAME, 'keepOriginal' );
-
 			if (
 				! item.parentId &&
-				item.file instanceof ImageFile &&
-				item.file.wasResized &&
-				keepOriginal
+				( ( item.file instanceof ImageFile && item.file?.wasResized ) ||
+					isHeifImage( await item.sourceFile.arrayBuffer() ) )
 			) {
-				const originalName = attachment.mexp_filename || item.file.name;
-				const originalBaseName = getFileBasename( originalName );
+				const originalBaseName = getFileBasename(
+					attachment.mexp_filename || item.file.name
+				);
 
-				// TODO: What if sourceFile is of type HEIC/HEIF?
-				// Mime types of item.sourceFile and item.file are different.
-				// Right now this triggers another HEIC conversion, which is not ideal.
 				dispatch.addSideloadItem( {
 					file: renameFile(
 						item.sourceFile,
-						originalName.replace(
-							originalBaseName,
-							`${ originalBaseName }-original`
-						)
+						`${ originalBaseName }-original.${ getFileExtension(
+							item.sourceFile.name
+						) }`
 					),
 					parentId: item.id,
 					additionalData: {
