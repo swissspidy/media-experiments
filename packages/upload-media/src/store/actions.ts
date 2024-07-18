@@ -752,7 +752,6 @@ export function processItem( id: QueueItemId ) {
 
 		// If we're sideloading a thumbnail, pause upload to avoid race conditions.
 		// It will be resumed after the previous upload finishes.
-		// TODO: Do this in the WP layer instead.
 		if (
 			operation === OperationType.Upload &&
 			item.parentId &&
@@ -780,7 +779,7 @@ export function processItem( id: QueueItemId ) {
 		 or if itself is a side-loaded item.
 		*/
 
-		if ( ! item.operations || ! item.operations[ 0 ] ) {
+		if ( ! operation ) {
 			const isBatchUploaded =
 				batchId && select.isBatchUploaded( batchId );
 
@@ -814,7 +813,7 @@ export function processItem( id: QueueItemId ) {
 					parentItem.onBatchSuccess?.();
 				}
 
-				dispatch.removeItem( id );
+				dispatch.removeItem( parentId );
 				dispatch.revokeBlobUrls( parentId );
 			}
 
