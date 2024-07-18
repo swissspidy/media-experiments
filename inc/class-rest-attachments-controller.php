@@ -142,14 +142,13 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			$upload_request = $this->get_upload_request_post( $request );
 
 			if ( $upload_request ) {
-				$attachment_id = get_post_meta(
+				$attachment_ids = get_post_meta(
 					$upload_request->ID,
-					'mexp_attachment_id',
-					true
+					'mexp_attachment_id'
 				);
 
-				if ( $attachment_id ) {
-					$query_args['post__in'] = [ $attachment_id ];
+				if ( ! empty( $attachment_ids ) ) {
+					$query_args['post__in'] = $attachment_ids;
 				} else {
 					// Upload has not been completed yet.
 					// Trick into returning an empty list.
@@ -301,7 +300,36 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		}
 		// @codeCoverageIgnoreEnd
 
+		$filter_upload_mimes = null;
+
+		if ( $upload_request ) {
+			$allowed_types = get_post_meta( $upload_request->ID, 'mexp_allowed_types', true );
+
+			/**
+			 * Filters list of mime types based on upload request restrictions.
+			 *
+			 * @param array $types Mime types keyed by the file extension regex corresponding to those types.
+			 *
+			 * @return array Filtered list of mime types.
+			 */
+			$filter_upload_mimes = static function ( array $types ) use ( $allowed_types ) {
+				return array_filter(
+					$types,
+					static function ( $mime_type ) use ( $allowed_types ) {
+						$file_type = explode( '/', $mime_type )[0];
+						return in_array( $file_type, $allowed_types, true );
+					}
+				);
+			};
+
+			add_filter( 'upload_mimes', $filter_upload_mimes );
+		}
+
 		$response = parent::create_item( $request );
+
+		if ( $upload_request ) {
+			remove_filter( 'upload_mimes', $filter_upload_mimes );
+		}
 
 		// @codeCoverageIgnoreStart
 		if ( function_exists( 'perflab_server_timing_register_metric' ) && ! empty( $before_metadata ) ) {
@@ -332,8 +360,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			add_post_meta(
 				$upload_request->ID,
 				'mexp_attachment_id',
-				$attachment_id,
-				true
+				$attachment_id
 			);
 		}
 
@@ -551,11 +578,15 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		 * @return string Filtered file name.
 		 */
 		$filter_filename = static function ( $filename, $ext, $dir, $unique_filename_callback, $alt_filenames, $number ) use ( $attachment_filename ) {
+			if ( empty( $number ) || ! $attachment_filename ) {
+				return $filename;
+			}
+
 			$ext       = pathinfo( $filename, PATHINFO_EXTENSION );
 			$name      = pathinfo( $filename, PATHINFO_FILENAME );
 			$orig_name = pathinfo( $attachment_filename, PATHINFO_FILENAME );
 
-			if ( empty( $number ) || ! $ext || ! $name ) {
+			if ( ! $ext || ! $name ) {
 				return $filename;
 			}
 
@@ -572,10 +603,30 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		add_filter( 'wp_unique_filename', $filter_filename, 10, 6 );
 
-		if ( ! empty( $files ) ) {
-			$file = $this->upload_from_file( $files, $headers );
+		// See https://github.com/swissspidy/media-experiments/issues/465.
+		// See https://core.trac.wordpress.org/ticket/61189.
+		if ( version_compare( get_bloginfo( 'version' ), '6.6-beta1', '>=' ) ) {
+			$parent_post = get_post_parent( $attachment_id );
+
+			$time = null;
+
+			// Matches logic in media_handle_upload().
+			// The post date doesn't usually matter for pages, so don't backdate this upload.
+			if ( $parent_post && 'page' !== $parent_post->post_type && substr( $parent_post->post_date, 0, 4 ) > 0 ) {
+				$time = $parent_post->post_date;
+			}
+
+			if ( ! empty( $files ) ) {
+				$file = $this->upload_from_file( $files, $headers, $time );
+			} else {
+				$file = $this->upload_from_data( $request->get_body(), $headers, $time );
+			}
 		} else {
-			$file = $this->upload_from_data( $request->get_body(), $headers );
+			if ( ! empty( $files ) ) {
+				$file = $this->upload_from_file( $files, $headers );
+			} else {
+				$file = $this->upload_from_data( $request->get_body(), $headers );
+			}
 		}
 
 		remove_filter( 'wp_unique_filename', $filter_filename );

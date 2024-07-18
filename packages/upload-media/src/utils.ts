@@ -1,23 +1,75 @@
-import {
-	blobToFile,
-	getExtensionFromMimeType,
-	getFileExtension,
-	getMimeTypeFromExtension,
-} from '@mexp/media-utils';
+import { getExtensionFromMimeType, getMimeTypeFromExtension } from '@mexp/mime';
+import { getFilename } from '@wordpress/url';
+import { _x } from '@wordpress/i18n';
 
 import {
-	MEDIA_TRANSCODING_MAX_FILE_SIZE,
-	TRANSCODABLE_MIME_TYPES,
+	WASM_MEMORY_LIMIT,
+	FFMPEG_SUPPORTED_AUDIO_VIDEO_MIME_TYPES,
 } from './constants';
-import { UploadError } from './uploadError';
-import type { Attachment, RestAttachment } from './store/types';
+import { MediaError } from './mediaError';
 
-// TODO: Make work for HEIF, GIF and audio as well.
-export function canTranscodeFile( file: File ) {
+/**
+ * Renames a given file and returns a new file.
+ *
+ * Copies over the last modified time.
+ *
+ * @param file File object.
+ * @param name File name.
+ * @return Renamed file object.
+ */
+export function renameFile( file: File, name: string ): File {
+	return new File( [ file ], name, {
+		type: file.type,
+		lastModified: file.lastModified,
+	} );
+}
+
+/**
+ * Clones a given file object.
+ *
+ * @param file File object.
+ * @return New file object.
+ */
+export function cloneFile( file: File ): File {
+	return renameFile( file, file.name );
+}
+
+/**
+ * Returns the file extension from a given file name or URL.
+ *
+ * @param file File URL.
+ * @return File extension or null if it does not have one.
+ */
+export function getFileExtension( file: string ): string | null {
+	return file.includes( '.' ) ? file.split( '.' ).pop() || null : null;
+}
+
+/**
+ * Returns file basename without extension.
+ *
+ * For example, turns "my-awesome-file.jpeg" into "my-awesome-file".
+ *
+ * @param name File name.
+ * @return File basename.
+ */
+export function getFileBasename( name: string ): string {
+	return name.includes( '.' )
+		? name.split( '.' ).slice( 0, -1 ).join( '.' )
+		: name;
+}
+
+/**
+ * Determines whether a video file can be processed in the browser.
+ *
+ * Takes into account a hardcoded list of mime types,
+ * and WebAssembly memory limits.
+ *
+ * @param file File object.
+ */
+export function canProcessWithFFmpeg( file: File ) {
 	return (
-		window?.crossOriginIsolated &&
-		TRANSCODABLE_MIME_TYPES.includes( file.type ) &&
-		file.size <= MEDIA_TRANSCODING_MAX_FILE_SIZE
+		FFMPEG_SUPPORTED_AUDIO_VIDEO_MIME_TYPES.includes( file.type ) &&
+		file.size <= WASM_MEMORY_LIMIT
 	);
 }
 
@@ -25,9 +77,6 @@ export function canTranscodeFile( file: File ) {
  * Browsers may use unexpected mime types, and they differ from browser to browser.
  * This function computes a flexible array of mime types from the mime type structured provided by the server.
  * Converts { jpg|jpeg|jpe: "image/jpeg" } into [ "image/jpeg", "image/jpg", "image/jpeg", "image/jpe" ]
- * The computation of this array instead of directly using the object,
- * solves the problem in chrome where mp3 files have audio/mp3 as mime type instead of audio/mpeg.
- * https://bugs.chromium.org/p/chromium/issues/detail?id=227004
  *
  * @param {?Object} wpMimeTypesObject Mime type object received from the server.
  *                                    Extensions are keys separated by '|' and values are mime types associated with an extension.
@@ -40,8 +89,8 @@ export function getMimeTypesArray(
 	if ( ! wpMimeTypesObject ) {
 		return [];
 	}
-	return Object.entries( wpMimeTypesObject )
-		.map( ( [ extensionsString, mime ] ) => {
+	return Object.entries( wpMimeTypesObject ).flatMap(
+		( [ extensionsString, mime ] ) => {
 			const [ type ] = mime.split( '/' );
 			const extensions = extensionsString.split( '|' );
 			return [
@@ -50,8 +99,8 @@ export function getMimeTypesArray(
 					( extension ) => `${ type }/${ extension }`
 				),
 			];
-		} )
-		.flat();
+		}
+	);
 }
 
 /**
@@ -61,14 +110,18 @@ export function getMimeTypesArray(
  * @return File name.
  */
 export function getFileNameFromUrl( url: string ) {
-	const tail = url.split( '/' ).at( -1 );
-	if ( ! tail ) {
-		return 'unnamed'; // TODO: Better fallback needed?
-	}
-	return tail.split( /[#?]/ ).at( 0 ) ?? tail;
+	return (
+		getFilename( url ) || _x( 'unnamed', 'file name', 'media-experiments' )
+	); // TODO: Better fallback needed?
 }
 
-export async function fetchRemoteFile( url: string, nameOverride?: string ) {
+/**
+ * Fetches a remote file and returns a File instance.
+ *
+ * @param url          URL.
+ * @param nameOverride File name to use, instead of deriving it from the URL.
+ */
+export async function fetchFile( url: string, nameOverride?: string ) {
 	const response = await fetch( url );
 	if ( ! response.ok ) {
 		throw new Error( `Could not fetch remote file: ${ response.status }` );
@@ -81,10 +134,10 @@ export async function fetchRemoteFile( url: string, nameOverride?: string ) {
 	const mimeType =
 		blob.type || getMimeTypeFromExtension( getFileExtension( name ) || '' );
 
-	const file = blobToFile( blob, name, mimeType || '' );
+	const file = new File( [ blob ], name, { type: mimeType || '' } );
 
 	if ( ! mimeType ) {
-		throw new UploadError( {
+		throw new MediaError( {
 			code: 'FETCH_REMOTE_FILE_ERROR',
 			message: 'File could not be uploaded',
 			file,
@@ -94,6 +147,47 @@ export async function fetchRemoteFile( url: string, nameOverride?: string ) {
 	return file;
 }
 
+/**
+ * Preloads a given image using the `Image()` constructor.
+ *
+ * Useful for further processing of the image, like saving it
+ * or extracting its dominant color.
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/Image
+ *
+ * @todo Remove as it appears to be unused
+ *
+ * @param src    Image URL.
+ * @param width  Desired width.
+ * @param height Desired height.
+ */
+export function preloadImage(
+	src: string,
+	width?: number,
+	height?: number
+): Promise< HTMLImageElement > {
+	return new Promise< HTMLImageElement >( ( resolve, reject ) => {
+		// If no width or height are provided, set them to undefined
+		// so that is preloaded with its full dimensions.
+		// Avoids creating an image with 0x0 dimensions.
+		const image = new Image(
+			width ? Number( width ) : undefined,
+			height ? Number( height ) : undefined
+		);
+		image.addEventListener( 'load', () => resolve( image ) );
+		image.addEventListener( 'error', ( error ) => reject( error ) );
+		image.decoding = 'async';
+		image.crossOrigin = 'anonymous';
+
+		image.src = src;
+	} );
+}
+
+/**
+ * Preloads a video's metadata.
+ *
+ * @param src Video URL.
+ */
 function preloadVideoMetadata( src: string ) {
 	const video = document.createElement( 'video' );
 	video.muted = true;
@@ -108,6 +202,11 @@ function preloadVideoMetadata( src: string ) {
 	} );
 }
 
+/**
+ * Preloads a video.
+ *
+ * @param src Video URL.
+ */
 async function preloadVideo( src: string ) {
 	const video = await preloadVideoMetadata( src );
 
@@ -121,6 +220,17 @@ async function preloadVideo( src: string ) {
 	} );
 }
 
+/**
+ * Seeks a video to a new time.
+ *
+ * Note: browsers don't support very accurate seeking
+ * to offer protection against timing attacks and fingerprinting
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/currentTime
+ *
+ * @param video  Video element.
+ * @param offset Desired playback time.
+ */
 function seekVideo( video: HTMLVideoElement, offset = 0.99 ) {
 	if ( video.currentTime === offset ) {
 		return Promise.resolve();
@@ -157,6 +267,16 @@ export async function videoHasAudio( src: string ) {
 	);
 }
 
+/**
+ * Returns a File containing the poster image of a given video.
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
+ *
+ * @param src      Video URL.
+ * @param basename The video's base filename.
+ * @param type     Desired output mime type, as supported by HTMLCanvasElement.toBlob().
+ * @param quality  Desired image quality.
+ */
 export async function getPosterFromVideo(
 	src: string,
 	basename: string,
@@ -171,13 +291,25 @@ export async function getPosterFromVideo(
 		blob = await getFirstFrameOfVideo( src, 'image/jpeg', quality );
 	}
 
-	return blobToFile(
-		blob,
+	return new File(
+		[ blob ],
 		`${ basename }.${ getExtensionFromMimeType( blob.type ) }`,
-		blob.type
+		{ type: blob.type }
 	);
 }
 
+/**
+ * Returns the earliest possible still frame from a video.
+ *
+ * Preloads the video and seeks to a very early offset before attempting
+ * to capture the frame.
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
+ *
+ * @param src     Video URL.
+ * @param type    Desired output mime type, as supported by HTMLCanvasElement.toBlob().
+ * @param quality Desired image quality.
+ */
 export async function getFirstFrameOfVideo(
 	src: string,
 	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/jpeg',
@@ -188,6 +320,15 @@ export async function getFirstFrameOfVideo(
 	return getImageFromVideo( video, type, quality );
 }
 
+/**
+ * Returns a still image from a video element.
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
+ *
+ * @param video   HTML video element.
+ * @param type    Desired output mime type, as supported by HTMLCanvasElement.toBlob().
+ * @param quality Desired image quality.
+ */
 export function getImageFromVideo(
 	video: HTMLVideoElement,
 	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/jpeg',
@@ -208,7 +349,7 @@ export function getImageFromVideo(
 }
 
 /**
- * Whether an image is an animated GIF.
+ * Determines whether an image is an animated GIF.
  *
  * Loosely based on https://www.npmjs.com/package/animated-gif-detector (MIT-compatible ISC license)
  *
@@ -251,19 +392,25 @@ export function isAnimatedGif( buffer: ArrayBuffer ) {
 	return frames > 1;
 }
 
-export function transformAttachment( attachment: RestAttachment ): Attachment {
-	return {
-		id: attachment.id,
-		alt: attachment.alt_text,
-		caption: attachment.caption?.raw ?? '',
-		title: attachment.title.raw,
-		url: attachment.source_url,
-		mimeType: attachment.mime_type,
-		blurHash: attachment.mexp_blurhash,
-		dominantColor: attachment.mexp_dominant_color,
-		posterId: attachment.featured_media,
-		missingImageSizes: attachment.missing_image_sizes,
-		fileName: attachment.mexp_filename,
-		media_details: attachment.media_details,
-	} as Attachment;
+/**
+ * Determines whether a given image is an HEIF image.
+ *
+ * @param buffer File array buffer.
+ * @return Whether it is an HEIF image.
+ */
+export function isHeifImage( buffer: ArrayBuffer ) {
+	const fourCC = String.fromCharCode(
+		...Array.from( new Uint8Array( buffer.slice( 8, 12 ) ) )
+	);
+
+	const validFourCC = [
+		'mif1', // .heic / image/heif
+		'msf1', // .heic / image/heif-sequence
+		'heic', // .heic / image/heic
+		'heix', // .heic / image/heic
+		'hevc', // .heic / image/heic-sequence
+		'hevx', // .heic / image/heic-sequence
+	];
+
+	return validFourCC.includes( fourCC );
 }

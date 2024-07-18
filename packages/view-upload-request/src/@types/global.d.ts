@@ -1,4 +1,4 @@
-import { ImageSizeCrop } from '@mexp/upload-media';
+import type { ImageSizeCrop } from '@mexp/upload-media';
 
 declare global {
 	interface Window {
@@ -6,10 +6,15 @@ declare global {
 			availableImageSizes: Record< string, ImageSizeCrop >;
 			bigImageSizeThreshold: number;
 			bigVideoSizeThreshold: number;
+			jpegInterlaced: boolean;
+			pngInterlaced: boolean;
+			gifInterlaced: boolean;
 			allowedMimeTypes?: Record< string, string > | null;
-			uploadRequest?: string;
+			uploadRequest: string;
+			allowedTypes: string[];
+			accept: string[];
+			multiple: boolean;
+			maxUploadFileSize: number;
 		};
 	}
 }
-
-export {};

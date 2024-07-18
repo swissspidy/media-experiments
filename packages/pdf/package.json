@@ -32,7 +32,7 @@
 		}
 	},
 	"dependencies": {
-		"@mexp/media-utils": "../media-utils",
-		"pdfjs-dist": "^4.2.67"
+		"@mexp/mime": "../mime",
+		"pdfjs-dist": "^4.4.168"
 	}
 }

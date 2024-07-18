@@ -1,12 +1,12 @@
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 import { isAnimatedGif } from '../utils';
 
 describe( 'isAnimatedGif', () => {
 	it( 'should detect animated GIF', () => {
 		const buffer = readFileSync(
-			join( __dirname, '/testUtils/nyancat.gif' )
+			join( __dirname, '/fixtures/nyancat.gif' )
 		);
 		const arrayBuffer = buffer.slice(
 			buffer.byteOffset,
@@ -18,9 +18,7 @@ describe( 'isAnimatedGif', () => {
 	} );
 
 	it( 'should not detect non-animated GIF', () => {
-		const buffer = readFileSync(
-			join( __dirname, '/testUtils/still.gif' )
-		);
+		const buffer = readFileSync( join( __dirname, '/fixtures/still.gif' ) );
 		const arrayBuffer = buffer.slice(
 			buffer.byteOffset,
 			buffer.byteOffset + buffer.byteLength

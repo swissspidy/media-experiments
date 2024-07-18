@@ -1,0 +1,15 @@
+{
+	"extends": "../../tsconfig.shared.json",
+	"compilerOptions": {
+		"rootDir": "src",
+		"declarationDir": "dist-types"
+	},
+	"references": [
+		{ "path": "../interface" },
+		{ "path": "../media-recording" },
+		{ "path": "../media-utils" },
+		{ "path": "../mime" },
+		{ "path": "../upload-media" }
+	],
+	"include": [ "src/**/*" ]
+}

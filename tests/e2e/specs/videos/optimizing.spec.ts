@@ -1,8 +1,11 @@
-import { test, expect } from '../../fixtures';
+import { expect, test } from '../../fixtures';
 
 test.describe( 'Videos', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllMedia();
+		await Promise.all( [
+			requestUtils.deleteAllMedia(),
+			requestUtils.resetPreferences(),
+		] );
 	} );
 
 	test( 'uploads a file and allows optimizing it afterwards', async ( {
@@ -18,6 +21,16 @@ test.describe( 'Videos', () => {
 		);
 
 		await admin.createNewPost();
+
+		await page.evaluate( () => {
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
+					'jpeg_outputFormat',
+					'jpeg'
+				);
+		} );
 
 		await editor.insertBlock( { name: 'core/video' } );
 
@@ -37,7 +50,7 @@ test.describe( 'Videos', () => {
 				.filter( {
 					hasText: 'Sorry, this file type is not supported here',
 				} )
-		).not.toBeVisible();
+		).toBeHidden();
 
 		await page.waitForFunction(
 			() =>

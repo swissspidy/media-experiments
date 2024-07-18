@@ -36,15 +36,54 @@ if ( $post instanceof WP_Post ) {
 		unset( $dep );
 	}
 
-	// TODO: Only provide mime types allowed for this upload request.
+	// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals
+	$allowed_types = get_post_meta( $post->ID, 'mexp_allowed_types', true );
+	$accept        = get_post_meta( $post->ID, 'mexp_accept', true );
+	$multiple      = (bool) get_post_meta( $post->ID, 'mexp_multiple', true );
+
+	$max_upload_size = wp_max_upload_size();
+	if ( ! $max_upload_size ) {
+		$max_upload_size = 0;
+	}
+
+	add_filter(
+		'upload_mimes',
+		/**
+		 * Filters list of mime types based on upload request restrictions.
+		 *
+		 * @param array $types Mime types keyed by the file extension regex corresponding to those types.
+		 *
+		 * @return array Filtered list of mime types.
+		 */
+		static function ( array $types ) use ( $allowed_types ) {
+			return array_filter(
+				$types,
+				static function ( $mime_type ) use ( $allowed_types ) {
+					$file_type = explode( '/', $mime_type )[0];
+					return in_array( $file_type, $allowed_types, true );
+				}
+			);
+		}
+	);
+
+	// phpcs:enable WordPress.NamingConventions.PrefixAllGlobals
+
 	wp_add_inline_script(
 		'media-experiments-view-upload-request',
 		sprintf(
 			'
 			window.mediaExperiments.allowedMimeTypes = %1$s;
-			window.mediaExperiments.uploadRequest = %2$s;',
+			window.mediaExperiments.uploadRequest = %2$s;
+			window.mediaExperiments.allowedTypes = %3$s;
+			window.mediaExperiments.accept = %4$s;
+			window.mediaExperiments.multiple = %5$s;
+			window.mediaExperiments.maxUploadFileSize = %6$s;',
 			wp_json_encode( get_allowed_mime_types() ),
-			wp_json_encode( $post?->post_name )
+			wp_json_encode( $post->post_name ),
+			wp_json_encode( $allowed_types ? (array) $allowed_types : null ),
+			wp_json_encode( $accept ? (array) $accept : null ),
+			wp_json_encode( $multiple ),
+			wp_json_encode( $max_upload_size )
 		),
 		'before'
 	);
@@ -69,24 +108,52 @@ wp_print_inline_script_tag( "document.body.className = document.body.className.r
 	<div class="inner-wrap">
 		<p>
 			<?php
-			if ( ! $mexp_request_parent instanceof WP_Post ) {
-				printf(
-					'%s would like you to upload a file to their site. Please choose a file below.',
-					get_the_author(),
-				);
-			} elseif ( is_string( $mexp_request_parent_url ) ) {
-				printf(
-					'%1$s would like you to upload a file to their post <a href="%2$s">%3$s</a>. Please choose a file below.',
-					get_the_author(),
-					esc_url( $mexp_request_parent_url ),
-					get_the_title( $mexp_request_parent ),
-				);
+			if ( $multiple ) {
+				if ( ! $mexp_request_parent instanceof WP_Post ) {
+					printf(
+						/* translators: %s: author name */
+						__( '%s would like you to upload files to their site. Please choose files below.', 'media-experiments' ),
+						get_the_author(),
+					);
+				} elseif ( is_string( $mexp_request_parent_url ) ) {
+					printf(
+						/* translators: 1: author name. 2: post URL. 3: post title */
+						__( '%1$s would like you to upload files to their post <a href="%2$s">%3$s</a>. Please choose files below.', 'media-experiments' ),
+						get_the_author(),
+						esc_url( $mexp_request_parent_url ),
+						get_the_title( $mexp_request_parent ),
+					);
+				} else {
+					printf(
+						/* translators: 1: author name. 2: post title */
+						__( '%1$s would like you to upload files to their post "%2$s". Please choose files below.', 'media-experiments' ),
+						get_the_author(),
+						get_the_title( $mexp_request_parent ),
+					);
+				}
 			} else {
-				printf(
-					'%1$s would like you to upload a file to their post "%2$s". Please choose a file below.',
-					get_the_author(),
-					get_the_title( $mexp_request_parent ),
-				);
+				if ( ! $mexp_request_parent instanceof WP_Post ) {
+					printf(
+						/* translators: %s: author name */
+						__( '%s would like you to upload a file to their site. Please choose a file below.', 'media-experiments' ),
+						get_the_author(),
+					);
+				} elseif ( is_string( $mexp_request_parent_url ) ) {
+					printf(
+						/* translators: 1: author name. 2: post URL. 3: post title */
+						__( '%1$s would like you to upload a file to their post <a href="%2$s">%3$s</a>. Please choose a file below.', 'media-experiments' ),
+						get_the_author(),
+						esc_url( $mexp_request_parent_url ),
+						get_the_title( $mexp_request_parent ),
+					);
+				} else {
+					printf(
+						/* translators: 1: author name. 2: post title */
+						__( '%1$s would like you to upload a file to their post "%2$s". Please choose a file below.', 'media-experiments' ),
+						get_the_author(),
+						get_the_title( $mexp_request_parent ),
+					);
+				}
 			}
 			?>
 		</p>

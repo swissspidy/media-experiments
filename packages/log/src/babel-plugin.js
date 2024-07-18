@@ -47,7 +47,7 @@ function babelPlugin( { types: t } ) {
 					return specifier.type === 'ImportSpecifier';
 				} );
 
-				if ( importSpecifier && importSpecifier.local ) {
+				if ( importSpecifier?.local ) {
 					const { name } = importSpecifier.local;
 					state.callee = name;
 				}

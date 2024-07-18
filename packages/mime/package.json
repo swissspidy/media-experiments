@@ -1,0 +1,36 @@
+{
+	"name": "@mexp/mime",
+	"version": "0.0.1",
+	"description": "Mime type related utils",
+	"private": true,
+	"author": "",
+	"license": "GPL-2.0-or-later",
+	"keywords": [
+		"wordpress",
+		"media",
+		"mimetype"
+	],
+	"homepage": "https://github.com/swissspidy/media-experiments/tree/HEAD/packages/mime/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/swissspidy/media-experiments.git",
+		"directory": "packages/mime"
+	},
+	"bugs": {
+		"url": "https://github.com/swissspidy/media-experiments/issues"
+	},
+	"engines": {
+		"node": ">=20"
+	},
+	"main": "dist/index.js",
+	"types": "dist-types/index.d.ts",
+	"source": "src/index.ts",
+	"exports": {
+		".": {
+			"default": "./src/index.ts"
+		}
+	},
+	"dependencies": {
+		"mime": "^3.0.0"
+	}
+}

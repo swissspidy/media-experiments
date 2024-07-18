@@ -1,4 +1,4 @@
-import { test, expect } from '../fixtures';
+import { expect, test } from '../fixtures';
 
 test.describe( 'Cross-Origin Isolation', () => {
 	test( 'should be enabled by default', async ( {

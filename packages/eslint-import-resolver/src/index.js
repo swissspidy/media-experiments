@@ -2,7 +2,7 @@
  * External dependencies
  */
 const nodeResolver = require( 'eslint-import-resolver-node' );
-const path = require( 'path' );
+const path = require( 'node:path' );
 
 const PACKAGES_DIR = path.resolve( __dirname, '../..' );
 

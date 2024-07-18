@@ -1,8 +1,11 @@
-import { test, expect } from '../../fixtures';
+import { expect, test } from '../../fixtures';
 
 test.describe( 'Videos', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllMedia();
+		await Promise.all( [
+			requestUtils.deleteAllMedia(),
+			requestUtils.resetPreferences(),
+		] );
 	} );
 
 	test( 'generates subtitles', async ( { admin, page, editor } ) => {
@@ -33,7 +36,17 @@ test.describe( 'Videos', () => {
 
 		await expect(
 			page.getByRole( 'button', { name: 'Remove audio channel' } )
-		).not.toBeVisible();
+		).toBeHidden();
+
+		await page.waitForFunction(
+			() =>
+				window.wp.data.select( 'media-experiments/upload' ).getItems()
+					.length === 0,
+			undefined,
+			{
+				timeout: 30_000, // Transcoding might take longer
+			}
+		);
 
 		const vttUrl = await page.evaluate(
 			() =>
@@ -41,6 +54,7 @@ test.describe( 'Videos', () => {
 					?.attributes?.tracks?.[ 0 ]?.src
 		);
 		await expect( vttUrl ).not.toBeNull();
+		await expect( vttUrl ).toMatch( /\.vtt$/ );
 
 		const vttContents = await ( await fetch( vttUrl ) ).text();
 		expect( vttContents ).toContain( 'WEBVTT' );

@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 
 import { addCoverageReport } from 'monocart-reporter';
 import type { V8CoverageEntry } from 'monocart-coverage-reports';
@@ -15,6 +15,7 @@ type E2EFixture = {
 	secondPage: Page;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getSourceMapForEntry( entry: V8CoverageEntry, index: number ) {
 	if ( entry.sourceMap ) {
 		return entry;
@@ -33,6 +34,11 @@ function getSourceMapForEntry( entry: V8CoverageEntry, index: number ) {
 		if ( j >= 0 ) {
 			filePath = filePath.substring( 0, j );
 		}
+
+		if ( ! existsSync( `${ filePath }.map` ) ) {
+			return entry;
+		}
+
 		entry.sourceMap = JSON.parse(
 			readFileSync( `${ filePath }.map` ).toString( 'utf-8' )
 		);

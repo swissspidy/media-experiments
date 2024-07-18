@@ -61,7 +61,29 @@ jobs:
             - name: Update version number
               if: ${{ env.CURRENT_TAG != 'nightly' }}
               run: |
-                  sed -i -e "s/Version:     0.0.2/Version:     0.0.2-$GITHUB_SHA/g" ./media-experiments.php
+                  CURRENT_DATE=$(date +%Y.%-m.%-d)
+                  sed -i -e "s/Version:.*/Version:           0.1.$CURRENT_DATE-${GITHUB_SHA::7}/g" ./media-experiments.php
+
+            - name: Create updates information
+              if: ${{ env.CURRENT_TAG != 'nightly' }}
+              run: |
+                  CURRENT_DATE=$(date +%Y.%m.%d)
+                  UPDATE=$(cat <<-END
+                    {
+                        "id": "https://swissspidy.github.io/media-experiments/update.json",
+                        "slug": "media-experiments",
+                        "version": "0.1.$CURRENT_DATE-${GITHUB_SHA::7}",
+                        "url": "https://github.com/swissspidy/media-experiments",
+                        "package": "https://swissspidy.github.io/media-experiments/nightly.zip",
+                        "tested": "6.6",
+                        "requires_php": "8.0",
+                        "autoupdate": true
+                    }
+                  END
+
+                  )
+
+                  echo $UPDATE > update.json
 
             - name: Create ZIP file
               if: ${{ env.CURRENT_TAG != 'nightly' }}
@@ -71,6 +93,7 @@ jobs:
               if: ${{ env.CURRENT_TAG != 'nightly' }}
               run: |
                   mkdir -p _site
+                  mv update.json _site/update.json
                   cp ./media-experiments.zip _site/nightly.zip
 
             - name: Upload artifact
@@ -105,20 +128,6 @@ jobs:
                   git push origin :refs/tags/nightly
                   git tag -f nightly
                   git push origin --tags
-
-            - name: Publish Release
-              uses: softprops/action-gh-release@9d7c94cfd0a1f3ed45544c887983e9fa900f0564
-              if: ${{ env.CURRENT_TAG != 'nightly' }}
-              with:
-                  tag_name: nightly
-                  name: Nightly Build
-                  target_commitish: ${{ github.ref }}
-                  draft: false
-                  prerelease: true
-                  generate_release_notes: true
-                  files: |
-                      media-experiments.zip
-                  fail_on_unmatched_files: true
 
     # Deployment job
     deploy:

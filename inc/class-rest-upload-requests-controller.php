@@ -64,6 +64,18 @@ class REST_Upload_Requests_Controller extends WP_REST_Posts_Controller {
 	}
 
 	/**
+	 * Creates a single post.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function create_item( $request ) {
+		$request['slug'] = uniqid();
+
+		return parent::create_item( $request );
+	}
+
+	/**
 	 * Gets an upload request by its slug.
 	 *
 	 * @param string $slug Supplied slug.

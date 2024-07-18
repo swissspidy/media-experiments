@@ -1,0 +1,52 @@
+.mexp-upload-requests-modal p {
+	margin: 0 0 1em;
+}
+
+.mexp-upload-requests-modal__qrcode {
+	text-align: center;
+	margin: 0 0 1em;
+}
+
+@media (min-width: 600px) {
+
+	.mexp-upload-requests-modal {
+		min-width: 450px;
+	}
+
+	.mexp-upload-requests-modal__qrcode svg {
+		width: 150px;
+		height: 150px;
+	}
+}
+
+@media (min-width: 960px) {
+
+	.mexp-upload-requests-modal__qrcode svg {
+		width: 200px;
+		height: 200px;
+	}
+}
+
+.mexp-upload-requests-modal__input_wrapper {
+	display: flex;
+	margin: 0 0 1em;
+}
+
+.mexp-upload-requests-modal__input_wrapper .components-base-control {
+	width: 100%;
+}
+
+.mexp-upload-requests-modal__input_wrapper .components-text-control__input {
+	min-width: 250px;
+	height: 36px;
+}
+
+.mexp-upload-requests-modal__input_wrapper button {
+	margin-left: 1em;
+}
+
+.mexp-upload-requests-modal__buttons {
+	display: flex;
+	justify-content: flex-end;
+	gap: 1em;
+}

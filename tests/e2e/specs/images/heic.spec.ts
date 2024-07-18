@@ -1,8 +1,11 @@
-import { test, expect } from '../../fixtures';
+import { expect, test } from '../../fixtures';
 
 test.describe( 'Images', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllMedia();
+		await Promise.all( [
+			requestUtils.deleteAllMedia(),
+			requestUtils.resetPreferences(),
+		] );
 	} );
 
 	test( 'uploads and converts an HEIC image', async ( {
@@ -43,6 +46,15 @@ test.describe( 'Images', () => {
 			imageBlock.locator( 'data-testid=form-file-upload-input' ),
 			'hill-800x600.heic'
 		);
+
+		await expect(
+			page
+				.getByRole( 'button', { name: 'Dismiss this notice' } )
+				.filter( {
+					hasText:
+						/Sorry, you are not allowed to upload this file type/,
+				} )
+		).toBeHidden();
 
 		await page.waitForFunction(
 			() =>

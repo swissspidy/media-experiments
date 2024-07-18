@@ -4,11 +4,11 @@
 		"plugin:@wordpress/eslint-plugin/recommended",
 		"plugin:@wordpress/eslint-plugin/i18n"
 	],
-	"plugins": ["oxlint"],
+	"plugins": [ "oxlint" ],
 	"parserOptions": {
 		"requireConfigFile": false,
 		"babelOptions": {
-			"presets": ["@wordpress/babel-preset-default"]
+			"presets": [ "@wordpress/babel-preset-default" ]
 		},
 		"warnOnUnsupportedTypeScriptVersion": false
 	},
@@ -49,6 +49,7 @@
 					"upload_request",
 					"[a-z]+_outputFormat",
 					"[a-z]+_quality",
+					"[a-z]+_interlaced",
 					"gif_convert",
 					"media_details",
 					"option_string"
@@ -58,12 +59,15 @@
 	},
 	"overrides": [
 		{
-			"files": ["tests/e2e/specs/**/*.js"],
-			"extends": ["plugin:@wordpress/eslint-plugin/test-e2e"]
+			"files": [ "tests/e2e/specs/**/*.ts" ],
+			"extends": [ "plugin:@wordpress/eslint-plugin/test-playwright" ],
+			"rules": {
+				"playwright/no-skipped-test": "off"
+			}
 		},
 		{
-			"files": ["tests/js/**/*.js"],
-			"extends": ["plugin:@wordpress/eslint-plugin/test-unit"]
+			"files": [ "tests/js/**/*.js" ],
+			"extends": [ "plugin:@wordpress/eslint-plugin/test-unit" ]
 		}
 	]
 }

@@ -33,9 +33,9 @@
 	"dependencies": {
 		"@mexp/media-utils": "../media-utils",
 		"@mexp/upload-media": "../upload-media",
-		"@wordpress/components": "^27.0.0",
-		"@wordpress/compose": "^6.10.0",
-		"@wordpress/core-data": "^6.33.0",
-		"@wordpress/data": "^9.6.0"
+		"@wordpress/components": "^28.0.0",
+		"@wordpress/compose": "^7.0.0",
+		"@wordpress/core-data": "^7.0.0",
+		"@wordpress/data": "^10.0.0"
 	}
 }

@@ -2,4 +2,4 @@ declare global {
 	const PDFJS_CDN_URL: string;
 }
 
-export {};
+export type {};

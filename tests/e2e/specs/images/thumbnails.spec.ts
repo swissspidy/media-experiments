@@ -4,7 +4,7 @@ import {
 	ThumbnailGeneration,
 } from '@mexp/upload-media';
 
-import { test, expect } from '../../fixtures';
+import { expect, test } from '../../fixtures';
 
 const scenarios: {
 	imageLibrary: ImageLibrary;
@@ -31,7 +31,10 @@ const scenarios: {
 
 test.describe( 'Images', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllMedia();
+		await Promise.all( [
+			requestUtils.deleteAllMedia(),
+			requestUtils.resetPreferences(),
+		] );
 	} );
 
 	test.describe( 'Thumbnail generation', () => {
@@ -111,19 +114,18 @@ test.describe( 'Images', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 20000, // Transcoding might take longer
+						timeout: 30_000, // Transcoding might take longer
 					}
 				);
 
-				const imageUrl = await page.evaluate(
+				// See https://github.com/swissspidy/media-experiments/issues/321.
+				await page.waitForFunction(
 					() =>
 						window.wp.data
 							.select( 'core/block-editor' )
-							.getSelectedBlock()?.attributes?.url
+							.getSelectedBlock()
+							?.attributes?.url.includes( '-1024x683' )
 				);
-
-				// See https://github.com/swissspidy/media-experiments/issues/321.
-				expect( imageUrl ).toMatch( /-1024x683\.jpeg$/ );
 
 				const imageId = await page.evaluate(
 					() =>
@@ -189,7 +191,6 @@ test.describe( 'Images', () => {
 							source_url:
 								expect.stringContaining( '-1024x683.jpeg' ),
 						} ),
-
 						'bottom-right': expect.objectContaining( {
 							width: 220,
 							height: 220,
@@ -217,7 +218,6 @@ test.describe( 'Images', () => {
 							source_url:
 								expect.stringContaining( '-400x267.jpeg' ),
 						} ),
-
 						'ninek-width': expect.objectContaining( {
 							width: 900,
 							height: 600,

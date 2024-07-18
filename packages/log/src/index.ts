@@ -69,7 +69,22 @@ export function error( message: string ) {
 	return _log( message, console.error );
 }
 
-export function start( message: string ) {
+/**
+ * Starts a timer and returns a callback to stop it.
+ *
+ * @param message Message to show after stopping.
+ * @return Callback function or undefined in production mode.
+ *
+ * @example
+ * ```js
+ * import { start } from '@mexp/log';
+ *
+ * const stop = start( 'Doing stuff' );
+ * // ...
+ * stop();
+ * ```
+ */
+export function start( message: string ): undefined | ( () => void ) {
 	if ( ! isDev() ) {
 		// Forces consumer to use optional chaining to avoid errors in prod.
 		return undefined;

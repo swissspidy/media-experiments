@@ -1,10 +1,13 @@
 import { join } from 'node:path';
 
-import { test, expect } from '../fixtures';
+import { expect, test } from '../fixtures';
 
 test.describe( 'Block Transforms', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllMedia();
+		await Promise.all( [
+			requestUtils.deleteAllMedia(),
+			requestUtils.resetPreferences(),
+		] );
 	} );
 
 	test( 'uploads multiple audio files', async ( {
@@ -49,7 +52,7 @@ test.describe( 'Block Transforms', () => {
 				.filter( {
 					hasText: 'Sorry, this file type is not supported here',
 				} )
-		).not.toBeVisible();
+		).toBeHidden();
 
 		await page.waitForFunction(
 			() =>

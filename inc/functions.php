@@ -18,6 +18,39 @@ use function is_array;
 use function register_post_meta;
 
 /**
+ * Filters the update response for this plugin.
+ *
+ * Allows downloading updates from GitHub.
+ *
+ * @param array<string,mixed>|false $update      The plugin update data with the latest details. Default false.
+ * @param array<string,string>      $plugin_data Plugin headers.
+ * @param string                    $plugin_file Plugin filename.
+ *
+ * @return array<string,mixed>|false Filtered update data.
+ */
+function filter_update_plugins( $update, $plugin_data, string $plugin_file ) {
+	if ( MEXP_BASENAME !== $plugin_file ) {
+		return $update;
+	}
+
+	require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+	$updater = new \WP_Automatic_Updater();
+
+	if ( $updater->is_vcs_checkout( dirname( __DIR__ ) ) ) {
+		return $update;
+	}
+
+	$response = wp_remote_get( $plugin_data['UpdateURI'] );
+	$response = wp_remote_retrieve_body( $response );
+
+	if ( ! $response ) {
+		return $update;
+	}
+
+	return json_decode( $response, true );
+}
+
+/**
  * Sets up cross-origin isolation in the block editor.
  *
  * @codeCoverageIgnore
@@ -26,7 +59,7 @@ use function register_post_meta;
  * @return void
  */
 function set_up_cross_origin_isolation_editor( WP_Screen $screen ): void {
-	if ( ! $screen->is_block_editor() ) {
+	if ( ! $screen->is_block_editor() && 'site-editor' !== $screen->id && ! ( 'widgets' === $screen->id && wp_use_widgets_block_editor() ) ) {
 		return;
 	}
 
@@ -40,14 +73,20 @@ function set_up_cross_origin_isolation_editor( WP_Screen $screen ): void {
  *
  * @param int $user_id User ID.
  * @return array<string, mixed>
+ * @phpstan-return array<string, array{bigImageSizeThreshold?: int}>
  */
 function get_user_media_preferences( int $user_id ) {
+	/**
+	 * User preferences.
+	 *
+	 * @var false|array<string, array<string, array{bigImageSizeThreshold?: int}>> $preferences
+	 */
 	$preferences = get_user_meta( $user_id, 'wp_persisted_preferences', true );
 	if ( ! $preferences ) {
 		return [];
 	}
 
-	return (array) $preferences['media-experiments/preferences'] ?? [];
+	return (array) ( $preferences['media-experiments/preferences'] ?? [] );
 }
 
 /**
@@ -70,6 +109,31 @@ function filter_big_image_size_threshold( $threshold ) {
 	}
 
 	return $threshold;
+}
+
+/**
+ * Filters whether to output progressive images (if available).
+ *
+ * @param bool   $interlace Whether to use progressive images for output if available. Default false.
+ * @param string $mime_type The mime type being saved.
+ * @return bool Whether to use progressive images
+ */
+function filter_image_save_progressive( $interlace, $mime_type ) {
+	$user_id = get_current_user_id();
+
+	if ( ! $user_id ) {
+		return $interlace;
+	}
+
+	$preferences = get_user_media_preferences( $user_id );
+
+	$ext = explode( '/', $mime_type )[1];
+
+	if ( isset( $preferences[ "{$ext}_interlaced" ] ) ) {
+		return (bool) $preferences[ "{$ext}_interlaced" ];
+	}
+
+	return $interlace;
 }
 
 /**
@@ -116,6 +180,24 @@ function register_assets(): void {
 
 	$default_image_output_formats = get_default_image_output_formats();
 
+	$media_source_terms = array_flip(
+		get_terms(
+			[
+				'taxonomy'   => 'mexp_media_source',
+				'hide_empty' => false,
+				'orderby'    => false,
+				'fields'     => 'id=>slug',
+			]
+		)
+	);
+
+	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
+	$jpeg_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/jpeg' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
+	$png_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/png' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
+	$gif_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/gif' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+
 	wp_add_inline_script(
 		'media-experiments-view-upload-request',
 		sprintf(
@@ -126,6 +208,10 @@ function register_assets(): void {
 					'bigImageSizeThreshold'     => $image_size_threshold,
 					'bigVideoSizeThreshold'     => $video_size_threshold,
 					'defaultImageOutputFormats' => (object) $default_image_output_formats,
+					'jpegInterlaced'            => $jpeg_interlaced,
+					'pngInterlaced'             => $png_interlaced,
+					'gifInterlaced'             => $gif_interlaced,
+					'mediaSourceTerms'          => $media_source_terms,
 				]
 			)
 		),
@@ -203,6 +289,24 @@ function enqueue_block_editor_assets(): void {
 
 	$default_image_output_formats = get_default_image_output_formats();
 
+	$media_source_terms = array_flip(
+		get_terms(
+			[
+				'taxonomy'   => 'mexp_media_source',
+				'hide_empty' => false,
+				'orderby'    => false,
+				'fields'     => 'id=>slug',
+			]
+		)
+	);
+
+	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
+	$jpeg_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/jpeg' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
+	$png_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/png' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
+	$gif_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/gif' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+
 	wp_add_inline_script(
 		'media-experiments',
 		sprintf(
@@ -213,6 +317,10 @@ function enqueue_block_editor_assets(): void {
 					'bigImageSizeThreshold'     => $image_size_threshold,
 					'bigVideoSizeThreshold'     => $video_size_threshold,
 					'defaultImageOutputFormats' => (object) $default_image_output_formats,
+					'jpegInterlaced'            => $jpeg_interlaced,
+					'pngInterlaced'             => $png_interlaced,
+					'gifInterlaced'             => $gif_interlaced,
+					'mediaSourceTerms'          => $media_source_terms,
 				]
 			)
 		),
@@ -227,15 +335,6 @@ function enqueue_block_editor_assets(): void {
 	);
 
 	wp_style_add_data( 'media-experiments-editor', 'rtl', 'replace' );
-
-	wp_enqueue_style(
-		'media-experiments-upload-requests',
-		plugins_url( 'build/upload-requests-modal.css', __DIR__ ),
-		array( 'wp-components' ),
-		$asset['version']
-	);
-
-	wp_style_add_data( 'media-experiments-upload-requests', 'rtl', 'replace' );
 }
 
 /**
@@ -268,7 +367,7 @@ function enqueue_block_assets(): void {
  * Returns a list of all available image sizes.
  *
  * @return array Existing image sizes.
- * @phpstan-return array<string,string|int>
+ * @phpstan-return array<string, array<string,string|int>>
  */
 function get_all_image_sizes(): array {
 	$sizes = wp_get_registered_image_subsizes();
@@ -285,6 +384,8 @@ function get_all_image_sizes(): array {
 
 /**
  * Register additional REST fields for attachments.
+ *
+ * @todo Expose these in embed context as well?
  *
  * @uses rest_get_attachment_filename
  * @uses rest_get_attachment_filesize
@@ -528,7 +629,7 @@ function register_media_source_taxonomy(): void {
 		'attachment',
 		[
 			'label'        => __( 'Source', 'media-experiments' ),
-			'public'       => true, // Set to true for debugging.
+			'public'       => false,
 			'rewrite'      => false,
 			'hierarchical' => false,
 			'show_in_rest' => true,
@@ -925,11 +1026,63 @@ function register_upload_request_post_type(): void {
 		'mexp-upload-request',
 		'mexp_attachment_id',
 		[
-			'type'         => 'string',
+			'type'         => 'number',
 			'description'  => __( 'Associated attachment ID.', 'media-experiments' ),
 			'show_in_rest' => [
 				'schema' => [
-					'type' => 'string',
+					'type' => 'number',
+				],
+			],
+		]
+	);
+
+	register_post_meta(
+		'mexp-upload-request',
+		'mexp_allowed_types',
+		[
+			'type'         => 'string',
+			'description'  => __( 'Allowed media types.', 'media-experiments' ),
+			'show_in_rest' => [
+				'schema' => [
+					'type'  => 'array',
+					'items' => [
+						'type' => 'string',
+						'enum' => [ 'image', 'video', 'audio' ],
+					],
+				],
+			],
+			'single'       => true,
+		]
+	);
+
+	// See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#Unique_file_type_specifiers.
+	register_post_meta(
+		'mexp-upload-request',
+		'mexp_accept',
+		[
+			'type'         => 'string',
+			'description'  => __( 'List of allowed file types.', 'media-experiments' ),
+			'show_in_rest' => [
+				'schema' => [
+					'type'  => 'array',
+					'items' => [
+						'type' => 'string',
+					],
+				],
+			],
+			'single'       => true,
+		]
+	);
+
+	register_post_meta(
+		'mexp-upload-request',
+		'mexp_multiple',
+		[
+			'type'         => 'string',
+			'description'  => __( 'Whether multiple files are allowed.', 'media-experiments' ),
+			'show_in_rest' => [
+				'schema' => [
+					'type' => 'boolean',
 				],
 			],
 			'single'       => true,

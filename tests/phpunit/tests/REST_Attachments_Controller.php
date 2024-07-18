@@ -46,9 +46,9 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 			copy( DIR_TESTDATA . '/images/canola.jpg', self::$image_file );
 		}
 
-		self::$image_file_2 = get_temp_dir() . 'gradient-square.jpg';
+		self::$image_file_2 = get_temp_dir() . 'canola.jpg';
 		if ( ! file_exists( self::$image_file_2 ) ) {
-			copy( DIR_TESTDATA . '/images/gradient-square.jpg', self::$image_file_2 );
+			copy( DIR_TESTDATA . '/images/canola.jpg', self::$image_file_2 );
 		}
 
 		self::$pdf_file = get_temp_dir() . 'test-alpha.pdf';
@@ -143,6 +143,11 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 				'post_type'   => 'mexp-upload-request',
 				'post_status' => 'publish',
 				'post_name'   => 'someslug',
+				'meta_input'  => [
+					'mexp_allowed_types' => [ 'image' ],
+					'mexp_accept'        => 'image/*',
+					'mexp_multiple'      => false,
+				],
 			]
 		);
 
@@ -471,7 +476,7 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 
 		$request = new WP_REST_Request( 'POST', "/wp/v2/media/$attachment_id/sideload" );
 		$request->set_header( 'Content-Type', 'image/jpeg' );
-		$request->set_header( 'Content-Disposition', 'attachment; filename=gradient-square.jpg' );
+		$request->set_header( 'Content-Disposition', 'attachment; filename=canola.jpg' );
 		$request->set_param( 'image_size', 'medium' );
 
 		$request->set_body( file_get_contents( self::$image_file_2 ) );
@@ -486,7 +491,7 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 		$this->assertArrayHasKey( 'sizes', $data['media_details'] );
 		$this->assertArrayHasKey( 'medium', $data['media_details']['sizes'] );
 		$this->assertArrayHasKey( 'file', $data['media_details']['sizes']['medium'] );
-		$this->assertSame( 'gradient-square.jpg', $data['media_details']['sizes']['medium']['file'] );
+		$this->assertSame( 'canola.jpg', $data['media_details']['sizes']['medium']['file'] );
 	}
 
 	/**
@@ -495,5 +500,122 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 	 */
 	public function test_sideload_item_for_upload_request() {
 		$this->markTestIncomplete( 'TODO: Implement' );
+	}
+
+
+	/**
+	 * @covers ::sideload_item
+	 * @covers ::sideload_item_permissions_check
+	 */
+	public function test_sideload_item_year_month_based_folders() {
+		if ( version_compare( get_bloginfo( 'version' ), '6.6-beta1', '<' ) ) {
+			$this->markTestSkipped( 'This test requires WordPress 6.6+' );
+		}
+
+		update_option( 'uploads_use_yearmonth_folders', 1 );
+
+		wp_set_current_user( self::$admin_id );
+
+		$published_post = self::factory()->post->create(
+			array(
+				'post_status'   => 'publish',
+				'post_date'     => '2017-02-14 00:00:00',
+				'post_date_gmt' => '2017-02-14 00:00:00',
+			)
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/media' );
+		$request->set_header( 'Content-Type', 'image/jpeg' );
+		$request->set_header( 'Content-Disposition', 'attachment; filename=canola.jpg' );
+		$request->set_param( 'post', $published_post );
+		$request->set_param( 'generate_sub_sizes', false );
+
+		$request->set_body( file_get_contents( self::$image_file ) );
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$attachment_id = $data['id'];
+
+		$request = new WP_REST_Request( 'POST', "/wp/v2/media/$attachment_id/sideload" );
+		$request->set_header( 'Content-Type', 'image/jpeg' );
+		$request->set_header( 'Content-Disposition', 'attachment; filename=canola.jpg' );
+		$request->set_param( 'image_size', 'medium' );
+
+		$request->set_body( file_get_contents( self::$image_file_2 ) );
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		update_option( 'uploads_use_yearmonth_folders', 0 );
+
+		$this->assertSame( 201, $response->get_status() );
+
+		$attachment = get_post( $data['id'] );
+
+		$this->assertSame( $attachment->post_parent, $data['post'] );
+		$this->assertSame( $attachment->post_parent, $published_post );
+		$this->assertSame( wp_get_attachment_url( $attachment->ID ), $data['source_url'] );
+		$this->assertStringContainsString( '2017/02', $data['source_url'] );
+	}
+
+
+	/**
+	 * @covers ::sideload_item
+	 * @covers ::sideload_item_permissions_check
+	 */
+	public function test_sideload_item_year_month_based_folders_page_post_type() {
+		if ( version_compare( get_bloginfo( 'version' ), '6.6-beta1', '<' ) ) {
+			$this->markTestSkipped( 'This test requires WordPress 6.6+' );
+		}
+
+		update_option( 'uploads_use_yearmonth_folders', 1 );
+
+		wp_set_current_user( self::$admin_id );
+
+		$published_post = self::factory()->post->create(
+			array(
+				'post_type'     => 'page',
+				'post_status'   => 'publish',
+				'post_date'     => '2017-02-14 00:00:00',
+				'post_date_gmt' => '2017-02-14 00:00:00',
+			)
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/media' );
+		$request->set_header( 'Content-Type', 'image/jpeg' );
+		$request->set_header( 'Content-Disposition', 'attachment; filename=canola.jpg' );
+		$request->set_param( 'post', $published_post );
+		$request->set_param( 'generate_sub_sizes', false );
+
+		$request->set_body( file_get_contents( self::$image_file ) );
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$attachment_id = $data['id'];
+
+		$request = new WP_REST_Request( 'POST', "/wp/v2/media/$attachment_id/sideload" );
+		$request->set_header( 'Content-Type', 'image/jpeg' );
+		$request->set_header( 'Content-Disposition', 'attachment; filename=canola.jpg' );
+		$request->set_param( 'image_size', 'medium' );
+
+		$request->set_body( file_get_contents( self::$image_file_2 ) );
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		update_option( 'uploads_use_yearmonth_folders', 0 );
+
+		$time   = current_time( 'mysql' );
+		$y      = substr( $time, 0, 4 );
+		$m      = substr( $time, 5, 2 );
+		$subdir = "/$y/$m";
+
+		$this->assertSame( 201, $response->get_status() );
+
+		$attachment = get_post( $data['id'] );
+
+		$this->assertSame( $attachment->post_parent, $data['post'] );
+		$this->assertSame( $attachment->post_parent, $published_post );
+		$this->assertSame( wp_get_attachment_url( $attachment->ID ), $data['source_url'] );
+		$this->assertStringNotContainsString( '2017/02', $data['source_url'] );
+		$this->assertStringContainsString( $subdir, $data['source_url'] );
 	}
 }

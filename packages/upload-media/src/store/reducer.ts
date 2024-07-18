@@ -1,227 +1,93 @@
 import {
 	type AddAction,
-	type AddPosterAction,
+	type AddOperationsAction,
 	type ApproveUploadAction,
+	type CacheBlobUrlAction,
 	type CancelAction,
 	ItemStatus,
-	type PrepareAction,
+	type OperationFinishAction,
+	type OperationStartAction,
+	type PauseItemAction,
+	type PauseQueueAction,
+	type QueueItem,
 	type RemoveAction,
-	type RequestApprovalAction,
+	type ResumeItemAction,
+	type ResumeQueueAction,
+	type RevokeBlobUrlsAction,
 	type SetImageSizesAction,
-	type SetMediaSourceTermsAction,
-	type SideloadFinishAction,
 	type State,
-	type TranscodingFinishAction,
-	type TranscodingPrepareAction,
-	type TranscodingStartAction,
 	Type,
 	type UnknownAction,
-	type UploadFinishAction,
-	type UploadStartAction,
+	type UpdateSettingsAction,
 } from './types';
+
+const noop = () => {};
 
 const DEFAULT_STATE: State = {
 	queue: [],
-	mediaSourceTerms: {},
 	imageSizes: {},
+	queueStatus: 'active',
+	blobUrls: {},
+	settings: {
+		mediaUpload: noop,
+		mediaSideload: noop,
+	},
 };
 
 type Action =
-	| UnknownAction
 	| AddAction
-	| PrepareAction
-	| TranscodingPrepareAction
-	| TranscodingStartAction
-	| TranscodingFinishAction
-	| UploadStartAction
-	| UploadFinishAction
-	| SideloadFinishAction
-	| CancelAction
 	| RemoveAction
-	| AddPosterAction
-	| SetMediaSourceTermsAction
+	| CancelAction
+	| PauseItemAction
+	| ResumeItemAction
+	| PauseQueueAction
+	| ResumeQueueAction
+	| AddOperationsAction
+	| ApproveUploadAction
+	| OperationFinishAction
+	| OperationStartAction
 	| SetImageSizesAction
-	| RequestApprovalAction
-	| ApproveUploadAction;
+	| CacheBlobUrlAction
+	| RevokeBlobUrlsAction
+	| UpdateSettingsAction
+	| UnknownAction;
 
-function reducer( state = DEFAULT_STATE, action: Action ) {
+function reducer(
+	state = DEFAULT_STATE,
+	action: Action = { type: Type.Unknown }
+) {
 	switch ( action.type ) {
+		case Type.PauseQueue: {
+			return {
+				...state,
+				queueStatus: 'paused',
+			};
+		}
+
+		case Type.ResumeQueue: {
+			return {
+				...state,
+				queueStatus: 'active',
+			};
+		}
+
 		case Type.Add:
 			return {
 				...state,
 				queue: [ ...state.queue, action.item ],
 			};
-		case Type.Prepare:
-			return {
-				...state,
-				queue: state.queue.map( ( item ) =>
-					item.id === action.id
-						? {
-								...item,
-								status: ItemStatus.Preparing,
-						  }
-						: item
-				),
-			};
-
-		case Type.TranscodingPrepare:
-			return {
-				...state,
-				queue: state.queue.map( ( item ) => {
-					if ( item.id !== action.id ) {
-						return item;
-					}
-
-					if ( ! action.transcode ) {
-						return {
-							...item,
-							status: ItemStatus.PendingTranscoding,
-						};
-					}
-
-					return {
-						...item,
-						status: ItemStatus.PendingTranscoding,
-						transcode: item.transcode
-							? [ ...item.transcode, ...action.transcode ]
-							: [ ...action.transcode ],
-					};
-				} ),
-			};
-
-		case Type.TranscodingStart:
-			return {
-				...state,
-				queue: state.queue.map( ( item ) =>
-					item.id === action.id
-						? {
-								...item,
-								status: ItemStatus.Transcoding,
-						  }
-						: item
-				),
-			};
-
-		case Type.TranscodingFinish:
-			return {
-				...state,
-				queue: state.queue.map( ( item ) => {
-					if ( item.id !== action.id ) {
-						return item;
-					}
-
-					const transcode = item.transcode
-						? item.transcode.slice( 1 )
-						: [];
-
-					return {
-						...item,
-						status:
-							transcode.length > 0
-								? ItemStatus.PendingTranscoding
-								: ItemStatus.Transcoded,
-						transcode,
-						file: action.file,
-						attachment: {
-							...item.attachment,
-							url: action.url,
-							mimeType: action.file.type,
-						},
-						additionalData: {
-							...item.additionalData,
-							...action.additionalData,
-						},
-						mediaSourceTerms: [
-							...( item.mediaSourceTerms || [] ),
-							action.mediaSourceTerm,
-						],
-						timings: action.timings
-							? [ ...item.timings, ...action.timings ]
-							: item.timings,
-					};
-				} ),
-			};
 
 		case Type.Cancel:
 			return {
 				...state,
-				queue: state.queue.map( ( item ) =>
-					item.id === action.id
-						? {
-								...item,
-								status: ItemStatus.Cancelled,
-								error: action.error,
-						  }
-						: item
-				),
-			};
-
-		case Type.UploadStart:
-			return {
-				...state,
-				queue: state.queue.map( ( item ) =>
-					item.id === action.id
-						? {
-								...item,
-								status: ItemStatus.Uploading,
-						  }
-						: item
-				),
-			};
-
-		case Type.UploadFinish:
-			return {
-				...state,
-				queue: state.queue.map( ( item ) =>
-					item.id === action.id
-						? {
-								...item,
-								status: ItemStatus.Uploaded,
-								attachment: {
-									...item.attachment,
-									...action.attachment,
-								},
-								blurHash: action.attachment.blurHash,
-								dominantColor: action.attachment.dominantColor,
-								timings: action.timings
-									? [ ...item.timings, ...action.timings ]
-									: item.timings,
-						  }
-						: item
-				),
-			};
-
-		case Type.SideloadFinish:
-			return {
-				...state,
-				queue: state.queue.map( ( item ) =>
-					item.id === action.id
-						? {
-								...item,
-								status: ItemStatus.Uploaded,
-								attachment: {
-									...item.attachment,
-									...action.attachment,
-								},
-						  }
-						: item
-				),
-			};
-
-		case Type.AddPoster:
-			return {
-				...state,
-				queue: state.queue.map( ( item ) =>
-					item.id === action.id
-						? {
-								...item,
-								poster: action.file,
-								attachment: {
-									...item.attachment,
-									poster: action.url,
-								},
-						  }
-						: item
+				queue: state.queue.map(
+					( item ): QueueItem =>
+						item.id === action.id
+							? {
+									...item,
+									error: action.error,
+							  }
+							: item
 				),
 			};
 
@@ -231,49 +97,158 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 				queue: state.queue.filter( ( item ) => item.id !== action.id ),
 			};
 
-		case Type.RequestApproval:
+		case Type.PauseItem:
 			return {
 				...state,
-				queue: state.queue.map( ( item ) =>
-					item.id === action.id
-						? {
-								...item,
-								status: ItemStatus.PendingApproval,
-								file: action.file,
-								attachment: {
-									...item.attachment,
-									url: action.url,
-									mimeType: action.file.type,
-								},
-						  }
-						: item
+				queue: state.queue.map(
+					( item ): QueueItem =>
+						item.id === action.id
+							? {
+									...item,
+									status: ItemStatus.Paused,
+							  }
+							: item
 				),
+			};
+
+		case Type.ResumeItem:
+			return {
+				...state,
+				queue: state.queue.map(
+					( item ): QueueItem =>
+						item.id === action.id
+							? {
+									...item,
+									status: ItemStatus.Processing,
+							  }
+							: item
+				),
+			};
+
+		case Type.OperationStart: {
+			return {
+				...state,
+				queue: state.queue.map(
+					( item ): QueueItem =>
+						item.id === action.id
+							? {
+									...item,
+									currentOperation: action.operation,
+							  }
+							: item
+				),
+			};
+		}
+
+		case Type.AddOperations:
+			return {
+				...state,
+				queue: state.queue.map( ( item ): QueueItem => {
+					if ( item.id !== action.id ) {
+						return item;
+					}
+
+					return {
+						...item,
+						operations: [
+							...action.operations,
+							...( item.operations || [] ),
+						],
+					};
+				} ),
+			};
+
+		case Type.OperationFinish:
+			return {
+				...state,
+				queue: state.queue.map( ( item ): QueueItem => {
+					if ( item.id !== action.id ) {
+						return item;
+					}
+
+					const operations = item.operations
+						? item.operations.slice( 1 )
+						: [];
+
+					// Prevent an empty object if there's no attachment data.
+					const attachment =
+						item.attachment || action.item.attachment
+							? {
+									...item.attachment,
+									...action.item.attachment,
+									// TODO: Update to pass this correctly.
+									// url: action.item?.url,
+									// mimeType: action.item?.file?.type,
+							  }
+							: undefined;
+
+					return {
+						...item,
+						currentOperation: undefined,
+						operations,
+						...action.item,
+						attachment,
+						additionalData: {
+							...item.additionalData,
+							...action.item.additionalData,
+						},
+						timings: [
+							...( item.timings || [] ),
+							...( action.item.timings || [] ),
+						],
+					};
+				} ),
 			};
 
 		case Type.ApproveUpload:
 			return {
 				...state,
-				queue: state.queue.map( ( item ) =>
-					item.id === action.id
-						? {
-								...item,
-								status: ItemStatus.Approved,
-						  }
-						: item
+				queue: state.queue.map(
+					( item ): QueueItem =>
+						item.id === action.id
+							? {
+									...item,
+									status: ItemStatus.Processing,
+							  }
+							: item
 				),
 			};
-
-		case Type.SetMediaSourceTerms: {
-			return {
-				...state,
-				mediaSourceTerms: action.terms,
-			};
-		}
 
 		case Type.SetImageSizes: {
 			return {
 				...state,
 				imageSizes: action.imageSizes,
+			};
+		}
+
+		case Type.CacheBlobUrl: {
+			const blobUrls = state.blobUrls[ action.id ] || [];
+			return {
+				...state,
+				blobUrls: {
+					...state.blobUrls,
+					[ action.id ]: [ ...blobUrls, action.blobUrl ],
+				},
+			};
+		}
+
+		case Type.RevokeBlobUrls: {
+			const newBlobUrls = { ...state.blobUrls };
+			delete newBlobUrls[ action.id ];
+
+			return {
+				...state,
+				blobUrls: newBlobUrls,
+			};
+		}
+
+		case Type.UpdateSettings: {
+			return {
+				...state,
+				settings: {
+					...state.settings,
+					...action.settings,
+				},
 			};
 		}
 	}

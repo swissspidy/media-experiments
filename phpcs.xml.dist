@@ -23,6 +23,10 @@
 		</properties>
 	</rule>
 
+	<rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
+		<exclude-pattern>media-experiments.php</exclude-pattern>
+	</rule>
+
 	<rule ref="WordPress.Files.FileName">
 		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>

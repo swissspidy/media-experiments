@@ -34,7 +34,6 @@
 	},
 	"dependencies": {
 		"@audapolis/webvtt-writer": "^1.0.6",
-		"@mexp/media-utils": "../media-utils",
 		"vosk-browser": "^0.0.8"
 	}
 }

@@ -1,22 +1,26 @@
 <?php
 /**
- * Plugin Name: Media Experiments
- * Plugin URI:  https://github.com/swissspidy/media-experiments
- * Description: Media Experiments
- * Version:     0.0.2
- * Author:      Pascal Birchler
- * Author URI:  https://pascalbirchler.com
- * License:     Apache-2.0
- * License URI: https://www.apache.org/licenses/LICENSE-2.0
- * Text Domain: media-experiments
- * Requires at least: 6.5
- * Requires PHP: 8.0
- * GitHub Plugin URI: https://github.com/swissspidy/media-experiments
- * Primary Branch: main
- * Release Asset: true
+ * Plugin Name:       Media Experiments
+ * Plugin URI:        https://github.com/swissspidy/media-experiments
+ * Description:       Media Experiments
+ * Version:           0.1.0
+ * Author:            Pascal Birchler
+ * Author URI:        https://pascalbirchler.com
+ * License:           GPLv2 or later
+ * License URI:       https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * Text Domain:       media-experiments
+ * Requires at least: 6.6
+ * Requires PHP:      8.0
+ * Update URI:        https://swissspidy.github.io/media-experiments/update.json
  *
  * @package MediaExperiments
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+define( 'MEXP_BASENAME', plugin_basename( __FILE__ ) );
 
 /**
  * REST attachments controller.

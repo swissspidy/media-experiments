@@ -3,5 +3,13 @@
 	"plugins": [ "." ],
 	"mappings": {
 		"wp-content/mu-plugins": "./tests/e2e/mu-plugins"
+	},
+	"env": {
+		"development": {
+			"mysqlPort": 3306
+		},
+		"tests": {
+			"mysqlPort": 3307
+		}
 	}
 }

@@ -1,12 +1,9 @@
 import { createWorkerFactory } from '@shopify/web-worker';
 
-import {
-	blobToFile,
-	getExtensionFromMimeType,
-	getFileBasename,
-	ImageFile,
-} from '@mexp/media-utils';
+import { getExtensionFromMimeType } from '@mexp/mime';
 
+import { ImageFile } from '../../imageFile';
+import { getFileBasename } from '../../utils';
 import type { ImageSizeCrop, QueueItemId } from '../types';
 
 const createVipsWorker = createWorkerFactory(
@@ -23,35 +20,39 @@ export async function vipsConvertImageFormat(
 		| 'image/webp'
 		| 'image/avif'
 		| 'image/gif',
-	quality: number
+	quality: number,
+	interlaced?: boolean
 ) {
 	const buffer = await vipsWorker.convertImageFormat(
 		id,
 		await file.arrayBuffer(),
 		file.type,
 		type,
-		quality
+		quality,
+		interlaced
 	);
 	const ext = getExtensionFromMimeType( type );
 	const fileName = `${ getFileBasename( file.name ) }.${ ext }`;
-	return blobToFile( new Blob( [ buffer ], { type } ), fileName, type );
+	return new File( [ new Blob( [ buffer ] ) ], fileName, { type } );
 }
 
 export async function vipsCompressImage(
 	id: QueueItemId,
 	file: File,
-	quality: number
+	quality: number,
+	interlaced?: boolean
 ) {
 	const buffer = await vipsWorker.compressImage(
 		id,
 		await file.arrayBuffer(),
 		file.type,
-		quality
+		quality,
+		interlaced
 	);
-	return blobToFile(
-		new Blob( [ buffer ], { type: file.type } ),
+	return new File(
+		[ new Blob( [ buffer ], { type: file.type } ) ],
 		file.name,
-		file.type
+		{ type: file.type }
 	);
 }
 
@@ -88,11 +89,9 @@ export async function vipsResizeImage(
 	}
 
 	return new ImageFile(
-		blobToFile(
-			new Blob( [ buffer ], { type: file.type } ),
-			fileName,
-			file.type
-		),
+		new File( [ new Blob( [ buffer ], { type: file.type } ) ], fileName, {
+			type: file.type,
+		} ),
 		width,
 		height,
 		originalWidth,

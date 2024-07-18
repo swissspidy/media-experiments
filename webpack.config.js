@@ -2,7 +2,6 @@ const { resolve, dirname, basename } = require( 'node:path' );
 const { readFileSync } = require( 'node:fs' );
 
 const { DefinePlugin } = require( 'webpack' );
-const RtlCssPlugin = require( 'rtlcss-webpack-plugin' );
 const MiniCSSExtractPlugin = require( 'mini-css-extract-plugin' );
 const { WebWorkerPlugin } = require( '@shopify/web-worker/webpack' );
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
@@ -44,7 +43,7 @@ module.exports = {
 	entry: {
 		'media-experiments': resolve(
 			__dirname,
-			'packages/edit-post/src/index.ts'
+			'packages/editor/src/index.ts'
 		),
 		'view-upload-request': resolve(
 			__dirname,
@@ -118,9 +117,6 @@ module.exports = {
 		new WebWorkerPlugin(),
 		new MiniCSSExtractPlugin( {
 			filename: '[name].css',
-		} ),
-		new RtlCssPlugin( {
-			filename: `../build/[name]-rtl.css`,
 		} ),
 		new DefinePlugin( {
 			FFMPEG_CDN_URL: JSON.stringify( ffmpegCdnUrl ),

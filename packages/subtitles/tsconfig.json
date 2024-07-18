@@ -4,6 +4,6 @@
 		"rootDir": "src",
 		"declarationDir": "dist-types"
 	},
-	"references": [ { "path": "../media-utils" } ],
+	"references": [],
 	"include": [ "src/**/*" ]
 }

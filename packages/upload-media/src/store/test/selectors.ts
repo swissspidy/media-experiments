@@ -2,17 +2,9 @@
  * Internal dependencies
  */
 import {
-	getApprovedItems,
-	getCancelledItems,
-	getInProgressItems,
 	getItems,
-	getPendingItems,
-	getPendingTranscodingItems,
-	getTranscodedItems,
-	getUploadedItems,
 	isPendingApproval,
 	isPendingApprovalByAttachmentId,
-	isTranscoding,
 	isUploading,
 	isUploadingByBatchId,
 	isUploadingById,
@@ -25,8 +17,13 @@ describe( 'selectors', () => {
 		it( 'should return empty array by default', () => {
 			const state: State = {
 				queue: [],
-				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'paused',
+				blobUrls: {},
+				settings: {
+					mediaUpload: jest.fn(),
+					mediaSideload: jest.fn(),
+				},
 			};
 
 			expect( getItems( state ) ).toHaveLength( 0 );
@@ -36,283 +33,33 @@ describe( 'selectors', () => {
 			const state: State = {
 				queue: [
 					{
-						status: ItemStatus.Pending,
-					},
-					{
-						status: ItemStatus.Approved,
-					},
-					{
-						status: ItemStatus.Uploading,
-					},
-					{
-						status: ItemStatus.Uploading,
-					},
-					{
-						status: ItemStatus.Uploaded,
-					},
-				] as QueueItem[],
-				mediaSourceTerms: {},
-				imageSizes: {},
-			};
-
-			expect( getItems( state, ItemStatus.Uploading ) ).toHaveLength( 2 );
-		} );
-	} );
-
-	describe( 'getPendingItems', () => {
-		it( 'should return items with the given status', () => {
-			const state: State = {
-				queue: [
-					{
-						status: ItemStatus.Pending,
-					},
-					{
-						status: ItemStatus.Approved,
-					},
-					{
-						status: ItemStatus.Uploading,
-					},
-					{
-						status: ItemStatus.Uploading,
-					},
-					{
-						status: ItemStatus.Uploaded,
-					},
-				] as QueueItem[],
-				mediaSourceTerms: {},
-				imageSizes: {},
-			};
-
-			expect( getPendingItems( state ) ).toHaveLength( 1 );
-		} );
-	} );
-
-	describe( 'getPendingTranscodingItems', () => {
-		it( 'should return items with the given status', () => {
-			const state: State = {
-				queue: [
-					{
-						status: ItemStatus.Pending,
-					},
-					{
-						status: ItemStatus.Approved,
-					},
-					{
-						status: ItemStatus.PendingTranscoding,
-					},
-					{
-						status: ItemStatus.PendingTranscoding,
-					},
-					{
-						status: ItemStatus.Uploaded,
-					},
-				] as QueueItem[],
-				mediaSourceTerms: {},
-				imageSizes: {},
-			};
-
-			expect( getPendingTranscodingItems( state ) ).toHaveLength( 2 );
-		} );
-	} );
-
-	describe( 'getTranscodedItems', () => {
-		it( 'should return items with the given status', () => {
-			const state: State = {
-				queue: [
-					{
-						status: ItemStatus.Pending,
-					},
-					{
-						status: ItemStatus.Transcoded,
-					},
-					{
-						status: ItemStatus.Uploading,
-					},
-					{
-						status: ItemStatus.Uploading,
-					},
-					{
-						status: ItemStatus.Uploaded,
-					},
-				] as QueueItem[],
-				mediaSourceTerms: {},
-				imageSizes: {},
-			};
-
-			expect( getTranscodedItems( state ) ).toHaveLength( 1 );
-		} );
-	} );
-
-	describe( 'getApprovedItems', () => {
-		it( 'should return items with the given status', () => {
-			const state: State = {
-				queue: [
-					{
-						status: ItemStatus.Pending,
-					},
-					{
-						status: ItemStatus.Approved,
-					},
-					{
-						status: ItemStatus.Uploading,
-					},
-					{
-						status: ItemStatus.Uploading,
-					},
-					{
-						status: ItemStatus.Uploaded,
-					},
-				] as QueueItem[],
-				mediaSourceTerms: {},
-				imageSizes: {},
-			};
-
-			expect( getApprovedItems( state ) ).toHaveLength( 1 );
-		} );
-	} );
-
-	describe( 'getUploadedItems', () => {
-		it( 'should return items with the given status', () => {
-			const state: State = {
-				queue: [
-					{
-						status: ItemStatus.Pending,
-					},
-					{
-						status: ItemStatus.Approved,
-					},
-					{
-						status: ItemStatus.Uploading,
-					},
-					{
-						status: ItemStatus.Uploading,
-					},
-					{
-						status: ItemStatus.Uploaded,
-					},
-				] as QueueItem[],
-				mediaSourceTerms: {},
-				imageSizes: {},
-			};
-
-			expect( getUploadedItems( state ) ).toHaveLength( 1 );
-		} );
-	} );
-
-	describe( 'getCancelledItems', () => {
-		it( 'should return items with the given status', () => {
-			const state: State = {
-				queue: [
-					{
-						status: ItemStatus.Pending,
-					},
-					{
-						status: ItemStatus.Approved,
-					},
-					{
-						status: ItemStatus.Uploading,
-					},
-					{
-						status: ItemStatus.Uploading,
-					},
-					{
-						status: ItemStatus.Cancelled,
-					},
-					{
-						status: ItemStatus.Cancelled,
-					},
-				] as QueueItem[],
-				mediaSourceTerms: {},
-				imageSizes: {},
-			};
-
-			expect( getCancelledItems( state ) ).toHaveLength( 2 );
-		} );
-	} );
-
-	describe( 'getInProgressItems', () => {
-		it( 'should return items with the given status', () => {
-			const state: State = {
-				queue: [
-					{
-						status: ItemStatus.Pending,
-					},
-					{
-						status: ItemStatus.Preparing,
-					},
-					{
-						status: ItemStatus.PendingTranscoding,
-					},
-					{
-						status: ItemStatus.Transcoding,
-					},
-					{
-						status: ItemStatus.Transcoded,
+						status: ItemStatus.Processing,
 					},
 					{
 						status: ItemStatus.PendingApproval,
 					},
 					{
-						status: ItemStatus.Approved,
+						status: ItemStatus.Processing,
 					},
 					{
-						status: ItemStatus.Uploading,
-					},
-					{
-						status: ItemStatus.Uploaded,
-					},
-					{
-						status: ItemStatus.Cancelled,
-					},
-				] as QueueItem[],
-				mediaSourceTerms: {},
-				imageSizes: {},
-			};
-
-			expect( getInProgressItems( state ) ).toHaveLength( 5 );
-		} );
-	} );
-
-	describe( 'isTranscoding', () => {
-		it( 'should return true if there are items being transcoded', () => {
-			const state: State = {
-				queue: [
-					{
-						status: ItemStatus.Pending,
-					},
-					{
-						status: ItemStatus.Preparing,
-					},
-					{
-						status: ItemStatus.PendingTranscoding,
-					},
-					{
-						status: ItemStatus.Transcoding,
-					},
-					{
-						status: ItemStatus.Transcoded,
+						status: ItemStatus.Processing,
 					},
 					{
 						status: ItemStatus.PendingApproval,
 					},
-					{
-						status: ItemStatus.Approved,
-					},
-					{
-						status: ItemStatus.Uploading,
-					},
-					{
-						status: ItemStatus.Uploaded,
-					},
-					{
-						status: ItemStatus.Cancelled,
-					},
 				] as QueueItem[],
-				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'paused',
+				blobUrls: {},
+				settings: {
+					mediaUpload: jest.fn(),
+					mediaSideload: jest.fn(),
+				},
 			};
 
-			expect( isTranscoding( state ) ).toBe( true );
+			expect( getItems( state, ItemStatus.Processing ) ).toHaveLength(
+				3
+			);
 		} );
 	} );
 
@@ -321,38 +68,25 @@ describe( 'selectors', () => {
 			const state: State = {
 				queue: [
 					{
-						status: ItemStatus.Pending,
+						status: ItemStatus.Processing,
 					},
 					{
-						status: ItemStatus.Preparing,
-					},
-					{
-						status: ItemStatus.PendingTranscoding,
-					},
-					{
-						status: ItemStatus.Transcoding,
-					},
-					{
-						status: ItemStatus.Transcoded,
+						status: ItemStatus.Processing,
 					},
 					{
 						status: ItemStatus.PendingApproval,
 					},
 					{
-						status: ItemStatus.Approved,
-					},
-					{
-						status: ItemStatus.Uploading,
-					},
-					{
-						status: ItemStatus.Uploaded,
-					},
-					{
-						status: ItemStatus.Cancelled,
+						status: ItemStatus.Paused,
 					},
 				] as QueueItem[],
-				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'paused',
+				blobUrls: {},
+				settings: {
+					mediaUpload: jest.fn(),
+					mediaSideload: jest.fn(),
+				},
 			};
 
 			expect( isUploading( state ) ).toBe( true );
@@ -364,21 +98,26 @@ describe( 'selectors', () => {
 			const state: State = {
 				queue: [
 					{
-						status: ItemStatus.Pending,
+						status: ItemStatus.Processing,
 						attachment: {
 							url: 'https://example.com/one.jpeg',
 						},
 					},
 					{
-						status: ItemStatus.Approved,
+						status: ItemStatus.PendingApproval,
 						sourceUrl: 'https://example.com/two.jpeg',
 					},
 					{
-						status: ItemStatus.Uploading,
+						status: ItemStatus.Processing,
 					},
 				] as QueueItem[],
-				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'paused',
+				blobUrls: {},
+				settings: {
+					mediaUpload: jest.fn(),
+					mediaSideload: jest.fn(),
+				},
 			};
 
 			expect(
@@ -398,21 +137,26 @@ describe( 'selectors', () => {
 			const state: State = {
 				queue: [
 					{
-						status: ItemStatus.Pending,
+						status: ItemStatus.Processing,
 						attachment: {
 							id: 123,
 						},
 					},
 					{
-						status: ItemStatus.Preparing,
+						status: ItemStatus.PendingApproval,
 						sourceAttachmentId: 456,
 					},
 					{
-						status: ItemStatus.PendingTranscoding,
+						status: ItemStatus.PendingApproval,
 					},
 				] as QueueItem[],
-				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'paused',
+				blobUrls: {},
+				settings: {
+					mediaUpload: jest.fn(),
+					mediaSideload: jest.fn(),
+				},
 			};
 
 			expect( isUploadingById( state, 123 ) ).toBe( true );
@@ -426,20 +170,25 @@ describe( 'selectors', () => {
 			const state: State = {
 				queue: [
 					{
-						status: ItemStatus.Uploading,
+						status: ItemStatus.Processing,
 						batchId: 'foo',
 					},
 					{
-						status: ItemStatus.Pending,
+						status: ItemStatus.Processing,
 						batchId: 'bar',
 					},
 				] as QueueItem[],
-				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'paused',
+				blobUrls: {},
+				settings: {
+					mediaUpload: jest.fn(),
+					mediaSideload: jest.fn(),
+				},
 			};
 
 			expect( isUploadingByBatchId( state, 'foo' ) ).toBe( true );
-			expect( isUploadingByBatchId( state, 'bar' ) ).toBe( false );
+			expect( isUploadingByBatchId( state, 'baz' ) ).toBe( false );
 		} );
 	} );
 
@@ -448,38 +197,37 @@ describe( 'selectors', () => {
 			const state: State = {
 				queue: [
 					{
-						status: ItemStatus.Pending,
+						status: ItemStatus.Processing,
 					},
 					{
-						status: ItemStatus.Preparing,
-					},
-					{
-						status: ItemStatus.PendingTranscoding,
-					},
-					{
-						status: ItemStatus.Transcoding,
-					},
-					{
-						status: ItemStatus.Transcoded,
+						status: ItemStatus.Processing,
 					},
 					{
 						status: ItemStatus.PendingApproval,
 					},
 					{
-						status: ItemStatus.Approved,
+						status: ItemStatus.Paused,
 					},
 					{
-						status: ItemStatus.Uploading,
+						status: ItemStatus.Processing,
 					},
 					{
-						status: ItemStatus.Uploaded,
+						status: ItemStatus.PendingApproval,
 					},
 					{
-						status: ItemStatus.Cancelled,
+						status: ItemStatus.Paused,
+					},
+					{
+						status: ItemStatus.Processing,
 					},
 				] as QueueItem[],
-				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'paused',
+				blobUrls: {},
+				settings: {
+					mediaUpload: jest.fn(),
+					mediaSideload: jest.fn(),
+				},
 			};
 
 			expect( isPendingApproval( state ) ).toBe( true );
@@ -491,19 +239,13 @@ describe( 'selectors', () => {
 			const state: State = {
 				queue: [
 					{
-						status: ItemStatus.Pending,
+						status: ItemStatus.Processing,
 					},
 					{
-						status: ItemStatus.Preparing,
+						status: ItemStatus.Processing,
 					},
 					{
-						status: ItemStatus.PendingTranscoding,
-					},
-					{
-						status: ItemStatus.Transcoding,
-					},
-					{
-						status: ItemStatus.Transcoded,
+						status: ItemStatus.PendingApproval,
 					},
 					{
 						status: ItemStatus.PendingApproval,
@@ -516,21 +258,20 @@ describe( 'selectors', () => {
 						},
 					},
 					{
-						status: ItemStatus.Approved,
+						status: ItemStatus.Paused,
 						sourceAttachmentId: 789,
 					},
 					{
-						status: ItemStatus.Uploading,
-					},
-					{
-						status: ItemStatus.Uploaded,
-					},
-					{
-						status: ItemStatus.Cancelled,
+						status: ItemStatus.Processing,
 					},
 				] as QueueItem[],
-				mediaSourceTerms: {},
 				imageSizes: {},
+				queueStatus: 'paused',
+				blobUrls: {},
+				settings: {
+					mediaUpload: jest.fn(),
+					mediaSideload: jest.fn(),
+				},
 			};
 
 			expect( isPendingApprovalByAttachmentId( state, 123 ) ).toBe(

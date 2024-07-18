@@ -1,6 +1,6 @@
 import type { ImageFormat, ImageLibrary } from '@mexp/upload-media';
 
-import { test, expect } from '../../fixtures';
+import { expect, test } from '../../fixtures';
 
 const scenarios: {
 	outputFormat: ImageFormat;
@@ -191,7 +191,7 @@ test.describe( 'Images', () => {
 						.filter( {
 							hasText: 'There was an error optimizing the file',
 						} )
-				).not.toBeVisible();
+				).toBeHidden();
 
 				await page.waitForFunction(
 					() =>
@@ -231,7 +231,7 @@ test.describe( 'Images', () => {
 						.filter( {
 							hasText: 'There was an error optimizing the file',
 						} )
-				).not.toBeVisible();
+				).toBeHidden();
 
 				await expect( settingsPanel ).toHaveText(
 					new RegExp( `Mime type: ${ expectedMimeType }` )
@@ -325,7 +325,7 @@ test.describe( 'Images', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 30000, // Transcoding might take longer
+						timeout: 100_000, // Transcoding might take longer, especially AVIF on Firefox.
 					}
 				);
 

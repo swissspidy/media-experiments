@@ -5,6 +5,7 @@
 artifacts
 bin
 blueprints
+docs
 node_modules
 packages
 patches
@@ -13,6 +14,7 @@ vendor
 vosk
 .*
 *.config.js
+*.config.cjs
 /*.js
 *.json
 *.lock
