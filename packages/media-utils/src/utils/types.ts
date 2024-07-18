@@ -208,6 +208,7 @@ export type Attachment = BetterOmit<
 	caption: WP_REST_API_Attachment[ 'caption' ][ 'raw' ] & string;
 	title: WP_REST_API_Attachment[ 'title' ][ 'raw' ];
 	url: WP_REST_API_Attachment[ 'source_url' ];
+	poster?: WP_REST_API_Attachment[ 'source_url' ];
 };
 
 export type OnChangeHandler = ( attachments: Partial< Attachment >[] ) => void;

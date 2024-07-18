@@ -28,7 +28,7 @@ export function VideoControls( props: VideoControlsProps ) {
 		props.setAttributes( {
 			src: media.url,
 			id: media.id,
-			poster: media._embedded?.[ 'wp:featuredmedia' ]?.[ 0 ]?.source_url,
+			poster: media.poster,
 			caption: media.caption,
 		} );
 	}

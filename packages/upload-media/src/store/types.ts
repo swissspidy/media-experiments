@@ -180,13 +180,9 @@ export type Attachment = {
 	mexp_has_transparency?: boolean;
 	media_type: 'image' | 'file';
 	mime_type: string;
-	featured_media: number;
+	featured_media?: number;
 	missing_image_sizes?: string[];
-
 	poster?: string;
-	blurHash?: string;
-	dominantColor?: string;
-	posterId?: number;
 };
 
 export type OnChangeHandler = ( attachments: Partial< Attachment >[] ) => void;

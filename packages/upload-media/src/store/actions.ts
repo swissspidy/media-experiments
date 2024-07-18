@@ -1849,7 +1849,6 @@ export function optimizeImageItem(
 					file,
 					attachment: {
 						url: blobUrl,
-						// eslint-disable-next-line camelcase
 						mime_type: file.type,
 					},
 					timings,
@@ -2400,13 +2399,13 @@ export function uploadItem( id: QueueItemId ) {
 			additionalData,
 			signal: item.abortController?.signal,
 			onFileChange: ( [ attachment ] ) => {
-				// TODO: Check if a poster happened to be generated on the server side already (check attachment.posterId !== 0).
-				// In that case there is no need for client-side generation.
-				// Instead, get the poster URL from the ID. Maybe async within the finishUploading() action?
-				if ( 'video' === mediaType ) {
-					// The newly uploaded file won't have a poster yet.
-					// However, we'll likely still have one on file.
-					// Add it back so we're never without one.
+				// TODO: Get the poster URL from the ID if one exists already.
+				if ( 'video' === mediaType && ! attachment.featured_media ) {
+					/*
+					 The newly uploaded file won't have a poster yet.
+					 However, we'll likely still have one on file.
+					 Add it back so we're never without one.
+					*/
 					if ( item.attachment?.poster ) {
 						attachment.poster = item.attachment.poster;
 					} else if ( poster ) {
