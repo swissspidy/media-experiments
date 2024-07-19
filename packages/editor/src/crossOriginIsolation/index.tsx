@@ -16,6 +16,11 @@ function addAttribute( el: Element ) {
 	}
 
 	if ( el.nodeName === 'IFRAME' && ! el.hasAttribute( 'credentialless' ) ) {
+		// Do not modify the iframed editor canvas.
+		if ( el.getAttribute( 'src' )?.startsWith( 'blob:' ) ) {
+			return;
+		}
+
 		el.setAttribute( 'credentialless', 'true' );
 
 		if ( ! el.hasAttribute( 'src' ) ) {
