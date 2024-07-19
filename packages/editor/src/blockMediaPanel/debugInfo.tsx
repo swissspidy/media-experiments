@@ -24,7 +24,6 @@ const numberFormatter = Intl.NumberFormat( 'en', {
 	style: 'unit',
 	unit: 'byte',
 	unitDisplay: 'narrow',
-	// @ts-ignore -- TODO: Update types somehow.
 	roundingPriority: 'lessPrecision',
 	maximumSignificantDigits: 2,
 	maximumFractionDigits: 2,

@@ -112,7 +112,7 @@ export function getMimeTypesArray(
 export function getFileNameFromUrl( url: string ) {
 	return (
 		getFilename( url ) || _x( 'unnamed', 'file name', 'media-experiments' )
-	); // TODO: Better fallback needed?
+	);
 }
 
 /**

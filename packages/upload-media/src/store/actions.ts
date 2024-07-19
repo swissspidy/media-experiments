@@ -1226,7 +1226,7 @@ export function prepareItem( id: QueueItemId ) {
 
 				operations.push( OperationType.AddPoster );
 
-				// TODO: First check if video already meets criteria, e.g. with mediainfo.js.
+				// TODO: First check if video already meets criteria.
 				// No need to compress a video that's already quite small.
 
 				if (
