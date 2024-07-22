@@ -30,8 +30,6 @@ add_action( 'rest_after_insert_attachment', __NAMESPACE__ . '\rest_after_insert_
 
 add_filter( 'register_post_type_args', __NAMESPACE__ . '\filter_attachment_post_type_args', 10, 2 );
 
-add_filter( 'wp_prepare_attachment_for_js', __NAMESPACE__ . '\filter_wp_prepare_attachment_for_js' );
-
 add_filter( 'wp_content_img_tag', __NAMESPACE__ . '\filter_wp_content_img_tag_add_placeholders', 100, 3 );
 
 // Upload requests, see https://github.com/swissspidy/media-experiments/issues/246.
