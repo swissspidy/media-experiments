@@ -48,7 +48,6 @@ interface UploadMediaArgs {
  * @param $0.maxUploadFileSize  Maximum upload size in bytes allowed for the site.
  * @param $0.onError            Function called when an error happens.
  * @param $0.onFileChange       Function called each time a file or a temporary representation of the file is available.
- * @param $0.onSuccess          Function called once a file has completely finished uploading, including thumbnails.
  * @param $0.wpAllowedMimeTypes List of allowed mime types and file extensions.
  * @param $0.signal             Abort signal.
  */
@@ -60,7 +59,6 @@ export function uploadMedia( {
 	maxUploadFileSize,
 	onError = noop,
 	onFileChange,
-	onSuccess,
 	signal,
 }: UploadMediaArgs ) {
 	const validFiles = [];
@@ -98,6 +96,5 @@ export function uploadMedia( {
 	validFiles.map( async ( file ) => {
 		const attachment = await uploadToServer( file, additionalData, signal );
 		onFileChange?.( [ attachment ] );
-		onSuccess?.( [ attachment ] );
 	} );
 }

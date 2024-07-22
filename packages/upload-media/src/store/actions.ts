@@ -1443,6 +1443,7 @@ export function uploadPoster( id: QueueItemId ) {
 
 						// Video block expects such a structure for the poster.
 						// https://github.com/WordPress/gutenberg/blob/e0a413d213a2a829ece52c6728515b10b0154d8d/packages/block-library/src/video/edit.js#L154
+						// TODO: Pass poster ID as well so that the video block can update `featured_media` via the REST API.
 						const updatedAttachment = {
 							...attachment,
 							image: {
@@ -1454,25 +1455,6 @@ export function uploadPoster( id: QueueItemId ) {
 						// video item in the editor with the newly uploaded poster.
 						item.onChange?.( [ updatedAttachment ] );
 					},
-					/*
-					onSuccess: async ( [ posterAttachment ] ) => {
-						// Similarly, update the original video in the DB to have the
-						// poster as the featured image.
-						// TODO: Do this server-side instead?
-						// TODO: Move to WP specific package.
-						void updateMediaItem(
-							attachment.id,
-							{
-								featured_media: posterAttachment.id,
-								meta: {
-									mexp_generated_poster_id:
-										posterAttachment.id,
-								},
-							},
-							abortController.signal
-						);
-					},
-					*/
 					additionalData: {
 						// Reminder: Parent post ID might not be set, depending on context,
 						// but should be carried over if it does.
