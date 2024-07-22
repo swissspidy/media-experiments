@@ -117,6 +117,7 @@ type ActionCreators = {
 	muteVideoItem: typeof muteVideoItem;
 	muteExistingVideo: typeof muteExistingVideo;
 	addSubtitlesForExistingVideo: typeof addSubtitlesForExistingVideo;
+	addPosterForExistingVideo: typeof addPosterForExistingVideo;
 	convertHeifItem: typeof convertHeifItem;
 	resizeCropItem: typeof resizeCropItem;
 	convertGifItem: typeof convertGifItem;
@@ -578,7 +579,71 @@ export function addSubtitlesForExistingVideo( {
 	};
 }
 
-interface OptimizexistingItemArgs {
+interface AddPosterForExistingVideoArgs {
+	id?: number;
+	url: string;
+	fileName?: string;
+	onChange?: OnChangeHandler;
+	onSuccess?: OnSuccessHandler;
+	onError?: OnErrorHandler;
+	additionalData: AdditionalData;
+}
+
+/**
+ * Adds a new item to the upload queue to generate a poster for an existing video.
+ *
+ * @todo Rename id to sourceAttachmentId for consistency
+ *
+ * @param $0
+ * @param $0.id               Attachment ID.
+ * @param $0.url              URL.
+ * @param [$0.fileName]       File name.
+ * @param [$0.onChange]       Function called each time a file or a temporary representation of the file is available.
+ * @param [$0.onSuccess]      Function called after the file is uploaded.
+ * @param [$0.onError]        Function called when an error happens.
+ * @param [$0.additionalData] Additional data to include in the request.
+ */
+export function addPosterForExistingVideo( {
+	id,
+	url,
+	fileName,
+	onChange,
+	onSuccess,
+	onError,
+	additionalData = {} as AdditionalData,
+}: AddPosterForExistingVideoArgs ) {
+	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
+		fileName = fileName || getFileNameFromUrl( url );
+
+		const itemId = uuidv4();
+
+		dispatch< AddAction >( {
+			type: Type.Add,
+			item: {
+				id: itemId,
+				status: ItemStatus.Processing,
+				file: new StubFile(),
+				sourceFile: new StubFile( fileName ),
+				onChange,
+				onSuccess,
+				onError,
+				sourceUrl: url,
+				sourceAttachmentId: id,
+				additionalData,
+				abortController: new AbortController(),
+				operations: [
+					OperationType.AddPoster,
+					OperationType.TranscodeImage,
+					OperationType.Upload,
+				],
+			},
+		} );
+
+		dispatch.prepareItem( itemId );
+	};
+}
+
+interface OptimizeExistingItemArgs {
 	id: number;
 	url: string;
 	fileName?: string;
@@ -631,7 +696,7 @@ export function optimizeExistingItem( {
 	dominantColor,
 	generatedPosterId,
 	startTime,
-}: OptimizexistingItemArgs ) {
+}: OptimizeExistingItemArgs ) {
 	return async ( {
 		dispatch,
 		registry,
@@ -1027,20 +1092,18 @@ export function addPosterForItem( id: QueueItemId ) {
 	} ) => {
 		const item = select.getItem( id ) as QueueItem;
 
-		const { file } = item;
-
 		// Bail early if the video already has a poster.
 		if ( item.poster ) {
 			dispatch.finishOperation( id, {} );
 			return;
 		}
 
-		const mediaType = getMediaTypeFromMimeType( file.type );
+		const mediaType = getMediaTypeFromMimeType( item.file.type );
 
 		try {
 			switch ( mediaType ) {
 				case 'video':
-					const src = createBlobURL( file );
+					const src = createBlobURL( item.file );
 
 					dispatch< CacheBlobUrlAction >( {
 						type: Type.CacheBlobUrl,
@@ -1050,7 +1113,7 @@ export function addPosterForItem( id: QueueItemId ) {
 
 					const poster = await getPosterFromVideo(
 						src,
-						`${ getFileBasename( item.file.name ) }-poster`
+						`${ getFileBasename( item.sourceFile.name ) }-poster`
 					);
 
 					const posterUrl = createBlobURL( poster );
@@ -1075,7 +1138,7 @@ export function addPosterForItem( id: QueueItemId ) {
 						/* webpackChunkName: 'pdf' */ '@mexp/pdf'
 					);
 
-					const pdfSrc = createBlobURL( file );
+					const pdfSrc = createBlobURL( item.file );
 
 					dispatch< CacheBlobUrlAction >( {
 						type: Type.CacheBlobUrl,
@@ -1106,6 +1169,29 @@ export function addPosterForItem( id: QueueItemId ) {
 						},
 					} );
 					break;
+
+				// We're dealing with a StubFile, e.g. via addPosterForExistingVideo().
+				default:
+					const file = await getPosterFromVideo(
+						// @ts-ignore -- Expected to exist at this point.
+						item.sourceUrl,
+						`${ getFileBasename( item.sourceFile.name ) }-poster`
+					);
+
+					const blobURL = createBlobURL( file );
+
+					dispatch< CacheBlobUrlAction >( {
+						type: Type.CacheBlobUrl,
+						id,
+						blobUrl: blobURL,
+					} );
+
+					dispatch.finishOperation( id, {
+						file,
+						attachment: {
+							url: blobURL,
+						},
+					} );
 			}
 		} catch ( err ) {
 			// Do not throw error. Could be a simple error such as video playback not working in tests.
