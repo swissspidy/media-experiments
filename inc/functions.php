@@ -22,6 +22,8 @@ use function register_post_meta;
  *
  * Allows downloading updates from GitHub.
  *
+ * @codeCoverageIgnore
+ *
  * @param array<string,mixed>|false $update      The plugin update data with the latest details. Default false.
  * @param array<string,string>      $plugin_data Plugin headers.
  * @param string                    $plugin_file Plugin filename.

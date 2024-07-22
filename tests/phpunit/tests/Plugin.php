@@ -89,6 +89,21 @@ class Test_Plugin extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @covers \MediaExperiments\filter_image_save_progressive
+	 */
+	public function test_filter_image_save_progressive() {
+		wp_set_current_user( self::$admin_id );
+
+		add_user_meta( self::$admin_id, 'wp_persisted_preferences', [ 'media-experiments/preferences' => [ 'png_interlaced' => true, 'jpeg_interlaced' => false ] ] );
+
+		$jpeg_interlaced = (bool) apply_filters( 'image_save_progressive', true, 'image/jpeg' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+		$png_interlaced  = (bool) apply_filters( 'image_save_progressive', false, 'image/png' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+
+		$this->assertFalse( $jpeg_interlaced );
+		$this->assertTrue( $png_interlaced );
+	}
+
+	/**
 	 * @covers \MediaExperiments\register_assets
 	 */
 	public function test_register_assets() {
