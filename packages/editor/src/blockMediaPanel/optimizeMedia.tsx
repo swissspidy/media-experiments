@@ -22,6 +22,7 @@ interface OptimizeMediaProps {
 	url?: string;
 	poster?: string;
 	onSuccess: ( attachment: Partial< Attachment > ) => void;
+	label?: string;
 }
 
 export function OptimizeMedia( {
@@ -29,6 +30,7 @@ export function OptimizeMedia( {
 	url,
 	poster,
 	onSuccess,
+	label,
 }: OptimizeMediaProps ) {
 	const { baseControlProps, controlProps } = useBaseControlProps( {} );
 
@@ -105,13 +107,11 @@ export function OptimizeMedia( {
 		} );
 	};
 
-	// TODO: This needs some (async) checks first to see whether optimization is needed.
-
 	return (
 		<>
 			<BaseControl { ...baseControlProps }>
 				<BaseControl.VisualLabel>
-					{ __( 'Optimize media', 'media-experiments' ) }
+					{ label || __( 'Optimize media', 'media-experiments' ) }
 				</BaseControl.VisualLabel>
 				<p>
 					{ __(

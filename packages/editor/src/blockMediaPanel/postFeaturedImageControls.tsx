@@ -1,29 +1,15 @@
-import { useSelect } from '@wordpress/data';
-import { store as editorStore } from '@wordpress/editor';
-import { useEntityProp } from '@wordpress/core-data';
 import { Fragment } from '@wordpress/element';
 
 import type { Attachment } from '@mexp/media-utils';
 
-import { useAttachment } from '../utils/hooks';
+import { useFeaturedImageAttachment } from '../utils/hooks';
 import { UploadIndicator } from './uploadIndicator';
 import { OptimizeMedia } from './optimizeMedia';
 import { DebugInfo } from './debugInfo';
 
 export function PostFeaturedImageControls() {
-	const { type: postType, id: postId } = useSelect(
-		( select ) => select( editorStore ).getCurrentPost(),
-		[]
-	);
-
-	const [ featuredImage, setFeaturedImage ] = useEntityProp(
-		'postType',
-		postType,
-		'featured_media',
-		postId as number
-	) as [ number | undefined, ( id: number ) => void, unknown ];
-
-	const attachment = useAttachment( featuredImage );
+	const { featuredImage, setFeaturedImage, attachment } =
+		useFeaturedImageAttachment();
 
 	if ( ! featuredImage || ! attachment ) {
 		return null;
