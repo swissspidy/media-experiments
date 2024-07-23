@@ -14,7 +14,7 @@ type E2EFixture = {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function getSourceMapForEntry( entry: V8CoverageEntry, index: number ) {
+function getSourceMapForEntry( entry: V8CoverageEntry, index?: number ) {
 	if ( entry.sourceMap ) {
 		return entry;
 	}
@@ -62,7 +62,10 @@ export const test = base.extend< E2EFixture, {} >( {
 
 		await use( page );
 
-		const [ jsCoverage, cssCoverage ] = await Promise.all( [
+		const [ jsCoverage, cssCoverage ]: [
+			V8CoverageEntry[],
+			V8CoverageEntry[],
+		] = await Promise.all( [
 			page.coverage.stopJSCoverage(),
 			page.coverage.stopCSSCoverage(),
 		] );
@@ -70,11 +73,9 @@ export const test = base.extend< E2EFixture, {} >( {
 		// Manually resolve the source map if it's missing.
 		// See https://github.com/cenfun/monocart-coverage-reports#manually-resolve-the-sourcemap.
 		jsCoverage.forEach( ( entry: V8CoverageEntry, index: number ) => {
-			// @ts-ignore
 			jsCoverage[ index ] = getSourceMapForEntry( entry );
 		} );
 		cssCoverage.forEach( ( entry: V8CoverageEntry, index: number ) => {
-			// @ts-ignore
 			cssCoverage[ index ] = getSourceMapForEntry( entry );
 		} );
 
@@ -104,7 +105,10 @@ export const test = base.extend< E2EFixture, {} >( {
 
 		await use( secondPage );
 
-		const [ jsCoverage, cssCoverage ] = await Promise.all( [
+		const [ jsCoverage, cssCoverage ]: [
+			V8CoverageEntry[],
+			V8CoverageEntry[],
+		] = await Promise.all( [
 			secondPage.coverage.stopJSCoverage(),
 			secondPage.coverage.stopCSSCoverage(),
 		] );
@@ -112,11 +116,9 @@ export const test = base.extend< E2EFixture, {} >( {
 		// Manually resolve the source map if it's missing.
 		// See https://github.com/cenfun/monocart-coverage-reports#manually-resolve-the-sourcemap.
 		jsCoverage.forEach( ( entry: V8CoverageEntry, index: number ) => {
-			// @ts-ignore
 			jsCoverage[ index ] = getSourceMapForEntry( entry );
 		} );
 		cssCoverage.forEach( ( entry: V8CoverageEntry, index: number ) => {
-			// @ts-ignore
 			cssCoverage[ index ] = getSourceMapForEntry( entry );
 		} );
 
