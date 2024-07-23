@@ -35,6 +35,7 @@ test.describe( 'Upload Requests', () => {
 			editor,
 			mediaUtils,
 			browserName,
+			request,
 		} ) => {
 			// TODO: Grab URL from input field instead of clipboard.
 			test.skip(
@@ -150,7 +151,7 @@ test.describe( 'Upload Requests', () => {
 			}
 
 			// Verifies that the upload request was properly deleted.
-			const response = await secondPage.reload();
+			const response = await request.head( secondPage.url() );
 			expect( response.status() ).toBe( 404 );
 		} );
 	}
