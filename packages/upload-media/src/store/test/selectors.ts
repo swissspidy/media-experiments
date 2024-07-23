@@ -4,9 +4,7 @@
 import {
 	getItems,
 	isPendingApproval,
-	isPendingApprovalByAttachmentId,
 	isUploading,
-	isUploadingByBatchId,
 	isUploadingById,
 	isUploadingByUrl,
 } from '../selectors';
@@ -165,33 +163,6 @@ describe( 'selectors', () => {
 		} );
 	} );
 
-	describe( 'isUploadingByBatchId', () => {
-		it( 'should return true if there are items in the pipeline', () => {
-			const state: State = {
-				queue: [
-					{
-						status: ItemStatus.Processing,
-						batchId: 'foo',
-					},
-					{
-						status: ItemStatus.Processing,
-						batchId: 'bar',
-					},
-				] as QueueItem[],
-				imageSizes: {},
-				queueStatus: 'paused',
-				blobUrls: {},
-				settings: {
-					mediaUpload: jest.fn(),
-					mediaSideload: jest.fn(),
-				},
-			};
-
-			expect( isUploadingByBatchId( state, 'foo' ) ).toBe( true );
-			expect( isUploadingByBatchId( state, 'baz' ) ).toBe( false );
-		} );
-	} );
-
 	describe( 'isPendingApproval', () => {
 		it( 'should return true if there are items pending approval', () => {
 			const state: State = {
@@ -231,58 +202,6 @@ describe( 'selectors', () => {
 			};
 
 			expect( isPendingApproval( state ) ).toBe( true );
-		} );
-	} );
-
-	describe( 'isPendingApprovalByAttachmentId', () => {
-		it( 'should return true if there are items pending approval', () => {
-			const state: State = {
-				queue: [
-					{
-						status: ItemStatus.Processing,
-					},
-					{
-						status: ItemStatus.Processing,
-					},
-					{
-						status: ItemStatus.PendingApproval,
-					},
-					{
-						status: ItemStatus.PendingApproval,
-						sourceAttachmentId: 123,
-					},
-					{
-						status: ItemStatus.PendingApproval,
-						attachment: {
-							id: 456,
-						},
-					},
-					{
-						status: ItemStatus.Paused,
-						sourceAttachmentId: 789,
-					},
-					{
-						status: ItemStatus.Processing,
-					},
-				] as QueueItem[],
-				imageSizes: {},
-				queueStatus: 'paused',
-				blobUrls: {},
-				settings: {
-					mediaUpload: jest.fn(),
-					mediaSideload: jest.fn(),
-				},
-			};
-
-			expect( isPendingApprovalByAttachmentId( state, 123 ) ).toBe(
-				true
-			);
-			expect( isPendingApprovalByAttachmentId( state, 456 ) ).toBe(
-				true
-			);
-			expect( isPendingApprovalByAttachmentId( state, 786 ) ).toBe(
-				false
-			);
 		} );
 	} );
 } );
