@@ -4,13 +4,15 @@
 		"checkJs": true,
 		"allowSyntheticDefaultImports": true,
 		"jsx": "preserve",
-		"target": "ES2020",
-		"module": "ES2020",
+		"target": "esnext",
+		"module": "esnext",
 		"lib": [ "dom", "dom.iterable", "esnext" ],
 		"declaration": true,
 		"declarationMap": true,
 		"composite": true,
 		"emitDeclarationOnly": true,
+		"isolatedModules": true,
+		"skipDefaultLibCheck": true,
 		"strict": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
@@ -29,5 +31,8 @@
 		"typeRoots": [ "./@types", "./node_modules/@types" ],
 		"types": [ "jest", "node" ]
 	},
-	"exclude": [ "packages/*/dist-types/**", "packages/*/dist/**" ]
+	"exclude": [
+		"packages/*/dist-types/**",
+		"packages/*/dist/**"
+	]
 }

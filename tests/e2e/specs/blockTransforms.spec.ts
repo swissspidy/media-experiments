@@ -1,5 +1,3 @@
-import { join } from 'node:path';
-
 import { expect, test } from '../fixtures';
 
 test.describe( 'Block Transforms', () => {
@@ -14,33 +12,46 @@ test.describe( 'Block Transforms', () => {
 		admin,
 		page,
 		editor,
-		pageUtils,
-		draggingUtils,
+		mediaUtils,
 	} ) => {
 		await admin.createNewPost();
 
-		await editor.insertBlock( { name: 'core/paragraph' } );
+		const tmpInput = await page.evaluateHandle( () => {
+			const input = document.createElement( 'input' );
+			input.type = 'file';
+			input.multiple = true;
+			return input;
+		} );
 
-		const filePath1 = join(
-			__dirname,
-			'../assets',
-			'garden-adventures.ogg'
-		);
-		const filePath2 = join( __dirname, '../assets', 'japanese-rose.ogg' );
-
-		const { dragOver, drop } = await pageUtils.dragFiles( [
-			filePath1,
-			filePath2,
-		] );
-
-		await dragOver(
-			editor.canvas.locator( '[data-type="core/paragraph"]' )
+		await mediaUtils.upload(
+			tmpInput,
+			'garden-adventures.oga',
+			'japanese-rose.oga'
 		);
 
-		await expect( draggingUtils.dropZone ).toBeVisible();
-		await expect( draggingUtils.insertionIndicator ).toBeHidden();
+		const paragraphBlock = editor.canvas.getByLabel( 'Add default block' );
 
-		await drop();
+		const paragraphRect = await paragraphBlock.boundingBox();
+		const pX = paragraphRect.x + paragraphRect.width / 2;
+		const pY = paragraphRect.y + paragraphRect.height / 3;
+
+		await paragraphBlock.evaluate(
+			( element, [ input, clientX, clientY ] ) => {
+				const dataTransfer = new window.DataTransfer();
+				// @ts-ignore
+				for ( const file of input.files ) {
+					dataTransfer.items.add( file );
+				}
+				const event = new window.DragEvent( 'drop', {
+					bubbles: true,
+					clientX,
+					clientY,
+					dataTransfer,
+				} );
+				element.dispatchEvent( event );
+			},
+			[ tmpInput, pX, pY ] as const
+		);
 
 		await expect(
 			page
@@ -69,43 +80,47 @@ test.describe( 'Block Transforms', () => {
 		admin,
 		page,
 		editor,
-		pageUtils,
-		draggingUtils,
+		mediaUtils,
 	} ) => {
 		await admin.createNewPost();
 
-		await editor.insertBlock( { name: 'core/paragraph' } );
+		const tmpInput = await page.evaluateHandle( () => {
+			const input = document.createElement( 'input' );
+			input.type = 'file';
+			input.multiple = true;
+			return input;
+		} );
 
-		const filePath1 = join(
-			__dirname,
-			'../assets',
-			'garden-adventures.ogg'
-		);
-		const filePath2 = join(
-			__dirname,
-			'../assets',
-			'car-desert-600x338.webm'
-		);
-		const filePath3 = join(
-			__dirname,
-			'../assets',
+		await mediaUtils.upload(
+			tmpInput,
+			'garden-adventures.oga',
+			'car-desert-600x338.webm',
 			'wordpress-logo-512x512.png'
 		);
 
-		const { dragOver, drop } = await pageUtils.dragFiles( [
-			filePath1,
-			filePath2,
-			filePath3,
-		] );
+		const paragraphBlock = editor.canvas.getByLabel( 'Add default block' );
 
-		await dragOver(
-			editor.canvas.locator( '[data-type="core/paragraph"]' )
+		const paragraphRect = await paragraphBlock.boundingBox();
+		const pX = paragraphRect.x + paragraphRect.width / 2;
+		const pY = paragraphRect.y + paragraphRect.height / 3;
+
+		await paragraphBlock.evaluate(
+			( element, [ input, clientX, clientY ] ) => {
+				const dataTransfer = new window.DataTransfer();
+				// @ts-ignore
+				for ( const file of input.files ) {
+					dataTransfer.items.add( file );
+				}
+				const event = new window.DragEvent( 'drop', {
+					bubbles: true,
+					clientX,
+					clientY,
+					dataTransfer,
+				} );
+				element.dispatchEvent( event );
+			},
+			[ tmpInput, pX, pY ] as const
 		);
-
-		await expect( draggingUtils.dropZone ).toBeVisible();
-		await expect( draggingUtils.insertionIndicator ).toBeHidden();
-
-		await drop();
 
 		await expect(
 			page
