@@ -1,9 +1,10 @@
-import { useEntityRecord } from '@wordpress/core-data';
+import { useEntityProp, useEntityRecord } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 
 import { type RestAttachment } from '@mexp/media-utils';
 import { store as uploadStore } from '@mexp/upload-media';
 import { isBlobURL } from '@wordpress/blob';
+import { store as editorStore } from '@wordpress/editor';
 
 export function useAttachment( id?: number ) {
 	const { record } = useEntityRecord( 'postType', 'attachment', id || 0 );
@@ -31,4 +32,26 @@ export function useIsUploadingByUrl( url?: string ) {
 		},
 		[ url ]
 	);
+}
+
+export function useFeaturedImageAttachment() {
+	const { type: postType, id: postId } = useSelect(
+		( select ) => select( editorStore ).getCurrentPost(),
+		[]
+	);
+
+	const [ featuredImage, setFeaturedImage ] = useEntityProp(
+		'postType',
+		postType,
+		'featured_media',
+		postId as number
+	) as [ number | undefined, ( id: number ) => void, unknown ];
+
+	const attachment = useAttachment( featuredImage );
+
+	return {
+		featuredImage,
+		setFeaturedImage,
+		attachment,
+	};
 }

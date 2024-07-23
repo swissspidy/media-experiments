@@ -64,8 +64,8 @@ _Parameters_
 -   _$0.measureName_ `MeasureOptions[ 'measureName' ]`: A string representing the name of the measure.
 -   _$0.startTime_ `MeasureOptions[ 'startTime' ]`: Start time.
 -   _$0.endTime_ `MeasureOptions[ 'endTime' ]`: End time. Defaults to `performance.now()`
--   _$0.hintText_ `MeasureOptions[ 'hintText' ]`: A short description shown over the entry when hovered.
--   _$0.detailsPairs_ `MeasureOptions[ 'detailsPairs' ]`: key-value pairs added to the details drawer when the entry is selected.
+-   _$0.tooltipText_ `MeasureOptions[ 'tooltipText' ]`: A short description shown over the entry when hovered.
+-   _$0.properties_ `MeasureOptions[ 'properties' ]`: key-value pairs added to the details drawer when the entry is selected.
 -   _$0.color_ `MeasureOptions[ 'color' ]`: The color the entry will be displayed with in the timeline.
 -   _$0.track_ `MeasureOptions[ 'track' ]`: The name (and identifier) of the extension track the entry belongs to.
 

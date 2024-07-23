@@ -1,6 +1,5 @@
 import { registerPlugin } from '@wordpress/plugins';
-import { PluginMoreMenuItem as PluginMoreMenuItem65 } from '@wordpress/edit-post';
-import { PluginMoreMenuItem as PluginMoreMenuItem66 } from '@wordpress/editor';
+import { PluginMoreMenuItem } from '@wordpress/editor';
 import { media } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import {
@@ -19,9 +18,6 @@ import { Modal } from './modal';
 import { PREFERENCES_NAME } from './constants';
 
 import './editor.css';
-
-// PluginMoreMenuItem from @wordpress/edit-post is deprecated since WP 6.6.
-const PluginMoreMenuItem = PluginMoreMenuItem66 || PluginMoreMenuItem65;
 
 function PreferencesMenuItem() {
 	const { openModal } = useDispatch( interfaceStore );

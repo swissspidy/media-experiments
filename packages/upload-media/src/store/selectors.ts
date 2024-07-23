@@ -73,26 +73,6 @@ export function getItemByAttachmentId(
 }
 
 /**
- * Determines whether there is an item pending approval given its associated attachment ID.
- *
- * @param state        Upload state.
- * @param attachmentId Attachment ID.
- *
- * @return Whether the item is pending approval.
- */
-export function isPendingApprovalByAttachmentId(
-	state: State,
-	attachmentId: number
-): boolean {
-	return state.queue.some(
-		( item ) =>
-			( item.attachment?.id === attachmentId ||
-				item.sourceAttachmentId === attachmentId ) &&
-			item.status === ItemStatus.PendingApproval
-	);
-}
-
-/**
  * Determines whether an item is the first one pending approval given its associated attachment ID.
  *
  * @param state        Upload state.
@@ -253,21 +233,6 @@ export function getPausedUploadForPost(
 			item.status === ItemStatus.Paused &&
 			item.additionalData.post === postOrAttachmentId
 	);
-}
-
-/**
- * Determines whether an upload is currently in progress given a batch ID.
- *
- * @param state   Upload state.
- * @param batchId Batch ID.
- *
- * @return Whether upload is currently in progress for the given batch ID.
- */
-export function isUploadingByBatchId(
-	state: State,
-	batchId: BatchId
-): boolean {
-	return state.queue.some( ( item ) => item.batchId === batchId );
 }
 
 /**

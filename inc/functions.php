@@ -22,6 +22,8 @@ use function register_post_meta;
  *
  * Allows downloading updates from GitHub.
  *
+ * @codeCoverageIgnore
+ *
  * @param array<string,mixed>|false $update      The plugin update data with the latest details. Default false.
  * @param array<string,string>      $plugin_data Plugin headers.
  * @param string                    $plugin_file Plugin filename.
@@ -825,29 +827,6 @@ function filter_attachment_post_type_args( array $args, string $post_type ): arr
 	}
 
 	return $args;
-}
-
-/**
- * Filters the attachment data prepared for JavaScript.
- *
- * @param array $response Array of prepared attachment data. See {@see wp_prepare_attachment_for_js()}.
- * @return array Filtered attachment data.
- * @phpstan-param array<string, mixed> $response
- * @phpstan-return array<string, mixed>
- */
-function filter_wp_prepare_attachment_for_js( array $response ): array {
-	/**
-	 * Post ID.
-	 *
-	 * @var int $id
-	 */
-	$id = $response['id'];
-
-	$terms = get_the_terms( $id, 'mexp_media_source' );
-
-	$response['mexp_media_source'] = is_array( $terms ) ? wp_list_pluck( $terms, 'term_id' ) : [];
-
-	return $response;
 }
 
 /**

@@ -116,31 +116,26 @@ export function start( message: string ): undefined | ( () => void ) {
 	};
 }
 
-export interface TimingObject {
-	name: string;
-	measure: PerformanceMeasureOptions;
-}
-
 /**
  * Small wrapper around `performance.measure`.
  *
  * Only works if not in production mode.
  *
- * @param $0              Parameters object passed to the function.
- * @param $0.measureName  A string representing the name of the measure.
- * @param $0.startTime    Start time.
- * @param $0.endTime      End time. Defaults to `performance.now()`
- * @param $0.hintText     A short description shown over the entry when hovered.
- * @param $0.detailsPairs key-value pairs added to the details drawer when the entry is selected.
- * @param $0.color        The color the entry will be displayed with in the timeline.
- * @param $0.track        The name (and identifier) of the extension track the entry belongs to.
+ * @param $0             Parameters object passed to the function.
+ * @param $0.measureName A string representing the name of the measure.
+ * @param $0.startTime   Start time.
+ * @param $0.endTime     End time. Defaults to `performance.now()`
+ * @param $0.tooltipText A short description shown over the entry when hovered.
+ * @param $0.properties  key-value pairs added to the details drawer when the entry is selected.
+ * @param $0.color       The color the entry will be displayed with in the timeline.
+ * @param $0.track       The name (and identifier) of the extension track the entry belongs to.
  */
 export function measure( {
 	measureName,
 	startTime,
 	endTime = performance.now(),
-	hintText,
-	detailsPairs = [],
+	tooltipText,
+	properties = [],
 	color = 'primary',
 	track = 'Media Experiments',
 }: MeasureOptions ) {
@@ -153,19 +148,15 @@ export function measure( {
 		end: endTime,
 		detail: {
 			devtools: {
-				metadata: {
-					// An identifier for the data type contained in the payload
-					dataType: 'track-entry',
-					// An identifier for the extension. Not used / displayed.
-					extensionName: 'Media Experiments',
-				},
+				// An identifier for the data type contained in the payload
+				dataType: 'track-entry',
 				color,
 				// All entries will be grouped under this track.
 				track,
 				// A short description shown over the entry when hovered.
-				hintText,
+				tooltipText,
 				// key-value pairs added to the details drawer when the entry is selected.
-				detailsPairs,
+				properties,
 			},
 		},
 	} );
@@ -173,8 +164,8 @@ export function measure( {
 
 export function mark( {
 	markName,
-	hintText,
-	detailsPairs = [],
+	tooltipText,
+	properties = [],
 	color = 'primary',
 	track = 'Media Experiments',
 }: MarkOptions ) {
@@ -185,19 +176,15 @@ export function mark( {
 	performance.mark( markName, {
 		detail: {
 			devtools: {
-				metadata: {
-					// An identifier for the data type contained in the payload
-					dataType: 'marker',
-					// An identifier for the extension. Not used / displayed.
-					extensionName: 'Media Experiments',
-				},
+				// An identifier for the data type contained in the payload
+				dataType: 'marker',
 				color,
 				// All entries will be grouped under this track.
 				track,
 				// A short description shown over the entry when hovered.
-				hintText,
+				tooltipText,
 				// key-value pairs added to the details drawer when the entry is selected.
-				detailsPairs,
+				properties,
 			},
 		},
 	} );

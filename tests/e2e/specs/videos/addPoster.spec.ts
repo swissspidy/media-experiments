@@ -8,11 +8,12 @@ test.describe( 'Videos', () => {
 		] );
 	} );
 
-	test( 'should upload external video', async ( {
+	test( 'generate poster image', async ( {
 		admin,
 		editor,
 		page,
 		browserName,
+		mediaUtils,
 	} ) => {
 		test.skip(
 			browserName === 'webkit',
@@ -21,12 +22,29 @@ test.describe( 'Videos', () => {
 
 		await admin.createNewPost();
 
-		await editor.insertBlock( {
-			name: 'core/video',
-			attributes: {
-				src: 'https://raw.githubusercontent.com/swissspidy/media-experiments/main/tests/e2e/assets/car-desert-av1.mp4',
-			},
-		} );
+		await editor.insertBlock( { name: 'core/video' } );
+
+		const videoBlock = editor.canvas.locator(
+			'role=document[name="Block: Video"i]'
+		);
+		await expect( videoBlock ).toBeVisible();
+
+		await editor.selectBlocks( videoBlock );
+
+		await editor.canvas
+			.getByRole( 'button', { name: 'Media Library' } )
+			.click();
+
+		await page.getByRole( 'tab', { name: 'Upload files' } ).click();
+
+		await mediaUtils.upload(
+			page.locator( '.media-modal input[type=file]' ),
+			'car-desert-600x338.webm'
+		);
+
+		await page
+			.getByRole( 'button', { name: 'Select', exact: true } )
+			.click();
 
 		const settingsPanel = page
 			.getByRole( 'region', {
@@ -36,7 +54,9 @@ test.describe( 'Videos', () => {
 				name: 'Settings',
 			} );
 
-		await settingsPanel.getByRole( 'button', { name: 'Import' } ).click();
+		await settingsPanel
+			.getByRole( 'button', { name: 'Generate poster' } )
+			.click();
 
 		await expect( settingsPanel ).toHaveText( /Upload in progress/ );
 
@@ -50,19 +70,16 @@ test.describe( 'Videos', () => {
 			}
 		);
 
-		const videoBlock = editor.canvas.locator(
-			'role=document[name="Block: Video"i]'
-		);
 		const video = videoBlock.locator( 'video[src^="http"]' );
 		const src = await video.getAttribute( 'src' );
 
 		expect( src ).toMatch( /\/wp-content\/uploads\// );
 
-		// TODO: Check why mime type is not consistent.
-		await expect( settingsPanel ).toHaveText(
-			/Mime type: video\/(mp4|webm)/
+		const blockAttributes = await page.evaluate(
+			() =>
+				window.wp.data.select( 'core/block-editor' ).getSelectedBlock()
+					?.attributes ?? {}
 		);
-		await expect( settingsPanel.getByLabel( '#8b837e' ) ).toBeVisible();
-		await expect( page.locator( 'css=[data-blurhash]' ) ).toBeVisible();
+		await expect( blockAttributes.poster ).toMatch( /-poster\.jpeg$/ );
 	} );
 } );

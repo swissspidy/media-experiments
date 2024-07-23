@@ -349,6 +349,7 @@ export function addItemFromUrl( {
 			sourceUrl: url,
 			operations: [
 				[ OperationType.FetchRemoteFile, { url, fileName } ],
+				OperationType.AddPoster,
 				OperationType.Upload,
 			],
 		} );
@@ -728,8 +729,8 @@ export function optimizeExistingItem( {
 		const timing: MeasureOptions = {
 			measureName: `Optimize existing item ${ fileName }`,
 			startTime: startTime || performance.now(),
-			hintText: 'This is a rendering task',
-			detailsPairs: [
+			tooltipText: 'This is a rendering task',
+			properties: [
 				[ 'Item ID', itemId ],
 				[ 'File name', fileName ],
 			],
@@ -1170,8 +1171,8 @@ export function addPosterForItem( id: QueueItemId ) {
 					} );
 					break;
 
-				// We're dealing with a StubFile, e.g. via addPosterForExistingVideo().
 				default:
+					// We're dealing with a StubFile, e.g. via addPosterForExistingVideo() or addItemFromUrl().
 					const file = await getPosterFromVideo(
 						// @ts-ignore -- Expected to exist at this point.
 						item.sourceUrl,
@@ -1898,8 +1899,8 @@ export function optimizeImageItem(
 				measureName: `Optimize image ${ item.file.name }`,
 				startTime,
 				endTime,
-				hintText: 'This is a rendering task',
-				detailsPairs: [
+				tooltipText: 'This is a rendering task',
+				properties: [
 					[ 'Item ID', item.id ],
 					[ 'File name', item.file.name ],
 					[ 'Image library', imageLibrary ],
@@ -2453,8 +2454,8 @@ export function uploadItem( id: QueueItemId ) {
 			measureName: `Upload item ${ item.file.name }`,
 			startTime,
 			endTime: performance.now(),
-			hintText: 'This is a rendering task',
-			detailsPairs: [
+			tooltipText: 'This is a rendering task',
+			properties: [
 				[ 'Item ID', id ],
 				[ 'File name', item.file.name ],
 			],

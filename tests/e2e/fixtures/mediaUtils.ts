@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { copyFile, mkdtemp } from 'node:fs/promises';
 
 import { v4 as uuidv4 } from 'uuid';
-import type { Locator, Page } from '@playwright/test';
+import type { ElementHandle, Locator, Page } from '@playwright/test';
 
 export class MediaUtils {
 	page: Page;
@@ -20,7 +20,10 @@ export class MediaUtils {
 		);
 	}
 
-	async upload( inputElement: Locator, ...fileNames: string[] ) {
+	async upload(
+		inputElement: Locator | ElementHandle< HTMLInputElement >,
+		...fileNames: string[]
+	) {
 		const tmpDirectory = await mkdtemp(
 			join( tmpdir(), 'gutenberg-test-image-' )
 		);

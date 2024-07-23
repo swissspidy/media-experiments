@@ -1,5 +1,5 @@
 import { expect, test } from '../fixtures';
-import type { RestAttachment } from '@mexp/upload-media';
+import type { RestAttachment } from '@mexp/media-utils';
 
 test.describe( 'Animated GIFs', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
@@ -104,7 +104,7 @@ test.describe( 'Animated GIFs', () => {
 				window.wp.data.select( 'core/block-editor' ).getSelectedBlock()
 					?.attributes ?? {}
 		);
-		await expect( blockAttributes.src ).toMatch( /\.mp4$/ );
+		expect( blockAttributes.src ).toMatch( /\.mp4$/ );
 		// TODO: Fix poster addition for converted block.
 		// TODO: File extension should be based on preference.
 		// await expect( blockAttributes.poster ).toMatch(

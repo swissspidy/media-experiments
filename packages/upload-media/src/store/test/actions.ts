@@ -120,7 +120,7 @@ describe( 'actions', () => {
 	} );
 
 	describe( 'addItemFromUrl', () => {
-		it( 'adds an item to the queue for download', async () => {
+		it( 'adds an item to the queue for downloading', async () => {
 			await registry.dispatch( uploadStore ).addItemFromUrl( {
 				url: 'https://example.com/example.jpg',
 			} );
@@ -148,6 +148,7 @@ describe( 'actions', () => {
 								fileName: 'example.jpg',
 							},
 						],
+						OperationType.AddPoster,
 						OperationType.Upload,
 					],
 				} )

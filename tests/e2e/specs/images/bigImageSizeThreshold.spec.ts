@@ -1,4 +1,5 @@
-import { ImageLibrary, RestAttachment } from '@mexp/upload-media';
+import { ImageLibrary } from '@mexp/upload-media';
+import { RestAttachment } from '@mexp/media-utils';
 
 import { expect, test } from '../../fixtures';
 

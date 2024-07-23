@@ -11,7 +11,7 @@ const scenarios = [
 	},
 	{
 		blockType: 'audio',
-		fileNames: [ 'garden-adventures.ogg' ],
+		fileNames: [ 'garden-adventures.oga' ],
 	},
 	{
 		blockType: 'gallery',

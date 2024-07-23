@@ -74,36 +74,6 @@ export function canProcessWithFFmpeg( file: File ) {
 }
 
 /**
- * Browsers may use unexpected mime types, and they differ from browser to browser.
- * This function computes a flexible array of mime types from the mime type structured provided by the server.
- * Converts { jpg|jpeg|jpe: "image/jpeg" } into [ "image/jpeg", "image/jpg", "image/jpeg", "image/jpe" ]
- *
- * @param {?Object} wpMimeTypesObject Mime type object received from the server.
- *                                    Extensions are keys separated by '|' and values are mime types associated with an extension.
- *
- * @return {?Array} An array of mime types.
- */
-export function getMimeTypesArray(
-	wpMimeTypesObject?: Record< string, string > | null
-) {
-	if ( ! wpMimeTypesObject ) {
-		return [];
-	}
-	return Object.entries( wpMimeTypesObject ).flatMap(
-		( [ extensionsString, mime ] ) => {
-			const [ type ] = mime.split( '/' );
-			const extensions = extensionsString.split( '|' );
-			return [
-				mime,
-				...extensions.map(
-					( extension ) => `${ type }/${ extension }`
-				),
-			];
-		}
-	);
-}
-
-/**
  * Returns the file name including extension from a URL.
  *
  * @param url File URL.
@@ -130,13 +100,21 @@ export async function fetchFile( url: string, nameOverride?: string ) {
 	const name = nameOverride || getFileNameFromUrl( url );
 	const blob = await response.blob();
 
-	// Fallback if blob.type is an empty string, e.g. when server does not return correct Content-Type.
-	const mimeType =
-		blob.type || getMimeTypeFromExtension( getFileExtension( name ) || '' );
+	const ext = getFileExtension( name );
+	const guessedMimeType = ext ? getMimeTypeFromExtension( ext ) : '';
 
-	const file = new File( [ blob ], name, { type: mimeType || '' } );
+	let type = '';
 
-	if ( ! mimeType ) {
+	// blob.type can be an empty string when server does not return a correct Content-Type.
+	if ( blob.type && blob.type !== 'application/octet-stream' ) {
+		type = blob.type;
+	} else if ( guessedMimeType ) {
+		type = guessedMimeType;
+	}
+
+	const file = new File( [ blob ], name, { type } );
+
+	if ( ! guessedMimeType ) {
 		throw new MediaError( {
 			code: 'FETCH_REMOTE_FILE_ERROR',
 			message: 'File could not be uploaded',
@@ -145,42 +123,6 @@ export async function fetchFile( url: string, nameOverride?: string ) {
 	}
 
 	return file;
-}
-
-/**
- * Preloads a given image using the `Image()` constructor.
- *
- * Useful for further processing of the image, like saving it
- * or extracting its dominant color.
- *
- * @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/Image
- *
- * @todo Remove as it appears to be unused
- *
- * @param src    Image URL.
- * @param width  Desired width.
- * @param height Desired height.
- */
-export function preloadImage(
-	src: string,
-	width?: number,
-	height?: number
-): Promise< HTMLImageElement > {
-	return new Promise< HTMLImageElement >( ( resolve, reject ) => {
-		// If no width or height are provided, set them to undefined
-		// so that is preloaded with its full dimensions.
-		// Avoids creating an image with 0x0 dimensions.
-		const image = new Image(
-			width ? Number( width ) : undefined,
-			height ? Number( height ) : undefined
-		);
-		image.addEventListener( 'load', () => resolve( image ) );
-		image.addEventListener( 'error', ( error ) => reject( error ) );
-		image.decoding = 'async';
-		image.crossOrigin = 'anonymous';
-
-		image.src = src;
-	} );
 }
 
 /**

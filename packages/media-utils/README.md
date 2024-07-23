@@ -55,7 +55,6 @@ _Parameters_
 -   _$0.maxUploadFileSize_ `UploadMediaArgs[ 'maxUploadFileSize' ]`: Maximum upload size in bytes allowed for the site.
 -   _$0.onError_ `UploadMediaArgs[ 'onError' ]`: Function called when an error happens.
 -   _$0.onFileChange_ `UploadMediaArgs[ 'onFileChange' ]`: Function called each time a file or a temporary representation of the file is available.
--   _$0.onSuccess_ `UploadMediaArgs[ 'onSuccess' ]`: Function called once a file has completely finished uploading, including thumbnails.
 -   _$0.wpAllowedMimeTypes_ `UploadMediaArgs[ 'wpAllowedMimeTypes' ]`: List of allowed mime types and file extensions.
 -   _$0.signal_ `UploadMediaArgs[ 'signal' ]`: Abort signal.
 
