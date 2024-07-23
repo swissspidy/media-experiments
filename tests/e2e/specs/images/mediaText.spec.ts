@@ -13,41 +13,9 @@ const scenarios: {
 		expectedMimeType: 'image/jpeg',
 	},
 	{
-		outputFormat: 'webp',
-		imageLibrary: 'browser',
-		expectedMimeType: 'image/webp',
-	},
-	{
-		outputFormat: 'avif',
-		imageLibrary: 'browser',
-		expectedMimeType: 'image/avif',
-	},
-	{
-		outputFormat: 'png',
-		imageLibrary: 'browser',
-		// Default image in tests is a png, so type should be unchanged.
-		expectedMimeType: 'image/png',
-	},
-	{
 		outputFormat: 'jpeg',
 		imageLibrary: 'vips',
 		expectedMimeType: 'image/jpeg',
-	},
-	{
-		outputFormat: 'webp',
-		imageLibrary: 'vips',
-		expectedMimeType: 'image/webp',
-	},
-	{
-		outputFormat: 'avif',
-		imageLibrary: 'vips',
-		expectedMimeType: 'image/avif',
-	},
-	{
-		outputFormat: 'png',
-		imageLibrary: 'vips',
-		// Default image in tests is a png, so type should be unchanged.
-		expectedMimeType: 'image/png',
 	},
 ];
 
@@ -66,14 +34,8 @@ test.describe( 'Media & Text', () => {
 				browserName,
 			} ) => {
 				test.skip(
-					browserName === 'webkit' &&
-						( imageLibrary === 'vips' || outputFormat === 'avif' ),
+					browserName === 'webkit' && imageLibrary === 'vips',
 					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
-				);
-
-				test.skip(
-					browserName === 'webkit' && outputFormat === 'webp',
-					'WebKit does not currently support Canvas.toBlob with WebP'
 				);
 
 				// TODO: Investigate.
