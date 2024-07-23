@@ -19,7 +19,7 @@ const scenarios: {
 	},
 ];
 
-test.describe( 'Images', () => {
+test.describe( 'Cover Block', () => {
 	test.describe( 'uploads a file and allows optimizing it afterwards', () => {
 		for ( const {
 			outputFormat,
@@ -73,13 +73,13 @@ test.describe( 'Images', () => {
 
 				await editor.insertBlock( { name: 'core/cover' } );
 
-				const imageBlock = editor.canvas.locator(
+				const coverBlock = editor.canvas.locator(
 					'role=document[name="Block: Cover"i]'
 				);
-				await expect( imageBlock ).toBeVisible();
+				await expect( coverBlock ).toBeVisible();
 
 				await mediaUtils.upload(
-					imageBlock.locator( 'data-testid=form-file-upload-input' ),
+					coverBlock.locator( 'data-testid=form-file-upload-input' ),
 					'wordpress-logo-512x512.png'
 				);
 
@@ -89,6 +89,8 @@ test.describe( 'Images', () => {
 							.select( 'media-experiments/upload' )
 							.getItems().length === 0
 				);
+
+				await editor.selectBlocks( coverBlock );
 
 				const settingsPanel = page
 					.getByRole( 'region', {
@@ -270,13 +272,13 @@ test.describe( 'Images', () => {
 
 				await editor.insertBlock( { name: 'core/cover' } );
 
-				const imageBlock = editor.canvas.locator(
+				const coverBlock = editor.canvas.locator(
 					'role=document[name="Block: Cover"i]'
 				);
-				await expect( imageBlock ).toBeVisible();
+				await expect( coverBlock ).toBeVisible();
 
 				await mediaUtils.upload(
-					imageBlock.locator( 'data-testid=form-file-upload-input' ),
+					coverBlock.locator( 'data-testid=form-file-upload-input' ),
 					'wordpress-logo-512x512.png'
 				);
 
@@ -290,6 +292,8 @@ test.describe( 'Images', () => {
 						timeout: 100_000, // Transcoding might take longer, especially AVIF on Firefox.
 					}
 				);
+
+				await editor.selectBlocks( coverBlock );
 
 				const settingsPanel = page
 					.getByRole( 'region', {
