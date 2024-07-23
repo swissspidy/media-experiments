@@ -6,10 +6,6 @@ jest.mock( '../uploadToServer', () => ( {
 	uploadToServer: jest.fn(),
 } ) );
 
-jest.mock( '@mexp/pdf', () => ( {
-	getImageFromPdf: jest.fn(),
-} ) );
-
 const xmlFile = new window.File( [ 'fake_file' ], 'test.xml', {
 	type: 'text/xml',
 } );
