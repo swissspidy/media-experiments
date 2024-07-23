@@ -349,6 +349,7 @@ export function addItemFromUrl( {
 			sourceUrl: url,
 			operations: [
 				[ OperationType.FetchRemoteFile, { url, fileName } ],
+				OperationType.AddPoster,
 				OperationType.Upload,
 			],
 		} );
@@ -1170,8 +1171,8 @@ export function addPosterForItem( id: QueueItemId ) {
 					} );
 					break;
 
-				// We're dealing with a StubFile, e.g. via addPosterForExistingVideo().
 				default:
+					// We're dealing with a StubFile, e.g. via addPosterForExistingVideo() or addItemFromUrl().
 					const file = await getPosterFromVideo(
 						// @ts-ignore -- Expected to exist at this point.
 						item.sourceUrl,

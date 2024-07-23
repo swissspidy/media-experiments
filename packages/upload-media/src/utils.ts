@@ -130,13 +130,21 @@ export async function fetchFile( url: string, nameOverride?: string ) {
 	const name = nameOverride || getFileNameFromUrl( url );
 	const blob = await response.blob();
 
-	// Fallback if blob.type is an empty string, e.g. when server does not return correct Content-Type.
-	const mimeType =
-		blob.type || getMimeTypeFromExtension( getFileExtension( name ) || '' );
+	const ext = getFileExtension( name );
+	const guessedMimeType = ext ? getMimeTypeFromExtension( ext ) : '';
 
-	const file = new File( [ blob ], name, { type: mimeType || '' } );
+	let type = '';
 
-	if ( ! mimeType ) {
+	// blob.type can be an empty string when server does not return a correct Content-Type.
+	if ( blob.type && blob.type !== 'application/octet-stream' ) {
+		type = blob.type;
+	} else if ( guessedMimeType ) {
+		type = guessedMimeType;
+	}
+
+	const file = new File( [ blob ], name, { type } );
+
+	if ( ! guessedMimeType ) {
 		throw new MediaError( {
 			code: 'FETCH_REMOTE_FILE_ERROR',
 			message: 'File could not be uploaded',

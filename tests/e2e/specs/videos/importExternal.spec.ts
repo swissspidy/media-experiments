@@ -8,8 +8,7 @@ test.describe( 'Videos', () => {
 		] );
 	} );
 
-	// Skipped because external video is served with incorrect audio/webm Content-Type.
-	test.skip( 'should upload external video', async ( {
+	test( 'should upload external video', async ( {
 		admin,
 		editor,
 		page,
@@ -25,7 +24,7 @@ test.describe( 'Videos', () => {
 		await editor.insertBlock( {
 			name: 'core/video',
 			attributes: {
-				src: 'https://raw.githubusercontent.com/swissspidy/media-experiments/main/tests/e2e/assets/car-desert-600x338.webm',
+				src: 'https://raw.githubusercontent.com/swissspidy/media-experiments/main/tests/e2e/assets/car-desert-av1.mp4',
 			},
 		} );
 
