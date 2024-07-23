@@ -126,42 +126,6 @@ export async function fetchFile( url: string, nameOverride?: string ) {
 }
 
 /**
- * Preloads a given image using the `Image()` constructor.
- *
- * Useful for further processing of the image, like saving it
- * or extracting its dominant color.
- *
- * @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/Image
- *
- * @todo Remove as it appears to be unused
- *
- * @param src    Image URL.
- * @param width  Desired width.
- * @param height Desired height.
- */
-export function preloadImage(
-	src: string,
-	width?: number,
-	height?: number
-): Promise< HTMLImageElement > {
-	return new Promise< HTMLImageElement >( ( resolve, reject ) => {
-		// If no width or height are provided, set them to undefined
-		// so that is preloaded with its full dimensions.
-		// Avoids creating an image with 0x0 dimensions.
-		const image = new Image(
-			width ? Number( width ) : undefined,
-			height ? Number( height ) : undefined
-		);
-		image.addEventListener( 'load', () => resolve( image ) );
-		image.addEventListener( 'error', ( error ) => reject( error ) );
-		image.decoding = 'async';
-		image.crossOrigin = 'anonymous';
-
-		image.src = src;
-	} );
-}
-
-/**
  * Preloads a video's metadata.
  *
  * @param src Video URL.
