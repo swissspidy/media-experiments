@@ -729,8 +729,8 @@ export function optimizeExistingItem( {
 		const timing: MeasureOptions = {
 			measureName: `Optimize existing item ${ fileName }`,
 			startTime: startTime || performance.now(),
-			hintText: 'This is a rendering task',
-			detailsPairs: [
+			tooltipText: 'This is a rendering task',
+			properties: [
 				[ 'Item ID', itemId ],
 				[ 'File name', fileName ],
 			],
@@ -1899,8 +1899,8 @@ export function optimizeImageItem(
 				measureName: `Optimize image ${ item.file.name }`,
 				startTime,
 				endTime,
-				hintText: 'This is a rendering task',
-				detailsPairs: [
+				tooltipText: 'This is a rendering task',
+				properties: [
 					[ 'Item ID', item.id ],
 					[ 'File name', item.file.name ],
 					[ 'Image library', imageLibrary ],
@@ -2454,8 +2454,8 @@ export function uploadItem( id: QueueItemId ) {
 			measureName: `Upload item ${ item.file.name }`,
 			startTime,
 			endTime: performance.now(),
-			hintText: 'This is a rendering task',
-			detailsPairs: [
+			tooltipText: 'This is a rendering task',
+			properties: [
 				[ 'Item ID', id ],
 				[ 'File name', item.file.name ],
 			],
