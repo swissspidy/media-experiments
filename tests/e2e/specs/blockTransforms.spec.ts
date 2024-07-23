@@ -65,7 +65,7 @@ test.describe( 'Block Transforms', () => {
 		).toHaveCount( 2 );
 	} );
 
-	test.only( 'uploads mixed files', async ( {
+	test( 'uploads mixed files', async ( {
 		admin,
 		page,
 		editor,
