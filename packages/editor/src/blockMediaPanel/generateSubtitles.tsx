@@ -3,7 +3,11 @@ import { isBlobURL } from '@wordpress/blob';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
 import { __, _x } from '@wordpress/i18n';
-import { Button, PanelRow } from '@wordpress/components';
+import {
+	BaseControl,
+	Button,
+	useBaseControlProps,
+} from '@wordpress/components';
 
 import { store as uploadStore } from '@mexp/upload-media';
 
@@ -17,6 +21,8 @@ export function GenerateSubtitles( {
 	attributes,
 	setAttributes,
 }: GenerateSubtitlesProps ) {
+	const { baseControlProps, controlProps } = useBaseControlProps( {} );
+
 	const post = useAttachment( attributes.id );
 
 	const url = attributes.src;
@@ -63,14 +69,24 @@ export function GenerateSubtitles( {
 	};
 
 	return (
-		<PanelRow>
+		<BaseControl { ...baseControlProps }>
+			<BaseControl.VisualLabel>
+				{ __( 'Accessibility', 'media-experiments' ) }
+			</BaseControl.VisualLabel>
+			<p>
+				{ __(
+					'Use AI to automatically create subtitles for this video.',
+					'media-experiments'
+				) }
+			</p>
 			<Button
 				variant="primary"
 				onClick={ onClick }
 				disabled={ isUploading }
+				{ ...controlProps }
 			>
 				{ __( 'Generate subtitles', 'media-experiments' ) }
 			</Button>
-		</PanelRow>
+		</BaseControl>
 	);
 }

@@ -9,7 +9,7 @@ import { ImportMedia } from './importMedia';
 import { OptimizeMedia } from './optimizeMedia';
 import { MuteVideo } from './muteVideo';
 import { GenerateSubtitles } from './generateSubtitles';
-import { RestorePoster } from './restorePoster';
+import { AddPoster } from './addPoster';
 import { DebugInfo } from './debugInfo';
 import type { VideoBlock } from './types';
 import { isBlobURL } from '@wordpress/blob';
@@ -110,7 +110,7 @@ export function VideoControls( props: VideoControlsProps ) {
 				onChange={ onMuteVideo }
 			/>
 			<GenerateSubtitles { ...props } />
-			<RestorePoster { ...props } />
+			<AddPoster { ...props } />
 			<DebugInfo id={ props.attributes.id } />
 		</Fragment>
 	);

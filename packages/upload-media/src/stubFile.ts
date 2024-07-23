@@ -1,5 +1,5 @@
 export class StubFile extends File {
-	constructor() {
-		super( [], 'stub-file' );
+	constructor( fileName = 'stub-file' ) {
+		super( [], fileName );
 	}
 }

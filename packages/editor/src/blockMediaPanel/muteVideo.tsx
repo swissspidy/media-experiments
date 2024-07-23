@@ -1,7 +1,11 @@
 import { isBlobURL } from '@wordpress/blob';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
-import { Button, PanelRow } from '@wordpress/components';
+import {
+	BaseControl,
+	Button,
+	useBaseControlProps,
+} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 import type { Attachment } from '@mexp/media-utils';
@@ -17,6 +21,8 @@ interface MuteVideoProps {
 }
 
 export function MuteVideo( { id, url, poster, onChange }: MuteVideoProps ) {
+	const { baseControlProps, controlProps } = useBaseControlProps( {} );
+
 	const post = useAttachment( id );
 
 	const isUploading = useIsUploadingByUrl( url ) || isBlobURL( url );
@@ -50,14 +56,24 @@ export function MuteVideo( { id, url, poster, onChange }: MuteVideoProps ) {
 	};
 
 	return (
-		<PanelRow>
+		<BaseControl { ...baseControlProps }>
+			<BaseControl.VisualLabel>
+				{ __( 'Mute Video', 'media-experiments' ) }
+			</BaseControl.VisualLabel>
+			<p>
+				{ __(
+					'Mute the video by completely removing the audio information, reducing the file size.',
+					'media-experiments'
+				) }
+			</p>
 			<Button
 				variant="primary"
 				onClick={ onClick }
 				disabled={ isUploading }
+				{ ...controlProps }
 			>
 				{ __( 'Remove audio channel', 'media-experiments' ) }
 			</Button>
-		</PanelRow>
+		</BaseControl>
 	);
 }
