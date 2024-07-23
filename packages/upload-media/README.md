@@ -60,6 +60,21 @@ _Parameters_
 -   _$0.onError_ `[AddItemsArgs[ 'onError' ]]`: Function called when an error happens.
 -   _$0.additionalData_ `[AddItemsArgs[ 'additionalData' ]]`: Additional data to include in the request.
 
+#### addPosterForExistingVideo
+
+Adds a new item to the upload queue to generate a poster for an existing video.
+
+_Parameters_
+
+-   _$0_ `AddPosterForExistingVideoArgs`: 
+-   _$0.id_ `AddPosterForExistingVideoArgs[ 'id' ]`: Attachment ID.
+-   _$0.url_ `AddPosterForExistingVideoArgs[ 'url' ]`: URL.
+-   _$0.fileName_ `[AddPosterForExistingVideoArgs[ 'fileName' ]]`: File name.
+-   _$0.onChange_ `[AddPosterForExistingVideoArgs[ 'onChange' ]]`: Function called each time a file or a temporary representation of the file is available.
+-   _$0.onSuccess_ `[AddPosterForExistingVideoArgs[ 'onSuccess' ]]`: Function called after the file is uploaded.
+-   _$0.onError_ `[AddPosterForExistingVideoArgs[ 'onError' ]]`: Function called when an error happens.
+-   _$0.additionalData_ `[AddPosterForExistingVideoArgs[ 'additionalData' ]]`: Additional data to include in the request.
+
 #### addPosterForItem
 
 Triggers poster image generation for an item.
@@ -207,21 +222,21 @@ Adds a new item to the upload queue for optimizing (compressing) an existing ite
 
 _Parameters_
 
--   _$0_ `OptimizexistingItemArgs`: 
--   _$0.id_ `OptimizexistingItemArgs[ 'id' ]`: Attachment ID.
--   _$0.url_ `OptimizexistingItemArgs[ 'url' ]`: URL.
--   _$0.fileName_ `[OptimizexistingItemArgs[ 'fileName' ]]`: File name.
--   _$0.poster_ `[OptimizexistingItemArgs[ 'poster' ]]`: Poster URL.
--   _$0.batchId_ `[OptimizexistingItemArgs[ 'batchId' ]]`: Batch ID.
--   _$0.onChange_ `[OptimizexistingItemArgs[ 'onChange' ]]`: Function called each time a file or a temporary representation of the file is available.
--   _$0.onSuccess_ `[OptimizexistingItemArgs[ 'onSuccess' ]]`: Function called after the file is uploaded.
--   _$0.onBatchSuccess_ `[OptimizexistingItemArgs[ 'onBatchSuccess' ]]`: Function called after a batch of files is uploaded.
--   _$0.onError_ `[OptimizexistingItemArgs[ 'onError' ]]`: Function called when an error happens.
--   _$0.additionalData_ `[OptimizexistingItemArgs[ 'additionalData' ]]`: Additional data to include in the request.
--   _$0.blurHash_ `[OptimizexistingItemArgs[ 'blurHash' ]]`: Item's BlurHash.
--   _$0.dominantColor_ `[OptimizexistingItemArgs[ 'dominantColor' ]]`: Item's dominant color.
--   _$0.generatedPosterId_ `[OptimizexistingItemArgs[ 'generatedPosterId' ]]`: Attachment ID of the generated poster image, if it exists.
--   _$0.startTime_ `[OptimizexistingItemArgs[ 'startTime' ]]`: Time the action was initiated by the user (e.g. by clicking on a button).
+-   _$0_ `OptimizeExistingItemArgs`: 
+-   _$0.id_ `OptimizeExistingItemArgs[ 'id' ]`: Attachment ID.
+-   _$0.url_ `OptimizeExistingItemArgs[ 'url' ]`: URL.
+-   _$0.fileName_ `[OptimizeExistingItemArgs[ 'fileName' ]]`: File name.
+-   _$0.poster_ `[OptimizeExistingItemArgs[ 'poster' ]]`: Poster URL.
+-   _$0.batchId_ `[OptimizeExistingItemArgs[ 'batchId' ]]`: Batch ID.
+-   _$0.onChange_ `[OptimizeExistingItemArgs[ 'onChange' ]]`: Function called each time a file or a temporary representation of the file is available.
+-   _$0.onSuccess_ `[OptimizeExistingItemArgs[ 'onSuccess' ]]`: Function called after the file is uploaded.
+-   _$0.onBatchSuccess_ `[OptimizeExistingItemArgs[ 'onBatchSuccess' ]]`: Function called after a batch of files is uploaded.
+-   _$0.onError_ `[OptimizeExistingItemArgs[ 'onError' ]]`: Function called when an error happens.
+-   _$0.additionalData_ `[OptimizeExistingItemArgs[ 'additionalData' ]]`: Additional data to include in the request.
+-   _$0.blurHash_ `[OptimizeExistingItemArgs[ 'blurHash' ]]`: Item's BlurHash.
+-   _$0.dominantColor_ `[OptimizeExistingItemArgs[ 'dominantColor' ]]`: Item's dominant color.
+-   _$0.generatedPosterId_ `[OptimizeExistingItemArgs[ 'generatedPosterId' ]]`: Attachment ID of the generated poster image, if it exists.
+-   _$0.startTime_ `[OptimizeExistingItemArgs[ 'startTime' ]]`: Time the action was initiated by the user (e.g. by clicking on a button).
 
 #### optimizeImageItem
 
@@ -547,19 +562,6 @@ _Returns_
 
 -   `boolean`: Whether there is an item pending approval.
 
-#### isPendingApprovalByAttachmentId
-
-Determines whether there is an item pending approval given its associated attachment ID.
-
-_Parameters_
-
--   _state_ `State`: Upload state.
--   _attachmentId_ `number`: Attachment ID.
-
-_Returns_
-
--   `boolean`: Whether the item is pending approval.
-
 #### isUploading
 
 Determines whether any upload is currently in progress.
@@ -575,19 +577,6 @@ _Parameters_
 _Returns_
 
 -   `boolean`: Whether any upload is currently in progress.
-
-#### isUploadingByBatchId
-
-Determines whether an upload is currently in progress given a batch ID.
-
-_Parameters_
-
--   _state_ `State`: Upload state.
--   _batchId_ `BatchId`: Batch ID.
-
-_Returns_
-
--   `boolean`: Whether upload is currently in progress for the given batch ID.
 
 #### isUploadingById
 
