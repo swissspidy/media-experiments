@@ -14,23 +14,19 @@ test.describe( 'Block Transforms', () => {
 		admin,
 		page,
 		editor,
-		browserName,
 		pageUtils,
 		draggingUtils,
 	} ) => {
-		test.skip(
-			browserName !== 'chromium',
-			'Drag & drop in PageUtils currently requires CDP'
-		);
-
 		await admin.createNewPost();
 
 		await editor.insertBlock( { name: 'core/paragraph' } );
 
-		const fileName1 = 'garden-adventures.ogg';
-		const filePath1 = join( __dirname, '../assets', fileName1 );
-		const fileName2 = 'japanese-rose.ogg';
-		const filePath2 = join( __dirname, '../assets', fileName2 );
+		const filePath1 = join(
+			__dirname,
+			'../assets',
+			'garden-adventures.ogg'
+		);
+		const filePath2 = join( __dirname, '../assets', 'japanese-rose.ogg' );
 
 		const { dragOver, drop } = await pageUtils.dragFiles( [
 			filePath1,
@@ -67,15 +63,76 @@ test.describe( 'Block Transforms', () => {
 		await expect(
 			editor.canvas.locator( 'role=document[name="Block: Audio"i]' )
 		).toHaveCount( 2 );
+	} );
+
+	test.only( 'uploads mixed files', async ( {
+		admin,
+		page,
+		editor,
+		pageUtils,
+		draggingUtils,
+	} ) => {
+		await admin.createNewPost();
+
+		await editor.insertBlock( { name: 'core/paragraph' } );
+
+		const filePath1 = join(
+			__dirname,
+			'../assets',
+			'garden-adventures.ogg'
+		);
+		const filePath2 = join(
+			__dirname,
+			'../assets',
+			'car-desert-600x338.webm'
+		);
+		const filePath3 = join(
+			__dirname,
+			'../assets',
+			'wordpress-logo-512x512.png'
+		);
+
+		const { dragOver, drop } = await pageUtils.dragFiles( [
+			filePath1,
+			filePath2,
+			filePath3,
+		] );
+
+		await dragOver(
+			editor.canvas.locator( '[data-type="core/paragraph"]' )
+		);
+
+		await expect( draggingUtils.dropZone ).toBeVisible();
+		await expect( draggingUtils.insertionIndicator ).toBeHidden();
+
+		await drop();
 
 		await expect(
 			page
-				.getByRole( 'region', {
-					name: 'Editor settings',
+				.getByRole( 'button', { name: 'Dismiss this notice' } )
+				.filter( {
+					hasText: 'Sorry, this file type is not supported here',
 				} )
-				.getByRole( 'tabpanel', {
-					name: 'Settings',
-				} )
-		).toHaveText( /Mime type: audio\/mpeg/ );
+		).toBeHidden();
+
+		await page.waitForFunction(
+			() =>
+				window.wp.data.select( 'media-experiments/upload' ).getItems()
+					.length === 0,
+			undefined,
+			{
+				timeout: 40000, // Audio transcoding might take longer
+			}
+		);
+
+		await expect(
+			editor.canvas.locator( 'role=document[name="Block: Audio"i]' )
+		).toHaveCount( 1 );
+		await expect(
+			editor.canvas.locator( 'role=document[name="Block: Video"i]' )
+		).toHaveCount( 1 );
+		await expect(
+			editor.canvas.locator( 'role=document[name="Block: Image"i]' )
+		).toHaveCount( 1 );
 	} );
 } );
