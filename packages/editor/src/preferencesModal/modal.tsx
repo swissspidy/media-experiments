@@ -434,10 +434,6 @@ export function Modal() {
 									label: 'WebM',
 									value: 'webm',
 								},
-								{
-									label: 'Ogg',
-									value: 'ogg',
-								},
 							] }
 						/>
 						<FeatureNumberControl

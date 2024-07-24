@@ -14,7 +14,6 @@ export const FFMPEG_SUPPORTED_AUDIO_VIDEO_MIME_TYPES = [
 	'video/MP2T',
 	'video/mp4',
 	'video/mpeg',
-	'video/ogg',
 	'video/quicktime',
 	'video/webm',
 	'video/x-flv',
