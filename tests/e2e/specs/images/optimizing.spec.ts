@@ -247,6 +247,166 @@ test.describe( 'Images', () => {
 		}
 	} );
 
+	test( 'reject an optimization', async ( {
+		admin,
+		page,
+		editor,
+		mediaUtils,
+		browserName,
+	} ) => {
+		// TODO: Investigate.
+		test.skip(
+			browserName === 'webkit',
+			'Works locally but is flaky on CI'
+		);
+
+		await admin.createNewPost();
+
+		// Ensure the initially uploaded PNG is left untouched.
+		await page.evaluate( () => {
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
+					'optimizeOnUpload',
+					false
+				);
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
+					'png_outputFormat',
+					'png'
+				);
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
+					'imageLibrary',
+					'browser'
+				);
+		} );
+
+		await editor.insertBlock( { name: 'core/image' } );
+
+		const imageBlock = editor.canvas.locator(
+			'role=document[name="Block: Image"i]'
+		);
+		await expect( imageBlock ).toBeVisible();
+
+		await mediaUtils.upload(
+			imageBlock.locator( 'data-testid=form-file-upload-input' ),
+			'wordpress-logo-512x512.png'
+		);
+
+		await page.waitForFunction(
+			() =>
+				window.wp.data.select( 'media-experiments/upload' ).getItems()
+					.length === 0
+		);
+
+		const settingsPanel = page
+			.getByRole( 'region', {
+				name: 'Editor settings',
+			} )
+			.getByRole( 'tabpanel', {
+				name: 'Settings',
+			} );
+
+		await expect( settingsPanel ).toHaveText( /Mime type: image\/png/ );
+		await expect( settingsPanel.getByLabel( '#696969' ) ).toBeVisible();
+		await expect( page.locator( 'css=[data-blurhash]' ) ).toBeVisible();
+
+		await page.evaluate( () => {
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
+					'optimizeOnUpload',
+					true
+				);
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
+					'png_outputFormat',
+					'jpeg'
+				);
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
+					'imageLibrary',
+					'browser'
+				);
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
+					'requireApproval',
+					true
+				);
+		} );
+
+		await page
+			.getByRole( 'region', { name: 'Editor settings' } )
+			.getByRole( 'button', { name: 'Optimize' } )
+			.click();
+
+		await expect(
+			page
+				.getByRole( 'button', { name: 'Dismiss this notice' } )
+				.filter( {
+					hasText: 'There was an error optimizing the file',
+				} )
+		).toBeHidden();
+
+		await page.waitForFunction(
+			() =>
+				window.wp.data
+					.select( 'media-experiments/upload' )
+					.isPendingApproval(),
+			undefined,
+			{
+				timeout: 30000, // Transcoding might take longer
+			}
+		);
+
+		const dialog = page.getByRole( 'dialog', {
+			name: 'Compare media quality',
+		} );
+
+		await expect( dialog ).toBeVisible();
+
+		await dialog.getByRole( 'button', { name: 'Cancel' } ).click();
+
+		await page.waitForFunction(
+			() =>
+				window.wp.data.select( 'media-experiments/upload' ).getItems()
+					.length === 0,
+			undefined,
+			{
+				timeout: 30000, // Transcoding might take longer
+			}
+		);
+
+		await expect(
+			page
+				.getByRole( 'button', { name: 'Dismiss this notice' } )
+				.filter( {
+					hasText: 'File upload was cancelled',
+				} )
+		).toBeVisible();
+
+		await expect( settingsPanel ).toHaveText( /Mime type: image\/png/ );
+
+		await expect(
+			page
+				.getByRole( 'region', { name: 'Editor settings' } )
+				.getByRole( 'button', { name: 'Optimize' } )
+		).toBeVisible();
+	} );
+
 	test.describe( 'optimizes a file on upload', () => {
 		for ( const {
 			outputFormat,
