@@ -4,7 +4,6 @@ import type { FFmpeg } from '@ffmpeg/ffmpeg';
 
 const VIDEO_CODEC: Record< string, string > = {
 	'video/mp4': 'libx264', // H.264
-	'video/ogg': 'libtheora',
 	'video/webm': 'libvpx-vp9',
 };
 

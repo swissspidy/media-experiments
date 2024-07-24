@@ -1967,32 +1967,16 @@ export function optimizeVideoItem( id: QueueItemId ) {
 			.get( PREFERENCES_NAME, 'bigVideoSizeThreshold' );
 
 		try {
-			let file: File;
 			const { transcodeVideo } = await import(
 				/* webpackChunkName: 'ffmpeg' */ '@mexp/ffmpeg'
 			);
 
-			switch ( outputFormat ) {
-				case 'ogg':
-					file = await transcodeVideo(
-						item.file,
-						getFileBasename( item.file.name ),
-						'video/ogg',
-						videoSizeThreshold
-					);
-					break;
-
-				case 'mp4':
-				case 'webm':
-				default:
-					file = await transcodeVideo(
-						item.file,
-						getFileBasename( item.file.name ),
-						`video/${ outputFormat }`,
-						videoSizeThreshold
-					);
-					break;
-			}
+			const file = await transcodeVideo(
+				item.file,
+				getFileBasename( item.file.name ),
+				`video/${ outputFormat }`,
+				videoSizeThreshold
+			);
 
 			const blobUrl = createBlobURL( file );
 			dispatch< CacheBlobUrlAction >( {
@@ -2154,32 +2138,16 @@ export function convertGifItem( id: QueueItemId ) {
 			.get( PREFERENCES_NAME, 'bigVideoSizeThreshold' );
 
 		try {
-			let file: File;
 			const { convertGifToVideo } = await import(
 				/* webpackChunkName: 'ffmpeg' */ '@mexp/ffmpeg'
 			);
 
-			switch ( outputFormat ) {
-				case 'ogg':
-					file = await convertGifToVideo(
-						item.file,
-						getFileBasename( item.file.name ),
-						'video/ogg',
-						videoSizeThreshold
-					);
-					break;
-
-				case 'mp4':
-				case 'webm':
-				default:
-					file = await convertGifToVideo(
-						item.file,
-						getFileBasename( item.file.name ),
-						`video/${ outputFormat }`,
-						videoSizeThreshold
-					);
-					break;
-			}
+			const file = await convertGifToVideo(
+				item.file,
+				getFileBasename( item.file.name ),
+				`video/${ outputFormat }`,
+				videoSizeThreshold
+			);
 
 			const blobUrl = createBlobURL( file );
 			dispatch< CacheBlobUrlAction >( {

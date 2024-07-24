@@ -255,7 +255,7 @@ export type ImageLibrary = 'browser' | 'vips';
 
 export type ImageFormat = 'jpeg' | 'webp' | 'avif' | 'png' | 'gif';
 
-export type VideoFormat = 'mp4' | 'webm' | 'ogg';
+export type VideoFormat = 'mp4' | 'webm';
 
 export type AudioFormat = 'mp3' | 'ogg';
 
