@@ -243,6 +243,7 @@ describe( 'actions', () => {
 							{ requireApproval: undefined },
 						],
 						OperationType.Upload,
+						OperationType.ThumbnailGeneration,
 					],
 				} )
 			);
