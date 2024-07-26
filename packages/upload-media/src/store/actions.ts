@@ -1970,7 +1970,10 @@ type OptimizeVideoItemArgs = OperationArgs[ OperationType.TranscodeVideo ];
  * @param id     Item ID.
  * @param [args] Additional arguments for the operation.
  */
-export function optimizeVideoItem( id: QueueItemId, args?: OptimizeVideoItemArgs ) {
+export function optimizeVideoItem(
+	id: QueueItemId,
+	args?: OptimizeVideoItemArgs
+) {
 	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
 
