@@ -778,6 +778,7 @@ export function optimizeExistingItem( {
 					],
 					[ OperationType.Compress, { requireApproval } ],
 					OperationType.Upload,
+					OperationType.ThumbnailGeneration,
 				],
 				generatedPosterId,
 				abortController,
