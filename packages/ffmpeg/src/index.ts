@@ -49,10 +49,7 @@ const FFMPEG_CONFIG = {
 
 const ffmpegCoreUrl = FFMPEG_CDN_URL;
 
-const isDevelopment =
-	typeof process !== 'undefined' &&
-	process.env &&
-	process.env.NODE_ENV !== 'production';
+const isDevelopment = typeof SCRIPT_DEBUG !== 'undefined' && SCRIPT_DEBUG;
 
 function readFile( file: File ): Promise< Uint8Array > {
 	const reader = new FileReader();
