@@ -160,6 +160,11 @@ export async function convertImageFormat(
 		saveOptions.interlace = interlaced;
 	}
 
+	// See https://github.com/swissspidy/media-experiments/issues/324.
+	if ( 'image/avif' === outputType ) {
+		saveOptions.effort = 2;
+	}
+
 	const outBuffer = image.writeToBuffer( `.${ ext }`, saveOptions );
 	const result = outBuffer.buffer;
 

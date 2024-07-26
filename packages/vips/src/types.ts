@@ -116,6 +116,13 @@ export type SaveOptions< T extends string > = {
 	 * Do not provide for any other type!
 	 */
 	lossless?: T extends 'image/gif' ? never : boolean;
+	/**
+	 * CPU effort / encoding speed.
+	 *
+	 * While supported by other encoders as well,
+	 * it is most relevant for AVIF, as it is slow by default.
+	 */
+	effort?: number;
 };
 
 export type ThumbnailOptions = {
