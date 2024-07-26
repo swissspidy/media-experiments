@@ -49,10 +49,7 @@ const FFMPEG_CONFIG = {
 
 const ffmpegCoreUrl = FFMPEG_CDN_URL;
 
-const isDevelopment =
-	typeof process !== 'undefined' &&
-	process.env &&
-	process.env.NODE_ENV !== 'production';
+const isDevelopment = typeof SCRIPT_DEBUG !== 'undefined' && SCRIPT_DEBUG;
 
 function readFile( file: File ): Promise< Uint8Array > {
 	const reader = new FileReader();
@@ -123,14 +120,18 @@ async function runFFmpegWithConfig(
 		// Delete file in MEMFS to free memory.
 		ffmpeg.FS( 'unlink', tempFileName );
 
+		// TODO: Consider using ffmpeg.setLogger() and look for messages such as "Decoder (codec av1) not found for input stream".
+		// Allows throwing with more detailed error message.
+		if ( ! data.buffer.byteLength ) {
+			throw new Error( `File ${ fileName } could not be processed` );
+		}
+
 		return new File(
 			[ new Blob( [ data.buffer ], { type: mimeType } ) ],
 			fileName,
 			{ type: mimeType }
 		);
 	} catch ( err ) {
-		// eslint-disable-next-line no-console -- We want to surface this error.
-		console.error( err );
 		throw err;
 	} finally {
 		try {

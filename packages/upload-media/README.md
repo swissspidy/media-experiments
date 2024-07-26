@@ -254,6 +254,7 @@ Optimizes/Compresses an existing video item.
 _Parameters_
 
 -   _id_ `QueueItemId`: Item ID.
+-   _args_ `[OptimizeVideoItemArgs]`: Additional arguments for the operation.
 
 #### pauseQueue
 

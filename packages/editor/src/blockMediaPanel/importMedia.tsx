@@ -6,7 +6,8 @@ import {
 import { useDispatch, useSelect } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
 import { isBlobURL } from '@wordpress/blob';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
+import { store as noticesStore } from '@wordpress/notices';
 
 import type { Attachment } from '@mexp/media-utils';
 import { store as uploadStore } from '@mexp/upload-media';
@@ -22,6 +23,7 @@ export function ImportMedia( { url, onChange }: ImportMediaProps ) {
 	const { baseControlProps, controlProps } = useBaseControlProps( {} );
 
 	const { addItemFromUrl } = useDispatch( uploadStore );
+	const { createErrorNotice } = useDispatch( noticesStore );
 	const isUploading = useIsUploadingByUrl( url );
 	const currentPostId = useSelect(
 		( select ) => select( editorStore ).getCurrentPostId(),
@@ -36,6 +38,21 @@ export function ImportMedia( { url, onChange }: ImportMediaProps ) {
 		void addItemFromUrl( {
 			url,
 			onChange: ( [ media ] ) => onChange( media ),
+			onError: ( err: Error ) => {
+				void createErrorNotice(
+					sprintf(
+						/* translators: %s: error message */
+						__(
+							'There was an error importing the file: %s',
+							'media-experiments'
+						),
+						err.message
+					),
+					{
+						type: 'snackbar',
+					}
+				);
+			},
 			additionalData: {
 				post: currentPostId,
 				mexp_media_source:

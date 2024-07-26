@@ -197,6 +197,7 @@ export enum ItemStatus {
 }
 
 export enum OperationType {
+	Prepare = 'PREPARE',
 	AddPoster = 'ADD_POSTER',
 	UploadPoster = 'UPLOAD_POSTER',
 	UploadOriginal = 'UPLOAD_ORIGINAL',
@@ -231,6 +232,7 @@ export type OperationArgs = {
 		interlaced?: boolean;
 	};
 	[ OperationType.ResizeCrop ]: { resize?: ImageSizeCrop };
+	[ OperationType.TranscodeVideo ]: { continueOnError?: true };
 };
 
 type OperationWithArgs< T extends keyof OperationArgs = keyof OperationArgs > =

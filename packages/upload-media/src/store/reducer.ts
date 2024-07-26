@@ -151,8 +151,8 @@ function reducer(
 					return {
 						...item,
 						operations: [
-							...action.operations,
 							...( item.operations || [] ),
+							...action.operations,
 						],
 					};
 				} ),
@@ -176,9 +176,6 @@ function reducer(
 							? {
 									...item.attachment,
 									...action.item.attachment,
-									// TODO: Update to pass this correctly.
-									// url: action.item?.url,
-									// mimeType: action.item?.file?.type,
 							  }
 							: undefined;
 

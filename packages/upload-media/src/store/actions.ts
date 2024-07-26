@@ -229,12 +229,17 @@ export function addItem( {
 
 		const itemId = uuidv4();
 
-		const blobUrl = createBlobURL( file );
-		dispatch< CacheBlobUrlAction >( {
-			type: Type.CacheBlobUrl,
-			id: itemId,
-			blobUrl,
-		} );
+		let blobUrl;
+
+		// StubFile could be coming from addItemFromUrl().
+		if ( ! ( file instanceof StubFile ) ) {
+			blobUrl = createBlobURL( file );
+			dispatch< CacheBlobUrlAction >( {
+				type: Type.CacheBlobUrl,
+				id: itemId,
+				blobUrl,
+			} );
+		}
 
 		dispatch< AddAction >( {
 			type: Type.Add,
@@ -260,11 +265,13 @@ export function addItem( {
 				blurHash,
 				dominantColor,
 				abortController: abortController || new AbortController(),
-				operations,
+				operations: Array.isArray( operations )
+					? operations
+					: [ OperationType.Prepare ],
 			},
 		} );
 
-		dispatch.prepareItem( itemId );
+		dispatch.processItem( itemId );
 	};
 }
 
@@ -349,8 +356,8 @@ export function addItemFromUrl( {
 			sourceUrl: url,
 			operations: [
 				[ OperationType.FetchRemoteFile, { url, fileName } ],
-				OperationType.AddPoster,
-				OperationType.Upload,
+				// This will add the next steps, such as compression, poster generation, and upload.
+				OperationType.Prepare,
 			],
 		} );
 	};
@@ -402,12 +409,14 @@ export function addSideloadItem( {
 					...additionalData,
 				},
 				parentId,
-				operations,
+				operations: Array.isArray( operations )
+					? operations
+					: [ OperationType.Prepare ],
 				abortController: new AbortController(),
 			},
 		} );
 
-		dispatch.prepareItem( itemId );
+		dispatch.processItem( itemId );
 	};
 }
 
@@ -505,7 +514,7 @@ export function muteExistingVideo( {
 			},
 		} );
 
-		dispatch.prepareItem( itemId );
+		dispatch.processItem( itemId );
 	};
 }
 
@@ -576,7 +585,7 @@ export function addSubtitlesForExistingVideo( {
 			},
 		} );
 
-		dispatch.prepareItem( itemId );
+		dispatch.processItem( itemId );
 	};
 }
 
@@ -640,7 +649,7 @@ export function addPosterForExistingVideo( {
 			},
 		} );
 
-		dispatch.prepareItem( itemId );
+		dispatch.processItem( itemId );
 	};
 }
 
@@ -776,7 +785,7 @@ export function optimizeExistingItem( {
 			},
 		} );
 
-		dispatch.prepareItem( itemId );
+		dispatch.processItem( itemId );
 	};
 }
 
@@ -903,6 +912,10 @@ export function processItem( id: QueueItemId ) {
 		} );
 
 		switch ( operation ) {
+			case OperationType.Prepare:
+				dispatch.prepareItem( item.id );
+				break;
+
 			case OperationType.ResizeCrop:
 				dispatch.resizeCropItem(
 					item.id,
@@ -923,7 +936,10 @@ export function processItem( id: QueueItemId ) {
 				break;
 
 			case OperationType.TranscodeVideo:
-				dispatch.optimizeVideoItem( item.id );
+				dispatch.optimizeVideoItem(
+					item.id,
+					operationArgs as OperationArgs[ OperationType.TranscodeVideo ]
+				);
 				break;
 
 			case OperationType.MuteVideo:
@@ -1104,13 +1120,19 @@ export function addPosterForItem( id: QueueItemId ) {
 		try {
 			switch ( mediaType ) {
 				case 'video':
-					const src = createBlobURL( item.file );
+					let src = isBlobURL( item.attachment?.url )
+						? item.attachment?.url
+						: undefined;
 
-					dispatch< CacheBlobUrlAction >( {
-						type: Type.CacheBlobUrl,
-						id,
-						blobUrl: src,
-					} );
+					if ( ! src ) {
+						src = createBlobURL( item.file );
+
+						dispatch< CacheBlobUrlAction >( {
+							type: Type.CacheBlobUrl,
+							id,
+							blobUrl: src,
+						} );
+					}
 
 					const poster = await getPosterFromVideo(
 						src,
@@ -1128,6 +1150,7 @@ export function addPosterForItem( id: QueueItemId ) {
 					dispatch.finishOperation( id, {
 						poster,
 						attachment: {
+							url: item.attachment?.url || src,
 							poster: posterUrl,
 						},
 					} );
@@ -1222,15 +1245,6 @@ export function prepareItem( id: QueueItemId ) {
 
 		const { file } = item;
 
-		// TODO: Check canTranscode either here, in muteExistingVideo, or in the UI.
-
-		// Transcoding type has already been set, e.g. via muteExistingVideo() or addSideloadItem().
-		// Also allow empty arrays, useful for example when sideloading original image.
-		if ( item.operations !== undefined ) {
-			dispatch.processItem( id );
-			return;
-		}
-
 		const mediaType = getMediaTypeFromMimeType( file.type );
 
 		const operations: Operation[] = [];
@@ -1320,7 +1334,11 @@ export function prepareItem( id: QueueItemId ) {
 					window.crossOriginIsolated &&
 					canProcessWithFFmpeg( file )
 				) {
-					operations.push( OperationType.TranscodeVideo );
+					operations.push( [
+						OperationType.TranscodeVideo,
+						// Don't make a fuzz if video cannot be transcoded.
+						{ continueOnError: true },
+					] );
 				}
 
 				operations.push(
@@ -1365,7 +1383,7 @@ export function prepareItem( id: QueueItemId ) {
 			operations,
 		} );
 
-		dispatch.processItem( id );
+		dispatch.finishOperation( id, {} );
 	};
 }
 
@@ -1442,14 +1460,16 @@ export function uploadPoster( id: QueueItemId ) {
 							return;
 						}
 
-						// Video block expects such a structure for the poster.
-						// https://github.com/WordPress/gutenberg/blob/e0a413d213a2a829ece52c6728515b10b0154d8d/packages/block-library/src/video/edit.js#L154
 						// TODO: Pass poster ID as well so that the video block can update `featured_media` via the REST API.
 						const updatedAttachment = {
 							...attachment,
+							// Video block expects such a structure for the poster.
+							// https://github.com/WordPress/gutenberg/blob/e0a413d213a2a829ece52c6728515b10b0154d8d/packages/block-library/src/video/edit.js#L154
 							image: {
 								src: posterAttachment.url,
 							},
+							// Expected by ImportMedia / addItemFromUrl()
+							poster: posterAttachment.url,
 						};
 
 						// This might be confusing, but the idea is to update the original
@@ -1948,12 +1968,18 @@ export function optimizeImageItem(
 	};
 }
 
+type OptimizeVideoItemArgs = OperationArgs[ OperationType.TranscodeVideo ];
+
 /**
  * Optimizes/Compresses an existing video item.
  *
- * @param id Item ID.
+ * @param id     Item ID.
+ * @param [args] Additional arguments for the operation.
  */
-export function optimizeVideoItem( id: QueueItemId ) {
+export function optimizeVideoItem(
+	id: QueueItemId,
+	args?: OptimizeVideoItemArgs
+) {
 	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
 
@@ -1992,6 +2018,11 @@ export function optimizeVideoItem( id: QueueItemId ) {
 				},
 			} );
 		} catch ( error ) {
+			if ( args?.continueOnError ) {
+				dispatch.finishOperation( id, {} );
+				return;
+			}
+
 			dispatch.cancelItem(
 				id,
 				error instanceof Error
