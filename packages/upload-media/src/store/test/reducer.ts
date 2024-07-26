@@ -246,7 +246,7 @@ describe( 'reducer', () => {
 	} );
 
 	describe( `${ Type.AddOperations }`, () => {
-		it( 'prepends operations to the list', () => {
+		it( 'appends operations to the list', () => {
 			const initialState: State = {
 				imageSizes: {},
 				queueStatus: 'active',
@@ -282,9 +282,9 @@ describe( 'reducer', () => {
 						id: '1',
 						status: ItemStatus.Processing,
 						operations: [
+							OperationType.Upload,
 							OperationType.Compress,
 							OperationType.AddPoster,
-							OperationType.Upload,
 						],
 					},
 				],
