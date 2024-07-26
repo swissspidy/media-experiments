@@ -936,7 +936,10 @@ export function processItem( id: QueueItemId ) {
 				break;
 
 			case OperationType.TranscodeVideo:
-				dispatch.optimizeVideoItem( item.id );
+				dispatch.optimizeVideoItem(
+					item.id,
+					operationArgs as OperationArgs[ OperationType.TranscodeVideo ]
+				);
 				break;
 
 			case OperationType.MuteVideo:
@@ -1331,7 +1334,11 @@ export function prepareItem( id: QueueItemId ) {
 					window.crossOriginIsolated &&
 					canProcessWithFFmpeg( file )
 				) {
-					operations.push( OperationType.TranscodeVideo );
+					operations.push( [
+						OperationType.TranscodeVideo,
+						// Don't make a fuzz if video cannot be transcoded.
+						{ continueOnError: true },
+					] );
 				}
 
 				operations.push(
@@ -1959,12 +1966,15 @@ export function optimizeImageItem(
 	};
 }
 
+type OptimizeVideoItemArgs = OperationArgs[ OperationType.TranscodeVideo ];
+
 /**
  * Optimizes/Compresses an existing video item.
  *
- * @param id Item ID.
+ * @param id     Item ID.
+ * @param [args] Additional arguments for the operation.
  */
-export function optimizeVideoItem( id: QueueItemId ) {
+export function optimizeVideoItem( id: QueueItemId, args?: OptimizeVideoItemArgs ) {
 	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
 
@@ -2003,6 +2013,11 @@ export function optimizeVideoItem( id: QueueItemId ) {
 				},
 			} );
 		} catch ( error ) {
+			if ( args?.continueOnError ) {
+				dispatch.finishOperation( id, {} );
+				return;
+			}
+
 			dispatch.cancelItem(
 				id,
 				error instanceof Error
