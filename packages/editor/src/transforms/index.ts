@@ -8,7 +8,6 @@ type Writable< T > = { -readonly [ P in keyof T ]: Writable< T[ P ] > };
 
 type FilterableBlock = Writable< Block >;
 
-// TODO: Prevent incorrect 'If uploading to a gallery all files need to be image formats' snackbar from image block.
 function addMultiFileTransformToBlock(
 	settings: FilterableBlock,
 	name: string
@@ -20,6 +19,14 @@ function addMultiFileTransformToBlock(
 			if ( ! settings.transforms || ! settings.transforms.from ) {
 				return;
 			}
+
+			// Prevent incorrect 'If uploading to a gallery all files need to be image formats' snackbar from image block.
+			if ( 'core/image' === name ) {
+				settings.transforms.from = settings.transforms.from.filter(
+					( transform ) => transform.type !== 'files'
+				);
+			}
+
 			settings.transforms.from.unshift( {
 				type: 'files',
 				// Higher than the default priority of 10, so that this is picked up
