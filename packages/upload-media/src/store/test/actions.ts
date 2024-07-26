@@ -138,7 +138,7 @@ describe( 'actions', () => {
 					sourceFile: expect.any( File ),
 					status: ItemStatus.Processing,
 					attachment: {
-						url: expect.stringMatching( /^blob:/ ),
+						url: undefined,
 					},
 					operations: [
 						[
