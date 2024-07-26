@@ -1460,14 +1460,10 @@ export function uploadPoster( id: QueueItemId ) {
 							return;
 						}
 
-						// Video block expects such a structure for the poster.
-						// https://github.com/WordPress/gutenberg/blob/e0a413d213a2a829ece52c6728515b10b0154d8d/packages/block-library/src/video/edit.js#L154
 						// TODO: Pass poster ID as well so that the video block can update `featured_media` via the REST API.
 						const updatedAttachment = {
 							...attachment,
-							image: {
-								src: posterAttachment.url,
-							},
+							poster: posterAttachment.url,
 						};
 
 						// This might be confusing, but the idea is to update the original
