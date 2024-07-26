@@ -148,8 +148,7 @@ describe( 'actions', () => {
 								fileName: 'example.jpg',
 							},
 						],
-						OperationType.AddPoster,
-						OperationType.Upload,
+						OperationType.Prepare,
 					],
 				} )
 			);
