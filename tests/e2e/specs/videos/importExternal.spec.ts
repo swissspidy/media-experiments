@@ -58,6 +58,13 @@ test.describe( 'Videos', () => {
 
 		expect( src ).toMatch( /\/wp-content\/uploads\// );
 
+		const blockAttributes = await page.evaluate(
+			() =>
+				window.wp.data.select( 'core/block-editor' ).getSelectedBlock()
+					?.attributes ?? {}
+		);
+		await expect( blockAttributes.poster ).toMatch( /-poster\.jpeg$/ );
+
 		// TODO: Check why mime type is not consistent.
 		await expect( settingsPanel ).toHaveText(
 			/Mime type: video\/(mp4|webm)/
