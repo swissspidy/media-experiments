@@ -229,12 +229,17 @@ export function addItem( {
 
 		const itemId = uuidv4();
 
-		const blobUrl = createBlobURL( file );
-		dispatch< CacheBlobUrlAction >( {
-			type: Type.CacheBlobUrl,
-			id: itemId,
-			blobUrl,
-		} );
+		let blobUrl;
+
+		// StubFile could be coming from addItemFromUrl().
+		if ( ! ( file instanceof StubFile ) ) {
+			blobUrl = createBlobURL( file );
+			dispatch< CacheBlobUrlAction >( {
+				type: Type.CacheBlobUrl,
+				id: itemId,
+				blobUrl,
+			} );
+		}
 
 		dispatch< AddAction >( {
 			type: Type.Add,
@@ -1112,13 +1117,19 @@ export function addPosterForItem( id: QueueItemId ) {
 		try {
 			switch ( mediaType ) {
 				case 'video':
-					const src = createBlobURL( item.file );
+					let src = isBlobURL( item.attachment?.url )
+						? item.attachment?.url
+						: undefined;
 
-					dispatch< CacheBlobUrlAction >( {
-						type: Type.CacheBlobUrl,
-						id,
-						blobUrl: src,
-					} );
+					if ( ! src ) {
+						src = createBlobURL( item.file );
+
+						dispatch< CacheBlobUrlAction >( {
+							type: Type.CacheBlobUrl,
+							id,
+							blobUrl: src,
+						} );
+					}
 
 					const poster = await getPosterFromVideo(
 						src,
@@ -1136,6 +1147,7 @@ export function addPosterForItem( id: QueueItemId ) {
 					dispatch.finishOperation( id, {
 						poster,
 						attachment: {
+							url: item.attachment?.url || src,
 							poster: posterUrl,
 						},
 					} );
