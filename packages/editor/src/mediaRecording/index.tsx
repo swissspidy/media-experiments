@@ -114,7 +114,7 @@ function Recorder() {
 		error,
 		liveStream,
 		url,
-		recordingType,
+		recordingTypes,
 		mediaType,
 		dimensions,
 		isGifMode,
@@ -128,7 +128,7 @@ function Recorder() {
 			status: select( recordingStore ).getRecordingStatus(),
 			error: select( recordingStore ).getError(),
 			liveStream: select( recordingStore ).getMediaStream(),
-			recordingType: select( recordingStore ).getRecordingType(),
+			recordingTypes: select( recordingStore ).getRecordingTypes(),
 			mediaType: file ? getMediaTypeFromMimeType( file.type ) : null,
 			url: select( recordingStore ).getUrl(),
 			dimensions: select( recordingStore ).getDimensions(),
@@ -202,7 +202,7 @@ function Recorder() {
 			<div className="mexp-recording__wrapper">
 				<Countdown />
 				<OverlayText />
-				{ 'audio' === recordingType ? (
+				{ recordingTypes.includes( 'audio' ) ? (
 					<AudioAnalyzer source={ liveStream } />
 				) : (
 					<video

@@ -7,7 +7,7 @@ export interface State {
 	audioInput?: string;
 	videoEffect: VideoEffect;
 	blockClientId?: string;
-	recordingType: RecordingType;
+	recordingTypes: RecordingType[];
 	devices: MediaDeviceInfo[];
 	hasAudio: boolean;
 	isGifMode: boolean;
@@ -76,7 +76,7 @@ export enum Type {
 export type UnknownAction = Action< Type.Unknown >;
 export type EnterRecordingModeAction = Action<
 	Type.EnterRecordingMode,
-	{ clientId: string; recordingType: string }
+	{ clientId: string; recordingTypes: RecordingType[] }
 >;
 export type LeaveRecordingModeAction = Action< Type.LeaveRecordingMode >;
 export type SetMediaDevicesAction = Action<

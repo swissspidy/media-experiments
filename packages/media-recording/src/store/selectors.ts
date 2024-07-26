@@ -28,12 +28,12 @@ export function isBlockInRecordingMode(
 }
 
 /**
- * Returns the current recording media type.
+ * Returns the current recording media types.
  *
  * @param state Recording state.
  */
-export function getRecordingType( state: State ): RecordingType {
-	return state.recordingType;
+export function getRecordingTypes( state: State ): RecordingType[] {
+	return state.recordingTypes;
 }
 
 /**
@@ -60,7 +60,10 @@ export function isGifMode( state: State ): boolean {
  * @param state Recording state.
  */
 export function hasVideo( state: State ): boolean {
-	return state.recordingType !== 'audio';
+	return (
+		state.recordingTypes.includes( 'video' ) ||
+		state.recordingTypes.includes( 'image' )
+	);
 }
 
 /**

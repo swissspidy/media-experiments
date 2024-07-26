@@ -147,20 +147,18 @@ export function toggleHasAudio(): ToggleHasAudioAction {
 /**
  * Enters recording mode for a given block and recording type.
  *
- * @todo Allow passing an array for recordingType. (#230)
- *
- * @param clientId      Block client ID.
- * @param recordingType Recording type.
+ * @param clientId       Block client ID.
+ * @param recordingTypes Recording types.
  */
 export function enterRecordingMode(
 	clientId: string,
-	recordingType = 'video'
+	recordingTypes = [ 'video' ]
 ) {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
 		dispatch( {
 			type: Type.EnterRecordingMode,
 			clientId,
-			recordingType,
+			recordingTypes,
 		} );
 
 		dispatch.invalidateResolutionForStoreSelector( 'getMediaStream' );

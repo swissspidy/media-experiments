@@ -1,7 +1,7 @@
 import {
 	getAudioInput,
 	getDevices,
-	getRecordingType,
+	getRecordingTypes,
 	getVideoEffect,
 	getVideoInput,
 	hasAudio,
@@ -17,7 +17,7 @@ const defaultState: State = {
 	audioInput: undefined,
 	videoEffect: 'none',
 	blockClientId: undefined,
-	recordingType: 'video',
+	recordingTypes: [ 'video' ],
 	devices: [],
 	hasAudio: true,
 	isGifMode: false,
@@ -54,9 +54,9 @@ describe( 'selectors', () => {
 		} );
 	} );
 
-	describe( 'getRecordingType', () => {
+	describe( 'getRecordingTypes', () => {
 		it( 'should return video by default', () => {
-			expect( getRecordingType( defaultState ) ).toBe( 'video' );
+			expect( getRecordingTypes( defaultState ) ).toBe( [ 'video' ] );
 		} );
 	} );
 
