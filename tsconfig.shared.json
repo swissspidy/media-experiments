@@ -31,8 +31,5 @@
 		"typeRoots": [ "./@types", "./node_modules/@types" ],
 		"types": [ "jest", "node" ]
 	},
-	"exclude": [
-		"packages/*/dist-types/**",
-		"packages/*/dist/**"
-	]
+	"exclude": [ "packages/*/dist-types/**", "packages/*/dist/**" ]
 }
