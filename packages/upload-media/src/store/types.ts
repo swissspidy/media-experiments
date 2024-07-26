@@ -197,6 +197,7 @@ export enum ItemStatus {
 }
 
 export enum OperationType {
+	Prepare = 'PREPARE',
 	AddPoster = 'ADD_POSTER',
 	UploadPoster = 'UPLOAD_POSTER',
 	UploadOriginal = 'UPLOAD_ORIGINAL',

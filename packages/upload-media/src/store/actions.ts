@@ -260,11 +260,13 @@ export function addItem( {
 				blurHash,
 				dominantColor,
 				abortController: abortController || new AbortController(),
-				operations,
+				operations: Array.isArray( operations )
+					? operations
+					: [ OperationType.Prepare ],
 			},
 		} );
 
-		dispatch.prepareItem( itemId );
+		dispatch.processItem( itemId );
 	};
 }
 
@@ -349,8 +351,8 @@ export function addItemFromUrl( {
 			sourceUrl: url,
 			operations: [
 				[ OperationType.FetchRemoteFile, { url, fileName } ],
-				OperationType.AddPoster,
-				OperationType.Upload,
+				// This will add the next steps, such as compression, poster generation, and upload.
+				OperationType.Prepare,
 			],
 		} );
 	};
@@ -402,12 +404,14 @@ export function addSideloadItem( {
 					...additionalData,
 				},
 				parentId,
-				operations,
+				operations: Array.isArray( operations )
+					? operations
+					: [ OperationType.Prepare ],
 				abortController: new AbortController(),
 			},
 		} );
 
-		dispatch.prepareItem( itemId );
+		dispatch.processItem( itemId );
 	};
 }
 
@@ -505,7 +509,7 @@ export function muteExistingVideo( {
 			},
 		} );
 
-		dispatch.prepareItem( itemId );
+		dispatch.processItem( itemId );
 	};
 }
 
@@ -576,7 +580,7 @@ export function addSubtitlesForExistingVideo( {
 			},
 		} );
 
-		dispatch.prepareItem( itemId );
+		dispatch.processItem( itemId );
 	};
 }
 
@@ -640,7 +644,7 @@ export function addPosterForExistingVideo( {
 			},
 		} );
 
-		dispatch.prepareItem( itemId );
+		dispatch.processItem( itemId );
 	};
 }
 
@@ -776,7 +780,7 @@ export function optimizeExistingItem( {
 			},
 		} );
 
-		dispatch.prepareItem( itemId );
+		dispatch.processItem( itemId );
 	};
 }
 
@@ -903,6 +907,10 @@ export function processItem( id: QueueItemId ) {
 		} );
 
 		switch ( operation ) {
+			case OperationType.Prepare:
+				dispatch.prepareItem( item.id );
+				break;
+
 			case OperationType.ResizeCrop:
 				dispatch.resizeCropItem(
 					item.id,
@@ -1222,15 +1230,6 @@ export function prepareItem( id: QueueItemId ) {
 
 		const { file } = item;
 
-		// TODO: Check canTranscode either here, in muteExistingVideo, or in the UI.
-
-		// Transcoding type has already been set, e.g. via muteExistingVideo() or addSideloadItem().
-		// Also allow empty arrays, useful for example when sideloading original image.
-		if ( item.operations !== undefined ) {
-			dispatch.processItem( id );
-			return;
-		}
-
 		const mediaType = getMediaTypeFromMimeType( file.type );
 
 		const operations: Operation[] = [];
@@ -1365,7 +1364,7 @@ export function prepareItem( id: QueueItemId ) {
 			operations,
 		} );
 
-		dispatch.processItem( id );
+		dispatch.finishOperation( id, {} );
 	};
 }
 
