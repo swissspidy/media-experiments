@@ -1,0 +1,78 @@
+diff --git a/node_modules/@wordpress/core-data/build-types/actions.d.ts b/node_modules/@wordpress/core-data/build-types/actions.d.ts
+index deed8c7..c5ad95b 100644
+--- a/node_modules/@wordpress/core-data/build-types/actions.d.ts
++++ b/node_modules/@wordpress/core-data/build-types/actions.d.ts
+@@ -176,13 +176,13 @@ export function receiveNavigationFallbackId(fallbackId: integer): any;
+  * @return {Object} Action object.
+  */
+ export function receiveDefaultTemplateId(query: any, templateId: string): any;
+-export function deleteEntityRecord(kind: string, name: string, recordId: string, query: any | null, { __unstableFetch, throwOnError }?: {
++export function deleteEntityRecord(kind: string, name: string, recordId: string | number, query: any | null, { __unstableFetch, throwOnError }?: {
+     __unstableFetch?: Function | undefined;
+     throwOnError?: boolean | undefined;
+ } | undefined): ({ dispatch }: {
+     dispatch: any;
+ }) => Promise<boolean | undefined>;
+-export function editEntityRecord(kind: string, name: string, recordId: number | string, edits: any, options?: {
++export function editEntityRecord(kind: string, name: string, recordId: number | string | undefined, edits: any, options?: {
+     undoIgnore?: boolean | undefined;
+ }): any;
+ export function undo(): ({ select, dispatch }: {
+diff --git a/node_modules/@wordpress/core-data/build-types/hooks/use-entity-prop.d.ts b/node_modules/@wordpress/core-data/build-types/hooks/use-entity-prop.d.ts
+index 44b7e32..c8293bf 100644
+--- a/node_modules/@wordpress/core-data/build-types/hooks/use-entity-prop.d.ts
++++ b/node_modules/@wordpress/core-data/build-types/hooks/use-entity-prop.d.ts
+@@ -15,5 +15,5 @@
+  * 							  information like `raw`, `rendered` and
+  * 							  `protected` props.
+  */
+-export default function useEntityProp(kind: string, name: string, prop: string, _id?: string | undefined): [any, Function, any];
++export default function useEntityProp(kind: string, name: string, prop: string, _id?: string | number | undefined): [any, Function, any];
+ //# sourceMappingURL=use-entity-prop.d.ts.map
+diff --git a/node_modules/@wordpress/core-data/build-types/index.d.ts b/node_modules/@wordpress/core-data/build-types/index.d.ts
+index a29e9e2..57b42ab 100644
+--- a/node_modules/@wordpress/core-data/build-types/index.d.ts
++++ b/node_modules/@wordpress/core-data/build-types/index.d.ts
+@@ -24,13 +24,13 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
+     receiveAutosaves(postId: number, autosaves: any[] | any): any;
+     receiveNavigationFallbackId(fallbackId: integer): any;
+     receiveDefaultTemplateId(query: any, templateId: string): any;
+-    deleteEntityRecord: (kind: string, name: string, recordId: string, query: any | null, { __unstableFetch, throwOnError }?: {
++    deleteEntityRecord: (kind: string, name: string, recordId: string | number, query: any | null, { __unstableFetch, throwOnError }?: {
+         __unstableFetch?: Function | undefined;
+         throwOnError?: boolean | undefined;
+     } | undefined) => ({ dispatch }: {
+         dispatch: any;
+     }) => Promise<boolean | undefined>;
+-    editEntityRecord: (kind: string, name: string, recordId: number | string, edits: any, options?: {
++    editEntityRecord: (kind: string, name: string, recordId: number | string | undefined, edits: any, options?: {
+         undoIgnore?: boolean | undefined;
+     }) => any;
+     undo: () => ({ select, dispatch }: {
+@@ -68,6 +68,8 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
+         [x: string]: any;
+     }): import("./entity-types").User[];
+     getCurrentUser(state: selectors.State): import("./entity-types").User<"edit">;
++	getPostType(state: selectors.State, slug: string): import("./entity-types").Type | null;
++	getMedia<U,V,W>(state: selectors.State, id: number, query?: { [x: string]: any; }): import("./entity-types").Attachment;
+     getEntitiesByKind(state: selectors.State, kind: string): Array<any>;
+     getEntity(state: selectors.State, kind: string, name: string): any;
+     getEntityConfig(state: selectors.State, kind: string, name: string): any;
+@@ -96,7 +98,7 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
+         name: string;
+         id?: string | number;
+     }, id?: string | number): boolean | undefined;
+-    canUserEditEntityRecord(state: selectors.State, kind: string, name: string, recordId: string | number): boolean | undefined;
++    canUserEditEntityRecord(state: selectors.State, kind: string, name: string, recordId: string | number | undefined): boolean | undefined;
+     getAutosaves(state: selectors.State, postType: string, postId: string | number): Array<any> | undefined;
+     getAutosave<EntityRecord extends import("./entity-types").EntityRecord<any>>(state: selectors.State, postType: string, postId: string | number, authorId: string | number): EntityRecord | undefined;
+     getReferenceByDistinctEdits(state: any): any;
+@@ -137,7 +139,7 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
+         kind: string;
+     }>) & import("rememo").EnhancedSelector;
+     getEntityRecordNonTransientEdits: ((state: selectors.State, kind: string, name: string, recordId: string | number) => any) & import("rememo").EnhancedSelector;
+-    getEditedEntityRecord: (<EntityRecord extends import("./entity-types").EntityRecord<any>>(state: selectors.State, kind: string, name: string, recordId: string | number) => import("./entity-types").Updatable<EntityRecord> | false) & import("rememo").EnhancedSelector;
++    getEditedEntityRecord: (<EntityRecord extends import("./entity-types").EntityRecord<any>>(state: selectors.State, kind: string, name: string, recordId: string | number | undefined) => import("./entity-types").Updatable<EntityRecord> | false) & import("rememo").EnhancedSelector;
+     hasFetchedAutosaves: Function;
+     getRevisions: (state: selectors.State, kind: string, name: string, recordKey: string | number, query?: {
+         [x: string]: any;
