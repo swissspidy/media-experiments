@@ -83,7 +83,7 @@ export function VideoControls( props: VideoControlsProps ) {
 				clientId={ props.clientId }
 				url={ props.attributes.src }
 				onInsert={ onInsertRecording }
-				recordingType="video"
+				recordingTypes={ [ 'video' ] }
 			/>
 			{ ! props.attributes.src ? (
 				<UploadRequestControls

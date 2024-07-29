@@ -11,10 +11,17 @@ import { Fragment } from '@wordpress/element';
 import { BlockControls } from '@wordpress/block-editor';
 import { capturePhoto, check } from '@wordpress/icons';
 
-import { store as recordingStore } from '@mexp/media-recording';
+import {
+	store as recordingStore,
+	type RecordingType,
+} from '@mexp/media-recording';
 
 import { ReactComponent as BlurOn } from '../icons/blurOn.svg';
 import { ReactComponent as BlurOff } from '../icons/blurOff.svg';
+import { ReactComponent as StartRecording } from '../icons/startRecording.svg';
+import { ReactComponent as StopRecording } from '../icons/stopRecording.svg';
+import { ReactComponent as PauseRecording } from '../icons/pauseRecording.svg';
+import { ReactComponent as ResumeRecording } from '../icons/resumeRecording.svg';
 
 function InputControls() {
 	const { setVideoInput, setAudioInput, toggleHasAudio } =
@@ -27,11 +34,14 @@ function InputControls() {
 		hasAudio,
 		videoDevices,
 		audioDevices,
-		recordingType,
+		useMicrophone,
 	} = useSelect( ( select ) => {
 		const mediaDevices = select( recordingStore ).getDevices();
+		const recordingTypes = select( recordingStore ).getRecordingTypes();
 		return {
-			recordingType: select( recordingStore ).getRecordingType(),
+			useMicrophone:
+				recordingTypes.includes( 'audio' ) ||
+				recordingTypes.includes( 'video' ),
 			videoInput: select( recordingStore ).getVideoInput(),
 			audioInput: select( recordingStore ).getAudioInput(),
 			hasVideo: select( recordingStore ).hasVideo(),
@@ -68,7 +78,7 @@ function InputControls() {
 		icon: hasAudio && audioInput === device.deviceId ? check : undefined,
 	} ) );
 
-	if ( 'video' === recordingType ) {
+	if ( hasVideo ) {
 		audioControls.unshift( {
 			title: __( 'No Microphone', 'media-experiments' ),
 			onClick: () => {
@@ -82,7 +92,7 @@ function InputControls() {
 
 	return (
 		<>
-			{ 'audio' !== recordingType && (
+			{ hasVideo && (
 				<ToolbarDropdownMenu
 					label={ __( 'Select Camera', 'media-experiments' ) }
 					icon="camera"
@@ -92,7 +102,7 @@ function InputControls() {
 					} }
 				/>
 			) }
-			{ 'image' !== recordingType && (
+			{ useMicrophone && (
 				<ToolbarDropdownMenu
 					label={ __( 'Select Microphone', 'media-experiments' ) }
 					icon="microphone"
@@ -121,15 +131,21 @@ function ToolbarControls( { onInsert }: ToolbarControlsProps ) {
 		captureImage,
 		leaveRecordingMode,
 	} = useDispatch( recordingStore );
-	const { videoEffect, status, recordingType, url } = useSelect(
-		( select ) => ( {
-			videoEffect: select( recordingStore ).getVideoEffect(),
-			status: select( recordingStore ).getRecordingStatus(),
-			recordingType: select( recordingStore ).getRecordingType(),
-			url: select( recordingStore ).getUrl(),
-		} ),
-		[]
-	);
+	const { videoEffect, status, url, useMicrophone, hasVideo, hasCapture } =
+		useSelect( ( select ) => {
+			const recordingTypes = select( recordingStore ).getRecordingTypes();
+
+			return {
+				hasCapture: recordingTypes.includes( 'image' ),
+				useMicrophone:
+					recordingTypes.includes( 'audio' ) ||
+					recordingTypes.includes( 'video' ),
+				hasVideo: select( recordingStore ).hasVideo(),
+				videoEffect: select( recordingStore ).getVideoEffect(),
+				status: select( recordingStore ).getRecordingStatus(),
+				url: select( recordingStore ).getUrl(),
+			};
+		}, [] );
 
 	const isReady = 'ready' === status;
 	const isStopped = 'stopped' === status;
@@ -144,7 +160,7 @@ function ToolbarControls( { onInsert }: ToolbarControlsProps ) {
 			<BlockControls group="block">
 				<InputControls />
 			</BlockControls>
-			{ supportsCanvasBlur && 'audio' !== recordingType && (
+			{ supportsCanvasBlur && hasVideo && (
 				<BlockControls group="inline">
 					<ToolbarButton
 						onClick={ () => {
@@ -161,11 +177,11 @@ function ToolbarControls( { onInsert }: ToolbarControlsProps ) {
 						label={
 							'blur' === videoEffect
 								? __(
-										'Disable Background Blur',
+										'Disable background blur',
 										'media-experiments'
 								  )
 								: __(
-										'Enable Background Blur',
+										'Enable background blur',
 										'media-experiments'
 								  )
 						}
@@ -176,54 +192,87 @@ function ToolbarControls( { onInsert }: ToolbarControlsProps ) {
 				</BlockControls>
 			) }
 			<BlockControls group="other">
-				{ 'image' !== recordingType && (
-					<Fragment>
-						{ ! isStopped && (
-							<ToolbarButton
-								onClick={ () => {
-									if ( isRecordingOrCountdown ) {
-										void stopRecording();
-									} else {
-										void startRecording();
-									}
-								} }
-								extraProps={ {
-									disabled:
-										! isReady && ! isRecordingOrCountdown,
-								} }
-							>
-								{ ! isRecordingOrCountdown
-									? __( 'Start', 'media-experiments' )
-									: __( 'Stop', 'media-experiments' ) }
-							</ToolbarButton>
-						) }
-						{ isRecording && (
-							<ToolbarButton
-								onClick={ () => {
+				{ useMicrophone && ! isStopped ? (
+					<>
+						<ToolbarButton
+							onClick={ () => {
+								if ( isRecordingOrCountdown ) {
+									void stopRecording();
+								} else {
+									void startRecording();
+								}
+							} }
+							extraProps={ {
+								disabled: ! isReady && ! isRecording,
+							} }
+							icon={
+								! isRecordingOrCountdown ? (
+									<StartRecording
+										width={ 20 }
+										height={ 20 }
+									/>
+								) : (
+									<StopRecording width={ 20 } height={ 20 } />
+								)
+							}
+							label={
+								! isRecordingOrCountdown
+									? __(
+											'Start recording',
+											'media-experiments'
+									  )
+									: __(
+											'Stop recording',
+											'media-experiments'
+									  )
+							}
+						/>
+
+						<ToolbarButton
+							onClick={ () => {
+								if ( isRecording ) {
 									void pauseRecording();
-								} }
-							>
-								{ __( 'Pause', 'media-experiments' ) }
-							</ToolbarButton>
-						) }
-						{ isPaused && (
-							<ToolbarButton
-								onClick={ () => {
+								} else {
 									void resumeRecording();
-								} }
-							>
-								{ __( 'Resume', 'media-experiments' ) }
-							</ToolbarButton>
-						) }
-					</Fragment>
-				) }
-				{ 'image' === recordingType && ! isStopped && (
+								}
+							} }
+							extraProps={ {
+								disabled: ! isRecording && ! isPaused,
+							} }
+							icon={
+								isPaused ? (
+									<ResumeRecording
+										width={ 24 }
+										height={ 24 }
+									/>
+								) : (
+									<PauseRecording
+										width={ 20 }
+										height={ 20 }
+									/>
+								)
+							}
+							label={
+								isRecording
+									? __(
+											'Pause recording',
+											'media-experiments'
+									  )
+									: __(
+											'Resume recording',
+											'media-experiments'
+									  )
+							}
+						/>
+					</>
+				) : null }
+				{ hasCapture && ! isStopped && (
 					<ToolbarButton
 						onClick={ () => {
 							void captureImage();
 						} }
 						icon={ capturePhoto }
-						label={ __( 'Capture Photo', 'media-experiments' ) }
+						label={ __( 'Capture photo', 'media-experiments' ) }
 						extraProps={ {
 							disabled: ! isReady,
 						} }
@@ -266,14 +315,14 @@ interface RecordingControlsProps {
 	url?: string;
 	clientId: string;
 	onInsert: ( url?: string ) => void;
-	recordingType: string;
+	recordingTypes: RecordingType[];
 }
 
 export function RecordingControls( {
 	url,
 	clientId,
 	onInsert,
-	recordingType,
+	recordingTypes,
 }: RecordingControlsProps ) {
 	const { baseControlProps, controlProps } = useBaseControlProps( {} );
 
@@ -290,7 +339,7 @@ export function RecordingControls( {
 		if ( isInRecordingMode ) {
 			void leaveRecordingMode();
 		} else {
-			void enterRecordingMode( clientId, recordingType );
+			void enterRecordingMode( clientId, recordingTypes );
 		}
 	};
 
