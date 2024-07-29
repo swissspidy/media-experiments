@@ -72,7 +72,7 @@ index 20d4bb7..46d4c89 100644
  //# sourceMappingURL=actions.d.ts.map
 \ No newline at end of file
 diff --git a/node_modules/@wordpress/notices/build-types/store/selectors.d.ts b/node_modules/@wordpress/notices/build-types/store/selectors.d.ts
-index b8623c4..14b0dd6 100644
+index f6a683a..5cdf11d 100644
 --- a/node_modules/@wordpress/notices/build-types/store/selectors.d.ts
 +++ b/node_modules/@wordpress/notices/build-types/store/selectors.d.ts
 @@ -63,7 +63,7 @@ export type WPNotice = {
