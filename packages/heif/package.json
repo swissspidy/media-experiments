@@ -31,6 +31,6 @@
 		}
 	},
 	"dependencies": {
-		"libheif-js": "^1.17.1"
+		"libheif-js": "^1.18.0"
 	}
 }
