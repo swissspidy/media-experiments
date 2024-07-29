@@ -43,7 +43,6 @@
 		"@wordpress/data": "^10.0.0",
 		"@wordpress/i18n": "^5.0.0",
 		"@wordpress/preferences": "^4.0.0",
-		"@wordpress/private-apis": "^1.4.0",
 		"@wordpress/url": "^4.3.0",
 		"blurhash": "^2.0.5",
 		"fast-average-color": "^9.3.0",

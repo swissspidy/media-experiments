@@ -10,9 +10,6 @@ import { store as preferencesStore } from '@wordpress/preferences';
  */
 import { store as uploadStore } from '..';
 import { ItemStatus, OperationType, type QueueItem } from '../types';
-import { unlock } from '../../lock-unlock';
-import { addItem, pauseQueue } from '../private-actions';
-import { addItems } from '../actions';
 
 jest.mock( '@wordpress/blob', () => ( {
 	__esModule: true,
@@ -37,13 +34,6 @@ jest.mock( '../utils/vips', () => ( {
 function createRegistryWithStores() {
 	// Create a registry and register used stores.
 	const registry = createRegistry();
-
-	unlock( uploadStore ).registerPrivateActions(
-		pauseQueue,
-		addItem,
-		addItems
-	);
-
 	// @ts-ignore
 	[ uploadStore, preferencesStore ].forEach( registry.register );
 	return registry;
@@ -63,15 +53,12 @@ describe( 'actions', () => {
 	let registry: WPDataRegistry;
 	beforeEach( () => {
 		registry = createRegistryWithStores();
-
-		const privateActions = unlock( registry.dispatch( uploadStore ) );
-		privateActions.pauseQueue();
+		registry.dispatch( uploadStore ).pauseQueue();
 	} );
 
 	describe( 'addItem', () => {
 		it( 'adds an item to the queue', () => {
-			const privateActions = unlock( registry.dispatch( uploadStore ) );
-			privateActions.addItem( {
+			registry.dispatch( uploadStore ).addItem( {
 				file: jpegFile,
 			} );
 
@@ -96,8 +83,7 @@ describe( 'actions', () => {
 
 	describe( 'addItems', () => {
 		it( 'adds multiple items to the queue', () => {
-			const privateActions = unlock( registry.dispatch( uploadStore ) );
-			privateActions.addItems( {
+			registry.dispatch( uploadStore ).addItems( {
 				files: [ jpegFile, mp4File ],
 			} );
 
@@ -135,8 +121,7 @@ describe( 'actions', () => {
 
 	describe( 'addItemFromUrl', () => {
 		it( 'adds an item to the queue for downloading', async () => {
-			const privateActions = unlock( registry.dispatch( uploadStore ) );
-			privateActions.addItemFromUrl( {
+			await registry.dispatch( uploadStore ).addItemFromUrl( {
 				url: 'https://example.com/example.jpg',
 			} );
 
@@ -267,8 +252,7 @@ describe( 'actions', () => {
 
 	describe( 'grantApproval', () => {
 		it( 'should approve upload by attachment ID', async () => {
-			const privateActions = unlock( registry.dispatch( uploadStore ) );
-			privateActions.addItem( {
+			registry.dispatch( uploadStore ).addItem( {
 				file: jpegFile,
 				sourceAttachmentId: 1234,
 			} );
@@ -288,8 +272,7 @@ describe( 'actions', () => {
 		} );
 
 		it( 'should do nothing for an invalid attachment ID', async () => {
-			const privateActions = unlock( registry.dispatch( uploadStore ) );
-			privateActions.addItem( {
+			registry.dispatch( uploadStore ).addItem( {
 				file: jpegFile,
 				sourceAttachmentId: 1234,
 			} );
@@ -311,8 +294,7 @@ describe( 'actions', () => {
 	describe( 'rejectApproval', () => {
 		it( 'should cancel upload by attachment ID', async () => {
 			const onError = jest.fn();
-			const privateActions = unlock( registry.dispatch( uploadStore ) );
-			privateActions.addItem( {
+			registry.dispatch( uploadStore ).addItem( {
 				file: jpegFile,
 				sourceAttachmentId: 1234,
 				onError,
@@ -327,8 +309,7 @@ describe( 'actions', () => {
 		} );
 
 		it( 'should do nothing for an invalid attachment ID', async () => {
-			const privateActions = unlock( registry.dispatch( uploadStore ) );
-			privateActions.addItem( {
+			registry.dispatch( uploadStore ).addItem( {
 				file: jpegFile,
 				sourceAttachmentId: 1234,
 			} );
