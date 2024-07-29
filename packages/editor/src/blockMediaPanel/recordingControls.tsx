@@ -18,6 +18,10 @@ import {
 
 import { ReactComponent as BlurOn } from '../icons/blurOn.svg';
 import { ReactComponent as BlurOff } from '../icons/blurOff.svg';
+import { ReactComponent as StartRecording } from '../icons/startRecording.svg';
+import { ReactComponent as StopRecording } from '../icons/stopRecording.svg';
+import { ReactComponent as PauseRecording } from '../icons/pauseRecording.svg';
+import { ReactComponent as ResumeRecording } from '../icons/resumeRecording.svg';
 
 function InputControls() {
 	const { setVideoInput, setAudioInput, toggleHasAudio } =
@@ -173,11 +177,11 @@ function ToolbarControls( { onInsert }: ToolbarControlsProps ) {
 						label={
 							'blur' === videoEffect
 								? __(
-										'Disable Background Blur',
+										'Disable background blur',
 										'media-experiments'
 								  )
 								: __(
-										'Enable Background Blur',
+										'Enable background blur',
 										'media-experiments'
 								  )
 						}
@@ -188,54 +192,87 @@ function ToolbarControls( { onInsert }: ToolbarControlsProps ) {
 				</BlockControls>
 			) }
 			<BlockControls group="other">
-				{ useMicrophone && (
-					<Fragment>
-						{ ! isStopped && (
-							<ToolbarButton
-								onClick={ () => {
-									if ( isRecordingOrCountdown ) {
-										void stopRecording();
-									} else {
-										void startRecording();
-									}
-								} }
-								extraProps={ {
-									disabled:
-										! isReady && ! isRecordingOrCountdown,
-								} }
-							>
-								{ ! isRecordingOrCountdown
-									? __( 'Start', 'media-experiments' )
-									: __( 'Stop', 'media-experiments' ) }
-							</ToolbarButton>
-						) }
-						{ isRecording && (
-							<ToolbarButton
-								onClick={ () => {
+				{ useMicrophone && ! isStopped ? (
+					<>
+						<ToolbarButton
+							onClick={ () => {
+								if ( isRecordingOrCountdown ) {
+									void stopRecording();
+								} else {
+									void startRecording();
+								}
+							} }
+							extraProps={ {
+								disabled: ! isReady && ! isRecording,
+							} }
+							icon={
+								! isRecordingOrCountdown ? (
+									<StartRecording
+										width={ 20 }
+										height={ 20 }
+									/>
+								) : (
+									<StopRecording width={ 20 } height={ 20 } />
+								)
+							}
+							label={
+								! isRecordingOrCountdown
+									? __(
+											'Start recording',
+											'media-experiments'
+									  )
+									: __(
+											'Stop recording',
+											'media-experiments'
+									  )
+							}
+						/>
+
+						<ToolbarButton
+							onClick={ () => {
+								if ( isRecording ) {
 									void pauseRecording();
-								} }
-							>
-								{ __( 'Pause', 'media-experiments' ) }
-							</ToolbarButton>
-						) }
-						{ isPaused && (
-							<ToolbarButton
-								onClick={ () => {
+								} else {
 									void resumeRecording();
-								} }
-							>
-								{ __( 'Resume', 'media-experiments' ) }
-							</ToolbarButton>
-						) }
-					</Fragment>
-				) }
+								}
+							} }
+							extraProps={ {
+								disabled: ! isRecording && ! isPaused,
+							} }
+							icon={
+								isPaused ? (
+									<ResumeRecording
+										width={ 24 }
+										height={ 24 }
+									/>
+								) : (
+									<PauseRecording
+										width={ 20 }
+										height={ 20 }
+									/>
+								)
+							}
+							label={
+								isRecording
+									? __(
+											'Pause recording',
+											'media-experiments'
+									  )
+									: __(
+											'Resume recording',
+											'media-experiments'
+									  )
+							}
+						/>
+					</>
+				) : null }
 				{ hasCapture && ! isStopped && (
 					<ToolbarButton
 						onClick={ () => {
 							void captureImage();
 						} }
 						icon={ capturePhoto }
-						label={ __( 'Capture Photo', 'media-experiments' ) }
+						label={ __( 'Capture photo', 'media-experiments' ) }
 						extraProps={ {
 							disabled: ! isReady,
 						} }

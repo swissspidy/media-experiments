@@ -56,7 +56,9 @@ describe( 'selectors', () => {
 
 	describe( 'getRecordingTypes', () => {
 		it( 'should return video by default', () => {
-			expect( getRecordingTypes( defaultState ) ).toStrictEqual( [ 'video' ] );
+			expect( getRecordingTypes( defaultState ) ).toStrictEqual( [
+				'video',
+			] );
 		} );
 	} );
 

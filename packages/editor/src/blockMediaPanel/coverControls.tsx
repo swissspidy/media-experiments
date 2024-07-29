@@ -43,7 +43,7 @@ export function CoverControls( props: CoverControlsProps ) {
 				clientId={ props.clientId }
 				url={ props.attributes.url }
 				onInsert={ onInsertRecording }
-				recordingTypes={ [ 'image' ] }
+				recordingTypes={ [ 'image', 'video' ] }
 			/>
 			<OptimizeMedia
 				id={ props.attributes.id }
