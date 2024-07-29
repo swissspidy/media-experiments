@@ -33,6 +33,6 @@
 	},
 	"dependencies": {
 		"@mexp/mime": "../mime",
-		"pdfjs-dist": "^4.4.168"
+		"pdfjs-dist": "^4.5.136"
 	}
 }
