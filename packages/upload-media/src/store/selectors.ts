@@ -1,6 +1,5 @@
 import {
 	type BatchId,
-	type ImageSizeCrop,
 	ItemStatus,
 	OperationType,
 	type QueueItem,
@@ -26,21 +25,6 @@ export function getItems( state: State, status?: ItemStatus ): QueueItem[] {
 }
 
 /**
- * Returns a specific item given its unique ID.
- *
- * @param state Upload state.
- * @param id    Item ID.
- *
- * @return Queue item.
- */
-export function getItem(
-	state: State,
-	id: QueueItemId
-): QueueItem | undefined {
-	return state.queue.find( ( item ) => item.id === id );
-}
-
-/**
  * Determines whether there is an item pending approval.
  *
  * @param state Upload state.
@@ -50,25 +34,6 @@ export function getItem(
 export function isPendingApproval( state: State ): boolean {
 	return state.queue.some(
 		( item ) => item.status === ItemStatus.PendingApproval
-	);
-}
-
-/**
- * Returns a specific item given its associated attachment ID.
- *
- * @param state        Upload state.
- * @param attachmentId Item ID.
- *
- * @return Queue item.
- */
-export function getItemByAttachmentId(
-	state: State,
-	attachmentId: number
-): QueueItem | undefined {
-	return state.queue.find(
-		( item ) =>
-			item.attachment?.id === attachmentId ||
-			item.sourceAttachmentId === attachmentId
 	);
 }
 
@@ -101,7 +66,7 @@ export function isFirstPendingApprovalByAttachmentId(
 /**
  * Returns data to compare the old file vs. the optimized file, given the attachment ID.
  *
- * Includes both the URLs as well as the respective file sizes and the size difference in percentage.
+ * Includes both the URLs and the respective file sizes and the size difference in percentage.
  *
  * @param state        Upload state.
  * @param attachmentId Attachment ID.
@@ -259,30 +224,6 @@ export function isUploadingByParentId(
  */
 export function isPaused( state: State ): boolean {
 	return state.queueStatus === 'paused';
-}
-
-/**
- * Returns an image size given its name.
- *
- * @param state Upload state.
- * @param name  Image size name.
- *
- * @return Image size data.
- */
-export function getImageSize( state: State, name: string ): ImageSizeCrop {
-	return state.imageSizes[ name ];
-}
-
-/**
- * Returns all cached blob URLs for a given item ID.
- *
- * @param state Upload state.
- * @param id    Item ID
- *
- * @return List of blob URLs.
- */
-export function getBlobUrls( state: State, id: QueueItemId ): string[] {
-	return state.blobUrls[ id ] || [];
 }
 
 /**

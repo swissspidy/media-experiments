@@ -14,7 +14,6 @@ import {
 	type ResumeItemAction,
 	type ResumeQueueAction,
 	type RevokeBlobUrlsAction,
-	type SetImageSizesAction,
 	type State,
 	Type,
 	type UnknownAction,
@@ -25,12 +24,12 @@ const noop = () => {};
 
 const DEFAULT_STATE: State = {
 	queue: [],
-	imageSizes: {},
 	queueStatus: 'active',
 	blobUrls: {},
 	settings: {
 		mediaUpload: noop,
 		mediaSideload: noop,
+		imageSizes: {},
 	},
 };
 
@@ -46,7 +45,6 @@ type Action =
 	| ApproveUploadAction
 	| OperationFinishAction
 	| OperationStartAction
-	| SetImageSizesAction
 	| CacheBlobUrlAction
 	| RevokeBlobUrlsAction
 	| UpdateSettingsAction
@@ -210,13 +208,6 @@ function reducer(
 							: item
 				),
 			};
-
-		case Type.SetImageSizes: {
-			return {
-				...state,
-				imageSizes: action.imageSizes,
-			};
-		}
 
 		case Type.CacheBlobUrl: {
 			const blobUrls = state.blobUrls[ action.id ] || [];

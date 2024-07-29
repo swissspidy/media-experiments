@@ -131,8 +131,6 @@ async function runFFmpegWithConfig(
 			fileName,
 			{ type: mimeType }
 		);
-	} catch ( err ) {
-		throw err;
 	} finally {
 		try {
 			// Also removes MEMFS to free memory.

@@ -10,6 +10,9 @@ import { store as preferencesStore } from '@wordpress/preferences';
  */
 import { store as uploadStore } from '..';
 import { ItemStatus, OperationType, type QueueItem } from '../types';
+import { unlock } from '../../lock-unlock';
+import { addItem, pauseQueue } from '../private-actions';
+import { addItems } from '../actions';
 
 jest.mock( '@wordpress/blob', () => ( {
 	__esModule: true,
@@ -34,6 +37,13 @@ jest.mock( '../utils/vips', () => ( {
 function createRegistryWithStores() {
 	// Create a registry and register used stores.
 	const registry = createRegistry();
+
+	unlock( uploadStore ).registerPrivateActions(
+		pauseQueue,
+		addItem,
+		addItems
+	);
+
 	// @ts-ignore
 	[ uploadStore, preferencesStore ].forEach( registry.register );
 	return registry;
@@ -53,12 +63,15 @@ describe( 'actions', () => {
 	let registry: WPDataRegistry;
 	beforeEach( () => {
 		registry = createRegistryWithStores();
-		registry.dispatch( uploadStore ).pauseQueue();
+
+		const privateActions = unlock( registry.dispatch( uploadStore ) );
+		privateActions.pauseQueue();
 	} );
 
 	describe( 'addItem', () => {
 		it( 'adds an item to the queue', () => {
-			registry.dispatch( uploadStore ).addItem( {
+			const privateActions = unlock( registry.dispatch( uploadStore ) );
+			privateActions.addItem( {
 				file: jpegFile,
 			} );
 
@@ -83,7 +96,8 @@ describe( 'actions', () => {
 
 	describe( 'addItems', () => {
 		it( 'adds multiple items to the queue', () => {
-			registry.dispatch( uploadStore ).addItems( {
+			const privateActions = unlock( registry.dispatch( uploadStore ) );
+			privateActions.addItems( {
 				files: [ jpegFile, mp4File ],
 			} );
 
@@ -121,7 +135,8 @@ describe( 'actions', () => {
 
 	describe( 'addItemFromUrl', () => {
 		it( 'adds an item to the queue for downloading', async () => {
-			await registry.dispatch( uploadStore ).addItemFromUrl( {
+			const privateActions = unlock( registry.dispatch( uploadStore ) );
+			privateActions.addItemFromUrl( {
 				url: 'https://example.com/example.jpg',
 			} );
 
@@ -252,7 +267,8 @@ describe( 'actions', () => {
 
 	describe( 'grantApproval', () => {
 		it( 'should approve upload by attachment ID', async () => {
-			registry.dispatch( uploadStore ).addItem( {
+			const privateActions = unlock( registry.dispatch( uploadStore ) );
+			privateActions.addItem( {
 				file: jpegFile,
 				sourceAttachmentId: 1234,
 			} );
@@ -272,7 +288,8 @@ describe( 'actions', () => {
 		} );
 
 		it( 'should do nothing for an invalid attachment ID', async () => {
-			registry.dispatch( uploadStore ).addItem( {
+			const privateActions = unlock( registry.dispatch( uploadStore ) );
+			privateActions.addItem( {
 				file: jpegFile,
 				sourceAttachmentId: 1234,
 			} );
@@ -294,7 +311,8 @@ describe( 'actions', () => {
 	describe( 'rejectApproval', () => {
 		it( 'should cancel upload by attachment ID', async () => {
 			const onError = jest.fn();
-			registry.dispatch( uploadStore ).addItem( {
+			const privateActions = unlock( registry.dispatch( uploadStore ) );
+			privateActions.addItem( {
 				file: jpegFile,
 				sourceAttachmentId: 1234,
 				onError,
@@ -309,7 +327,8 @@ describe( 'actions', () => {
 		} );
 
 		it( 'should do nothing for an invalid attachment ID', async () => {
-			registry.dispatch( uploadStore ).addItem( {
+			const privateActions = unlock( registry.dispatch( uploadStore ) );
+			privateActions.addItem( {
 				file: jpegFile,
 				sourceAttachmentId: 1234,
 			} );
@@ -325,25 +344,6 @@ describe( 'actions', () => {
 			expect( registry.select( uploadStore ).getItems()[ 0 ] ).toBe(
 				item
 			);
-		} );
-	} );
-
-	describe( 'setImageSizes', () => {
-		it( 'adds image sizes to state', () => {
-			registry.dispatch( uploadStore ).setImageSizes( {
-				thumbnail: { width: 150, height: 150, crop: true },
-				large: { width: 1000, height: 0, crop: false },
-			} );
-
-			expect(
-				registry.select( uploadStore ).getImageSize( 'thumbnail' )
-			).toStrictEqual( { width: 150, height: 150, crop: true } );
-			expect(
-				registry.select( uploadStore ).getImageSize( 'large' )
-			).toStrictEqual( { width: 1000, height: 0, crop: false } );
-			expect(
-				registry.select( uploadStore ).getImageSize( 'unknown' )
-			).toBe( undefined );
 		} );
 	} );
 } );

@@ -15,12 +15,12 @@ describe( 'selectors', () => {
 		it( 'should return empty array by default', () => {
 			const state: State = {
 				queue: [],
-				imageSizes: {},
 				queueStatus: 'paused',
 				blobUrls: {},
 				settings: {
 					mediaUpload: jest.fn(),
 					mediaSideload: jest.fn(),
+					imageSizes: {},
 				},
 			};
 
@@ -46,12 +46,12 @@ describe( 'selectors', () => {
 						status: ItemStatus.PendingApproval,
 					},
 				] as QueueItem[],
-				imageSizes: {},
 				queueStatus: 'paused',
 				blobUrls: {},
 				settings: {
 					mediaUpload: jest.fn(),
 					mediaSideload: jest.fn(),
+					imageSizes: {},
 				},
 			};
 
@@ -78,12 +78,12 @@ describe( 'selectors', () => {
 						status: ItemStatus.Paused,
 					},
 				] as QueueItem[],
-				imageSizes: {},
 				queueStatus: 'paused',
 				blobUrls: {},
 				settings: {
 					mediaUpload: jest.fn(),
 					mediaSideload: jest.fn(),
+					imageSizes: {},
 				},
 			};
 
@@ -109,12 +109,12 @@ describe( 'selectors', () => {
 						status: ItemStatus.Processing,
 					},
 				] as QueueItem[],
-				imageSizes: {},
 				queueStatus: 'paused',
 				blobUrls: {},
 				settings: {
 					mediaUpload: jest.fn(),
 					mediaSideload: jest.fn(),
+					imageSizes: {},
 				},
 			};
 
@@ -148,12 +148,12 @@ describe( 'selectors', () => {
 						status: ItemStatus.PendingApproval,
 					},
 				] as QueueItem[],
-				imageSizes: {},
 				queueStatus: 'paused',
 				blobUrls: {},
 				settings: {
 					mediaUpload: jest.fn(),
 					mediaSideload: jest.fn(),
+					imageSizes: {},
 				},
 			};
 
@@ -192,12 +192,12 @@ describe( 'selectors', () => {
 						status: ItemStatus.Processing,
 					},
 				] as QueueItem[],
-				imageSizes: {},
 				queueStatus: 'paused',
 				blobUrls: {},
 				settings: {
 					mediaUpload: jest.fn(),
 					mediaSideload: jest.fn(),
+					imageSizes: {},
 				},
 			};
 
