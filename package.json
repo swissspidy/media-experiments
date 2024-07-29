@@ -42,7 +42,7 @@
 		"@wordpress/env": "^10.0.0",
 		"@wordpress/eslint-plugin": "^20.0.0",
 		"@wordpress/scripts": "^28.3.0",
-		"@wp-now/wp-now": "^0.1.72",
+		"@wp-now/wp-now": "^0.1.74",
 		"eslint": "^8.57.0",
 		"eslint-plugin-oxlint": "^0.5.0",
 		"mini-css-extract-plugin": "^2.9.0",
