@@ -327,23 +327,4 @@ describe( 'actions', () => {
 			);
 		} );
 	} );
-
-	describe( 'setImageSizes', () => {
-		it( 'adds image sizes to state', () => {
-			registry.dispatch( uploadStore ).setImageSizes( {
-				thumbnail: { width: 150, height: 150, crop: true },
-				large: { width: 1000, height: 0, crop: false },
-			} );
-
-			expect(
-				registry.select( uploadStore ).getImageSize( 'thumbnail' )
-			).toStrictEqual( { width: 150, height: 150, crop: true } );
-			expect(
-				registry.select( uploadStore ).getImageSize( 'large' )
-			).toStrictEqual( { width: 1000, height: 0, crop: false } );
-			expect(
-				registry.select( uploadStore ).getImageSize( 'unknown' )
-			).toBe( undefined );
-		} );
-	} );
 } );

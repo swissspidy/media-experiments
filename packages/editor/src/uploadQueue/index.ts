@@ -174,17 +174,14 @@ export default function blockEditorUploadMedia( {
 }
 
 /*
+ Make the upload queue aware of the function for uploading to the server.
  The list of available image sizes is passed via an inline script
  and needs to be saved in the store first.
 */
-void dispatch( uploadStore ).setImageSizes(
-	window.mediaExperiments.availableImageSizes
-);
-
-// Make the upload queue aware of the function for uploading to the server.
 void dispatch( uploadStore ).updateSettings( {
 	mediaUpload: editorUploadMedia,
 	mediaSideload: originalSideloadMedia,
+	imageSizes: window.mediaExperiments.availableImageSizes,
 } );
 
 // Subscribe to state updates so that we can override the mediaUpload() function at the right time.
@@ -208,10 +205,4 @@ subscribe( () => {
 	void dispatch( blockEditorStore ).updateSettings( {
 		mediaUpload: blockEditorUploadMedia,
 	} );
-
-	// addFilter(
-	// 	'editor.MediaUpload',
-	// 	'media-experiments/replace-media-upload',
-	// 	replaceMediaUpload
-	// );
 }, blockEditorStore );

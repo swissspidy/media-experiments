@@ -35,7 +35,6 @@ export type QueueItem = {
 
 export interface State {
 	queue: QueueItem[];
-	imageSizes: Record< string, ImageSizeCrop >;
 	queueStatus: QueueStatus;
 	blobUrls: Record< QueueItemId, string[] >;
 	settings: Settings;
@@ -101,10 +100,6 @@ export type ResumeItemAction = Action< Type.ResumeItem, { id: QueueItemId } >;
 export type PauseQueueAction = Action< Type.PauseQueue >;
 export type ResumeQueueAction = Action< Type.ResumeQueue >;
 export type RemoveAction = Action< Type.Remove, { id: QueueItemId } >;
-export type SetImageSizesAction = Action<
-	Type.SetImageSizes,
-	{ imageSizes: Record< string, ImageSizeCrop > }
->;
 export type CacheBlobUrlAction = Action<
 	Type.CacheBlobUrl,
 	{ id: QueueItemId; blobUrl: string }
@@ -157,6 +152,7 @@ interface SideloadMediaArgs {
 export type Settings = {
 	mediaUpload: ( args: UploadMediaArgs ) => void;
 	mediaSideload: ( args: SideloadMediaArgs ) => void;
+	imageSizes: Record< string, ImageSizeCrop >;
 };
 
 // Must match the Attachment type from the media-utils package.

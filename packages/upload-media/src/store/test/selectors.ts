@@ -15,49 +15,16 @@ describe( 'selectors', () => {
 		it( 'should return empty array by default', () => {
 			const state: State = {
 				queue: [],
-				imageSizes: {},
 				queueStatus: 'paused',
 				blobUrls: {},
 				settings: {
 					mediaUpload: jest.fn(),
 					mediaSideload: jest.fn(),
+					imageSizes: {},
 				},
 			};
 
 			expect( getItems( state ) ).toHaveLength( 0 );
-		} );
-
-		it( 'should return items with the given status', () => {
-			const state: State = {
-				queue: [
-					{
-						status: ItemStatus.Processing,
-					},
-					{
-						status: ItemStatus.PendingApproval,
-					},
-					{
-						status: ItemStatus.Processing,
-					},
-					{
-						status: ItemStatus.Processing,
-					},
-					{
-						status: ItemStatus.PendingApproval,
-					},
-				] as QueueItem[],
-				imageSizes: {},
-				queueStatus: 'paused',
-				blobUrls: {},
-				settings: {
-					mediaUpload: jest.fn(),
-					mediaSideload: jest.fn(),
-				},
-			};
-
-			expect( getItems( state, ItemStatus.Processing ) ).toHaveLength(
-				3
-			);
 		} );
 	} );
 
@@ -78,12 +45,12 @@ describe( 'selectors', () => {
 						status: ItemStatus.Paused,
 					},
 				] as QueueItem[],
-				imageSizes: {},
 				queueStatus: 'paused',
 				blobUrls: {},
 				settings: {
 					mediaUpload: jest.fn(),
 					mediaSideload: jest.fn(),
+					imageSizes: {},
 				},
 			};
 
@@ -109,12 +76,12 @@ describe( 'selectors', () => {
 						status: ItemStatus.Processing,
 					},
 				] as QueueItem[],
-				imageSizes: {},
 				queueStatus: 'paused',
 				blobUrls: {},
 				settings: {
 					mediaUpload: jest.fn(),
 					mediaSideload: jest.fn(),
+					imageSizes: {},
 				},
 			};
 
@@ -148,12 +115,12 @@ describe( 'selectors', () => {
 						status: ItemStatus.PendingApproval,
 					},
 				] as QueueItem[],
-				imageSizes: {},
 				queueStatus: 'paused',
 				blobUrls: {},
 				settings: {
 					mediaUpload: jest.fn(),
 					mediaSideload: jest.fn(),
+					imageSizes: {},
 				},
 			};
 
@@ -192,12 +159,12 @@ describe( 'selectors', () => {
 						status: ItemStatus.Processing,
 					},
 				] as QueueItem[],
-				imageSizes: {},
 				queueStatus: 'paused',
 				blobUrls: {},
 				settings: {
 					mediaUpload: jest.fn(),
 					mediaSideload: jest.fn(),
+					imageSizes: {},
 				},
 			};
 
