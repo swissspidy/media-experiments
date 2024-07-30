@@ -26,6 +26,7 @@ use WP_REST_Server;
  *   author?: int,
  *   sticky?: bool,
  *   generate_sub_sizes?: bool,
+ *   convert_format?: bool,
  * }
  * @phpstan-type SideloadRequest array{
  *   id: int,
@@ -47,6 +48,11 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			'type'        => 'boolean',
 			'default'     => true,
 			'description' => __( 'Whether to generate image sub sizes.', 'media-experiments' ),
+		];
+		$args['convert_format']     = [
+			'type'        => 'boolean',
+			'default'     => true,
+			'description' => __( 'Whether to support server-side format conversion.', 'media-experiments' ),
 		];
 		$args['upload_request']     = [
 			'description' => __( 'Upload request this file is for.', 'media-experiments' ),
@@ -240,6 +246,12 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		if ( false === $request['generate_sub_sizes'] ) {
 			add_filter( 'intermediate_image_sizes_advanced', '__return_empty_array', 100 );
 			add_filter( 'fallback_intermediate_image_sizes', '__return_empty_array', 100 );
+
+		}
+
+		if ( false === $request['convert_format'] ) {
+			// Prevent image conversion as that is done client-side.
+			add_filter( 'image_editor_output_format', '__return_empty_array', 100 );
 		}
 
 		$upload_request = $this->get_upload_request_post( $request );
@@ -347,6 +359,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		remove_filter( 'intermediate_image_sizes_advanced', '__return_empty_array', 100 );
 		remove_filter( 'fallback_intermediate_image_sizes', '__return_empty_array', 100 );
+		remove_filter( 'image_editor_output_format', '__return_empty_array', 100 );
 		remove_filter( 'map_meta_cap', $grant_meta_update );
 
 		if ( $upload_request && $response instanceof WP_REST_Response ) {
@@ -551,6 +564,11 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			);
 		}
 
+		if ( false === $request['convert_format'] ) {
+			// Prevent image conversion as that is done client-side.
+			add_filter( 'image_editor_output_format', '__return_empty_array', 100 );
+		}
+
 		$before_upload = microtime( true );
 
 		// Get the file via $_FILES or raw data.
@@ -630,6 +648,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		}
 
 		remove_filter( 'wp_unique_filename', $filter_filename );
+		remove_filter( 'image_editor_output_format', '__return_empty_array', 100 );
 
 		if ( is_wp_error( $file ) ) {
 			return $file;

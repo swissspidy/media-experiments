@@ -50,6 +50,7 @@
 					"site_icon",
 					"site_logo",
 					"generate_sub_sizes",
+					"convert_format",
 					"upload_request",
 					"[a-z]+_outputFormat",
 					"[a-z]+_quality",

@@ -1,3 +1,5 @@
+import { __, sprintf } from '@wordpress/i18n';
+
 import type {
 	AdditionalData,
 	OnChangeHandler,
@@ -8,6 +10,7 @@ import { uploadToServer } from './uploadToServer';
 import { validateMimeType } from './validateMimeType';
 import { validateMimeTypeForUser } from './validateMimeTypeForUser';
 import { validateFileSize } from './validateFileSize';
+import { UploadError } from './uploadError';
 
 const noop = () => {};
 
@@ -94,7 +97,34 @@ export function uploadMedia( {
 	}
 
 	validFiles.map( async ( file ) => {
-		const attachment = await uploadToServer( file, additionalData, signal );
-		onFileChange?.( [ attachment ] );
+		try {
+			const attachment = await uploadToServer(
+				file,
+				additionalData,
+				signal
+			);
+			onFileChange?.( [ attachment ] );
+		} catch ( error ) {
+			let message;
+			if ( error instanceof Error ) {
+				message = error.message;
+			} else {
+				message = sprintf(
+					// translators: %s: file name
+					__(
+						'Error while uploading file %s to the media library.',
+						'media-experiments'
+					),
+					file.name
+				);
+			}
+			onError(
+				new UploadError( {
+					code: 'GENERAL',
+					message,
+					file,
+				} )
+			);
+		}
 	} );
 }
