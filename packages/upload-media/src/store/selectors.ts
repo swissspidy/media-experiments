@@ -1,9 +1,6 @@
 import {
-	type BatchId,
 	ItemStatus,
-	OperationType,
 	type QueueItem,
-	type QueueItemId,
 	type Settings,
 	type State,
 } from './types';
@@ -104,21 +101,6 @@ export function getComparisonDataForApproval(
 }
 
 /**
- * Determines whether a batch has been successfully uploaded, given its unique ID.
- *
- * @param state   Upload state.
- * @param batchId Batch ID.
- *
- * @return Whether a batch has been uploaded.
- */
-export function isBatchUploaded( state: State, batchId: BatchId ): boolean {
-	const batchItems = state.queue.filter(
-		( item ) => batchId === item.batchId
-	);
-	return batchItems.length <= 1;
-}
-
-/**
  * Determines whether any upload is currently in progress.
  *
  * @todo Change forceIsSaving in GB depending on this selector.
@@ -160,70 +142,6 @@ export function isUploadingById( state: State, attachmentId: number ): boolean {
 			item.attachment?.id === attachmentId ||
 			item.sourceAttachmentId === attachmentId
 	);
-}
-
-/**
- * Determines whether an upload is currently in progress given a post or attachment ID.
- *
- * @param state              Upload state.
- * @param postOrAttachmentId Post ID or attachment ID.
- *
- * @return Whether upload is currently in progress for the given post or attachment.
- */
-export function isUploadingToPost(
-	state: State,
-	postOrAttachmentId: number
-): boolean {
-	return state.queue.some(
-		( item ) =>
-			item.currentOperation === OperationType.Upload &&
-			item.additionalData.post === postOrAttachmentId
-	);
-}
-
-/**
- * Returns the next paused upload for a given post or attachment ID.
- *
- * @param state              Upload state.
- * @param postOrAttachmentId Post ID or attachment ID.
- *
- * @return Paused item.
- */
-export function getPausedUploadForPost(
-	state: State,
-	postOrAttachmentId: number
-): QueueItem | undefined {
-	return state.queue.find(
-		( item ) =>
-			item.status === ItemStatus.Paused &&
-			item.additionalData.post === postOrAttachmentId
-	);
-}
-
-/**
- * Determines whether an upload is currently in progress given a parent ID.
- *
- * @param state    Upload state.
- * @param parentId Parent ID.
- *
- * @return Whether upload is currently in progress for the given parent ID.
- */
-export function isUploadingByParentId(
-	state: State,
-	parentId: QueueItemId
-): boolean {
-	return state.queue.some( ( item ) => item.parentId === parentId );
-}
-
-/**
- * Determines whether uploading is currently paused.
- *
- * @param state Upload state.
- *
- * @return Whether uploading is currently paused.
- */
-export function isPaused( state: State ): boolean {
-	return state.queueStatus === 'paused';
 }
 
 /**
