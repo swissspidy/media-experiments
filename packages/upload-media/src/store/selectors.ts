@@ -1,24 +1,14 @@
-import {
-	ItemStatus,
-	type QueueItem,
-	type Settings,
-	type State,
-} from './types';
+import { ItemStatus, type QueueItem, type Settings, type State } from './types';
 
 /**
- * Returns all items currently being uploaded.
+ * Returns all items currently being uploaded, without sub-sizes (children).
  *
- * @param state  Upload state.
- * @param status Status to filter items by.
+ * @param state Upload state.
  *
  * @return Queue items.
  */
-export function getItems( state: State, status?: ItemStatus ): QueueItem[] {
-	if ( status ) {
-		return state.queue.filter( ( item ) => item.status === status );
-	}
-
-	return state.queue;
+export function getItems( state: State ): QueueItem[] {
+	return state.queue.filter( ( item ) => ! Boolean( item.parentId ) );
 }
 
 /**

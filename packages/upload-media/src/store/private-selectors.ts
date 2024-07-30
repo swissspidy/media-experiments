@@ -9,6 +9,32 @@ import {
 } from './types';
 
 /**
+ * Returns all items currently being uploaded.
+ *
+ * @param state Upload state.
+ *
+ * @return Queue items.
+ */
+export function getAllItems( state: State ): QueueItem[] {
+	return state.queue;
+}
+
+/**
+ * Returns all items currently being uploaded.
+ *
+ * @param state    Upload state.
+ * @param parentId Parent item ID.
+ *
+ * @return Queue items.
+ */
+export function getChildItems(
+	state: State,
+	parentId: QueueItemId
+): QueueItem[] {
+	return state.queue.filter( ( item ) => item.parentId === parentId );
+}
+
+/**
  * Returns a specific item given its unique ID.
  *
  * @param state Upload state.

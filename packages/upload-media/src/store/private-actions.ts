@@ -554,7 +554,7 @@ export function resumeQueue() {
 			type: Type.ResumeQueue,
 		} );
 
-		for ( const item of select.getItems() ) {
+		for ( const item of select.getAllItems() ) {
 			dispatch.processItem( item.id );
 		}
 	};

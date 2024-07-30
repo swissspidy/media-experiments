@@ -35,9 +35,7 @@ export function UploadStatusIndicator() {
 	const { cancelItem } = useDispatch( uploadStore );
 	const { isUploading, items } = useSelect(
 		( select ) => {
-			const queueItems = select( uploadStore )
-				.getItems()
-				.filter( ( item ) => ! item.parentId );
+			const queueItems = select( uploadStore ).getItems();
 
 			return {
 				isUploading: select( uploadStore ).isUploading(),

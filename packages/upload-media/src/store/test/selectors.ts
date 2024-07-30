@@ -26,39 +26,6 @@ describe( 'selectors', () => {
 
 			expect( getItems( state ) ).toHaveLength( 0 );
 		} );
-
-		it( 'should return items with the given status', () => {
-			const state: State = {
-				queue: [
-					{
-						status: ItemStatus.Processing,
-					},
-					{
-						status: ItemStatus.PendingApproval,
-					},
-					{
-						status: ItemStatus.Processing,
-					},
-					{
-						status: ItemStatus.Processing,
-					},
-					{
-						status: ItemStatus.PendingApproval,
-					},
-				] as QueueItem[],
-				queueStatus: 'paused',
-				blobUrls: {},
-				settings: {
-					mediaUpload: jest.fn(),
-					mediaSideload: jest.fn(),
-					imageSizes: {},
-				},
-			};
-
-			expect( getItems( state, ItemStatus.Processing ) ).toHaveLength(
-				3
-			);
-		} );
 	} );
 
 	describe( 'isUploading', () => {

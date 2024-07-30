@@ -610,9 +610,7 @@ export function cancelItem( id: QueueItemId, error: Error ) {
 		}
 
 		// When cancelling a parent item, cancel all the children too.
-		for ( const child of select
-			.getItems()
-			.filter( ( _item ) => _item.parentId === id ) ) {
+		for ( const child of select.getChildItems( id ) ) {
 			dispatch.cancelItem( child.id, error );
 		}
 
