@@ -223,6 +223,7 @@ export function addItem( {
 				},
 				additionalData: {
 					generate_sub_sizes: 'server' === thumbnailGeneration,
+					convert_format: false,
 					...additionalData,
 				},
 				onChange,
@@ -286,7 +287,6 @@ export function addSideloadItem( {
 				file,
 				onChange,
 				additionalData: {
-					generate_sub_sizes: false,
 					...additionalData,
 				},
 				parentId,
@@ -1060,6 +1060,7 @@ export function generateThumbnails( id: QueueItemId ) {
 						// attachment ID as the image sizes need to be added to it.
 						post: attachment.id,
 						image_size: 'full',
+						convert_format: false,
 					},
 					operations: [
 						[
@@ -1096,6 +1097,7 @@ export function generateThumbnails( id: QueueItemId ) {
 							// Reference the same upload_request if needed.
 							upload_request: item.additionalData.upload_request,
 							image_size: name,
+							convert_format: false,
 						},
 						operations: [
 							[ OperationType.ResizeCrop, { resize: imageSize } ],
@@ -1156,6 +1158,7 @@ export function uploadOriginal( id: QueueItemId ) {
 						// Reference the same upload_request if needed.
 						upload_request: item.additionalData.upload_request,
 						image_size: 'original',
+						convert_format: false,
 					},
 					// Skip any resizing or optimization of the original image.
 					operations: [ OperationType.Upload ],

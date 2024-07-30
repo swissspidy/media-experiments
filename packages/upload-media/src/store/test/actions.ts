@@ -222,9 +222,6 @@ describe( 'actions', () => {
 					sourceFile: expect.any( File ),
 					sourceAttachmentId: 1234,
 					status: ItemStatus.Processing,
-					additionalData: {
-						generate_sub_sizes: false,
-					},
 					attachment: {
 						url: 'https://example.com/awesome-video.mp4',
 						poster: undefined,

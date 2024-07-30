@@ -217,6 +217,7 @@ export type OnErrorHandler = ( error: Error ) => void;
 
 export type CreateRestAttachment = Partial< RestAttachment > & {
 	generate_sub_sizes?: boolean;
+	convert_format?: boolean;
 };
 
 export type AdditionalData = BetterOmit<

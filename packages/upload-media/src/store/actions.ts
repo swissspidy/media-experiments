@@ -513,6 +513,7 @@ export function optimizeExistingItem( {
 				},
 				additionalData: {
 					generate_sub_sizes: 'server' === thumbnailGeneration,
+					convert_format: false,
 					...additionalData,
 				},
 				onChange,
