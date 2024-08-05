@@ -34,7 +34,8 @@ interface SideloadMediaArgs {
  * @param $0.attachmentId   Parent attachment ID.
  * @param $0.additionalData Additional data to include in the request.
  * @param $0.signal         Abort signal.
- * @param $0.onFileChange
+ * @param $0.onFileChange   Function called each time a file or a temporary representation of the file is available.
+ * @param $0.onError        Function called when an error happens.
  */
 export async function sideloadMedia( {
 	file,
