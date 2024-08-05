@@ -1075,36 +1075,38 @@ export function generateThumbnails( id: QueueItemId ) {
 
 			for ( const name of attachment.missing_image_sizes ) {
 				const imageSize = select.getImageSize( name );
-				if ( imageSize ) {
-					// Force thumbnails to be soft crops, see wp_generate_attachment_metadata().
-					if ( 'pdf' === mediaType && 'thumbnail' === name ) {
-						imageSize.crop = false;
-					}
-
-					dispatch.addSideloadItem( {
-						file,
-						onChange: ( [ updatedAttachment ] ) => {
-							// This might be confusing, but the idea is to update the original
-							// image item in the editor with the new one with the added sub-size.
-							item.onChange?.( [ updatedAttachment ] );
-						},
-						batchId,
-						parentId: item.id,
-						additionalData: {
-							// Sideloading does not use the parent post ID but the
-							// attachment ID as the image sizes need to be added to it.
-							post: attachment.id,
-							// Reference the same upload_request if needed.
-							upload_request: item.additionalData.upload_request,
-							image_size: name,
-							convert_format: false,
-						},
-						operations: [
-							[ OperationType.ResizeCrop, { resize: imageSize } ],
-							OperationType.Upload,
-						],
-					} );
+				if ( ! imageSize ) {
+					continue;
 				}
+
+				// Force thumbnails to be soft crops, see wp_generate_attachment_metadata().
+				if ( 'pdf' === mediaType && 'thumbnail' === name ) {
+					imageSize.crop = false;
+				}
+
+				dispatch.addSideloadItem( {
+					file,
+					onChange: ( [ updatedAttachment ] ) => {
+						// This might be confusing, but the idea is to update the original
+						// image item in the editor with the new one with the added sub-size.
+						item.onChange?.( [ updatedAttachment ] );
+					},
+					batchId,
+					parentId: item.id,
+					additionalData: {
+						// Sideloading does not use the parent post ID but the
+						// attachment ID as the image sizes need to be added to it.
+						post: attachment.id,
+						// Reference the same upload_request if needed.
+						upload_request: item.additionalData.upload_request,
+						image_size: name,
+						convert_format: false,
+					},
+					operations: [
+						[ OperationType.ResizeCrop, { resize: imageSize } ],
+						OperationType.Upload,
+					],
+				} );
 			}
 		}
 

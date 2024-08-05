@@ -1,3 +1,5 @@
+import { __, sprintf } from '@wordpress/i18n';
+
 import type {
 	OnChangeHandler,
 	OnErrorHandler,
@@ -5,6 +7,9 @@ import type {
 	RestAttachment,
 } from './types';
 import { sideloadToServer } from './sideloadToServer';
+import { UploadError } from './uploadError';
+
+const noop = () => {};
 
 interface SideloadMediaArgs {
 	// Additional data to include in the request.
@@ -37,14 +42,38 @@ export async function sideloadMedia( {
 	additionalData = {},
 	signal,
 	onFileChange,
+	onError = noop,
 }: SideloadMediaArgs ) {
 	// TODO: Also do file validation here?
 
-	const attachment = await sideloadToServer(
-		file,
-		attachmentId,
-		additionalData,
-		signal
-	);
-	return onFileChange?.( [ attachment ] );
+	try {
+		const attachment = await sideloadToServer(
+			file,
+			attachmentId,
+			additionalData,
+			signal
+		);
+		onFileChange?.( [ attachment ] );
+	} catch ( error ) {
+		let message;
+		if ( error instanceof Error ) {
+			message = error.message;
+		} else {
+			message = sprintf(
+				// translators: %s: file name
+				__(
+					'Error while sideloading file %s to the server.',
+					'media-experiments'
+				),
+				file.name
+			);
+		}
+		onError(
+			new UploadError( {
+				code: 'GENERAL',
+				message,
+				file,
+			} )
+		);
+	}
 }
