@@ -69,7 +69,7 @@ jobs:
                   cd $WP_ENV_DIR
                   mkdir -p tests-WordPress/wp-content/languages tests-WordPress/wp-content/upgrade
                   chmod -R 767 tests-WordPress/wp-content/languages tests-WordPress/wp-content/upgrade
-                  docker-compose run --rm -u $(id -u) -e HOME=/tmp tests-cli wp language core install de_CH de_DE es_ES fr_FR it_IT
+                  docker compose run --rm -u $(id -u) -e HOME=/tmp tests-cli wp language core install de_CH de_DE es_ES fr_FR it_IT
                   cd -
 
             - name: Run tests
