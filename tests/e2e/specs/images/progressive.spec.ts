@@ -64,7 +64,7 @@ test.describe( 'Images', () => {
 					.length === 0,
 			undefined,
 			{
-				timeout: 30_000, // Transcoding might take longer
+				timeout: 60_000, // Transcoding might take longer
 			}
 		);
 

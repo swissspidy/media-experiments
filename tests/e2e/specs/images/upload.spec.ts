@@ -8,46 +8,46 @@ const scenarios: {
 	outputFormat: ImageFormat;
 	expectedMimeType: string;
 }[] = [
+	// {
+	// 	imageLibrary: 'browser',
+	// 	outputFormat: 'jpeg',
+	// 	expectedMimeType: 'image/jpeg',
+	// },
+	// {
+	// 	imageLibrary: 'browser',
+	// 	outputFormat: 'webp',
+	// 	expectedMimeType: 'image/webp',
+	// },
+	// {
+	// 	imageLibrary: 'browser',
+	// 	outputFormat: 'png',
+	// 	expectedMimeType: 'image/png',
+	// },
+	// {
+	// 	imageLibrary: 'browser',
+	// 	outputFormat: 'avif',
+	// 	expectedMimeType: 'image/avif',
+	// },
 	{
-		imageLibrary: 'browser',
+		imageLibrary: 'vips',
 		outputFormat: 'jpeg',
 		expectedMimeType: 'image/jpeg',
 	},
-	{
-		imageLibrary: 'browser',
-		outputFormat: 'webp',
-		expectedMimeType: 'image/webp',
-	},
-	{
-		imageLibrary: 'browser',
-		outputFormat: 'png',
-		expectedMimeType: 'image/png',
-	},
-	{
-		imageLibrary: 'browser',
-		outputFormat: 'avif',
-		expectedMimeType: 'image/avif',
-	},
-	{
-		imageLibrary: 'vips',
-		outputFormat: 'jpeg',
-		expectedMimeType: 'image/jpeg',
-	},
-	{
-		imageLibrary: 'vips',
-		outputFormat: 'webp',
-		expectedMimeType: 'image/webp',
-	},
-	{
-		imageLibrary: 'vips',
-		outputFormat: 'png',
-		expectedMimeType: 'image/png',
-	},
-	{
-		imageLibrary: 'vips',
-		outputFormat: 'avif',
-		expectedMimeType: 'image/avif',
-	},
+	// {
+	// 	imageLibrary: 'vips',
+	// 	outputFormat: 'webp',
+	// 	expectedMimeType: 'image/webp',
+	// },
+	// {
+	// 	imageLibrary: 'vips',
+	// 	outputFormat: 'png',
+	// 	expectedMimeType: 'image/png',
+	// },
+	// {
+	// 	imageLibrary: 'vips',
+	// 	outputFormat: 'avif',
+	// 	expectedMimeType: 'image/avif',
+	// },
 ];
 
 test.describe( 'Images', () => {

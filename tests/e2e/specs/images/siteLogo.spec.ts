@@ -122,7 +122,7 @@ test.describe( 'Site Logo', () => {
 							.isPendingApproval(),
 					undefined,
 					{
-						timeout: 30000, // Transcoding might take longer
+						timeout: 60_000, // Transcoding might take longer
 					}
 				);
 
@@ -143,7 +143,7 @@ test.describe( 'Site Logo', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 30000, // Transcoding might take longer
+						timeout: 60_000, // Transcoding might take longer
 					}
 				);
 
