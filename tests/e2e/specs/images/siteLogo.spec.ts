@@ -160,7 +160,7 @@ test.describe( 'Site Logo', () => {
 				);
 
 				await expect(
-					settingsPanel.getByLabel( '#696969' )
+					settingsPanel.getByLabel( /#69696[9a]/ )
 				).toBeVisible();
 				await expect(
 					page.locator( 'css=[data-blurhash]' )

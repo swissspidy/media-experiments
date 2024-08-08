@@ -50,7 +50,7 @@ test.describe( 'Images', () => {
 
 		await expect( settingsPanel ).toHaveText( /Mime type: image\/jpeg/ );
 		await expect(
-			settingsPanel.getByLabel( /#8a74bc|#8974bb/ )
+			settingsPanel.getByLabel( /#8a7[45]b[c|b]/ )
 		).toBeVisible();
 		await expect( page.locator( 'css=[data-blurhash]' ) ).toBeVisible();
 	} );

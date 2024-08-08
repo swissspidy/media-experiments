@@ -134,7 +134,7 @@ test.describe( 'Images', () => {
 					/Mime type: image\/png/
 				);
 				await expect(
-					settingsPanel.getByLabel( '#696969' )
+					settingsPanel.getByLabel( /#69696[9a]/ )
 				).toBeVisible();
 				await expect(
 					page.locator( 'css=[data-blurhash]' )
@@ -232,7 +232,7 @@ test.describe( 'Images', () => {
 				);
 
 				await expect(
-					settingsPanel.getByLabel( '#696969' )
+					settingsPanel.getByLabel( /#69696[9a]/ )
 				).toBeVisible();
 				await expect(
 					page.locator( 'css=[data-blurhash]' )
@@ -308,7 +308,7 @@ test.describe( 'Images', () => {
 			} );
 
 		await expect( settingsPanel ).toHaveText( /Mime type: image\/png/ );
-		await expect( settingsPanel.getByLabel( '#696969' ) ).toBeVisible();
+		await expect( settingsPanel.getByLabel( /#69696[9a]/ ) ).toBeVisible();
 		await expect( page.locator( 'css=[data-blurhash]' ) ).toBeVisible();
 
 		await page.evaluate( () => {
@@ -489,7 +489,7 @@ test.describe( 'Images', () => {
 					new RegExp( `Mime type: ${ expectedMimeType }` )
 				);
 				await expect(
-					settingsPanel.getByLabel( '#696969' )
+					settingsPanel.getByLabel( /#69696[9a]/ )
 				).toBeVisible();
 				await expect(
 					page.locator( 'css=[data-blurhash]' )

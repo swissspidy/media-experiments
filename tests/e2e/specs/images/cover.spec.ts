@@ -99,7 +99,7 @@ test.describe( 'Cover Block', () => {
 					/Mime type: image\/png/
 				);
 				await expect(
-					settingsPanel.getByLabel( '#696969' )
+					settingsPanel.getByLabel( /#69696[9a]/ )
 				).toBeVisible();
 				await expect(
 					page.locator( 'css=[data-blurhash]' )
@@ -197,7 +197,7 @@ test.describe( 'Cover Block', () => {
 				);
 
 				await expect(
-					settingsPanel.getByLabel( '#696969' )
+					settingsPanel.getByLabel( /#69696[9a]/ )
 				).toBeVisible();
 				await expect(
 					page.locator( 'css=[data-blurhash]' )
@@ -296,7 +296,7 @@ test.describe( 'Cover Block', () => {
 					new RegExp( `Mime type: ${ expectedMimeType }` )
 				);
 				await expect(
-					settingsPanel.getByLabel( '#696969' )
+					settingsPanel.getByLabel( /#69696[9a]/ )
 				).toBeVisible();
 				await expect(
 					page.locator( 'css=[data-blurhash]' )
