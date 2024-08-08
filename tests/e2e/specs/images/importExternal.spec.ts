@@ -8,17 +8,7 @@ test.describe( 'Images', () => {
 		] );
 	} );
 
-	test( 'should upload external image', async ( {
-		admin,
-		editor,
-		page,
-		browserName,
-	} ) => {
-		test.skip(
-			browserName === 'webkit',
-			'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
-		);
-
+	test( 'should upload external image', async ( { admin, editor, page } ) => {
 		await admin.createNewPost();
 
 		await editor.insertBlock( {

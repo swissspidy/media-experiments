@@ -16,13 +16,7 @@ test.describe( 'PDF', () => {
 		editor,
 		mediaUtils,
 		requestUtils,
-		browserName,
 	} ) => {
-		test.skip(
-			browserName === 'webkit',
-			'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
-		);
-
 		await admin.createNewPost();
 
 		await page.evaluate( () => {

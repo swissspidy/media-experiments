@@ -29,14 +29,8 @@ test.describe( 'Images', () => {
 				page,
 				editor,
 				mediaUtils,
-				browserName,
 				requestUtils,
 			} ) => {
-				test.skip(
-					browserName === 'webkit' && imageLibrary === 'vips',
-					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
-				);
-
 				await admin.createNewPost();
 
 				await page.evaluate(

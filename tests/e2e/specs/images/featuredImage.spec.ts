@@ -34,11 +34,6 @@ test.describe( 'Post Featured Image', () => {
 					mediaUtils,
 					browserName,
 				} ) => {
-					test.skip(
-						browserName === 'webkit' && imageLibrary === 'vips',
-						'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
-					);
-
 					// TODO: Investigate.
 					test.skip(
 						browserName === 'webkit' && imageLibrary === 'browser',
@@ -204,11 +199,6 @@ test.describe( 'Post Featured Image', () => {
 					mediaUtils,
 					browserName,
 				} ) => {
-					test.skip(
-						browserName === 'webkit' && imageLibrary === 'vips',
-						'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
-					);
-
 					// TODO: Investigate.
 					test.skip(
 						browserName === 'webkit' && imageLibrary === 'browser',
