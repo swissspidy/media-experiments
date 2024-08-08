@@ -184,7 +184,6 @@ test.describe( 'Images', () => {
 			page,
 			editor,
 			mediaUtils,
-			browserName,
 		} ) => {
 			await admin.createNewPost();
 
