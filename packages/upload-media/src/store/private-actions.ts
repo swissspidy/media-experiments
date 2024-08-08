@@ -185,13 +185,7 @@ export function addItem( {
 	abortController,
 	operations,
 }: AddItemArgs ) {
-	return async ( {
-		dispatch,
-		registry,
-	}: {
-		dispatch: ActionCreators;
-		registry: WPDataRegistry;
-	} ) => {
+	return async ( { dispatch, registry }: ThunkArgs ) => {
 		const thumbnailGeneration: ThumbnailGeneration = registry
 			.select( preferencesStore )
 			.get( PREFERENCES_NAME, 'thumbnailGeneration' );
@@ -612,13 +606,7 @@ export function finishOperation(
  * @param id Item ID.
  */
 export function addPosterForItem( id: QueueItemId ) {
-	return async ( {
-		select,
-		dispatch,
-	}: {
-		select: Selectors;
-		dispatch: ActionCreators;
-	} ) => {
+	return async ( { select, dispatch }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
 
 		// Bail early if the video already has a poster.

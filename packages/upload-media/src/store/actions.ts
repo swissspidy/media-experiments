@@ -460,13 +460,7 @@ export function optimizeExistingItem( {
 	generatedPosterId,
 	startTime,
 }: OptimizeExistingItemArgs ) {
-	return async ( {
-		dispatch,
-		registry,
-	}: {
-		dispatch: ActionCreators;
-		registry: WPDataRegistry;
-	} ) => {
+	return async ( { dispatch, registry }: ThunkArgs ) => {
 		fileName = fileName || getFileNameFromUrl( url );
 		const baseName = getFileBasename( fileName );
 		const newFileName = fileName.replace(
