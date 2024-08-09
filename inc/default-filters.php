@@ -21,6 +21,8 @@ add_action( 'enqueue_block_assets', __NAMESPACE__ . '\enqueue_block_assets' );
 add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_fields' );
 add_action( 'init', __NAMESPACE__ . '\register_attachment_post_meta' );
 
+add_filter( 'mod_rewrite_rules', __NAMESPACE__ . '\filter_mod_rewrite_rules' );
+
 add_filter( 'big_image_size_threshold', __NAMESPACE__ . '\filter_big_image_size_threshold' );
 add_filter( 'image_save_progressive', __NAMESPACE__ . '\filter_image_save_progressive', 10, 2 );
 

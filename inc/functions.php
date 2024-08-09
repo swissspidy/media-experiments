@@ -1210,3 +1210,19 @@ function rest_post_dispatch_add_server_timing( $response ) {
 
 	return $response;
 }
+
+/**
+ * Filters the list of rewrite rules formatted for output to an .htaccess file.
+ *
+ * Adds support for serving wasm-vips locally.
+ *
+ * @param string $rules mod_rewrite Rewrite rules formatted for .htaccess.
+ * @return string Filtered rewrite rules.
+ */
+function filter_mod_rewrite_rules( string $rules ) {
+	$rules .= "\n# BEGIN Media Experiments\n" .
+				"AddType application/wasm wasm\n" .
+				"# END Media Experiments\n";
+
+	return $rules;
+}
