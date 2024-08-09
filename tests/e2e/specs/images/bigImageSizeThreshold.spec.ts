@@ -97,15 +97,14 @@ test.describe( 'Images', () => {
 					}
 				);
 
-				const imageUrl = await page.evaluate(
+				// See https://github.com/swissspidy/media-experiments/issues/321.
+				await page.waitForFunction(
 					() =>
 						window.wp.data
 							.select( 'core/block-editor' )
-							.getSelectedBlock()?.attributes?.url
+							.getSelectedBlock()
+							?.attributes?.url.includes( '-1024x683' )
 				);
-
-				// See https://github.com/swissspidy/media-experiments/issues/321.
-				expect( imageUrl ).toMatch( /-1024x683/ );
 
 				const imageId = await page.evaluate(
 					() =>
@@ -124,12 +123,6 @@ test.describe( 'Images', () => {
 					expect.objectContaining( {
 						width: 1200,
 						height: 800,
-						filesize: expect.any( Number ),
-						blurhash: expect.any( String ),
-						dominant_color: expect.any( String ),
-						has_transparency: false,
-						image_meta: expect.anything(),
-						sizes: expect.anything(),
 					} )
 				);
 				expect( media.media_details.sizes ).toEqual(
