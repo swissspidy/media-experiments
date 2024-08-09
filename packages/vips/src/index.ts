@@ -26,6 +26,12 @@ type EmscriptenModule = {
 	setDelayFunction: ( fn: ( fn: () => void ) => void ) => void;
 };
 
+let location = '';
+
+export function setLocation( newLocation: string ) {
+	location = newLocation;
+}
+
 let cleanup: () => void;
 
 let vipsInstance: typeof Vips;
@@ -52,7 +58,11 @@ async function getVips(): Promise< typeof Vips > {
 				fileName = VipsJxlModule;
 			}
 
-			return self.location.origin + fileName;
+			// fileName is a blob:<...> URL.
+			// Only get the path name and append it to the provided location.
+			return (
+				location + new URL( fileName.replace( 'blob:', '' ) ).pathname
+			);
 		},
 		preRun: ( module: EmscriptenModule ) => {
 			// https://github.com/kleisauke/wasm-vips/issues/13#issuecomment-1073246828
