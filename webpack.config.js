@@ -1,5 +1,4 @@
 const { resolve, dirname, basename } = require( 'node:path' );
-const { readFileSync } = require( 'node:fs' );
 
 const { DefinePlugin } = require( 'webpack' );
 const MiniCSSExtractPlugin = require( 'mini-css-extract-plugin' );

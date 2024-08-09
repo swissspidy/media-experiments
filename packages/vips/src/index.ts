@@ -1,12 +1,15 @@
 import Vips from 'wasm-vips';
 
 // @ts-expect-error
+// eslint-disable-next-line import/no-unresolved
 import VipsModule from 'wasm-vips/vips.wasm';
 
 // @ts-expect-error
+// eslint-disable-next-line import/no-unresolved
 import VipsHeifModule from 'wasm-vips/vips-heif.wasm';
 
 // @ts-expect-error
+// eslint-disable-next-line import/no-unresolved
 import VipsJxlModule from 'wasm-vips/vips-jxl.wasm';
 
 import { getExtensionFromMimeType } from '@mexp/mime';
