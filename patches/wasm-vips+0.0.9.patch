@@ -1,0 +1,16 @@
+diff --git a/node_modules/wasm-vips/package.json b/node_modules/wasm-vips/package.json
+index ed69597..22d63c0 100644
+--- a/node_modules/wasm-vips/package.json
++++ b/node_modules/wasm-vips/package.json
+@@ -25,7 +25,10 @@
+       },
+       "default": "./lib/vips.js"
+     },
+-    "./versions": "./versions.json"
++    "./versions": "./versions.json",
++    "./vips.wasm": "./lib/vips.wasm",
++    "./vips-heif.wasm": "./lib/vips-heif.wasm",
++    "./vips-jxl.wasm": "./lib/vips-jxl.wasm"
+   },
+   "main": "lib/vips-node.js",
+   "browser": "lib/vips.js",

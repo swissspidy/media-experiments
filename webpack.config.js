@@ -19,23 +19,10 @@ const {
 const { version: pdfJsVersion } = require( 'pdfjs-dist/package.json' );
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-const { version: vipsVersion } = JSON.parse(
-	readFileSync(
-		`${ dirname(
-			dirname( require.resolve( 'wasm-vips' ) )
-		) }/package.json`,
-		{
-			encoding: 'utf-8',
-		}
-	)
-);
-
-// eslint-disable-next-line import/no-extraneous-dependencies
 const { version: ffmpegVersion } = require( '@ffmpeg/core/package.json' );
 
 const mediapipeCdnUrl = `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@${ mediaPipeVersion }`;
 const pdfJsCdnUrl = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${ pdfJsVersion }/build/pdf.worker.mjs`;
-const vipsCdnUrl = `https://cdn.jsdelivr.net/npm/wasm-vips@${ vipsVersion }/lib`;
 const ffmpegCdnUrl = `https://cdn.jsdelivr.net/npm/@ffmpeg/core@${ ffmpegVersion }/dist/ffmpeg-core.js`;
 
 module.exports = {
@@ -56,6 +43,10 @@ module.exports = {
 		globalObject: 'self', // This is the default, but required for @shopify/web-worker.
 	},
 	resolve: {
+		// Ensure "require" has a higher priority when matching export conditions.
+		// https://webpack.js.org/configuration/resolve/#resolveconditionnames
+		// https://github.com/kleisauke/wasm-vips/issues/50#issuecomment-1664118137
+		conditionNames: [ 'require', 'import' ],
 		extensions: [ '.jsx', '.ts', '.tsx', '...' ],
 		fallback: {
 			crypto: false,
@@ -107,6 +98,15 @@ module.exports = {
 					},
 				],
 			},
+			{
+				test: /\.wasm$/,
+				type: 'asset/resource',
+				generator: {
+					// Use [contenthash:8] to help with cache busting.
+					filename: '[name].[contenthash:8].wasm',
+					publicPath: '/wp-content/plugins/media-experiments/build/',
+				},
+			},
 			...defaultConfig.module.rules.slice( 1 ),
 		],
 	},
@@ -122,7 +122,6 @@ module.exports = {
 			FFMPEG_CDN_URL: JSON.stringify( ffmpegCdnUrl ),
 			MEDIAPIPE_CDN_URL: JSON.stringify( mediapipeCdnUrl ),
 			PDFJS_CDN_URL: JSON.stringify( pdfJsCdnUrl ),
-			VIPS_CDN_URL: JSON.stringify( vipsCdnUrl ),
 		} ),
 	],
 	optimization: {
