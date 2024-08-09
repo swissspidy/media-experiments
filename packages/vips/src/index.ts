@@ -1,7 +1,16 @@
-const Vips = require( 'wasm-vips' ) as (
-	config?: Parameters< typeof VipsInstance >[ 0 ]
-) => Promise< NonNullable< typeof VipsInstance > >;
-import type VipsInstance from 'wasm-vips';
+import Vips from 'wasm-vips';
+
+// @ts-expect-error
+// eslint-disable-next-line import/no-unresolved
+import VipsModule from 'wasm-vips/vips.wasm';
+
+// @ts-expect-error
+// eslint-disable-next-line import/no-unresolved
+import VipsHeifModule from 'wasm-vips/vips-heif.wasm';
+
+// @ts-expect-error
+// eslint-disable-next-line import/no-unresolved
+import VipsJxlModule from 'wasm-vips/vips-jxl.wasm';
 
 import { getExtensionFromMimeType } from '@mexp/mime';
 
@@ -19,7 +28,7 @@ type EmscriptenModule = {
 
 let cleanup: () => void;
 
-let vipsInstance: typeof VipsInstance;
+let vipsInstance: typeof Vips;
 
 type ItemId = string;
 
@@ -28,18 +37,23 @@ type ItemId = string;
  *
  * Reuses any existing instance.
  */
-async function getVips(): Promise< typeof VipsInstance > {
+async function getVips(): Promise< typeof Vips > {
 	if ( vipsInstance ) {
 		return vipsInstance;
 	}
 
-	const mainBlobUrl = URL.createObjectURL(
-		await ( await fetch( `${ VIPS_CDN_URL }/vips.js` ) ).blob()
-	);
-
 	vipsInstance = await Vips( {
-		locateFile: ( fileName: string ) => `${ VIPS_CDN_URL }/${ fileName }`,
-		mainScriptUrlOrBlob: mainBlobUrl,
+		locateFile: ( fileName: string ) => {
+			if ( fileName.endsWith( 'vips.wasm' ) ) {
+				fileName = VipsModule;
+			} else if ( fileName.endsWith( 'vips-heif.wasm' ) ) {
+				fileName = VipsHeifModule;
+			} else if ( fileName.endsWith( 'vips-jxl.wasm' ) ) {
+				fileName = VipsJxlModule;
+			}
+
+			return self.location.origin + fileName;
+		},
 		preRun: ( module: EmscriptenModule ) => {
 			// https://github.com/kleisauke/wasm-vips/issues/13#issuecomment-1073246828
 			module.setAutoDeleteLater( true );
