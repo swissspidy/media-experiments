@@ -58,11 +58,7 @@ async function getVips(): Promise< typeof Vips > {
 				fileName = VipsJxlModule;
 			}
 
-			// fileName is a blob:<...> URL.
-			// Only get the path name and append it to the provided location.
-			return (
-				location + new URL( fileName.replace( 'blob:', '' ) ).pathname
-			);
+			return location + fileName;
 		},
 		preRun: ( module: EmscriptenModule ) => {
 			// https://github.com/kleisauke/wasm-vips/issues/13#issuecomment-1073246828
