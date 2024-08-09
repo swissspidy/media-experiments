@@ -19,8 +19,7 @@
 	"globals": {
 		"FFMPEG_CDN_URL": "readonly",
 		"MEDIAPIPE_CDN_URL": "readonly",
-		"PDFJS_CDN_URL": "readonly",
-		"VIPS_CDN_URL": "readonly"
+		"PDFJS_CDN_URL": "readonly"
 	},
 	"rules": {
 		"@wordpress/no-unused-vars-before-return": [
@@ -40,6 +39,7 @@
 			"error",
 			{
 				"allow": [
+					"__webpack_.*__",
 					"WP_REST_API_.*",
 					"featured_media",
 					"alt_text",

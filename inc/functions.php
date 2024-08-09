@@ -214,6 +214,7 @@ function register_assets(): void {
 					'pngInterlaced'             => $png_interlaced,
 					'gifInterlaced'             => $gif_interlaced,
 					'mediaSourceTerms'          => $media_source_terms,
+					'publicPath'                => plugins_url( 'build/', __DIR__ ),
 				]
 			)
 		),
@@ -323,6 +324,7 @@ function enqueue_block_editor_assets(): void {
 					'pngInterlaced'             => $png_interlaced,
 					'gifInterlaced'             => $gif_interlaced,
 					'mediaSourceTerms'          => $media_source_terms,
+					'publicPath'                => plugins_url( 'build/', __DIR__ ),
 				]
 			)
 		),
@@ -1209,4 +1211,20 @@ function rest_post_dispatch_add_server_timing( $response ) {
 	$response->header( 'Server-Timing', $server_timing->get_header() );
 
 	return $response;
+}
+
+/**
+ * Filters the list of rewrite rules formatted for output to an .htaccess file.
+ *
+ * Adds support for serving wasm-vips locally.
+ *
+ * @param string $rules mod_rewrite Rewrite rules formatted for .htaccess.
+ * @return string Filtered rewrite rules.
+ */
+function filter_mod_rewrite_rules( string $rules ) {
+	$rules .= "\n# BEGIN Media Experiments\n" .
+				"AddType application/wasm wasm\n" .
+				"# END Media Experiments\n";
+
+	return $rules;
 }
