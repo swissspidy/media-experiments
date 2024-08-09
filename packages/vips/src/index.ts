@@ -1,6 +1,12 @@
 import Vips from 'wasm-vips';
+
+// @ts-expect-error
 import VipsModule from 'wasm-vips/vips.wasm';
+
+// @ts-expect-error
 import VipsHeifModule from 'wasm-vips/vips-heif.wasm';
+
+// @ts-expect-error
 import VipsJxlModule from 'wasm-vips/vips-jxl.wasm';
 
 import { getExtensionFromMimeType } from '@mexp/mime';
