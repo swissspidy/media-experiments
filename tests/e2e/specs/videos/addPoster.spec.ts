@@ -12,14 +12,8 @@ test.describe( 'Videos', () => {
 		admin,
 		editor,
 		page,
-		browserName,
 		mediaUtils,
 	} ) => {
-		test.skip(
-			browserName === 'webkit',
-			'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
-		);
-
 		await admin.createNewPost();
 
 		await editor.insertBlock( { name: 'core/video' } );

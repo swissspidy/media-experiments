@@ -68,11 +68,10 @@ const config = defineConfig( {
 				},
 			},
 		},
-		// Blocked by https://github.com/microsoft/playwright/issues/14043.
-		// {
-		// 	name: 'webkit',
-		// 	use: { ...devices[ 'Desktop Safari' ] },
-		// },
+		{
+			name: 'webkit',
+			use: { ...devices[ 'Desktop Safari' ] },
+		},
 		{
 			name: 'firefox',
 			use: {

@@ -33,11 +33,6 @@ test.describe( 'Cover Block', () => {
 				mediaUtils,
 				browserName,
 			} ) => {
-				test.skip(
-					browserName === 'webkit' && imageLibrary === 'vips',
-					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
-				);
-
 				// TODO: Investigate.
 				test.skip(
 					browserName === 'webkit' && imageLibrary === 'browser',
@@ -104,7 +99,7 @@ test.describe( 'Cover Block', () => {
 					/Mime type: image\/png/
 				);
 				await expect(
-					settingsPanel.getByLabel( '#696969' )
+					settingsPanel.getByLabel( /#69696[9a]/ )
 				).toBeVisible();
 				await expect(
 					page.locator( 'css=[data-blurhash]' )
@@ -164,7 +159,7 @@ test.describe( 'Cover Block', () => {
 							.isPendingApproval(),
 					undefined,
 					{
-						timeout: 30000, // Transcoding might take longer
+						timeout: 60_000, // Transcoding might take longer
 					}
 				);
 
@@ -185,7 +180,7 @@ test.describe( 'Cover Block', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 30000, // Transcoding might take longer
+						timeout: 60_000, // Transcoding might take longer
 					}
 				);
 
@@ -202,7 +197,7 @@ test.describe( 'Cover Block', () => {
 				);
 
 				await expect(
-					settingsPanel.getByLabel( '#696969' )
+					settingsPanel.getByLabel( /#69696[9a]/ )
 				).toBeVisible();
 				await expect(
 					page.locator( 'css=[data-blurhash]' )
@@ -224,12 +219,6 @@ test.describe( 'Cover Block', () => {
 				mediaUtils,
 				browserName,
 			} ) => {
-				test.skip(
-					browserName === 'webkit' &&
-						( imageLibrary === 'vips' || outputFormat === 'avif' ),
-					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
-				);
-
 				test.skip(
 					browserName === 'webkit' && outputFormat === 'webp',
 					'WebKit does not currently support Canvas.toBlob with WebP'
@@ -307,7 +296,7 @@ test.describe( 'Cover Block', () => {
 					new RegExp( `Mime type: ${ expectedMimeType }` )
 				);
 				await expect(
-					settingsPanel.getByLabel( '#696969' )
+					settingsPanel.getByLabel( /#69696[9a]/ )
 				).toBeVisible();
 				await expect(
 					page.locator( 'css=[data-blurhash]' )

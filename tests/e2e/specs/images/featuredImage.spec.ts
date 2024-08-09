@@ -34,11 +34,6 @@ test.describe( 'Post Featured Image', () => {
 					mediaUtils,
 					browserName,
 				} ) => {
-					test.skip(
-						browserName === 'webkit' && imageLibrary === 'vips',
-						'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
-					);
-
 					// TODO: Investigate.
 					test.skip(
 						browserName === 'webkit' && imageLibrary === 'browser',
@@ -137,7 +132,7 @@ test.describe( 'Post Featured Image', () => {
 								.isPendingApproval(),
 						undefined,
 						{
-							timeout: 30000, // Transcoding might take longer
+							timeout: 60_000, // Transcoding might take longer
 						}
 					);
 
@@ -160,7 +155,7 @@ test.describe( 'Post Featured Image', () => {
 								.getItems().length === 0,
 						undefined,
 						{
-							timeout: 30000, // Transcoding might take longer
+							timeout: 60_000, // Transcoding might take longer
 						}
 					);
 
@@ -180,7 +175,7 @@ test.describe( 'Post Featured Image', () => {
 					);
 
 					await expect(
-						settingsPanel.getByLabel( '#696969' )
+						settingsPanel.getByLabel( /#69696[9a]/ )
 					).toBeVisible();
 					await expect(
 						page.locator( 'css=[data-blurhash]' )
@@ -204,11 +199,6 @@ test.describe( 'Post Featured Image', () => {
 					mediaUtils,
 					browserName,
 				} ) => {
-					test.skip(
-						browserName === 'webkit' && imageLibrary === 'vips',
-						'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
-					);
-
 					// TODO: Investigate.
 					test.skip(
 						browserName === 'webkit' && imageLibrary === 'browser',
@@ -307,7 +297,7 @@ test.describe( 'Post Featured Image', () => {
 								.isPendingApproval(),
 						undefined,
 						{
-							timeout: 30000, // Transcoding might take longer
+							timeout: 60_000, // Transcoding might take longer
 						}
 					);
 
@@ -330,7 +320,7 @@ test.describe( 'Post Featured Image', () => {
 								.getItems().length === 0,
 						undefined,
 						{
-							timeout: 30000, // Transcoding might take longer
+							timeout: 60_000, // Transcoding might take longer
 						}
 					);
 

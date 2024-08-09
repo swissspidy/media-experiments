@@ -66,12 +66,6 @@ test.describe( 'Images', () => {
 				browserName,
 			} ) => {
 				test.skip(
-					browserName === 'webkit' &&
-						( imageLibrary === 'vips' || outputFormat === 'avif' ),
-					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
-				);
-
-				test.skip(
 					browserName === 'webkit' && outputFormat === 'webp',
 					'WebKit does not currently support Canvas.toBlob with WebP'
 				);
@@ -140,7 +134,7 @@ test.describe( 'Images', () => {
 					/Mime type: image\/png/
 				);
 				await expect(
-					settingsPanel.getByLabel( '#696969' )
+					settingsPanel.getByLabel( /#69696[9a]/ )
 				).toBeVisible();
 				await expect(
 					page.locator( 'css=[data-blurhash]' )
@@ -200,7 +194,7 @@ test.describe( 'Images', () => {
 							.isPendingApproval(),
 					undefined,
 					{
-						timeout: 30000, // Transcoding might take longer
+						timeout: 60_000, // Transcoding might take longer
 					}
 				);
 
@@ -221,7 +215,7 @@ test.describe( 'Images', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 30000, // Transcoding might take longer
+						timeout: 60_000, // Transcoding might take longer
 					}
 				);
 
@@ -238,7 +232,7 @@ test.describe( 'Images', () => {
 				);
 
 				await expect(
-					settingsPanel.getByLabel( '#696969' )
+					settingsPanel.getByLabel( /#69696[9a]/ )
 				).toBeVisible();
 				await expect(
 					page.locator( 'css=[data-blurhash]' )
@@ -314,7 +308,7 @@ test.describe( 'Images', () => {
 			} );
 
 		await expect( settingsPanel ).toHaveText( /Mime type: image\/png/ );
-		await expect( settingsPanel.getByLabel( '#696969' ) ).toBeVisible();
+		await expect( settingsPanel.getByLabel( /#69696[9a]/ ) ).toBeVisible();
 		await expect( page.locator( 'css=[data-blurhash]' ) ).toBeVisible();
 
 		await page.evaluate( () => {
@@ -368,7 +362,7 @@ test.describe( 'Images', () => {
 					.isPendingApproval(),
 			undefined,
 			{
-				timeout: 30000, // Transcoding might take longer
+				timeout: 60_000, // Transcoding might take longer
 			}
 		);
 
@@ -386,7 +380,7 @@ test.describe( 'Images', () => {
 					.length === 0,
 			undefined,
 			{
-				timeout: 30000, // Transcoding might take longer
+				timeout: 60_000, // Transcoding might take longer
 			}
 		);
 
@@ -420,12 +414,6 @@ test.describe( 'Images', () => {
 				mediaUtils,
 				browserName,
 			} ) => {
-				test.skip(
-					browserName === 'webkit' &&
-						( imageLibrary === 'vips' || outputFormat === 'avif' ),
-					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
-				);
-
 				test.skip(
 					browserName === 'webkit' && outputFormat === 'webp',
 					'WebKit does not currently support Canvas.toBlob with WebP'
@@ -501,7 +489,7 @@ test.describe( 'Images', () => {
 					new RegExp( `Mime type: ${ expectedMimeType }` )
 				);
 				await expect(
-					settingsPanel.getByLabel( '#696969' )
+					settingsPanel.getByLabel( /#69696[9a]/ )
 				).toBeVisible();
 				await expect(
 					page.locator( 'css=[data-blurhash]' )

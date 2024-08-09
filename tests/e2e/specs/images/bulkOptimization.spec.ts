@@ -14,13 +14,7 @@ test.describe( 'Images', () => {
 			page,
 			editor,
 			mediaUtils,
-			browserName,
 		} ) => {
-			test.skip(
-				browserName === 'webkit',
-				'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
-			);
-
 			await admin.createNewPost();
 
 			// Ensure the initially uploaded PNG is left untouched.
@@ -190,13 +184,7 @@ test.describe( 'Images', () => {
 			page,
 			editor,
 			mediaUtils,
-			browserName,
 		} ) => {
-			test.skip(
-				browserName === 'webkit',
-				'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
-			);
-
 			await admin.createNewPost();
 
 			// Ensure the initially uploaded PNG is left untouched.

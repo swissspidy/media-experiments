@@ -73,12 +73,6 @@ test.describe( 'Images', () => {
 				requestUtils,
 			} ) => {
 				test.skip(
-					browserName === 'webkit' &&
-						( imageLibrary === 'vips' || outputFormat === 'avif' ),
-					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
-				);
-
-				test.skip(
 					browserName === 'webkit' && outputFormat === 'webp',
 					'WebKit does not currently support Canvas.toBlob with WebP'
 				);
