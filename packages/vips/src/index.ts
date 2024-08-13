@@ -1,11 +1,6 @@
 /**
  * External dependencies
  */
-const Vips = require( 'wasm-vips' ) as (
-	config?: Parameters< typeof VipsInstance >[ 0 ]
-) => Promise< NonNullable< typeof VipsInstance > >;
-import type VipsInstance from 'wasm-vips';
-
 import Vips from 'wasm-vips';
 
 // @ts-expect-error
