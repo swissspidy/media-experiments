@@ -1073,7 +1073,10 @@ export function generateThumbnails( id: QueueItemId ) {
 				}
 
 				// Force thumbnails to be soft crops, see wp_generate_attachment_metadata().
-				if ( 'application/pdf' === item.file.type && 'thumbnail' === name ) {
+				if (
+					'application/pdf' === item.file.type &&
+					'thumbnail' === name
+				) {
 					imageSize.crop = false;
 				}
 
