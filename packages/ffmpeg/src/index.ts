@@ -1,5 +1,4 @@
 import { v4 as uuidv4 } from 'uuid';
-import { getExtensionFromMimeType } from '@mexp/mime';
 import type { FFmpeg } from '@ffmpeg/ffmpeg';
 
 const VIDEO_CODEC: Record< string, string > = {
@@ -235,9 +234,8 @@ export async function transcodeAudio(
 	basename: string,
 	mimeType: string
 ): Promise< File > {
-	const outputFileName = `${ basename }.${ getExtensionFromMimeType(
-		mimeType
-	) }`;
+	const ext = mimeType.split( '/' )[ 1 ];
+	const outputFileName = `${ basename }.${ ext }`;
 	return runFFmpegWithConfig(
 		file,
 		[
