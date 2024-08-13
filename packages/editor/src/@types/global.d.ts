@@ -9,6 +9,8 @@ type MediaSourceTerm =
 	| 'subtitles-generation';
 
 declare global {
+	let __webpack_public_path__: string;
+
 	interface Window {
 		mediaExperiments: {
 			bigImageSizeThreshold: number;
@@ -19,6 +21,7 @@ declare global {
 			gifInterlaced: boolean;
 			availableImageSizes: Record< string, ImageSizeCrop >;
 			mediaSourceTerms: Record< MediaSourceTerm, number >;
+			publicPath: string;
 		};
 	}
 }

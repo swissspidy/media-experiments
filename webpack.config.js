@@ -103,7 +103,7 @@ module.exports = {
 				generator: {
 					// Use [contenthash:8] to help with cache busting.
 					filename: '[name].[contenthash:8].wasm',
-					publicPath: '/wp-content/plugins/media-experiments/build/',
+					publicPath: '',
 				},
 			},
 			...defaultConfig.module.rules.slice( 1 ),
