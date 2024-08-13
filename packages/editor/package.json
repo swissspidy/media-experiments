@@ -33,6 +33,8 @@
 		}
 	},
 	"dependencies": {
+		"@shopify/web-worker": "^6.3.0",
+		"@mexp/ai": "../ai",
 		"@mexp/interface": "../interface",
 		"@mexp/media-recording": "../media-recording",
 		"@mexp/media-utils": "../media-utils",

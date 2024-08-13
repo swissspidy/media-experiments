@@ -30,11 +30,11 @@
 		}
 	},
 	"dependencies": {
+		"@mexp/ai": "../ai",
 		"@mexp/ffmpeg": "../ffmpeg",
 		"@mexp/heif": "../heif",
 		"@mexp/log": "../log",
 		"@mexp/pdf": "../pdf",
-		"@mexp/subtitles": "../subtitles",
 		"@mexp/vips": "../vips",
 		"@shopify/web-worker": "^6.3.0",
 		"@wordpress/api-fetch": "^7.0.0",

@@ -5,6 +5,7 @@
 		"declarationDir": "dist-types"
 	},
 	"references": [
+		{ "path": "../ai" },
 		{ "path": "../interface" },
 		{ "path": "../media-recording" },
 		{ "path": "../media-utils" },

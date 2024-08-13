@@ -1,4 +1,4 @@
-# `@mexp/subtitles`
+# `@mexp/ai`
 
 Generate subtitles (captions) for video files.
 

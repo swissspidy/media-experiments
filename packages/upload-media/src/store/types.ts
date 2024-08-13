@@ -211,6 +211,7 @@ export enum OperationType {
 	Compress = 'TRANSCODE_COMPRESS',
 	FetchRemoteFile = 'FETCH_REMOTE_FILE',
 	GenerateSubtitles = 'GENERATE_SUBTITLES',
+	GenerateCaptions = 'GENERATE_CAPTIONS',
 	Upload = 'UPLOAD',
 }
 

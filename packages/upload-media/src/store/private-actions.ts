@@ -123,7 +123,8 @@ type ActionCreators = {
 	uploadPoster: typeof uploadPoster;
 	revokeBlobUrls: typeof revokeBlobUrls;
 	fetchRemoteFile: typeof fetchRemoteFile;
-	generateSubtitles: typeof generateSubtitles;
+	generateVideoSubtitles: typeof generateVideoSubtitles;
+	generateImageCaptions: typeof generateImageCaptions;
 	< T = Record< string, unknown > >( args: T ): void;
 };
 
@@ -507,7 +508,11 @@ export function processItem( id: QueueItemId ) {
 				break;
 
 			case OperationType.GenerateSubtitles:
-				dispatch.generateSubtitles( id );
+				dispatch.generateVideoSubtitles( id );
+				break;
+
+			case OperationType.GenerateCaptions:
+				dispatch.generateImageCaptions( id );
 				break;
 		}
 	};
@@ -814,6 +819,7 @@ export function prepareItem( id: QueueItemId ) {
 				}
 
 				operations.push(
+					OperationType.GenerateCaptions,
 					OperationType.Upload,
 					OperationType.ThumbnailGeneration
 				);
@@ -1997,20 +2003,20 @@ export function fetchRemoteFile( id: QueueItemId, args: FetchRemoteFileArgs ) {
 }
 
 /**
- * Generates subtitles for the video item.
+ * Generates subtitles for a video.
  *
  * @param id Item ID.
  */
-export function generateSubtitles( id: QueueItemId ) {
+export function generateVideoSubtitles( id: QueueItemId ) {
 	return async ( { select, dispatch }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
 
 		try {
-			const { generateSubtitles: _generateSubtitles } = await import(
-				/* webpackChunkName: 'subtitles' */ '@mexp/subtitles'
+			const { generateSubtitles } = await import(
+				/* webpackChunkName: 'ai' */ '@mexp/ai'
 			);
 
-			const file = await _generateSubtitles(
+			const file = await generateSubtitles(
 				item.sourceFile,
 				getFileBasename( item.sourceFile.name )
 			);
@@ -2039,6 +2045,54 @@ export function generateSubtitles( id: QueueItemId ) {
 							file: item.file,
 					  } )
 			);
+		}
+	};
+}
+
+/**
+ * Generates captions and alternative text for an image.
+ *
+ * @param id Item ID.
+ */
+export function generateImageCaptions( id: QueueItemId ) {
+	return async ( { select, dispatch }: ThunkArgs ) => {
+		const item = select.getItem( id ) as QueueItem;
+
+		try {
+			const { generateCaption } = await import(
+				/* webpackChunkName: 'ai' */ '@mexp/ai'
+			);
+
+			let url = item.attachment?.url;
+
+			if ( ! url ) {
+				url = createBlobURL( item.file );
+
+				dispatch< CacheBlobUrlAction >( {
+					type: Type.CacheBlobUrl,
+					id,
+					blobUrl: url,
+				} );
+			}
+
+			const caption = await generateCaption( url );
+			const alt = await generateCaption( url, '<DETAILED_CAPTION>' );
+
+			dispatch.finishOperation( id, {
+				// For updating in the editor straight away.
+				attachment: {
+					caption,
+					alt,
+				},
+				// For sending to the server.
+				additionalData: {
+					caption,
+					alt_text: alt,
+				},
+			} );
+		} catch {
+			// No big deal if captions could not be generated, just proceed normally.
+			dispatch.finishOperation( id, {} );
 		}
 	};
 }

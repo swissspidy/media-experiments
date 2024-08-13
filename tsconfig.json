@@ -1,6 +1,9 @@
 {
 	"references": [
 		{
+			"path": "packages/ai"
+		},
+		{
 			"path": "packages/editor"
 		},
 		{
@@ -23,9 +26,6 @@
 		},
 		{
 			"path": "packages/pdf"
-		},
-		{
-			"path": "packages/subtitles"
 		},
 		{
 			"path": "packages/upload-media"
