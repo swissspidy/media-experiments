@@ -28,6 +28,11 @@ type EmscriptenModule = {
 
 let location = '';
 
+/**
+ * Dynamically sets the location / public path to use for loading the WASM files.
+ *
+ * @param newLocation Location, typically a base URL such as "https://example.com/wp-content/...".
+ */
 export function setLocation( newLocation: string ) {
 	location = newLocation;
 }
