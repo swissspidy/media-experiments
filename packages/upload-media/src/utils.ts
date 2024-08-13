@@ -1,4 +1,5 @@
-import { getExtensionFromMimeType, getMimeTypeFromExtension } from '@mexp/mime';
+import mime from 'mime/lite';
+
 import { getFilename } from '@wordpress/url';
 import { _x } from '@wordpress/i18n';
 
@@ -101,7 +102,7 @@ export async function fetchFile( url: string, nameOverride?: string ) {
 	const blob = await response.blob();
 
 	const ext = getFileExtension( name );
-	const guessedMimeType = ext ? getMimeTypeFromExtension( ext ) : '';
+	const guessedMimeType = ext ? mime.getType( ext ) : '';
 
 	let type = '';
 
@@ -233,11 +234,9 @@ export async function getPosterFromVideo(
 		blob = await getFirstFrameOfVideo( src, 'image/jpeg', quality );
 	}
 
-	return new File(
-		[ blob ],
-		`${ basename }.${ getExtensionFromMimeType( blob.type ) }`,
-		{ type: blob.type }
-	);
+	const ext = blob.type.split( '/' )[ 1 ];
+
+	return new File( [ blob ], `${ basename }.${ ext }`, { type: blob.type } );
 }
 
 /**

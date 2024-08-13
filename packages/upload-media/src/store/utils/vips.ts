@@ -1,7 +1,5 @@
 import { createWorkerFactory } from '@shopify/web-worker';
 
-import { getExtensionFromMimeType } from '@mexp/mime';
-
 import { ImageFile } from '../../imageFile';
 import { getFileBasename } from '../../utils';
 import type { ImageSizeCrop, QueueItemId } from '../types';
@@ -31,7 +29,7 @@ export async function vipsConvertImageFormat(
 		quality,
 		interlaced
 	);
-	const ext = getExtensionFromMimeType( type );
+	const ext = type.split( '/' )[ 1 ];
 	const fileName = `${ getFileBasename( file.name ) }.${ ext }`;
 	return new File( [ new Blob( [ buffer ] ) ], fileName, { type } );
 }
