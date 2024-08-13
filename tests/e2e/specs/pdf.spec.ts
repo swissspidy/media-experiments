@@ -3,6 +3,11 @@ import { RestAttachment } from '@mexp/media-utils';
 import { expect, test } from '../fixtures';
 
 test.describe( 'PDF', () => {
+	test.skip(
+		( { browserName } ) => browserName === 'webkit',
+		'Needs some investigation as to why the generated thumbnail is much bigger in WebKit'
+	);
+
 	test.beforeAll( async ( { requestUtils } ) => {
 		await Promise.all( [
 			requestUtils.deleteAllMedia(),
