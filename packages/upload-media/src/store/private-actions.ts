@@ -664,13 +664,17 @@ export function addPosterForItem( id: QueueItemId ) {
 					/* webpackChunkName: 'pdf' */ '@mexp/pdf'
 				);
 
-				const pdfSrc = createBlobURL( item.file );
+				let pdfSrc = item.attachment?.url;
 
-				dispatch< CacheBlobUrlAction >( {
-					type: Type.CacheBlobUrl,
-					id,
-					blobUrl: pdfSrc,
-				} );
+				if ( ! pdfSrc ) {
+					pdfSrc = createBlobURL( item.file );
+
+					dispatch< CacheBlobUrlAction >( {
+						type: Type.CacheBlobUrl,
+						id,
+						blobUrl: pdfSrc,
+					} );
+				}
 
 				// TODO: is this the right place?
 				// Note: Causes another state update.
@@ -1009,8 +1013,6 @@ export function generateThumbnails( id: QueueItemId ) {
 
 		const attachment: Attachment = item.attachment as Attachment;
 
-		const mediaType = item.file.type.split( '/' )[ 0 ];
-
 		const thumbnailGeneration: ThumbnailGeneration = registry
 			.select( preferencesStore )
 			.get( PREFERENCES_NAME, 'thumbnailGeneration' );
@@ -1028,7 +1030,7 @@ export function generateThumbnails( id: QueueItemId ) {
 				: item.file;
 			const batchId = uuidv4();
 
-			if ( 'pdf' === mediaType && item.poster ) {
+			if ( 'application/pdf' === item.file.type && item.poster ) {
 				file = item.poster;
 
 				const outputFormat: ImageFormat = registry
@@ -1071,7 +1073,7 @@ export function generateThumbnails( id: QueueItemId ) {
 				}
 
 				// Force thumbnails to be soft crops, see wp_generate_attachment_metadata().
-				if ( 'pdf' === mediaType && 'thumbnail' === name ) {
+				if ( 'application/pdf' === item.file.type && 'thumbnail' === name ) {
 					imageSize.crop = false;
 				}
 
