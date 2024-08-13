@@ -33,7 +33,6 @@
 	"dependencies": {
 		"@ffmpeg/core": "^0.11.0",
 		"@ffmpeg/ffmpeg": "^0.11.6",
-		"@mexp/mime": "../mime",
 		"uuid": "^10.0.0"
 	}
 }

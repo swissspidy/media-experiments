@@ -176,9 +176,8 @@ export async function transcodeVideo(
 	mimeType: string,
 	threshold: number
 ): Promise< File > {
-	const outputFileName = `${ basename }.${ getExtensionFromMimeType(
-		mimeType
-	) }`;
+	const ext = mimeType.split( '/' )[ 1 ];
+	const outputFileName = `${ basename }.${ ext }`;
 	return runFFmpegWithConfig(
 		file,
 		[
