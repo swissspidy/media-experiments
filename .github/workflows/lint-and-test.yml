@@ -66,7 +66,8 @@ jobs:
             - name: Bundle size check
               uses: preactjs/compressed-size-action@v2
               with:
-                  pattern: '{build/*.js,build/*.css}'
+                  pattern: 'build/*.{js,css,wasm}'
+                  strip-hash: "\\.(\\w{8})\\.wasm$"
                   build-script: 'build'
                   minimum-change-threshold: 100
 
