@@ -125,7 +125,7 @@ test.describe( 'Videos', () => {
 					.isPendingApproval(),
 			undefined,
 			{
-				timeout: 40000, // Transcoding might take longer
+				timeout: 40000,
 			}
 		);
 

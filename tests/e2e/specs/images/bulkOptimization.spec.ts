@@ -134,7 +134,7 @@ test.describe( 'Images', () => {
 						.isPendingApproval(),
 				undefined,
 				{
-					timeout: 20000, // Transcoding might take longer
+					timeout: 20000,
 				}
 			);
 
@@ -305,7 +305,7 @@ test.describe( 'Images', () => {
 						.isPendingApproval(),
 				undefined,
 				{
-					timeout: 20000, // Transcoding might take longer
+					timeout: 20000,
 				}
 			);
 

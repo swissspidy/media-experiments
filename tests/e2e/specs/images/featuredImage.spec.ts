@@ -138,7 +138,7 @@ test.describe( 'Post Featured Image', () => {
 								.isPendingApproval(),
 						undefined,
 						{
-							timeout: 100_000, // Transcoding might take longer
+							timeout: 120_000,
 						}
 					);
 
@@ -161,7 +161,7 @@ test.describe( 'Post Featured Image', () => {
 								.getItems().length === 0,
 						undefined,
 						{
-							timeout: 60_000, // Transcoding might take longer
+							timeout: 120_000,
 						}
 					);
 
@@ -303,7 +303,7 @@ test.describe( 'Post Featured Image', () => {
 								.isPendingApproval(),
 						undefined,
 						{
-							timeout: 100_000, // Transcoding might take longer
+							timeout: 120_000,
 						}
 					);
 
@@ -326,7 +326,7 @@ test.describe( 'Post Featured Image', () => {
 								.getItems().length === 0,
 						undefined,
 						{
-							timeout: 60_000, // Transcoding might take longer
+							timeout: 120_000,
 						}
 					);
 

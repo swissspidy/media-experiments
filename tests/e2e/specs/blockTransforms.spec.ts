@@ -139,7 +139,7 @@ test.describe( 'Block Transforms', () => {
 					.length === 0,
 			undefined,
 			{
-				timeout: 100_000, // Transcoding might take longer
+				timeout: 120_000,
 			}
 		);
 

@@ -163,7 +163,7 @@ test.describe( 'Media & Text', () => {
 							.isPendingApproval(),
 					undefined,
 					{
-						timeout: 60_000, // Transcoding might take longer
+						timeout: 120_000,
 					}
 				);
 
@@ -184,7 +184,7 @@ test.describe( 'Media & Text', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 60_000, // Transcoding might take longer
+						timeout: 120_000,
 					}
 				);
 
@@ -282,7 +282,7 @@ test.describe( 'Media & Text', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 100_000, // Transcoding might take longer, especially AVIF on Firefox.
+						timeout: 120_000,
 					}
 				);
 

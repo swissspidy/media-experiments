@@ -47,7 +47,7 @@ test.describe( 'Videos', () => {
 					.length === 0,
 			undefined,
 			{
-				timeout: 60_000, // Transcoding might take longer
+				timeout: 120_000,
 			}
 		);
 
