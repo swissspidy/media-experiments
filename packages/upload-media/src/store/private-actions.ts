@@ -745,7 +745,10 @@ export function prepareItem( id: QueueItemId ) {
 
 		const { file } = item;
 
-		const mediaType = file.type.split( '/' )[ 0 ];
+		const mediaType =
+			'application/pdf' == file.type
+				? 'pdf'
+				: file.type.split( '/' )[ 0 ];
 
 		const operations: Operation[] = [];
 
