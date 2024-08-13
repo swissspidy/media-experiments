@@ -1,8 +1,9 @@
+/**
+ * WordPress dependencies
+ */
 import { addFilter } from '@wordpress/hooks';
 import { createBlobURL } from '@wordpress/blob';
 import { type Block, type BlockInstance, createBlock } from '@wordpress/blocks';
-
-import { getMediaTypeFromMimeType } from '@mexp/mime';
 
 type Writable< T > = { -readonly [ P in keyof T ]: Writable< T[ P ] > };
 
@@ -37,10 +38,11 @@ function addMultiFileTransformToBlock(
 				isMatch( files: File[] ) {
 					return (
 						files.length > 0 &&
-						files.every( ( file: File ) =>
-							[ 'video', 'image', 'audio' ].includes(
-								getMediaTypeFromMimeType( file.type )
-							)
+						files.every(
+							( file: File ) =>
+								file.type.startsWith( 'video' ) ||
+								file.type.startsWith( 'image/' ) ||
+								file.type.startsWith( 'audio/' )
 						)
 					);
 				},
@@ -48,31 +50,24 @@ function addMultiFileTransformToBlock(
 					const blocks: BlockInstance< {} >[] = [];
 
 					files.forEach( ( file ) => {
-						const mediaType = getMediaTypeFromMimeType( file.type );
-						switch ( mediaType ) {
-							case 'video':
-								blocks.push(
-									createBlock( 'core/video', {
-										src: createBlobURL( file ),
-									} )
-								);
-								break;
-
-							case 'image':
-								blocks.push(
-									createBlock( 'core/image', {
-										url: createBlobURL( file ),
-									} )
-								);
-								break;
-
-							case 'audio':
-								blocks.push(
-									createBlock( 'core/audio', {
-										src: createBlobURL( file ),
-									} )
-								);
-								break;
+						if ( file.type.startsWith( 'video/' ) ) {
+							blocks.push(
+								createBlock( 'core/video', {
+									src: createBlobURL( file ),
+								} )
+							);
+						} else if ( file.type.startsWith( 'image/' ) ) {
+							blocks.push(
+								createBlock( 'core/image', {
+									url: createBlobURL( file ),
+								} )
+							);
+						} else if ( file.type.startsWith( 'audio/' ) ) {
+							blocks.push(
+								createBlock( 'core/audio', {
+									src: createBlobURL( file ),
+								} )
+							);
 						}
 					} );
 

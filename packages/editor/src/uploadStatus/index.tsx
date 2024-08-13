@@ -1,3 +1,6 @@
+/**
+ * WordPress dependencies
+ */
 import {
 	createPortal,
 	useLayoutEffect,
@@ -9,6 +12,9 @@ import { registerPlugin } from '@wordpress/plugins';
 import { store as coreStore } from '@wordpress/core-data';
 import { store as editorStore } from '@wordpress/editor';
 
+/**
+ * Internal dependencies
+ */
 import { UploadStatusIndicator } from './indicator';
 
 function WrappedUploadStatusIndicator() {

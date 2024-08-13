@@ -1,5 +1,11 @@
+/**
+ * External dependencies
+ */
 import type { ChangeEvent } from 'react';
 
+/**
+ * WordPress dependencies
+ */
 import {
 	StrictMode,
 	createRoot,
@@ -28,6 +34,9 @@ import {
 } from '@mexp/media-utils';
 import { store as uploadStore } from '@mexp/upload-media';
 
+/**
+ * Internal dependencies
+ */
 import './view.css';
 
 /**

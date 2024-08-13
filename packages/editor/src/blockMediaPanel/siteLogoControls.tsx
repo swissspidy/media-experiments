@@ -1,10 +1,19 @@
+/**
+ * External dependencies
+ */
+import type { Attachment } from '@mexp/media-utils';
+
+/**
+ * WordPress dependencies
+ */
 import { useDispatch, useSelect } from '@wordpress/data';
 import { type Settings, store as coreStore } from '@wordpress/core-data';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { Fragment } from '@wordpress/element';
 
-import type { Attachment } from '@mexp/media-utils';
-
+/**
+ * Internal dependencies
+ */
 import { useAttachment } from '../utils/hooks';
 import { UploadIndicator } from './uploadIndicator';
 import { OptimizeMedia } from './optimizeMedia';

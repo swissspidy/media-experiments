@@ -1,5 +1,11 @@
+/**
+ * External dependencies
+ */
 import { QRCodeSVG } from 'qrcode.react';
 
+/**
+ * WordPress dependencies
+ */
 import {
 	Button,
 	Modal as BaseModal,
@@ -14,6 +20,9 @@ import type { Post } from '@wordpress/core-data';
 import { useCopyToClipboard } from '@wordpress/compose';
 import { store as noticesStore } from '@wordpress/notices';
 
+/**
+ * Internal dependencies
+ */
 import './editor.css';
 
 interface ModalProps {

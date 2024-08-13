@@ -1,6 +1,12 @@
+/**
+ * External dependencies
+ */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+/**
+ * Internal dependencies
+ */
 import { isAnimatedGif } from '../utils';
 
 describe( 'isAnimatedGif', () => {

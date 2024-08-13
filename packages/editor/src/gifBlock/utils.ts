@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import type { VideoBlock } from '../blockMediaPanel/types';
 
 export function isGifVariation(

@@ -1,13 +1,21 @@
+/**
+ * External dependencies
+ */
 import { v4 as uuidv4 } from 'uuid';
 import { createWorkerFactory } from '@shopify/web-worker';
 
+/**
+ * WordPress dependencies
+ */
 import { createBlobURL, isBlobURL, revokeBlobURL } from '@wordpress/blob';
 import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as preferencesStore } from '@wordpress/preferences';
 
-import { getExtensionFromMimeType, getMediaTypeFromMimeType } from '@mexp/mime';
 import { measure, type MeasureOptions, start } from '@mexp/log';
 
+/**
+ * Internal dependencies
+ */
 import { ImageFile } from '../imageFile';
 import { MediaError } from '../mediaError';
 import {
@@ -615,107 +623,103 @@ export function addPosterForItem( id: QueueItemId ) {
 			return;
 		}
 
-		const mediaType = getMediaTypeFromMimeType( item.file.type );
-
 		try {
-			switch ( mediaType ) {
-				case 'video':
-					let src = isBlobURL( item.attachment?.url )
-						? item.attachment?.url
-						: undefined;
+			if ( item.file.type.startsWith( 'video/' ) ) {
+				let src = isBlobURL( item.attachment?.url )
+					? item.attachment?.url
+					: undefined;
 
-					if ( ! src ) {
-						src = createBlobURL( item.file );
-
-						dispatch< CacheBlobUrlAction >( {
-							type: Type.CacheBlobUrl,
-							id,
-							blobUrl: src,
-						} );
-					}
-
-					const poster = await getPosterFromVideo(
-						src,
-						`${ getFileBasename( item.sourceFile.name ) }-poster`
-					);
-
-					const posterUrl = createBlobURL( poster );
+				if ( ! src ) {
+					src = createBlobURL( item.file );
 
 					dispatch< CacheBlobUrlAction >( {
 						type: Type.CacheBlobUrl,
 						id,
-						blobUrl: posterUrl,
+						blobUrl: src,
 					} );
+				}
 
-					dispatch.finishOperation( id, {
-						poster,
-						attachment: {
-							url: item.attachment?.url || src,
-							poster: posterUrl,
-						},
-					} );
+				const poster = await getPosterFromVideo(
+					src,
+					`${ getFileBasename( item.sourceFile.name ) }-poster`
+				);
 
-					break;
+				const posterUrl = createBlobURL( poster );
 
-				case 'pdf':
-					const { getImageFromPdf } = await import(
-						/* webpackChunkName: 'pdf' */ '@mexp/pdf'
-					);
+				dispatch< CacheBlobUrlAction >( {
+					type: Type.CacheBlobUrl,
+					id,
+					blobUrl: posterUrl,
+				} );
 
-					const pdfSrc = createBlobURL( item.file );
+				dispatch.finishOperation( id, {
+					poster,
+					attachment: {
+						url: item.attachment?.url || src,
+						poster: posterUrl,
+					},
+				} );
+			} else if ( 'application/pdf' === item.file.type ) {
+				const { getImageFromPdf } = await import(
+					/* webpackChunkName: 'pdf' */ '@mexp/pdf'
+				);
+
+				let pdfSrc = item.attachment?.url;
+
+				if ( ! pdfSrc ) {
+					pdfSrc = createBlobURL( item.file );
 
 					dispatch< CacheBlobUrlAction >( {
 						type: Type.CacheBlobUrl,
 						id,
 						blobUrl: pdfSrc,
 					} );
+				}
 
-					// TODO: is this the right place?
-					// Note: Causes another state update.
-					const pdfThumbnail = await getImageFromPdf(
-						pdfSrc,
-						// Same suffix as WP core uses, see https://github.com/WordPress/wordpress-develop/blob/8a5daa6b446e8c70ba22d64820f6963f18d36e92/src/wp-admin/includes/image.php#L609-L634
-						`${ getFileBasename( item.file.name ) }-pdf`
-					);
+				// TODO: is this the right place?
+				// Note: Causes another state update.
+				const pdfThumbnail = await getImageFromPdf(
+					pdfSrc,
+					// Same suffix as WP core uses, see https://github.com/WordPress/wordpress-develop/blob/8a5daa6b446e8c70ba22d64820f6963f18d36e92/src/wp-admin/includes/image.php#L609-L634
+					`${ getFileBasename( item.file.name ) }-pdf`
+				);
 
-					const pdfThumbnailUrl = createBlobURL( pdfThumbnail );
+				const pdfThumbnailUrl = createBlobURL( pdfThumbnail );
 
-					dispatch< CacheBlobUrlAction >( {
-						type: Type.CacheBlobUrl,
-						id,
-						blobUrl: pdfThumbnailUrl,
-					} );
+				dispatch< CacheBlobUrlAction >( {
+					type: Type.CacheBlobUrl,
+					id,
+					blobUrl: pdfThumbnailUrl,
+				} );
 
-					dispatch.finishOperation( id, {
-						poster: pdfThumbnail,
-						attachment: {
-							poster: pdfThumbnailUrl,
-						},
-					} );
-					break;
+				dispatch.finishOperation( id, {
+					poster: pdfThumbnail,
+					attachment: {
+						poster: pdfThumbnailUrl,
+					},
+				} );
+			} else {
+				// We're dealing with a StubFile, e.g. via addPosterForExistingVideo() or addItemFromUrl().
+				const file = await getPosterFromVideo(
+					// @ts-ignore -- Expected to exist at this point.
+					item.sourceUrl,
+					`${ getFileBasename( item.sourceFile.name ) }-poster`
+				);
 
-				default:
-					// We're dealing with a StubFile, e.g. via addPosterForExistingVideo() or addItemFromUrl().
-					const file = await getPosterFromVideo(
-						// @ts-ignore -- Expected to exist at this point.
-						item.sourceUrl,
-						`${ getFileBasename( item.sourceFile.name ) }-poster`
-					);
+				const blobURL = createBlobURL( file );
 
-					const blobURL = createBlobURL( file );
+				dispatch< CacheBlobUrlAction >( {
+					type: Type.CacheBlobUrl,
+					id,
+					blobUrl: blobURL,
+				} );
 
-					dispatch< CacheBlobUrlAction >( {
-						type: Type.CacheBlobUrl,
-						id,
-						blobUrl: blobURL,
-					} );
-
-					dispatch.finishOperation( id, {
-						file,
-						attachment: {
-							url: blobURL,
-						},
-					} );
+				dispatch.finishOperation( id, {
+					file,
+					attachment: {
+						url: blobURL,
+					},
+				} );
 			}
 		} catch ( err ) {
 			// Do not throw error. Could be a simple error such as video playback not working in tests.
@@ -745,7 +749,10 @@ export function prepareItem( id: QueueItemId ) {
 
 		const { file } = item;
 
-		const mediaType = getMediaTypeFromMimeType( file.type );
+		const mediaType =
+			'application/pdf' == file.type
+				? 'pdf'
+				: file.type.split( '/' )[ 0 ];
 
 		const operations: Operation[] = [];
 
@@ -1006,8 +1013,6 @@ export function generateThumbnails( id: QueueItemId ) {
 
 		const attachment: Attachment = item.attachment as Attachment;
 
-		const mediaType = getMediaTypeFromMimeType( item.file.type );
-
 		const thumbnailGeneration: ThumbnailGeneration = registry
 			.select( preferencesStore )
 			.get( PREFERENCES_NAME, 'thumbnailGeneration' );
@@ -1025,7 +1030,7 @@ export function generateThumbnails( id: QueueItemId ) {
 				: item.file;
 			const batchId = uuidv4();
 
-			if ( 'pdf' === mediaType && item.poster ) {
+			if ( 'application/pdf' === item.file.type && item.poster ) {
 				file = item.poster;
 
 				const outputFormat: ImageFormat = registry
@@ -1068,7 +1073,10 @@ export function generateThumbnails( id: QueueItemId ) {
 				}
 
 				// Force thumbnails to be soft crops, see wp_generate_attachment_metadata().
-				if ( 'pdf' === mediaType && 'thumbnail' === name ) {
+				if (
+					'application/pdf' === item.file.type &&
+					'thumbnail' === name
+				) {
 					imageSize.crop = false;
 				}
 
@@ -1116,14 +1124,12 @@ export function uploadOriginal( id: QueueItemId ) {
 
 		const attachment: Attachment = item.attachment as Attachment;
 
-		const mediaType = getMediaTypeFromMimeType( item.file.type );
-
 		/*
 		 Upload the original image file if it was a HEIF image,
 		 or if it was resized because of the big image size threshold.
 		*/
 
-		if ( 'image' === mediaType ) {
+		if ( item.file.type.startsWith( 'image/' ) ) {
 			if (
 				! item.parentId &&
 				( ( item.file instanceof ImageFile && item.file?.wasResized ) ||
@@ -1187,11 +1193,7 @@ export function optimizeImageItem(
 		try {
 			let file: File;
 
-			const inputFormat = getExtensionFromMimeType( item.file.type );
-
-			if ( ! inputFormat ) {
-				throw new Error( 'Unsupported file type' );
-			}
+			const inputFormat = item.file.type.split( '/' )[ 1 ];
 
 			const outputFormat: ImageFormat =
 				args?.outputFormat ||
@@ -1766,17 +1768,17 @@ export function uploadItem( id: QueueItemId ) {
 			featured_media: item.generatedPosterId || undefined,
 		};
 
-		const mediaType = getMediaTypeFromMimeType( item.file.type );
-
-		let stillUrl = [ 'video', 'pdf' ].includes( mediaType )
-			? item.attachment?.poster
-			: item.attachment?.url;
+		let stillUrl =
+			'application/pdf' === item.file.type ||
+			item.file.type.startsWith( 'video/' )
+				? item.attachment?.poster
+				: item.attachment?.url;
 
 		// Freshly converted GIF.
 		if (
 			! stillUrl &&
-			'video' === mediaType &&
-			'image' === getMediaTypeFromMimeType( item.sourceFile.type )
+			item.file.type.startsWith( 'video/' ) &&
+			item.sourceFile.type.startsWith( 'image/' )
 		) {
 			stillUrl = createBlobURL( item.sourceFile );
 
@@ -1791,7 +1793,7 @@ export function uploadItem( id: QueueItemId ) {
 		// Could be made reusable to enable back-filling of existing blocks.
 		if (
 			typeof additionalData.mexp_is_muted === 'undefined' &&
-			'video' === mediaType
+			item.file.type.startsWith( 'video/' )
 		) {
 			try {
 				const hasAudio =
@@ -1806,7 +1808,9 @@ export function uploadItem( id: QueueItemId ) {
 		if (
 			! additionalData.mexp_dominant_color &&
 			stillUrl &&
-			[ 'video', 'image', 'pdf' ].includes( mediaType )
+			( item.file.type.startsWith( 'video/' ) ||
+				item.file.type.startsWith( 'image/' ) ||
+				'application/pdf' === item.file.type )
 		) {
 			// TODO: Make this async after upload?
 			// Could be made reusable to enable backfilling of existing blocks.
@@ -1820,7 +1824,11 @@ export function uploadItem( id: QueueItemId ) {
 			}
 		}
 
-		if ( 'image' === mediaType && stillUrl && window.crossOriginIsolated ) {
+		if (
+			item.file.type.startsWith( 'image/' ) &&
+			stillUrl &&
+			window.crossOriginIsolated
+		) {
 			// TODO: Make this async after upload?
 			// Could be made reusable to enable backfilling of existing blocks.
 			// TODO: Create a scaled-down version of the image first for performance reasons.
@@ -1836,7 +1844,9 @@ export function uploadItem( id: QueueItemId ) {
 		if (
 			! additionalData.mexp_blurhash &&
 			stillUrl &&
-			[ 'video', 'image', 'pdf' ].includes( mediaType )
+			( item.file.type.startsWith( 'video/' ) ||
+				item.file.type.startsWith( 'image/' ) ||
+				'application/pdf' === item.file.type )
 		) {
 			// TODO: Make this async after upload?
 			// Could be made reusable to enable backfilling of existing blocks.
@@ -1869,7 +1879,10 @@ export function uploadItem( id: QueueItemId ) {
 			signal: item.abortController?.signal,
 			onFileChange: ( [ attachment ] ) => {
 				// TODO: Get the poster URL from the ID if one exists already.
-				if ( 'video' === mediaType && ! attachment.featured_media ) {
+				if (
+					item.file.type.startsWith( 'video/' ) &&
+					! attachment.featured_media
+				) {
 					/*
 					 The newly uploaded file won't have a poster yet.
 					 However, we'll likely still have one on file.

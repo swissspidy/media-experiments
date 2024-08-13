@@ -1,5 +1,11 @@
+/**
+ * External dependencies
+ */
 import type { ImageFormat, ImageLibrary } from '@mexp/upload-media';
 
+/**
+ * Internal dependencies
+ */
 import { expect, test } from '../../fixtures';
 
 const scenarios: {

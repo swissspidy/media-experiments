@@ -1,7 +1,17 @@
-import { getExtensionFromMimeType, getMimeTypeFromExtension } from '@mexp/mime';
+/**
+ * External dependencies
+ */
+import mime from 'mime/lite';
+
+/**
+ * WordPress dependencies
+ */
 import { getFilename } from '@wordpress/url';
 import { _x } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
 import {
 	WASM_MEMORY_LIMIT,
 	FFMPEG_SUPPORTED_AUDIO_VIDEO_MIME_TYPES,
@@ -101,7 +111,7 @@ export async function fetchFile( url: string, nameOverride?: string ) {
 	const blob = await response.blob();
 
 	const ext = getFileExtension( name );
-	const guessedMimeType = ext ? getMimeTypeFromExtension( ext ) : '';
+	const guessedMimeType = ext ? mime.getType( ext ) : '';
 
 	let type = '';
 
@@ -233,11 +243,9 @@ export async function getPosterFromVideo(
 		blob = await getFirstFrameOfVideo( src, 'image/jpeg', quality );
 	}
 
-	return new File(
-		[ blob ],
-		`${ basename }.${ getExtensionFromMimeType( blob.type ) }`,
-		{ type: blob.type }
-	);
+	const ext = blob.type.split( '/' )[ 1 ];
+
+	return new File( [ blob ], `${ basename }.${ ext }`, { type: blob.type } );
 }
 
 /**

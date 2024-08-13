@@ -1,10 +1,19 @@
+/**
+ * External dependencies
+ */
+import type { Attachment } from '@mexp/media-utils';
+
+/**
+ * WordPress dependencies
+ */
 import { registerPlugin } from '@wordpress/plugins';
 import { PluginDocumentSettingPanel } from '@wordpress/editor';
 import { __ } from '@wordpress/i18n';
 import { media as mediaIcon } from '@wordpress/icons';
 
-import type { Attachment } from '@mexp/media-utils';
-
+/**
+ * Internal dependencies
+ */
 import { BulkOptimization } from '../components/bulkOptimization';
 
 import { useMediaBlockAttachments } from './useMediaBlockAttachments';

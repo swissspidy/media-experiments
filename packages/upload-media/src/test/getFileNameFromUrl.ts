@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { getFileNameFromUrl } from '../utils';
 
 describe( 'getFileNameFromUrl', () => {

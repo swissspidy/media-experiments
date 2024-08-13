@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import type { ImageSizeCrop } from '../types';
 
 export async function convertImageFormat(

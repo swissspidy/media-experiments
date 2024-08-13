@@ -1,14 +1,23 @@
+/**
+ * External dependencies
+ */
 import {
 	ReactCompareSlider,
 	ReactCompareSliderImage,
 } from 'react-compare-slider';
 
+/**
+ * WordPress dependencies
+ */
 import { Button, Modal } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { createInterpolateElement, useState } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 
 import { store as uploadStore } from '@mexp/upload-media';
+/**
+ * Internal dependencies
+ */
 import { useAttachment } from '../utils/hooks';
 
 const numberFormatter = Intl.NumberFormat( 'en', {

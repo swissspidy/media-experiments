@@ -22,6 +22,7 @@
 		"PDFJS_CDN_URL": "readonly"
 	},
 	"rules": {
+		"@wordpress/dependency-group": "error",
 		"@wordpress/no-unused-vars-before-return": [
 			"error",
 			{

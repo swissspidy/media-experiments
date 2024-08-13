@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { expect, test } from '../fixtures';
 
 // TODO: Add test for embed previews.

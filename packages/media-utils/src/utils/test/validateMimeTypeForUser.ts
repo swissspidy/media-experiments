@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { validateMimeTypeForUser } from '../validateMimeTypeForUser';
 import { UploadError } from '../uploadError';
 

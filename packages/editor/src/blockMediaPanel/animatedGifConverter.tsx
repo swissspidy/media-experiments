@@ -1,8 +1,14 @@
+/**
+ * WordPress dependencies
+ */
 import { useEffect } from '@wordpress/element';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { createBlock } from '@wordpress/blocks';
 import { useDispatch } from '@wordpress/data';
 
+/**
+ * Internal dependencies
+ */
 import { useAttachment } from '../utils/hooks';
 
 interface AnimatedGifDetectorProps {

@@ -1,5 +1,11 @@
+/**
+ * External dependencies
+ */
 import type { ReactNode } from 'react';
 
+/**
+ * WordPress dependencies
+ */
 import { useViewportMatch } from '@wordpress/compose';
 /* eslint-disable @wordpress/no-unsafe-wp-apis */
 import {
@@ -22,6 +28,9 @@ import { useMemo, useState } from '@wordpress/element';
 import { Icon, chevronLeft, chevronRight } from '@wordpress/icons';
 import { __, isRTL } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
 import { Tabs } from '../tabs';
 
 import './editor.css';

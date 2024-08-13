@@ -1,6 +1,12 @@
+/**
+ * External dependencies
+ */
 import { Blurhash } from 'react-blurhash';
 import type { PropsWithChildren } from 'react';
 
+/**
+ * WordPress dependencies
+ */
 import {
 	BaseControl,
 	ColorIndicator,
@@ -13,6 +19,9 @@ import {
 import { __, sprintf } from '@wordpress/i18n';
 import { Component, createInterpolateElement } from '@wordpress/element';
 
+/**
+ * Internal dependencies
+ */
 import { useAttachment } from '../utils/hooks';
 
 interface DebugInfoProps {

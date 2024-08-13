@@ -1,5 +1,5 @@
 diff --git a/node_modules/@wordpress/core-data/build-types/actions.d.ts b/node_modules/@wordpress/core-data/build-types/actions.d.ts
-index deed8c7..c5ad95b 100644
+index ddfcbd6..79f5881 100644
 --- a/node_modules/@wordpress/core-data/build-types/actions.d.ts
 +++ b/node_modules/@wordpress/core-data/build-types/actions.d.ts
 @@ -176,13 +176,13 @@ export function receiveNavigationFallbackId(fallbackId: integer): any;
@@ -19,7 +19,7 @@ index deed8c7..c5ad95b 100644
  }): any;
  export function undo(): ({ select, dispatch }: {
 diff --git a/node_modules/@wordpress/core-data/build-types/hooks/use-entity-prop.d.ts b/node_modules/@wordpress/core-data/build-types/hooks/use-entity-prop.d.ts
-index 44b7e32..c8293bf 100644
+index 44b7e32..f22d5d9 100644
 --- a/node_modules/@wordpress/core-data/build-types/hooks/use-entity-prop.d.ts
 +++ b/node_modules/@wordpress/core-data/build-types/hooks/use-entity-prop.d.ts
 @@ -15,5 +15,5 @@
@@ -29,8 +29,9 @@ index 44b7e32..c8293bf 100644
 -export default function useEntityProp(kind: string, name: string, prop: string, _id?: string | undefined): [any, Function, any];
 +export default function useEntityProp(kind: string, name: string, prop: string, _id?: string | number | undefined): [any, Function, any];
  //# sourceMappingURL=use-entity-prop.d.ts.map
+\ No newline at end of file
 diff --git a/node_modules/@wordpress/core-data/build-types/index.d.ts b/node_modules/@wordpress/core-data/build-types/index.d.ts
-index a29e9e2..57b42ab 100644
+index 8f05002..0f323c1 100644
 --- a/node_modules/@wordpress/core-data/build-types/index.d.ts
 +++ b/node_modules/@wordpress/core-data/build-types/index.d.ts
 @@ -24,13 +24,13 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<

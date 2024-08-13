@@ -1,11 +1,20 @@
+/**
+ * External dependencies
+ */
+import { store as uploadStore } from '@mexp/upload-media';
+import type { RestAttachment } from '@mexp/media-utils';
+
+/**
+ * WordPress dependencies
+ */
 import type { BlockInstance } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as coreStore } from '@wordpress/core-data';
 
-import { store as uploadStore } from '@mexp/upload-media';
-import type { RestAttachment } from '@mexp/media-utils';
-
+/**
+ * Internal dependencies
+ */
 import type { BulkOptimizationAttachmentData } from '../types';
 
 const SUPPORTED_BLOCKS = [ 'core/image', 'core/video' ];

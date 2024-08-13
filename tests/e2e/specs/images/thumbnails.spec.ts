@@ -1,6 +1,12 @@
+/**
+ * External dependencies
+ */
 import { ImageLibrary, ThumbnailGeneration } from '@mexp/upload-media';
 import { RestAttachment } from '@mexp/media-utils';
 
+/**
+ * Internal dependencies
+ */
 import { expect, test } from '../../fixtures';
 
 const scenarios: {

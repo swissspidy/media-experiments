@@ -1,8 +1,14 @@
+/**
+ * WordPress dependencies
+ */
 import { isBlobURL } from '@wordpress/blob';
 import { Fragment } from '@wordpress/element';
 import { Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
 import { useIsUploadingById, useIsUploadingByUrl } from '../utils/hooks';
 
 interface UploadIndicatorProps {

@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { getMimeTypesArray } from '../getMimeTypesArray';
 
 describe( 'getMimeTypesArray', () => {

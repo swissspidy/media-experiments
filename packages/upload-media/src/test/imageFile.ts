@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { ImageFile } from '../imageFile';
 
 describe( 'ImageFile', () => {

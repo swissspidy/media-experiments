@@ -1,5 +1,11 @@
+/**
+ * External dependencies
+ */
 import { RestAttachment } from '@mexp/media-utils';
 
+/**
+ * Internal dependencies
+ */
 import { expect, test } from '../fixtures';
 
 test.describe( 'PDF', () => {

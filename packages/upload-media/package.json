@@ -33,7 +33,6 @@
 		"@mexp/ffmpeg": "../ffmpeg",
 		"@mexp/heif": "../heif",
 		"@mexp/log": "../log",
-		"@mexp/mime": "../mime",
 		"@mexp/pdf": "../pdf",
 		"@mexp/subtitles": "../subtitles",
 		"@mexp/vips": "../vips",
@@ -46,6 +45,7 @@
 		"@wordpress/url": "^4.3.0",
 		"blurhash": "^2.0.5",
 		"fast-average-color": "^9.3.0",
+		"mime": "^3.0.0",
 		"uuid": "^10.0.0"
 	}
 }

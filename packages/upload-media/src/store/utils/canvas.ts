@@ -1,7 +1,11 @@
+/**
+ * External dependencies
+ */
 import { createWorkerFactory } from '@shopify/web-worker';
 
-import { getExtensionFromMimeType } from '@mexp/mime';
-
+/**
+ * Internal dependencies
+ */
 import { ImageFile } from '../../imageFile';
 import { getFileBasename } from '../../utils';
 import type { ImageSizeCrop } from '../types';
@@ -65,7 +69,9 @@ export async function resizeImage(
 		resize
 	);
 	const basename = getFileBasename( file.name );
-	let fileName = `${ basename }.${ getExtensionFromMimeType( file.type ) }`;
+	const ext = file.type.split( '/' )[ 1 ];
+
+	let fileName = `${ basename }.${ ext }`;
 
 	if (
 		addSuffix &&

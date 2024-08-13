@@ -1,5 +1,6 @@
-import type { BlockInstance } from '@wordpress/blocks';
-
+/**
+ * External dependencies
+ */
 import type { Attachment } from '@mexp/media-utils';
 import type {
 	AudioFormat,
@@ -8,6 +9,11 @@ import type {
 	ThumbnailGeneration,
 	VideoFormat,
 } from '@mexp/upload-media';
+
+/**
+ * WordPress dependencies
+ */
+import type { BlockInstance } from '@wordpress/blocks';
 
 export type BulkOptimizationAttachmentData = Pick<
 	Attachment,
