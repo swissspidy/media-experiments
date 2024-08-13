@@ -6,8 +6,6 @@ import { ImageCapture } from 'image-capture';
 import { createBlobURL, revokeBlobURL } from '@wordpress/blob';
 import { dateI18n } from '@wordpress/date';
 
-import { getExtensionFromMimeType } from '@mexp/mime';
-
 import {
 	COUNTDOWN_TIME_IN_SECONDS,
 	MAX_RECORDING_DURATION_IN_SECONDS,
@@ -539,7 +537,7 @@ export function captureImage() {
 					} );
 
 					const { type } = blob;
-					const ext = getExtensionFromMimeType( type );
+					const ext = type.split( '/' )[ 1 ];
 
 					const file = new File(
 						[ blob ],
