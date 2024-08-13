@@ -10,7 +10,6 @@ import {
 import { store as preferencesStore } from '@wordpress/preferences';
 
 import type { ImageFormat } from '@mexp/upload-media';
-import { getExtensionFromMimeType } from '@mexp/mime';
 import { store as interfaceStore } from '@mexp/interface';
 
 import type { MediaPreferences } from '../types';
@@ -45,7 +44,7 @@ registerPlugin( 'media-experiments-preferences', {
 } );
 
 function getExtension( mimeType: string ): ImageFormat {
-	return ( getExtensionFromMimeType( mimeType ) || 'jpeg' ) as ImageFormat;
+	return ( mimeType.split( '/' )[ 1 ] || 'jpeg' ) as ImageFormat;
 }
 
 const defaultPreferences: MediaPreferences = {

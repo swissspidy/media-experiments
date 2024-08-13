@@ -5,7 +5,6 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
-import { getMediaTypeFromMimeType } from '@mexp/mime';
 import { store as recordingStore } from '@mexp/media-recording';
 
 import type { MediaPanelProps } from '../blockMediaPanel/types';
@@ -129,7 +128,7 @@ function Recorder() {
 			error: select( recordingStore ).getError(),
 			liveStream: select( recordingStore ).getMediaStream(),
 			recordingTypes: select( recordingStore ).getRecordingTypes(),
-			mediaType: file ? getMediaTypeFromMimeType( file.type ) : null,
+			mediaType: file ? file.type.split( '/' )[ 0 ] : null,
 			url: select( recordingStore ).getUrl(),
 			dimensions: select( recordingStore ).getDimensions(),
 			isGifMode: isGif,
