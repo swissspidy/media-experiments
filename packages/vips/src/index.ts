@@ -3,8 +3,6 @@ const Vips = require( 'wasm-vips' ) as (
 ) => Promise< NonNullable< typeof VipsInstance > >;
 import type VipsInstance from 'wasm-vips';
 
-import { getExtensionFromMimeType } from '@mexp/mime';
-
 import type {
 	ImageSizeCrop,
 	LoadOptions,
@@ -123,11 +121,7 @@ export async function convertImageFormat(
 	quality = 0.82,
 	interlaced = false
 ): Promise< ArrayBuffer > {
-	const ext = getExtensionFromMimeType( outputType );
-
-	if ( ! ext ) {
-		throw new Error( 'Unsupported file type' );
-	}
+	const ext = outputType.split( '/' )[ 1 ];
 
 	inProgressOperations.add( id );
 
@@ -242,11 +236,7 @@ export async function resizeImage(
 	originalWidth: number;
 	originalHeight: number;
 } > {
-	const ext = getExtensionFromMimeType( type );
-
-	if ( ! ext ) {
-		throw new Error( 'Unsupported file type' );
-	}
+	const ext = type.split( '/' )[ 1 ];
 
 	inProgressOperations.add( id );
 
