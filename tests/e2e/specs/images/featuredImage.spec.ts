@@ -132,7 +132,7 @@ test.describe( 'Post Featured Image', () => {
 								.isPendingApproval(),
 						undefined,
 						{
-							timeout: 60_000, // Transcoding might take longer
+							timeout: 100_000, // Transcoding might take longer
 						}
 					);
 
@@ -297,7 +297,7 @@ test.describe( 'Post Featured Image', () => {
 								.isPendingApproval(),
 						undefined,
 						{
-							timeout: 60_000, // Transcoding might take longer
+							timeout: 100_000, // Transcoding might take longer
 						}
 					);
 

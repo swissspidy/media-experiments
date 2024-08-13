@@ -30,6 +30,14 @@ test.describe( 'Images', () => {
 
 		await expect( settingsPanel ).toHaveText( /Upload in progress/ );
 
+		await expect(
+			page
+				.getByRole( 'button', { name: 'Dismiss this notice' } )
+				.filter( {
+					hasText: 'There was an error importing the file',
+				} )
+		).toBeHidden();
+
 		await page.waitForFunction(
 			() =>
 				window.wp.data.select( 'media-experiments/upload' ).getItems()

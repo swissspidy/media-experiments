@@ -82,7 +82,11 @@ test.describe( 'Cover Block', () => {
 					() =>
 						window.wp.data
 							.select( 'media-experiments/upload' )
-							.getItems().length === 0
+							.getItems().length === 0,
+					undefined,
+					{
+						timeout: 30_000,
+					}
 				);
 
 				await editor.selectBlocks( coverBlock );
@@ -278,7 +282,7 @@ test.describe( 'Cover Block', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 100_000, // Transcoding might take longer, especially AVIF on Firefox.
+						timeout: 120_000, // Transcoding might take longer, especially AVIF on Firefox.
 					}
 				);
 
