@@ -214,6 +214,7 @@ function register_assets(): void {
 					'pngInterlaced'             => $png_interlaced,
 					'gifInterlaced'             => $gif_interlaced,
 					'mediaSourceTerms'          => $media_source_terms,
+					'publicPath'                => plugins_url( 'build/', __DIR__ ),
 				]
 			)
 		),
@@ -323,6 +324,7 @@ function enqueue_block_editor_assets(): void {
 					'pngInterlaced'             => $png_interlaced,
 					'gifInterlaced'             => $gif_interlaced,
 					'mediaSourceTerms'          => $media_source_terms,
+					'publicPath'                => plugins_url( 'build/', __DIR__ ),
 				]
 			)
 		),

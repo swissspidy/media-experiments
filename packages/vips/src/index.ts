@@ -30,6 +30,17 @@ type EmscriptenModule = {
 	setDelayFunction: ( fn: ( fn: () => void ) => void ) => void;
 };
 
+let location = '';
+
+/**
+ * Dynamically sets the location / public path to use for loading the WASM files.
+ *
+ * @param newLocation Location, typically a base URL such as "https://example.com/wp-content/...".
+ */
+export function setLocation( newLocation: string ) {
+	location = newLocation;
+}
+
 let cleanup: () => void;
 
 let vipsInstance: typeof Vips;
@@ -56,7 +67,7 @@ async function getVips(): Promise< typeof Vips > {
 				fileName = VipsJxlModule;
 			}
 
-			return self.location.origin + fileName;
+			return location + fileName;
 		},
 		preRun: ( module: EmscriptenModule ) => {
 			// https://github.com/kleisauke/wasm-vips/issues/13#issuecomment-1073246828
