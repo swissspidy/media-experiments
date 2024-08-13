@@ -1,5 +1,11 @@
+/**
+ * External dependencies
+ */
 import type { ComponentProps, PropsWithChildren } from 'react';
 
+/**
+ * WordPress dependencies
+ */
 import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis -- Why is this still experimental?
 	__experimentalUnitControl as UnitControl,
@@ -7,6 +13,9 @@ import {
 import { useDispatch, useSelect } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
 
+/**
+ * Internal dependencies
+ */
 import type { MediaPreferences } from '../types';
 import { PREFERENCES_NAME } from './constants';
 

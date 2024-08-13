@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { store as uploadStore } from './store';
 
 export { uploadStore as store };

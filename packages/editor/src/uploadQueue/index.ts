@@ -1,7 +1,6 @@
-import { dispatch, select, subscribe } from '@wordpress/data';
-import { store as blockEditorStore } from '@wordpress/block-editor';
-import { store as editorStore } from '@wordpress/editor';
-
+/**
+ * External dependencies
+ */
 import {
 	uploadMedia as originalUploadMedia,
 	sideloadMedia as originalSideloadMedia,
@@ -10,6 +9,13 @@ import {
 	validateMimeTypeForUser,
 } from '@mexp/media-utils';
 import { store as uploadStore } from '@mexp/upload-media';
+
+/**
+ * WordPress dependencies
+ */
+import { dispatch, select, subscribe } from '@wordpress/data';
+import { store as blockEditorStore } from '@wordpress/block-editor';
+import { store as editorStore } from '@wordpress/editor';
 
 const noop = () => {};
 

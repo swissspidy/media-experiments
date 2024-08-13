@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import { resolve } from 'node:path';
 
 import type {
@@ -6,6 +9,9 @@ import type {
 } from 'monocart-coverage-reports';
 import { defineConfig, devices } from '@playwright/test';
 
+/**
+ * WordPress dependencies
+ */
 import baseConfig from '@wordpress/scripts/config/playwright.config';
 
 const config = defineConfig( {

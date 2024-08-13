@@ -1,8 +1,14 @@
-import { useEntityProp, useEntityRecord } from '@wordpress/core-data';
-import { useSelect } from '@wordpress/data';
-
+/**
+ * External dependencies
+ */
 import { type RestAttachment } from '@mexp/media-utils';
 import { store as uploadStore } from '@mexp/upload-media';
+
+/**
+ * WordPress dependencies
+ */
+import { useEntityProp, useEntityRecord } from '@wordpress/core-data';
+import { useSelect } from '@wordpress/data';
 import { isBlobURL } from '@wordpress/blob';
 import { store as editorStore } from '@wordpress/editor';
 

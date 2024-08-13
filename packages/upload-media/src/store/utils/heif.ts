@@ -1,5 +1,11 @@
+/**
+ * External dependencies
+ */
 import { createWorkerFactory } from '@shopify/web-worker';
 
+/**
+ * Internal dependencies
+ */
 import { getFileBasename } from '../../utils';
 
 const createHeifWorker = createWorkerFactory(

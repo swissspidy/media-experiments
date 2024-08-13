@@ -1,3 +1,11 @@
+/**
+ * External dependencies
+ */
+import { store as uploadStore } from '@mexp/upload-media';
+
+/**
+ * WordPress dependencies
+ */
 import type { BlockEditProps } from '@wordpress/blocks';
 import { isBlobURL } from '@wordpress/blob';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -9,8 +17,9 @@ import {
 	useBaseControlProps,
 } from '@wordpress/components';
 
-import { store as uploadStore } from '@mexp/upload-media';
-
+/**
+ * Internal dependencies
+ */
 import { useAttachment, useIsUploadingByUrl } from '../utils/hooks';
 import type { VideoBlock } from './types';
 

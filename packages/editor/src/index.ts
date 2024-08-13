@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import './uploadQueue';
 import './transforms';
 import './gifBlock';

@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import { FastAverageColor } from 'fast-average-color';
 
 const isDevelopment =

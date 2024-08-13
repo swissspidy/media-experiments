@@ -1,5 +1,11 @@
+/**
+ * WordPress dependencies
+ */
 import { forwardRef } from '@wordpress/element';
 
+/**
+ * Internal dependencies
+ */
 import type { TabProps } from './types';
 import warning from '@wordpress/warning';
 import { useTabsContext } from './context';

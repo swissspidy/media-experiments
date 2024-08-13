@@ -1,10 +1,19 @@
+/**
+ * External dependencies
+ */
+import { store as interfaceStore } from '@mexp/interface';
+import { store as recordingStore } from '@mexp/media-recording';
+
+/**
+ * WordPress dependencies
+ */
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useMemo } from '@wordpress/element';
 import { __, _x, sprintf } from '@wordpress/i18n';
 
-import { store as interfaceStore } from '@mexp/interface';
-import { store as recordingStore } from '@mexp/media-recording';
-
+/**
+ * Internal dependencies
+ */
 import { FeatureNumberControl } from './numberControl';
 import { SelectFeature } from './selectFeature';
 import { EnableFeature } from './enableFeature';

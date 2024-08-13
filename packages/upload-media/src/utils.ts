@@ -1,8 +1,17 @@
+/**
+ * External dependencies
+ */
 import mime from 'mime/lite';
 
+/**
+ * WordPress dependencies
+ */
 import { getFilename } from '@wordpress/url';
 import { _x } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
 import {
 	WASM_MEMORY_LIMIT,
 	FFMPEG_SUPPORTED_AUDIO_VIDEO_MIME_TYPES,

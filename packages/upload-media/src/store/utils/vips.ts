@@ -1,5 +1,11 @@
+/**
+ * External dependencies
+ */
 import { createWorkerFactory } from '@shopify/web-worker';
 
+/**
+ * Internal dependencies
+ */
 import { ImageFile } from '../../imageFile';
 import { getFileBasename } from '../../utils';
 import type { ImageSizeCrop, QueueItemId } from '../types';

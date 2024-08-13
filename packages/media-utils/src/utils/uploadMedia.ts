@@ -1,5 +1,11 @@
+/**
+ * WordPress dependencies
+ */
 import { __, sprintf } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
 import type {
 	AdditionalData,
 	OnChangeHandler,

@@ -1,8 +1,14 @@
+/**
+ * External dependencies
+ */
+import { store as uploadStore } from '@mexp/upload-media';
+
+/**
+ * WordPress dependencies
+ */
 import { useEffect } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-
-import { store as uploadStore } from '@mexp/upload-media';
 
 /**
  * Warns the user if there are unsaved changes before leaving the editor.

@@ -1,12 +1,21 @@
+/**
+ * External dependencies
+ */
 import { v4 as uuidv4 } from 'uuid';
 import { createWorkerFactory } from '@shopify/web-worker';
 
+/**
+ * WordPress dependencies
+ */
 import { createBlobURL, isBlobURL, revokeBlobURL } from '@wordpress/blob';
 import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as preferencesStore } from '@wordpress/preferences';
 
 import { measure, type MeasureOptions, start } from '@mexp/log';
 
+/**
+ * Internal dependencies
+ */
 import { ImageFile } from '../imageFile';
 import { MediaError } from '../mediaError';
 import {

@@ -1,8 +1,14 @@
 const Vips = require( 'wasm-vips' ) as (
 	config?: Parameters< typeof VipsInstance >[ 0 ]
 ) => Promise< NonNullable< typeof VipsInstance > >;
+/**
+ * External dependencies
+ */
 import type VipsInstance from 'wasm-vips';
 
+/**
+ * Internal dependencies
+ */
 import type {
 	ImageSizeCrop,
 	LoadOptions,

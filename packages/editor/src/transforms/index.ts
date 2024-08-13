@@ -1,3 +1,6 @@
+/**
+ * WordPress dependencies
+ */
 import { addFilter } from '@wordpress/hooks';
 import { createBlobURL } from '@wordpress/blob';
 import { type Block, type BlockInstance, createBlock } from '@wordpress/blocks';

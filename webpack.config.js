@@ -1,9 +1,15 @@
+/**
+ * External dependencies
+ */
 const { resolve, dirname, basename } = require( 'node:path' );
 const { readFileSync } = require( 'node:fs' );
 
 const { DefinePlugin } = require( 'webpack' );
 const MiniCSSExtractPlugin = require( 'mini-css-extract-plugin' );
 const { WebWorkerPlugin } = require( '@shopify/web-worker/webpack' );
+/**
+ * WordPress dependencies
+ */
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 const { hasBabelConfig, hasArgInCLI } = require( '@wordpress/scripts/utils' );
 

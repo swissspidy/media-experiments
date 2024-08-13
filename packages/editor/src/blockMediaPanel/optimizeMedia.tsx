@@ -1,4 +1,11 @@
+/**
+ * External dependencies
+ */
 import type { MouseEvent } from 'react';
+
+/**
+ * WordPress dependencies
+ */
 import {
 	BaseControl,
 	Button,
@@ -14,6 +21,9 @@ import apiFetch from '@wordpress/api-fetch';
 import type { Attachment } from '@mexp/media-utils';
 import { store as uploadStore } from '@mexp/upload-media';
 
+/**
+ * Internal dependencies
+ */
 import { useAttachment, useIsUploadingById } from '../utils/hooks';
 import { ApprovalDialog } from '../components/approvalDialog';
 

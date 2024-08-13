@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist';
 
 // Setting worker path to worker bundle.

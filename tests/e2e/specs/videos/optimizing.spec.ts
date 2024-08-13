@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { expect, test } from '../../fixtures';
 
 test.describe( 'Videos', () => {

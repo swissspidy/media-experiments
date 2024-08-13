@@ -1,5 +1,12 @@
-import { UploadError } from './uploadError';
+/**
+ * WordPress dependencies
+ */
 import { __, sprintf } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
+import { UploadError } from './uploadError';
 
 /**
  * Verifies whether the file is within the file upload size limits for the site.

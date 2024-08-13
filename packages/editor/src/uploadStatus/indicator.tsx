@@ -1,3 +1,11 @@
+/**
+ * External dependencies
+ */
+import { store as uploadStore } from '@mexp/upload-media';
+
+/**
+ * WordPress dependencies
+ */
 import { file, image, upload, video } from '@wordpress/icons';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __, _n, sprintf } from '@wordpress/i18n';
@@ -5,8 +13,9 @@ import { DropdownMenu } from '@wordpress/components';
 import { useEffect } from '@wordpress/element';
 import { store as editorStore } from '@wordpress/editor';
 
-import { store as uploadStore } from '@mexp/upload-media';
-
+/**
+ * Internal dependencies
+ */
 import { UnfinishedUploadsWarning } from './unfinishedUploadsWarning';
 
 const EMPTY_ARRAY: never[] = [];

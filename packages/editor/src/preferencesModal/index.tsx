@@ -1,3 +1,12 @@
+/**
+ * External dependencies
+ */
+import type { ImageFormat } from '@mexp/upload-media';
+import { store as interfaceStore } from '@mexp/interface';
+
+/**
+ * WordPress dependencies
+ */
 import { registerPlugin } from '@wordpress/plugins';
 import { PluginMoreMenuItem } from '@wordpress/editor';
 import { media } from '@wordpress/icons';
@@ -9,9 +18,9 @@ import {
 } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
 
-import type { ImageFormat } from '@mexp/upload-media';
-import { store as interfaceStore } from '@mexp/interface';
-
+/**
+ * Internal dependencies
+ */
 import type { MediaPreferences } from '../types';
 import { Modal } from './modal';
 import { PREFERENCES_NAME } from './constants';

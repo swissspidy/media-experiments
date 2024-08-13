@@ -1,3 +1,6 @@
+/**
+ * WordPress dependencies
+ */
 import { Fragment } from '@wordpress/element';
 import { addFilter } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
@@ -6,6 +9,9 @@ import { InspectorControls } from '@wordpress/block-editor';
 import { PanelBody } from '@wordpress/components';
 import { media } from '@wordpress/icons';
 
+/**
+ * Internal dependencies
+ */
 import { VideoControls } from './videoControls';
 import { ImageControls } from './imageControls';
 import { AudioControls } from './audioControls';

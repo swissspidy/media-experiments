@@ -1,3 +1,11 @@
+/**
+ * External dependencies
+ */
+import { store as recordingStore } from '@mexp/media-recording';
+
+/**
+ * WordPress dependencies
+ */
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { Warning, useBlockProps } from '@wordpress/block-editor';
 import { addFilter } from '@wordpress/hooks';
@@ -5,8 +13,9 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
-import { store as recordingStore } from '@mexp/media-recording';
-
+/**
+ * Internal dependencies
+ */
 import type { MediaPanelProps } from '../blockMediaPanel/types';
 import './blocks.css';
 import { formatSecondsToMinutesSeconds } from './utils';

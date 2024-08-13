@@ -1,3 +1,14 @@
+/**
+ * External dependencies
+ */
+import {
+	store as recordingStore,
+	type RecordingType,
+} from '@mexp/media-recording';
+
+/**
+ * WordPress dependencies
+ */
 import {
 	BaseControl,
 	Button,
@@ -11,11 +22,9 @@ import { Fragment } from '@wordpress/element';
 import { BlockControls } from '@wordpress/block-editor';
 import { capturePhoto, check } from '@wordpress/icons';
 
-import {
-	store as recordingStore,
-	type RecordingType,
-} from '@mexp/media-recording';
-
+/**
+ * Internal dependencies
+ */
 import { ReactComponent as BlurOn } from '../icons/blurOn.svg';
 import { ReactComponent as BlurOff } from '../icons/blurOff.svg';
 import { ReactComponent as StartRecording } from '../icons/startRecording.svg';

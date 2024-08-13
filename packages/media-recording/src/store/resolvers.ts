@@ -1,5 +1,11 @@
+/**
+ * External dependencies
+ */
 import type { Results } from '@mediapipe/selfie_segmentation';
 
+/**
+ * Internal dependencies
+ */
 import { BACKGROUND_BLUR_PX } from './constants';
 import { type State, Type } from './types';
 
