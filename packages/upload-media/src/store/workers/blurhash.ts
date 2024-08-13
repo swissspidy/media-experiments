@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import { encode } from 'blurhash';
 
 export async function getBlurHash( url: string ) {

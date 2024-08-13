@@ -1,11 +1,20 @@
+/**
+ * External dependencies
+ */
 import { readFileSync, existsSync } from 'node:fs';
 
 import { addCoverageReport } from 'monocart-reporter';
 import type { V8CoverageEntry } from 'monocart-coverage-reports';
 import type { Page } from '@playwright/test';
 
+/**
+ * WordPress dependencies
+ */
 import { test as base } from '@wordpress/e2e-test-utils-playwright';
 
+/**
+ * Internal dependencies
+ */
 import { MediaUtils } from './mediaUtils';
 
 type E2EFixture = {

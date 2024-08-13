@@ -1,7 +1,13 @@
+/**
+ * WordPress dependencies
+ */
 import { addFilter } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 import type { Block } from '@wordpress/blocks';
 
+/**
+ * Internal dependencies
+ */
 import type { VideoBlock } from '../blockMediaPanel/types';
 import { isGifVariation } from './utils';
 

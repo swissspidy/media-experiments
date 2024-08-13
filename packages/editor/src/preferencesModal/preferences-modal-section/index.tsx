@@ -1,5 +1,11 @@
+/**
+ * External dependencies
+ */
 import type { ReactNode } from 'react';
 
+/**
+ * Internal dependencies
+ */
 import './editor.css';
 
 interface PreferencesModalSectionProps {

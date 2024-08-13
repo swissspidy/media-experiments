@@ -31,7 +31,6 @@
 		}
 	},
 	"dependencies": {
-		"@mexp/mime": "../mime",
 		"wasm-vips": "^0.0.9"
 	}
 }

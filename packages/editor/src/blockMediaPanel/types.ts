@@ -1,3 +1,6 @@
+/**
+ * WordPress dependencies
+ */
 import type { BlockInstance, BlockEditProps } from '@wordpress/blocks';
 
 export type ImageBlock = BlockInstance< {

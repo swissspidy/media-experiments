@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { MediaError } from '../mediaError';
 
 describe( 'MediaError', () => {

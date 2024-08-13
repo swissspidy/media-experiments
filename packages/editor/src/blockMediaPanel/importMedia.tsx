@@ -1,3 +1,12 @@
+/**
+ * External dependencies
+ */
+import type { Attachment } from '@mexp/media-utils';
+import { store as uploadStore } from '@mexp/upload-media';
+
+/**
+ * WordPress dependencies
+ */
 import {
 	BaseControl,
 	Button,
@@ -9,9 +18,9 @@ import { isBlobURL } from '@wordpress/blob';
 import { __, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
 
-import type { Attachment } from '@mexp/media-utils';
-import { store as uploadStore } from '@mexp/upload-media';
-
+/**
+ * Internal dependencies
+ */
 import { useIsUploadingByUrl } from '../utils/hooks';
 
 interface ImportMediaProps {

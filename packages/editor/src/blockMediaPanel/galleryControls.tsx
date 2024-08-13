@@ -1,3 +1,12 @@
+/**
+ * External dependencies
+ */
+import type { Attachment, RestAttachment } from '@mexp/media-utils';
+import { store as uploadStore } from '@mexp/upload-media';
+
+/**
+ * WordPress dependencies
+ */
 import { Fragment } from '@wordpress/element';
 import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -5,9 +14,9 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as coreStore } from '@wordpress/core-data';
 import { createBlock } from '@wordpress/blocks';
 
-import type { Attachment, RestAttachment } from '@mexp/media-utils';
-import { store as uploadStore } from '@mexp/upload-media';
-
+/**
+ * Internal dependencies
+ */
 import { BulkOptimization } from '../components/bulkOptimization';
 import type { BulkOptimizationAttachmentData } from '../types';
 import type { GalleryBlock, ImageBlock } from './types';

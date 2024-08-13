@@ -1,9 +1,15 @@
 // eslint-disable-next-line
 import * as Ariakit from '@ariakit/react';
 
+/**
+ * WordPress dependencies
+ */
 import warning from '@wordpress/warning';
 import { forwardRef } from '@wordpress/element';
 
+/**
+ * Internal dependencies
+ */
 import type { TabListProps } from './types';
 import { useTabsContext } from './context';
 import { TabListWrapper } from './styles';

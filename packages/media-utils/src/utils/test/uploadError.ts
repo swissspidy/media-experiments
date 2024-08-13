@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { UploadError } from '../uploadError';
 
 describe( 'UploadError', () => {

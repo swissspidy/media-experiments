@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { sideloadMedia } from '../sideloadMedia';
 import { sideloadToServer } from '../sideloadToServer';
 

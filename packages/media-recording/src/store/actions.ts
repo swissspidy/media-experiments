@@ -1,13 +1,20 @@
 // ImageCapture polyfill for Safari and Firefox.
 // See https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_Image_Capture_API
 // See https://github.com/GoogleChromeLabs/imagecapture-polyfill
+/**
+ * External dependencies
+ */
 import { ImageCapture } from 'image-capture';
 
+/**
+ * WordPress dependencies
+ */
 import { createBlobURL, revokeBlobURL } from '@wordpress/blob';
 import { dateI18n } from '@wordpress/date';
 
-import { getExtensionFromMimeType } from '@mexp/mime';
-
+/**
+ * Internal dependencies
+ */
 import {
 	COUNTDOWN_TIME_IN_SECONDS,
 	MAX_RECORDING_DURATION_IN_SECONDS,
@@ -539,7 +546,7 @@ export function captureImage() {
 					} );
 
 					const { type } = blob;
-					const ext = getExtensionFromMimeType( type );
+					const ext = type.split( '/' )[ 1 ];
 
 					const file = new File(
 						[ blob ],

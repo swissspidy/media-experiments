@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { ItemStatus, type QueueItem, type Settings, type State } from './types';
 
 /**

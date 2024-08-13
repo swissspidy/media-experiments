@@ -1,7 +1,11 @@
+/**
+ * External dependencies
+ */
 import { createWorkerFactory } from '@shopify/web-worker';
 
-import { getExtensionFromMimeType } from '@mexp/mime';
-
+/**
+ * Internal dependencies
+ */
 import { getFileBasename } from '../../utils';
 
 const createHeifWorker = createWorkerFactory(
@@ -56,11 +60,8 @@ export async function transcodeHeifImage(
 
 	const blob = await bufferToBlob( buffer, width, height, type, quality );
 
-	return new File(
-		[ blob ],
-		`${ getFileBasename( file.name ) }.${ getExtensionFromMimeType(
-			type
-		) }`,
-		{ type }
-	);
+	const basename = getFileBasename( file.name );
+	const ext = type.split( '/' )[ 1 ];
+
+	return new File( [ blob ], `${ basename }.${ ext }`, { type } );
 }

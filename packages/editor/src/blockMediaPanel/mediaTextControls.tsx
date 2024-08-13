@@ -1,8 +1,17 @@
+/**
+ * External dependencies
+ */
+import type { Attachment } from '@mexp/media-utils';
+
+/**
+ * WordPress dependencies
+ */
 import type { BlockEditProps } from '@wordpress/blocks';
 import { Fragment } from '@wordpress/element';
 
-import type { Attachment } from '@mexp/media-utils';
-
+/**
+ * Internal dependencies
+ */
 import { DebugInfo } from './debugInfo';
 import { MuteVideo } from './muteVideo';
 import { OptimizeMedia } from './optimizeMedia';

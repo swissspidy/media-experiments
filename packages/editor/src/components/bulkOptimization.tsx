@@ -1,6 +1,12 @@
+/**
+ * External dependencies
+ */
 import type { MouseEvent } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
+/**
+ * WordPress dependencies
+ */
 import { Fragment } from '@wordpress/element';
 import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -19,6 +25,9 @@ import apiFetch from '@wordpress/api-fetch';
 
 import { store as uploadStore } from '@mexp/upload-media';
 
+/**
+ * Internal dependencies
+ */
 import type { BulkOptimizationAttachmentData } from '../types';
 import { ReactComponent as CompressIcon } from '../icons/compress.svg';
 import { ApprovalDialog } from './approvalDialog';

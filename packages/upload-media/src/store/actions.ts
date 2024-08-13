@@ -1,10 +1,19 @@
+/**
+ * External dependencies
+ */
 import { v4 as uuidv4 } from 'uuid';
 
+/**
+ * WordPress dependencies
+ */
 import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as preferencesStore } from '@wordpress/preferences';
 
 import { type MeasureOptions } from '@mexp/log';
 
+/**
+ * Internal dependencies
+ */
 import { MediaError } from '../mediaError';
 import { getFileBasename, getFileNameFromUrl } from '../utils';
 import { PREFERENCES_NAME } from '../constants';

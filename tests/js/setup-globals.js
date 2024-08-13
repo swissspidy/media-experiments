@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import { Blob as BlobPolyfill, File as FilePolyfill } from 'node:buffer';
 
 global.Blob = BlobPolyfill;

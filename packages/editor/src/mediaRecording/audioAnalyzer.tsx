@@ -1,3 +1,6 @@
+/**
+ * WordPress dependencies
+ */
 import { useEffect, useRef, useState } from '@wordpress/element';
 
 function AudioVisualiser( { data }: { data: Uint8Array } ) {

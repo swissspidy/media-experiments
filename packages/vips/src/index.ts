@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import Vips from 'wasm-vips';
 
 // @ts-expect-error
@@ -12,8 +15,9 @@ import VipsHeifModule from 'wasm-vips/vips-heif.wasm';
 // eslint-disable-next-line import/no-unresolved
 import VipsJxlModule from 'wasm-vips/vips-jxl.wasm';
 
-import { getExtensionFromMimeType } from '@mexp/mime';
-
+/**
+ * Internal dependencies
+ */
 import type {
 	ImageSizeCrop,
 	LoadOptions,
@@ -148,11 +152,7 @@ export async function convertImageFormat(
 	quality = 0.82,
 	interlaced = false
 ): Promise< ArrayBuffer > {
-	const ext = getExtensionFromMimeType( outputType );
-
-	if ( ! ext ) {
-		throw new Error( 'Unsupported file type' );
-	}
+	const ext = outputType.split( '/' )[ 1 ];
 
 	inProgressOperations.add( id );
 
@@ -267,11 +267,7 @@ export async function resizeImage(
 	originalWidth: number;
 	originalHeight: number;
 } > {
-	const ext = getExtensionFromMimeType( type );
-
-	if ( ! ext ) {
-		throw new Error( 'Unsupported file type' );
-	}
+	const ext = type.split( '/' )[ 1 ];
 
 	inProgressOperations.add( id );
 

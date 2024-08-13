@@ -1,3 +1,11 @@
+/**
+ * External dependencies
+ */
+import { store as uploadStore } from '@mexp/upload-media';
+
+/**
+ * WordPress dependencies
+ */
 import {
 	BaseControl,
 	Button,
@@ -10,8 +18,9 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
 import apiFetch from '@wordpress/api-fetch';
 
-import { store as uploadStore } from '@mexp/upload-media';
-
+/**
+ * Internal dependencies
+ */
 import { useAttachment, useIsUploadingByUrl } from '../utils/hooks';
 
 interface AddPosterProps {

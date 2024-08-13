@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import libheif from 'libheif-js/libheif-wasm/libheif-bundle.js';
 
 type DecodeResult = {

@@ -1,7 +1,16 @@
+/**
+ * External dependencies
+ */
 import type { ComponentProps, ReactNode } from 'react';
 
+/**
+ * WordPress dependencies
+ */
 import { ToggleControl } from '@wordpress/components';
 
+/**
+ * Internal dependencies
+ */
 import './editor.css';
 
 interface BaseOptionProps

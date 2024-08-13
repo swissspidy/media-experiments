@@ -1,7 +1,16 @@
-import { Fragment } from '@wordpress/element';
-
+/**
+ * External dependencies
+ */
 import type { Attachment } from '@mexp/media-utils';
 
+/**
+ * WordPress dependencies
+ */
+import { Fragment } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
 import { useFeaturedImageAttachment } from '../utils/hooks';
 import { UploadIndicator } from './uploadIndicator';
 import { OptimizeMedia } from './optimizeMedia';

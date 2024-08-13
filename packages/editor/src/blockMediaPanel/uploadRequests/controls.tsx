@@ -1,3 +1,16 @@
+/**
+ * External dependencies
+ */
+import {
+	transformAttachment,
+	type Attachment,
+	type RestAttachment,
+} from '@mexp/media-utils';
+import { store as interfaceStore } from '@mexp/interface';
+
+/**
+ * WordPress dependencies
+ */
 import {
 	BaseControl,
 	Button,
@@ -12,13 +25,9 @@ import { store as editorStore } from '@wordpress/editor';
 import { store as noticesStore } from '@wordpress/notices';
 import apiFetch from '@wordpress/api-fetch';
 
-import {
-	transformAttachment,
-	type Attachment,
-	type RestAttachment,
-} from '@mexp/media-utils';
-import { store as interfaceStore } from '@mexp/interface';
-
+/**
+ * Internal dependencies
+ */
 import { Modal } from './modal';
 
 interface UploadRequestControlsProps {

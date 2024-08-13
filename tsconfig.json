@@ -22,9 +22,6 @@
 			"path": "packages/media-utils"
 		},
 		{
-			"path": "packages/mime"
-		},
-		{
 			"path": "packages/pdf"
 		},
 		{

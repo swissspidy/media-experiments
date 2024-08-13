@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { getFileExtension } from '../utils';
 
 describe( 'getFileExtension', () => {

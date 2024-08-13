@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { type OpenModalAction, type CloseModalAction, Type } from './types';
 
 /**

@@ -1,9 +1,18 @@
+/**
+ * External dependencies
+ */
 import type { ComponentProps, PropsWithChildren } from 'react';
 
+/**
+ * WordPress dependencies
+ */
 import { useDispatch, useSelect } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
 import { SelectControl } from '@wordpress/components';
 
+/**
+ * Internal dependencies
+ */
 import type { MediaPreferences } from '../types';
 import { PREFERENCES_NAME } from './constants';
 

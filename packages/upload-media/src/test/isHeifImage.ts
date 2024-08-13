@@ -1,6 +1,12 @@
+/**
+ * External dependencies
+ */
 import { openAsBlob } from 'node:fs';
 import { resolve } from 'node:path';
 
+/**
+ * Internal dependencies
+ */
 import { isHeifImage } from '../utils';
 
 describe( 'isHeifImage', () => {

@@ -1,5 +1,11 @@
-import type { ReactNode } from 'react';
+/**
+ * External dependencies
+ */
+import { store as uploadStore } from '@mexp/upload-media';
 
+/**
+ * WordPress dependencies
+ */
 import { file, image, upload, video } from '@wordpress/icons';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __, _n, sprintf } from '@wordpress/i18n';
@@ -7,28 +13,23 @@ import { DropdownMenu } from '@wordpress/components';
 import { useEffect } from '@wordpress/element';
 import { store as editorStore } from '@wordpress/editor';
 
-import { store as uploadStore } from '@mexp/upload-media';
-import { getMediaTypeFromMimeType } from '@mexp/mime';
-
+/**
+ * Internal dependencies
+ */
 import { UnfinishedUploadsWarning } from './unfinishedUploadsWarning';
 
 const EMPTY_ARRAY: never[] = [];
 
 function getIconForMimeType( mimeType: string ) {
-	let icon: ReactNode;
-	const mediaType = getMediaTypeFromMimeType( mimeType );
-	switch ( mediaType ) {
-		case 'image':
-			icon = image;
-			break;
-		case 'video':
-			icon = video;
-			break;
-		default:
-			icon = file;
+	if ( mimeType.startsWith( 'image/' ) ) {
+		return image;
 	}
 
-	return icon;
+	if ( mimeType.startsWith( 'video/' ) ) {
+		return video;
+	}
+
+	return file;
 }
 
 export function UploadStatusIndicator() {

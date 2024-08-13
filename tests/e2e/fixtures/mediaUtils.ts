@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import { extname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { copyFile, mkdtemp } from 'node:fs/promises';

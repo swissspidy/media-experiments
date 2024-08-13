@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { resolve } from '../';
 
 describe( 'resolve', () => {

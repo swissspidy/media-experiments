@@ -1,5 +1,12 @@
-import { UploadError } from './uploadError';
+/**
+ * WordPress dependencies
+ */
 import { __, sprintf } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
+import { UploadError } from './uploadError';
 
 /**
  * Verifies if the caller (e.g. a block) supports this mime type.

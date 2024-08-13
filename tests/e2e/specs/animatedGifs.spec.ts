@@ -1,5 +1,12 @@
-import { expect, test } from '../fixtures';
+/**
+ * External dependencies
+ */
 import type { RestAttachment } from '@mexp/media-utils';
+
+/**
+ * Internal dependencies
+ */
+import { expect, test } from '../fixtures';
 
 test.describe( 'Animated GIFs', () => {
 	test.beforeAll( async ( { requestUtils } ) => {

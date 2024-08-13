@@ -1,6 +1,12 @@
+/**
+ * WordPress dependencies
+ */
 import { addFilter } from '@wordpress/hooks';
 import { createHigherOrderComponent } from '@wordpress/compose';
 
+/**
+ * Internal dependencies
+ */
 import type { MediaPanelProps } from '../blockMediaPanel/types';
 
 type CrossOriginValue = 'anonymous' | 'use-credentials' | '' | undefined;

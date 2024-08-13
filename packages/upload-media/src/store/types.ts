@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import type { MeasureOptions } from '@mexp/log';
 
 export type QueueItemId = string;
