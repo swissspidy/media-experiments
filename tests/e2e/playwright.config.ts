@@ -70,6 +70,7 @@ const config = defineConfig( {
 								__dirname,
 								'./assets/garden-adventures.wav'
 							),
+						'--enable-unsafe-webgpu',
 					],
 				},
 			},
