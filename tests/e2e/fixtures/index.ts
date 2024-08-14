@@ -56,7 +56,10 @@ function getSourceMapForEntry( entry: V8CoverageEntry, index?: number ) {
 
 export const test = base.extend< E2EFixture, {} >( {
 	page: async ( { page, browserName }, use ) => {
-		if ( browserName !== 'chromium' || ! process.env.COLLECT_COVERAGE ) {
+		if (
+			browserName !== 'chromium' ||
+			process.env.COLLECT_COVERAGE !== 'true'
+		) {
 			return use( page );
 		}
 
@@ -95,7 +98,10 @@ export const test = base.extend< E2EFixture, {} >( {
 		const context = await browser.newContext();
 		const secondPage = await context.newPage();
 
-		if ( browserName !== 'chromium' || ! process.env.COLLECT_COVERAGE ) {
+		if (
+			browserName !== 'chromium' ||
+			process.env.COLLECT_COVERAGE !== 'true'
+		) {
 			await use( secondPage );
 
 			await context.close();
