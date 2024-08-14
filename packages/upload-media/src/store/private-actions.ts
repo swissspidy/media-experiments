@@ -16,8 +16,8 @@ import { measure, type MeasureOptions, start } from '@mexp/log';
 /**
  * Internal dependencies
  */
-import { ImageFile } from '../imageFile';
-import { MediaError } from '../mediaError';
+import { ImageFile } from '../image-file';
+import { MediaError } from '../media-error';
 import {
 	canProcessWithFFmpeg,
 	cloneFile,
@@ -31,7 +31,7 @@ import {
 	videoHasAudio,
 } from '../utils';
 import { PREFERENCES_NAME } from '../constants';
-import { StubFile } from '../stubFile';
+import { StubFile } from '../stub-file';
 import { transcodeHeifImage } from './utils/heif';
 import {
 	vipsCompressImage,
@@ -80,7 +80,7 @@ import type { cancelItem } from './actions';
 const createDominantColorWorker = createWorkerFactory(
 	() =>
 		import(
-			/* webpackChunkName: 'dominant-color' */ './workers/dominantColor'
+			/* webpackChunkName: 'dominant-color' */ './workers/dominant-color'
 		)
 );
 const dominantColorWorker = createDominantColorWorker();
@@ -2023,7 +2023,7 @@ export function generateVideoSubtitles( id: QueueItemId ) {
 			 AudioBuffer are not available in a worker context.
 			*/
 			const { generateSubtitles } = await import(
-				/* webpackChunkName: 'subtitles' */ '../generateSubtitles'
+				/* webpackChunkName: 'subtitles' */ '../generate-subtitles'
 			);
 
 			const file = await generateSubtitles(
