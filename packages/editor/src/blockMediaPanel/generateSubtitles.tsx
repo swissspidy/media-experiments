@@ -16,6 +16,7 @@ import {
 	Button,
 	useBaseControlProps,
 } from '@wordpress/components';
+import { useLayoutEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -43,7 +44,31 @@ export function GenerateSubtitles( {
 		[]
 	);
 
-	if ( post?.mexp_is_muted || attributes.tracks.length > 0 ) {
+	const hasTracks = attributes.tracks.length > 0;
+
+	// Force-show subtitles in the video player so user immediately sees result.
+	useLayoutEffect( () => {
+		if ( ! hasTracks ) {
+			return;
+		}
+
+		const editorCanvas =
+			(
+				( document.querySelector(
+					'iframe[name="editor-canvas"]'
+				) as HTMLIFrameElement ) || null
+			)?.contentDocument || document;
+
+		const videoPlayer = editorCanvas.querySelector(
+			`video[src="${ url }"]`
+		) as HTMLVideoElement | null;
+
+		if ( videoPlayer && videoPlayer.textTracks?.[ 0 ] ) {
+			videoPlayer.textTracks[ 0 ].mode = 'showing';
+		}
+	}, [ url, hasTracks ] );
+
+	if ( post?.mexp_is_muted || hasTracks ) {
 		return null;
 	}
 

@@ -7,6 +7,7 @@ export type ImageBlock = BlockInstance< {
 	id: number;
 	url: string;
 	caption: string;
+	alt: string;
 } > & { name: 'core/image' };
 
 export type AudioBlock = BlockInstance< {
