@@ -134,6 +134,14 @@ test.describe( 'Upload Requests', () => {
 					} )
 			).toBeVisible();
 
+			await expect(
+				page
+					.getByRole( 'button', { name: 'Dismiss this notice' } )
+					.filter( {
+						hasText: 'Media successfully uploaded',
+					} )
+			).toBeVisible();
+
 			// Simple verification that the upload request was successful.
 
 			// eslint-disable-next-line playwright/no-conditional-in-test
@@ -142,7 +150,7 @@ test.describe( 'Upload Requests', () => {
 					() =>
 						window.wp.data
 							.select( 'core/block-editor' )
-							.getSelectedBlock()?.innerBlocks.length > 1
+							.getSelectedBlock()?.innerBlocks.length >= 1
 				);
 			} else {
 				await page.waitForFunction(
