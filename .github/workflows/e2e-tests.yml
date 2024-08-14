@@ -42,7 +42,7 @@ jobs:
               uses: actions/checkout@v4
 
             - name: Install Docker (missing on macOS)
-              if: ${{ matrix.os == 'macos-latest' }}
+              if: runner.os == 'macOS'
               run: |
                 brew install docker
                 colima start
