@@ -41,6 +41,12 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4
 
+            - name: Install Docker (missing on macOS)
+              if: ${{ matrix.os == 'macos-latest' }}
+              run: |
+                brew install docker
+                colima start
+
             - name: Setup Node
               uses: actions/setup-node@v4
               with:
