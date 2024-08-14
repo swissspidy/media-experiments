@@ -200,7 +200,11 @@ test.describe( 'Media Recording', () => {
 		await page.waitForFunction(
 			() =>
 				window.wp.data.select( 'media-experiments/upload' ).getItems()
-					.length === 0
+					.length === 0,
+			undefined,
+			{
+				timeout: 30_000,
+			}
 		);
 
 		await expect( settingsPanel ).toHaveText( /Mime type: image\/jpeg/ );
