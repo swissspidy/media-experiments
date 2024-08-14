@@ -16,7 +16,7 @@ import {
 	WASM_MEMORY_LIMIT,
 	FFMPEG_SUPPORTED_AUDIO_VIDEO_MIME_TYPES,
 } from './constants';
-import { MediaError } from './mediaError';
+import { MediaError } from './media-error';
 
 /**
  * Renames a given file and returns a new file.
