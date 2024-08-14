@@ -370,7 +370,7 @@ export function RecordingControls( {
 					'media-experiments'
 				) }
 			</p>
-			<Button variant="primary" onClick={ onClick } { ...controlProps }>
+			<Button variant="secondary" onClick={ onClick } { ...controlProps }>
 				{ isInRecordingMode
 					? __( 'Exit', 'media-experiments' )
 					: __( 'Start', 'media-experiments' ) }

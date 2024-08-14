@@ -227,7 +227,7 @@ function CompressAll( props: {
 
 	return (
 		<Button
-			variant="primary"
+			variant="secondary"
 			onClick={ onClick }
 			disabled={ areAllUploading }
 		>

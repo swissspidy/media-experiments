@@ -76,7 +76,7 @@ export function MuteVideo( { id, url, poster, onChange }: MuteVideoProps ) {
 				) }
 			</p>
 			<Button
-				variant="primary"
+				variant="secondary"
 				onClick={ onClick }
 				disabled={ isUploading }
 				{ ...controlProps }

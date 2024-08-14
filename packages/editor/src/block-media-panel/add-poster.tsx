@@ -119,7 +119,7 @@ export function AddPoster( { attributes, setAttributes }: AddPosterProps ) {
 			</p>
 			{ poster ? (
 				<Button
-					variant="primary"
+					variant="secondary"
 					onClick={ restorePoster }
 					disabled={ isUploading }
 					{ ...controlProps }
@@ -128,7 +128,7 @@ export function AddPoster( { attributes, setAttributes }: AddPosterProps ) {
 				</Button>
 			) : (
 				<Button
-					variant="primary"
+					variant="secondary"
 					onClick={ generatePoster }
 					disabled={ isUploading }
 					{ ...controlProps }

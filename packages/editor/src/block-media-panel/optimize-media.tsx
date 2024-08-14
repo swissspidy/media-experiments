@@ -130,7 +130,7 @@ export function OptimizeMedia( {
 					) }
 				</p>
 				<Button
-					variant="primary"
+					variant="secondary"
 					onClick={ onClick }
 					disabled={ isUploading }
 					{ ...controlProps }

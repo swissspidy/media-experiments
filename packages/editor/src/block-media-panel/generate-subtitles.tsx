@@ -114,7 +114,7 @@ export function GenerateSubtitles( {
 				) }
 			</p>
 			<Button
-				variant="primary"
+				variant="secondary"
 				onClick={ onClick }
 				disabled={ isUploading }
 				{ ...controlProps }

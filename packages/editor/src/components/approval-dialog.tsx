@@ -143,7 +143,7 @@ export function ApprovalDialog( { id }: ApprovalDialogProps ) {
 				/>
 			</div>
 			<div className="mexp-comparison-modal__buttons">
-				<Button variant="primary" onClick={ onApprove }>
+				<Button variant="secondary" onClick={ onApprove }>
 					{ __( 'Use optimized version', 'media-experiments' ) }
 				</Button>
 				<Button variant="secondary" onClick={ onReject }>

@@ -84,7 +84,7 @@ export function ImportMedia( { url, onChange }: ImportMediaProps ) {
 				) }
 			</p>
 			<Button
-				variant="primary"
+				variant="secondary"
 				onClick={ onClick }
 				disabled={ isUploading }
 				{ ...controlProps }
