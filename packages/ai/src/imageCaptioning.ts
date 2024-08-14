@@ -38,7 +38,7 @@ async function loadModel() {
 /**
  * Generate a caption for a given URL.
  *
- * @param url Image URL.
+ * @param url  Image URL.
  * @param task Task to perform, determines how detailed the caption will be.
  */
 export async function runTask(
