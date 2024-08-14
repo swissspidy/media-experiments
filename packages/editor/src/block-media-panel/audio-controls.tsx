@@ -7,7 +7,6 @@ import type { Attachment } from '@mexp/media-utils';
  * WordPress dependencies
  */
 import type { BlockEditProps } from '@wordpress/blocks';
-import { Fragment } from '@wordpress/element';
 import { isBlobURL } from '@wordpress/blob';
 
 /**
@@ -55,7 +54,7 @@ export function AudioControls( props: AudioControlsProps ) {
 	}
 
 	return (
-		<Fragment>
+		<>
 			<UploadIndicator
 				id={ props.attributes.id }
 				url={ props.attributes.src }
@@ -80,6 +79,6 @@ export function AudioControls( props: AudioControlsProps ) {
 				/>
 			) : null }
 			<DebugInfo id={ props.attributes.id } />
-		</Fragment>
+		</>
 	);
 }

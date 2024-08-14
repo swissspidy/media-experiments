@@ -7,7 +7,6 @@ import type { Attachment } from '@mexp/media-utils';
  * WordPress dependencies
  */
 import type { BlockEditProps } from '@wordpress/blocks';
-import { Fragment } from '@wordpress/element';
 import { isBlobURL } from '@wordpress/blob';
 
 /**
@@ -82,7 +81,7 @@ export function VideoControls( props: VideoControlsProps ) {
 	}
 
 	return (
-		<Fragment>
+		<>
 			<UploadIndicator
 				id={ props.attributes.id }
 				url={ props.attributes.src }
@@ -121,6 +120,6 @@ export function VideoControls( props: VideoControlsProps ) {
 			<GenerateSubtitles { ...props } />
 			<AddPoster { ...props } />
 			<DebugInfo id={ props.attributes.id } />
-		</Fragment>
+		</>
 	);
 }

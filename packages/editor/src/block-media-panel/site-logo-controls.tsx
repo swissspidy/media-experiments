@@ -9,7 +9,6 @@ import type { Attachment } from '@mexp/media-utils';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { type Settings, store as coreStore } from '@wordpress/core-data';
 import type { BlockEditProps } from '@wordpress/blocks';
-import { Fragment } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -64,7 +63,7 @@ export function SiteLogoControls( { attributes }: SiteLogoControlsProps ) {
 	}
 
 	return (
-		<Fragment>
+		<>
 			<UploadIndicator id={ siteLogoId } />
 			<OptimizeMedia
 				id={ siteLogoId }
@@ -72,6 +71,6 @@ export function SiteLogoControls( { attributes }: SiteLogoControlsProps ) {
 				onSuccess={ onChange }
 			/>
 			<DebugInfo id={ siteLogoId } />
-		</Fragment>
+		</>
 	);
 }

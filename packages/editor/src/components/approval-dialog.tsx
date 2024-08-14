@@ -15,6 +15,7 @@ import { createInterpolateElement, useState } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 
 import { store as uploadStore } from '@mexp/upload-media';
+
 /**
  * Internal dependencies
  */

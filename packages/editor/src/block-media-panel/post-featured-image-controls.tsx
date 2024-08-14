@@ -4,11 +4,6 @@
 import type { Attachment } from '@mexp/media-utils';
 
 /**
- * WordPress dependencies
- */
-import { Fragment } from '@wordpress/element';
-
-/**
  * Internal dependencies
  */
 import { useFeaturedImageAttachment } from '../utils/hooks';
@@ -33,7 +28,7 @@ export function PostFeaturedImageControls() {
 	}
 
 	return (
-		<Fragment>
+		<>
 			<UploadIndicator id={ featuredImage } />
 			<OptimizeMedia
 				id={ featuredImage }
@@ -41,6 +36,6 @@ export function PostFeaturedImageControls() {
 				onSuccess={ onChange }
 			/>
 			<DebugInfo id={ featuredImage } />
-		</Fragment>
+		</>
 	);
 }

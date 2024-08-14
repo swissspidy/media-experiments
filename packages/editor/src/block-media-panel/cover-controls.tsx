@@ -6,7 +6,6 @@ import type { Attachment } from '@mexp/media-utils';
 /**
  * WordPress dependencies
  */
-import { Fragment } from '@wordpress/element';
 import type { BlockEditProps } from '@wordpress/blocks';
 
 /**
@@ -43,7 +42,7 @@ export function CoverControls( props: CoverControlsProps ) {
 	}
 
 	return (
-		<Fragment>
+		<>
 			<UploadIndicator
 				id={ props.attributes.id }
 				url={ props.attributes.url }
@@ -67,6 +66,6 @@ export function CoverControls( props: CoverControlsProps ) {
 				/>
 			) : null }
 			<DebugInfo id={ props.attributes.id } />
-		</Fragment>
+		</>
 	);
 }

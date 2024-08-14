@@ -1,7 +1,6 @@
 /**
  * WordPress dependencies
  */
-import { Fragment } from '@wordpress/element';
 import { addFilter } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 import { createHigherOrderComponent } from '@wordpress/compose';
@@ -75,7 +74,7 @@ const addMediaPanel = createHigherOrderComponent(
 		}
 
 		return (
-			<Fragment>
+			<>
 				<BlockEdit { ...props } />
 				<InspectorControls>
 					<PanelBody
@@ -86,7 +85,7 @@ const addMediaPanel = createHigherOrderComponent(
 						<PerBlockControls { ...props } />
 					</PanelBody>
 				</InspectorControls>
-			</Fragment>
+			</>
 		);
 	},
 	'withMediaPanel'

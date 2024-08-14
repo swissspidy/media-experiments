@@ -7,7 +7,6 @@ import type { Attachment } from '@mexp/media-utils';
  * WordPress dependencies
  */
 import type { BlockEditProps } from '@wordpress/blocks';
-import { Fragment } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -43,7 +42,7 @@ export function MediaTextControls( props: MediaTextControlsProps ) {
 	}
 
 	return (
-		<Fragment>
+		<>
 			<UploadIndicator
 				id={ props.attributes.mediaId }
 				url={ props.attributes.mediaUrl }
@@ -67,6 +66,6 @@ export function MediaTextControls( props: MediaTextControlsProps ) {
 				/>
 			) : null }
 			<DebugInfo id={ props.attributes.mediaId } />
-		</Fragment>
+		</>
 	);
 }

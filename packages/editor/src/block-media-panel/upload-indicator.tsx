@@ -2,7 +2,6 @@
  * WordPress dependencies
  */
 import { isBlobURL } from '@wordpress/blob';
-import { Fragment } from '@wordpress/element';
 import { Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
@@ -28,7 +27,7 @@ export function UploadIndicator( { id, url, poster }: UploadIndicatorProps ) {
 	);
 
 	return (
-		<Fragment>
+		<>
 			{ isUploading && (
 				<Notice isDismissible={ false }>
 					<p>{ __( 'Upload in progress', 'media-experiments' ) }</p>
@@ -44,6 +43,6 @@ export function UploadIndicator( { id, url, poster }: UploadIndicatorProps ) {
 					</p>
 				</Notice>
 			) }
-		</Fragment>
+		</>
 	);
 }

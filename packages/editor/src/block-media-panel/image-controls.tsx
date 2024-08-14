@@ -6,7 +6,6 @@ import type { Attachment } from '@mexp/media-utils';
 /**
  * WordPress dependencies
  */
-import { Fragment } from '@wordpress/element';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { isBlobURL } from '@wordpress/blob';
 
@@ -80,7 +79,7 @@ export function ImageControls( props: ImageControlsProps ) {
 	}
 
 	return (
-		<Fragment>
+		<>
 			<AnimatedGifConverter
 				id={ props.attributes.id }
 				url={ props.attributes.url }
@@ -121,6 +120,6 @@ export function ImageControls( props: ImageControlsProps ) {
 				onUpdateAltText={ onUpdateAltText }
 			/>
 			<DebugInfo id={ props.attributes.id } />
-		</Fragment>
+		</>
 	);
 }

@@ -7,7 +7,6 @@ import { store as uploadStore } from '@mexp/upload-media';
 /**
  * WordPress dependencies
  */
-import { Fragment } from '@wordpress/element';
 import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
@@ -118,7 +117,7 @@ export function GalleryControls( props: GalleryControlsProps ) {
 	}
 
 	return (
-		<Fragment>
+		<>
 			<BulkOptimization attachments={ attachments } />
 			{ ! attachments.length ? (
 				<UploadRequestControls
@@ -128,6 +127,6 @@ export function GalleryControls( props: GalleryControlsProps ) {
 					multiple
 				/>
 			) : null }
-		</Fragment>
+		</>
 	);
 }
