@@ -44,7 +44,7 @@ jobs:
             - name: Install Docker (missing on macOS)
               if: runner.os == 'macOS'
               run: |
-                brew install docker
+                brew install docker colima
                 colima start
 
             - name: Setup Node
