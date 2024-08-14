@@ -45,6 +45,9 @@ jobs:
               if: runner.os == 'macOS'
               run: |
                 brew install docker docker-compose colima
+
+                # See https://github.com/abiosoft/colima/discussions/874
+                mkdir -p ~/.docker/cli-plugins
                 ln -sfn $(brew --prefix docker-compose)/bin/docker-compose ~/.docker/cli-plugins/docker-compose
 
                 # See https://github.com/abiosoft/colima/issues/970#issuecomment-2224011277
