@@ -41,19 +41,6 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4
 
-            - name: Install Docker (missing on macOS)
-              if: runner.os == 'macOS'
-              run: |
-                brew install docker docker-compose colima
-
-                # See https://github.com/abiosoft/colima/discussions/874
-                mkdir -p ~/.docker/cli-plugins
-                ln -sfn $(brew --prefix docker-compose)/bin/docker-compose ~/.docker/cli-plugins/docker-compose
-
-                # See https://github.com/abiosoft/colima/issues/970#issuecomment-2224011277
-                sudo curl -L -o /opt/homebrew/Cellar/lima/0.22.0/bin/limactl https://github.com/mikekazakov/lima-nohvf/raw/master/limactl && sudo chmod +x /opt/homebrew/Cellar/lima/0.22.0/bin/limactl
-                colima start --network-address --arch arm64 --vm-type=qemu
-
             - name: Setup Node
               uses: actions/setup-node@v4
               with:
@@ -73,31 +60,10 @@ jobs:
                   # To get CSS source maps
                   NODE_ENV: development
 
-            - name: Configure WordPress version
-              run: |
-                  if [[ $WP_VERSION == 'trunk' ]]; then
-                    echo "Using WordPress trunk"
-                    echo "{\"core\":\"WordPress/WordPress#master\"}" >> .wp-env.override.json
-                  fi
+            - name: Start server
+              run: npm run wp-now -- --wp=$WP_VERSION -- &
               env:
                   WP_VERSION: ${{ matrix.wp }}
-
-            - name: Install WordPress
-              run: |
-                  chmod -R 767 ./ # TODO: Possibly integrate in wp-env
-                  npm run wp-env start
-
-            # Ensure the wp-content/languages folder exists and is writable.
-            # See https://github.com/WordPress/gutenberg/issues/22515
-            # and https://github.com/WordPress/gutenberg/tree/trunk/packages/env#installing-a-plugin-or-theme-on-the-development-instance
-            - name: Prepare tests
-              run: |
-                  WP_ENV_DIR=$(npm run wp-env install-path --silent 2>&1 | head -1)
-                  cd $WP_ENV_DIR
-                  mkdir -p tests-WordPress/wp-content/languages tests-WordPress/wp-content/upgrade
-                  chmod -R 767 tests-WordPress/wp-content/languages tests-WordPress/wp-content/upgrade
-                  docker compose run --rm -u $(id -u) -e HOME=/tmp tests-cli wp language core install de_CH de_DE es_ES fr_FR it_IT
-                  cd -
 
             - name: Run tests
               run: npm run test:e2e -- --shard=${{ matrix.shard }}

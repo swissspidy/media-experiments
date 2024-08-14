@@ -5,7 +5,7 @@
 		"declarationDir": "dist-types"
 	},
 	"references": [
-		{ "path": "../ai"},
+		{ "path": "../ai" },
 		{ "path": "../ffmpeg" },
 		{ "path": "../heif" },
 		{ "path": "../log" },
