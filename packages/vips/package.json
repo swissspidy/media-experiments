@@ -31,6 +31,6 @@
 		}
 	},
 	"dependencies": {
-		"wasm-vips": "^0.0.9"
+		"wasm-vips": "^0.0.10"
 	}
 }
