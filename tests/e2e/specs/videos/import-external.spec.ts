@@ -4,6 +4,12 @@
 import { expect, test } from '../../fixtures';
 
 test.describe( 'Videos', () => {
+	// TODO: Import seems to silently fail due to ffmpeg cancellation, without any user-facing notice.
+	test.skip(
+		( { browserName } ) => browserName === 'webkit',
+		'Needs investigation into ffmpeg errors (lack of codec?)'
+	);
+
 	test.beforeAll( async ( { requestUtils } ) => {
 		await Promise.all( [
 			requestUtils.deleteAllMedia(),

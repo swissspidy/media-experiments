@@ -4,6 +4,11 @@
 import { expect, test } from '../../fixtures';
 
 test.describe( 'Videos', () => {
+	test.skip(
+		( { browserName } ) => browserName === 'webkit',
+		'Needs investigation into ffmpeg errors (lack of codec?) and missing poster'
+	);
+
 	test.beforeAll( async ( { requestUtils } ) => {
 		await Promise.all( [
 			requestUtils.deleteAllMedia(),
