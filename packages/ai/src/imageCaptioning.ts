@@ -41,7 +41,7 @@ async function loadModel() {
  * @param url  Image URL.
  * @param task Task to perform, determines how detailed the caption will be.
  */
-export async function runTask(
+export async function generateCaption(
 	url: string,
 	task:
 		| '<CAPTION>'

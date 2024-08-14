@@ -90,6 +90,12 @@ const createBlurhashWorker = createWorkerFactory(
 );
 const blurhashWorker = createBlurhashWorker();
 
+const createAiWorker = createWorkerFactory(
+	() => import( /* webpackChunkName: 'ai' */ '@mexp/ai' )
+);
+
+const aiWorker = createAiWorker();
+
 // Safari does not currently support WebP in HTMLCanvasElement.toBlob()
 // See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
 const isSafari = Boolean(
@@ -2012,12 +2018,14 @@ export function generateVideoSubtitles( id: QueueItemId ) {
 		const item = select.getItem( id ) as QueueItem;
 
 		try {
-			const { generateSubtitles } = await import(
-				/* webpackChunkName: 'ai' */ '@mexp/ai'
-			);
+			// AudioContext is not available in a web worker, so we pass the audio ArrayBuffer instead.
+			const arrayBuffer = await item.sourceFile.arrayBuffer();
+			const audioContext = new AudioContext();
+			const audioBuffer =
+				await audioContext.decodeAudioData( arrayBuffer );
 
-			const file = await generateSubtitles(
-				item.sourceFile,
+			const file = await aiWorker.generateSubtitles(
+				audioBuffer,
 				getFileBasename( item.sourceFile.name )
 			);
 
@@ -2059,10 +2067,6 @@ export function generateImageCaptions( id: QueueItemId ) {
 		const item = select.getItem( id ) as QueueItem;
 
 		try {
-			const { generateCaption } = await import(
-				/* webpackChunkName: 'ai' */ '@mexp/ai'
-			);
-
 			let url = item.attachment?.url;
 
 			if ( ! url ) {
@@ -2075,8 +2079,11 @@ export function generateImageCaptions( id: QueueItemId ) {
 				} );
 			}
 
-			const caption = await generateCaption( url );
-			const alt = await generateCaption( url, '<DETAILED_CAPTION>' );
+			const caption = await aiWorker.generateCaption( url );
+			const alt = await aiWorker.generateCaption(
+				url,
+				'<DETAILED_CAPTION>'
+			);
 
 			dispatch.finishOperation( id, {
 				// For updating in the editor straight away.

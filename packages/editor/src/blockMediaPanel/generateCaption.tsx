@@ -22,7 +22,7 @@ const createAiWorker = createWorkerFactory(
 	() => import( /* webpackChunkName: 'ai' */ '@mexp/ai' )
 );
 
-const altTextWorker = createAiWorker();
+const aiWorker = createAiWorker();
 
 interface GenerateCaptionsProps {
 	url?: string;
@@ -51,7 +51,7 @@ export function GenerateCaptions( {
 				setCaptionInProgress( true );
 
 				try {
-					const result = await altTextWorker.generateCaption(
+					const result = await aiWorker.generateCaption(
 						url,
 						'<CAPTION>'
 					);
@@ -80,7 +80,7 @@ export function GenerateCaptions( {
 				setAltInProgress( true );
 
 				try {
-					const result = await altTextWorker.generateCaption(
+					const result = await aiWorker.generateCaption(
 						url,
 						'<DETAILED_CAPTION>'
 					);
