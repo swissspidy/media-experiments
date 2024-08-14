@@ -33,12 +33,12 @@
 		}
 	},
 	"dependencies": {
+		"@mexp/ai": "file:../ai",
+		"@mexp/interface": "file:../interface",
+		"@mexp/media-recording": "file:../media-recording",
+		"@mexp/media-utils": "file:../media-utils",
+		"@mexp/upload-media": "file:../upload-media",
 		"@shopify/web-worker": "^6.3.0",
-		"@mexp/ai": "../ai",
-		"@mexp/interface": "../interface",
-		"@mexp/media-recording": "../media-recording",
-		"@mexp/media-utils": "../media-utils",
-		"@mexp/upload-media": "../upload-media",
 		"@wordpress/blob": "^4.5.0",
 		"@wordpress/block-editor": "^14.0.0",
 		"@wordpress/blocks": "^13.0.0",

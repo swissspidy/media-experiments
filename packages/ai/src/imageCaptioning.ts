@@ -35,6 +35,12 @@ async function loadModel() {
 	tokenizer = await AutoTokenizer.from_pretrained( modelId );
 }
 
+/**
+ * Generate a caption for a given URL.
+ *
+ * @param url Image URL.
+ * @param task Task to perform, determines how detailed the caption will be.
+ */
 export async function runTask(
 	url: string,
 	task:
