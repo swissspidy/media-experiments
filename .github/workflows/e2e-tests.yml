@@ -44,7 +44,7 @@ jobs:
             - name: Install Docker (missing on macOS)
               if: runner.os == 'macOS'
               run: |
-                brew install docker colima
+                brew install docker docker-compose colima
 
                 # See https://github.com/abiosoft/colima/issues/970#issuecomment-2224011277
                 sudo curl -L -o /opt/homebrew/Cellar/lima/0.22.0/bin/limactl https://github.com/mikekazakov/lima-nohvf/raw/master/limactl && sudo chmod +x /opt/homebrew/Cellar/lima/0.22.0/bin/limactl
