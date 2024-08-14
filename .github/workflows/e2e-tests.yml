@@ -24,9 +24,9 @@ jobs:
             fail-fast: false
             matrix:
                 wp: ['latest']
+                project: ['chromium', 'firefox', 'webkit']
                 shard: ['1/2', '2/2']
                 experimental: [false]
-                project: ['chromium', 'firefox', 'webkit']
                 include:
                     - wp: 'trunk'
                       shard: '1/2'
