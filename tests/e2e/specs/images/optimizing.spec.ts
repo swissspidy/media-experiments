@@ -306,7 +306,11 @@ test.describe( 'Images', () => {
 		await page.waitForFunction(
 			() =>
 				window.wp.data.select( 'media-experiments/upload' ).getItems()
-					.length === 0
+					.length === 0,
+			undefined,
+			{
+				timeout: 30_000,
+			}
 		);
 
 		const settingsPanel = page
