@@ -18,7 +18,6 @@ import { BulkOptimization } from '../components/bulk-optimization';
 
 import { useMediaBlockAttachments } from './use-media-block-attachments';
 
-import './editor.css';
 import { useFeaturedImageAttachment } from '../utils/hooks';
 import { OptimizeMedia } from '../block-media-panel/optimize-media';
 import { UploadIndicator } from '../block-media-panel/upload-indicator';

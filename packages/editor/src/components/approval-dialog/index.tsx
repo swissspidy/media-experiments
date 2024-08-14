@@ -19,7 +19,9 @@ import { store as uploadStore } from '@mexp/upload-media';
 /**
  * Internal dependencies
  */
-import { useAttachment } from '../utils/hooks';
+import { useAttachment } from '../../utils/hooks';
+
+import './editor.css';
 
 const numberFormatter = Intl.NumberFormat( 'en', {
 	notation: 'compact',
@@ -80,6 +82,7 @@ export function ApprovalDialog( { id }: ApprovalDialogProps ) {
 		<Modal
 			title={ __( 'Compare media quality', 'media-experiments' ) }
 			onRequestClose={ onReject }
+			size="medium"
 		>
 			<div className="mexp-comparison-modal__labels">
 				<p>
@@ -144,11 +147,11 @@ export function ApprovalDialog( { id }: ApprovalDialogProps ) {
 				/>
 			</div>
 			<div className="mexp-comparison-modal__buttons">
-				<Button variant="secondary" onClick={ onApprove }>
-					{ __( 'Use optimized version', 'media-experiments' ) }
-				</Button>
 				<Button variant="secondary" onClick={ onReject }>
 					{ __( 'Cancel', 'media-experiments' ) }
+				</Button>
+				<Button variant="primary" onClick={ onApprove }>
+					{ __( 'Use optimized version', 'media-experiments' ) }
 				</Button>
 			</div>
 		</Modal>

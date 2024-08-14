@@ -22,8 +22,6 @@ import { PostFeaturedImageControls } from './post-featured-image-controls';
 import { SiteLogoControls } from './site-logo-controls';
 import type { MediaPanelProps } from './types';
 
-import './editor.css';
-
 const SUPPORTED_BLOCKS = [
 	'core/image',
 	'core/audio',

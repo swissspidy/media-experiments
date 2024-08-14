@@ -135,7 +135,7 @@ export function OptimizeMedia( {
 					disabled={ isUploading }
 					{ ...controlProps }
 				>
-					{ __( 'Optimize', 'media-experiments' ) }
+					{ __( 'Compress', 'media-experiments' ) }
 				</Button>
 			</BaseControl>
 			<ApprovalDialog id={ attachment.id } />

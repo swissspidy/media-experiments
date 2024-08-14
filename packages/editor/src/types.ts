@@ -21,7 +21,6 @@ export type BulkOptimizationAttachmentData = Pick<
 > & {
 	posterUrl: Attachment[ 'url' ];
 	clientId: BlockInstance[ 'clientId' ];
-	isUploading: boolean;
 	isOptimized: boolean;
 	isFetched: boolean;
 };

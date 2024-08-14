@@ -376,9 +376,6 @@ export function processItem( id: QueueItemId ) {
 		*/
 
 		if ( ! operation ) {
-			const isBatchUploaded =
-				batchId && select.isBatchUploaded( batchId );
-
 			if (
 				parentId ||
 				( ! parentId && ! select.isUploadingByParentId( id ) )
@@ -386,16 +383,17 @@ export function processItem( id: QueueItemId ) {
 				if ( attachment ) {
 					onSuccess?.( [ attachment ] );
 				}
-				if ( isBatchUploaded ) {
-					onBatchSuccess?.();
-				}
 
 				dispatch.removeItem( id );
 				dispatch.revokeBlobUrls( id );
+
+				if ( batchId && select.isBatchUploaded( batchId ) ) {
+					onBatchSuccess?.();
+				}
 			}
 
 			// All other side-loaded items have been removed, so remove the parent too.
-			if ( parentId && isBatchUploaded ) {
+			if ( parentId && batchId && select.isBatchUploaded( batchId ) ) {
 				const parentItem = select.getItem( parentId ) as QueueItem;
 
 				if ( attachment ) {

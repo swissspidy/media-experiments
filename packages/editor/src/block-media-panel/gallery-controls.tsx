@@ -2,7 +2,6 @@
  * External dependencies
  */
 import type { Attachment, RestAttachment } from '@mexp/media-utils';
-import { store as uploadStore } from '@mexp/upload-media';
 
 /**
  * WordPress dependencies
@@ -61,9 +60,6 @@ function useGalleryImageAttachments( clientId: BlockInstance[ 'clientId' ] ) {
 						posterUrl: block.attributes.url,
 						mexp_filesize: 0,
 						mexp_filename: '',
-						isUploading: select( uploadStore ).isUploadingById(
-							block.attributes.id
-						),
 						isOptimized: false,
 						isFetched: false,
 					};

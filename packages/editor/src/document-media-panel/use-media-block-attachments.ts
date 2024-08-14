@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { store as uploadStore } from '@mexp/upload-media';
 import type { RestAttachment } from '@mexp/media-utils';
 
 /**
@@ -78,9 +77,6 @@ export function useMediaBlockAttachments() {
 								: block.attributes.url,
 						mexp_filesize: 0,
 						mexp_filename: '',
-						isUploading: select( uploadStore ).isUploadingById(
-							block.attributes.id
-						),
 						isOptimized: false,
 						isFetched: false,
 					};

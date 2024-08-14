@@ -1,0 +1,45 @@
+.mexp-bulk-optimization-row > .components-item {
+	padding: 0;
+}
+
+.mexp-bulk-optimization-row .mexp-bulk-optimization-row__image {
+	border-radius: 100%;
+	height: 1.5em;
+	width: 1.5em;
+	object-fit: cover;
+	border: 1px solid #666;
+}
+.mexp-bulk-optimization-row__text {
+	flex: 1;
+}
+
+/* so the compact button and the spinner have the same size and position */
+.mexp-bulk-optimization-row__action {
+	width: 32px;
+	height: 32px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.mexp-bulk-optimization-row__action > .components-spinner {
+	margin-top: 0;
+}
+
+.mexp-bulk-optimization-row__button svg {
+	fill: #757575; /* --wp-components-color-gray-700 */
+}
+
+.mexp-bulk-optimization-row__button:hover svg {
+	fill: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9)); /* $components-color-accent */
+}
+
+.mexp-bulk-optimization-compress-all {
+	display: flex;
+	justify-content: center;
+	width: 100%;
+}
+
+.mexp-bulk-optimization-compress-all > .components-spinner {
+	margin-top: 0;
+}

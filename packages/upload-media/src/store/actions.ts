@@ -647,23 +647,24 @@ export function cancelItem( id: QueueItemId, error: Error ) {
 		dispatch.removeItem( id );
 		dispatch.revokeBlobUrls( id );
 
-		// All other side-loaded items have been removed, so remove the parent too.
-		if (
-			item.parentId &&
-			item.batchId &&
-			select.isBatchUploaded( item.batchId )
-		) {
-			const parentItem = select.getItem( item.parentId ) as QueueItem;
+		// All items of this batch were cancelled or finished.
+		if ( item.batchId && select.isBatchUploaded( item.batchId ) ) {
+			item.onBatchSuccess?.();
 
-			if (
-				parentItem.batchId &&
-				select.isBatchUploaded( parentItem.batchId )
-			) {
-				parentItem.onBatchSuccess?.();
+			// All other side-loaded items have been removed, so remove the parent too.
+			if ( item.parentId ) {
+				const parentItem = select.getItem( item.parentId ) as QueueItem;
+
+				if (
+					parentItem.batchId &&
+					select.isBatchUploaded( parentItem.batchId )
+				) {
+					parentItem.onBatchSuccess?.();
+				}
+
+				dispatch.removeItem( item.parentId );
+				dispatch.revokeBlobUrls( item.parentId );
 			}
-
-			dispatch.removeItem( item.parentId );
-			dispatch.revokeBlobUrls( item.parentId );
 		}
 	};
 }

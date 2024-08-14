@@ -83,7 +83,7 @@ export function isBatchUploaded( state: State, batchId: BatchId ): boolean {
 	const batchItems = state.queue.filter(
 		( item ) => batchId === item.batchId
 	);
-	return batchItems.length <= 1;
+	return batchItems.length === 0;
 }
 
 /**
