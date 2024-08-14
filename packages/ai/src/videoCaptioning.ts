@@ -128,7 +128,7 @@ export async function generateSubtitles(
 					[ vtt ],
 					`${ basename }-captions.vtt`,
 					{
-						lastModified: 1234567891,
+						lastModified: new Date().getTime(),
 						type: 'text/vtt',
 					}
 				);
