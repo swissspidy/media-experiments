@@ -100,7 +100,7 @@ jobs:
                   cd -
 
             - name: Run tests
-              run: npm run test:e2e -- --shard=${{ matrix.shard }}
+              run: npm run test:e2e -- --shard=${{ matrix.shard }} --project=${{ matrix.project }}
               env:
                   COLLECT_COVERAGE: ${{ matrix.wp == 'latest' && matrix.project == 'chromium' }}
 
