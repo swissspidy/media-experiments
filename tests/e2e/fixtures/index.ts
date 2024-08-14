@@ -15,7 +15,7 @@ import { test as base } from '@wordpress/e2e-test-utils-playwright';
 /**
  * Internal dependencies
  */
-import { MediaUtils } from './mediaUtils';
+import { MediaUtils } from './media-utils';
 
 type E2EFixture = {
 	mediaUtils: MediaUtils;
