@@ -11,7 +11,7 @@ import { ItemStatus, type QueueItem, type Settings, type State } from './types';
  * @return Queue items.
  */
 export function getItems( state: State ): QueueItem[] {
-	return state.queue.filter( ( item ) => ! Boolean( item.parentId ) );
+	return state.queue.filter( ( item ) => ! item.parentId );
 }
 
 /**
