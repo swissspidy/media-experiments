@@ -1,1 +1,1 @@
-export { generateCaption } from './imageCaptioning';
+export { generateCaption } from './image-captioning';

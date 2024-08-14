@@ -14,10 +14,10 @@ import { type MeasureOptions } from '@mexp/log';
 /**
  * Internal dependencies
  */
-import { MediaError } from '../mediaError';
+import { MediaError } from '../media-error';
 import { getFileBasename, getFileNameFromUrl } from '../utils';
 import { PREFERENCES_NAME } from '../constants';
-import { StubFile } from '../stubFile';
+import { StubFile } from '../stub-file';
 import { vipsCancelOperations } from './utils/vips';
 import type {
 	AddAction,
