@@ -16,27 +16,25 @@ permissions: {}
 
 jobs:
     e2e-tests:
-        name: 'E2E Tests (${{ matrix.wp }}) (${{ matrix.shard }})'
-        runs-on: ubuntu-latest
+        name: 'E2E Tests (${{ matrix.wp }}) (${{ matrix.project }}) (${{ matrix.shard }})'
+        # Temporarily use ARM macOS for WebKit tests to work around https://github.com/swissspidy/media-experiments/issues/611
+        runs-on: ${{ matrix.project == 'webkit' && 'macos-latest' || 'ubuntu-latest' }}
         continue-on-error: ${{ matrix.experimental == true }}
         strategy:
             fail-fast: false
             matrix:
                 wp: ['latest']
-                shard: ['1/4', '2/4', '3/4', '4/4']
+                shard: ['1/2', '2/2']
                 experimental: [false]
+                project: ['chromium', 'firefox', 'webkit']
                 include:
                     - wp: 'trunk'
-                      shard: '1/4'
+                      shard: '1/2'
+                      project: 'chromium'
                       experimental: true
                     - wp: 'trunk'
-                      shard: '2/4'
-                      experimental: true
-                    - wp: 'trunk'
-                      shard: '3/4'
-                      experimental: true
-                    - wp: 'trunk'
-                      shard: '4/4'
+                      shard: '2/2'
+                      project: 'chromium'
                       experimental: true
 
         steps:
@@ -91,7 +89,7 @@ jobs:
             - name: Run tests
               run: npm run test:e2e -- --shard=${{ matrix.shard }}
               env:
-                  COLLECT_COVERAGE: ${{ matrix.wp == 'trunk' }}
+                  COLLECT_COVERAGE: ${{ matrix.wp == 'latest' && matrix.project == 'chromium' }}
 
             - name: Upload code coverage report
               uses: codecov/codecov-action@v4.5.0
