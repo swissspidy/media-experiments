@@ -7,7 +7,7 @@ import { createHigherOrderComponent } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import type { MediaPanelProps } from '../blockMediaPanel/types';
+import type { MediaPanelProps } from '../block-media-panel/types';
 
 type CrossOriginValue = 'anonymous' | 'use-credentials' | '' | undefined;
 

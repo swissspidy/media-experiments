@@ -8,7 +8,7 @@ import type { Block } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import type { VideoBlock } from '../blockMediaPanel/types';
+import type { VideoBlock } from '../block-media-panel/types';
 import { isGifVariation } from './utils';
 
 type Writable< T > = { -readonly [ P in keyof T ]: Writable< T[ P ] > };
