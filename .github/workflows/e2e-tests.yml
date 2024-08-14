@@ -116,7 +116,7 @@ jobs:
                   ARTIFACT_NAME=${ARTIFACT_NAME//\//-}
                   echo "ARTIFACT_NAME=${ARTIFACT_NAME}" >> $GITHUB_ENV
               env:
-                  ARTIFACT_NAME: failures-artifacts-${{ matrix.wp }}-${{ matrix.shard }}
+                  ARTIFACT_NAME: failures-artifacts-${{ matrix.wp }}-${{ matrix.project }}-${{ matrix.shard }}
 
             - name: Archive debug artifacts (screenshots, HTML snapshots)
               uses: actions/upload-artifact@v4
