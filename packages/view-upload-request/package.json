@@ -31,8 +31,8 @@
 		}
 	},
 	"dependencies": {
-		"@mexp/media-utils": "../media-utils",
-		"@mexp/upload-media": "../upload-media",
+		"@mexp/media-utils": "file:../media-utils",
+		"@mexp/upload-media": "file:../upload-media",
 		"@wordpress/components": "^28.0.0",
 		"@wordpress/compose": "^7.0.0",
 		"@wordpress/core-data": "^7.5.0",

@@ -92,7 +92,7 @@ function createWebVttFromResults( results: Result[] ) {
 /**
  * Generates subtitles for a given video file.
  *
- * @param file     Video file.
+ * @param file     File object.
  * @param basename Video file name without extension.
  * @return VTT file.
  */
@@ -132,7 +132,7 @@ export async function generateSubtitles(
 					[ vtt ],
 					`${ basename }-captions.vtt`,
 					{
-						lastModified: 1234567891,
+						lastModified: new Date().getTime(),
 						type: 'text/vtt',
 					}
 				);

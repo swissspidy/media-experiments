@@ -1,5 +1,5 @@
 {
-	"name": "@mexp/subtitles",
+	"name": "@mexp/ai",
 	"version": "0.0.1",
 	"description": "Subtitles generation",
 	"private": true,
@@ -12,11 +12,11 @@
 		"webvtt",
 		"vosk"
 	],
-	"homepage": "https://github.com/swissspidy/media-experiments/tree/HEAD/packages/subtitles/README.md",
+	"homepage": "https://github.com/swissspidy/media-experiments/tree/HEAD/packages/ai/README.md",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/swissspidy/media-experiments.git",
-		"directory": "packages/subtitles"
+		"directory": "packages/ai"
 	},
 	"bugs": {
 		"url": "https://github.com/swissspidy/media-experiments/issues"
@@ -33,7 +33,6 @@
 		}
 	},
 	"dependencies": {
-		"@audapolis/webvtt-writer": "^1.0.6",
-		"vosk-browser": "^0.0.8"
+		"@huggingface/transformers": "^3.0.0-alpha.5"
 	}
 }

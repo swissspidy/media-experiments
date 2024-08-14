@@ -21,6 +21,7 @@ import type { ImageBlock } from './types';
 import { AnimatedGifConverter } from './animatedGifConverter';
 import { UploadRequestControls } from './uploadRequests/controls';
 import { isBlobURL } from '@wordpress/blob';
+import { GenerateCaptions } from './generateCaption';
 
 type ImageControlsProps = ImageBlock &
 	Pick< BlockEditProps< ImageBlock[ 'attributes' ] >, 'setAttributes' >;
@@ -66,6 +67,18 @@ export function ImageControls( props: ImageControlsProps ) {
 		} );
 	}
 
+	function onUpdateCaption( caption: string ) {
+		props.setAttributes( {
+			caption,
+		} );
+	}
+
+	function onUpdateAltText( alt: string ) {
+		props.setAttributes( {
+			alt,
+		} );
+	}
+
 	return (
 		<Fragment>
 			<AnimatedGifConverter
@@ -101,6 +114,11 @@ export function ImageControls( props: ImageControlsProps ) {
 				id={ props.attributes.id }
 				url={ props.attributes.url }
 				onSuccess={ onOptimizeMedia }
+			/>
+			<GenerateCaptions
+				url={ props.attributes.url }
+				onUpdateCaption={ onUpdateCaption }
+				onUpdateAltText={ onUpdateAltText }
 			/>
 			<DebugInfo id={ props.attributes.id } />
 		</Fragment>

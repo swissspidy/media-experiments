@@ -30,12 +30,13 @@
 		}
 	},
 	"dependencies": {
-		"@mexp/ffmpeg": "../ffmpeg",
-		"@mexp/heif": "../heif",
-		"@mexp/log": "../log",
-		"@mexp/pdf": "../pdf",
-		"@mexp/subtitles": "../subtitles",
-		"@mexp/vips": "../vips",
+		"@audapolis/webvtt-writer": "^1.0.6",
+		"@mexp/ai": "file:../ai",
+		"@mexp/ffmpeg": "file:../ffmpeg",
+		"@mexp/heif": "file:../heif",
+		"@mexp/log": "file:../log",
+		"@mexp/pdf": "file:../pdf",
+		"@mexp/vips": "file:../vips",
 		"@shopify/web-worker": "^6.3.0",
 		"@wordpress/api-fetch": "^7.0.0",
 		"@wordpress/blob": "^4.5.0",
@@ -46,6 +47,7 @@
 		"blurhash": "^2.0.5",
 		"fast-average-color": "^9.3.0",
 		"mime": "^3.0.0",
-		"uuid": "^10.0.0"
+		"uuid": "^10.0.0",
+		"vosk-browser": "^0.0.8"
 	}
 }
