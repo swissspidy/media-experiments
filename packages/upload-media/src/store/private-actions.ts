@@ -2018,14 +2018,16 @@ export function generateVideoSubtitles( id: QueueItemId ) {
 		const item = select.getItem( id ) as QueueItem;
 
 		try {
-			// AudioContext is not available in a web worker, so we pass the audio ArrayBuffer instead.
-			const arrayBuffer = await item.sourceFile.arrayBuffer();
-			const audioContext = new AudioContext();
-			const audioBuffer =
-				await audioContext.decodeAudioData( arrayBuffer );
+			/*
+			 Cannot load this in a dedicated worker, as AudioContext and
+			 AudioBuffer are not available in a worker context.
+			*/
+			const { generateSubtitles } = await import(
+				/* webpackChunkName: 'subtitles' */ '../generateSubtitles'
+			);
 
-			const file = await aiWorker.generateSubtitles(
-				audioBuffer,
+			const file = await generateSubtitles(
+				item.sourceFile,
 				getFileBasename( item.sourceFile.name )
 			);
 

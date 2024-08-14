@@ -92,15 +92,19 @@ function createWebVttFromResults( results: Result[] ) {
 /**
  * Generates subtitles for a given video file.
  *
- * @param audioBuffer Audio buffer.
- * @param basename    Video file name without extension.
+ * @param file     File object.
+ * @param basename Video file name without extension.
  * @return VTT file.
  */
 export async function generateSubtitles(
-	audioBuffer: AudioBuffer,
+	file: File,
 	basename: string
 ): Promise< File > {
 	const results: Result[] = [];
+
+	const arrayBuffer = await file.arrayBuffer();
+	const audioContext = new AudioContext();
+	const audioBuffer = await audioContext.decodeAudioData( arrayBuffer );
 
 	// TODO: Terminate previous model upon changing it.
 	// TODO: Make customizable based on language in the video.
