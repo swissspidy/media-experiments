@@ -9,6 +9,7 @@
 	object-fit: cover;
 	border: 1px solid #666;
 }
+
 .mexp-bulk-optimization-row__text {
 	flex: 1;
 }
