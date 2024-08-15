@@ -103,7 +103,7 @@ test.describe( 'Media Recording', () => {
 					.length === 0,
 			undefined,
 			{
-				timeout: 40000, // Video transcoding might take longer
+				timeout: 60_000, // Video transcoding might take longer
 			}
 		);
 

@@ -70,7 +70,7 @@ test.describe( 'Block Transforms', () => {
 					.length === 0,
 			undefined,
 			{
-				timeout: 40000, // Audio transcoding might take longer
+				timeout: 60_000, // Audio transcoding might take longer
 			}
 		);
 
