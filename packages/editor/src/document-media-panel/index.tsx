@@ -15,20 +15,17 @@ import { media as mediaIcon } from '@wordpress/icons';
  * Internal dependencies
  */
 import { BulkOptimization } from '../components/bulk-optimization';
-
-import { useMediaBlockAttachments } from './use-media-block-attachments';
-
-import { useFeaturedImageAttachment } from '../utils/hooks';
+import { useDocumentAttachments, useFeaturedImage } from '../utils/hooks';
 import { OptimizeMedia } from '../block-media-panel/optimize-media';
 import { UploadIndicator } from '../block-media-panel/upload-indicator';
 
 function DocumentMediaPanel() {
-	const attachments = useMediaBlockAttachments();
+	const attachments = useDocumentAttachments();
 	const {
 		featuredImage,
 		setFeaturedImage,
 		attachment: featuredImageAttachment,
-	} = useFeaturedImageAttachment();
+	} = useFeaturedImage();
 
 	function onChange( media: Partial< Attachment > ) {
 		if ( ! media || ! media.id ) {

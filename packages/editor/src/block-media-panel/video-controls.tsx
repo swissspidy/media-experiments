@@ -20,7 +20,7 @@ import { MuteVideo } from './mute-video';
 import { GenerateSubtitles } from './generate-subtitles';
 import { AddPoster } from './add-poster';
 import { DebugInfo } from './debug-info';
-import type { VideoBlock } from './types';
+import type { VideoBlock } from '../types';
 import { UploadRequestControls } from './upload-requests/controls';
 
 type VideoControlsProps = VideoBlock &

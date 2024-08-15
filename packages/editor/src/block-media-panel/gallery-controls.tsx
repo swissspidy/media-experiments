@@ -17,7 +17,7 @@ import { createBlock } from '@wordpress/blocks';
  */
 import { BulkOptimization } from '../components/bulk-optimization';
 import type { BulkOptimizationAttachmentData } from '../types';
-import type { GalleryBlock, ImageBlock } from './types';
+import type { GalleryBlock, ImageBlock } from '../types';
 import { UploadRequestControls } from './upload-requests/controls';
 
 type GalleryControlsProps = GalleryBlock &

@@ -17,13 +17,13 @@ import { useAttachment } from '../utils/hooks';
 import { UploadIndicator } from './upload-indicator';
 import { OptimizeMedia } from './optimize-media';
 import { DebugInfo } from './debug-info';
-import type { SiteLogoBlock } from './types';
+import type { SiteLogoBlock } from '../types';
 
 type SiteLogoControlsProps = SiteLogoBlock &
 	Pick< BlockEditProps< SiteLogoBlock[ 'attributes' ] >, 'setAttributes' >;
 
 export function SiteLogoControls( { attributes }: SiteLogoControlsProps ) {
-	const { siteLogoId, canUserEdit } = useSelect( ( select ) => {
+	const { siteLogoId } = useSelect( ( select ) => {
 		const { canUser, getEditedEntityRecord } = select( coreStore );
 		const _canUserEdit = canUser( 'update', 'settings' );
 		const siteSettings = _canUserEdit
@@ -33,14 +33,13 @@ export function SiteLogoControls( { attributes }: SiteLogoControlsProps ) {
 
 		return {
 			siteLogoId: _siteLogoId,
-			canUserEdit: _canUserEdit,
 		};
 	}, [] );
 
 	const { editEntityRecord } = useDispatch( coreStore );
 	const attachment = useAttachment( siteLogoId );
 
-	if ( ! siteLogoId || ! attachment || ! canUserEdit ) {
+	if ( ! siteLogoId || ! attachment ) {
 		return null;
 	}
 

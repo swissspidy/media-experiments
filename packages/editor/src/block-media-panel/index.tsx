@@ -20,7 +20,7 @@ import { GalleryControls } from './gallery-controls';
 import { MediaTextControls } from './media-text-controls';
 import { PostFeaturedImageControls } from './post-featured-image-controls';
 import { SiteLogoControls } from './site-logo-controls';
-import type { MediaPanelProps } from './types';
+import type { MediaPanelProps } from '../types';
 
 const SUPPORTED_BLOCKS = [
 	'core/image',

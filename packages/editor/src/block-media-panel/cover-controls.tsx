@@ -15,7 +15,7 @@ import { DebugInfo } from './debug-info';
 import { MuteVideo } from './mute-video';
 import { OptimizeMedia } from './optimize-media';
 import { RecordingControls } from './recording-controls';
-import type { CoverBlock } from './types';
+import type { CoverBlock } from '../types';
 import { UploadIndicator } from './upload-indicator';
 
 type CoverControlsProps = CoverBlock &

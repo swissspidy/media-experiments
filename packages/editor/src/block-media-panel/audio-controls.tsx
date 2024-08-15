@@ -15,7 +15,7 @@ import { isBlobURL } from '@wordpress/blob';
 import { UploadIndicator } from './upload-indicator';
 import { RecordingControls } from './recording-controls';
 import { ImportMedia } from './import-media';
-import type { AudioBlock } from './types';
+import type { AudioBlock } from '../types';
 import { DebugInfo } from './debug-info';
 import { UploadRequestControls } from './upload-requests/controls';
 

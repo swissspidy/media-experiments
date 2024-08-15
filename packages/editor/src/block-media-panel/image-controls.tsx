@@ -17,7 +17,7 @@ import { RecordingControls } from './recording-controls';
 import { ImportMedia } from './import-media';
 import { OptimizeMedia } from './optimize-media';
 import { DebugInfo } from './debug-info';
-import type { ImageBlock } from './types';
+import type { ImageBlock } from '../types';
 import { AnimatedGifConverter } from './animated-gif-converter';
 import { UploadRequestControls } from './upload-requests/controls';
 import { GenerateCaptions } from './generate-caption';

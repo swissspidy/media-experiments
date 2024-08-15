@@ -6,14 +6,13 @@ import type { Attachment } from '@mexp/media-utils';
 /**
  * Internal dependencies
  */
-import { useFeaturedImageAttachment } from '../utils/hooks';
+import { useFeaturedImage } from '../utils/hooks';
 import { UploadIndicator } from './upload-indicator';
 import { OptimizeMedia } from './optimize-media';
 import { DebugInfo } from './debug-info';
 
 export function PostFeaturedImageControls() {
-	const { featuredImage, setFeaturedImage, attachment } =
-		useFeaturedImageAttachment();
+	const { featuredImage, setFeaturedImage, attachment } = useFeaturedImage();
 
 	if ( ! featuredImage || ! attachment ) {
 		return null;

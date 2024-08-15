@@ -22,7 +22,7 @@ import { useLayoutEffect } from '@wordpress/element';
  * Internal dependencies
  */
 import { useAttachment, useIsUploadingByUrl } from '../utils/hooks';
-import type { VideoBlock } from './types';
+import type { VideoBlock } from '../types';
 
 type GenerateSubtitlesProps = VideoBlock &
 	Pick< BlockEditProps< VideoBlock[ 'attributes' ] >, 'setAttributes' >;

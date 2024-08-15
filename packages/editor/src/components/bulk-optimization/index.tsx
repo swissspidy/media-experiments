@@ -25,7 +25,6 @@ import {
 } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
-import { store as blockEditorStore } from '@wordpress/block-editor';
 import { __, sprintf } from '@wordpress/i18n';
 import { filterURLForDisplay } from '@wordpress/url';
 import { store as noticesStore } from '@wordpress/notices';
@@ -57,7 +56,6 @@ function Row(
 	const { optimizeExistingItem } = useDispatch( uploadStore );
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( noticesStore );
-	const { updateBlockAttributes } = useDispatch( blockEditorStore );
 	const currentPostId = useSelect(
 		( select ) => select( editorStore ).getCurrentPostId(),
 		[]
@@ -74,12 +72,9 @@ function Row(
 		void optimizeExistingItem( {
 			id: props.id,
 			url: props.url,
-			fileName: props.mexp_filename || undefined,
+			fileName: props.filename || undefined,
 			onSuccess: ( [ media ] ) => {
-				void updateBlockAttributes( props.clientId, {
-					id: media.id,
-					url: media.url,
-				} );
+				props.onChange( media );
 
 				void apiFetch( {
 					path: `/wp/v2/media/${ props.id }`,
@@ -128,15 +123,13 @@ function Row(
 	return (
 		<>
 			<Flex direction={ [ 'column', 'row' ] }>
-				{ props.posterUrl ? (
-					<img
-						src={ props.posterUrl }
-						width={ 32 }
-						height={ 32 }
-						alt=""
-						className="mexp-bulk-optimization-row__image"
-					/>
-				) : null }
+				<img
+					src={ props.url }
+					width={ 32 }
+					height={ 32 }
+					alt=""
+					className="mexp-bulk-optimization-row__image"
+				/>
 				<Tooltip text={ props.url }>
 					<Text
 						aria-label={ props.url }
@@ -147,8 +140,8 @@ function Row(
 				</Tooltip>
 				{ ! isUploading || props.isBulkUploading ? (
 					<Text variant="muted">
-						{ props.mexp_filesize
-							? numberFormatter.format( props.mexp_filesize )
+						{ props.filesize
+							? numberFormatter.format( props.filesize )
 							: /* translators: unknown file size */
 							  __( '? KB', 'media-experiments' ) }
 					</Text>
@@ -191,7 +184,6 @@ function CompressAll( props: {
 		[]
 	);
 
-	const { updateBlockAttributes } = useDispatch( blockEditorStore );
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( noticesStore );
 	const { optimizeExistingItem } = useDispatch( uploadStore );
@@ -210,14 +202,9 @@ function CompressAll( props: {
 				batchId,
 				id: attachment.id,
 				url: attachment.url,
-				fileName: attachment.mexp_filename || undefined,
+				fileName: attachment.filename || undefined,
 				onSuccess: ( [ media ] ) => {
-					// TODO: Update correct attribute depending on block type.
-					// Video blocks use 'src'.
-					void updateBlockAttributes( attachment.clientId, {
-						id: media.id,
-						url: media.url,
-					} );
+					attachment.onChange( media );
 
 					void apiFetch( {
 						path: `/wp/v2/media/${ attachment.id }`,
