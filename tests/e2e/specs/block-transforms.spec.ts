@@ -85,6 +85,11 @@ test.describe( 'Block Transforms', () => {
 		editor,
 		mediaUtils,
 	} ) => {
+		test.skip(
+			( { browserName } ) => browserName === 'webkit',
+			'Needs investigation into unexpected page crashes, likely due to ffmpeg'
+		);
+
 		await admin.createNewPost();
 
 		const tmpInput = await page.evaluateHandle( () => {
