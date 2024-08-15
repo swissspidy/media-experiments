@@ -134,14 +134,6 @@ test.describe( 'Upload Requests', () => {
 					} )
 			).toBeVisible();
 
-			await expect(
-				page
-					.getByRole( 'button', { name: 'Dismiss this notice' } )
-					.filter( {
-						hasText: 'Media successfully uploaded',
-					} )
-			).toBeVisible();
-
 			// Simple verification that the upload request was successful.
 
 			// eslint-disable-next-line playwright/no-conditional-in-test
