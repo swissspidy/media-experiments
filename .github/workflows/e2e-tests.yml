@@ -16,24 +16,27 @@ permissions: {}
 
 jobs:
     e2e-tests:
-        name: 'E2E Tests (${{ matrix.wp }}) (${{ matrix.project }}) (${{ matrix.shard }})'
+        name: 'E2E Tests (${{ matrix.wp }}) (${{ matrix.shard }})'
         runs-on: ubuntu-latest
         continue-on-error: ${{ matrix.experimental == true }}
         strategy:
             fail-fast: false
             matrix:
                 wp: ['latest']
-                project: ['chromium', 'firefox', 'webkit']
-                shard: ['1/2', '2/2']
+                shard: ['1/4', '2/4', '3/4', '4/4']
                 experimental: [false]
                 include:
                     - wp: 'trunk'
-                      shard: '1/2'
-                      project: 'chromium'
+                      shard: '1/4'
                       experimental: true
                     - wp: 'trunk'
-                      shard: '2/2'
-                      project: 'chromium'
+                      shard: '2/4'
+                      experimental: true
+                    - wp: 'trunk'
+                      shard: '3/4'
+                      experimental: true
+                    - wp: 'trunk'
+                      shard: '4/4'
                       experimental: true
 
         steps:
@@ -59,36 +62,23 @@ jobs:
                   # To get CSS source maps
                   NODE_ENV: development
 
-            - name: Configure WordPress version
+            - name: Start server
               run: |
                   if [[ $WP_VERSION == 'trunk' ]]; then
                     echo "Using WordPress trunk"
                     echo "{\"core\":\"WordPress/WordPress#master\"}" >> .wp-env.override.json
                   fi
+
+                  chmod -R 767 ./
+                  npm run wp-env start
               env:
                   WP_VERSION: ${{ matrix.wp }}
 
-            - name: Install WordPress
-              run: |
-                  chmod -R 767 ./ # TODO: Possibly integrate in wp-env
-                  npm run wp-env start
-
-            # Ensure the wp-content/languages folder exists and is writable.
-            # See https://github.com/WordPress/gutenberg/issues/22515
-            # and https://github.com/WordPress/gutenberg/tree/trunk/packages/env#installing-a-plugin-or-theme-on-the-development-instance
-            - name: Prepare tests
-              run: |
-                  WP_ENV_DIR=$(npm run wp-env install-path --silent 2>&1 | head -1)
-                  cd $WP_ENV_DIR
-                  mkdir -p tests-WordPress/wp-content/languages tests-WordPress/wp-content/upgrade
-                  chmod -R 767 tests-WordPress/wp-content/languages tests-WordPress/wp-content/upgrade
-                  docker compose run --rm -u $(id -u) -e HOME=/tmp tests-cli wp language core install de_CH de_DE es_ES fr_FR it_IT
-                  cd -
-
             - name: Run tests
-              run: npm run test:e2e -- --shard=${{ matrix.shard }} --project=${{ matrix.project }}
+              run: |
+                npm run test:e2e -- --shard=${{ matrix.shard }}
               env:
-                  COLLECT_COVERAGE: ${{ matrix.wp == 'latest' && matrix.project == 'chromium' }}
+                  COLLECT_COVERAGE: ${{ matrix.wp == 'latest' }}
 
             - name: Upload code coverage report
               uses: codecov/codecov-action@v4.5.0
@@ -104,7 +94,7 @@ jobs:
                   ARTIFACT_NAME=${ARTIFACT_NAME//\//-}
                   echo "ARTIFACT_NAME=${ARTIFACT_NAME}" >> $GITHUB_ENV
               env:
-                  ARTIFACT_NAME: failures-artifacts-${{ matrix.wp }}-${{ matrix.project }}-${{ matrix.shard }}
+                  ARTIFACT_NAME: failures-artifacts-${{ matrix.wp }}-${{ matrix.shard }}
 
             - name: Archive debug artifacts (screenshots, HTML snapshots)
               uses: actions/upload-artifact@v4
