@@ -60,7 +60,23 @@ jobs:
                   # To get CSS source maps
                   NODE_ENV: development
 
-            - name: Start server
+            - name: Start wp-env
+              if: runner.os != 'macOS'
+              run: |
+                if [[ $WP_VERSION == 'trunk' ]]; then
+                  echo "Using WordPress trunk"
+                  echo "{\"core\":\"WordPress/WordPress#master\"}" >> .wp-env.override.json
+                fi
+
+                chmod -R 767 ./
+                npm run wp-env start
+              env:
+                WP_VERSION: ${{ matrix.wp }}
+
+            # Temporary workaround for WebKit tests as ARM macOS does not support Docker
+            # and nested virtualization. Playground is a good approximation.
+            - name: Start wp-now
+              if: runner.os == 'macOS'
               run: npm run wp-now -- --wp=$WP_VERSION -- &
               env:
                   WP_VERSION: ${{ matrix.wp }}
