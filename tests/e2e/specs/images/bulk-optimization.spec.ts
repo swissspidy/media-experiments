@@ -116,7 +116,7 @@ test.describe( 'Images', () => {
 
 			await page
 				.getByRole( 'region', { name: 'Editor settings' } )
-				.getByRole( 'button', { name: 'Optimize all' } )
+				.getByRole( 'button', { name: 'Compress all' } )
 				.click();
 
 			await expect(
@@ -294,7 +294,7 @@ test.describe( 'Images', () => {
 
 			await page
 				.getByRole( 'region', { name: 'Editor settings' } )
-				.getByLabel( 'Optimize' )
+				.getByLabel( 'Compress' )
 				.first()
 				.click();
 

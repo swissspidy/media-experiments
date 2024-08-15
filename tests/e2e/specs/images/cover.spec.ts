@@ -151,7 +151,7 @@ test.describe( 'Cover Block', () => {
 
 				await page
 					.getByRole( 'region', { name: 'Editor settings' } )
-					.getByRole( 'button', { name: 'Optimize' } )
+					.getByRole( 'button', { name: 'Compress' } )
 					.click();
 
 				await expect(

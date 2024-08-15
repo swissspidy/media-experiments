@@ -117,7 +117,7 @@ test.describe( 'Post Featured Image', () => {
 
 					await page
 						.getByRole( 'region', { name: 'Editor settings' } )
-						.getByRole( 'button', { name: 'Optimize' } )
+						.getByRole( 'button', { name: 'Compress' } )
 						.click();
 
 					await expect(
@@ -282,7 +282,7 @@ test.describe( 'Post Featured Image', () => {
 
 					await page
 						.getByRole( 'region', { name: 'Editor settings' } )
-						.getByRole( 'button', { name: 'Optimize' } )
+						.getByRole( 'button', { name: 'Compress' } )
 						.click();
 
 					await expect(

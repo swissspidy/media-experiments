@@ -149,7 +149,7 @@ test.describe( 'Media & Text', () => {
 
 				await page
 					.getByRole( 'region', { name: 'Editor settings' } )
-					.getByRole( 'button', { name: 'Optimize' } )
+					.getByRole( 'button', { name: 'Compress' } )
 					.click();
 
 				await expect(
