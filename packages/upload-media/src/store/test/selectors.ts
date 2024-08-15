@@ -16,6 +16,7 @@ describe( 'selectors', () => {
 			const state: State = {
 				queue: [],
 				queueStatus: 'paused',
+				pendingApproval: undefined,
 				blobUrls: {},
 				settings: {
 					mediaUpload: jest.fn(),
@@ -46,6 +47,7 @@ describe( 'selectors', () => {
 					},
 				] as QueueItem[],
 				queueStatus: 'paused',
+				pendingApproval: undefined,
 				blobUrls: {},
 				settings: {
 					mediaUpload: jest.fn(),
@@ -77,6 +79,7 @@ describe( 'selectors', () => {
 					},
 				] as QueueItem[],
 				queueStatus: 'paused',
+				pendingApproval: undefined,
 				blobUrls: {},
 				settings: {
 					mediaUpload: jest.fn(),
@@ -116,6 +119,7 @@ describe( 'selectors', () => {
 					},
 				] as QueueItem[],
 				queueStatus: 'paused',
+				pendingApproval: undefined,
 				blobUrls: {},
 				settings: {
 					mediaUpload: jest.fn(),
@@ -160,6 +164,7 @@ describe( 'selectors', () => {
 					},
 				] as QueueItem[],
 				queueStatus: 'paused',
+				pendingApproval: undefined,
 				blobUrls: {},
 				settings: {
 					mediaUpload: jest.fn(),
