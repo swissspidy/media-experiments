@@ -86,7 +86,7 @@ jobs:
                   file: artifacts/e2e-coverage/coverage/codecov.json
                   flags: e2e
                   token: ${{ secrets.CODECOV_TOKEN }}
-              if: ${{ matrix.wp == 'trunk' }}
+              if: ${{ matrix.wp == 'latest' }}
 
             - name: Get debug artifact name
               if: always()
