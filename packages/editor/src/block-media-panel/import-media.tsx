@@ -12,8 +12,7 @@ import {
 	Button,
 	useBaseControlProps,
 } from '@wordpress/components';
-import { useDispatch, useSelect } from '@wordpress/data';
-import { store as editorStore } from '@wordpress/editor';
+import { useDispatch } from '@wordpress/data';
 import { isBlobURL } from '@wordpress/blob';
 import { __, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
@@ -34,10 +33,6 @@ export function ImportMedia( { url, onChange }: ImportMediaProps ) {
 	const { addItemFromUrl } = useDispatch( uploadStore );
 	const { createErrorNotice } = useDispatch( noticesStore );
 	const isUploading = useIsUploadingByUrl( url );
-	const currentPostId = useSelect(
-		( select ) => select( editorStore ).getCurrentPostId(),
-		[]
-	);
 
 	if ( ! url || isBlobURL( url ) ) {
 		return null;
@@ -63,7 +58,6 @@ export function ImportMedia( { url, onChange }: ImportMediaProps ) {
 				);
 			},
 			additionalData: {
-				post: currentPostId,
 				mexp_media_source:
 					window.mediaExperiments.mediaSourceTerms[
 						'subtitles-generation'

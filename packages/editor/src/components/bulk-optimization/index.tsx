@@ -24,7 +24,6 @@ import {
 	useBaseControlProps,
 } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { store as editorStore } from '@wordpress/editor';
 import { __, sprintf } from '@wordpress/i18n';
 import { filterURLForDisplay } from '@wordpress/url';
 import { store as noticesStore } from '@wordpress/notices';
@@ -56,10 +55,6 @@ function Row(
 	const { optimizeExistingItem } = useDispatch( uploadStore );
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( noticesStore );
-	const currentPostId = useSelect(
-		( select ) => select( editorStore ).getCurrentPostId(),
-		[]
-	);
 
 	const { isUploading } = useSelect(
 		( select ) => ( {
@@ -109,7 +104,6 @@ function Row(
 				);
 			},
 			additionalData: {
-				post: currentPostId,
 				mexp_media_source:
 					window.mediaExperiments.mediaSourceTerms[
 						'media-optimization'
@@ -171,11 +165,6 @@ function CompressAll( props: {
 	onSuccess: () => void;
 	isBulkUploading: boolean;
 } ) {
-	const currentPostId = useSelect(
-		( select ) => select( editorStore ).getCurrentPostId(),
-		[]
-	);
-
 	const { isUploadingById } = useSelect(
 		( select ) => ( {
 			isUploadingById: select( uploadStore ).isUploadingById,
@@ -244,7 +233,6 @@ function CompressAll( props: {
 					);
 				},
 				additionalData: {
-					post: currentPostId,
 					mexp_media_source:
 						window.mediaExperiments.mediaSourceTerms[
 							'media-optimization'

@@ -8,8 +8,7 @@ import { store as uploadStore } from '@mexp/upload-media';
  */
 import type { BlockEditProps } from '@wordpress/blocks';
 import { isBlobURL } from '@wordpress/blob';
-import { useDispatch, useSelect } from '@wordpress/data';
-import { store as editorStore } from '@wordpress/editor';
+import { useDispatch } from '@wordpress/data';
 import { __, _x } from '@wordpress/i18n';
 import {
 	BaseControl,
@@ -39,10 +38,6 @@ export function GenerateSubtitles( {
 	const isUploading = useIsUploadingByUrl( url ) || isBlobURL( url );
 
 	const { addSubtitlesForExistingVideo } = useDispatch( uploadStore );
-	const currentPostId = useSelect(
-		( select ) => select( editorStore ).getCurrentPostId(),
-		[]
-	);
 
 	const hasTracks = attributes.tracks.length > 0;
 
@@ -94,7 +89,6 @@ export function GenerateSubtitles( {
 					],
 				} ),
 			additionalData: {
-				post: currentPostId,
 				mexp_media_source:
 					window.mediaExperiments.mediaSourceTerms[
 						'subtitles-generation'
