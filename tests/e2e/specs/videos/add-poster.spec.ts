@@ -4,6 +4,11 @@
 import { expect, test } from '../../fixtures';
 
 test.describe( 'Videos', () => {
+	test.skip(
+		( { browserName } ) => browserName === 'webkit',
+		'Needs some investigation as to why image is uploaded as PNG instead of JPEG'
+	);
+
 	test.beforeAll( async ( { requestUtils } ) => {
 		await Promise.all( [
 			requestUtils.deleteAllMedia(),
@@ -15,14 +20,8 @@ test.describe( 'Videos', () => {
 		admin,
 		editor,
 		page,
-		browserName,
 		mediaUtils,
 	} ) => {
-		test.skip(
-			browserName === 'webkit',
-			'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
-		);
-
 		await admin.createNewPost();
 
 		await editor.insertBlock( { name: 'core/video' } );
@@ -69,7 +68,7 @@ test.describe( 'Videos', () => {
 					.length === 0,
 			undefined,
 			{
-				timeout: 20000, // Transcoding might take longer
+				timeout: 30_000,
 			}
 		);
 

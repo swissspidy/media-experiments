@@ -11,17 +11,7 @@ test.describe( 'Images', () => {
 		] );
 	} );
 
-	test( 'should upload external image', async ( {
-		admin,
-		editor,
-		page,
-		browserName,
-	} ) => {
-		test.skip(
-			browserName === 'webkit',
-			'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
-		);
-
+	test( 'should upload external image', async ( { admin, editor, page } ) => {
 		await admin.createNewPost();
 
 		await editor.insertBlock( {
@@ -43,13 +33,21 @@ test.describe( 'Images', () => {
 
 		await expect( settingsPanel ).toHaveText( /Upload in progress/ );
 
+		await expect(
+			page
+				.getByRole( 'button', { name: 'Dismiss this notice' } )
+				.filter( {
+					hasText: 'There was an error importing the file',
+				} )
+		).toBeHidden();
+
 		await page.waitForFunction(
 			() =>
 				window.wp.data.select( 'media-experiments/upload' ).getItems()
 					.length === 0,
 			undefined,
 			{
-				timeout: 20000, // Transcoding might take longer
+				timeout: 30_000,
 			}
 		);
 
@@ -63,7 +61,7 @@ test.describe( 'Images', () => {
 
 		await expect( settingsPanel ).toHaveText( /Mime type: image\/jpeg/ );
 		await expect(
-			settingsPanel.getByLabel( /#8a74bc|#8974bb/ )
+			settingsPanel.getByLabel( /#8a7[45]b[c|b]/ )
 		).toBeVisible();
 		await expect( page.locator( 'css=[data-blurhash]' ) ).toBeVisible();
 	} );

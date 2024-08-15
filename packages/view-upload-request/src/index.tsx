@@ -156,7 +156,7 @@ function App() {
 		if ( ! isUploading && wasUploading.current ) {
 			void createSuccessNotice(
 				__(
-					'File successfully uploaded. You may now close this page.',
+					'Media successfully uploaded. You may now close this page.',
 					'media-experiments'
 				),
 				{ type: 'snackbar' }
@@ -228,7 +228,7 @@ function App() {
 			) : (
 				<Text>
 					{ __(
-						'File successfully uploaded. You may now close this page.',
+						'Media successfully uploaded. You may now close this page.',
 						'media-experiments'
 					) }
 				</Text>

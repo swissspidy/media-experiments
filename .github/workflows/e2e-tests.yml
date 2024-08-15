@@ -62,36 +62,23 @@ jobs:
                   # To get CSS source maps
                   NODE_ENV: development
 
-            - name: Configure WordPress version
+            - name: Start server
               run: |
                   if [[ $WP_VERSION == 'trunk' ]]; then
                     echo "Using WordPress trunk"
                     echo "{\"core\":\"WordPress/WordPress#master\"}" >> .wp-env.override.json
                   fi
+
+                  chmod -R 767 ./
+                  npm run wp-env start
               env:
                   WP_VERSION: ${{ matrix.wp }}
 
-            - name: Install WordPress
-              run: |
-                  chmod -R 767 ./ # TODO: Possibly integrate in wp-env
-                  npm run wp-env start
-
-            # Ensure the wp-content/languages folder exists and is writable.
-            # See https://github.com/WordPress/gutenberg/issues/22515
-            # and https://github.com/WordPress/gutenberg/tree/trunk/packages/env#installing-a-plugin-or-theme-on-the-development-instance
-            - name: Prepare tests
-              run: |
-                  WP_ENV_DIR=$(npm run wp-env install-path --silent 2>&1 | head -1)
-                  cd $WP_ENV_DIR
-                  mkdir -p tests-WordPress/wp-content/languages tests-WordPress/wp-content/upgrade
-                  chmod -R 767 tests-WordPress/wp-content/languages tests-WordPress/wp-content/upgrade
-                  docker compose run --rm -u $(id -u) -e HOME=/tmp tests-cli wp language core install de_CH de_DE es_ES fr_FR it_IT
-                  cd -
-
             - name: Run tests
-              run: npm run test:e2e -- --shard=${{ matrix.shard }}
+              run: |
+                npm run test:e2e -- --shard=${{ matrix.shard }}
               env:
-                  COLLECT_COVERAGE: ${{ matrix.wp == 'trunk' }}
+                  COLLECT_COVERAGE: ${{ matrix.wp == 'latest' }}
 
             - name: Upload code coverage report
               uses: codecov/codecov-action@v4.5.0

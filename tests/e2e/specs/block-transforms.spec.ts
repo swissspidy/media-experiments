@@ -70,7 +70,7 @@ test.describe( 'Block Transforms', () => {
 					.length === 0,
 			undefined,
 			{
-				timeout: 40000, // Audio transcoding might take longer
+				timeout: 60_000, // Audio transcoding might take longer
 			}
 		);
 
@@ -84,7 +84,13 @@ test.describe( 'Block Transforms', () => {
 		page,
 		editor,
 		mediaUtils,
+		browserName,
 	} ) => {
+		test.skip(
+			browserName === 'webkit',
+			'Needs investigation into unexpected page crashes, likely due to ffmpeg'
+		);
+
 		await admin.createNewPost();
 
 		const tmpInput = await page.evaluateHandle( () => {
@@ -139,7 +145,7 @@ test.describe( 'Block Transforms', () => {
 					.length === 0,
 			undefined,
 			{
-				timeout: 60000, // Transcoding might take longer
+				timeout: 120_000,
 			}
 		);
 

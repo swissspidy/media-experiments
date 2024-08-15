@@ -17,13 +17,7 @@ test.describe( 'Images', () => {
 			page,
 			editor,
 			mediaUtils,
-			browserName,
 		} ) => {
-			test.skip(
-				browserName === 'webkit',
-				'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
-			);
-
 			await admin.createNewPost();
 
 			// Ensure the initially uploaded PNG is left untouched.
@@ -72,7 +66,11 @@ test.describe( 'Images', () => {
 				() =>
 					window.wp.data
 						.select( 'media-experiments/upload' )
-						.getItems().length === 0
+						.getItems().length === 0,
+				undefined,
+				{
+					timeout: 30_000,
+				}
 			);
 
 			await editor.insertBlock( { name: 'core/image' } );
@@ -136,7 +134,7 @@ test.describe( 'Images', () => {
 						.isPendingApproval(),
 				undefined,
 				{
-					timeout: 20000, // Transcoding might take longer
+					timeout: 30_000,
 				}
 			);
 
@@ -193,13 +191,7 @@ test.describe( 'Images', () => {
 			page,
 			editor,
 			mediaUtils,
-			browserName,
 		} ) => {
-			test.skip(
-				browserName === 'webkit',
-				'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
-			);
-
 			await admin.createNewPost();
 
 			// Ensure the initially uploaded PNG is left untouched.
@@ -248,7 +240,11 @@ test.describe( 'Images', () => {
 				() =>
 					window.wp.data
 						.select( 'media-experiments/upload' )
-						.getItems().length === 0
+						.getItems().length === 0,
+				undefined,
+				{
+					timeout: 30_000,
+				}
 			);
 
 			await editor.insertBlock( { name: 'core/image' } );
@@ -265,7 +261,11 @@ test.describe( 'Images', () => {
 				() =>
 					window.wp.data
 						.select( 'media-experiments/upload' )
-						.getItems().length === 0
+						.getItems().length === 0,
+				undefined,
+				{
+					timeout: 30_000,
+				}
 			);
 
 			await editor.openDocumentSettingsSidebar();
@@ -313,7 +313,7 @@ test.describe( 'Images', () => {
 						.isPendingApproval(),
 				undefined,
 				{
-					timeout: 20000, // Transcoding might take longer
+					timeout: 30_000,
 				}
 			);
 

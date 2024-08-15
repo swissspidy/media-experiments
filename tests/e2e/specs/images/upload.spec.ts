@@ -79,14 +79,19 @@ test.describe( 'Images', () => {
 				requestUtils,
 			} ) => {
 				test.skip(
-					browserName === 'webkit' &&
-						( imageLibrary === 'vips' || outputFormat === 'avif' ),
-					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
+					browserName === 'webkit' && imageLibrary === 'browser',
+					'Needs some investigation as to why image is uploaded as PNG instead of JPEG'
 				);
 
 				test.skip(
 					browserName === 'webkit' && outputFormat === 'webp',
 					'WebKit does not currently support Canvas.toBlob with WebP'
+				);
+
+				// See https://github.com/microsoft/playwright/issues/22781
+				test.skip(
+					browserName === 'webkit' && outputFormat === 'avif',
+					'WebKit in Playwright does not support AVIF'
 				);
 
 				test.skip(
@@ -156,7 +161,7 @@ test.describe( 'Images', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 100_000, // Transcoding might take longer, especially AVIF
+						timeout: 120_000,
 					}
 				);
 

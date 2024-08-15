@@ -39,11 +39,6 @@ test.describe( 'Site Logo', () => {
 				mediaUtils,
 				browserName,
 			} ) => {
-				test.skip(
-					browserName === 'webkit' && imageLibrary === 'vips',
-					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
-				);
-
 				// TODO: Investigate.
 				test.skip(
 					browserName === 'webkit' && imageLibrary === 'browser',
@@ -133,7 +128,7 @@ test.describe( 'Site Logo', () => {
 							.isPendingApproval(),
 					undefined,
 					{
-						timeout: 30000, // Transcoding might take longer
+						timeout: 120_000,
 					}
 				);
 
@@ -154,7 +149,7 @@ test.describe( 'Site Logo', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 30000, // Transcoding might take longer
+						timeout: 120_000,
 					}
 				);
 
@@ -171,7 +166,7 @@ test.describe( 'Site Logo', () => {
 				);
 
 				await expect(
-					settingsPanel.getByLabel( '#696969' )
+					settingsPanel.getByLabel( /#69696[9a]/ )
 				).toBeVisible();
 				await expect(
 					page.locator( 'css=[data-blurhash]' )

@@ -103,7 +103,7 @@ test.describe( 'Media Recording', () => {
 					.length === 0,
 			undefined,
 			{
-				timeout: 40000, // Video transcoding might take longer
+				timeout: 60_000, // Video transcoding might take longer
 			}
 		);
 
@@ -200,7 +200,11 @@ test.describe( 'Media Recording', () => {
 		await page.waitForFunction(
 			() =>
 				window.wp.data.select( 'media-experiments/upload' ).getItems()
-					.length === 0
+					.length === 0,
+			undefined,
+			{
+				timeout: 30_000,
+			}
 		);
 
 		await expect( settingsPanel ).toHaveText( /Mime type: image\/jpeg/ );

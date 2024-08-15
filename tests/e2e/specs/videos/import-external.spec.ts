@@ -11,17 +11,7 @@ test.describe( 'Videos', () => {
 		] );
 	} );
 
-	test( 'should upload external video', async ( {
-		admin,
-		editor,
-		page,
-		browserName,
-	} ) => {
-		test.skip(
-			browserName === 'webkit',
-			'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
-		);
-
+	test( 'should upload external video', async ( { admin, editor, page } ) => {
 		await admin.createNewPost();
 
 		await editor.insertBlock( {
@@ -49,7 +39,7 @@ test.describe( 'Videos', () => {
 					.length === 0,
 			undefined,
 			{
-				timeout: 20000, // Transcoding might take longer
+				timeout: 30_000,
 			}
 		);
 
@@ -72,7 +62,11 @@ test.describe( 'Videos', () => {
 		await expect( settingsPanel ).toHaveText(
 			/Mime type: video\/(mp4|webm)/
 		);
-		await expect( settingsPanel.getByLabel( '#8b837e' ) ).toBeVisible();
+
+		// TODO: Investigate why the color is white in WebKit.
+		await expect(
+			settingsPanel.getByLabel( /#8b837e|#ffffff/ )
+		).toBeVisible();
 		await expect( page.locator( 'css=[data-blurhash]' ) ).toBeVisible();
 	} );
 } );

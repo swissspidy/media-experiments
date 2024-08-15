@@ -70,15 +70,25 @@ const config = defineConfig( {
 								__dirname,
 								'./assets/garden-adventures.wav'
 							),
+						'--enable-unsafe-webgpu',
 					],
 				},
 			},
 		},
-		// Blocked by https://github.com/microsoft/playwright/issues/14043.
-		// {
-		// 	name: 'webkit',
-		// 	use: { ...devices[ 'Desktop Safari' ] },
-		// },
+		{
+			name: 'webkit',
+			use: {
+				...devices[ 'Desktop Safari' ],
+				launchOptions: {
+					env: {
+						...process.env,
+						// https://bugs.webkit.org/show_bug.cgi?id=276953
+						// eslint-disable-next-line camelcase
+						JSC_webAssemblyLLIntTiersUpToBBQ: 0,
+					},
+				},
+			},
+		},
 		{
 			name: 'firefox',
 			use: {

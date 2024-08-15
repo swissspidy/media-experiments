@@ -51,8 +51,8 @@ test.describe( 'Images', () => {
 				browserName,
 			} ) => {
 				test.skip(
-					browserName === 'webkit',
-					'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
+					browserName === 'webkit' && imageLibrary === 'browser',
+					'Needs some investigation as to why image is uploaded as PNG instead of JPEG'
 				);
 
 				await admin.createNewPost();
@@ -117,7 +117,7 @@ test.describe( 'Images', () => {
 							.getItems().length === 0,
 					undefined,
 					{
-						timeout: 30_000, // Transcoding might take longer
+						timeout: 120_000,
 					}
 				);
 

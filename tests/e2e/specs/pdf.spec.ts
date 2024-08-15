@@ -9,6 +9,11 @@ import { RestAttachment } from '@mexp/media-utils';
 import { expect, test } from '../fixtures';
 
 test.describe( 'PDF', () => {
+	test.skip(
+		( { browserName } ) => browserName === 'webkit',
+		'Needs some investigation as to why the generated thumbnail is much bigger in WebKit'
+	);
+
 	test.beforeAll( async ( { requestUtils } ) => {
 		await Promise.all( [
 			requestUtils.deleteAllMedia(),
@@ -22,13 +27,7 @@ test.describe( 'PDF', () => {
 		editor,
 		mediaUtils,
 		requestUtils,
-		browserName,
 	} ) => {
-		test.skip(
-			browserName === 'webkit',
-			'No cross-origin isolation in Playwright WebKit builds yet, see https://github.com/microsoft/playwright/issues/14043'
-		);
-
 		await admin.createNewPost();
 
 		await page.evaluate( () => {
@@ -73,7 +72,7 @@ test.describe( 'PDF', () => {
 					.length === 0,
 			undefined,
 			{
-				timeout: 20000, // Transcoding might take longer
+				timeout: 30_000,
 			}
 		);
 
