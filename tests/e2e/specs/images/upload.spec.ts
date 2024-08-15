@@ -88,6 +88,12 @@ test.describe( 'Images', () => {
 					'WebKit does not currently support Canvas.toBlob with WebP'
 				);
 
+				// See https://github.com/microsoft/playwright/issues/22781
+				test.skip(
+					browserName === 'webkit' && outputFormat === 'avif',
+					'WebKit in Playwright does not support AVIF'
+				);
+
 				test.skip(
 					browserName === 'firefox' && outputFormat === 'avif',
 					'AVIF encoding on Firefox is very slow'
