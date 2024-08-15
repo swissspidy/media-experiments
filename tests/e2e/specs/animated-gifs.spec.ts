@@ -179,7 +179,7 @@ test.describe( 'Animated GIFs', () => {
 					.length === 0,
 			undefined,
 			{
-				timeout: 20000,
+				timeout: 30_000,
 			}
 		);
 

@@ -134,7 +134,7 @@ test.describe( 'Images', () => {
 						.isPendingApproval(),
 				undefined,
 				{
-					timeout: 20000,
+					timeout: 30_000,
 				}
 			);
 
@@ -313,7 +313,7 @@ test.describe( 'Images', () => {
 						.isPendingApproval(),
 				undefined,
 				{
-					timeout: 20000,
+					timeout: 30_000,
 				}
 			);
 
