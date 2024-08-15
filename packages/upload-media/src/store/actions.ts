@@ -655,15 +655,15 @@ export function cancelItem( id: QueueItemId, error: Error ) {
 			if ( item.parentId ) {
 				const parentItem = select.getItem( item.parentId ) as QueueItem;
 
+				dispatch.removeItem( item.parentId );
+				dispatch.revokeBlobUrls( item.parentId );
+
 				if (
 					parentItem.batchId &&
 					select.isBatchUploaded( parentItem.batchId )
 				) {
 					parentItem.onBatchSuccess?.();
 				}
-
-				dispatch.removeItem( item.parentId );
-				dispatch.revokeBlobUrls( item.parentId );
 			}
 		}
 	};

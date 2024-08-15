@@ -400,15 +400,15 @@ export function processItem( id: QueueItemId ) {
 					parentItem.onSuccess?.( [ attachment ] );
 				}
 
+				dispatch.removeItem( parentId );
+				dispatch.revokeBlobUrls( parentId );
+
 				if (
 					parentItem.batchId &&
 					select.isBatchUploaded( parentItem.batchId )
 				) {
 					parentItem.onBatchSuccess?.();
 				}
-
-				dispatch.removeItem( parentId );
-				dispatch.revokeBlobUrls( parentId );
 			}
 
 			/*
