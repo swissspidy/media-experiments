@@ -10,7 +10,7 @@ import type { PostFeaturedImageBlock } from '../types';
 export function PostFeaturedImageControls( props: PostFeaturedImageBlock ) {
 	const attachments = useBlockAttachments( props.clientId );
 
-	if ( ! attachments ) {
+	if ( attachments.length !== 1 ) {
 		return null;
 	}
 
