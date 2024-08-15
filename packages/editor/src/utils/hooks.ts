@@ -142,11 +142,7 @@ export function useBlockAttachments( clientId?: string ) {
 		const { canUser, getEditedEntityRecord } = select( coreStore );
 		const canUserEdit = canUser( 'update', 'settings' );
 		const siteSettings = canUserEdit
-			? ( getEditedEntityRecord(
-					'root',
-					'site',
-					undefined
-			  ) as Settings )
+			? ( getEditedEntityRecord( 'root', 'site', undefined ) as Settings )
 			: undefined;
 		return canUserEdit ? siteSettings?.site_logo : undefined;
 	}, [] );
