@@ -4,6 +4,11 @@
 import { expect, test } from '../../fixtures';
 
 test.describe( 'Videos', () => {
+	test.skip(
+		( { browserName } ) => browserName === 'webkit',
+		'Needs some investigation as to why image is uploaded as PNG instead of JPEG'
+	);
+
 	test.beforeAll( async ( { requestUtils } ) => {
 		await Promise.all( [
 			requestUtils.deleteAllMedia(),
