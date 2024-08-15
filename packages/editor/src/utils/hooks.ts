@@ -146,7 +146,7 @@ export function useBlockAttachments( clientId?: string ) {
 					'root',
 					'site',
 					undefined
-			  ) as Settings ) || undefined
+			  ) as Settings )
 			: undefined;
 		return canUserEdit ? siteSettings?.site_logo : undefined;
 	}, [] );
@@ -298,9 +298,9 @@ export function useBlockAttachments( clientId?: string ) {
 		return acc;
 	}, [] as Partial< BulkOptimizationAttachmentData >[] );
 
-	// Avoid requests until site logo ID has been fetched.
+	// Avoid requests until site logo and featured image have been fetched.
 	const attachmentsToQuery =
-		siteLogoId !== undefined && blocks.length > 0
+		siteLogoId !== undefined && featuredImage !== undefined
 			? attachments
 			: EMPTY_ARRAY;
 
