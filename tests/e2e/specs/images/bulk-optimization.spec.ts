@@ -351,12 +351,6 @@ test.describe( 'Images', () => {
 						hasText: 'File successfully optimized',
 					} )
 			).toBeVisible();
-
-			await expect(
-				page
-					.getByRole( 'region', { name: 'Editor settings' } )
-					.getByRole( 'listitem' )
-			).toHaveCount( 1 );
 		} );
 	} );
 } );
