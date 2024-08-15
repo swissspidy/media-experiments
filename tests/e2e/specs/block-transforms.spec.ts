@@ -84,9 +84,10 @@ test.describe( 'Block Transforms', () => {
 		page,
 		editor,
 		mediaUtils,
+		browserName,
 	} ) => {
 		test.skip(
-			( { browserName } ) => browserName === 'webkit',
+			browserName === 'webkit',
 			'Needs investigation into unexpected page crashes, likely due to ffmpeg'
 		);
 
