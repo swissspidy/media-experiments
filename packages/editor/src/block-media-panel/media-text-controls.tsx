@@ -13,15 +13,18 @@ import type { BlockEditProps } from '@wordpress/blocks';
  */
 import { DebugInfo } from './debug-info';
 import { MuteVideo } from './mute-video';
-import { OptimizeMedia } from './optimize-media';
 import { RecordingControls } from './recording-controls';
 import type { MediaTextBlock } from '../types';
 import { UploadIndicator } from './upload-indicator';
+import { BulkOptimization } from '../components/bulk-optimization';
+import { useBlockAttachments } from '../utils/hooks';
 
 type MediaTextControlsProps = MediaTextBlock &
 	Pick< BlockEditProps< MediaTextBlock[ 'attributes' ] >, 'setAttributes' >;
 
 export function MediaTextControls( props: MediaTextControlsProps ) {
+	const attachments = useBlockAttachments( props.clientId );
+
 	function onChange( media: Partial< Attachment > ) {
 		if ( ! media || ! media.url ) {
 			return;
@@ -53,11 +56,7 @@ export function MediaTextControls( props: MediaTextControlsProps ) {
 				onInsert={ onInsertRecording }
 				recordingTypes={ [ 'image', 'video' ] }
 			/>
-			<OptimizeMedia
-				id={ props.attributes.mediaId }
-				url={ props.attributes.mediaUrl }
-				onSuccess={ onChange }
-			/>
+			<BulkOptimization attachments={ attachments } />
 			{ 'video' === props.attributes.mediaType ? (
 				<MuteVideo
 					id={ props.attributes.mediaId }

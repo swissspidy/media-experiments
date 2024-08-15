@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import type { Attachment } from '@mexp/media-utils';
-
-/**
  * WordPress dependencies
  */
 import { registerPlugin } from '@wordpress/plugins';
@@ -15,27 +10,12 @@ import { media as mediaIcon } from '@wordpress/icons';
  * Internal dependencies
  */
 import { BulkOptimization } from '../components/bulk-optimization';
-import { useDocumentAttachments, useFeaturedImage } from '../utils/hooks';
-import { OptimizeMedia } from '../block-media-panel/optimize-media';
-import { UploadIndicator } from '../block-media-panel/upload-indicator';
+import { useBlockAttachments } from '../utils/hooks';
 
 function DocumentMediaPanel() {
-	const attachments = useDocumentAttachments();
-	const {
-		featuredImage,
-		setFeaturedImage,
-		attachment: featuredImageAttachment,
-	} = useFeaturedImage();
+	const attachments = useBlockAttachments();
 
-	function onChange( media: Partial< Attachment > ) {
-		if ( ! media || ! media.id ) {
-			return;
-		}
-
-		setFeaturedImage( media.id );
-	}
-
-	if ( ! attachments.length && ! featuredImageAttachment ) {
+	if ( ! attachments.length ) {
 		return null;
 	}
 
@@ -46,20 +26,6 @@ function DocumentMediaPanel() {
 			title={ __( 'Media Experiments', 'media-experiments' ) }
 		>
 			<BulkOptimization attachments={ attachments } />
-			{ featuredImageAttachment && featuredImage ? (
-				<>
-					<UploadIndicator id={ featuredImage } />
-					<OptimizeMedia
-						id={ featuredImage }
-						url={ featuredImageAttachment.source_url }
-						onSuccess={ onChange }
-						label={ __(
-							'Optimize featured image',
-							'media-experiments'
-						) }
-					/>
-				</>
-			) : null }
 		</PluginDocumentSettingPanel>
 	);
 }

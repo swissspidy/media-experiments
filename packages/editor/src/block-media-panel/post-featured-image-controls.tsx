@@ -1,40 +1,24 @@
 /**
- * External dependencies
- */
-import type { Attachment } from '@mexp/media-utils';
-
-/**
  * Internal dependencies
  */
-import { useFeaturedImage } from '../utils/hooks';
+import { useBlockAttachments } from '../utils/hooks';
 import { UploadIndicator } from './upload-indicator';
-import { OptimizeMedia } from './optimize-media';
 import { DebugInfo } from './debug-info';
+import { BulkOptimization } from '../components/bulk-optimization';
+import type { PostFeaturedImageBlock } from '../types';
 
-export function PostFeaturedImageControls() {
-	const { featuredImage, setFeaturedImage, attachment } = useFeaturedImage();
+export function PostFeaturedImageControls( props: PostFeaturedImageBlock ) {
+	const attachments = useBlockAttachments( props.clientId );
 
-	if ( ! featuredImage || ! attachment ) {
+	if ( ! attachments ) {
 		return null;
-	}
-
-	function onChange( media: Partial< Attachment > ) {
-		if ( ! media || ! media.id ) {
-			return;
-		}
-
-		setFeaturedImage( media.id );
 	}
 
 	return (
 		<>
-			<UploadIndicator id={ featuredImage } />
-			<OptimizeMedia
-				id={ featuredImage }
-				url={ attachment.source_url }
-				onSuccess={ onChange }
-			/>
-			<DebugInfo id={ featuredImage } />
+			<UploadIndicator id={ attachments[ 0 ].id } />
+			<BulkOptimization attachments={ attachments } />
+			<DebugInfo id={ attachments[ 0 ].id } />
 		</>
 	);
 }

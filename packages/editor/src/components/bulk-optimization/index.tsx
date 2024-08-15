@@ -119,7 +119,6 @@ function Row(
 		} );
 	};
 
-	// TODO: Add placeholder if there's no poster.
 	return (
 		<>
 			<Flex direction={ [ 'column', 'row' ] }>
@@ -286,7 +285,9 @@ export function BulkOptimization( {
 	return (
 		<BaseControl { ...baseControlProps }>
 			<BaseControl.VisualLabel>
-				{ __( 'Compress attachments', 'media-experiments' ) }
+				{ attachments.length === 1
+					? __( 'Compress attachment', 'media-experiments' )
+					: __( 'Compress attachments', 'media-experiments' ) }
 			</BaseControl.VisualLabel>
 			<ItemGroup>
 				{ attachments.map( ( data ) => (
@@ -300,15 +301,17 @@ export function BulkOptimization( {
 					</Item>
 				) ) }
 			</ItemGroup>
-			<PanelRow>
-				<CompressAll
-					attachments={ attachments }
-					isBulkUploading={ isBulkUploading }
-					onStart={ () => setIsBulkUploading( true ) }
-					onSuccess={ () => setIsBulkUploading( false ) }
-					{ ...controlProps }
-				/>
-			</PanelRow>
+			{ attachments.length > 1 ? (
+				<PanelRow>
+					<CompressAll
+						attachments={ attachments }
+						isBulkUploading={ isBulkUploading }
+						onStart={ () => setIsBulkUploading( true ) }
+						onSuccess={ () => setIsBulkUploading( false ) }
+						{ ...controlProps }
+					/>
+				</PanelRow>
+			) : null }
 		</BaseControl>
 	);
 }

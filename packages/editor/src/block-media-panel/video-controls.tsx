@@ -15,7 +15,6 @@ import { isBlobURL } from '@wordpress/blob';
 import { UploadIndicator } from './upload-indicator';
 import { RecordingControls } from './recording-controls';
 import { ImportMedia } from './import-media';
-import { OptimizeMedia } from './optimize-media';
 import { MuteVideo } from './mute-video';
 import { GenerateSubtitles } from './generate-subtitles';
 import { AddPoster } from './add-poster';
@@ -38,16 +37,6 @@ export function VideoControls( props: VideoControlsProps ) {
 			id: media.id,
 			poster: media.poster,
 			caption: media.caption,
-		} );
-	}
-
-	function onOptimizeMedia( media: Partial< Attachment > ) {
-		if ( ! media || ! media.url ) {
-			return;
-		}
-		props.setAttributes( {
-			id: media.id,
-			src: media.url,
 		} );
 	}
 
@@ -106,11 +95,6 @@ export function VideoControls( props: VideoControlsProps ) {
 					onChange={ onImportMedia }
 				/>
 			) : null }
-			<OptimizeMedia
-				id={ props.attributes.id }
-				poster={ props.attributes.poster }
-				onSuccess={ onOptimizeMedia }
-			/>
 			<MuteVideo
 				id={ props.attributes.id }
 				url={ props.attributes.src }

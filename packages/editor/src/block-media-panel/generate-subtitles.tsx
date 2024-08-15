@@ -47,6 +47,7 @@ export function GenerateSubtitles( {
 	const hasTracks = attributes.tracks.length > 0;
 
 	// Force-show subtitles in the video player so user immediately sees result.
+	// TODO: Also add to core/media-text and core/cover blocks.
 	useLayoutEffect( () => {
 		if ( ! hasTracks ) {
 			return;

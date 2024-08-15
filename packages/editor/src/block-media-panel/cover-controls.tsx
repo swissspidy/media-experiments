@@ -13,15 +13,18 @@ import type { BlockEditProps } from '@wordpress/blocks';
  */
 import { DebugInfo } from './debug-info';
 import { MuteVideo } from './mute-video';
-import { OptimizeMedia } from './optimize-media';
 import { RecordingControls } from './recording-controls';
 import type { CoverBlock } from '../types';
 import { UploadIndicator } from './upload-indicator';
+import { BulkOptimization } from '../components/bulk-optimization';
+import { useBlockAttachments } from '../utils/hooks';
 
 type CoverControlsProps = CoverBlock &
 	Pick< BlockEditProps< CoverBlock[ 'attributes' ] >, 'setAttributes' >;
 
 export function CoverControls( props: CoverControlsProps ) {
+	const attachments = useBlockAttachments( props.clientId );
+
 	function onChange( media: Partial< Attachment > ) {
 		if ( ! media || ! media.url ) {
 			return;
@@ -53,11 +56,7 @@ export function CoverControls( props: CoverControlsProps ) {
 				onInsert={ onInsertRecording }
 				recordingTypes={ [ 'image', 'video' ] }
 			/>
-			<OptimizeMedia
-				id={ props.attributes.id }
-				url={ props.attributes.url }
-				onSuccess={ onChange }
-			/>
+			<BulkOptimization attachments={ attachments } />
 			{ 'video' === props.attributes.backgroundType ? (
 				<MuteVideo
 					id={ props.attributes.id }

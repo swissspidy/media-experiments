@@ -55,7 +55,7 @@ function PerBlockControls( props: PerBlockControlsProps ) {
 			return <CoverControls { ...props } />;
 
 		case 'core/post-featured-image':
-			return <PostFeaturedImageControls />;
+			return <PostFeaturedImageControls { ...props } />;
 
 		case 'core/site-logo':
 			return <SiteLogoControls { ...props } />;

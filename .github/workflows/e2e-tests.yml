@@ -76,7 +76,7 @@ jobs:
 
             - name: Run tests
               run: |
-                npm run test:e2e -- --shard=${{ matrix.shard }}
+                  npm run test:e2e -- --shard=${{ matrix.shard }}
               env:
                   COLLECT_COVERAGE: ${{ matrix.wp == 'latest' }}
 

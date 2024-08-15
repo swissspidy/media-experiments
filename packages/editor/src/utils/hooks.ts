@@ -8,9 +8,11 @@ import { store as uploadStore } from '@mexp/upload-media';
  * WordPress dependencies
  */
 import {
+	type Settings,
 	store as coreStore,
 	useEntityProp,
 	useEntityRecord,
+	useEntityRecords,
 } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { isBlobURL } from '@wordpress/blob';
@@ -50,7 +52,80 @@ export function useIsUploadingByUrl( url?: string ) {
 	);
 }
 
-export function useFeaturedImage() {
+const EMPTY_ARRAY: never[] = [];
+
+function useAttachmentsWithEntityRecords(
+	attachments: Partial< BulkOptimizationAttachmentData >[],
+	enabled = true
+) {
+	const cachedRecords = useSelect(
+		( select ) => {
+			return attachments
+				.map( ( attachment ) =>
+					attachment.id
+						? ( select(
+								coreStore
+						  ).__experimentalGetEntityRecordNoResolver(
+								'postType',
+								'attachment',
+								attachment.id
+						  ) as RestAttachment | undefined )
+						: undefined
+				)
+				.filter( ( attachment ) => attachment !== undefined );
+		},
+		[ attachments ]
+	);
+
+	if ( cachedRecords.length === attachments.length ) {
+		enabled = false;
+	}
+
+	const { records, isResolving } = useEntityRecords< RestAttachment >(
+		'postType',
+		'attachment',
+		{
+			include: attachments.map( ( { id } ) => id ).join( ',' ),
+			// eslint-disable-next-line camelcase
+			per_page: -1,
+			orderby: 'include',
+		},
+		{ enabled }
+	);
+
+	if (
+		( isResolving || ! records ) &&
+		cachedRecords.length !== attachments.length
+	) {
+		return EMPTY_ARRAY;
+	}
+
+	return attachments.map( ( attachment ) => {
+		const media =
+			records?.find( ( record ) => record.id === attachment.id ) ||
+			cachedRecords.find( ( record ) => record.id === attachment.id );
+
+		if ( media ) {
+			// Always use the full URL, in case the block uses a sub-size.
+			attachment.url = media.source_url;
+
+			if ( media.mexp_filesize ) {
+				attachment.filesize = media.mexp_filesize;
+			}
+
+			if ( media.mexp_filename ) {
+				attachment.filename = media.mexp_filename;
+			}
+		}
+
+		return attachment as BulkOptimizationAttachmentData;
+	} );
+}
+
+export function useBlockAttachments( clientId?: string ) {
+	const { updateBlockAttributes } = useDispatch( blockEditorStore );
+	const { editEntityRecord } = useDispatch( coreStore );
+
 	const { type: postType, id: postId } = useSelect(
 		( select ) => select( editorStore ).getCurrentPost(),
 		[]
@@ -63,124 +138,174 @@ export function useFeaturedImage() {
 		postId as number
 	) as [ number | undefined, ( id: number ) => void, unknown ];
 
-	const attachment = useAttachment( featuredImage );
+	const siteLogoId = useSelect( ( select ) => {
+		const { canUser, getEditedEntityRecord } = select( coreStore );
+		const canUserEdit = canUser( 'update', 'settings' );
+		const siteSettings = canUserEdit
+			? ( getEditedEntityRecord(
+					'root',
+					'site',
+					undefined
+			  ) as Settings ) || undefined
+			: undefined;
+		return canUserEdit ? siteSettings?.site_logo : undefined;
+	}, [] );
 
-	return {
-		featuredImage,
-		setFeaturedImage,
-		attachment,
-	};
-}
+	const blocks = useSelect(
+		( select ) => {
+			if ( ! clientId ) {
+				return select( blockEditorStore )
+					.getClientIdsWithDescendants()
+					.map( ( id ) => select( blockEditorStore ).getBlock( id ) )
+					.filter( ( block ) => block !== null );
+			}
 
-/**
- * Returns all media attachments in a given document, from the featured image to
- * the ones found in blocks.
- */
-export function useDocumentAttachments() {
-	const { updateBlockAttributes } = useDispatch( blockEditorStore );
+			const block = select( blockEditorStore ).getBlock( clientId );
 
-	return useSelect(
-		( select ) =>
-			select( blockEditorStore )
-				.getClientIdsWithDescendants()
-				.map( ( clientId ) =>
-					select( blockEditorStore ).getBlock( clientId )
-				)
-				.filter( ( block ) => block !== null )
-				.map( ( block ) => {
-					const attachment: Partial< BulkOptimizationAttachmentData > =
-						{
-							filesize: 0,
-							filename: '',
-							isFetched: false,
-						};
+			if ( ! block ) {
+				return EMPTY_ARRAY;
+			}
 
-					if ( block.name === 'core/image' && block.attributes.id ) {
-						attachment.id = block.attributes.id;
-						attachment.url = block?.attributes.url;
-						attachment.onChange = (
-							media: Partial< Attachment >
-						) => {
-							void updateBlockAttributes( block.clientId, {
-								id: media.id,
-								url: media.url,
-							} );
-						};
+			if ( block.name === 'core/gallery' ) {
+				return block.innerBlocks;
+			}
 
-						return attachment as BulkOptimizationAttachmentData;
-					}
+			return [ block ];
+		},
+		[ clientId ]
+	);
 
-					if (
-						block.name === 'core/media-text' &&
-						block.attributes.mediaId &&
-						block.attributes.mediaType === 'image'
-					) {
-						attachment.id = block.attributes.mediaId;
-						attachment.url = block?.attributes.mediaUrl;
-						attachment.onChange = (
-							media: Partial< Attachment >
-						) => {
-							void updateBlockAttributes( block.clientId, {
-								mediaId: media.id,
-								mediaUrl: media.url,
-							} );
-						};
+	let attachments = blocks
+		.map( ( block ) => {
+			const attachment: Partial< BulkOptimizationAttachmentData > = {
+				filesize: 0,
+				filename: '',
+			};
 
-						return attachment as BulkOptimizationAttachmentData;
-					}
-
-					if (
-						block.name === 'core/cover' &&
-						block.attributes.id &&
-						block.attributes.backgroundType === 'image'
-					) {
-						attachment.id = block.attributes.id;
-						attachment.url = block?.attributes.url;
-						attachment.onChange = (
-							media: Partial< Attachment >
-						) => {
-							void updateBlockAttributes( block.clientId, {
-								id: media.id,
-								url: media.url,
-							} );
-						};
-
-						return attachment as BulkOptimizationAttachmentData;
-					}
-
-					return null;
-				} )
-				.filter(
-					( attachment, index, arr ) =>
-						attachment !== null &&
-						arr.findIndex( ( a ) => a?.id === attachment.id ) ===
-							index
-				)
-				.filter( ( attachment ) => attachment !== null )
-				.map( ( attachment ) => {
-					// @ts-ignore
-					const media: RestAttachment | undefined = select(
-						coreStore
-					).getMedia( attachment.id, {
-						context: 'edit',
+			if ( block.name === 'core/image' && block.attributes.id ) {
+				attachment.id = block.attributes.id;
+				attachment.onChange = ( media: Partial< Attachment > ) => {
+					void updateBlockAttributes( block.clientId, {
+						id: media.id,
+						url: media.url,
 					} );
+				};
 
-					if ( media ) {
-						attachment.isFetched = true;
+				return attachment;
+			}
 
-						// TODO: Use fetchFile() as fallback.
-						if ( media.mexp_filesize ) {
-							attachment.filesize = media.mexp_filesize;
-						}
+			if (
+				block.name === 'core/media-text' &&
+				block.attributes.mediaId &&
+				block.attributes.mediaType === 'image'
+			) {
+				attachment.id = block.attributes.mediaId;
+				attachment.onChange = ( media: Partial< Attachment > ) => {
+					void updateBlockAttributes( block.clientId, {
+						mediaId: media.id,
+						mediaUrl: media.url,
+					} );
+				};
 
-						if ( media.mexp_filename ) {
-							attachment.filename = media.mexp_filename;
-						}
+				return attachment;
+			}
+
+			if (
+				block.name === 'core/cover' &&
+				block.attributes.id &&
+				block.attributes.backgroundType === 'image'
+			) {
+				attachment.id = block.attributes.id;
+				attachment.onChange = ( media: Partial< Attachment > ) => {
+					void updateBlockAttributes( block.clientId, {
+						id: media.id,
+						url: media.url,
+					} );
+				};
+
+				return attachment;
+			}
+
+			if ( block.name === 'core/post-featured-image' && featuredImage ) {
+				attachment.id = featuredImage;
+				attachment.onChange = ( media: Partial< Attachment > ) => {
+					if ( media.id ) {
+						setFeaturedImage( media.id );
+					}
+				};
+
+				return attachment;
+			}
+
+			if ( block.name === 'core/site-logo' && siteLogoId ) {
+				attachment.id = siteLogoId;
+				attachment.onChange = ( media: Partial< Attachment > ) => {
+					if ( ! media || ! media.id ) {
+						return;
 					}
 
-					return attachment;
-				} )
-				.filter( ( data ) => data.isFetched ),
-		[ updateBlockAttributes ]
+					if ( block.attributes.shouldSyncIcon ) {
+						void editEntityRecord( 'root', 'site', undefined, {
+							site_icon: media.id,
+						} );
+					}
+
+					void editEntityRecord( 'root', 'site', undefined, {
+						site_logo: media.id,
+					} );
+				};
+
+				return attachment;
+			}
+
+			return null;
+		} )
+		.filter( ( attachment ) => attachment !== null );
+
+	if ( ! clientId && featuredImage ) {
+		attachments.unshift( {
+			filesize: 0,
+			filename: '',
+			id: featuredImage,
+			onChange: ( media: Partial< Attachment > ) => {
+				if ( media.id ) {
+					setFeaturedImage( media.id );
+				}
+			},
+		} );
+	}
+
+	/*
+	 * De-duplicate attachments in the list.
+	 *
+	 * If the same image is used multiple times on a page, this allows updating all instances
+	 * while showing it only once in the list.
+	 *
+	 * @param attachments Attachments list.
+	 */
+	attachments = attachments.reduce( ( acc, attachment ) => {
+		const foundIndex = acc.findIndex( ( a ) => a.id === attachment.id );
+
+		if ( foundIndex > -1 ) {
+			acc[ foundIndex ].onChange = ( media ) => {
+				acc[ foundIndex ].onChange?.( media );
+				attachment.onChange?.( media );
+			};
+		} else {
+			acc.push( attachment );
+		}
+
+		return acc;
+	}, [] as Partial< BulkOptimizationAttachmentData >[] );
+
+	// Avoid requests until site logo ID has been fetched.
+	const attachmentsToQuery =
+		siteLogoId !== undefined && blocks.length > 0
+			? attachments
+			: EMPTY_ARRAY;
+
+	return useAttachmentsWithEntityRecords(
+		attachmentsToQuery,
+		attachmentsToQuery.length > 0
 	);
 }

@@ -135,7 +135,6 @@ export type BulkOptimizationAttachmentData = {
 	url: string;
 	filesize: number | null;
 	filename: string | null;
-	isFetched: boolean;
 	onChange: ( media: Partial< Attachment > ) => void;
 };
 
