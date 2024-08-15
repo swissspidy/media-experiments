@@ -80,6 +80,7 @@ export async function sideloadMedia( {
 				code: 'GENERAL',
 				message,
 				file,
+				cause: error instanceof Error ? error : undefined,
 			} )
 		);
 	}

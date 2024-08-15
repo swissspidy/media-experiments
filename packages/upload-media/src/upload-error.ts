@@ -2,6 +2,7 @@ interface UploadErrorArgs {
 	code: string;
 	message: string;
 	file: File;
+	cause?: Error;
 }
 
 /**
@@ -14,8 +15,8 @@ export class UploadError extends Error {
 	code: string;
 	file: File;
 
-	constructor( { code, message, file }: UploadErrorArgs ) {
-		super( message );
+	constructor( { code, message, file, cause }: UploadErrorArgs ) {
+		super( message, { cause } );
 
 		Object.setPrototypeOf( this, new.target.prototype );
 

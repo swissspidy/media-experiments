@@ -1367,13 +1367,12 @@ export function optimizeImageItem(
 		} catch ( error ) {
 			dispatch.cancelItem(
 				id,
-				error instanceof Error
-					? error
-					: new UploadError( {
-							code: 'MEDIA_TRANSCODING_ERROR',
-							message: 'File could not be uploaded',
-							file: item.file,
-					  } )
+				new UploadError( {
+					code: 'MEDIA_TRANSCODING_ERROR',
+					message: 'File could not be uploaded',
+					file: item.file,
+					cause: error instanceof Error ? error : undefined,
+				} )
 			);
 		} finally {
 			stop?.();
@@ -1438,13 +1437,12 @@ export function optimizeVideoItem(
 
 			dispatch.cancelItem(
 				id,
-				error instanceof Error
-					? error
-					: new UploadError( {
-							code: 'VIDEO_TRANSCODING_ERROR',
-							message: 'File could not be uploaded',
-							file: item.file,
-					  } )
+				new UploadError( {
+					code: 'VIDEO_TRANSCODING_ERROR',
+					message: 'File could not be uploaded',
+					file: item.file,
+					cause: error instanceof Error ? error : undefined,
+				} )
 			);
 		}
 	};
@@ -1484,13 +1482,12 @@ export function muteVideoItem( id: QueueItemId ) {
 		} catch ( error ) {
 			dispatch.cancelItem(
 				id,
-				error instanceof Error
-					? error
-					: new UploadError( {
-							code: 'VIDEO_MUTING_ERROR',
-							message: 'File could not be uploaded',
-							file: item.file,
-					  } )
+				new UploadError( {
+					code: 'VIDEO_MUTING_ERROR',
+					message: 'File could not be uploaded',
+					file: item.file,
+					cause: error instanceof Error ? error : undefined,
+				} )
 			);
 		}
 	};
@@ -1551,13 +1548,12 @@ export function optimizeAudioItem( id: QueueItemId ) {
 		} catch ( error ) {
 			dispatch.cancelItem(
 				id,
-				error instanceof Error
-					? error
-					: new UploadError( {
-							code: 'AUDIO_TRANSCODING_ERROR',
-							message: 'File could not be uploaded',
-							file: item.file,
-					  } )
+				new UploadError( {
+					code: 'AUDIO_TRANSCODING_ERROR',
+					message: 'File could not be uploaded',
+					file: item.file,
+					cause: error instanceof Error ? error : undefined,
+				} )
 			);
 		}
 	};
@@ -1609,13 +1605,12 @@ export function convertGifItem( id: QueueItemId ) {
 		} catch ( error ) {
 			dispatch.cancelItem(
 				id,
-				error instanceof Error
-					? error
-					: new UploadError( {
-							code: 'VIDEO_TRANSCODING_ERROR',
-							message: 'File could not be uploaded',
-							file: item.file,
-					  } )
+				new UploadError( {
+					code: 'VIDEO_TRANSCODING_ERROR',
+					message: 'File could not be uploaded',
+					file: item.file,
+					cause: error instanceof Error ? error : undefined,
+				} )
 			);
 		}
 	};
@@ -1649,13 +1644,12 @@ export function convertHeifItem( id: QueueItemId ) {
 		} catch ( error ) {
 			dispatch.cancelItem(
 				id,
-				error instanceof Error
-					? error
-					: new UploadError( {
-							code: 'IMAGE_TRANSCODING_ERROR',
-							message: 'File could not be uploaded',
-							file: item.file,
-					  } )
+				new UploadError( {
+					code: 'IMAGE_TRANSCODING_ERROR',
+					message: 'File could not be uploaded',
+					file: item.file,
+					cause: error instanceof Error ? error : undefined,
+				} )
 			);
 		}
 	};
@@ -1739,13 +1733,12 @@ export function resizeCropItem( id: QueueItemId, args?: ResizeCropItemArgs ) {
 		} catch ( error ) {
 			dispatch.cancelItem(
 				id,
-				error instanceof Error
-					? error
-					: new UploadError( {
-							code: 'IMAGE_TRANSCODING_ERROR',
-							message: 'File could not be uploaded',
-							file: item.file,
-					  } )
+				new UploadError( {
+					code: 'IMAGE_TRANSCODING_ERROR',
+					message: 'File could not be uploaded',
+					file: item.file,
+					cause: error instanceof Error ? error : undefined,
+				} )
 			);
 		} finally {
 			stop?.();
@@ -1994,13 +1987,12 @@ export function fetchRemoteFile( id: QueueItemId, args: FetchRemoteFileArgs ) {
 		} catch ( error ) {
 			dispatch.cancelItem(
 				id,
-				error instanceof Error
-					? error
-					: new UploadError( {
-							code: 'FETCH_REMOTE_FILE_ERROR',
-							message: 'Remote file could not be downloaded',
-							file: item.file,
-					  } )
+				new UploadError( {
+					code: 'FETCH_REMOTE_FILE_ERROR',
+					message: 'Remote file could not be downloaded',
+					file: item.file,
+					cause: error instanceof Error ? error : undefined,
+				} )
 			);
 		}
 	};
@@ -2045,13 +2037,12 @@ export function generateVideoSubtitles( id: QueueItemId ) {
 		} catch ( error ) {
 			dispatch.cancelItem(
 				id,
-				error instanceof Error
-					? error
-					: new UploadError( {
-							code: 'FETCH_REMOTE_FILE_ERROR',
-							message: 'Remote file could not be downloaded',
-							file: item.file,
-					  } )
+				new UploadError( {
+					code: 'FETCH_REMOTE_FILE_ERROR',
+					message: 'Remote file could not be downloaded',
+					file: item.file,
+					cause: error instanceof Error ? error : undefined,
+				} )
 			);
 		}
 	};
