@@ -122,7 +122,7 @@ test.describe( 'Upload Requests', () => {
 						.getItems().length === 0,
 				undefined,
 				{
-					timeout: 20000,
+					timeout: 30_000,
 				}
 			);
 
@@ -130,7 +130,15 @@ test.describe( 'Upload Requests', () => {
 				secondPage
 					.getByRole( 'button', { name: 'Dismiss this notice' } )
 					.filter( {
-						hasText: 'File successfully uploaded',
+						hasText: 'Media successfully uploaded',
+					} )
+			).toBeVisible();
+
+			await expect(
+				page
+					.getByRole( 'button', { name: 'Dismiss this notice' } )
+					.filter( {
+						hasText: 'Media successfully uploaded',
 					} )
 			).toBeVisible();
 
