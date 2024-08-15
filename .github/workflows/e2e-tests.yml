@@ -17,8 +17,7 @@ permissions: {}
 jobs:
     e2e-tests:
         name: 'E2E Tests (${{ matrix.wp }}) (${{ matrix.project }}) (${{ matrix.shard }})'
-        # Temporarily use ARM macOS for WebKit tests to work around https://github.com/swissspidy/media-experiments/issues/611
-        runs-on: ${{ matrix.project == 'webkit' && 'macos-latest' || 'ubuntu-latest' }}
+        runs-on: ubuntu-latest
         continue-on-error: ${{ matrix.experimental == true }}
         strategy:
             fail-fast: false
@@ -40,20 +39,6 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v4
-
-            - name: Install Docker (missing on macOS)
-              if: runner.os == 'macOS'
-              run: |
-                brew install docker docker-compose colima
-
-                # See https://github.com/abiosoft/colima/discussions/874
-                mkdir -p ~/.docker/cli-plugins
-                ln -sfn $(brew --prefix docker-compose)/bin/docker-compose ~/.docker/cli-plugins/docker-compose
-
-                # See https://github.com/abiosoft/colima/issues/970#issuecomment-2224011277
-                sudo curl -L -o /opt/homebrew/Cellar/lima/0.22.0/bin/limactl https://github.com/mikekazakov/lima-nohvf/raw/master/limactl && sudo chmod +x /opt/homebrew/Cellar/lima/0.22.0/bin/limactl
-
-                colima start --network-address --arch arm64 --vm-type=qemu --cpu 3 --memory 7
 
             - name: Setup Node
               uses: actions/setup-node@v4
