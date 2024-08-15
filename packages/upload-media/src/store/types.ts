@@ -39,6 +39,7 @@ export type QueueItem = {
 export interface State {
 	queue: QueueItem[];
 	queueStatus: QueueStatus;
+	pendingApproval: QueueItemId | undefined;
 	blobUrls: Record< QueueItemId, string[] >;
 	settings: Settings;
 }
@@ -167,7 +168,6 @@ export type Attachment = {
 	url: string;
 	mexp_filename: string | null;
 	mexp_filesize: number | null;
-	mexp_media_source: number[];
 	meta: {
 		mexp_generated_poster_id?: number;
 		mexp_original_id?: number;

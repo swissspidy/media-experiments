@@ -17,7 +17,7 @@ import { measure, type MeasureOptions, start } from '@mexp/log';
  * Internal dependencies
  */
 import { ImageFile } from '../image-file';
-import { MediaError } from '../media-error';
+import { UploadError } from '../upload-error';
 import {
 	canProcessWithFFmpeg,
 	cloneFile,
@@ -1369,7 +1369,7 @@ export function optimizeImageItem(
 				id,
 				error instanceof Error
 					? error
-					: new MediaError( {
+					: new UploadError( {
 							code: 'MEDIA_TRANSCODING_ERROR',
 							message: 'File could not be uploaded',
 							file: item.file,
@@ -1440,7 +1440,7 @@ export function optimizeVideoItem(
 				id,
 				error instanceof Error
 					? error
-					: new MediaError( {
+					: new UploadError( {
 							code: 'VIDEO_TRANSCODING_ERROR',
 							message: 'File could not be uploaded',
 							file: item.file,
@@ -1486,7 +1486,7 @@ export function muteVideoItem( id: QueueItemId ) {
 				id,
 				error instanceof Error
 					? error
-					: new MediaError( {
+					: new UploadError( {
 							code: 'VIDEO_MUTING_ERROR',
 							message: 'File could not be uploaded',
 							file: item.file,
@@ -1553,7 +1553,7 @@ export function optimizeAudioItem( id: QueueItemId ) {
 				id,
 				error instanceof Error
 					? error
-					: new MediaError( {
+					: new UploadError( {
 							code: 'AUDIO_TRANSCODING_ERROR',
 							message: 'File could not be uploaded',
 							file: item.file,
@@ -1611,7 +1611,7 @@ export function convertGifItem( id: QueueItemId ) {
 				id,
 				error instanceof Error
 					? error
-					: new MediaError( {
+					: new UploadError( {
 							code: 'VIDEO_TRANSCODING_ERROR',
 							message: 'File could not be uploaded',
 							file: item.file,
@@ -1651,7 +1651,7 @@ export function convertHeifItem( id: QueueItemId ) {
 				id,
 				error instanceof Error
 					? error
-					: new MediaError( {
+					: new UploadError( {
 							code: 'IMAGE_TRANSCODING_ERROR',
 							message: 'File could not be uploaded',
 							file: item.file,
@@ -1741,7 +1741,7 @@ export function resizeCropItem( id: QueueItemId, args?: ResizeCropItemArgs ) {
 				id,
 				error instanceof Error
 					? error
-					: new MediaError( {
+					: new UploadError( {
 							code: 'IMAGE_TRANSCODING_ERROR',
 							message: 'File could not be uploaded',
 							file: item.file,
@@ -1996,7 +1996,7 @@ export function fetchRemoteFile( id: QueueItemId, args: FetchRemoteFileArgs ) {
 				id,
 				error instanceof Error
 					? error
-					: new MediaError( {
+					: new UploadError( {
 							code: 'FETCH_REMOTE_FILE_ERROR',
 							message: 'Remote file could not be downloaded',
 							file: item.file,
@@ -2047,7 +2047,7 @@ export function generateVideoSubtitles( id: QueueItemId ) {
 				id,
 				error instanceof Error
 					? error
-					: new MediaError( {
+					: new UploadError( {
 							code: 'FETCH_REMOTE_FILE_ERROR',
 							message: 'Remote file could not be downloaded',
 							file: item.file,

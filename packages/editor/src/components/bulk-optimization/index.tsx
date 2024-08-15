@@ -3,7 +3,7 @@
  */
 import type { MouseEvent } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { store as uploadStore } from '@mexp/upload-media';
+import { store as uploadStore, UploadError } from '@mexp/upload-media';
 
 /**
  * WordPress dependencies
@@ -204,7 +204,14 @@ function CompressAll( props: {
 						method: 'POST',
 					} );
 				},
-				onError: ( err: Error ) => {
+				onError: ( err: Error | UploadError ) => {
+					if (
+						err instanceof UploadError &&
+						err.code === 'UPLOAD_CANCELLED'
+					) {
+						return;
+					}
+
 					void createErrorNotice(
 						sprintf(
 							/* translators: %s: error message */
@@ -223,10 +230,7 @@ function CompressAll( props: {
 					props.onSuccess();
 
 					void createSuccessNotice(
-						__(
-							'All files successfully optimized.',
-							'media-experiments'
-						),
+						__( 'All files processed.', 'media-experiments' ),
 						{
 							type: 'snackbar',
 						}

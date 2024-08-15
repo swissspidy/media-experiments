@@ -35,21 +35,20 @@ export function isPendingApproval( state: State ): boolean {
  *
  * @return Whether the item is first in the list of items pending approval.
  */
-export function isFirstPendingApprovalByAttachmentId(
+export function isPendingApprovalByAttachmentId(
 	state: State,
 	attachmentId: number
 ): boolean {
-	const foundItem = state.queue.find(
-		( item ) => item.status === ItemStatus.PendingApproval
-	);
-
-	if ( ! foundItem ) {
+	if ( ! state.pendingApproval ) {
 		return false;
 	}
 
-	return (
-		foundItem.attachment?.id === attachmentId ||
-		foundItem.sourceAttachmentId === attachmentId
+	return state.queue.some(
+		( item ) =>
+			item.status === ItemStatus.PendingApproval &&
+			item.id === state.pendingApproval &&
+			( item.attachment?.id === attachmentId ||
+				item.sourceAttachmentId === attachmentId )
 	);
 }
 

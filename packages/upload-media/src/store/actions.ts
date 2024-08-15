@@ -14,7 +14,7 @@ import { type MeasureOptions } from '@mexp/log';
 /**
  * Internal dependencies
  */
-import { MediaError } from '../media-error';
+import { UploadError } from '../upload-error';
 import { getFileBasename, getFileNameFromUrl } from '../utils';
 import { PREFERENCES_NAME } from '../constants';
 import { StubFile } from '../stub-file';
@@ -562,7 +562,7 @@ export function rejectApproval( id: number ) {
 
 		dispatch.cancelItem(
 			item.id,
-			new MediaError( {
+			new UploadError( {
 				code: 'UPLOAD_CANCELLED',
 				message: 'File upload was cancelled',
 				file: item.file,

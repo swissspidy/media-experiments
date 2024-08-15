@@ -50,9 +50,7 @@ export function ApprovalDialog( { id }: ApprovalDialogProps ) {
 			// This allows showing only one approval modal at a time if there
 			// are multiple pending items.
 			isPendingApproval: id
-				? select( uploadStore ).isFirstPendingApprovalByAttachmentId(
-						id
-				  )
+				? select( uploadStore ).isPendingApprovalByAttachmentId( id )
 				: false,
 			comparison: id
 				? select( uploadStore ).getComparisonDataForApproval( id )

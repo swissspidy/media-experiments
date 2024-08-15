@@ -181,7 +181,7 @@ test.describe( 'Images', () => {
 				page
 					.getByRole( 'button', { name: 'Dismiss this notice' } )
 					.filter( {
-						hasText: 'All files successfully optimized',
+						hasText: 'All files processed',
 					} )
 			).toBeVisible();
 		} );
