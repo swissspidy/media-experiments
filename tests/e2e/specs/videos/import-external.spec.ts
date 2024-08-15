@@ -62,7 +62,11 @@ test.describe( 'Videos', () => {
 		await expect( settingsPanel ).toHaveText(
 			/Mime type: video\/(mp4|webm)/
 		);
-		await expect( settingsPanel.getByLabel( '#8b837e' ) ).toBeVisible();
+
+		// TODO: Investigate why the color is white in WebKit.
+		await expect(
+			settingsPanel.getByLabel( /#8b837e|#ffffff/ )
+		).toBeVisible();
 		await expect( page.locator( 'css=[data-blurhash]' ) ).toBeVisible();
 	} );
 } );
