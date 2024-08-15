@@ -130,7 +130,7 @@ test.describe( 'Upload Requests', () => {
 				secondPage
 					.getByRole( 'button', { name: 'Dismiss this notice' } )
 					.filter( {
-						hasText: 'File successfully uploaded',
+						hasText: 'Media successfully uploaded',
 					} )
 			).toBeVisible();
 
