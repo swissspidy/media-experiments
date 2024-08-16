@@ -212,6 +212,7 @@ export enum OperationType {
 	FetchRemoteFile = 'FETCH_REMOTE_FILE',
 	GenerateSubtitles = 'GENERATE_SUBTITLES',
 	GenerateCaptions = 'GENERATE_CAPTIONS',
+	GenerateMetadata = 'GENERATE_METADATA',
 	Upload = 'UPLOAD',
 }
 

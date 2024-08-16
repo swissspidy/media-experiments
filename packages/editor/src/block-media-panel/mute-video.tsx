@@ -55,12 +55,14 @@ export function MuteVideo( { id, url, poster, onChange }: MuteVideoProps ) {
 			fileName: post.mexp_filename || undefined,
 			onChange: ( [ media ] ) => onChange( media ),
 			onSuccess: ( [ media ] ) => onChange( media ),
-			blurHash: post?.mexp_blurhash,
-			dominantColor: post?.mexp_dominant_color,
-			generatedPosterId: post?.meta.mexp_generated_poster_id,
 			additionalData: {
+				mexp_blurhash: post.mexp_blurhash,
+				mexp_dominant_color: post.mexp_dominant_color,
+				featured_media: post.meta.mexp_generated_poster_id,
 				meta: {
 					mexp_original_id: post.id,
+					mexp_generated_poster_id:
+						post.meta.mexp_generated_poster_id,
 				},
 			},
 		} );
