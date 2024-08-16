@@ -116,6 +116,13 @@ function useAttachmentsWithEntityRecords(
 			if ( media.mexp_filename ) {
 				attachment.filename = media.mexp_filename;
 			}
+
+			attachment.additionalData = {
+				mexp_blurhash: media.mexp_blurhash || undefined,
+				mexp_dominant_color: media.mexp_dominant_color || undefined,
+				featured_media:
+					media.meta.mexp_generated_poster_id || undefined,
+			};
 		}
 
 		return attachment as BulkOptimizationAttachmentData;

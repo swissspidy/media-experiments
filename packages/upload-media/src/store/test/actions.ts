@@ -239,6 +239,7 @@ describe( 'actions', () => {
 							OperationType.Compress,
 							{ requireApproval: undefined },
 						],
+						OperationType.GenerateMetadata,
 						OperationType.Upload,
 						OperationType.ThumbnailGeneration,
 					],

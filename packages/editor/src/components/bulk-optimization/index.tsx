@@ -104,6 +104,7 @@ function Row(
 				);
 			},
 			additionalData: {
+				...props.additionalData,
 				mexp_media_source:
 					window.mediaExperiments.mediaSourceTerms[
 						'media-optimization'
@@ -237,6 +238,7 @@ function CompressAll( props: {
 					);
 				},
 				additionalData: {
+					...attachment.additionalData,
 					mexp_media_source:
 						window.mediaExperiments.mediaSourceTerms[
 							'media-optimization'
