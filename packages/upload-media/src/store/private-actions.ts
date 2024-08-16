@@ -160,16 +160,12 @@ interface AddItemArgs {
 	additionalData?: AdditionalData;
 	sourceUrl?: string;
 	sourceAttachmentId?: number;
-	blurHash?: string;
-	dominantColor?: string;
 	abortController?: AbortController;
 	operations?: Operation[];
 }
 
 /**
  * Adds a new item to the upload queue.
- *
- * @todo Revisit blurHash and dominantColor fields.
  *
  * @param $0
  * @param $0.file                 File
@@ -181,8 +177,6 @@ interface AddItemArgs {
  * @param [$0.additionalData]     Additional data to include in the request.
  * @param [$0.sourceUrl]          Source URL. Used when importing a file from a URL or optimizing an existing file.
  * @param [$0.sourceAttachmentId] Source attachment ID. Used when optimizing an existing file for example.
- * @param [$0.blurHash]           Item's BlurHash.
- * @param [$0.dominantColor]      Item's dominant color.
  * @param [$0.abortController]    Abort controller for upload cancellation.
  * @param [$0.operations]         List of operations to perform. Defaults to automatically determined list, based on the file.
  */
@@ -196,8 +190,6 @@ export function addItem( {
 	additionalData = {} as AdditionalData,
 	sourceUrl,
 	sourceAttachmentId,
-	blurHash,
-	dominantColor,
 	abortController,
 	operations,
 }: AddItemArgs ) {
@@ -242,8 +234,6 @@ export function addItem( {
 				onError,
 				sourceUrl,
 				sourceAttachmentId,
-				blurHash,
-				dominantColor,
 				abortController: abortController || new AbortController(),
 				operations: Array.isArray( operations )
 					? operations
@@ -1006,9 +996,10 @@ export function uploadPoster( id: QueueItemId ) {
 						// Reminder: Parent post ID might not be set, depending on context,
 						// but should be carried over if it does.
 						post: item.additionalData.post,
+						mexp_blurash: item.additionalData.mexp_blurhash,
+						mexp_dominant_color:
+							item.additionalData.mexp_dominant_color,
 					},
-					blurHash: item.blurHash,
-					dominantColor: item.dominantColor,
 					abortController,
 					operations,
 				} );
@@ -1770,14 +1761,10 @@ export function uploadItem( id: QueueItemId ) {
 
 		const additionalData: Record< string, unknown > = {
 			...item.additionalData,
-			// generatedPosterId is set when using muteExistingVideo() for example.
 			meta: {
-				mexp_generated_poster_id: item.generatedPosterId || undefined,
+				...( item.additionalData.meta || {} ),
 				mexp_original_id: item.sourceAttachmentId || undefined,
 			},
-			mexp_blurhash: item.blurHash,
-			mexp_dominant_color: item.dominantColor,
-			featured_media: item.generatedPosterId || undefined,
 		};
 
 		const timing: MeasureOptions = {

@@ -191,9 +191,6 @@ interface MuteExistingVideoArgs {
 	onSuccess?: OnSuccessHandler;
 	onError?: OnErrorHandler;
 	additionalData?: AdditionalData;
-	blurHash?: string;
-	dominantColor?: string;
-	generatedPosterId?: number;
 }
 
 /**
@@ -202,17 +199,14 @@ interface MuteExistingVideoArgs {
  * @todo Rename id to sourceAttachmentId for consistency
  *
  * @param $0
- * @param $0.id                  Attachment ID.
- * @param $0.url                 Video URL.
- * @param [$0.fileName]          Video file name.
- * @param [$0.poster]            Poster URL.
- * @param [$0.onChange]          Function called each time a file or a temporary representation of the file is available.
- * @param [$0.onSuccess]         Function called after the file is uploaded.
- * @param [$0.onError]           Function called when an error happens.
- * @param [$0.additionalData]    Additional data to include in the request.
- * @param [$0.blurHash]          Item's BlurHash.
- * @param [$0.dominantColor]     Item's dominant color.
- * @param [$0.generatedPosterId] Attachment ID of the generated poster image, if it exists.
+ * @param $0.id               Attachment ID.
+ * @param $0.url              Video URL.
+ * @param [$0.fileName]       Video file name.
+ * @param [$0.poster]         Poster URL.
+ * @param [$0.onChange]       Function called each time a file or a temporary representation of the file is available.
+ * @param [$0.onSuccess]      Function called after the file is uploaded.
+ * @param [$0.onError]        Function called when an error happens.
+ * @param [$0.additionalData] Additional data to include in the request.
  */
 export function muteExistingVideo( {
 	id,
@@ -223,9 +217,6 @@ export function muteExistingVideo( {
 	onSuccess,
 	onError,
 	additionalData = {} as AdditionalData,
-	blurHash,
-	dominantColor,
-	generatedPosterId,
 }: MuteExistingVideoArgs ) {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
 		fileName = fileName || getFileNameFromUrl( url );
@@ -261,8 +252,6 @@ export function muteExistingVideo( {
 				onError,
 				sourceUrl: url,
 				sourceAttachmentId: id,
-				blurHash,
-				dominantColor,
 				operations: [
 					[
 						OperationType.FetchRemoteFile,
@@ -271,7 +260,6 @@ export function muteExistingVideo( {
 					OperationType.MuteVideo,
 					OperationType.Upload,
 				],
-				generatedPosterId,
 				abortController: new AbortController(),
 			},
 		} );
@@ -426,9 +414,6 @@ interface OptimizeExistingItemArgs {
 	onBatchSuccess?: OnBatchSuccessHandler;
 	onError?: OnErrorHandler;
 	additionalData?: AdditionalData;
-	blurHash?: string;
-	dominantColor?: string;
-	generatedPosterId?: number;
 	startTime?: number;
 }
 
@@ -438,20 +423,17 @@ interface OptimizeExistingItemArgs {
  * @todo Rename id to sourceAttachmentId for consistency
  *
  * @param $0
- * @param $0.id                  Attachment ID.
- * @param $0.url                 URL.
- * @param [$0.fileName]          File name.
- * @param [$0.poster]            Poster URL.
- * @param [$0.batchId]           Batch ID.
- * @param [$0.onChange]          Function called each time a file or a temporary representation of the file is available.
- * @param [$0.onSuccess]         Function called after the file is uploaded.
- * @param [$0.onBatchSuccess]    Function called after a batch of files is uploaded.
- * @param [$0.onError]           Function called when an error happens.
- * @param [$0.additionalData]    Additional data to include in the request.
- * @param [$0.blurHash]          Item's BlurHash.
- * @param [$0.dominantColor]     Item's dominant color.
- * @param [$0.generatedPosterId] Attachment ID of the generated poster image, if it exists.
- * @param [$0.startTime]         Time the action was initiated by the user (e.g. by clicking on a button).
+ * @param $0.id               Attachment ID.
+ * @param $0.url              URL.
+ * @param [$0.fileName]       File name.
+ * @param [$0.poster]         Poster URL.
+ * @param [$0.batchId]        Batch ID.
+ * @param [$0.onChange]       Function called each time a file or a temporary representation of the file is available.
+ * @param [$0.onSuccess]      Function called after the file is uploaded.
+ * @param [$0.onBatchSuccess] Function called after a batch of files is uploaded.
+ * @param [$0.onError]        Function called when an error happens.
+ * @param [$0.additionalData] Additional data to include in the request.
+ * @param [$0.startTime]      Time the action was initiated by the user (e.g. by clicking on a button).
  */
 export function optimizeExistingItem( {
 	id,
@@ -464,9 +446,6 @@ export function optimizeExistingItem( {
 	onBatchSuccess,
 	onError,
 	additionalData = {} as AdditionalData,
-	blurHash,
-	dominantColor,
-	generatedPosterId,
 	startTime,
 }: OptimizeExistingItemArgs ) {
 	return async ( { dispatch, registry }: ThunkArgs ) => {
@@ -526,8 +505,6 @@ export function optimizeExistingItem( {
 				onError,
 				sourceUrl: url,
 				sourceAttachmentId: id,
-				blurHash,
-				dominantColor,
 				operations: [
 					[
 						OperationType.FetchRemoteFile,
@@ -537,7 +514,6 @@ export function optimizeExistingItem( {
 					OperationType.Upload,
 					OperationType.ThumbnailGeneration,
 				],
-				generatedPosterId,
 				abortController,
 				timings,
 			},
