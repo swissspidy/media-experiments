@@ -210,7 +210,7 @@ function App() {
 					multiple={ window.mediaExperiments.multiple }
 					render={ ( { openFileDialog } ) => (
 						<Button
-							variant="primary"
+							variant="secondary"
 							onClick={ openFileDialog }
 							disabled={ isUploading }
 						>

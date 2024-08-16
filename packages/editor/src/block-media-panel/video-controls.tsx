@@ -7,7 +7,6 @@ import type { Attachment } from '@mexp/media-utils';
  * WordPress dependencies
  */
 import type { BlockEditProps } from '@wordpress/blocks';
-import { Fragment } from '@wordpress/element';
 import { isBlobURL } from '@wordpress/blob';
 
 /**
@@ -16,12 +15,11 @@ import { isBlobURL } from '@wordpress/blob';
 import { UploadIndicator } from './upload-indicator';
 import { RecordingControls } from './recording-controls';
 import { ImportMedia } from './import-media';
-import { OptimizeMedia } from './optimize-media';
 import { MuteVideo } from './mute-video';
 import { GenerateSubtitles } from './generate-subtitles';
 import { AddPoster } from './add-poster';
 import { DebugInfo } from './debug-info';
-import type { VideoBlock } from './types';
+import type { VideoBlock } from '../types';
 import { UploadRequestControls } from './upload-requests/controls';
 
 type VideoControlsProps = VideoBlock &
@@ -39,16 +37,6 @@ export function VideoControls( props: VideoControlsProps ) {
 			id: media.id,
 			poster: media.poster,
 			caption: media.caption,
-		} );
-	}
-
-	function onOptimizeMedia( media: Partial< Attachment > ) {
-		if ( ! media || ! media.url ) {
-			return;
-		}
-		props.setAttributes( {
-			id: media.id,
-			src: media.url,
 		} );
 	}
 
@@ -82,7 +70,7 @@ export function VideoControls( props: VideoControlsProps ) {
 	}
 
 	return (
-		<Fragment>
+		<>
 			<UploadIndicator
 				id={ props.attributes.id }
 				url={ props.attributes.src }
@@ -107,11 +95,6 @@ export function VideoControls( props: VideoControlsProps ) {
 					onChange={ onImportMedia }
 				/>
 			) : null }
-			<OptimizeMedia
-				id={ props.attributes.id }
-				poster={ props.attributes.poster }
-				onSuccess={ onOptimizeMedia }
-			/>
 			<MuteVideo
 				id={ props.attributes.id }
 				url={ props.attributes.src }
@@ -121,6 +104,6 @@ export function VideoControls( props: VideoControlsProps ) {
 			<GenerateSubtitles { ...props } />
 			<AddPoster { ...props } />
 			<DebugInfo id={ props.attributes.id } />
-		</Fragment>
+		</>
 	);
 }

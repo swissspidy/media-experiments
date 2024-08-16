@@ -440,7 +440,7 @@ _Returns_
 
 -   `Settings`: Settings
 
-#### isFirstPendingApprovalByAttachmentId
+#### isPendingApprovalByAttachmentId
 
 Determines whether an item is the first one pending approval given its associated attachment ID.
 

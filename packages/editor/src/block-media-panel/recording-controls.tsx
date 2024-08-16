@@ -18,7 +18,6 @@ import {
 } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import { Fragment } from '@wordpress/element';
 import { BlockControls } from '@wordpress/block-editor';
 import { capturePhoto, check } from '@wordpress/icons';
 
@@ -165,7 +164,7 @@ function ToolbarControls( { onInsert }: ToolbarControlsProps ) {
 	const isRecording = 'recording' === status;
 
 	return (
-		<Fragment>
+		<>
 			<BlockControls group="block">
 				<InputControls />
 			</BlockControls>
@@ -288,7 +287,7 @@ function ToolbarControls( { onInsert }: ToolbarControlsProps ) {
 					/>
 				) }
 				{ isStopped && (
-					<Fragment>
+					<>
 						<ToolbarButton
 							onClick={ () => {
 								// Upload the file and leave recording mode.
@@ -313,10 +312,10 @@ function ToolbarControls( { onInsert }: ToolbarControlsProps ) {
 						>
 							{ __( 'Retry', 'media-experiments' ) }
 						</ToolbarButton>
-					</Fragment>
+					</>
 				) }
 			</BlockControls>
-		</Fragment>
+		</>
 	);
 }
 
@@ -370,7 +369,7 @@ export function RecordingControls( {
 					'media-experiments'
 				) }
 			</p>
-			<Button variant="primary" onClick={ onClick } { ...controlProps }>
+			<Button variant="secondary" onClick={ onClick } { ...controlProps }>
 				{ isInRecordingMode
 					? __( 'Exit', 'media-experiments' )
 					: __( 'Start', 'media-experiments' ) }

@@ -6,7 +6,6 @@ import type { Attachment } from '@mexp/media-utils';
 /**
  * WordPress dependencies
  */
-import { Fragment } from '@wordpress/element';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { isBlobURL } from '@wordpress/blob';
 
@@ -16,33 +15,26 @@ import { isBlobURL } from '@wordpress/blob';
 import { UploadIndicator } from './upload-indicator';
 import { RecordingControls } from './recording-controls';
 import { ImportMedia } from './import-media';
-import { OptimizeMedia } from './optimize-media';
 import { DebugInfo } from './debug-info';
-import type { ImageBlock } from './types';
+import type { ImageBlock } from '../types';
 import { AnimatedGifConverter } from './animated-gif-converter';
 import { UploadRequestControls } from './upload-requests/controls';
 import { GenerateCaptions } from './generate-caption';
+import { BulkOptimization } from '../components/bulk-optimization';
+import { useBlockAttachments } from '../utils/hooks';
 
 type ImageControlsProps = ImageBlock &
 	Pick< BlockEditProps< ImageBlock[ 'attributes' ] >, 'setAttributes' >;
 
 export function ImageControls( props: ImageControlsProps ) {
+	const attachments = useBlockAttachments( props.clientId );
+
 	function onImportMedia( media: Partial< Attachment > ) {
 		// Ignore blob URLs as otherwise the block tries to upload it again.
 		if ( ! media || ! media.url || isBlobURL( media.url ) ) {
 			return;
 		}
 
-		props.setAttributes( {
-			url: media.url,
-			id: media.id,
-		} );
-	}
-
-	function onOptimizeMedia( media: Partial< Attachment > ) {
-		if ( ! media || ! media.url ) {
-			return;
-		}
 		props.setAttributes( {
 			url: media.url,
 			id: media.id,
@@ -80,7 +72,7 @@ export function ImageControls( props: ImageControlsProps ) {
 	}
 
 	return (
-		<Fragment>
+		<>
 			<AnimatedGifConverter
 				id={ props.attributes.id }
 				url={ props.attributes.url }
@@ -110,17 +102,13 @@ export function ImageControls( props: ImageControlsProps ) {
 					onChange={ onImportMedia }
 				/>
 			) : null }
-			<OptimizeMedia
-				id={ props.attributes.id }
-				url={ props.attributes.url }
-				onSuccess={ onOptimizeMedia }
-			/>
+			<BulkOptimization attachments={ attachments } />
 			<GenerateCaptions
 				url={ props.attributes.url }
 				onUpdateCaption={ onUpdateCaption }
 				onUpdateAltText={ onUpdateAltText }
 			/>
 			<DebugInfo id={ props.attributes.id } />
-		</Fragment>
+		</>
 	);
 }

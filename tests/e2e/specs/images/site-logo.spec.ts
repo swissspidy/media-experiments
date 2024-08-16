@@ -110,7 +110,7 @@ test.describe( 'Site Logo', () => {
 
 				await page
 					.getByRole( 'region', { name: 'Editor settings' } )
-					.getByRole( 'button', { name: 'Optimize' } )
+					.getByRole( 'button', { name: 'Compress' } )
 					.click();
 
 				await expect(

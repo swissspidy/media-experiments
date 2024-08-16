@@ -14,7 +14,7 @@ import { type MeasureOptions } from '@mexp/log';
 /**
  * Internal dependencies
  */
-import { MediaError } from '../media-error';
+import { UploadError } from '../upload-error';
 import { getFileBasename, getFileNameFromUrl } from '../utils';
 import { PREFERENCES_NAME } from '../constants';
 import { StubFile } from '../stub-file';
@@ -562,7 +562,7 @@ export function rejectApproval( id: number ) {
 
 		dispatch.cancelItem(
 			item.id,
-			new MediaError( {
+			new UploadError( {
 				code: 'UPLOAD_CANCELLED',
 				message: 'File upload was cancelled',
 				file: item.file,
@@ -647,23 +647,24 @@ export function cancelItem( id: QueueItemId, error: Error ) {
 		dispatch.removeItem( id );
 		dispatch.revokeBlobUrls( id );
 
-		// All other side-loaded items have been removed, so remove the parent too.
-		if (
-			item.parentId &&
-			item.batchId &&
-			select.isBatchUploaded( item.batchId )
-		) {
-			const parentItem = select.getItem( item.parentId ) as QueueItem;
+		// All items of this batch were cancelled or finished.
+		if ( item.batchId && select.isBatchUploaded( item.batchId ) ) {
+			item.onBatchSuccess?.();
 
-			if (
-				parentItem.batchId &&
-				select.isBatchUploaded( parentItem.batchId )
-			) {
-				parentItem.onBatchSuccess?.();
+			// All other side-loaded items have been removed, so remove the parent too.
+			if ( item.parentId ) {
+				const parentItem = select.getItem( item.parentId ) as QueueItem;
+
+				dispatch.removeItem( item.parentId );
+				dispatch.revokeBlobUrls( item.parentId );
+
+				if (
+					parentItem.batchId &&
+					select.isBatchUploaded( parentItem.batchId )
+				) {
+					parentItem.onBatchSuccess?.();
+				}
 			}
-
-			dispatch.removeItem( item.parentId );
-			dispatch.revokeBlobUrls( item.parentId );
 		}
 	};
 }

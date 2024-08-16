@@ -5,7 +5,7 @@ import { store as uploadStore } from './store';
 
 export { uploadStore as store };
 
-export { MediaError } from './media-error';
+export { UploadError } from './upload-error';
 
 export type {
 	ImageFormat,

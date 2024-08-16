@@ -1,46 +1,24 @@
 /**
- * External dependencies
- */
-import type { Attachment } from '@mexp/media-utils';
-
-/**
- * WordPress dependencies
- */
-import { Fragment } from '@wordpress/element';
-
-/**
  * Internal dependencies
  */
-import { useFeaturedImageAttachment } from '../utils/hooks';
+import { useBlockAttachments } from '../utils/hooks';
 import { UploadIndicator } from './upload-indicator';
-import { OptimizeMedia } from './optimize-media';
 import { DebugInfo } from './debug-info';
+import { BulkOptimization } from '../components/bulk-optimization';
+import type { PostFeaturedImageBlock } from '../types';
 
-export function PostFeaturedImageControls() {
-	const { featuredImage, setFeaturedImage, attachment } =
-		useFeaturedImageAttachment();
+export function PostFeaturedImageControls( props: PostFeaturedImageBlock ) {
+	const attachments = useBlockAttachments( props.clientId );
 
-	if ( ! featuredImage || ! attachment ) {
+	if ( attachments.length !== 1 ) {
 		return null;
 	}
 
-	function onChange( media: Partial< Attachment > ) {
-		if ( ! media || ! media.id ) {
-			return;
-		}
-
-		setFeaturedImage( media.id );
-	}
-
 	return (
-		<Fragment>
-			<UploadIndicator id={ featuredImage } />
-			<OptimizeMedia
-				id={ featuredImage }
-				url={ attachment.source_url }
-				onSuccess={ onChange }
-			/>
-			<DebugInfo id={ featuredImage } />
-		</Fragment>
+		<>
+			<UploadIndicator id={ attachments[ 0 ].id } />
+			<BulkOptimization attachments={ attachments } />
+			<DebugInfo id={ attachments[ 0 ].id } />
+		</>
 	);
 }

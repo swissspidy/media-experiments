@@ -11,3 +11,15 @@ index a13724a..2663152 100644
      margin?: import("../../utils/space").SpaceInput | undefined;
      marginEnd?: import("../../utils/space").SpaceInput | undefined;
      marginStart?: import("../../utils/space").SpaceInput | undefined;
+diff --git a/node_modules/@wordpress/components/build-types/item-group/types.d.ts b/node_modules/@wordpress/components/build-types/item-group/types.d.ts
+index 96fc577..b4966fd 100644
+--- a/node_modules/@wordpress/components/build-types/item-group/types.d.ts
++++ b/node_modules/@wordpress/components/build-types/item-group/types.d.ts
+@@ -41,6 +41,7 @@ export interface ItemProps {
+      * The children elements.
+      */
+     children: React.ReactNode;
++	wrapperClassName?: string;
+ }
+ export type ItemGroupContext = {
+     /**

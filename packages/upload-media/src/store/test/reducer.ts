@@ -15,6 +15,7 @@ describe( 'reducer', () => {
 		it( 'adds an item to the queue', () => {
 			const initialState: State = {
 				queueStatus: 'active',
+				pendingApproval: undefined,
 				blobUrls: {},
 				settings: {
 					mediaUpload: jest.fn(),
@@ -38,6 +39,7 @@ describe( 'reducer', () => {
 
 			expect( state ).toEqual( {
 				queueStatus: 'active',
+				pendingApproval: undefined,
 				blobUrls: {},
 				settings: {
 					mediaUpload: expect.any( Function ),
@@ -62,6 +64,7 @@ describe( 'reducer', () => {
 		it( 'removes an item from the queue', () => {
 			const initialState: State = {
 				queueStatus: 'active',
+				pendingApproval: undefined,
 				blobUrls: {},
 				settings: {
 					mediaUpload: jest.fn(),
@@ -87,6 +90,7 @@ describe( 'reducer', () => {
 
 			expect( state ).toEqual( {
 				queueStatus: 'active',
+				pendingApproval: undefined,
 				blobUrls: {},
 				settings: {
 					mediaUpload: expect.any( Function ),
@@ -112,6 +116,7 @@ describe( 'reducer', () => {
 		it( 'removes an item from the queue', () => {
 			const initialState: State = {
 				queueStatus: 'active',
+				pendingApproval: undefined,
 				blobUrls: {},
 				settings: {
 					mediaUpload: jest.fn(),
@@ -136,6 +141,7 @@ describe( 'reducer', () => {
 
 			expect( state ).toEqual( {
 				queueStatus: 'active',
+				pendingApproval: undefined,
 				blobUrls: {},
 				settings: {
 					mediaUpload: expect.any( Function ),
@@ -156,6 +162,7 @@ describe( 'reducer', () => {
 		it( 'marks an item as paused', () => {
 			const initialState: State = {
 				queueStatus: 'active',
+				pendingApproval: undefined,
 				blobUrls: {},
 				settings: {
 					mediaUpload: jest.fn(),
@@ -180,6 +187,7 @@ describe( 'reducer', () => {
 
 			expect( state ).toEqual( {
 				queueStatus: 'active',
+				pendingApproval: undefined,
 				blobUrls: {},
 				settings: {
 					mediaUpload: expect.any( Function ),
@@ -204,6 +212,7 @@ describe( 'reducer', () => {
 		it( 'marks an item as processing', () => {
 			const initialState: State = {
 				queueStatus: 'active',
+				pendingApproval: undefined,
 				blobUrls: {},
 				settings: {
 					mediaUpload: jest.fn(),
@@ -228,6 +237,7 @@ describe( 'reducer', () => {
 
 			expect( state ).toEqual( {
 				queueStatus: 'active',
+				pendingApproval: undefined,
 				blobUrls: {},
 				settings: {
 					mediaUpload: expect.any( Function ),
@@ -252,6 +262,7 @@ describe( 'reducer', () => {
 		it( 'appends operations to the list', () => {
 			const initialState: State = {
 				queueStatus: 'active',
+				pendingApproval: undefined,
 				blobUrls: {},
 				settings: {
 					mediaUpload: jest.fn(),
@@ -274,6 +285,7 @@ describe( 'reducer', () => {
 
 			expect( state ).toEqual( {
 				queueStatus: 'active',
+				pendingApproval: undefined,
 				blobUrls: {},
 				settings: {
 					mediaUpload: expect.any( Function ),
@@ -299,6 +311,7 @@ describe( 'reducer', () => {
 		it( 'marks an item as processing', () => {
 			const initialState: State = {
 				queueStatus: 'active',
+				pendingApproval: undefined,
 				blobUrls: {},
 				settings: {
 					mediaUpload: jest.fn(),
@@ -332,6 +345,7 @@ describe( 'reducer', () => {
 
 			expect( state ).toEqual( {
 				queueStatus: 'active',
+				pendingApproval: undefined,
 				blobUrls: {},
 				settings: {
 					mediaUpload: expect.any( Function ),
@@ -365,6 +379,7 @@ describe( 'reducer', () => {
 		it( 'marks an item as processing', () => {
 			const initialState: State = {
 				queueStatus: 'active',
+				pendingApproval: undefined,
 				blobUrls: {},
 				settings: {
 					mediaUpload: jest.fn(),
@@ -393,6 +408,7 @@ describe( 'reducer', () => {
 
 			expect( state ).toEqual( {
 				queueStatus: 'active',
+				pendingApproval: undefined,
 				blobUrls: {},
 				settings: {
 					mediaUpload: expect.any( Function ),

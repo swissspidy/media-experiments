@@ -116,7 +116,7 @@ test.describe( 'Images', () => {
 
 			await page
 				.getByRole( 'region', { name: 'Editor settings' } )
-				.getByRole( 'button', { name: 'Optimize all' } )
+				.getByRole( 'button', { name: 'Compress all' } )
 				.click();
 
 			await expect(
@@ -181,7 +181,7 @@ test.describe( 'Images', () => {
 				page
 					.getByRole( 'button', { name: 'Dismiss this notice' } )
 					.filter( {
-						hasText: 'All files successfully optimized',
+						hasText: 'All files processed',
 					} )
 			).toBeVisible();
 		} );
@@ -294,7 +294,7 @@ test.describe( 'Images', () => {
 
 			await page
 				.getByRole( 'region', { name: 'Editor settings' } )
-				.getByLabel( 'Optimize' )
+				.getByLabel( 'Compress' )
 				.first()
 				.click();
 
@@ -351,12 +351,6 @@ test.describe( 'Images', () => {
 						hasText: 'File successfully optimized',
 					} )
 			).toBeVisible();
-
-			await expect(
-				page
-					.getByRole( 'region', { name: 'Editor settings' } )
-					.getByRole( 'listitem' )
-			).toHaveCount( 1 );
 		} );
 	} );
 } );

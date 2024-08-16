@@ -3,34 +3,41 @@
  */
 import type { MouseEvent } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { store as uploadStore, UploadError } from '@mexp/upload-media';
 
 /**
  * WordPress dependencies
  */
-import { Fragment } from '@wordpress/element';
 import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalText as Text,
 	Button,
 	PanelRow,
 	Tooltip,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalItemGroup as ItemGroup,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalItem as Item,
+	Flex,
+	Spinner,
+	BaseControl,
+	useBaseControlProps,
 } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { store as editorStore } from '@wordpress/editor';
-import { store as blockEditorStore } from '@wordpress/block-editor';
 import { __, sprintf } from '@wordpress/i18n';
 import { filterURLForDisplay } from '@wordpress/url';
 import { store as noticesStore } from '@wordpress/notices';
 import apiFetch from '@wordpress/api-fetch';
 
-import { store as uploadStore } from '@mexp/upload-media';
-
 /**
  * Internal dependencies
  */
-import type { BulkOptimizationAttachmentData } from '../types';
-import { ReactComponent as CompressIcon } from '../icons/compress.svg';
-import { ApprovalDialog } from './approval-dialog';
+import type { BulkOptimizationAttachmentData } from '../../types';
+import { ReactComponent as CompressIcon } from '../../icons/compress.svg';
+import { ApprovalDialog } from '../approval-dialog';
+
+import './editor.css';
+import { useState } from '@wordpress/element';
 
 const numberFormatter = Intl.NumberFormat( 'en', {
 	notation: 'compact',
@@ -42,26 +49,27 @@ const numberFormatter = Intl.NumberFormat( 'en', {
 	maximumFractionDigits: 2,
 } );
 
-function Row( props: BulkOptimizationAttachmentData ) {
+function Row(
+	props: BulkOptimizationAttachmentData & { isBulkUploading: boolean }
+) {
 	const { optimizeExistingItem } = useDispatch( uploadStore );
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( noticesStore );
-	const { updateBlockAttributes } = useDispatch( blockEditorStore );
-	const currentPostId = useSelect(
-		( select ) => select( editorStore ).getCurrentPostId(),
-		[]
+
+	const { isUploading } = useSelect(
+		( select ) => ( {
+			isUploading: select( uploadStore ).isUploadingById( props.id ),
+		} ),
+		[ props.id ]
 	);
 
 	const onClick = ( evt: MouseEvent< HTMLButtonElement > ) => {
 		void optimizeExistingItem( {
 			id: props.id,
 			url: props.url,
-			fileName: props.mexp_filename || undefined,
+			fileName: props.filename || undefined,
 			onSuccess: ( [ media ] ) => {
-				void updateBlockAttributes( props.clientId, {
-					id: media.id,
-					url: media.url,
-				} );
+				props.onChange( media );
 
 				void apiFetch( {
 					path: `/wp/v2/media/${ props.id }`,
@@ -96,7 +104,6 @@ function Row( props: BulkOptimizationAttachmentData ) {
 				);
 			},
 			additionalData: {
-				post: currentPostId,
 				mexp_media_source:
 					window.mediaExperiments.mediaSourceTerms[
 						'media-optimization'
@@ -106,59 +113,76 @@ function Row( props: BulkOptimizationAttachmentData ) {
 		} );
 	};
 
-	// TODO: Add placeholder if there's no poster.
 	return (
-		<div role="listitem">
-			<PanelRow>
-				{ props.posterUrl ? (
-					<img
-						src={ props.posterUrl }
-						width={ 32 }
-						height={ 32 }
-						alt=""
-					/>
-				) : null }
+		<>
+			<Flex direction={ [ 'column', 'row' ] }>
+				<img
+					src={ props.url }
+					width={ 32 }
+					height={ 32 }
+					alt=""
+					className="mexp-bulk-optimization-row__image"
+				/>
 				<Tooltip text={ props.url }>
-					<Text aria-label={ props.url }>
+					<Text
+						aria-label={ props.url }
+						className="mexp-bulk-optimization-row__text"
+					>
 						{ filterURLForDisplay( props.url, 15 ) }
 					</Text>
 				</Tooltip>
-				<Text variant="muted">
-					{ props.mexp_filesize
-						? numberFormatter.format( props.mexp_filesize )
-						: /* translators: unknown file size */
-						  __( '? KB', 'media-experiments' ) }
-				</Text>
-				<Button
-					icon={ <CompressIcon width={ 32 } height={ 32 } /> }
-					className="mexp-document-panel-row__button"
-					label={ __( 'Optimize', 'media-experiments' ) }
-					onClick={ onClick }
-					disabled={ props.isUploading }
-				></Button>
-			</PanelRow>
-		</div>
+				{ ! isUploading || props.isBulkUploading ? (
+					<Text variant="muted">
+						{ props.filesize
+							? numberFormatter.format( props.filesize )
+							: /* translators: unknown file size */
+							  __( '? KB', 'media-experiments' ) }
+					</Text>
+				) : null }
+				<div className="mexp-bulk-optimization-row__action">
+					{ isUploading && ! props.isBulkUploading ? (
+						<Spinner />
+					) : (
+						<Button
+							icon={ <CompressIcon width={ 24 } height={ 24 } /> }
+							size="compact"
+							className="mexp-bulk-optimization-row__button"
+							label={ __( 'Compress', 'media-experiments' ) }
+							onClick={ onClick }
+							disabled={ props.isBulkUploading }
+						/>
+					) }
+				</div>
+			</Flex>
+		</>
 	);
 }
 
 function CompressAll( props: {
 	attachments: BulkOptimizationAttachmentData[];
+	id: string;
+	onStart: () => void;
+	onSuccess: () => void;
+	isBulkUploading: boolean;
 } ) {
-	const currentPostId = useSelect(
-		( select ) => select( editorStore ).getCurrentPostId(),
+	const { isUploadingById } = useSelect(
+		( select ) => ( {
+			isUploadingById: select( uploadStore ).isUploadingById,
+		} ),
 		[]
 	);
 
-	const { updateBlockAttributes } = useDispatch( blockEditorStore );
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( noticesStore );
 	const { optimizeExistingItem } = useDispatch( uploadStore );
 
 	const onClick = ( evt: MouseEvent< HTMLButtonElement > ) => {
+		props.onStart();
+
 		const batchId = uuidv4();
 
 		for ( const attachment of props.attachments ) {
-			if ( attachment.isUploading ) {
+			if ( isUploadingById( attachment.id ) ) {
 				continue;
 			}
 
@@ -166,12 +190,9 @@ function CompressAll( props: {
 				batchId,
 				id: attachment.id,
 				url: attachment.url,
-				fileName: attachment.mexp_filename || undefined,
+				fileName: attachment.filename || undefined,
 				onSuccess: ( [ media ] ) => {
-					void updateBlockAttributes( attachment.clientId, {
-						id: media.id,
-						url: media.url,
-					} );
+					attachment.onChange( media );
 
 					void apiFetch( {
 						path: `/wp/v2/media/${ attachment.id }`,
@@ -183,7 +204,14 @@ function CompressAll( props: {
 						method: 'POST',
 					} );
 				},
-				onError: ( err: Error ) => {
+				onError: ( err: Error | UploadError ) => {
+					if (
+						err instanceof UploadError &&
+						err.code === 'UPLOAD_CANCELLED'
+					) {
+						return;
+					}
+
 					void createErrorNotice(
 						sprintf(
 							/* translators: %s: error message */
@@ -199,18 +227,16 @@ function CompressAll( props: {
 					);
 				},
 				onBatchSuccess: () => {
+					props.onSuccess();
+
 					void createSuccessNotice(
-						__(
-							'All files successfully optimized.',
-							'media-experiments'
-						),
+						__( 'All files processed.', 'media-experiments' ),
 						{
 							type: 'snackbar',
 						}
 					);
 				},
 				additionalData: {
-					post: currentPostId,
 					mexp_media_source:
 						window.mediaExperiments.mediaSourceTerms[
 							'media-optimization'
@@ -221,17 +247,16 @@ function CompressAll( props: {
 		}
 	};
 
-	const areAllUploading = props.attachments.every(
-		( { isUploading } ) => isUploading
-	);
-
 	return (
 		<Button
-			variant="primary"
+			variant="secondary"
 			onClick={ onClick }
-			disabled={ areAllUploading }
+			disabled={ props.isBulkUploading }
+			className="mexp-bulk-optimization-compress-all"
+			id={ props.id }
 		>
-			{ __( 'Optimize all', 'media-experiments' ) }
+			{ props.isBulkUploading && <Spinner /> }
+			{ __( 'Compress all', 'media-experiments' ) }
 		</Button>
 	);
 }
@@ -241,23 +266,44 @@ export function BulkOptimization( {
 }: {
 	attachments: BulkOptimizationAttachmentData[];
 } ) {
+	const { baseControlProps, controlProps } = useBaseControlProps( {} );
+
+	const [ isBulkUploading, setIsBulkUploading ] = useState( false );
+
 	if ( ! attachments.length ) {
 		return null;
 	}
 
 	return (
-		<>
-			<div role="list">
+		<BaseControl { ...baseControlProps }>
+			<BaseControl.VisualLabel>
+				{ attachments.length === 1
+					? __( 'Compress attachment', 'media-experiments' )
+					: __( 'Compress attachments', 'media-experiments' ) }
+			</BaseControl.VisualLabel>
+			<ItemGroup>
 				{ attachments.map( ( data ) => (
-					<Fragment key={ data.id }>
-						<Row { ...data } />
+					<Item
+						key={ data.id }
+						role="listitem"
+						wrapperClassName="mexp-bulk-optimization-row"
+					>
+						<Row isBulkUploading={ isBulkUploading } { ...data } />
 						<ApprovalDialog id={ data.id } />
-					</Fragment>
+					</Item>
 				) ) }
-			</div>
-			<PanelRow>
-				<CompressAll attachments={ attachments } />
-			</PanelRow>
-		</>
+			</ItemGroup>
+			{ attachments.length > 1 ? (
+				<PanelRow>
+					<CompressAll
+						attachments={ attachments }
+						isBulkUploading={ isBulkUploading }
+						onStart={ () => setIsBulkUploading( true ) }
+						onSuccess={ () => setIsBulkUploading( false ) }
+						{ ...controlProps }
+					/>
+				</PanelRow>
+			) : null }
+		</BaseControl>
 	);
 }

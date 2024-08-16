@@ -16,7 +16,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import type { MediaPanelProps } from '../block-media-panel/types';
+import type { MediaPanelProps } from '../types';
 import './blocks.css';
 import { formatSecondsToMinutesSeconds } from './utils';
 import { UnfinishedRecordingWarning } from './unfinished-recording-warning';

@@ -8,8 +8,7 @@ import { store as uploadStore } from '@mexp/upload-media';
  */
 import type { BlockEditProps } from '@wordpress/blocks';
 import { isBlobURL } from '@wordpress/blob';
-import { useDispatch, useSelect } from '@wordpress/data';
-import { store as editorStore } from '@wordpress/editor';
+import { useDispatch } from '@wordpress/data';
 import { __, _x } from '@wordpress/i18n';
 import {
 	BaseControl,
@@ -22,7 +21,7 @@ import { useLayoutEffect } from '@wordpress/element';
  * Internal dependencies
  */
 import { useAttachment, useIsUploadingByUrl } from '../utils/hooks';
-import type { VideoBlock } from './types';
+import type { VideoBlock } from '../types';
 
 type GenerateSubtitlesProps = VideoBlock &
 	Pick< BlockEditProps< VideoBlock[ 'attributes' ] >, 'setAttributes' >;
@@ -39,14 +38,11 @@ export function GenerateSubtitles( {
 	const isUploading = useIsUploadingByUrl( url ) || isBlobURL( url );
 
 	const { addSubtitlesForExistingVideo } = useDispatch( uploadStore );
-	const currentPostId = useSelect(
-		( select ) => select( editorStore ).getCurrentPostId(),
-		[]
-	);
 
 	const hasTracks = attributes.tracks.length > 0;
 
 	// Force-show subtitles in the video player so user immediately sees result.
+	// TODO: Also add to core/media-text and core/cover blocks.
 	useLayoutEffect( () => {
 		if ( ! hasTracks ) {
 			return;
@@ -93,7 +89,6 @@ export function GenerateSubtitles( {
 					],
 				} ),
 			additionalData: {
-				post: currentPostId,
 				mexp_media_source:
 					window.mediaExperiments.mediaSourceTerms[
 						'subtitles-generation'
@@ -114,7 +109,7 @@ export function GenerateSubtitles( {
 				) }
 			</p>
 			<Button
-				variant="primary"
+				variant="secondary"
 				onClick={ onClick }
 				disabled={ isUploading }
 				{ ...controlProps }

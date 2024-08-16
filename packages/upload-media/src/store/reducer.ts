@@ -28,6 +28,7 @@ const noop = () => {};
 const DEFAULT_STATE: State = {
 	queue: [],
 	queueStatus: 'active',
+	pendingApproval: undefined,
 	blobUrls: {},
 	settings: {
 		mediaUpload: noop,
@@ -90,6 +91,15 @@ function reducer(
 							  }
 							: item
 				),
+				pendingApproval:
+					state.pendingApproval !== action.id
+						? state.pendingApproval
+						: state.queue.find(
+								( item ) =>
+									item.status ===
+										ItemStatus.PendingApproval &&
+									item.id !== action.id
+						  )?.id || undefined,
 			};
 
 		case Type.Remove:
@@ -196,6 +206,12 @@ function reducer(
 						],
 					};
 				} ),
+				// eslint-disable-next-line no-nested-ternary
+				pendingApproval: state.pendingApproval
+					? state.pendingApproval
+					: action.item.status === ItemStatus.PendingApproval
+					? action.id
+					: undefined,
 			};
 
 		case Type.ApproveUpload:
@@ -210,6 +226,12 @@ function reducer(
 							  }
 							: item
 				),
+				pendingApproval:
+					state.queue.find(
+						( item ) =>
+							item.status === ItemStatus.PendingApproval &&
+							item.id !== action.id
+					)?.id || undefined,
 			};
 
 		case Type.CacheBlobUrl: {

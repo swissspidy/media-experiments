@@ -746,7 +746,7 @@ function rest_after_insert_attachment_copy_metadata( WP_Post $attachment, WP_RES
 
 		$original_metadata = wp_get_attachment_metadata( $original_id );
 
-		$keys = [ 'width', 'height' ];
+		$keys = [ 'width', 'height', 'blurhash', 'dominant_color', 'has_transparency' ];
 		foreach ( $keys as $key ) {
 			if ( ! isset( $metadata[ $key ] ) && isset( $original_metadata[ $key ] ) ) {
 				$metadata[ $key ] = $original_metadata[ $key ];

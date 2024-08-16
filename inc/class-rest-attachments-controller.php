@@ -254,6 +254,22 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			add_filter( 'image_editor_output_format', '__return_empty_array', 100 );
 		}
 
+		// Copy over main fields from original. Metadata is handled in rest_after_insert_attachment_copy_metadata().
+		if ( isset( $request['meta']['mexp_original_id'] ) && ! empty( $request['meta']['mexp_original_id'] ) ) {
+			$original_id = $request['meta']['mexp_original_id'];
+
+			$original_attachment = get_post( $original_id );
+			if ( $original_attachment ) {
+				if ( ! isset( $request['caption'] ) ) {
+					$request['caption'] = $original_attachment->post_excerpt;
+				}
+
+				if ( ! isset( $request['alt_text'] ) ) {
+					$request['alt_text'] = get_post_meta( $original_id, '_wp_attachment_image_alt', true );
+				}
+			}
+		}
+
 		$upload_request = $this->get_upload_request_post( $request );
 
 		$grant_meta_update = static function ( $caps, $cap, $user_id, $args ) {

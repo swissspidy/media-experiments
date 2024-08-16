@@ -8,8 +8,7 @@ import { store as uploadStore } from '@mexp/upload-media';
  * WordPress dependencies
  */
 import { isBlobURL } from '@wordpress/blob';
-import { useDispatch, useSelect } from '@wordpress/data';
-import { store as editorStore } from '@wordpress/editor';
+import { useDispatch } from '@wordpress/data';
 import {
 	BaseControl,
 	Button,
@@ -37,10 +36,6 @@ export function MuteVideo( { id, url, poster, onChange }: MuteVideoProps ) {
 	const isUploading = useIsUploadingByUrl( url ) || isBlobURL( url );
 
 	const { muteExistingVideo } = useDispatch( uploadStore );
-	const currentPostId = useSelect(
-		( select ) => select( editorStore ).getCurrentPostId(),
-		[]
-	);
 
 	if ( ! post || post.mexp_is_muted ) {
 		return null;
@@ -58,9 +53,6 @@ export function MuteVideo( { id, url, poster, onChange }: MuteVideoProps ) {
 			blurHash: post?.mexp_blurhash,
 			dominantColor: post?.mexp_dominant_color,
 			generatedPosterId: post?.meta.mexp_generated_poster_id,
-			additionalData: {
-				post: currentPostId,
-			},
 		} );
 	};
 
@@ -76,7 +68,7 @@ export function MuteVideo( { id, url, poster, onChange }: MuteVideoProps ) {
 				) }
 			</p>
 			<Button
-				variant="primary"
+				variant="secondary"
 				onClick={ onClick }
 				disabled={ isUploading }
 				{ ...controlProps }

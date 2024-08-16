@@ -129,6 +129,7 @@ export function uploadMedia( {
 					code: 'GENERAL',
 					message,
 					file,
+					cause: error instanceof Error ? error : undefined,
 				} )
 			);
 		}

@@ -186,7 +186,7 @@ test.describe( 'Images', () => {
 
 				await page
 					.getByRole( 'region', { name: 'Editor settings' } )
-					.getByRole( 'button', { name: 'Optimize' } )
+					.getByRole( 'button', { name: 'Compress' } )
 					.click();
 
 				await expect(
@@ -358,7 +358,7 @@ test.describe( 'Images', () => {
 
 		await page
 			.getByRole( 'region', { name: 'Editor settings' } )
-			.getByRole( 'button', { name: 'Optimize' } )
+			.getByRole( 'button', { name: 'Compress' } )
 			.click();
 
 		await expect(
@@ -411,7 +411,7 @@ test.describe( 'Images', () => {
 		await expect(
 			page
 				.getByRole( 'region', { name: 'Editor settings' } )
-				.getByRole( 'button', { name: 'Optimize' } )
+				.getByRole( 'button', { name: 'Compress' } )
 		).toBeVisible();
 	} );
 

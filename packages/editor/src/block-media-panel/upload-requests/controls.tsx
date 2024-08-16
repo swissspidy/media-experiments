@@ -226,7 +226,7 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 					'media-experiments'
 				) }
 			</p>
-			<Button variant="primary" onClick={ onClick } { ...controlProps }>
+			<Button variant="secondary" onClick={ onClick } { ...controlProps }>
 				{ __( 'Upload', 'media-experiments' ) }
 			</Button>
 

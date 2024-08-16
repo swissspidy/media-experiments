@@ -16,7 +16,7 @@ import {
 	WASM_MEMORY_LIMIT,
 	FFMPEG_SUPPORTED_AUDIO_VIDEO_MIME_TYPES,
 } from './constants';
-import { MediaError } from './media-error';
+import { UploadError } from './upload-error';
 
 /**
  * Renames a given file and returns a new file.
@@ -125,7 +125,7 @@ export async function fetchFile( url: string, nameOverride?: string ) {
 	const file = new File( [ blob ], name, { type } );
 
 	if ( ! guessedMimeType ) {
-		throw new MediaError( {
+		throw new UploadError( {
 			code: 'FETCH_REMOTE_FILE_ERROR',
 			message: 'File could not be uploaded',
 			file,

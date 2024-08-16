@@ -1,7 +1,6 @@
 /**
  * WordPress dependencies
  */
-import { Fragment } from '@wordpress/element';
 import { addFilter } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 import { createHigherOrderComponent } from '@wordpress/compose';
@@ -21,9 +20,7 @@ import { GalleryControls } from './gallery-controls';
 import { MediaTextControls } from './media-text-controls';
 import { PostFeaturedImageControls } from './post-featured-image-controls';
 import { SiteLogoControls } from './site-logo-controls';
-import type { MediaPanelProps } from './types';
-
-import './editor.css';
+import type { MediaPanelProps } from '../types';
 
 const SUPPORTED_BLOCKS = [
 	'core/image',
@@ -58,7 +55,7 @@ function PerBlockControls( props: PerBlockControlsProps ) {
 			return <CoverControls { ...props } />;
 
 		case 'core/post-featured-image':
-			return <PostFeaturedImageControls />;
+			return <PostFeaturedImageControls { ...props } />;
 
 		case 'core/site-logo':
 			return <SiteLogoControls { ...props } />;
@@ -75,7 +72,7 @@ const addMediaPanel = createHigherOrderComponent(
 		}
 
 		return (
-			<Fragment>
+			<>
 				<BlockEdit { ...props } />
 				<InspectorControls>
 					<PanelBody
@@ -86,7 +83,7 @@ const addMediaPanel = createHigherOrderComponent(
 						<PerBlockControls { ...props } />
 					</PanelBody>
 				</InspectorControls>
-			</Fragment>
+			</>
 		);
 	},
 	'withMediaPanel'

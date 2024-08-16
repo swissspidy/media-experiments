@@ -14,8 +14,7 @@ import {
 import { useEffect, useState } from '@wordpress/element';
 import { isBlobURL } from '@wordpress/blob';
 import { __ } from '@wordpress/i18n';
-import { useDispatch, useSelect } from '@wordpress/data';
-import { store as editorStore } from '@wordpress/editor';
+import { useDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -39,11 +38,6 @@ export function AddPoster( { attributes, setAttributes }: AddPosterProps ) {
 
 	const attachment = useAttachment( attributes.id );
 	const poster = useAttachment( posterId );
-
-	const currentPostId = useSelect(
-		( select ) => select( editorStore ).getCurrentPostId(),
-		[]
-	);
 
 	const { addPosterForExistingVideo } = useDispatch( uploadStore );
 
@@ -97,7 +91,6 @@ export function AddPoster( { attributes, setAttributes }: AddPosterProps ) {
 				} );
 			},
 			additionalData: {
-				post: currentPostId,
 				mexp_media_source:
 					window.mediaExperiments.mediaSourceTerms[
 						'poster-generation'
@@ -119,7 +112,7 @@ export function AddPoster( { attributes, setAttributes }: AddPosterProps ) {
 			</p>
 			{ poster ? (
 				<Button
-					variant="primary"
+					variant="secondary"
 					onClick={ restorePoster }
 					disabled={ isUploading }
 					{ ...controlProps }
@@ -128,7 +121,7 @@ export function AddPoster( { attributes, setAttributes }: AddPosterProps ) {
 				</Button>
 			) : (
 				<Button
-					variant="primary"
+					variant="secondary"
 					onClick={ generatePoster }
 					disabled={ isUploading }
 					{ ...controlProps }
