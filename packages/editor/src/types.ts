@@ -132,6 +132,7 @@ export type MediaPanelProps =
 
 export type BulkOptimizationAttachmentData = {
 	id: number;
+	originalId?: number;
 	url: string;
 	filesize: number | null;
 	filename: string | null;

@@ -113,9 +113,7 @@ function useAttachmentsWithEntityRecords(
 					attachment.url = media.mexp_original_url;
 				}
 
-				if ( media.meta.mexp_original_id ) {
-					attachment.id = media.meta.mexp_original_id;
-				}
+				attachment.originalId = media.meta.mexp_original_id;
 
 				if ( media.mexp_filesize ) {
 					attachment.filesize = media.mexp_filesize;

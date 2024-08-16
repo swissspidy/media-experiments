@@ -58,6 +58,11 @@ export function MuteVideo( { id, url, poster, onChange }: MuteVideoProps ) {
 			blurHash: post?.mexp_blurhash,
 			dominantColor: post?.mexp_dominant_color,
 			generatedPosterId: post?.meta.mexp_generated_poster_id,
+			additionalData: {
+				meta: {
+					mexp_original_id: post.id,
+				},
+			},
 		} );
 	};
 

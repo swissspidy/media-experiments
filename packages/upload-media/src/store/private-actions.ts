@@ -1764,7 +1764,6 @@ export function uploadItem( id: QueueItemId ) {
 			// generatedPosterId is set when using muteExistingVideo() for example.
 			meta: {
 				mexp_generated_poster_id: item.generatedPosterId || undefined,
-				mexp_original_id: item.sourceAttachmentId || undefined,
 			},
 			mexp_blurhash: item.blurHash,
 			mexp_dominant_color: item.dominantColor,
