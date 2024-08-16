@@ -132,11 +132,11 @@ export type MediaPanelProps =
 
 export type BulkOptimizationAttachmentData = {
 	id: number;
-	originalId?: number;
 	url: string;
 	filesize: number | null;
 	filename: string | null;
 	onChange: ( media: Partial< Attachment > ) => void;
+	additionalData?: Record< string, unknown >;
 };
 
 export type MediaPreferences = {

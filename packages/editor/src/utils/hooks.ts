@@ -113,8 +113,6 @@ function useAttachmentsWithEntityRecords(
 					attachment.url = media.mexp_original_url;
 				}
 
-				attachment.originalId = media.meta.mexp_original_id;
-
 				if ( media.mexp_filesize ) {
 					attachment.filesize = media.mexp_filesize;
 				}
@@ -122,6 +120,14 @@ function useAttachmentsWithEntityRecords(
 				if ( media.mexp_filename ) {
 					attachment.filename = media.mexp_filename;
 				}
+
+				attachment.additionalData = {
+					meta: {
+						mexp_original_id:
+							media.meta.mexp_original_id || attachment.id,
+					},
+				};
+
 				return attachment as BulkOptimizationAttachmentData;
 			}
 			return undefined;
