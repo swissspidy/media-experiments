@@ -40,6 +40,17 @@ export function useIsUploadingByUrl( url?: string ) {
 
 const EMPTY_ARRAY: never[] = [];
 
+/**
+ * For a list of attachment objects, enriches them with server-side data.
+ *
+ * Since the number of items in the list can change, this uses
+ * `__experimentalGetEntityRecordNoResolver()` in addition to `useEntityRecords`
+ * to avoid unnecessary HTTP requests when all the individual items have been
+ * previously fetched already.
+ *
+ * @param attachments List of attachments.
+ * @param enabled     Whether to actually send requests.
+ */
 function useAttachmentsWithEntityRecords(
 	attachments: Partial< BulkOptimizationAttachmentData >[],
 	enabled = true
@@ -86,26 +97,38 @@ function useAttachmentsWithEntityRecords(
 		return EMPTY_ARRAY;
 	}
 
-	return attachments.map( ( attachment ) => {
-		const media =
-			records?.find( ( record ) => record.id === attachment.id ) ||
-			cachedRecords.find( ( record ) => record.id === attachment.id );
+	// Add server-side data but remove the ones not found on the server anymore.
+	return attachments
+		.map( ( attachment ) => {
+			const media =
+				records?.find( ( record ) => record.id === attachment.id ) ||
+				cachedRecords.find( ( record ) => record.id === attachment.id );
 
-		if ( media ) {
-			// Always use the full URL, in case the block uses a sub-size.
-			attachment.url = media.source_url;
+			if ( media ) {
+				// Always use the full URL, in case the block uses a sub-size.
+				attachment.url = media.source_url;
 
-			if ( media.mexp_filesize ) {
-				attachment.filesize = media.mexp_filesize;
+				// Always use the original ID and URL in case this image is already an optimized version.
+				if ( media.mexp_original_url ) {
+					attachment.url = media.mexp_original_url;
+				}
+
+				if ( media.meta.mexp_original_id ) {
+					attachment.id = media.meta.mexp_original_id;
+				}
+
+				if ( media.mexp_filesize ) {
+					attachment.filesize = media.mexp_filesize;
+				}
+
+				if ( media.mexp_filename ) {
+					attachment.filename = media.mexp_filename;
+				}
+				return attachment as BulkOptimizationAttachmentData;
 			}
-
-			if ( media.mexp_filename ) {
-				attachment.filename = media.mexp_filename;
-			}
-		}
-
-		return attachment as BulkOptimizationAttachmentData;
-	} );
+			return undefined;
+		} )
+		.filter( ( attachment ) => attachment !== undefined );
 }
 
 export function useBlockAttachments( clientId?: string ) {
