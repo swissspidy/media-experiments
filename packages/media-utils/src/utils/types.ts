@@ -191,6 +191,7 @@ export interface RestAttachment extends WP_REST_API_Attachment {
 	mexp_dominant_color?: string;
 	mexp_is_muted?: boolean;
 	mexp_has_transparency?: boolean;
+	mexp_original_url: string | null;
 }
 
 type BetterOmit< T, K extends PropertyKey > = {

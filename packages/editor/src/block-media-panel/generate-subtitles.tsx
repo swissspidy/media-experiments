@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import type { RestAttachment } from '@mexp/media-utils';
 import { store as uploadStore } from '@mexp/upload-media';
 
 /**
@@ -9,6 +10,7 @@ import { store as uploadStore } from '@mexp/upload-media';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { isBlobURL } from '@wordpress/blob';
 import { useDispatch } from '@wordpress/data';
+import { useEntityRecord } from '@wordpress/core-data';
 import { __, _x } from '@wordpress/i18n';
 import {
 	BaseControl,
@@ -20,7 +22,7 @@ import { useLayoutEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { useAttachment, useIsUploadingByUrl } from '../utils/hooks';
+import { useIsUploadingByUrl } from '../utils/hooks';
 import type { VideoBlock } from '../types';
 
 type GenerateSubtitlesProps = VideoBlock &
@@ -32,7 +34,11 @@ export function GenerateSubtitles( {
 }: GenerateSubtitlesProps ) {
 	const { baseControlProps, controlProps } = useBaseControlProps( {} );
 
-	const post = useAttachment( attributes.id );
+	const { record: post } = useEntityRecord< RestAttachment | null >(
+		'postType',
+		'attachment',
+		attributes.id
+	);
 
 	const url = attributes.src;
 	const isUploading = useIsUploadingByUrl( url ) || isBlobURL( url );

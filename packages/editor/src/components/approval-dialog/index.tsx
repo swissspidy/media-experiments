@@ -5,6 +5,8 @@ import {
 	ReactCompareSlider,
 	ReactCompareSliderImage,
 } from 'react-compare-slider';
+import type { RestAttachment } from '@mexp/media-utils';
+import { store as uploadStore } from '@mexp/upload-media';
 
 /**
  * WordPress dependencies
@@ -13,14 +15,11 @@ import { Button, Modal } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { createInterpolateElement, useState } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
-
-import { store as uploadStore } from '@mexp/upload-media';
+import { useEntityRecord } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
  */
-import { useAttachment } from '../../utils/hooks';
-
 import './editor.css';
 
 const numberFormatter = Intl.NumberFormat( 'en', {
@@ -44,7 +43,11 @@ interface ApprovalDialogProps {
 }
 
 export function ApprovalDialog( { id }: ApprovalDialogProps ) {
-	const post = useAttachment( id );
+	const { record: post } = useEntityRecord< RestAttachment | null >(
+		'postType',
+		'attachment',
+		id
+	);
 	const { isPendingApproval, comparison } = useSelect(
 		( select ) => ( {
 			// This allows showing only one approval modal at a time if there

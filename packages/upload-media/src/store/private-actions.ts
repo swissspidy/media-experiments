@@ -1757,16 +1757,6 @@ export function uploadItem( id: QueueItemId ) {
 
 		const startTime = performance.now();
 
-		const { poster } = item;
-
-		const additionalData: Record< string, unknown > = {
-			...item.additionalData,
-			meta: {
-				...( item.additionalData.meta || {} ),
-				mexp_original_id: item.sourceAttachmentId || undefined,
-			},
-		};
-
 		const timing: MeasureOptions = {
 			measureName: `Upload item ${ item.file.name }`,
 			startTime,
@@ -1782,7 +1772,7 @@ export function uploadItem( id: QueueItemId ) {
 
 		select.getSettings().mediaUpload( {
 			filesList: [ item.file ],
-			additionalData,
+			additionalData: item.additionalData,
 			signal: item.abortController?.signal,
 			onFileChange: ( [ attachment ] ) => {
 				// TODO: Get the poster URL from the ID if one exists already.
@@ -1797,8 +1787,8 @@ export function uploadItem( id: QueueItemId ) {
 					*/
 					if ( item.attachment?.poster ) {
 						attachment.poster = item.attachment.poster;
-					} else if ( poster ) {
-						attachment.poster = createBlobURL( poster );
+					} else if ( item.poster ) {
+						attachment.poster = createBlobURL( item.poster );
 
 						dispatch< CacheBlobUrlAction >( {
 							type: Type.CacheBlobUrl,

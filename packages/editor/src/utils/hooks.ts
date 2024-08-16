@@ -11,7 +11,6 @@ import {
 	type Settings,
 	store as coreStore,
 	useEntityProp,
-	useEntityRecord,
 	useEntityRecords,
 } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -23,19 +22,6 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
  * Internal dependencies
  */
 import type { BulkOptimizationAttachmentData } from '../types';
-
-export function useAttachment( id?: number ) {
-	const { record } = useEntityRecord( 'postType', 'attachment', id || 0 );
-	return record as RestAttachment | null;
-}
-
-export function useIsUploadingById( id?: number ) {
-	return useSelect(
-		( select ) =>
-			id ? select( uploadStore ).isUploadingById( id ) : false,
-		[ id ]
-	);
-}
 
 export function useIsUploadingByUrl( url?: string ) {
 	return useSelect(
@@ -54,6 +40,17 @@ export function useIsUploadingByUrl( url?: string ) {
 
 const EMPTY_ARRAY: never[] = [];
 
+/**
+ * For a list of attachment objects, enriches them with server-side data.
+ *
+ * Since the number of items in the list can change, this uses
+ * `__experimentalGetEntityRecordNoResolver()` in addition to `useEntityRecords`
+ * to avoid unnecessary HTTP requests when all the individual items have been
+ * previously fetched already.
+ *
+ * @param attachments List of attachments.
+ * @param enabled     Whether to actually send requests.
+ */
 function useAttachmentsWithEntityRecords(
 	attachments: Partial< BulkOptimizationAttachmentData >[],
 	enabled = true
@@ -100,33 +97,47 @@ function useAttachmentsWithEntityRecords(
 		return EMPTY_ARRAY;
 	}
 
-	return attachments.map( ( attachment ) => {
-		const media =
-			records?.find( ( record ) => record.id === attachment.id ) ||
-			cachedRecords.find( ( record ) => record.id === attachment.id );
+	// Add server-side data but remove the ones not found on the server anymore.
+	return attachments
+		.map( ( attachment ) => {
+			const media =
+				records?.find( ( record ) => record.id === attachment.id ) ||
+				cachedRecords.find( ( record ) => record.id === attachment.id );
 
-		if ( media ) {
-			// Always use the full URL, in case the block uses a sub-size.
-			attachment.url = media.source_url;
+			if ( media ) {
+				// Always use the full URL, in case the block uses a sub-size.
+				attachment.url = media.source_url;
 
-			if ( media.mexp_filesize ) {
-				attachment.filesize = media.mexp_filesize;
+				// Always use the original ID and URL in case this image is already an optimized version.
+				if ( media.mexp_original_url ) {
+					attachment.url = media.mexp_original_url;
+				}
+
+				if ( media.mexp_filesize ) {
+					attachment.filesize = media.mexp_filesize;
+				}
+
+				if ( media.mexp_filename ) {
+					attachment.filename = media.mexp_filename;
+				}
+
+				attachment.additionalData = {
+					meta: {
+						mexp_original_id:
+							media.meta.mexp_original_id || attachment.id,
+						mexp_blurhash: media.mexp_blurhash || undefined,
+						mexp_dominant_color:
+							media.mexp_dominant_color || undefined,
+						featured_media:
+							media.meta.mexp_generated_poster_id || undefined,
+					},
+				};
+
+				return attachment as BulkOptimizationAttachmentData;
 			}
-
-			if ( media.mexp_filename ) {
-				attachment.filename = media.mexp_filename;
-			}
-
-			attachment.additionalData = {
-				mexp_blurhash: media.mexp_blurhash || undefined,
-				mexp_dominant_color: media.mexp_dominant_color || undefined,
-				featured_media:
-					media.meta.mexp_generated_poster_id || undefined,
-			};
-		}
-
-		return attachment as BulkOptimizationAttachmentData;
-	} );
+			return undefined;
+		} )
+		.filter( ( attachment ) => attachment !== undefined );
 }
 
 export function useBlockAttachments( clientId?: string ) {

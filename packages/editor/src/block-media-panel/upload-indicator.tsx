@@ -1,14 +1,20 @@
 /**
+ * External dependencies
+ */
+import { store as uploadStore } from '@mexp/upload-media';
+
+/**
  * WordPress dependencies
  */
 import { isBlobURL } from '@wordpress/blob';
 import { Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { useIsUploadingById, useIsUploadingByUrl } from '../utils/hooks';
+import { useIsUploadingByUrl } from '../utils/hooks';
 
 interface UploadIndicatorProps {
 	id: number;
@@ -17,7 +23,11 @@ interface UploadIndicatorProps {
 }
 
 export function UploadIndicator( { id, url, poster }: UploadIndicatorProps ) {
-	const isUploadingById = useIsUploadingById( id );
+	const isUploadingById = useSelect(
+		( select ) =>
+			id ? select( uploadStore ).isUploadingById( id ) : false,
+		[ id ]
+	);
 	const isUploadingByUrl = useIsUploadingByUrl( url );
 	const isPosterUploadingByUrl = useIsUploadingByUrl( poster );
 	const isUploading = isUploadingById || isUploadingByUrl;
