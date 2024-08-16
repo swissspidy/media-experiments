@@ -136,6 +136,7 @@ export type BulkOptimizationAttachmentData = {
 	filesize: number | null;
 	filename: string | null;
 	onChange: ( media: Partial< Attachment > ) => void;
+	additionalData?: Record< string, unknown >;
 };
 
 export type MediaPreferences = {

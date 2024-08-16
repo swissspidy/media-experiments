@@ -511,6 +511,7 @@ export function optimizeExistingItem( {
 						{ url, fileName, newFileName },
 					],
 					[ OperationType.Compress, { requireApproval } ],
+					OperationType.GenerateMetadata,
 					OperationType.Upload,
 					OperationType.ThumbnailGeneration,
 				],
