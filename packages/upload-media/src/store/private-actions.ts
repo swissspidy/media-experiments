@@ -829,6 +829,7 @@ export function prepareItem( id: QueueItemId ) {
 				}
 
 				operations.push(
+					OperationType.GenerateMetadata,
 					OperationType.GenerateCaptions,
 					OperationType.Upload,
 					OperationType.ThumbnailGeneration
