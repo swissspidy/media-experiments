@@ -265,7 +265,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 				}
 
 				if ( ! isset( $request['alt_text'] ) ) {
-					$request['alt_text'] = 	get_post_meta( $original_id, '_wp_attachment_image_alt', true );
+					$request['alt_text'] = get_post_meta( $original_id, '_wp_attachment_image_alt', true );
 				}
 			}
 		}
