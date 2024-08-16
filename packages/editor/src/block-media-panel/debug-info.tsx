@@ -3,6 +3,7 @@
  */
 import { Blurhash } from 'react-blurhash';
 import type { PropsWithChildren } from 'react';
+import type { RestAttachment } from '@mexp/media-utils';
 
 /**
  * WordPress dependencies
@@ -18,11 +19,7 @@ import {
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { Component, createInterpolateElement } from '@wordpress/element';
-
-/**
- * Internal dependencies
- */
-import { useAttachment } from '../utils/hooks';
+import { useEntityRecord } from '@wordpress/core-data';
 
 interface DebugInfoProps {
 	id: number;
@@ -70,7 +67,11 @@ class HideOnError extends Component< PropsWithChildren< {} > > {
 export function DebugInfo( { id }: DebugInfoProps ) {
 	const { baseControlProps, controlProps } = useBaseControlProps( {} );
 
-	const attachment = useAttachment( id );
+	const { record: attachment } = useEntityRecord< RestAttachment | null >(
+		'postType',
+		'attachment',
+		id
+	);
 
 	if ( ! attachment ) {
 		return null;

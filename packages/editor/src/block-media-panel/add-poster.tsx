@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { store as uploadStore } from '@mexp/upload-media';
+import type { RestAttachment } from '@mexp/media-utils';
 
 /**
  * WordPress dependencies
@@ -15,12 +16,13 @@ import { useEffect, useState } from '@wordpress/element';
 import { isBlobURL } from '@wordpress/blob';
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
+import { useEntityRecord } from '@wordpress/core-data';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
  */
-import { useAttachment, useIsUploadingByUrl } from '../utils/hooks';
+import { useIsUploadingByUrl } from '../utils/hooks';
 
 interface AddPosterProps {
 	attributes: {
@@ -36,8 +38,17 @@ export function AddPoster( { attributes, setAttributes }: AddPosterProps ) {
 
 	const [ posterId, setPosterId ] = useState< number | undefined >();
 
-	const attachment = useAttachment( attributes.id );
-	const poster = useAttachment( posterId );
+	const { record: attachment } = useEntityRecord< RestAttachment | null >(
+		'postType',
+		'attachment',
+		attributes.id || 0
+	);
+
+	const { record: poster } = useEntityRecord< RestAttachment | null >(
+		'postType',
+		'attachment',
+		posterId || 0
+	);
 
 	const { addPosterForExistingVideo } = useDispatch( uploadStore );
 

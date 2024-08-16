@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Attachment } from '@mexp/media-utils';
+import type { Attachment, RestAttachment } from '@mexp/media-utils';
 import { store as uploadStore } from '@mexp/upload-media';
 
 /**
@@ -15,11 +15,12 @@ import {
 	useBaseControlProps,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { useEntityRecord } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
  */
-import { useAttachment, useIsUploadingByUrl } from '../utils/hooks';
+import { useIsUploadingByUrl } from '../utils/hooks';
 
 interface MuteVideoProps {
 	id: number;
@@ -31,7 +32,11 @@ interface MuteVideoProps {
 export function MuteVideo( { id, url, poster, onChange }: MuteVideoProps ) {
 	const { baseControlProps, controlProps } = useBaseControlProps( {} );
 
-	const post = useAttachment( id );
+	const { record: post } = useEntityRecord< RestAttachment | null >(
+		'postType',
+		'attachment',
+		id
+	);
 
 	const isUploading = useIsUploadingByUrl( url ) || isBlobURL( url );
 

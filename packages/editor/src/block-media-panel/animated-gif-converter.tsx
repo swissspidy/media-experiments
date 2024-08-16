@@ -1,15 +1,16 @@
 /**
+ * External dependencies
+ */
+import type { RestAttachment } from '@mexp/media-utils';
+
+/**
  * WordPress dependencies
  */
 import { useEffect } from '@wordpress/element';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { createBlock } from '@wordpress/blocks';
 import { useDispatch } from '@wordpress/data';
-
-/**
- * Internal dependencies
- */
-import { useAttachment } from '../utils/hooks';
+import { useEntityRecord } from '@wordpress/core-data';
 
 interface AnimatedGifDetectorProps {
 	id: number;
@@ -25,7 +26,11 @@ export function AnimatedGifConverter( {
 	caption,
 	clientId,
 }: AnimatedGifDetectorProps ) {
-	const attachment = useAttachment( id );
+	const { record: attachment } = useEntityRecord< RestAttachment | null >(
+		'postType',
+		'attachment',
+		id
+	);
 
 	const isVideo = attachment?.mime_type.startsWith( 'video/' );
 

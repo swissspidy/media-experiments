@@ -11,7 +11,6 @@ import {
 	type Settings,
 	store as coreStore,
 	useEntityProp,
-	useEntityRecord,
 	useEntityRecords,
 } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -23,19 +22,6 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
  * Internal dependencies
  */
 import type { BulkOptimizationAttachmentData } from '../types';
-
-export function useAttachment( id?: number ) {
-	const { record } = useEntityRecord( 'postType', 'attachment', id || 0 );
-	return record as RestAttachment | null;
-}
-
-export function useIsUploadingById( id?: number ) {
-	return useSelect(
-		( select ) =>
-			id ? select( uploadStore ).isUploadingById( id ) : false,
-		[ id ]
-	);
-}
 
 export function useIsUploadingByUrl( url?: string ) {
 	return useSelect(
