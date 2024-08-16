@@ -473,6 +473,19 @@ function register_rest_fields(): void {
 			'get_callback' => __NAMESPACE__ . '\rest_get_attachment_has_transparency',
 		]
 	);
+
+	register_rest_field(
+		'attachment',
+		'mexp_original_url',
+		[
+			'schema'       => [
+				'description' => __( 'URL of the original file if this is an optimized one', 'media-experiments' ),
+				'type'        => 'boolean',
+				'context'     => [ 'view', 'edit' ],
+			],
+			'get_callback' => __NAMESPACE__ . '\rest_get_attachment_original_file',
+		]
+	);
 }
 
 /**
@@ -574,6 +587,24 @@ function rest_get_attachment_is_muted( array $post ): bool {
 function rest_get_attachment_has_transparency( array $post ): ?bool {
 	$meta = wp_get_attachment_metadata( $post['id'] );
 	return isset( $meta['has_transparency'] ) ? (bool) $meta['has_transparency'] : null;
+}
+
+/**
+ * Returns the URL of the original file if this is an optimized one
+ *
+ * @param array $post Post data.
+ * @return string|null Original URL if applicable.
+ */
+function rest_get_attachment_original_file( array $post ): ?string {
+	$original_id = get_post_meta( $post['id'], 'mexp_original_id', true );
+
+	if ( empty( $original_id ) ) {
+		return null;
+	}
+
+	$original_url = wp_get_attachment_url( $original_id );
+
+	return $original_url ? $original_url : null;
 }
 
 /**
