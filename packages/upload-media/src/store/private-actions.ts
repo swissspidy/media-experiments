@@ -131,6 +131,7 @@ type ActionCreators = {
 	fetchRemoteFile: typeof fetchRemoteFile;
 	generateVideoSubtitles: typeof generateVideoSubtitles;
 	generateImageCaptions: typeof generateImageCaptions;
+	generateMetadata: typeof generateMetadata;
 	< T = Record< string, unknown > >( args: T ): void;
 };
 
@@ -484,6 +485,10 @@ export function processItem( id: QueueItemId ) {
 				dispatch.addPosterForItem( item.id );
 				break;
 
+			case OperationType.GenerateMetadata:
+				dispatch.generateMetadata( item.id );
+				break;
+
 			case OperationType.Upload:
 				if ( item.parentId ) {
 					dispatch.sideloadItem( id );
@@ -783,6 +788,7 @@ export function prepareItem( id: QueueItemId ) {
 					operations.push(
 						OperationType.TranscodeGif,
 						OperationType.AddPoster,
+						OperationType.GenerateMetadata,
 						OperationType.Upload,
 						// Try poster generation again *after* upload if it's still missing.
 						OperationType.AddPoster,
@@ -859,6 +865,7 @@ export function prepareItem( id: QueueItemId ) {
 				}
 
 				operations.push(
+					OperationType.GenerateMetadata,
 					OperationType.Upload,
 					// Try poster generation again *after* upload if it's still missing.
 					OperationType.AddPoster,
@@ -882,6 +889,7 @@ export function prepareItem( id: QueueItemId ) {
 			case 'pdf':
 				operations.push(
 					OperationType.AddPoster,
+					OperationType.GenerateMetadata,
 					OperationType.Upload,
 					OperationType.ThumbnailGeneration
 				);
@@ -1771,98 +1779,6 @@ export function uploadItem( id: QueueItemId ) {
 			featured_media: item.generatedPosterId || undefined,
 		};
 
-		let stillUrl =
-			'application/pdf' === item.file.type ||
-			item.file.type.startsWith( 'video/' )
-				? item.attachment?.poster
-				: item.attachment?.url;
-
-		// Freshly converted GIF.
-		if (
-			! stillUrl &&
-			item.file.type.startsWith( 'video/' ) &&
-			item.sourceFile.type.startsWith( 'image/' )
-		) {
-			stillUrl = createBlobURL( item.sourceFile );
-
-			dispatch< CacheBlobUrlAction >( {
-				type: Type.CacheBlobUrl,
-				id,
-				blobUrl: stillUrl,
-			} );
-		}
-
-		// TODO: Make this async after upload?
-		// Could be made reusable to enable back-filling of existing blocks.
-		if (
-			typeof additionalData.mexp_is_muted === 'undefined' &&
-			item.file.type.startsWith( 'video/' )
-		) {
-			try {
-				const hasAudio =
-					item.attachment?.url &&
-					( await videoHasAudio( item.attachment.url ) );
-				additionalData.mexp_is_muted = ! hasAudio;
-			} catch {
-				// No big deal if this fails, we can still continue uploading.
-			}
-		}
-
-		if (
-			! additionalData.mexp_dominant_color &&
-			stillUrl &&
-			( item.file.type.startsWith( 'video/' ) ||
-				item.file.type.startsWith( 'image/' ) ||
-				'application/pdf' === item.file.type )
-		) {
-			// TODO: Make this async after upload?
-			// Could be made reusable to enable backfilling of existing blocks.
-			// TODO: Create a scaled-down version of the image first for performance reasons.
-			try {
-				additionalData.mexp_dominant_color =
-					await dominantColorWorker.getDominantColor( stillUrl );
-			} catch ( err ) {
-				// No big deal if this fails, we can still continue uploading.
-				// TODO: Debug & catch & throw.
-			}
-		}
-
-		if (
-			item.file.type.startsWith( 'image/' ) &&
-			stillUrl &&
-			window.crossOriginIsolated
-		) {
-			// TODO: Make this async after upload?
-			// Could be made reusable to enable backfilling of existing blocks.
-			// TODO: Create a scaled-down version of the image first for performance reasons.
-			try {
-				additionalData.mexp_has_transparency =
-					await vipsHasTransparency( stillUrl );
-			} catch ( err ) {
-				// No big deal if this fails, we can still continue uploading.
-				// TODO: Debug & catch & throw.
-			}
-		}
-
-		if (
-			! additionalData.mexp_blurhash &&
-			stillUrl &&
-			( item.file.type.startsWith( 'video/' ) ||
-				item.file.type.startsWith( 'image/' ) ||
-				'application/pdf' === item.file.type )
-		) {
-			// TODO: Make this async after upload?
-			// Could be made reusable to enable backfilling of existing blocks.
-			// TODO: Create a scaled-down version of the image first for performance reasons.
-			try {
-				additionalData.mexp_blurhash =
-					await blurhashWorker.getBlurHash( stillUrl );
-			} catch ( err ) {
-				// No big deal if this fails, we can still continue uploading.
-				// TODO: Debug & catch & throw.
-			}
-		}
-
 		const timing: MeasureOptions = {
 			measureName: `Upload item ${ item.file.name }`,
 			startTime,
@@ -2092,6 +2008,105 @@ export function generateImageCaptions( id: QueueItemId ) {
 			// No big deal if captions could not be generated, just proceed normally.
 			dispatch.finishOperation( id, {} );
 		}
+	};
+}
+
+/**
+ * Generates additional metadata like the dominant color for every item.
+ *
+ * @param id Item ID.
+ */
+export function generateMetadata( id: QueueItemId ) {
+	return async ( { select, dispatch }: ThunkArgs ) => {
+		const item = select.getItem( id ) as QueueItem;
+
+		const additionalData: AdditionalData = {};
+
+		if (
+			typeof additionalData.mexp_is_muted === 'undefined' &&
+			item.file.type.startsWith( 'video/' )
+		) {
+			try {
+				const hasAudio =
+					item.attachment?.url &&
+					( await videoHasAudio( item.attachment.url ) );
+				additionalData.mexp_is_muted = ! hasAudio;
+			} catch {
+				// No big deal if this fails, we can still continue uploading.
+			}
+		}
+
+		// TODO: Create a scaled-down version of the image first for performance reasons.
+		let stillUrl =
+			'application/pdf' === item.file.type ||
+			item.file.type.startsWith( 'video/' )
+				? item.attachment?.poster
+				: item.attachment?.url;
+
+		// Freshly converted GIF.
+		if (
+			! stillUrl &&
+			item.file.type.startsWith( 'video/' ) &&
+			item.sourceFile.type.startsWith( 'image/' )
+		) {
+			stillUrl = createBlobURL( item.sourceFile );
+
+			dispatch< CacheBlobUrlAction >( {
+				type: Type.CacheBlobUrl,
+				id,
+				blobUrl: stillUrl,
+			} );
+		}
+
+		if (
+			! additionalData.mexp_dominant_color &&
+			stillUrl &&
+			( item.file.type.startsWith( 'video/' ) ||
+				item.file.type.startsWith( 'image/' ) ||
+				'application/pdf' === item.file.type )
+		) {
+			try {
+				additionalData.mexp_dominant_color =
+					await dominantColorWorker.getDominantColor( stillUrl );
+			} catch ( err ) {
+				// No big deal if this fails, we can still continue uploading.
+				// TODO: Debug & catch & throw.
+			}
+		}
+
+		if (
+			item.file.type.startsWith( 'image/' ) &&
+			stillUrl &&
+			window.crossOriginIsolated
+		) {
+			try {
+				additionalData.mexp_has_transparency =
+					await vipsHasTransparency( stillUrl );
+			} catch ( err ) {
+				// No big deal if this fails, we can still continue uploading.
+				// TODO: Debug & catch & throw.
+			}
+		}
+
+		if (
+			! additionalData.mexp_blurhash &&
+			stillUrl &&
+			( item.file.type.startsWith( 'video/' ) ||
+				item.file.type.startsWith( 'image/' ) ||
+				'application/pdf' === item.file.type )
+		) {
+			try {
+				additionalData.mexp_blurhash =
+					await blurhashWorker.getBlurHash( stillUrl );
+			} catch ( err ) {
+				// No big deal if this fails, we can still continue uploading.
+				// TODO: Debug & catch & throw.
+			}
+		}
+
+		dispatch.finishOperation( id, {
+			additionalData,
+		} );
 	};
 }
 
