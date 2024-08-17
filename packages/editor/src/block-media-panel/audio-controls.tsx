@@ -76,6 +76,7 @@ export function AudioControls( props: AudioControlsProps ) {
 				<ImportMedia
 					url={ props.attributes.src }
 					onChange={ onImportMedia }
+					allowedTypes={ [ 'audio' ] }
 				/>
 			) : null }
 			<DebugInfo id={ props.attributes.id } />

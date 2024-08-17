@@ -102,6 +102,7 @@ export function ImageControls( props: ImageControlsProps ) {
 				<ImportMedia
 					url={ props.attributes.url }
 					onChange={ onImportMedia }
+					allowedTypes={ [ 'image' ] }
 				/>
 			) : null }
 			<BulkOptimization attachments={ attachments } />

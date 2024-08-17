@@ -29,6 +29,7 @@ import {
 	isHeifImage,
 	renameFile,
 	videoHasAudio,
+	validateMimeType,
 } from '../utils';
 import { PREFERENCES_NAME } from '../constants';
 import { StubFile } from '../stub-file';
@@ -1853,6 +1854,8 @@ export function fetchRemoteFile( id: QueueItemId, args: FetchRemoteFileArgs ) {
 
 		try {
 			const sourceFile = await fetchFile( args.url, args.fileName );
+
+			validateMimeType( sourceFile, args.allowedTypes );
 
 			if ( args.skipAttachment ) {
 				dispatch.finishOperation( id, {

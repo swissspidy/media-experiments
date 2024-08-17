@@ -93,6 +93,7 @@ export function VideoControls( props: VideoControlsProps ) {
 				<ImportMedia
 					url={ props.attributes.src }
 					onChange={ onImportMedia }
+					allowedTypes={ [ 'video' ] }
 				/>
 			) : null }
 			<MuteVideo

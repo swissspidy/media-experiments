@@ -225,6 +225,7 @@ export type OperationArgs = {
 		fileName: string;
 		newFileName?: string;
 		skipAttachment?: boolean;
+		allowedTypes?: string[];
 	};
 	[ OperationType.TranscodeImage ]: {
 		requireApproval?: boolean;

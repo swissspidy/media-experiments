@@ -25,9 +25,10 @@ import { useIsUploadingByUrl, useMediaSourceTerms } from '../utils/hooks';
 interface ImportMediaProps {
 	url?: string;
 	onChange: ( attachment: Partial< Attachment > ) => void;
+	allowedTypes?: string[];
 }
 
-export function ImportMedia( { url, onChange }: ImportMediaProps ) {
+export function ImportMedia( { url, onChange, allowedTypes }: ImportMediaProps ) {
 	const { baseControlProps, controlProps } = useBaseControlProps( {} );
 
 	const { addItemFromUrl } = useDispatch( uploadStore );
@@ -62,6 +63,7 @@ export function ImportMedia( { url, onChange }: ImportMediaProps ) {
 			additionalData: {
 				mexp_media_source: mediaSourceTerms[ 'subtitles-generation' ],
 			},
+			allowedTypes,
 		} );
 	};
 
