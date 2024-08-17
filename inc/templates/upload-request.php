@@ -46,6 +46,11 @@ if ( $post instanceof WP_Post ) {
 		$max_upload_size = 0;
 	}
 
+	$post_title = get_the_title( $mexp_request_parent );
+	if ( empty( $post_title ) ) {
+		$post_title = __( '(no title)', 'media-experiments' );
+	}
+
 	add_filter(
 		'upload_mimes',
 		/**
@@ -93,11 +98,6 @@ if ( $post instanceof WP_Post ) {
 
 	$wp_styles = wp_styles();
 	$wp_styles->do_items( [ 'media-experiments-view-upload-request' ] );
-
-	$post_title = get_the_title( $mexp_request_parent );
-	if ( empty( $post_title ) ) {
-		$post_title = __( '(no title)', 'media-experiments' );
-	}
 	?>
 	<style>
 		.single-mexp-upload-request .outer-wrap h1 a {
