@@ -92,6 +92,11 @@ if ( $post instanceof WP_Post ) {
 
 	$wp_styles = wp_styles();
 	$wp_styles->do_items( [ 'media-experiments-view-upload-request' ] );
+
+	$post_title = get_the_title( $mexp_request_parent );
+	if ( empty( $post_title ) ) {
+		$post_title = __( '(no title)', 'media-experiments' );
+	}
 	?>
 	<style>
 		.single-mexp-upload-request .outer-wrap h1 a {
@@ -121,14 +126,14 @@ wp_print_inline_script_tag( "document.body.className = document.body.className.r
 						__( '%1$s would like you to upload files to their post <a href="%2$s">%3$s</a>. Please choose files below.', 'media-experiments' ),
 						get_the_author(),
 						esc_url( $mexp_request_parent_url ),
-						get_the_title( $mexp_request_parent ),
+						$post_title,
 					);
 				} else {
 					printf(
 						/* translators: 1: author name. 2: post title */
 						__( '%1$s would like you to upload files to their post "%2$s". Please choose files below.', 'media-experiments' ),
 						get_the_author(),
-						get_the_title( $mexp_request_parent ),
+						$post_title,
 					);
 				}
 			} else {
@@ -144,14 +149,14 @@ wp_print_inline_script_tag( "document.body.className = document.body.className.r
 						__( '%1$s would like you to upload a file to their post <a href="%2$s">%3$s</a>. Please choose a file below.', 'media-experiments' ),
 						get_the_author(),
 						esc_url( $mexp_request_parent_url ),
-						get_the_title( $mexp_request_parent ),
+						$post_title,
 					);
 				} else {
 					printf(
 						/* translators: 1: author name. 2: post title */
 						__( '%1$s would like you to upload a file to their post "%2$s". Please choose a file below.', 'media-experiments' ),
 						get_the_author(),
-						get_the_title( $mexp_request_parent ),
+						$post_title,
 					);
 				}
 			}
