@@ -22,7 +22,7 @@ import { useLayoutEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { useIsUploadingByUrl } from '../utils/hooks';
+import { useIsUploadingByUrl, useMediaSourceTerms } from '../utils/hooks';
 import type { VideoBlock } from '../types';
 
 type GenerateSubtitlesProps = VideoBlock &
@@ -42,6 +42,8 @@ export function GenerateSubtitles( {
 
 	const url = attributes.src;
 	const isUploading = useIsUploadingByUrl( url ) || isBlobURL( url );
+
+	const mediaSourceTerms = useMediaSourceTerms();
 
 	const { addSubtitlesForExistingVideo } = useDispatch( uploadStore );
 
@@ -95,10 +97,7 @@ export function GenerateSubtitles( {
 					],
 				} ),
 			additionalData: {
-				mexp_media_source:
-					window.mediaExperiments.mediaSourceTerms[
-						'subtitles-generation'
-					],
+				mexp_media_source: mediaSourceTerms[ 'subtitles-generation' ],
 			},
 		} );
 	};

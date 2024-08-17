@@ -20,6 +20,7 @@ add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_block_edito
 add_action( 'enqueue_block_assets', __NAMESPACE__ . '\enqueue_block_assets' );
 add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_fields' );
 add_action( 'init', __NAMESPACE__ . '\register_attachment_post_meta' );
+add_filter( 'rest_index', __NAMESPACE__ . '\filter_rest_index', 10, 2 );
 
 add_filter( 'mod_rewrite_rules', __NAMESPACE__ . '\filter_mod_rewrite_rules' );
 

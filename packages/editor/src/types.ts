@@ -8,6 +8,7 @@ import type {
 	ImageLibrary,
 	ThumbnailGeneration,
 	VideoFormat,
+	ImageSizeCrop,
 } from '@mexp/upload-media';
 
 /**
@@ -76,6 +77,7 @@ export type SiteLogoBlock = BlockInstance< {
 } > & {
 	name: 'core/site-logo';
 };
+
 export type EmbedBlock = BlockInstance< {
 	url: string;
 	providerNameSlug: string;
@@ -129,6 +131,35 @@ export type MediaPanelProps =
 				BlockEditProps< EmbedBlock[ 'attributes' ] >,
 				'setAttributes' | 'className'
 			> );
+
+// Keep in sync with PHP.
+export type MediaSourceTerm =
+	| 'media-optimization'
+	| 'poster-generation'
+	| 'media-import'
+	| 'gif-conversion'
+	| 'subtitles-generation';
+
+export type RestBaseRecord = {
+	description: string;
+	gmt_offset: number;
+	home: string;
+	name: string;
+	site_icon: number;
+	site_icon_url: string | false;
+	site_logo: number;
+	timezone_string: string;
+	url: string;
+	// The following ones are added by Media Experiments.
+	image_size_threshold: number;
+	video_size_threshold: number;
+	image_output_formats: Record< string, string >;
+	jpeg_interlaced: boolean;
+	png_interlaced: boolean;
+	gif_interlaced: boolean;
+	image_sizes: Record< string, ImageSizeCrop >;
+	media_source_terms: Record< MediaSourceTerm, number >;
+};
 
 export type BulkOptimizationAttachmentData = {
 	id: number;

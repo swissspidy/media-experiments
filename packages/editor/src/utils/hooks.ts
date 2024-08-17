@@ -21,7 +21,11 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 /**
  * Internal dependencies
  */
-import type { BulkOptimizationAttachmentData } from '../types';
+import type {
+	BulkOptimizationAttachmentData,
+	MediaSourceTerm,
+	RestBaseRecord,
+} from '../types';
 
 export function useIsUploadingByUrl( url?: string ) {
 	return useSelect(
@@ -36,6 +40,25 @@ export function useIsUploadingByUrl( url?: string ) {
 		},
 		[ url ]
 	);
+}
+
+const EMPTY_OBJECT = {} as Record< MediaSourceTerm, number >;
+
+export function useMediaSourceTerms() {
+	return useSelect( ( select ) => {
+		const siteData = select( coreStore ).getEntityRecord<
+			// @ts-ignore
+			RestBaseRecord | undefined
+		>( 'root', '__unstableBase', undefined, {
+			_fields: [ 'media_source_terms' ],
+		} );
+
+		if ( ! siteData ) {
+			return EMPTY_OBJECT;
+		}
+
+		return siteData.media_source_terms;
+	}, [] );
 }
 
 const EMPTY_ARRAY: never[] = [];

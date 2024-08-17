@@ -22,7 +22,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import { useIsUploadingByUrl } from '../utils/hooks';
+import { useIsUploadingByUrl, useMediaSourceTerms } from '../utils/hooks';
 
 interface AddPosterProps {
 	attributes: {
@@ -66,6 +66,8 @@ export function AddPoster( { attributes, setAttributes }: AddPosterProps ) {
 	const url = attributes.src;
 	const isUploading = useIsUploadingByUrl( url ) || isBlobURL( url );
 
+	const mediaSourceTerms = useMediaSourceTerms();
+
 	if ( ! attachment || ( attributes.poster && ! isUploading ) ) {
 		return null;
 	}
@@ -102,10 +104,7 @@ export function AddPoster( { attributes, setAttributes }: AddPosterProps ) {
 				} );
 			},
 			additionalData: {
-				mexp_media_source:
-					window.mediaExperiments.mediaSourceTerms[
-						'poster-generation'
-					],
+				mexp_media_source: mediaSourceTerms[ 'poster-generation' ],
 			},
 		} );
 	};

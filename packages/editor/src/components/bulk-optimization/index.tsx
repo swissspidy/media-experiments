@@ -28,6 +28,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { filterURLForDisplay } from '@wordpress/url';
 import { store as noticesStore } from '@wordpress/notices';
 import apiFetch from '@wordpress/api-fetch';
+import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -37,7 +38,7 @@ import { ReactComponent as CompressIcon } from '../../icons/compress.svg';
 import { ApprovalDialog } from '../approval-dialog';
 
 import './editor.css';
-import { useState } from '@wordpress/element';
+import { useMediaSourceTerms } from '../../utils/hooks';
 
 const numberFormatter = Intl.NumberFormat( 'en', {
 	notation: 'compact',
@@ -55,6 +56,8 @@ function Row(
 	const { optimizeExistingItem } = useDispatch( uploadStore );
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( noticesStore );
+
+	const mediaSourceTerms = useMediaSourceTerms();
 
 	const { isUploading } = useSelect(
 		( select ) => ( {
@@ -105,10 +108,7 @@ function Row(
 			},
 			additionalData: {
 				...props.additionalData,
-				mexp_media_source:
-					window.mediaExperiments.mediaSourceTerms[
-						'media-optimization'
-					],
+				mexp_media_source: mediaSourceTerms[ 'media-optimization' ],
 			},
 			startTime: evt.timeStamp,
 		} );
@@ -172,6 +172,8 @@ function CompressAll( props: {
 		} ),
 		[]
 	);
+
+	const mediaSourceTerms = useMediaSourceTerms();
 
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( noticesStore );
@@ -239,10 +241,7 @@ function CompressAll( props: {
 				},
 				additionalData: {
 					...attachment.additionalData,
-					mexp_media_source:
-						window.mediaExperiments.mediaSourceTerms[
-							'media-optimization'
-						],
+					mexp_media_source: mediaSourceTerms[ 'media-optimization' ],
 				},
 				startTime: evt.timeStamp,
 			} );

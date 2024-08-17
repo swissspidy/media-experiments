@@ -56,6 +56,8 @@ export function ImageControls( props: ImageControlsProps ) {
 		props.setAttributes( {
 			id: media.id,
 			url: media.url,
+			caption: media.caption,
+			alt: media.alt,
 		} );
 	}
 
