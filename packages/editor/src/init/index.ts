@@ -4,106 +4,35 @@
 import {
 	uploadMedia as originalUploadMedia,
 	sideloadMedia as originalSideloadMedia,
-	validateFileSize,
-	validateMimeType,
-	validateMimeTypeForUser,
 } from '@mexp/media-utils';
-import { store as uploadStore } from '@mexp/upload-media';
+import { type ImageFormat, store as uploadStore } from '@mexp/upload-media';
 
 /**
  * WordPress dependencies
  */
-import { dispatch, select, subscribe } from '@wordpress/data';
+import {
+	dispatch as globalDispatch,
+	dispatch,
+	select,
+	subscribe,
+} from '@wordpress/data';
+import { store as coreStore } from '@wordpress/core-data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as editorStore } from '@wordpress/editor';
+import { store as preferencesStore } from '@wordpress/preferences';
+
+/**
+ * Internal dependencies
+ */
+import { PREFERENCES_NAME } from '../preferences-modal/constants';
+import type { MediaPreferences, RestBaseRecord } from '../types';
+import {
+	editorUploadMedia,
+	editorValidateFileSize,
+	editorValidateMimeType,
+} from './media-utils';
 
 const noop = () => {};
-
-/**
- * Upload a media file when the file upload button is activated
- * or when adding a file to the editor via drag & drop.
- *
- * Similar to the mediaUpload() function from `@wordpress/editor`,
- * this is a wrapper around uploadMedia() from `@mexp/media-utils`
- * that injects the current post ID.
- *
- * @param $0                   Parameters object passed to the function.
- * @param $0.allowedTypes      Array with the types of media that can be uploaded, if unset all types are allowed.
- * @param $0.additionalData    Additional data to include in the request.
- * @param $0.filesList         List of files.
- * @param $0.maxUploadFileSize Maximum upload size in bytes allowed for the site.
- * @param $0.onError           Function called when an error happens.
- * @param $0.onFileChange      Function called each time a file or a temporary representation of the file is available.
- * @param $0.signal            Abort signal.
- */
-function editorUploadMedia( {
-	allowedTypes,
-	additionalData = {},
-	filesList,
-	maxUploadFileSize,
-	onError = noop,
-	onFileChange,
-	signal,
-}: Parameters< typeof originalUploadMedia >[ 0 ] ) {
-	const { getCurrentPost, getEditorSettings } = select( editorStore );
-	const wpAllowedMimeTypes = getEditorSettings().allowedMimeTypes;
-	maxUploadFileSize =
-		maxUploadFileSize || getEditorSettings().maxUploadFileSize;
-
-	const currentPost = getCurrentPost();
-	// Templates and template parts' numerical ID is stored in `wp_id`.
-	const currentPostId =
-		currentPost && 'wp_id' in currentPost
-			? currentPost.wp_id
-			: currentPost?.id;
-	const postData = currentPostId ? { post: currentPostId } : {};
-
-	originalUploadMedia( {
-		allowedTypes,
-		filesList,
-		onFileChange,
-		additionalData: {
-			...postData,
-			...additionalData,
-		},
-		maxUploadFileSize,
-		onError,
-		wpAllowedMimeTypes,
-		signal,
-	} );
-}
-
-/**
- * Verifies whether the file is within the file upload size limits for the site.
- *
- * Intended to live in `@wordpress/editor` as a wrapper around
- * validateFileSize() from `@mexp/media-utils`
- * that injects the current site's file size limit.
- *
- * @param file File object.
- */
-function editorValidateFileSize( file: File ) {
-	const { getEditorSettings } = select( editorStore );
-	return validateFileSize( file, getEditorSettings().maxUploadFileSize );
-}
-
-/**
- * Verifies if the caller (e.g. a block) supports this mime type.
- *
- * Intended to live in `@wordpress/editor` as a wrapper around
- * validateMimeType() and validateMimeTypeForUser() from `@mexp/media-utils`
- * that injects the current site's mime type limits.
- *
- * @param file         File object.
- * @param allowedTypes Array with the types of media that can be uploaded, if unset all types are allowed.
- */
-function editorValidateMimeType( file: File, allowedTypes?: string[] ) {
-	const { getEditorSettings } = select( editorStore );
-	const wpAllowedMimeTypes = getEditorSettings().allowedMimeTypes;
-
-	validateMimeTypeForUser( file, wpAllowedMimeTypes );
-	validateMimeType( file, allowedTypes );
-}
 
 /**
  * Upload a media file when the file upload button is activated
@@ -179,15 +108,101 @@ export default function blockEditorUploadMedia( {
 	} );
 }
 
+function getExtension( mimeType: string ): ImageFormat {
+	return ( mimeType.split( '/' )[ 1 ] || 'jpeg' ) as ImageFormat;
+}
+
+// Initialize default settings as soon as base data is available.
+const unsubscribeCoreStore = subscribe( () => {
+	const siteData = select( coreStore ).getEntityRecord<
+		// @ts-ignore
+		RestBaseRecord | undefined
+	>( 'root', '__unstableBase', undefined, {
+		_fields: [
+			'image_size_threshold',
+			'video_size_threshold',
+			'image_output_formats',
+			'jpeg_interlaced',
+			'png_interlaced',
+			'gif_interlaced',
+			'image_sizes',
+		],
+	} );
+
+	if ( ! siteData ) {
+		return;
+	}
+
+	const defaultPreferences: MediaPreferences = {
+		// General.
+		requireApproval: true,
+		optimizeOnUpload: true,
+		thumbnailGeneration: 'smart',
+		imageLibrary: window.crossOriginIsolated ? 'vips' : 'browser',
+		bigImageSizeThreshold: siteData.image_size_threshold,
+		bigVideoSizeThreshold: siteData.video_size_threshold,
+		keepOriginal: false,
+		// Formats.
+		default_outputFormat: 'jpeg',
+		default_quality: 82,
+		default_interlaced: siteData.jpeg_interlaced,
+		jpeg_outputFormat: getExtension(
+			siteData.image_output_formats[ 'image/jpeg' ] || 'image/jpeg'
+		),
+		jpeg_quality: 82,
+		jpeg_interlaced: siteData.jpeg_interlaced,
+		png_outputFormat: getExtension(
+			siteData.image_output_formats[ 'image/png' ] || 'image/png'
+		),
+		png_quality: 82,
+		png_interlaced: siteData.png_interlaced,
+		webp_outputFormat: getExtension(
+			siteData.image_output_formats[ 'image/webp' ] || 'image/webp'
+		),
+		webp_quality: 86,
+		webp_interlaced: false,
+		avif_outputFormat: getExtension(
+			siteData.image_output_formats[ 'image/avif' ] || 'image/avif'
+		),
+		avif_quality: 80,
+		avif_interlaced: false,
+		heic_outputFormat: getExtension(
+			siteData.image_output_formats[ 'image/heic' ] || 'image/jpeg'
+		),
+		heic_quality: 80,
+		heic_interlaced: siteData.jpeg_interlaced,
+		gif_outputFormat: getExtension(
+			siteData.image_output_formats[ 'image/gif' ] || 'image/webp'
+		),
+		gif_quality: 80,
+		gif_interlaced: siteData.gif_interlaced,
+		gif_convert: true,
+		video_outputFormat: 'mp4',
+		audio_outputFormat: 'mp3',
+		// Media recording.
+		videoInput: undefined,
+		audioInput: undefined,
+		videoEffect: 'none',
+	};
+
+	void globalDispatch( preferencesStore ).setDefaults(
+		PREFERENCES_NAME,
+		defaultPreferences
+	);
+
+	void dispatch( uploadStore ).updateSettings( {
+		imageSizes: siteData.image_sizes,
+	} );
+
+	unsubscribeCoreStore();
+}, coreStore );
+
 /*
  Make the upload queue aware of the function for uploading to the server.
- The list of available image sizes is passed via an inline script
- and needs to be saved in the store first.
 */
 void dispatch( uploadStore ).updateSettings( {
 	mediaUpload: editorUploadMedia,
 	mediaSideload: originalSideloadMedia,
-	imageSizes: window.mediaExperiments.availableImageSizes,
 } );
 
 // Subscribe to state updates so that we can override the mediaUpload() function at the right time.

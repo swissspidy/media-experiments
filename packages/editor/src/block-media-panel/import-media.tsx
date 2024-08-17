@@ -20,7 +20,7 @@ import { store as noticesStore } from '@wordpress/notices';
 /**
  * Internal dependencies
  */
-import { useIsUploadingByUrl } from '../utils/hooks';
+import { useIsUploadingByUrl, useMediaSourceTerms } from '../utils/hooks';
 
 interface ImportMediaProps {
 	url?: string;
@@ -33,6 +33,8 @@ export function ImportMedia( { url, onChange }: ImportMediaProps ) {
 	const { addItemFromUrl } = useDispatch( uploadStore );
 	const { createErrorNotice } = useDispatch( noticesStore );
 	const isUploading = useIsUploadingByUrl( url );
+
+	const mediaSourceTerms = useMediaSourceTerms();
 
 	if ( ! url || isBlobURL( url ) ) {
 		return null;
@@ -58,10 +60,7 @@ export function ImportMedia( { url, onChange }: ImportMediaProps ) {
 				);
 			},
 			additionalData: {
-				mexp_media_source:
-					window.mediaExperiments.mediaSourceTerms[
-						'subtitles-generation'
-					],
+				mexp_media_source: mediaSourceTerms[ 'subtitles-generation' ],
 			},
 		} );
 	};

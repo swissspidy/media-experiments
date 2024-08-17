@@ -100,7 +100,10 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 			void invalidateResolution( 'getEntityRecords', [
 				'postType',
 				'attachment',
-				{ upload_request: uploadRequestSlug },
+				{
+					upload_request: uploadRequestSlug,
+					context: 'edit',
+				},
 			] );
 
 			const attachments: RestAttachment[] | null = getEntityRecords(
@@ -108,6 +111,7 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 				'attachment',
 				{
 					upload_request: uploadRequestSlug,
+					context: 'edit',
 				}
 			);
 

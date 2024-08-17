@@ -162,65 +162,6 @@ function register_assets(): void {
 
 	wp_set_script_translations( 'media-experiments-view-upload-request', 'media-experiments' );
 
-	/** This filter is documented in wp-admin/includes/images.php */
-	$image_size_threshold = (int) apply_filters( 'big_image_size_threshold', 2560, array( 0, 0 ), '', 0 ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-
-	/**
-	 * Filters the "BIG video" threshold value.
-	 *
-	 * If the original video width or height is above the threshold, it will be scaled down. The threshold is
-	 * used as max width and max height. The scaled down image will be used as the largest available size, including
-	 * the `_wp_attached_file` post meta value.
-	 *
-	 * Returning `false` from the filter callback will disable the scaling.
-	 *
-	 * Analogous to {@see 'big_image_size_threshold'} for images.
-	 *
-	 * @param int $threshold The threshold value in pixels. Default 1920.
-	 */
-	$video_size_threshold = (int) apply_filters( 'mexp_big_video_size_threshold', 1920 );
-
-	$default_image_output_formats = get_default_image_output_formats();
-
-	$media_source_terms = array_flip(
-		get_terms(
-			[
-				'taxonomy'   => 'mexp_media_source',
-				'hide_empty' => false,
-				'orderby'    => false,
-				'fields'     => 'id=>slug',
-			]
-		)
-	);
-
-	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
-	$jpeg_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/jpeg' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
-	$png_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/png' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
-	$gif_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/gif' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-
-	wp_add_inline_script(
-		'media-experiments-view-upload-request',
-		sprintf(
-			'window.mediaExperiments = %s;',
-			wp_json_encode(
-				[
-					'availableImageSizes'       => get_all_image_sizes(),
-					'bigImageSizeThreshold'     => $image_size_threshold,
-					'bigVideoSizeThreshold'     => $video_size_threshold,
-					'defaultImageOutputFormats' => (object) $default_image_output_formats,
-					'jpegInterlaced'            => $jpeg_interlaced,
-					'pngInterlaced'             => $png_interlaced,
-					'gifInterlaced'             => $gif_interlaced,
-					'mediaSourceTerms'          => $media_source_terms,
-					'publicPath'                => plugins_url( 'build/', __DIR__ ),
-				]
-			)
-		),
-		'before'
-	);
-
 	wp_register_style(
 		'media-experiments-view-upload-request',
 		plugins_url( 'build/view-upload-request-view.css', __DIR__ ),
@@ -283,53 +224,6 @@ function enqueue_block_editor_assets(): void {
 	);
 
 	wp_set_script_translations( 'media-experiments', 'media-experiments' );
-
-	/** This filter is documented in wp-admin/includes/images.php */
-	$image_size_threshold = (int) apply_filters( 'big_image_size_threshold', 2560, array( 0, 0 ), '', 0 ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-
-	/** This filter is documented in inc/functions.php */
-	$video_size_threshold = (int) apply_filters( 'mexp_big_video_size_threshold', 1920 );
-
-	$default_image_output_formats = get_default_image_output_formats();
-
-	$media_source_terms = array_flip(
-		get_terms(
-			[
-				'taxonomy'   => 'mexp_media_source',
-				'hide_empty' => false,
-				'orderby'    => false,
-				'fields'     => 'id=>slug',
-			]
-		)
-	);
-
-	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
-	$jpeg_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/jpeg' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
-	$png_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/png' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
-	$gif_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/gif' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-
-	wp_add_inline_script(
-		'media-experiments',
-		sprintf(
-			'window.mediaExperiments = %s;',
-			wp_json_encode(
-				[
-					'availableImageSizes'       => get_all_image_sizes(),
-					'bigImageSizeThreshold'     => $image_size_threshold,
-					'bigVideoSizeThreshold'     => $video_size_threshold,
-					'defaultImageOutputFormats' => (object) $default_image_output_formats,
-					'jpegInterlaced'            => $jpeg_interlaced,
-					'pngInterlaced'             => $png_interlaced,
-					'gifInterlaced'             => $gif_interlaced,
-					'mediaSourceTerms'          => $media_source_terms,
-					'publicPath'                => plugins_url( 'build/', __DIR__ ),
-				]
-			)
-		),
-		'before'
-	);
 
 	wp_enqueue_style(
 		'media-experiments-editor',
@@ -486,6 +380,65 @@ function register_rest_fields(): void {
 			'get_callback' => __NAMESPACE__ . '\rest_get_attachment_original_file',
 		]
 	);
+}
+
+/**
+ * Filters the REST API root index data to add custom settings.
+ *
+ * @param WP_REST_Response $response Response data.
+ * @param WP_REST_Request  $request  Request data.
+ */
+function filter_rest_index( WP_REST_Response $response, WP_REST_Request $request ) {
+	/** This filter is documented in wp-admin/includes/images.php */
+	$image_size_threshold = (int) apply_filters( 'big_image_size_threshold', 2560, array( 0, 0 ), '', 0 ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+
+	/**
+	 * Filters the "BIG video" threshold value.
+	 *
+	 * If the original video width or height is above the threshold, it will be scaled down. The threshold is
+	 * used as max width and max height. The scaled down image will be used as the largest available size, including
+	 * the `_wp_attached_file` post meta value.
+	 *
+	 * Returning `false` from the filter callback will disable the scaling.
+	 *
+	 * Analogous to {@see 'big_image_size_threshold'} for images.
+	 *
+	 * @param int $threshold The threshold value in pixels. Default 1920.
+	 */
+	$video_size_threshold = (int) apply_filters( 'mexp_big_video_size_threshold', 1920 );
+
+	$default_image_output_formats = get_default_image_output_formats();
+
+	$media_source_terms = array_flip(
+		get_terms(
+			[
+				'taxonomy'   => 'mexp_media_source',
+				'hide_empty' => false,
+				'orderby'    => false,
+				'fields'     => 'id=>slug',
+			]
+		)
+	);
+
+	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
+	$jpeg_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/jpeg' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
+	$png_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/png' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
+	$gif_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/gif' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+
+	if ( current_user_can( 'upload_files' ) ) {
+		$response->data['image_sizes']          = get_all_image_sizes();
+		$response->data['image_size_threshold'] = $image_size_threshold;
+		$response->data['video_size_threshold'] = $video_size_threshold;
+		$response->data['image_output_formats'] = (object) $default_image_output_formats;
+		$response->data['jpeg_interlaced']      = $jpeg_interlaced;
+		$response->data['png_interlaced']       = $png_interlaced;
+		$response->data['gif_interlaced']       = $gif_interlaced;
+		$response->data['media_source_terms']   = $media_source_terms;
+	}
+
+	return $response;
 }
 
 /**

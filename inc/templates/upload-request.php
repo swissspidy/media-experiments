@@ -72,6 +72,7 @@ if ( $post instanceof WP_Post ) {
 		'media-experiments-view-upload-request',
 		sprintf(
 			'
+			window.mediaExperiments = window.mediaExperiments || {};
 			window.mediaExperiments.allowedMimeTypes = %1$s;
 			window.mediaExperiments.uploadRequest = %2$s;
 			window.mediaExperiments.allowedTypes = %3$s;
