@@ -144,6 +144,7 @@ interface AddItemFromUrlArgs {
 	onSuccess?: OnSuccessHandler;
 	onError?: OnErrorHandler;
 	additionalData?: AdditionalData;
+	allowedTypes?: string[];
 }
 
 /**
@@ -155,6 +156,7 @@ interface AddItemFromUrlArgs {
  * @param [$0.onSuccess]      Function called after the file is uploaded.
  * @param [$0.onError]        Function called when an error happens.
  * @param [$0.additionalData] Additional data to include in the request.
+ * @param [$0.allowedTypes]   Array with the types of media that can be uploaded, if unset all types are allowed.
  */
 export function addItemFromUrl( {
 	url,
@@ -162,6 +164,7 @@ export function addItemFromUrl( {
 	onSuccess,
 	onError,
 	additionalData,
+	allowedTypes,
 }: AddItemFromUrlArgs ) {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
 		const fileName = getFileNameFromUrl( url );
@@ -174,7 +177,10 @@ export function addItemFromUrl( {
 			additionalData,
 			sourceUrl: url,
 			operations: [
-				[ OperationType.FetchRemoteFile, { url, fileName } ],
+				[
+					OperationType.FetchRemoteFile,
+					{ url, fileName, allowedTypes },
+				],
 				// This will add the next steps, such as compression, poster generation, and upload.
 				OperationType.Prepare,
 			],
