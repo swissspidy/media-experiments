@@ -144,7 +144,7 @@ interface AddItemFromUrlArgs {
 	onSuccess?: OnSuccessHandler;
 	onError?: OnErrorHandler;
 	additionalData?: AdditionalData;
-	allowedTypes?: string[]
+	allowedTypes?: string[];
 }
 
 /**
@@ -177,7 +177,10 @@ export function addItemFromUrl( {
 			additionalData,
 			sourceUrl: url,
 			operations: [
-				[ OperationType.FetchRemoteFile, { url, fileName, allowedTypes } ],
+				[
+					OperationType.FetchRemoteFile,
+					{ url, fileName, allowedTypes },
+				],
 				// This will add the next steps, such as compression, poster generation, and upload.
 				OperationType.Prepare,
 			],
