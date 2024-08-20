@@ -81,7 +81,6 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			true
 		);
 
-		// TODO: Consider support general sideloading, not attached to any post.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)/sideload',
@@ -492,8 +491,6 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	protected function is_valid_upload_request( WP_REST_Request $request ): bool {
 		$post = $this->get_upload_request_post( $request );
 
-		// TODO: Bail if there is already an attachment for this upload request.
-
 		return (bool) $post;
 	}
 
@@ -637,30 +634,20 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		add_filter( 'wp_unique_filename', $filter_filename, 10, 6 );
 
-		// See https://github.com/swissspidy/media-experiments/issues/465.
-		// See https://core.trac.wordpress.org/ticket/61189.
-		if ( version_compare( get_bloginfo( 'version' ), '6.6-beta1', '>=' ) ) {
-			$parent_post = get_post_parent( $attachment_id );
+		$parent_post = get_post_parent( $attachment_id );
 
-			$time = null;
+		$time = null;
 
-			// Matches logic in media_handle_upload().
-			// The post date doesn't usually matter for pages, so don't backdate this upload.
-			if ( $parent_post && 'page' !== $parent_post->post_type && substr( $parent_post->post_date, 0, 4 ) > 0 ) {
-				$time = $parent_post->post_date;
-			}
+		// Matches logic in media_handle_upload().
+		// The post date doesn't usually matter for pages, so don't backdate this upload.
+		if ( $parent_post && 'page' !== $parent_post->post_type && substr( $parent_post->post_date, 0, 4 ) > 0 ) {
+			$time = $parent_post->post_date;
+		}
 
-			if ( ! empty( $files ) ) {
-				$file = $this->upload_from_file( $files, $headers, $time );
-			} else {
-				$file = $this->upload_from_data( $request->get_body(), $headers, $time );
-			}
+		if ( ! empty( $files ) ) {
+			$file = $this->upload_from_file( $files, $headers, $time );
 		} else {
-			if ( ! empty( $files ) ) {
-				$file = $this->upload_from_file( $files, $headers );
-			} else {
-				$file = $this->upload_from_data( $request->get_body(), $headers );
-			}
+			$file = $this->upload_from_data( $request->get_body(), $headers, $time );
 		}
 
 		remove_filter( 'wp_unique_filename', $filter_filename );
