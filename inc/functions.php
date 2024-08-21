@@ -611,16 +611,14 @@ function filter_rest_index( WP_REST_Response $response ): WP_REST_Response {
 	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
 	$gif_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/gif' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 
-	if ( current_user_can( 'upload_files' ) ) {
-		$response->data['image_sizes']          = get_all_image_sizes();
-		$response->data['image_size_threshold'] = $image_size_threshold;
-		$response->data['video_size_threshold'] = $video_size_threshold;
-		$response->data['image_output_formats'] = (object) $default_image_output_formats;
-		$response->data['jpeg_interlaced']      = $jpeg_interlaced;
-		$response->data['png_interlaced']       = $png_interlaced;
-		$response->data['gif_interlaced']       = $gif_interlaced;
-		$response->data['media_source_terms']   = $media_source_terms;
-	}
+	$response->data['image_sizes']          = get_all_image_sizes();
+	$response->data['image_size_threshold'] = $image_size_threshold;
+	$response->data['video_size_threshold'] = $video_size_threshold;
+	$response->data['image_output_formats'] = (object) $default_image_output_formats;
+	$response->data['jpeg_interlaced']      = $jpeg_interlaced;
+	$response->data['png_interlaced']       = $png_interlaced;
+	$response->data['gif_interlaced']       = $gif_interlaced;
+	$response->data['media_source_terms']   = $media_source_terms;
 
 	return $response;
 }
