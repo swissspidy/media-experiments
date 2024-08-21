@@ -386,9 +386,8 @@ function register_rest_fields(): void {
  * Filters the REST API root index data to add custom settings.
  *
  * @param WP_REST_Response $response Response data.
- * @param WP_REST_Request  $request  Request data.
  */
-function filter_rest_index( WP_REST_Response $response, WP_REST_Request $request ) {
+function filter_rest_index( WP_REST_Response $response ) {
 	/** This filter is documented in wp-admin/includes/images.php */
 	$image_size_threshold = (int) apply_filters( 'big_image_size_threshold', 2560, array( 0, 0 ), '', 0 ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 
