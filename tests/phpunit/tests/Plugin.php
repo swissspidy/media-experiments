@@ -3,6 +3,8 @@
 namespace MediaExperiments\Tests;
 
 use MediaExperiments\REST_Attachments_Controller;
+use WP_REST_Request;
+use WP_REST_Server;
 use WP_UnitTest_Factory;
 use WP_UnitTestCase;
 use function MediaExperiments\delete_old_upload_requests;
@@ -176,6 +178,62 @@ class Test_Plugin extends WP_UnitTestCase {
 			$this->assertIsInt( $size['height'] );
 			$this->assertIsString( $size['name'] );
 		}
+	}
+
+	/**
+	 * @covers \MediaExperiments\filter_rest_index
+	 */
+	public function test_get_rest_index_should_return_additional_settings() {
+		$server = new WP_REST_Server();
+
+		$request = new WP_REST_Request( 'GET', '/' );
+		$index   = $server->dispatch( $request );
+		$data    = $index->get_data();
+
+		$this->assertArrayNotHasKey( 'image_size_threshold', $data );
+		$this->assertArrayNotHasKey( 'video_size_threshold', $data );
+		$this->assertArrayNotHasKey( 'image_output_formats', $data );
+		$this->assertArrayNotHasKey( 'jpeg_interlaced', $data );
+		$this->assertArrayNotHasKey( 'png_interlaced', $data );
+		$this->assertArrayNotHasKey( 'gif_interlaced', $data );
+		$this->assertArrayNotHasKey( 'image_sizes', $data );
+	}
+
+	/**
+	 * @covers \MediaExperiments\filter_rest_index
+	 */
+	public function test_get_rest_index_should_return_additional_settings_can_upload_files() {
+		wp_set_current_user( self::$admin_id );
+
+		$server = new WP_REST_Server();
+
+		$request = new WP_REST_Request( 'GET', '/' );
+		$index   = $server->dispatch( $request );
+		$data    = $index->get_data();
+
+		$this->assertArrayHasKey( 'image_size_threshold', $data );
+		$this->assertArrayHasKey( 'video_size_threshold', $data );
+		$this->assertArrayHasKey( 'image_output_formats', $data );
+		$this->assertArrayHasKey( 'jpeg_interlaced', $data );
+		$this->assertArrayHasKey( 'png_interlaced', $data );
+		$this->assertArrayHasKey( 'gif_interlaced', $data );
+		$this->assertArrayHasKey( 'image_sizes', $data );
+	}
+
+	/**
+	 * @covers \MediaExperiments\mod_rewrite_rules
+	 */
+	public function test_filter_mod_rewrite_rules() {
+		$this->set_permalink_structure( '/%year%/%postname%/' );
+
+		/**
+		 * @var \WP_Rewrite $wp_rewrite
+		 */
+		global $wp_rewrite;
+
+		$rules = $wp_rewrite->mod_rewrite_rules();
+
+		$this->assertStringContainsString( 'AddType application/wasm wasm', $rules );
 	}
 
 	/**
