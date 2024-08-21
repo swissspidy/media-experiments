@@ -354,6 +354,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		$response = parent::create_item( $request );
 
+		$meta_update = $this->meta->update_value( $request['meta'], $response->get_data()['id'] );
 		if ( $upload_request ) {
 			remove_filter( 'upload_mimes', $filter_upload_mimes );
 		}

@@ -95,6 +95,8 @@ function needs_cross_origin_isolation(): bool {
  * media processing in the editor.
  *
  * @link https://web.dev/coop-coep/
+ *
+ * @codeCoverageIgnore
  */
 function start_cross_origin_isolation_output_buffer(): void {
 	global $is_safari;
@@ -220,15 +222,14 @@ function override_media_templates(): void {
 			wp_print_media_templates();
 			$html = (string) ob_get_clean();
 
-			// TODO: Eventually use HTML API once feasible.
-
 			$tags = [
 				'audio',
 				'img',
 				'video',
 			];
+
 			foreach ( $tags as $tag ) {
-				$html = (string) str_replace( '<' . $tag, '<' . $tag . ' crossorigin="anonymous"', $html );
+				$html = (string) str_replace( "<$tag", "<$tag crossorigin=\"anonymous\"", $html );
 			}
 
 			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -304,7 +305,7 @@ function filter_big_image_size_threshold( $threshold ) {
  * @param string $mime_type The mime type being saved.
  * @return bool Whether to use progressive images
  */
-function filter_image_save_progressive( $interlace, $mime_type ) {
+function filter_image_save_progressive( bool $interlace, string $mime_type ): bool {
 	$user_id = get_current_user_id();
 
 	if ( ! $user_id ) {
@@ -558,10 +559,10 @@ function register_rest_fields(): void {
 		[
 			'schema'       => [
 				'description' => __( 'URL of the original file if this is an optimized one', 'media-experiments' ),
-				'type'        => 'boolean',
+				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 			],
-			'get_callback' => __NAMESPACE__ . '\rest_get_attachment_original_file',
+			'get_callback' => __NAMESPACE__ . '\rest_get_attachment_original_url',
 		]
 	);
 }
@@ -696,7 +697,7 @@ function rest_get_attachment_blurhash( array $post ): ?string {
  * Returns the attachment's dominant color.
  *
  * @param array{id: int} $post Post data.
- * @return int|null Attachment dominant color.
+ * @return string|null Attachment dominant color.
  */
 function rest_get_attachment_dominant_color( array $post ): ?string {
 	$meta = wp_get_attachment_metadata( $post['id'] );
@@ -731,7 +732,7 @@ function rest_get_attachment_has_transparency( array $post ): ?bool {
  * @param array{id: int} $post Post data.
  * @return string|null Original URL if applicable.
  */
-function rest_get_attachment_original_file( array $post ): ?string {
+function rest_get_attachment_original_url( array $post ): ?string {
 	$original_id = get_post_meta( $post['id'], 'mexp_original_id', true );
 
 	if ( empty( $original_id ) ) {
@@ -1004,38 +1005,44 @@ function filter_attachment_post_type_args( array $args, string $post_type ): arr
  * Uses BlurHash-powered CSS gradients with a fallback
  * to a solid background color.
  *
- * @param string $filtered_image The image tag.
+ * @param string $content        The image tag markup.
  * @param string $context        The context of the image.
  * @param int    $attachment_id  The attachment ID.
+ *
  * @return string The filtered image tag.
  */
-function filter_wp_content_img_tag_add_placeholders( string $filtered_image, string $context, int $attachment_id ): string {
-	if ( ! str_contains( $filtered_image, ' src="' ) ) {
-		return $filtered_image;
+function filter_wp_content_img_tag_add_placeholders( string $content, string $context, int $attachment_id ): string {
+	$processor = new \WP_HTML_Tag_Processor( $content );
+	if ( ! $processor->next_tag( array( 'tag_name' => 'img' ) ) ) {
+		return $content;
+	}
+
+	if ( ! $processor->get_attribute( 'src' ) ) {
+		return $content;
 	}
 
 	$class_name = 'mexp-placeholder-' . $attachment_id;
 
 	// Ensure to not run the logic below in case relevant attributes are already present.
-	if ( str_contains( $filtered_image, $class_name ) ) {
-		return $filtered_image;
+	if ( $processor->has_class( $class_name ) ) {
+		return $content;
 	}
 
 	$meta = wp_get_attachment_metadata( $attachment_id );
 
 	if ( ! $meta ) {
-		return $filtered_image;
+		return $content;
 	}
 
 	if ( isset( $meta['has_transparency'] ) && $meta['has_transparency'] ) {
-		return $filtered_image;
+		return $content;
 	}
 
 	$dominant_color = $meta['dominant_color'] ?? null;
 	$blurhash       = $meta['blurhash'] ?? null;
 
 	if ( ! is_string( $dominant_color ) && ! is_string( $blurhash ) ) {
-		return $filtered_image;
+		return $content;
 	}
 
 	if ( is_string( $dominant_color ) ) {
@@ -1083,7 +1090,9 @@ function filter_wp_content_img_tag_add_placeholders( string $filtered_image, str
 		}
 	}
 
-	return str_replace( ' class="', ' class="' . $class_name . ' ', $filtered_image );
+	$processor->add_class( $class_name );
+
+	return $processor->get_updated_html();
 }
 
 /**
@@ -1350,7 +1359,7 @@ function rest_post_dispatch_add_server_timing( $response ) {
 		return $response;
 	}
 
-	$server_timing = perflab_server_timing();
+	$server_timing = \perflab_server_timing();
 
 	do_action( 'perflab_server_timing_send_header' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 
@@ -1367,7 +1376,7 @@ function rest_post_dispatch_add_server_timing( $response ) {
  * @param string $rules mod_rewrite Rewrite rules formatted for .htaccess.
  * @return string Filtered rewrite rules.
  */
-function filter_mod_rewrite_rules( string $rules ) {
+function filter_mod_rewrite_rules( string $rules ): string {
 	$rules .= "\n# BEGIN Media Experiments\n" .
 				"AddType application/wasm wasm\n" .
 				"# END Media Experiments\n";
