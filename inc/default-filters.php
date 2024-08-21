@@ -13,25 +13,35 @@ use function add_action;
 
 add_filter( 'update_plugins_swissspidy.github.io', __NAMESPACE__ . '\filter_update_plugins', 10, 3 );
 
+// Cross-origin isolation.
+
+add_action( 'load-post.php', __NAMESPACE__ . '\set_up_cross_origin_isolation_editor' );
+add_action( 'load-post-new.php', __NAMESPACE__ . '\set_up_cross_origin_isolation_editor' );
+add_action( 'load-site-editor.php', __NAMESPACE__ . '\set_up_cross_origin_isolation_editor' );
+add_action( 'load-widgets.php', __NAMESPACE__ . '\set_up_cross_origin_isolation_editor' );
+add_action( 'wp_enqueue_media', __NAMESPACE__ . '\override_media_templates' );
+
 add_action( 'init', __NAMESPACE__ . '\register_media_source_taxonomy', 5 );
 add_action( 'init', __NAMESPACE__ . '\register_assets' );
-add_action( 'current_screen', __NAMESPACE__ . '\set_up_cross_origin_isolation_editor' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_block_editor_assets' );
 add_action( 'enqueue_block_assets', __NAMESPACE__ . '\enqueue_block_assets' );
-add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_fields' );
-add_action( 'init', __NAMESPACE__ . '\register_attachment_post_meta' );
-add_filter( 'rest_index', __NAMESPACE__ . '\filter_rest_index', 10, 2 );
 
 add_filter( 'mod_rewrite_rules', __NAMESPACE__ . '\filter_mod_rewrite_rules' );
 
 add_filter( 'big_image_size_threshold', __NAMESPACE__ . '\filter_big_image_size_threshold' );
 add_filter( 'image_save_progressive', __NAMESPACE__ . '\filter_image_save_progressive', 10, 2 );
 
+// REST API.
+
+add_filter( 'register_post_type_args', __NAMESPACE__ . '\filter_attachment_post_type_args', 10, 2 );
+add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_fields' );
+add_action( 'init', __NAMESPACE__ . '\register_attachment_post_meta' );
+add_filter( 'rest_index', __NAMESPACE__ . '\filter_rest_index' );
 add_action( 'rest_after_insert_attachment', __NAMESPACE__ . '\rest_after_insert_attachment_handle_pdf_poster', 10, 2 );
 add_action( 'rest_after_insert_attachment', __NAMESPACE__ . '\rest_after_insert_attachment_copy_metadata', 10, 2 );
 add_action( 'rest_after_insert_attachment', __NAMESPACE__ . '\rest_after_insert_attachment_insert_additional_metadata', 10, 2 );
 
-add_filter( 'register_post_type_args', __NAMESPACE__ . '\filter_attachment_post_type_args', 10, 2 );
+// Blurred placeholders on the frontend.
 
 add_filter( 'wp_content_img_tag', __NAMESPACE__ . '\filter_wp_content_img_tag_add_placeholders', 100, 3 );
 

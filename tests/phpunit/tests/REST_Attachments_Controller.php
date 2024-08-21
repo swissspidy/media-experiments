@@ -177,6 +177,7 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 	 * @covers ::create_item
 	 * @covers ::create_item_permissions_check
 	 * @covers \MediaExperiments\rest_after_insert_attachment_copy_metadata
+	 * @covers \MediaExperiments\rest_get_attachment_original_url
 	 */
 	public function test_create_item_copy_metadata_from_original() {
 		wp_set_current_user( self::$admin_id );
@@ -192,8 +193,6 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 
 		wp_update_attachment_metadata( $original_id, wp_generate_attachment_metadata( $original_id, self::$image_file_2 ) );
 
-		add_filter( 'wp_generate_attachment_metadata', '__return_empty_array', 1 );
-
 		$request = new WP_REST_Request( 'POST', '/wp/v2/media' );
 		$request->set_header( 'Content-Type', 'image/jpeg' );
 		$request->set_header( 'Content-Disposition', 'attachment; filename=canola.jpg' );
@@ -207,8 +206,6 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 		$request->set_body( file_get_contents( self::$image_file ) );
 		$response = rest_get_server()->dispatch( $request );
 
-		remove_filter( 'wp_generate_attachment_metadata', '__return_empty_array', 1 );
-
 		$this->assertSame( 201, $response->get_status() );
 
 		$data = $response->get_data();
@@ -217,6 +214,7 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 		$this->assertArrayHasKey( 'width', $data['media_details'] );
 		$this->assertArrayHasKey( 'height', $data['media_details'] );
 		$this->assertArrayHasKey( 'file', $data['media_details'] );
+		$this->assertArrayHasKey( 'mexp_original_url', $data );
 	}
 
 	/**
@@ -244,8 +242,6 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 
 		$request->set_body( file_get_contents( self::$image_file ) );
 		$response = rest_get_server()->dispatch( $request );
-
-		remove_filter( 'wp_generate_attachment_metadata', '__return_empty_array', 1 );
 
 		$this->assertSame( 201, $response->get_status() );
 

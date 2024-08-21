@@ -15,9 +15,6 @@ parameters:
 			message: "/^Cannot assign offset 'post' to WP_REST_Request<array<string, bool\\|int\\|string>>.$/"
 			path: inc/class-rest-attachments-controller.php
 		-
-			message: '/^does not accept int<min, -1>\\|int<1, max>\.$/'
-			path: inc/class-rest-attachments-controller.php
-		-
 			message: "/Cannot access offset 'id' on mixed.$/"
 			path: inc/class-rest-attachments-controller.php
 

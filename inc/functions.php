@@ -53,21 +53,206 @@ function filter_update_plugins( $update, $plugin_data, string $plugin_file ) {
 }
 
 /**
+ * Determines whether "full" cross-origin isolation is needed.
+ *
+ * By default, `crossorigin="anonymous"` attributes are added to all external
+ * resources to make sure they can be accessed programmatically (e.g. by html-to-image).
+ *
+ * However, actual cross-origin isolation by sending COOP and COEP headers is only
+ * needed when video optimization is enabled
+ *
+ * @link https://web.dev/coop-coep/
+ *
+ * @return bool Whether the conditional object is needed.
+ */
+function needs_cross_origin_isolation(): bool {
+	// See https://github.com/WordPress/wordpress-playground/issues/952.
+	if ( defined( 'MEXP_IS_PLAYGROUND' ) && MEXP_IS_PLAYGROUND ) {
+		return false;
+	}
+
+	if ( is_singular( 'mexp-upload-request' ) ) {
+		return true;
+	}
+
+	$user_id = get_current_user_id();
+	if ( ! $user_id ) {
+		return false;
+	}
+
+	// Cross-origin isolation is not needed if users can't upload files anyway.
+	if ( ! user_can( $user_id, 'upload_files' ) ) {
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Enables cross-origin isolation in the block editor.
+ *
+ * Required for enabling SharedArrayBuffer for WebAssembly-based
+ * media processing in the editor.
+ *
+ * @link https://web.dev/coop-coep/
+ *
+ * @codeCoverageIgnore
+ */
+function start_cross_origin_isolation_output_buffer(): void {
+	global $is_safari;
+
+	$coep = $is_safari ? 'require-corp' : 'credentialless';
+
+	ob_start(
+		function ( string $output, ?int $phase ) use ( $coep ): string {
+			// Only send the header when the buffer is not being cleaned.
+			if ( ( $phase & PHP_OUTPUT_HANDLER_CLEAN ) === 0 ) {
+				header( 'Cross-Origin-Opener-Policy: same-origin' );
+				header( "Cross-Origin-Embedder-Policy: $coep" );
+
+				$output = add_crossorigin_attributes( $output );
+			}
+
+			return $output;
+		}
+	);
+}
+
+/**
+ * Adds crossorigin="anonymous" to relevant tags in the given HTML string.
+ *
+ * @param string $html HTML input.
+ *
+ * @return string Modified HTML.
+ */
+function add_crossorigin_attributes( string $html ): string {
+	$site_url = site_url();
+
+	$processor = new \WP_HTML_Tag_Processor( $html );
+
+	// See https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/crossorigin.
+	$tags = [
+		'AUDIO'  => 'src',
+		'IMG'    => 'src',
+		'LINK'   => 'href',
+		'SCRIPT' => 'src',
+		'VIDEO'  => 'src',
+		'SOURCE' => 'src',
+	];
+
+	$tag_names = array_keys( $tags );
+
+	while ( $processor->next_tag() ) {
+		$tag = $processor->get_tag();
+
+		if ( ! in_array( $tag, $tag_names, true ) ) {
+			continue;
+		}
+
+		if ( 'AUDIO' === $tag || 'VIDEO' === $tag ) {
+			$processor->set_bookmark( 'audio-video-parent' );
+		}
+
+		$processor->set_bookmark( 'resume' );
+
+		$seeked = false;
+
+		$crossorigin = $processor->get_attribute( 'crossorigin' );
+
+		$url = $processor->get_attribute( $tags[ $tag ] );
+
+		if ( is_string( $url ) && ! str_starts_with( $url, $site_url ) && ! str_starts_with( $url, '/' ) && ! is_string( $crossorigin ) ) {
+			if ( 'SOURCE' === $tag ) {
+				$seeked = $processor->seek( 'audio-video-parent' );
+
+				if ( $seeked ) {
+					$processor->set_attribute( 'crossorigin', 'anonymous' );
+				}
+			} else {
+				$processor->set_attribute( 'crossorigin', 'anonymous' );
+			}
+
+			if ( $seeked ) {
+				$processor->seek( 'resume' );
+				$processor->release_bookmark( 'audio-video-parent' );
+			}
+		}
+	}
+
+	return $processor->get_updated_html();
+}
+
+/**
  * Sets up cross-origin isolation in the block editor.
  *
  * @codeCoverageIgnore
  *
- * @param WP_Screen $screen Current WP_Screen object.
  * @return void
  */
-function set_up_cross_origin_isolation_editor( WP_Screen $screen ): void {
+function set_up_cross_origin_isolation_editor(): void {
+	$screen = get_current_screen();
+
+	if ( ! $screen ) {
+		return;
+	}
+
 	if ( ! $screen->is_block_editor() && 'site-editor' !== $screen->id && ! ( 'widgets' === $screen->id && wp_use_widgets_block_editor() ) ) {
 		return;
 	}
 
-	require_once plugin_dir_path( __FILE__ ) . '/class-cross-origin-isolation.php';
-	$instance = new Cross_Origin_Isolation();
-	$instance->register();
+	if ( ! needs_cross_origin_isolation() ) {
+		return;
+	}
+
+	start_cross_origin_isolation_output_buffer();
+}
+
+/**
+ * Overrides templates from wp_print_media_templates with custom ones.
+ *
+ * Adds `crossorigin` attribute to all tags that
+ * could have assets loaded from a different domain.
+ */
+function override_media_templates(): void {
+	remove_action( 'admin_footer', 'wp_print_media_templates' );
+	add_action(
+		'admin_footer',
+		static function (): void {
+			ob_start();
+			wp_print_media_templates();
+			$html = (string) ob_get_clean();
+
+			$tags = [
+				'audio',
+				'img',
+				'video',
+			];
+
+			foreach ( $tags as $tag ) {
+				$html = (string) str_replace( "<$tag", "<$tag crossorigin=\"anonymous\"", $html );
+			}
+
+			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		}
+	);
+}
+
+/**
+ * Filters the path of the queried template for single upload requests.
+ *
+ * @codeCoverageIgnore
+ *
+ * @param string $template Template path.
+ * @return string Filtered template path.
+ */
+function load_upload_request_template( string $template ): string {
+	if ( is_singular( 'mexp-upload-request' ) ) {
+		start_cross_origin_isolation_output_buffer();
+
+		return __DIR__ . '/templates/upload-request.php';
+	}
+
+	return $template;
 }
 
 /**
@@ -120,7 +305,7 @@ function filter_big_image_size_threshold( $threshold ) {
  * @param string $mime_type The mime type being saved.
  * @return bool Whether to use progressive images
  */
-function filter_image_save_progressive( $interlace, $mime_type ) {
+function filter_image_save_progressive( bool $interlace, string $mime_type ): bool {
 	$user_id = get_current_user_id();
 
 	if ( ! $user_id ) {
@@ -374,10 +559,10 @@ function register_rest_fields(): void {
 		[
 			'schema'       => [
 				'description' => __( 'URL of the original file if this is an optimized one', 'media-experiments' ),
-				'type'        => 'boolean',
+				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 			],
-			'get_callback' => __NAMESPACE__ . '\rest_get_attachment_original_file',
+			'get_callback' => __NAMESPACE__ . '\rest_get_attachment_original_url',
 		]
 	);
 }
@@ -386,9 +571,8 @@ function register_rest_fields(): void {
  * Filters the REST API root index data to add custom settings.
  *
  * @param WP_REST_Response $response Response data.
- * @param WP_REST_Request  $request  Request data.
  */
-function filter_rest_index( WP_REST_Response $response, WP_REST_Request $request ) {
+function filter_rest_index( WP_REST_Response $response ): WP_REST_Response {
 	/** This filter is documented in wp-admin/includes/images.php */
 	$image_size_threshold = (int) apply_filters( 'big_image_size_threshold', 2560, array( 0, 0 ), '', 0 ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 
@@ -427,16 +611,14 @@ function filter_rest_index( WP_REST_Response $response, WP_REST_Request $request
 	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
 	$gif_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/gif' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 
-	if ( current_user_can( 'upload_files' ) ) {
-		$response->data['image_sizes']          = get_all_image_sizes();
-		$response->data['image_size_threshold'] = $image_size_threshold;
-		$response->data['video_size_threshold'] = $video_size_threshold;
-		$response->data['image_output_formats'] = (object) $default_image_output_formats;
-		$response->data['jpeg_interlaced']      = $jpeg_interlaced;
-		$response->data['png_interlaced']       = $png_interlaced;
-		$response->data['gif_interlaced']       = $gif_interlaced;
-		$response->data['media_source_terms']   = $media_source_terms;
-	}
+	$response->data['image_sizes']          = get_all_image_sizes();
+	$response->data['image_size_threshold'] = $image_size_threshold;
+	$response->data['video_size_threshold'] = $video_size_threshold;
+	$response->data['image_output_formats'] = (object) $default_image_output_formats;
+	$response->data['jpeg_interlaced']      = $jpeg_interlaced;
+	$response->data['png_interlaced']       = $png_interlaced;
+	$response->data['gif_interlaced']       = $gif_interlaced;
+	$response->data['media_source_terms']   = $media_source_terms;
 
 	return $response;
 }
@@ -501,7 +683,7 @@ function get_attachment_filesize( int $attachment_id ): ?int {
 /**
  * Returns the attachment's BlurHash.
  *
- * @param array $post Post data.
+ * @param array{id: int} $post Post data.
  * @return string|null Attachment BlurHash.
  */
 function rest_get_attachment_blurhash( array $post ): ?string {
@@ -512,8 +694,8 @@ function rest_get_attachment_blurhash( array $post ): ?string {
 /**
  * Returns the attachment's dominant color.
  *
- * @param array $post Post data.
- * @return int|null Attachment dominant color.
+ * @param array{id: int} $post Post data.
+ * @return string|null Attachment dominant color.
  */
 function rest_get_attachment_dominant_color( array $post ): ?string {
 	$meta = wp_get_attachment_metadata( $post['id'] );
@@ -523,7 +705,7 @@ function rest_get_attachment_dominant_color( array $post ): ?string {
 /**
  * Returns whether the attachment is muted.
  *
- * @param array $post Post data.
+ * @param array{id: int} $post Post data.
  * @return bool Whether attachment is muted.
  */
 function rest_get_attachment_is_muted( array $post ): bool {
@@ -534,7 +716,7 @@ function rest_get_attachment_is_muted( array $post ): bool {
 /**
  * Returns whether the attachment has transparency (alpha channel).
  *
- * @param array $post Post data.
+ * @param array{id: int} $post Post data.
  * @return bool|null Whether attachment has transparency.
  */
 function rest_get_attachment_has_transparency( array $post ): ?bool {
@@ -545,10 +727,10 @@ function rest_get_attachment_has_transparency( array $post ): ?bool {
 /**
  * Returns the URL of the original file if this is an optimized one
  *
- * @param array $post Post data.
+ * @param array{id: int} $post Post data.
  * @return string|null Original URL if applicable.
  */
-function rest_get_attachment_original_file( array $post ): ?string {
+function rest_get_attachment_original_url( array $post ): ?string {
 	$original_id = get_post_meta( $post['id'], 'mexp_original_id', true );
 
 	if ( empty( $original_id ) ) {
@@ -821,38 +1003,44 @@ function filter_attachment_post_type_args( array $args, string $post_type ): arr
  * Uses BlurHash-powered CSS gradients with a fallback
  * to a solid background color.
  *
- * @param string $filtered_image The image tag.
+ * @param string $content        The image tag markup.
  * @param string $context        The context of the image.
  * @param int    $attachment_id  The attachment ID.
+ *
  * @return string The filtered image tag.
  */
-function filter_wp_content_img_tag_add_placeholders( string $filtered_image, string $context, int $attachment_id ): string {
-	if ( ! str_contains( $filtered_image, ' src="' ) ) {
-		return $filtered_image;
+function filter_wp_content_img_tag_add_placeholders( string $content, string $context, int $attachment_id ): string {
+	$processor = new \WP_HTML_Tag_Processor( $content );
+	if ( ! $processor->next_tag( array( 'tag_name' => 'img' ) ) ) {
+		return $content;
+	}
+
+	if ( ! $processor->get_attribute( 'src' ) ) {
+		return $content;
 	}
 
 	$class_name = 'mexp-placeholder-' . $attachment_id;
 
 	// Ensure to not run the logic below in case relevant attributes are already present.
-	if ( str_contains( $filtered_image, $class_name ) ) {
-		return $filtered_image;
+	if ( $processor->has_class( $class_name ) ) {
+		return $content;
 	}
 
 	$meta = wp_get_attachment_metadata( $attachment_id );
 
 	if ( ! $meta ) {
-		return $filtered_image;
+		return $content;
 	}
 
 	if ( isset( $meta['has_transparency'] ) && $meta['has_transparency'] ) {
-		return $filtered_image;
+		return $content;
 	}
 
 	$dominant_color = $meta['dominant_color'] ?? null;
 	$blurhash       = $meta['blurhash'] ?? null;
 
 	if ( ! is_string( $dominant_color ) && ! is_string( $blurhash ) ) {
-		return $filtered_image;
+		return $content;
 	}
 
 	if ( is_string( $dominant_color ) ) {
@@ -900,7 +1088,9 @@ function filter_wp_content_img_tag_add_placeholders( string $filtered_image, str
 		}
 	}
 
-	return str_replace( ' class="', ' class="' . $class_name . ' ', $filtered_image );
+	$processor->add_class( $class_name );
+
+	return $processor->get_updated_html();
 }
 
 /**
@@ -1073,27 +1263,6 @@ function filter_rest_route_for_post_for_upload_requests( string $route, WP_Post 
 }
 
 /**
- * Filters the path of the queried template for single upload requests.
- *
- * @codeCoverageIgnore
- *
- * @param string $template Template path.
- * @return string Filtered template path.
- */
-function load_upload_request_template( string $template ): string {
-	if ( is_singular( 'mexp-upload-request' ) ) {
-		require_once plugin_dir_path( __FILE__ ) . '/class-cross-origin-isolation.php';
-		$instance = new Cross_Origin_Isolation();
-		$instance->register();
-		$instance->send_headers();
-
-		return __DIR__ . '/templates/upload-request.php';
-	}
-
-	return $template;
-}
-
-/**
  * Adds a new cron schedule for running every 15 minutes.
  *
  * @param array $schedules Cron schedules.
@@ -1188,7 +1357,7 @@ function rest_post_dispatch_add_server_timing( $response ) {
 		return $response;
 	}
 
-	$server_timing = perflab_server_timing();
+	$server_timing = \perflab_server_timing();
 
 	do_action( 'perflab_server_timing_send_header' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 
@@ -1205,7 +1374,7 @@ function rest_post_dispatch_add_server_timing( $response ) {
  * @param string $rules mod_rewrite Rewrite rules formatted for .htaccess.
  * @return string Filtered rewrite rules.
  */
-function filter_mod_rewrite_rules( string $rules ) {
+function filter_mod_rewrite_rules( string $rules ): string {
 	$rules .= "\n# BEGIN Media Experiments\n" .
 				"AddType application/wasm wasm\n" .
 				"# END Media Experiments\n";

@@ -32,11 +32,6 @@ import {
  */
 import './view.css';
 
-void dispatch( uploadStore ).updateSettings( {
-	mediaUpload: uploadMedia,
-	mediaSideload: originalSideloadMedia,
-} );
-
 /**
  * Upload a media file when the file upload button is activated.
  *
@@ -128,6 +123,11 @@ function uploadRequestUploadMedia( {
 		additionalData,
 	} );
 }
+
+void dispatch( uploadStore ).updateSettings( {
+	mediaUpload: uploadMedia,
+	mediaSideload: originalSideloadMedia,
+} );
 
 export function App() {
 	const { createErrorNotice, createSuccessNotice, removeNotice } =

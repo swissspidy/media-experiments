@@ -23,9 +23,8 @@ function getExtension( mimeType: string ): ImageFormat {
 	return ( mimeType.split( '/' )[ 1 ] || 'jpeg' ) as ImageFormat;
 }
 
-// Initialize default settings as soon as base data is available.
-const unsubscribeCoreStore = subscribe( () => {
-	const siteData = select( coreStore ).getEntityRecord<
+function fetchBaseRecord() {
+	return select( coreStore ).getEntityRecord<
 		// @ts-ignore
 		RestBaseRecord | undefined
 	>( 'root', '__unstableBase', undefined, {
@@ -39,6 +38,14 @@ const unsubscribeCoreStore = subscribe( () => {
 			'image_sizes',
 		],
 	} );
+}
+
+// Initial fetch triggers state update in subscribe() block below.
+fetchBaseRecord();
+
+// Initialize default settings as soon as base data is available.
+const unsubscribeCoreStore = subscribe( () => {
+	const siteData = fetchBaseRecord();
 
 	if ( ! siteData ) {
 		return;

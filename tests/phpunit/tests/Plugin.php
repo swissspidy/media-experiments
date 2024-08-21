@@ -3,8 +3,11 @@
 namespace MediaExperiments\Tests;
 
 use MediaExperiments\REST_Attachments_Controller;
+use WP_REST_Request;
+use WP_REST_Server;
 use WP_UnitTest_Factory;
 use WP_UnitTestCase;
+use function MediaExperiments\add_crossorigin_attributes;
 use function MediaExperiments\delete_old_upload_requests;
 use function MediaExperiments\enqueue_block_assets;
 use function MediaExperiments\enqueue_block_editor_assets;
@@ -14,6 +17,8 @@ use function MediaExperiments\get_attachment_filesize;
 use function MediaExperiments\get_default_image_output_formats;
 use function MediaExperiments\get_user_media_preferences;
 use function MediaExperiments\is_upload_screen;
+use function MediaExperiments\needs_cross_origin_isolation;
+use function MediaExperiments\override_media_templates;
 use function MediaExperiments\register_assets;
 use function MediaExperiments\register_attachment_post_meta;
 use function MediaExperiments\register_media_source_taxonomy;
@@ -60,6 +65,80 @@ class Test_Plugin extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @covers \MediaExperiments\needs_cross_origin_isolation
+	 */
+	public function test_needs_cross_origin_isolation_cannot_upload() {
+		$this->assertFalse( needs_cross_origin_isolation() );
+	}
+
+	/**
+	 * @covers \MediaExperiments\needs_cross_origin_isolation
+	 */
+	public function test_needs_cross_origin_isolation_admin() {
+		wp_set_current_user( self::$admin_id );
+
+		$this->assertTrue( needs_cross_origin_isolation() );
+	}
+
+	/**
+	 * @covers \MediaExperiments\add_crossorigin_attributes
+	 */
+	public function test_add_crossorigin_attributes() {
+		$html = <<<HTML
+<img src="https://www.someothersite.com/test1.jpg" />
+<img src="test2.jpg" />
+<audio><source src="https://www.someothersite.com/test1.mp3"></audio>
+<audio src="https://www.someothersite.com/test1.mp3"></audio>
+<audio src="/test2.mp3"></audio>
+<video><source src="https://www.someothersite.com/test1.mp4"></video>
+<video src="https://www.someothersite.com/test1.mp4"></video>
+<video src="/test2.mp4"></video>
+<script src="https://www.someothersite.com/test1.js"></script>
+<script src="/test2.js"></script>
+<link href="https://www.someothersite.com/test1.css"></link>
+<link href="/test2.css"></link>
+HTML;
+
+		$expected = <<<HTML
+<img crossorigin="anonymous" src="https://www.someothersite.com/test1.jpg" />
+<img crossorigin="anonymous" src="test2.jpg" />
+<audio crossorigin="anonymous"><source src="https://www.someothersite.com/test1.mp3"></audio>
+<audio crossorigin="anonymous" src="https://www.someothersite.com/test1.mp3"></audio>
+<audio src="/test2.mp3"></audio>
+<video crossorigin="anonymous"><source src="https://www.someothersite.com/test1.mp4"></video>
+<video crossorigin="anonymous" src="https://www.someothersite.com/test1.mp4"></video>
+<video src="/test2.mp4"></video>
+<script crossorigin="anonymous" src="https://www.someothersite.com/test1.js"></script>
+<script src="/test2.js"></script>
+<link crossorigin="anonymous" href="https://www.someothersite.com/test1.css"></link>
+<link href="/test2.css"></link>
+HTML;
+
+		$actual = add_crossorigin_attributes( $html );
+
+		$this->assertSame( $expected, $actual );
+	}
+
+	/**
+	 * @covers \MediaExperiments\override_media_templates
+	 */
+	public function test_override_media_templates(): void {
+		if ( ! function_exists( '\wp_print_media_templates' ) ) {
+			require_once ABSPATH . WPINC . '/media-template.php';
+		}
+
+		override_media_templates();
+
+		ob_start();
+		do_action( 'admin_footer' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( '<audio crossorigin="anonymous"', $output );
+		$this->assertStringContainsString( '<img crossorigin="anonymous"', $output );
+		$this->assertStringContainsString( '<video crossorigin="anonymous"', $output );
+	}
+
+	/**
 	 * @covers \MediaExperiments\get_user_media_preferences
 	 */
 	public function test_get_user_media_preferences() {
@@ -89,6 +168,28 @@ class Test_Plugin extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @covers \MediaExperiments\filter_big_image_size_threshold
+	 */
+	public function test_filter_big_image_size_threshold_no_user() {
+		$image_size_threshold = (int) apply_filters( 'big_image_size_threshold', 2560, array( 0, 0 ), '', 0 ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+
+		$this->assertSame( 2560, $image_size_threshold );
+	}
+
+	/**
+	 * @covers \MediaExperiments\filter_big_image_size_threshold
+	 */
+	public function test_filter_big_image_size_threshold_no_preference() {
+		wp_set_current_user( self::$admin_id );
+
+		add_user_meta( self::$admin_id, 'wp_persisted_preferences', [ 'media-experiments/preferences' => [] ] );
+
+		$image_size_threshold = (int) apply_filters( 'big_image_size_threshold', 2560, array( 0, 0 ), '', 0 ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+
+		$this->assertSame( 2560, $image_size_threshold );
+	}
+
+	/**
 	 * @covers \MediaExperiments\filter_image_save_progressive
 	 */
 	public function test_filter_image_save_progressive() {
@@ -110,6 +211,39 @@ class Test_Plugin extends WP_UnitTestCase {
 
 		$this->assertFalse( $jpeg_interlaced );
 		$this->assertTrue( $png_interlaced );
+	}
+
+	/**
+	 * @covers \MediaExperiments\filter_image_save_progressive
+	 */
+	public function test_filter_image_save_progressive_no_user() {
+
+		$jpeg_interlaced = (bool) apply_filters( 'image_save_progressive', true, 'image/jpeg' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+		$png_interlaced  = (bool) apply_filters( 'image_save_progressive', false, 'image/png' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+
+		$this->assertTrue( $jpeg_interlaced );
+		$this->assertFalse( $png_interlaced );
+	}
+
+	/**
+	 * @covers \MediaExperiments\filter_image_save_progressive
+	 */
+	public function test_filter_image_save_progressive_no_preference() {
+		wp_set_current_user( self::$admin_id );
+
+		add_user_meta(
+			self::$admin_id,
+			'wp_persisted_preferences',
+			[
+				'media-experiments/preferences' => [],
+			]
+		);
+
+		$jpeg_interlaced = (bool) apply_filters( 'image_save_progressive', true, 'image/jpeg' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+		$png_interlaced  = (bool) apply_filters( 'image_save_progressive', false, 'image/png' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+
+		$this->assertTrue( $jpeg_interlaced );
+		$this->assertFalse( $png_interlaced );
 	}
 
 	/**
@@ -176,6 +310,41 @@ class Test_Plugin extends WP_UnitTestCase {
 			$this->assertIsInt( $size['height'] );
 			$this->assertIsString( $size['name'] );
 		}
+	}
+
+	/**
+	 * @covers \MediaExperiments\filter_rest_index
+	 */
+	public function test_get_rest_index_should_return_additional_settings() {
+		$server = new WP_REST_Server();
+
+		$request = new WP_REST_Request( 'GET', '/' );
+		$index   = $server->dispatch( $request );
+		$data    = $index->get_data();
+
+		$this->assertArrayHasKey( 'image_size_threshold', $data );
+		$this->assertArrayHasKey( 'video_size_threshold', $data );
+		$this->assertArrayHasKey( 'image_output_formats', $data );
+		$this->assertArrayHasKey( 'jpeg_interlaced', $data );
+		$this->assertArrayHasKey( 'png_interlaced', $data );
+		$this->assertArrayHasKey( 'gif_interlaced', $data );
+		$this->assertArrayHasKey( 'image_sizes', $data );
+	}
+
+	/**
+	 * @covers \MediaExperiments\filter_mod_rewrite_rules
+	 */
+	public function test_filter_mod_rewrite_rules() {
+		$this->set_permalink_structure( '/%year%/%postname%/' );
+
+		/**
+		 * @var \WP_Rewrite $wp_rewrite
+		 */
+		global $wp_rewrite;
+
+		$rules = $wp_rewrite->mod_rewrite_rules();
+
+		$this->assertStringContainsString( 'AddType application/wasm wasm', $rules );
 	}
 
 	/**
