@@ -53,21 +53,205 @@ function filter_update_plugins( $update, $plugin_data, string $plugin_file ) {
 }
 
 /**
+ * Determines whether "full" cross-origin isolation is needed.
+ *
+ * By default, `crossorigin="anonymous"` attributes are added to all external
+ * resources to make sure they can be accessed programmatically (e.g. by html-to-image).
+ *
+ * However, actual cross-origin isolation by sending COOP and COEP headers is only
+ * needed when video optimization is enabled
+ *
+ * @link https://web.dev/coop-coep/
+ *
+ * @return bool Whether the conditional object is needed.
+ */
+function needs_cross_origin_isolation(): bool {
+	// See https://github.com/WordPress/wordpress-playground/issues/952.
+	if ( defined( 'MEXP_IS_PLAYGROUND' ) && MEXP_IS_PLAYGROUND ) {
+		return false;
+	}
+
+	if ( is_singular( 'mexp-upload-request' ) ) {
+		return true;
+	}
+
+	$user_id = get_current_user_id();
+	if ( ! $user_id ) {
+		return false;
+	}
+
+	// Cross-origin isolation is not needed if users can't upload files anyway.
+	if ( ! user_can( $user_id, 'upload_files' ) ) {
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Enables cross-origin isolation in the block editor.
+ *
+ * Required for enabling SharedArrayBuffer for WebAssembly-based
+ * media processing in the editor.
+ *
+ * @link https://web.dev/coop-coep/
+ */
+function start_cross_origin_isolation_output_buffer(): void {
+	global $is_safari;
+
+	$coep = $is_safari ? 'require-corp' : 'credentialless';
+
+	ob_start(
+		function ( string $output, ?int $phase ) use ( $coep ): string {
+			// Only send the header when the buffer is not being cleaned.
+			if ( ( $phase & PHP_OUTPUT_HANDLER_CLEAN ) === 0 ) {
+				header( 'Cross-Origin-Opener-Policy: same-origin' );
+				header( "Cross-Origin-Embedder-Policy: $coep" );
+
+				$output = add_crossorigin_attributes( $output );
+			}
+
+			return $output;
+		}
+	);
+}
+
+/**
+ * Adds crossorigin="anonymous" to relevant tags in the given HTML string.
+ *
+ * @param string $html HTML input.
+ *
+ * @return string Modified HTML.
+ */
+function add_crossorigin_attributes( string $html ): string {
+	$site_url = site_url();
+
+	$processor = new \WP_HTML_Tag_Processor( $html );
+
+	// See https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/crossorigin.
+	$tags = [
+		'AUDIO'  => 'src',
+		'IMG'    => 'src',
+		'LINK'   => 'href',
+		'SCRIPT' => 'src',
+		'VIDEO'  => 'src',
+		'SOURCE' => 'src',
+	];
+
+	$tag_names = array_keys( $tags );
+
+	while ( $processor->next_tag() ) {
+		$tag = $processor->get_tag();
+
+		if ( ! in_array( $tag, $tag_names, true ) ) {
+			continue;
+		}
+
+		if ( 'AUDIO' === $tag || 'VIDEO' === $tag ) {
+			$processor->set_bookmark( 'audio-video-parent' );
+		}
+
+		$processor->set_bookmark( 'resume' );
+
+		$seeked = false;
+
+		$crossorigin = $processor->get_attribute( 'crossorigin' );
+
+		$url = $processor->get_attribute( $tags[ $tag ] );
+
+		if ( is_string( $url ) && ! str_starts_with( $url, $site_url ) && ! str_starts_with( $url, '/' ) && ! is_string( $crossorigin ) ) {
+			if ( 'SOURCE' === $tag ) {
+				$seeked = $processor->seek( 'audio-video-parent' );
+
+				if ( $seeked ) {
+					$processor->set_attribute( 'crossorigin', 'anonymous' );
+				}
+			} else {
+				$processor->set_attribute( 'crossorigin', 'anonymous' );
+			}
+
+			if ( $seeked ) {
+				$processor->seek( 'resume' );
+				$processor->release_bookmark( 'audio-video-parent' );
+			}
+		}
+	}
+
+	return $processor->get_updated_html();
+}
+
+/**
  * Sets up cross-origin isolation in the block editor.
  *
  * @codeCoverageIgnore
  *
- * @param WP_Screen $screen Current WP_Screen object.
  * @return void
  */
-function set_up_cross_origin_isolation_editor( WP_Screen $screen ): void {
+function set_up_cross_origin_isolation_editor(): void {
+	$screen = get_current_screen();
+
+	if ( ! $screen ) {
+		return;
+	}
+
 	if ( ! $screen->is_block_editor() && 'site-editor' !== $screen->id && ! ( 'widgets' === $screen->id && wp_use_widgets_block_editor() ) ) {
 		return;
 	}
 
-	require_once plugin_dir_path( __FILE__ ) . '/class-cross-origin-isolation.php';
-	$instance = new Cross_Origin_Isolation();
-	$instance->register();
+	if ( ! needs_cross_origin_isolation() ) {
+		return;
+	}
+
+	start_cross_origin_isolation_output_buffer();
+}
+
+/**
+ * Overrides templates from wp_print_media_templates with custom ones.
+ *
+ * Adds `crossorigin` attribute to all tags that
+ * could have assets loaded from a different domain.
+ */
+function override_media_templates(): void {
+	remove_action( 'admin_footer', 'wp_print_media_templates' );
+	add_action(
+		'admin_footer',
+		static function (): void {
+			ob_start();
+			wp_print_media_templates();
+			$html = (string) ob_get_clean();
+
+			// TODO: Eventually use HTML API once feasible.
+
+			$tags = [
+				'audio',
+				'img',
+				'video',
+			];
+			foreach ( $tags as $tag ) {
+				$html = (string) str_replace( '<' . $tag, '<' . $tag . ' crossorigin="anonymous"', $html );
+			}
+
+			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		}
+	);
+}
+
+/**
+ * Filters the path of the queried template for single upload requests.
+ *
+ * @codeCoverageIgnore
+ *
+ * @param string $template Template path.
+ * @return string Filtered template path.
+ */
+function load_upload_request_template( string $template ): string {
+	if ( is_singular( 'mexp-upload-request' ) ) {
+		start_cross_origin_isolation_output_buffer();
+
+		return __DIR__ . '/templates/upload-request.php';
+	}
+
+	return $template;
 }
 
 /**
@@ -387,7 +571,7 @@ function register_rest_fields(): void {
  *
  * @param WP_REST_Response $response Response data.
  */
-function filter_rest_index( WP_REST_Response $response ) {
+function filter_rest_index( WP_REST_Response $response ): WP_REST_Response {
 	/** This filter is documented in wp-admin/includes/images.php */
 	$image_size_threshold = (int) apply_filters( 'big_image_size_threshold', 2560, array( 0, 0 ), '', 0 ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 
@@ -500,7 +684,7 @@ function get_attachment_filesize( int $attachment_id ): ?int {
 /**
  * Returns the attachment's BlurHash.
  *
- * @param array $post Post data.
+ * @param array{id: int} $post Post data.
  * @return string|null Attachment BlurHash.
  */
 function rest_get_attachment_blurhash( array $post ): ?string {
@@ -511,7 +695,7 @@ function rest_get_attachment_blurhash( array $post ): ?string {
 /**
  * Returns the attachment's dominant color.
  *
- * @param array $post Post data.
+ * @param array{id: int} $post Post data.
  * @return int|null Attachment dominant color.
  */
 function rest_get_attachment_dominant_color( array $post ): ?string {
@@ -522,7 +706,7 @@ function rest_get_attachment_dominant_color( array $post ): ?string {
 /**
  * Returns whether the attachment is muted.
  *
- * @param array $post Post data.
+ * @param array{id: int} $post Post data.
  * @return bool Whether attachment is muted.
  */
 function rest_get_attachment_is_muted( array $post ): bool {
@@ -533,7 +717,7 @@ function rest_get_attachment_is_muted( array $post ): bool {
 /**
  * Returns whether the attachment has transparency (alpha channel).
  *
- * @param array $post Post data.
+ * @param array{id: int} $post Post data.
  * @return bool|null Whether attachment has transparency.
  */
 function rest_get_attachment_has_transparency( array $post ): ?bool {
@@ -544,7 +728,7 @@ function rest_get_attachment_has_transparency( array $post ): ?bool {
 /**
  * Returns the URL of the original file if this is an optimized one
  *
- * @param array $post Post data.
+ * @param array{id: int} $post Post data.
  * @return string|null Original URL if applicable.
  */
 function rest_get_attachment_original_file( array $post ): ?string {
@@ -1069,27 +1253,6 @@ function filter_rest_route_for_post_for_upload_requests( string $route, WP_Post 
 	}
 
 	return $route;
-}
-
-/**
- * Filters the path of the queried template for single upload requests.
- *
- * @codeCoverageIgnore
- *
- * @param string $template Template path.
- * @return string Filtered template path.
- */
-function load_upload_request_template( string $template ): string {
-	if ( is_singular( 'mexp-upload-request' ) ) {
-		require_once plugin_dir_path( __FILE__ ) . '/class-cross-origin-isolation.php';
-		$instance = new Cross_Origin_Isolation();
-		$instance->register();
-		$instance->send_headers();
-
-		return __DIR__ . '/templates/upload-request.php';
-	}
-
-	return $template;
 }
 
 /**
