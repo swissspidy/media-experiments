@@ -33,6 +33,6 @@
 		}
 	},
 	"dependencies": {
-		"@huggingface/transformers": "^3.0.0-alpha.7"
+		"@huggingface/transformers": "^3.0.0-alpha.9"
 	}
 }
