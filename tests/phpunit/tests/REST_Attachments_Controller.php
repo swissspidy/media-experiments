@@ -543,7 +543,7 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 
 		update_option( 'uploads_use_yearmonth_folders', 0 );
 
-		$this->assertSame( 201, $response->get_status() );
+		$this->assertSame( 200, $response->get_status() );
 
 		$attachment = get_post( $data['id'] );
 
@@ -604,7 +604,7 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 		$m      = substr( $time, 5, 2 );
 		$subdir = "/$y/$m";
 
-		$this->assertSame( 201, $response->get_status() );
+		$this->assertSame( 200, $response->get_status() );
 
 		$attachment = get_post( $data['id'] );
 
