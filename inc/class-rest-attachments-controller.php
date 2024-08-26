@@ -43,43 +43,10 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	public function register_routes(): void {
 		parent::register_routes();
 
-		$args                       = $this->get_endpoint_args_for_item_schema();
-		$args['generate_sub_sizes'] = [
-			'type'        => 'boolean',
-			'default'     => true,
-			'description' => __( 'Whether to generate image sub sizes.', 'media-experiments' ),
-		];
-		$args['convert_format']     = [
-			'type'        => 'boolean',
-			'default'     => true,
-			'description' => __( 'Whether to support server-side format conversion.', 'media-experiments' ),
-		];
-		$args['upload_request']     = [
-			'description' => __( 'Upload request this file is for.', 'media-experiments' ),
-			'type'        => 'string',
-		];
+		$valid_image_sizes = array_keys( wp_get_registered_image_subsizes() );
 
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base,
-			[
-				[
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'get_items' ],
-					'permission_callback' => [ $this, 'get_items_permissions_check' ],
-					'args'                => $this->get_collection_params(),
-				],
-				[
-					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => [ $this, 'create_item' ],
-					'permission_callback' => [ $this, 'create_item_permissions_check' ],
-					'args'                => $args,
-				],
-				'allow_batch' => $this->allow_batch,
-				'schema'      => [ $this, 'get_public_item_schema' ],
-			],
-			true
-		);
+		// Special case to set 'original_image' in attachment metadata.
+		$valid_image_sizes[] = 'original';
 
 		register_rest_route(
 			$this->namespace,
@@ -97,6 +64,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 						'image_size'     => [
 							'description' => __( 'Image size.', 'media-experiments' ),
 							'type'        => 'string',
+							'enum'        => $valid_image_sizes,
 							'required'    => true,
 						],
 						'upload_request' => [
@@ -109,6 +77,34 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 				'schema'      => [ $this, 'get_public_item_schema' ],
 			]
 		);
+	}
+
+
+	/**
+	 * Retrieves an array of endpoint arguments from the item schema for the controller.
+	 *
+	 * @param string $method Optional. HTTP method of the request. The arguments for `CREATABLE` requests are
+	 *                       checked for required values and may fall-back to a given default, this is not done
+	 *                       on `EDITABLE` requests. Default WP_REST_Server::CREATABLE.
+	 * @return array Endpoint arguments.
+	 */
+	public function get_endpoint_args_for_item_schema( $method = WP_REST_Server::CREATABLE ) {
+		$args = rest_get_endpoint_args_for_schema( $this->get_item_schema(), $method );
+
+		if ( WP_REST_Server::CREATABLE === $method ) {
+			$args['generate_sub_sizes'] = array(
+				'type'        => 'boolean',
+				'default'     => true,
+				'description' => __( 'Whether to generate image sub sizes.', 'gutenberg' ),
+			);
+			$args['convert_format']     = array(
+				'type'        => 'boolean',
+				'default'     => true,
+				'description' => __( 'Whether to convert image formats.', 'gutenberg' ),
+			);
+		}
+
+		return $args;
 	}
 
 	/**
@@ -184,7 +180,10 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		$data = $response->get_data();
 
-		if ( rest_is_field_included( 'missing_image_sizes', $fields ) ) {
+		if (
+			rest_is_field_included( 'missing_image_sizes', $fields ) &&
+			empty( $data['missing_image_sizes'] )
+		) {
 			$mime_type = get_post_mime_type( $item );
 			if ( 'application/pdf' === $mime_type ) {
 				// Try to create missing image sizes for PDFs.
@@ -242,13 +241,13 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 * @phpstan-param WP_REST_Request<UploadRequest> $request
 	 */
 	public function create_item( $request ): WP_Error|WP_REST_Response {
-		if ( false === $request['generate_sub_sizes'] ) {
+		if ( ! $request['generate_sub_sizes'] ) {
 			add_filter( 'intermediate_image_sizes_advanced', '__return_empty_array', 100 );
 			add_filter( 'fallback_intermediate_image_sizes', '__return_empty_array', 100 );
 
 		}
 
-		if ( false === $request['convert_format'] ) {
+		if ( ! $request['convert_format'] ) {
 			// Prevent image conversion as that is done client-side.
 			add_filter( 'image_editor_output_format', '__return_empty_array', 100 );
 		}
@@ -383,7 +382,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			 *
 			 * @var int $attachment_id
 			 */
-			$attachment_id = $response->get_data()['id']; // TODO: Improve phpstan typing.
+			$attachment_id = $response->get_data()['id'];
 
 			add_post_meta(
 				$upload_request->ID,
@@ -560,6 +559,62 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	}
 
 	/**
+	 * Returns a closure for filtering {@see 'wp_unique_filename'} during sideloads.
+	 *
+	 * {@see wp_unique_filename()} will always add numeric suffix if the name looks like a sub-size to avoid conflicts.
+	 *
+	 * Adding this closure to the filter helps work around this safeguard.
+	 *
+	 * Example: when uploading myphoto.jpeg, WordPress normally creates myphoto-150x150.jpeg,
+	 * and when uploading myphoto-150x150.jpeg, it will be renamed to myphoto-150x150-1.jpeg
+	 * However, here it is desired not to add the suffix in order to maintain the same
+	 * naming convention as if the file was uploaded regularly.
+	 *
+	 * @link https://github.com/WordPress/wordpress-develop/blob/30954f7ac0840cfdad464928021d7f380940c347/src/wp-includes/functions.php#L2576-L2582
+	 *
+	 * @param string $attachment_filename Attachment file name.
+	 * @return callable Function to add to the filter.
+	 */
+	private function get_wp_unique_filename_filter( $attachment_filename ) {
+		/**
+		 * Filters the result when generating a unique file name.
+		 *
+		 * @param string        $filename                 Unique file name.
+		 * @param string        $ext                      File extension. Example: ".png".
+		 * @param string        $dir                      Directory path.
+		 * @param callable|null $unique_filename_callback Callback function that generates the unique file name.
+		 * @param string[]      $alt_filenames            Array of alternate file names that were checked for collisions.
+		 * @param int|string    $number                   The highest number that was used to make the file name unique
+		 *                                                or an empty string if unused.
+		 *
+		 * @return string Filtered file name.
+		 */
+		return static function ( $filename, $ext, $dir, $unique_filename_callback, $alt_filenames, $number ) use ( $attachment_filename ) {
+			if ( empty( $number ) || ! $attachment_filename ) {
+				return $filename;
+			}
+
+			$ext       = pathinfo( $filename, PATHINFO_EXTENSION );
+			$name      = pathinfo( $filename, PATHINFO_FILENAME );
+			$orig_name = pathinfo( $attachment_filename, PATHINFO_FILENAME );
+
+			if ( ! $ext || ! $name ) {
+				return $filename;
+			}
+
+			$matches = array();
+			if ( preg_match( '/(.*)(-\d+x\d+)-' . $number . '$/', $name, $matches ) ) {
+				$filename_without_suffix = $matches[1] . $matches[2] . ".$ext";
+				if ( $matches[1] === $orig_name && ! file_exists( "$dir/$filename_without_suffix" ) ) {
+					return $filename_without_suffix;
+				}
+			}
+
+			return $filename;
+		};
+	}
+
+	/**
 	 * Side-loads a media file without creating an attachment.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -577,7 +632,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			);
 		}
 
-		if ( false === $request['convert_format'] ) {
+		if ( ! $request['convert_format'] ) {
 			// Prevent image conversion as that is done client-side.
 			add_filter( 'image_editor_output_format', '__return_empty_array', 100 );
 		}
@@ -593,44 +648,9 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		// With this filter we can work around this safeguard.
 
 		$attachment_filename = get_attached_file( $attachment_id, true );
-		$attachment_filename = $attachment_filename ? basename( $attachment_filename ) : null;
+		$attachment_filename = $attachment_filename ? wp_basename( $attachment_filename ) : null;
 
-		/**
-		 * Filters the result when generating a unique file name.
-		 *
-		 * @param string        $filename                 Unique file name.
-		 * @param string        $ext                      File extension. Example: ".png".
-		 * @param string        $dir                      Directory path.
-		 * @param callable|null $unique_filename_callback Callback function that generates the unique file name.
-		 * @param string[]      $alt_filenames            Array of alternate file names that were checked for collisions.
-		 * @param int|string    $number                   The highest number that was used to make the file name unique
-		 *                                                or an empty string if unused.
-		 *
-		 * @return string Filtered file name.
-		 */
-		$filter_filename = static function ( $filename, $ext, $dir, $unique_filename_callback, $alt_filenames, $number ) use ( $attachment_filename ) {
-			if ( empty( $number ) || ! $attachment_filename ) {
-				return $filename;
-			}
-
-			$ext       = pathinfo( $filename, PATHINFO_EXTENSION );
-			$name      = pathinfo( $filename, PATHINFO_FILENAME );
-			$orig_name = pathinfo( $attachment_filename, PATHINFO_FILENAME );
-
-			if ( ! $ext || ! $name ) {
-				return $filename;
-			}
-
-			$matches = [];
-			if ( preg_match( '/(.*)(-\d+x\d+)-' . $number . '$/', $name, $matches ) ) {
-				$filename_without_suffix = $matches[1] . $matches[2] . ".$ext";
-				if ( $matches[1] === $orig_name && ! file_exists( "$dir/$filename_without_suffix" ) ) {
-					return $filename_without_suffix;
-				}
-			}
-
-			return $filename;
-		};
+		$filter_filename = $this->get_wp_unique_filename_filter( $attachment_filename );
 
 		add_filter( 'wp_unique_filename', $filter_filename, 10, 6 );
 
@@ -660,7 +680,6 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		$type = $file['type'];
 		$path = $file['file'];
 
-		// TODO: Better fallback if image_size is not provided.
 		$image_size = $request['image_size'];
 
 		$metadata = wp_get_attachment_metadata( $attachment_id, true );
@@ -670,7 +689,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		}
 
 		if ( 'original' === $image_size ) {
-			$metadata['original_image'] = basename( $path );
+			$metadata['original_image'] = wp_basename( $path );
 		} else {
 			$metadata['sizes'] = $metadata['sizes'] ?? [];
 
@@ -679,7 +698,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			$metadata['sizes'][ $image_size ] = [
 				'width'     => $size ? $size[0] : 0,
 				'height'    => $size ? $size[1] : 0,
-				'file'      => basename( $path ),
+				'file'      => wp_basename( $path ),
 				'mime-type' => $type,
 				'filesize'  => wp_filesize( $path ),
 			];
@@ -689,10 +708,10 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		$response_request = new WP_REST_Request(
 			WP_REST_Server::READABLE,
-			rest_url( sprintf( '%s/%s/%d', $this->namespace, $this->rest_base, $attachment_id ) )
+			rest_get_route_for_post( $attachment_id )
 		);
 
-		$response_request->set_param( 'context', 'edit' );
+		$response_request['context'] = 'edit';
 
 		if ( isset( $request['_fields'] ) ) {
 			$response_request['_fields'] = $request['_fields'];
@@ -700,8 +719,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		$response = $this->prepare_item_for_response( get_post( $attachment_id ), $response_request );
 
-		$response->set_status( 201 );
-		$response->header( 'Location', rest_url( sprintf( '%s/%s/%d', $this->namespace, $this->rest_base, $attachment_id ) ) );
+		$response->header( 'Location', rest_url( rest_get_route_for_post( $attachment_id ) ) );
 
 		// @codeCoverageIgnoreStart
 		if ( function_exists( 'perflab_server_timing_register_metric' ) ) {

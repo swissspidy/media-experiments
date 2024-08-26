@@ -10,7 +10,10 @@ export function flattenFormData(
 	key: string,
 	data: string | undefined | Record< string, string >
 ) {
-	if ( typeof data === 'object' ) {
+	if (
+		typeof data === 'object' &&
+		Object.getPrototypeOf( data ) === Object.prototype
+	) {
 		for ( const name in data ) {
 			if ( Object.prototype.hasOwnProperty.call( data, name ) ) {
 				flattenFormData(
@@ -21,6 +24,6 @@ export function flattenFormData(
 			}
 		}
 	} else if ( data !== undefined ) {
-		formData.append( key, data );
+		formData.append( key, String( data ) );
 	}
 }
