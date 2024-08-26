@@ -479,7 +479,7 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 
-		$this->assertSame( 201, $response->get_status() );
+		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( 'image', $data['media_type'] );
 		$this->assertArrayHasKey( 'missing_image_sizes', $data );
 		$this->assertEmpty( $data['missing_image_sizes'] );
