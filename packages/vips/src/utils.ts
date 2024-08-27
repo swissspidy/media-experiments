@@ -45,7 +45,9 @@ export function supportsQuality(
  * @param type Mime type.
  * @return Whether the file supports animation.
  */
-export function supportsAnimation( type: string ): type is 'image/webp' | 'image/gif' {
+export function supportsAnimation(
+	type: string
+): type is 'image/webp' | 'image/gif' {
 	return [ 'image/webp', 'image/gif' ].includes( type );
 }
 
