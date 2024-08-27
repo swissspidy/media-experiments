@@ -19,11 +19,18 @@ import VipsJxlModule from 'wasm-vips/vips-jxl.wasm';
  * Internal dependencies
  */
 import type {
+	ItemId,
 	ImageSizeCrop,
 	LoadOptions,
 	SaveOptions,
 	ThumbnailOptions,
 } from './types';
+import {
+	isFileTypeSupported,
+	supportsAnimation,
+	supportsInterlace,
+	supportsQuality,
+} from './utils';
 
 type EmscriptenModule = {
 	setAutoDeleteLater: ( autoDelete: boolean ) => void;
@@ -35,7 +42,10 @@ let location = '';
 /**
  * Dynamically sets the location / public path to use for loading the WASM files.
  *
- * @param newLocation Location, typically a base URL such as "https://example.com/wp-content/...".
+ * This is required when loading this module in an inline worker,
+ * where globals such as __webpack_public_path__ are not available.
+ *
+ * @param newLocation Location, typically a base URL such as "https://example.com/path/to/js/...".
  */
 export function setLocation( newLocation: string ) {
 	location = newLocation;
@@ -44,8 +54,6 @@ export function setLocation( newLocation: string ) {
 let cleanup: () => void;
 
 let vipsInstance: typeof Vips;
-
-type ItemId = string;
 
 /**
  * Instantiates and returns a new vips instance.
@@ -82,51 +90,18 @@ async function getVips(): Promise< typeof Vips > {
 }
 
 /**
- * Determines whether a given file type supports a quality setting,
+ * Holds a list of ongoing operations for a given ID.
  *
- * @todo Make this smarter.
- *
- * @param type Mime type.
- * @return Whether the file supports a quality setting.
+ * This way, operations can be cancelled mid-progress.
  */
-function supportsQuality(
-	type: string
-): type is 'image/jpeg' | 'image/png' | 'image/webp' | 'image/avif' {
-	return [ 'image/jpeg', 'image/png', 'image/webp', 'image/avif' ].includes(
-		type
-	);
-}
-
-/**
- * Determines whether a given file type supports animation,
- *
- * @todo Make this smarter.
- *
- * @param type Mime type.
- * @return Whether the file supports animation.
- */
-function supportsAnimation( type: string ): type is 'image/webp' | 'image/gif' {
-	return [ 'image/webp', 'image/gif' ].includes( type );
-}
-
-/**
- * Determines whether a given file type supports interlaced/progressive output.
- *
- * @todo Make this smarter.
- *
- * @param type Mime type.
- * @return Whether the file supports interlaced/progressive output.
- */
-function supportsInterlace(
-	type: string
-): type is 'image/jpeg' | 'image/gif' | 'image/png' {
-	return [ 'image/jpeg', 'image/gif', 'image/png' ].includes( type );
-}
-
 const inProgressOperations = new Set< ItemId >();
 
 /**
  * Cancels all ongoing image operations for a given item ID.
+ *
+ * The onProgress callbacks check for an IDs existence in this list,
+ * killing the process if it's absence.
+ *
  * @param id Item ID.
  * @return boolean Whether any operation was cancelled.
  */
@@ -143,6 +118,7 @@ export async function cancelOperations( id: ItemId ) {
  * @param outputType Output mime type.
  * @param quality    Desired quality.
  * @param interlaced Whether to use interlaced/progressive mode.
+ *                   Only used if the outputType supports it.
  */
 export async function convertImageFormat(
 	id: ItemId,
@@ -196,29 +172,6 @@ export async function convertImageFormat(
 	cleanup?.();
 
 	return result;
-}
-
-/**
- * Determines whether a given file type is supported by vips.
- *
- * @param type Mime type.
- * @return Whether the file type is supported.
- */
-function isFileTypeSupported(
-	type: string
-): type is
-	| 'image/jpeg'
-	| 'image/png'
-	| 'image/webp'
-	| 'image/avif'
-	| 'image/gif' {
-	return [
-		'image/jpeg',
-		'image/png',
-		'image/webp',
-		'image/avif',
-		'image/gif',
-	].includes( type );
 }
 
 /**
