@@ -182,6 +182,7 @@ export async function convertImageFormat(
  * @param type       Mime type.
  * @param quality    Desired quality.
  * @param interlaced Whether to use interlaced/progressive mode.
+ *                   Only used if the outputType supports it.
  * @return Compressed file data.
  */
 export async function compressImage(
