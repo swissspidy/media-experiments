@@ -100,7 +100,7 @@ const inProgressOperations = new Set< ItemId >();
  * Cancels all ongoing image operations for a given item ID.
  *
  * The onProgress callbacks check for an IDs existence in this list,
- * killing the process if it's absence.
+ * killing the process if it's absent.
  *
  * @param id Item ID.
  * @return boolean Whether any operation was cancelled.

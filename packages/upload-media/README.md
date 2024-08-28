@@ -22,6 +22,7 @@ _Parameters_
 -   _$0.onSuccess_ `[AddItemFromUrlArgs[ 'onSuccess' ]]`: Function called after the file is uploaded.
 -   _$0.onError_ `[AddItemFromUrlArgs[ 'onError' ]]`: Function called when an error happens.
 -   _$0.additionalData_ `[AddItemFromUrlArgs[ 'additionalData' ]]`: Additional data to include in the request.
+-   _$0.allowedTypes_ `[AddItemFromUrlArgs[ 'allowedTypes' ]]`: Array with the types of media that can be uploaded, if unset all types are allowed.
 
 #### addItems
 
@@ -99,9 +100,6 @@ _Parameters_
 -   _$0.onSuccess_ `[MuteExistingVideoArgs[ 'onSuccess' ]]`: Function called after the file is uploaded.
 -   _$0.onError_ `[MuteExistingVideoArgs[ 'onError' ]]`: Function called when an error happens.
 -   _$0.additionalData_ `[MuteExistingVideoArgs[ 'additionalData' ]]`: Additional data to include in the request.
--   _$0.blurHash_ `[MuteExistingVideoArgs[ 'blurHash' ]]`: Item's BlurHash.
--   _$0.dominantColor_ `[MuteExistingVideoArgs[ 'dominantColor' ]]`: Item's dominant color.
--   _$0.generatedPosterId_ `[MuteExistingVideoArgs[ 'generatedPosterId' ]]`: Attachment ID of the generated poster image, if it exists.
 
 #### optimizeExistingItem
 
@@ -120,9 +118,6 @@ _Parameters_
 -   _$0.onBatchSuccess_ `[OptimizeExistingItemArgs[ 'onBatchSuccess' ]]`: Function called after a batch of files is uploaded.
 -   _$0.onError_ `[OptimizeExistingItemArgs[ 'onError' ]]`: Function called when an error happens.
 -   _$0.additionalData_ `[OptimizeExistingItemArgs[ 'additionalData' ]]`: Additional data to include in the request.
--   _$0.blurHash_ `[OptimizeExistingItemArgs[ 'blurHash' ]]`: Item's BlurHash.
--   _$0.dominantColor_ `[OptimizeExistingItemArgs[ 'dominantColor' ]]`: Item's dominant color.
--   _$0.generatedPosterId_ `[OptimizeExistingItemArgs[ 'generatedPosterId' ]]`: Attachment ID of the generated poster image, if it exists.
 -   _$0.startTime_ `[OptimizeExistingItemArgs[ 'startTime' ]]`: Time the action was initiated by the user (e.g. by clicking on a button).
 
 #### rejectApproval
@@ -171,8 +166,6 @@ _Parameters_
 -   _$0.additionalData_ `[AddItemArgs[ 'additionalData' ]]`: Additional data to include in the request.
 -   _$0.sourceUrl_ `[AddItemArgs[ 'sourceUrl' ]]`: Source URL. Used when importing a file from a URL or optimizing an existing file.
 -   _$0.sourceAttachmentId_ `[AddItemArgs[ 'sourceAttachmentId' ]]`: Source attachment ID. Used when optimizing an existing file for example.
--   _$0.blurHash_ `[AddItemArgs[ 'blurHash' ]]`: Item's BlurHash.
--   _$0.dominantColor_ `[AddItemArgs[ 'dominantColor' ]]`: Item's dominant color.
 -   _$0.abortController_ `[AddItemArgs[ 'abortController' ]]`: Abort controller for upload cancellation.
 -   _$0.operations_ `[AddItemArgs[ 'operations' ]]`: List of operations to perform. Defaults to automatically determined list, based on the file.
 
@@ -234,9 +227,17 @@ _Parameters_
 -   _id_ `QueueItemId`: Item ID.
 -   _updates_ `Partial< QueueItem >`: Updated item data.
 
-#### generateSubtitles
+#### generateImageCaptions
 
-Generates subtitles for the video item.
+Generates captions and alternative text for an image.
+
+_Parameters_
+
+-   _id_ `QueueItemId`: Item ID.
+
+#### generateMetadata
+
+Generates additional metadata like the dominant color for every item.
 
 _Parameters_
 
@@ -245,6 +246,14 @@ _Parameters_
 #### generateThumbnails
 
 Adds thumbnail versions to the queue for sideloading.
+
+_Parameters_
+
+-   _id_ `QueueItemId`: Item ID.
+
+#### generateVideoSubtitles
+
+Generates subtitles for a video.
 
 _Parameters_
 
@@ -440,6 +449,18 @@ _Returns_
 
 -   `Settings`: Settings
 
+#### isPendingApproval
+
+Determines whether there is an item pending approval.
+
+_Parameters_
+
+-   _state_ `State`: Upload state.
+
+_Returns_
+
+-   `boolean`: Whether there is an item pending approval.
+
 #### isPendingApprovalByAttachmentId
 
 Determines whether an item is the first one pending approval given its associated attachment ID.
@@ -452,18 +473,6 @@ _Parameters_
 _Returns_
 
 -   `boolean`: Whether the item is first in the list of items pending approval.
-
-#### isPendingApproval
-
-Determines whether there is an item pending approval.
-
-_Parameters_
-
--   _state_ `State`: Upload state.
-
-_Returns_
-
--   `boolean`: Whether there is an item pending approval.
 
 #### isUploading
 

@@ -28,7 +28,8 @@ _Parameters_
 -   _$0.attachmentId_ `SideloadMediaArgs[ 'attachmentId' ]`: Parent attachment ID.
 -   _$0.additionalData_ `SideloadMediaArgs[ 'additionalData' ]`: Additional data to include in the request.
 -   _$0.signal_ `SideloadMediaArgs[ 'signal' ]`: Abort signal.
--   _$0.onFileChange_ `SideloadMediaArgs[ 'onFileChange' ]`: 
+-   _$0.onFileChange_ `SideloadMediaArgs[ 'onFileChange' ]`: Function called each time a file or a temporary representation of the file is available.
+-   _$0.onError_ `SideloadMediaArgs[ 'onError' ]`: Function called when an error happens.
 
 ### transformAttachment
 
