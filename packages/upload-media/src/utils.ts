@@ -127,7 +127,7 @@ export async function fetchFile( url: string, nameOverride?: string ) {
 	if ( ! guessedMimeType ) {
 		throw new UploadError( {
 			code: 'FETCH_REMOTE_FILE_ERROR',
-			message: 'File could not be uploaded',
+			message: 'Remote file could not be downloaded',
 			file,
 		} );
 	}
