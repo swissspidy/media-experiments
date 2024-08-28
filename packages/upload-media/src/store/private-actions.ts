@@ -1067,7 +1067,7 @@ export function uploadSubtitles( id: QueueItemId ) {
 					};
 
 					// This might be confusing, but the idea is to update the original
-					// video item in the editor with the newly uploaded poster.
+					// video item in the editor with the newly uploaded tracks.
 					item.onChange?.( [ updatedAttachment ] );
 				},
 				additionalData: {
