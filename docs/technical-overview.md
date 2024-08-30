@@ -31,28 +31,23 @@ Versus on the client:
 sequenceDiagram
 	participant U as User
 	participant E as Editor
+	participant W as Worker
+	participant S as Server
 
 	U->>E: Drops image
-
-	create participant W as Web Worker
 
 	loop For every image size
         E->>W: Create thumbnail
 		destroy W
-	    W-->>E: Return thumbnail
+	    W-->>E: Return image
+		E-->>U: Updates image
+
+		E->>S: Upload thumbnail
+	    S-->>E: Returns partial attachment
+		E-->>U: Updates image
     end
 
-	create participant S as Server
-
-	loop For every image size
-		E->>S: Upload thumbnail
-		destroy S
-	    S-->>E: Returns partial attachment
-	end
-
-	E-->>U: Updates image
 ```
-
 
 ## Why client-side media processing
 
