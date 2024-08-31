@@ -3,9 +3,10 @@
  */
 import {
 	uploadMedia as originalUploadMedia,
-	validateFileSize,
-	validateMimeType,
-	validateMimeTypeForUser,
+	sideloadMedia as originalSideloadMedia,
+	validateFileSize as originalValidateFileSize,
+	validateMimeType as originalValidateMimeType,
+	validateMimeTypeForUser as originalValidateMimeTypeForUser,
 } from '@mexp/media-utils';
 
 /**
@@ -15,6 +16,8 @@ import { select } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
 
 const noop = () => {};
+
+export { originalSideloadMedia as mediaSideload };
 
 /**
  * Upload a media file when the file upload button is activated
@@ -33,7 +36,7 @@ const noop = () => {};
  * @param $0.onFileChange      Function called each time a file or a temporary representation of the file is available.
  * @param $0.signal            Abort signal.
  */
-export function editorUploadMedia( {
+export function mediaUpload( {
 	allowedTypes,
 	additionalData = {},
 	filesList,
@@ -79,9 +82,12 @@ export function editorUploadMedia( {
  *
  * @param file File object.
  */
-export function editorValidateFileSize( file: File ) {
+export function validateFileSize( file: File ) {
 	const { getEditorSettings } = select( editorStore );
-	return validateFileSize( file, getEditorSettings().maxUploadFileSize );
+	return originalValidateFileSize(
+		file,
+		getEditorSettings().maxUploadFileSize
+	);
 }
 
 /**
@@ -94,10 +100,10 @@ export function editorValidateFileSize( file: File ) {
  * @param file         File object.
  * @param allowedTypes Array with the types of media that can be uploaded, if unset all types are allowed.
  */
-export function editorValidateMimeType( file: File, allowedTypes?: string[] ) {
+export function validateMimeType( file: File, allowedTypes?: string[] ) {
 	const { getEditorSettings } = select( editorStore );
 	const wpAllowedMimeTypes = getEditorSettings().allowedMimeTypes;
 
-	validateMimeTypeForUser( file, wpAllowedMimeTypes );
-	validateMimeType( file, allowedTypes );
+	originalValidateMimeTypeForUser( file, wpAllowedMimeTypes );
+	originalValidateMimeType( file, allowedTypes );
 }
