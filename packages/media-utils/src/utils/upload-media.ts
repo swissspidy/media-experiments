@@ -6,11 +6,7 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import type {
-	AdditionalData,
-	OnChangeHandler,
-	OnErrorHandler,
-} from './types';
+import type { AdditionalData, OnChangeHandler, OnErrorHandler } from './types';
 import { uploadToServer } from './upload-to-server';
 import { validateMimeType } from './validate-mime-type';
 import { validateMimeTypeForUser } from './validate-mime-type-for-user';
