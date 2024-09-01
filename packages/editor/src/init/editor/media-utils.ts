@@ -20,12 +20,12 @@ const noop = () => {};
 export { originalSideloadMedia as mediaSideload };
 
 /**
- * Upload a media file when the file upload button is activated
- * or when adding a file to the editor via drag & drop.
+ * Upload a media file to the server.
  *
- * Similar to the mediaUpload() function from `@wordpress/editor`,
- * this is a wrapper around uploadMedia() from `@mexp/media-utils`
- * that injects the current post ID.
+ * Injects the current post ID into the original `uploadMedia()` function.
+ *
+ * @todo MERGE NOTE:
+ * Intended to replace the mediaUpload() function from `@wordpress/editor`.
  *
  * @param $0                   Parameters object passed to the function.
  * @param $0.allowedTypes      Array with the types of media that can be uploaded, if unset all types are allowed.
@@ -76,6 +76,7 @@ export function mediaUpload( {
 /**
  * Verifies whether the file is within the file upload size limits for the site.
  *
+ * @todo MERGE NOTE:
  * Intended to live in `@wordpress/editor` as a wrapper around
  * validateFileSize() from `@mexp/media-utils`
  * that injects the current site's file size limit.
@@ -93,6 +94,7 @@ export function validateFileSize( file: File ) {
 /**
  * Verifies if the caller (e.g. a block) supports this mime type.
  *
+ * @todo MERGE NOTE:
  * Intended to live in `@wordpress/editor` as a wrapper around
  * validateMimeType() and validateMimeTypeForUser() from `@mexp/media-utils`
  * that injects the current site's mime type limits.

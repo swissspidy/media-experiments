@@ -20,6 +20,7 @@ const noop = () => {};
  * Upload a media file when the file upload button is activated
  * or when adding a file to the editor via drag & drop.
  *
+ * @todo MERGE NOTE:
  * This function is intended to eventually live
  * in the `@wordpress/block-editor` package, allowing
  * to perform the client-side file processing before eventually
