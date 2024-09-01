@@ -43,7 +43,8 @@ export default function uploadMedia(
 	}
 ) {
 	// @ts-ignore -- invalidateResolution is not yet exposed in GB types.
-	const { invalidateResolution } = dispatch( coreStore );
+	const { invalidateResolution, invalidateResolutionForStoreSelector } =
+		dispatch( coreStore );
 
 	originalUploadMedia( {
 		...args,
@@ -59,6 +60,9 @@ export default function uploadMedia(
 						media.id,
 						{ context: 'edit' },
 					] );
+					void invalidateResolutionForStoreSelector( 'getMedia' );
+
+					// TODO: Trigger new call here.
 				}
 			}
 			args.onSuccess?.( attachments );
