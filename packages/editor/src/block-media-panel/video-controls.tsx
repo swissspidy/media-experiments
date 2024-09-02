@@ -21,6 +21,7 @@ import { AddPoster } from './add-poster';
 import { DebugInfo } from './debug-info';
 import type { VideoBlock } from '../types';
 import { UploadRequestControls } from './upload-requests/controls';
+import { GifLooper } from './gif-looper';
 
 type VideoControlsProps = VideoBlock &
 	Pick< BlockEditProps< VideoBlock[ 'attributes' ] >, 'setAttributes' >;
@@ -71,6 +72,7 @@ export function VideoControls( props: VideoControlsProps ) {
 
 	return (
 		<>
+			<GifLooper attributes={ props.attributes } />
 			<UploadIndicator
 				id={ props.attributes.id }
 				url={ props.attributes.src }
