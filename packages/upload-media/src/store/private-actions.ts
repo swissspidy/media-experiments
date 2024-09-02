@@ -1431,7 +1431,13 @@ export function optimizeVideoItem(
 				},
 			} );
 		} catch ( error ) {
-			if ( args?.continueOnError ) {
+			const isChunkLoadError =
+				error instanceof Error && error.name === 'ChunkLoadError';
+			if ( isChunkLoadError ) {
+				console.error( error );
+			}
+
+			if ( args?.continueOnError && ! isChunkLoadError ) {
 				dispatch.finishOperation( id, {} );
 				return;
 			}
@@ -1604,6 +1610,9 @@ export function convertGifItem( id: QueueItemId ) {
 				},
 			} );
 		} catch ( error ) {
+			if ( error instanceof Error && error.name === 'ChunkLoadError' ) {
+				console.error( error );
+			}
 			dispatch.cancelItem(
 				id,
 				new UploadError( {
