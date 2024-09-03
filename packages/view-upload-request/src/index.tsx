@@ -60,6 +60,7 @@ const unsubscribeCoreStore = subscribe( () => {
 		bigImageSizeThreshold: siteData.image_size_threshold,
 		bigVideoSizeThreshold: siteData.video_size_threshold,
 		keepOriginal: false,
+		convertUnsafe: true,
 		// Formats.
 		default_outputFormat: 'jpeg',
 		default_quality: 82,
@@ -84,11 +85,6 @@ const unsubscribeCoreStore = subscribe( () => {
 		),
 		avif_quality: 80,
 		avif_interlaced: false,
-		heic_outputFormat: getExtension(
-			siteData.image_output_formats[ 'image/heic' ] || 'image/jpeg'
-		),
-		heic_quality: 80,
-		heic_interlaced: siteData.jpeg_interlaced,
 		gif_outputFormat: getExtension(
 			siteData.image_output_formats[ 'image/gif' ] || 'image/webp'
 		),

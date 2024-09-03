@@ -759,6 +759,18 @@ export function prepareItem( id: QueueItemId ) {
 				? 'pdf'
 				: file.type.split( '/' )[ 0 ];
 
+		const outputFormat: ImageFormat = registry
+			.select( preferencesStore )
+			.get( PREFERENCES_NAME, 'default_outputFormat' );
+
+		const outputQuality: number = registry
+			.select( preferencesStore )
+			.get( PREFERENCES_NAME, 'default_quality' );
+
+		const interlaced: boolean = registry
+			.select( preferencesStore )
+			.get( PREFERENCES_NAME, 'default_interlaced' );
+
 		const operations: Operation[] = [];
 
 		switch ( mediaType ) {
@@ -815,7 +827,18 @@ export function prepareItem( id: QueueItemId ) {
 					.select( preferencesStore )
 					.get( PREFERENCES_NAME, 'optimizeOnUpload' );
 
-				if ( optimizeOnUpload ) {
+				const isJXL = item.file.type === 'image/jxl';
+
+				if ( isJXL ) {
+					operations.push( [
+						OperationType.TranscodeImage,
+						{
+							outputFormat,
+							outputQuality,
+							interlaced,
+						},
+					] );
+				} else if ( optimizeOnUpload ) {
 					operations.push( OperationType.TranscodeImage );
 				}
 

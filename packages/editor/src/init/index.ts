@@ -72,12 +72,14 @@ export default function blockEditorUploadMedia( {
 			mediaFile.type
 		);
 
+		const isJXL = mediaFile.type === 'image/jxl';
+
 		/*
 		 Check if the caller (e.g. a block) supports this mime type.
 		 Special case for file types such as HEIC which will be converted before upload anyway.
 		 Another check will be done before upload.
 		*/
-		if ( ! isHeifImage ) {
+		if ( ! isHeifImage && ! isJXL ) {
 			try {
 				editorValidateMimeType( mediaFile, allowedTypes );
 			} catch ( error: unknown ) {
@@ -142,6 +144,7 @@ const unsubscribeCoreStore = subscribe( () => {
 		bigImageSizeThreshold: siteData.image_size_threshold,
 		bigVideoSizeThreshold: siteData.video_size_threshold,
 		keepOriginal: false,
+		convertUnsafe: true,
 		// Formats.
 		default_outputFormat: 'jpeg',
 		default_quality: 82,
@@ -166,11 +169,6 @@ const unsubscribeCoreStore = subscribe( () => {
 		),
 		avif_quality: 80,
 		avif_interlaced: false,
-		heic_outputFormat: getExtension(
-			siteData.image_output_formats[ 'image/heic' ] || 'image/jpeg'
-		),
-		heic_quality: 80,
-		heic_interlaced: siteData.jpeg_interlaced,
 		gif_outputFormat: getExtension(
 			siteData.image_output_formats[ 'image/gif' ] || 'image/webp'
 		),

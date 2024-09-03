@@ -28,16 +28,10 @@ import { store as preferencesStore } from '@wordpress/preferences';
 import { PREFERENCES_NAME } from './constants';
 import type { MediaPreferences } from '../types';
 
-type InputFormat = 'jpeg' | 'webp' | 'avif' | 'png' | 'heic' | 'gif';
-type InputFormatLabel = 'JPEG' | 'PNG' | 'WebP' | 'AVIF' | 'HEIC' | 'GIF';
+type InputFormat = 'jpeg' | 'webp' | 'avif' | 'png' | 'gif';
+type InputFormatLabel = 'JPEG' | 'PNG' | 'WebP' | 'AVIF' | 'GIF';
 
-const inputFormats: InputFormatLabel[] = [
-	'JPEG',
-	'PNG',
-	'WebP',
-	'HEIC',
-	'GIF',
-];
+const inputFormats: InputFormatLabel[] = [ 'JPEG', 'PNG', 'WebP', 'GIF' ];
 
 if ( window.crossOriginIsolated ) {
 	inputFormats.push( 'AVIF' );
@@ -177,6 +171,14 @@ function DefaultFormatSection() {
 					'media-experiments'
 				) }
 				label={ __( 'Keep original', 'media-experiments' ) }
+			/>
+			<EnableFeature
+				featureName="convertUnsafe"
+				help={ __(
+					'Convert incompatible images to a web safe format.',
+					'media-experiments'
+				) }
+				label={ __( 'Prefer web safe images', 'media-experiments' ) }
 			/>
 		</PreferencesModalSection>
 	);
