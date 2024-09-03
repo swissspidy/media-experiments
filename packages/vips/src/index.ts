@@ -26,7 +26,6 @@ import type {
 	ThumbnailOptions,
 } from './types';
 import {
-	isFileTypeSupported,
 	supportsAnimation,
 	supportsInterlace,
 	supportsQuality,
@@ -192,9 +191,6 @@ export async function compressImage(
 	quality = 0.82,
 	interlaced = false
 ): Promise< ArrayBuffer > {
-	if ( ! isFileTypeSupported( type ) ) {
-		throw new Error( 'Unsupported file type' );
-	}
 	return convertImageFormat( id, buffer, type, type, quality, interlaced );
 }
 
