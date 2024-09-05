@@ -25,11 +25,7 @@ import type {
 	SaveOptions,
 	ThumbnailOptions,
 } from './types';
-import {
-	supportsAnimation,
-	supportsInterlace,
-	supportsQuality,
-} from './utils';
+import { supportsAnimation, supportsInterlace, supportsQuality } from './utils';
 
 type EmscriptenModule = {
 	setAutoDeleteLater: ( autoDelete: boolean ) => void;
