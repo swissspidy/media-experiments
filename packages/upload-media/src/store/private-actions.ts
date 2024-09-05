@@ -801,10 +801,33 @@ export function prepareItem( id: QueueItemId ) {
 					break;
 				}
 
+				const convertUnsafe: boolean = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'convertUnsafe' );
 				const isHeif = isHeifImage( fileBuffer );
+				const isWebSafe =
+					item.file.type.startsWith( 'image/' ) &&
+					[
+						'image/png',
+						'image/gif',
+						'image/jpeg',
+						'image/webp',
+						'image/avif',
+					].includes( item.file.type );
 
-				if ( isHeif ) {
-					operations.push( OperationType.TranscodeHeif );
+				if ( convertUnsafe ) {
+					if ( isHeif ) {
+						operations.push( OperationType.TranscodeHeif );
+					} else if ( ! isWebSafe ) {
+						operations.push( [
+							OperationType.TranscodeImage,
+							{
+								outputFormat,
+								outputQuality,
+								interlaced,
+							},
+						] );
+					}
 				}
 
 				const imageSizeThreshold: number = registry
@@ -827,18 +850,7 @@ export function prepareItem( id: QueueItemId ) {
 					.select( preferencesStore )
 					.get( PREFERENCES_NAME, 'optimizeOnUpload' );
 
-				const isJXL = item.file.type === 'image/jxl';
-
-				if ( isJXL ) {
-					operations.push( [
-						OperationType.TranscodeImage,
-						{
-							outputFormat,
-							outputQuality,
-							interlaced,
-						},
-					] );
-				} else if ( optimizeOnUpload ) {
+				if ( optimizeOnUpload ) {
 					operations.push( OperationType.TranscodeImage );
 				}
 
@@ -1217,38 +1229,54 @@ export function optimizeImageItem(
 
 		const startTime = performance.now();
 
-		const imageLibrary: ImageLibrary =
+		const inputFormat = item.file.type.split( '/' )[ 1 ];
+
+		let stop: undefined | ( () => void );
+
+		const outputFormat: ImageFormat =
+			args?.outputFormat ||
+			registry
+				.select( preferencesStore )
+				.get( PREFERENCES_NAME, `${ inputFormat }_outputFormat` ) ||
+			inputFormat;
+
+		const outputQuality: number =
+			args?.outputQuality ||
+			registry
+				.select( preferencesStore )
+				.get( PREFERENCES_NAME, `${ inputFormat }_quality` ) ||
+			80;
+
+		const interlaced: boolean =
+			args?.interlaced ||
+			registry
+				.select( preferencesStore )
+				.get( PREFERENCES_NAME, `${ inputFormat }_interlaced` ) ||
+			false;
+
+		let imageLibrary: ImageLibrary =
 			registry
 				.select( preferencesStore )
 				.get( PREFERENCES_NAME, 'imageLibrary' ) || 'vips';
 
-		let stop: undefined | ( () => void );
+		if (
+			! [ 'png', 'jpeg', 'webp' ].includes( inputFormat ) ||
+			! [ 'png', 'jpeg', 'webp' ].includes( inputFormat )
+		) {
+			imageLibrary = 'vips';
+		}
+
+		// Safari doesn't support WebP in HTMLCanvasElement.toBlob().
+		// See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
+		if (
+			isSafari &&
+			( 'webp' === inputFormat || 'webp' === outputFormat )
+		) {
+			imageLibrary = 'vips';
+		}
 
 		try {
 			let file: File;
-
-			const inputFormat = item.file.type.split( '/' )[ 1 ];
-
-			const outputFormat: ImageFormat =
-				args?.outputFormat ||
-				registry
-					.select( preferencesStore )
-					.get( PREFERENCES_NAME, `${ inputFormat }_outputFormat` ) ||
-				inputFormat;
-
-			const outputQuality: number =
-				args?.outputQuality ||
-				registry
-					.select( preferencesStore )
-					.get( PREFERENCES_NAME, `${ inputFormat }_quality` ) ||
-				80;
-
-			const interlaced: boolean =
-				args?.interlaced ||
-				registry
-					.select( preferencesStore )
-					.get( PREFERENCES_NAME, `${ inputFormat }_interlaced` ) ||
-				false;
 
 			stop = start(
 				`Optimize Item: ${ item.file.name } | ${ imageLibrary } | ${ inputFormat } | ${ outputFormat } | ${ outputQuality }`
@@ -1273,9 +1301,7 @@ export function optimizeImageItem(
 					break;
 
 				case 'webp':
-					// Safari doesn't support WebP in HTMLCanvasElement.toBlob().
-					// See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
-					if ( 'browser' === imageLibrary && ! isSafari ) {
+					if ( 'browser' === imageLibrary ) {
 						file = await canvasConvertImageFormat(
 							item.file,
 							'image/webp',

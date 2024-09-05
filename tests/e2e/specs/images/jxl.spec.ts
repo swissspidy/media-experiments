@@ -31,11 +31,7 @@ test.describe( 'Images', () => {
 				.set( 'media-experiments/preferences', 'imageFormat', 'jpeg' );
 			window.wp.data
 				.dispatch( 'core/preferences' )
-				.set(
-					'media-experiments/preferences',
-					'imageLibrary',
-					'browser'
-				);
+				.set( 'media-experiments/preferences', 'imageLibrary', 'vips' );
 		} );
 
 		await editor.insertBlock( { name: 'core/image' } );
@@ -68,6 +64,14 @@ test.describe( 'Images', () => {
 				timeout: 30_000,
 			}
 		);
+
+		await expect(
+			page
+				.getByRole( 'button', { name: 'Dismiss this notice' } )
+				.filter( {
+					hasText: 'File could not be uploaded',
+				} )
+		).toBeHidden();
 
 		const settingsPanel = page
 			.getByRole( 'region', {

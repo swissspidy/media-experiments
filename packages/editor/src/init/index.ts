@@ -10,12 +10,7 @@ import { type ImageFormat, store as uploadStore } from '@mexp/upload-media';
 /**
  * WordPress dependencies
  */
-import {
-	dispatch as globalDispatch,
-	dispatch,
-	select,
-	subscribe,
-} from '@wordpress/data';
+import { select, dispatch, subscribe } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as editorStore } from '@wordpress/editor';
@@ -64,25 +59,37 @@ export default function blockEditorUploadMedia( {
 	onError?: ( message: string ) => void;
 	onBatchSuccess: () => void;
 } ) {
+	const convertUnsafe: boolean = select( preferencesStore ).get(
+		PREFERENCES_NAME,
+		'convertUnsafe'
+	) as boolean;
+
 	const validFiles = [];
 
 	for ( const mediaFile of filesList ) {
-		// TODO: Consider using the _async_ isHeifImage() function from `@mexp/upload-media`
-		const isHeifImage = [ 'image/heic', 'image/heif' ].includes(
-			mediaFile.type
-		);
-
-		const isJXL = mediaFile.type === 'image/jxl';
-
 		/*
 		 Check if the caller (e.g. a block) supports this mime type.
 		 Special case for file types such as HEIC which will be converted before upload anyway.
 		 Another check will be done before upload.
 		*/
-		if ( ! isHeifImage && ! isJXL ) {
-			try {
-				editorValidateMimeType( mediaFile, allowedTypes );
-			} catch ( error: unknown ) {
+		try {
+			editorValidateMimeType( mediaFile, allowedTypes );
+		} catch ( error: unknown ) {
+			if (
+				! (
+					mediaFile.type.startsWith( 'image/' ) &&
+					! [
+						'image/png',
+						'image/gif',
+						'image/jpeg',
+						'image/webp',
+						'image/avif',
+						'image/heic',
+						'image/heif',
+					].includes( mediaFile.type ) &&
+					convertUnsafe
+				)
+			) {
 				onError( error as Error );
 				continue;
 			}
@@ -183,7 +190,7 @@ const unsubscribeCoreStore = subscribe( () => {
 		videoEffect: 'none',
 	};
 
-	void globalDispatch( preferencesStore ).setDefaults(
+	void dispatch( preferencesStore ).setDefaults(
 		PREFERENCES_NAME,
 		defaultPreferences
 	);
