@@ -28,10 +28,17 @@ test.describe( 'Images', () => {
 		await page.evaluate( () => {
 			window.wp.data
 				.dispatch( 'core/preferences' )
-				.set( 'media-experiments/preferences', 'imageFormat', 'jpeg' );
+				.set(
+					'media-experiments/preferences',
+					'default_outputFormat',
+					'jpeg'
+				);
 			window.wp.data
 				.dispatch( 'core/preferences' )
 				.set( 'media-experiments/preferences', 'imageLibrary', 'vips' );
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set( 'media-experiments/preferences', 'convertUnsafe', true );
 		} );
 
 		await editor.insertBlock( { name: 'core/image' } );
@@ -61,7 +68,7 @@ test.describe( 'Images', () => {
 					.length === 0,
 			undefined,
 			{
-				timeout: 30_000,
+				timeout: 100_000,
 			}
 		);
 

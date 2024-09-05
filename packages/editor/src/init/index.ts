@@ -59,10 +59,10 @@ export default function blockEditorUploadMedia( {
 	onError?: ( message: string ) => void;
 	onBatchSuccess: () => void;
 } ) {
-	const convertUnsafe: boolean = select( preferencesStore ).get(
+	const convertUnsafe: boolean | undefined = select( preferencesStore ).get(
 		PREFERENCES_NAME,
 		'convertUnsafe'
-	) as boolean;
+	) as boolean | undefined;
 
 	const validFiles = [];
 

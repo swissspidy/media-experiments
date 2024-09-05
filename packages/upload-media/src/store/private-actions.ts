@@ -801,7 +801,7 @@ export function prepareItem( id: QueueItemId ) {
 					break;
 				}
 
-				const convertUnsafe: boolean = registry
+				const convertUnsafe: boolean | undefined = registry
 					.select( preferencesStore )
 					.get( PREFERENCES_NAME, 'convertUnsafe' );
 				const isHeif = isHeifImage( fileBuffer );
@@ -815,7 +815,7 @@ export function prepareItem( id: QueueItemId ) {
 						'image/avif',
 					].includes( item.file.type );
 
-				if ( convertUnsafe ) {
+				if ( convertUnsafe !== false ) {
 					if ( isHeif ) {
 						operations.push( OperationType.TranscodeHeif );
 					} else if ( ! isWebSafe ) {

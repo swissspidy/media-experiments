@@ -28,7 +28,11 @@ test.describe( 'Images', () => {
 		await page.evaluate( () => {
 			window.wp.data
 				.dispatch( 'core/preferences' )
-				.set( 'media-experiments/preferences', 'imageFormat', 'jpeg' );
+				.set(
+					'media-experiments/preferences',
+					'default_outputFormat',
+					'jpeg'
+				);
 			window.wp.data
 				.dispatch( 'core/preferences' )
 				.set(
@@ -36,6 +40,10 @@ test.describe( 'Images', () => {
 					'imageLibrary',
 					'browser'
 				);
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set( 'media-experiments/preferences', 'convertUnsafe', true );
+
 		} );
 
 		await editor.insertBlock( { name: 'core/image' } );
