@@ -43,7 +43,6 @@ test.describe( 'Images', () => {
 			window.wp.data
 				.dispatch( 'core/preferences' )
 				.set( 'media-experiments/preferences', 'convertUnsafe', true );
-
 		} );
 
 		await editor.insertBlock( { name: 'core/image' } );
