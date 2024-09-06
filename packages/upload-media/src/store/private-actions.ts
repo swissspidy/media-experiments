@@ -28,8 +28,8 @@ import {
 	isAnimatedGif,
 	isHeifImage,
 	renameFile,
-	videoHasAudio,
 	validateMimeType,
+	videoHasAudio,
 } from '../utils';
 import { PREFERENCES_NAME } from '../constants';
 import { StubFile } from '../stub-file';
@@ -815,9 +815,12 @@ export function prepareItem( id: QueueItemId ) {
 						'image/avif',
 					].includes( item.file.type );
 
-				if ( convertUnsafe !== false ) {
+				let uploadOriginalUnsafe = false;
+
+				if ( convertUnsafe ) {
 					if ( isHeif ) {
 						operations.push( OperationType.TranscodeHeif );
+						uploadOriginalUnsafe = true;
 					} else if ( ! isWebSafe ) {
 						operations.push( [
 							OperationType.TranscodeImage,
@@ -827,6 +830,7 @@ export function prepareItem( id: QueueItemId ) {
 								interlaced,
 							},
 						] );
+						uploadOriginalUnsafe = true;
 					}
 				}
 
@@ -854,9 +858,17 @@ export function prepareItem( id: QueueItemId ) {
 					operations.push( OperationType.TranscodeImage );
 				}
 
+				operations.push( OperationType.GenerateMetadata );
+
+				const useAi: boolean = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'useAi' );
+
+				if ( useAi ) {
+					operations.push( OperationType.GenerateCaptions );
+				}
+
 				operations.push(
-					OperationType.GenerateMetadata,
-					OperationType.GenerateCaptions,
 					OperationType.Upload,
 					OperationType.ThumbnailGeneration
 				);
@@ -865,7 +877,10 @@ export function prepareItem( id: QueueItemId ) {
 					.select( preferencesStore )
 					.get( PREFERENCES_NAME, 'keepOriginal' );
 
-				if ( ( imageSizeThreshold && keepOriginal ) || isHeif ) {
+				if (
+					( imageSizeThreshold && keepOriginal ) ||
+					uploadOriginalUnsafe
+				) {
 					operations.push( OperationType.UploadOriginal );
 				}
 

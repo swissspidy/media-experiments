@@ -180,6 +180,7 @@ export type MediaPreferences = {
 	bigVideoSizeThreshold: number;
 	keepOriginal: boolean;
 	convertUnsafe: boolean;
+	useAi: boolean;
 	// Formats.
 	default_outputFormat: ImageFormat;
 	default_quality: number;

@@ -172,14 +172,6 @@ function DefaultFormatSection() {
 				) }
 				label={ __( 'Keep original', 'media-experiments' ) }
 			/>
-			<EnableFeature
-				featureName="convertUnsafe"
-				help={ __(
-					'Convert incompatible images to a web safe format.',
-					'media-experiments'
-				) }
-				label={ __( 'Prefer web safe images', 'media-experiments' ) }
-			/>
 		</PreferencesModalSection>
 	);
 }
@@ -319,6 +311,17 @@ export function Modal() {
 						) }
 					>
 						<EnableFeature
+							featureName="optimizeOnUpload"
+							help={ __(
+								'Compress and optimize media items before uploading to the server.',
+								'media-experiments'
+							) }
+							label={ __(
+								'Pre-upload compression',
+								'media-experiments'
+							) }
+						/>
+						<EnableFeature
 							featureName="requireApproval"
 							help={ __(
 								'Require approval step when optimizing existing videos or images.',
@@ -327,13 +330,24 @@ export function Modal() {
 							label={ __( 'Approval step', 'media-experiments' ) }
 						/>
 						<EnableFeature
-							featureName="optimizeOnUpload"
+							featureName="convertUnsafe"
 							help={ __(
-								'Compress and optimize media items before uploading to the server.',
+								'Convert incompatible images to a web safe format.',
 								'media-experiments'
 							) }
 							label={ __(
-								'Pre-upload compression',
+								'Prefer web safe images',
+								'media-experiments'
+							) }
+						/>
+						<EnableFeature
+							featureName="useAi"
+							help={ __(
+								'Use additional AI features for things like caption generation.',
+								'media-experiments'
+							) }
+							label={ __(
+								'AI integrations',
 								'media-experiments'
 							) }
 						/>
