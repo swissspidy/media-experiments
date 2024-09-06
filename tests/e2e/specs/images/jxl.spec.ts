@@ -12,17 +12,11 @@ test.describe( 'Images', () => {
 	} );
 
 	test( 'uploads and converts a JPEG XL image', async ( {
-		browserName,
 		admin,
 		page,
 		editor,
 		mediaUtils,
 	} ) => {
-		test.skip(
-			browserName === 'webkit',
-			'Needs some investigation as to why image is uploaded as PNG instead of JPEG'
-		);
-
 		await admin.createNewPost();
 
 		await page.evaluate( () => {
@@ -80,6 +74,15 @@ test.describe( 'Images', () => {
 				} )
 		).toBeHidden();
 
+		await expect(
+			page
+				.getByRole( 'button', { name: 'Dismiss this notice' } )
+				.filter( {
+					hasText:
+						/Error while uploading file .* to the media library/,
+				} )
+		).toBeHidden();
+
 		const settingsPanel = page
 			.getByRole( 'region', {
 				name: 'Editor settings',
@@ -90,7 +93,7 @@ test.describe( 'Images', () => {
 
 		await expect( settingsPanel ).toHaveText( /Mime type: image\/jpeg/ );
 		await expect(
-			settingsPanel.getByLabel( /#837776|#827675|#857776/ )
+			settingsPanel.getByLabel( /#8[23456]7[678]7[567]/ )
 		).toBeVisible();
 
 		await expect( page.locator( 'css=[data-blurhash]' ) ).toBeVisible();

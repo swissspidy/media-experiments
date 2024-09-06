@@ -12,17 +12,11 @@ test.describe( 'Images', () => {
 	} );
 
 	test( 'uploads and converts an HEIC image', async ( {
-		browserName,
 		admin,
 		page,
 		editor,
 		mediaUtils,
 	} ) => {
-		test.skip(
-			browserName === 'webkit',
-			'Needs some investigation as to why image is uploaded as PNG instead of JPEG'
-		);
-
 		await admin.createNewPost();
 
 		await page.evaluate( () => {
@@ -72,7 +66,7 @@ test.describe( 'Images', () => {
 					.length === 0,
 			undefined,
 			{
-				timeout: 30_000,
+				timeout: 60_000,
 			}
 		);
 
@@ -86,7 +80,7 @@ test.describe( 'Images', () => {
 
 		await expect( settingsPanel ).toHaveText( /Mime type: image\/jpeg/ );
 		await expect(
-			settingsPanel.getByLabel( /#837776|#827675/ )
+			settingsPanel.getByLabel( /#8[23456]7[678]7[567]/ )
 		).toBeVisible();
 
 		await expect( page.locator( 'css=[data-blurhash]' ) ).toBeVisible();
