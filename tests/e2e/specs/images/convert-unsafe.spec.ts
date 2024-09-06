@@ -59,14 +59,6 @@ test.describe.only( 'Images', () => {
 					);
 			} );
 
-			const pref = await page.evaluate( () => {
-				return window.wp.data
-					.select( 'core/preferences' )
-					.get( 'media-experiments/preferences', 'convertUnsafe' );
-			} );
-
-			console.log( 'pref', pref );
-
 			await editor.insertBlock( { name: 'core/image' } );
 
 			const imageBlock = editor.canvas.locator(
