@@ -324,6 +324,91 @@ function filter_image_save_progressive( bool $interlace, string $mime_type ): bo
 }
 
 /**
+ * Filters the list of mime types and file extensions.
+ *
+ * Adds support for JPEG XL (JXL).
+ *
+ * @param array $mime_types Mime types keyed by the file extension regex
+ *                                    corresponding to those types.
+ * @return array Filtered list of mime types
+ */
+function filter_mime_types( $mime_types ) {
+	$mime_types['jxl'] = 'image/jxl';
+	return $mime_types;
+}
+
+/**
+ * Filters file type based on the extension name.
+ *
+ * Adds support for JPEG XL (JXL).
+ *
+ * @param array[] $ext2type Multi-dimensional array of file extensions types keyed by the type of file.
+ * @return array[] Filtered array of file extensions.
+ */
+function filter_ext2type( $ext2type ) {
+	$ext2type['image'][] = 'jxl';
+	return $ext2type;
+}
+
+/**
+ * Filters the list mapping image mime types to their respective extensions.
+ *
+ * Adds support for JPEG XL (JXL).
+ *
+ * @param array $mime_to_ext Array of image mime types and their matching extensions.
+ */
+function filter_getimagesize_mimes_to_exts( array $mime_to_ext ) {
+	$mime_to_ext['image/jxl'] = 'jxl';
+	return $mime_to_ext;
+}
+
+/**
+ * Filters the "real" file type of the given file.
+ *
+ * Adds support for JPEG XL (JXL).
+ *
+ * @param array         $wp_check_filetype_and_ext Values for the extension, mime type, and corrected filename.
+ * @param string        $file Full path to the file.
+ * @param string        $filename                  The name of the file (may differ from $file due to
+ *                                                 $file being in a tmp directory).
+ * @param string[]|null $mimes                     Array of mime types keyed by their file extension regex, or null if
+ *                                                 none were provided.
+ * @return array Filtered values.
+ */
+function filter_wp_check_filetype_and_ext( $wp_check_filetype_and_ext, $file, $filename, $mimes ) {
+	if ( false !== $wp_check_filetype_and_ext['ext'] && false !== $wp_check_filetype_and_ext['type'] ) {
+		return $wp_check_filetype_and_ext;
+	}
+
+	// Do basic extension validation and MIME mapping.
+	$wp_filetype = wp_check_filetype( $filename, $mimes );
+	$type        = $wp_filetype['type'];
+
+	if ( ! $type && ! str_starts_with( $type, 'image/' ) ) {
+		return $wp_check_filetype_and_ext;
+	}
+
+	$magic = file_get_contents( $file, false, null, 0, 12 );
+
+	if ( false === $magic ) {
+		return $wp_check_filetype_and_ext;
+	}
+
+	$magic = bin2hex( $magic );
+
+	// See https://en.wikipedia.org/wiki/JPEG_XL.
+	if (
+		str_starts_with( $magic, 'ff0a' ) ||
+		str_starts_with( $magic, '0000000c4a584c200d0a870a' )
+	) {
+		$wp_check_filetype_and_ext['ext']  = 'jxl';
+		$wp_check_filetype_and_ext['type'] = 'image/jxl';
+	}
+
+	return $wp_check_filetype_and_ext;
+}
+
+/**
  * Register assets used by editor integration and others.
  *
  * @return void
@@ -369,7 +454,6 @@ function get_default_image_output_formats() {
 		'image/gif',
 		'image/webp',
 		'image/avif',
-		'image/heic',
 	];
 
 	$output_formats = [];
