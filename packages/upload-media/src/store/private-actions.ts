@@ -493,7 +493,10 @@ export function processItem( id: QueueItemId ) {
 				break;
 
 			case OperationType.UploadOriginal:
-				dispatch.uploadOriginal( id );
+				dispatch.uploadOriginal(
+					id,
+					operationArgs as OperationArgs[ OperationType.UploadOriginal ]
+				);
 				break;
 
 			case OperationType.UploadPoster:
@@ -881,7 +884,10 @@ export function prepareItem( id: QueueItemId ) {
 					( imageSizeThreshold && keepOriginal ) ||
 					uploadOriginalUnsafe
 				) {
-					operations.push( OperationType.UploadOriginal );
+					operations.push( [
+						OperationType.UploadOriginal,
+						{ force: uploadOriginalUnsafe },
+					] );
 				}
 
 				break;
@@ -1013,7 +1019,6 @@ export function uploadPoster( id: QueueItemId ) {
 					],
 					OperationType.Upload,
 					OperationType.ThumbnailGeneration,
-					OperationType.UploadOriginal
 				);
 
 				// Adding the poster to the queue on its own allows for it to be optimized, etc.
@@ -1171,56 +1176,59 @@ export function generateThumbnails( id: QueueItemId ) {
 	};
 }
 
+type UploadOriginalArgs = OperationArgs[ OperationType.UploadOriginal ];
+
 /**
  * Adds the original file to the queue for sideloading.
  *
  * If an item was downsized due to the big image size threshold,
  * this adds the original file for storing.
  *
- * @param id Item ID.
+ * @param id     Item ID.
+ * @param [args] Additional arguments for the operation.
  */
-export function uploadOriginal( id: QueueItemId ) {
+export function uploadOriginal( id: QueueItemId, args?: UploadOriginalArgs ) {
 	return async ( { select, dispatch }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
 
 		const attachment: Attachment = item.attachment as Attachment;
 
 		/*
-		 Upload the original image file if it was a HEIF image,
-		 or if it was resized because of the big image size threshold.
+		 Upload the original image file if it was resized because of the big image size threshold,
+		 or if it was converted to be web-safe (e.g. HEIC, JPEG XL) and thus
+		 uploading the original is "forced".
 		*/
 
-		if ( item.file.type.startsWith( 'image/' ) ) {
-			if (
-				! item.parentId &&
-				( ( item.file instanceof ImageFile && item.file?.wasResized ) ||
-					isHeifImage( await item.sourceFile.arrayBuffer() ) )
-			) {
-				const originalBaseName = getFileBasename(
-					attachment.mexp_filename || item.file.name
-				);
 
-				dispatch.addSideloadItem( {
-					file: renameFile(
-						item.sourceFile,
-						`${ originalBaseName }-original.${ getFileExtension(
-							item.sourceFile.name
-						) }`
-					),
-					parentId: item.id,
-					additionalData: {
-						// Sideloading does not use the parent post ID but the
-						// attachment ID as the image sizes need to be added to it.
-						post: attachment.id,
-						// Reference the same upload_request if needed.
-						upload_request: item.additionalData.upload_request,
-						image_size: 'original',
-						convert_format: false,
-					},
-					// Skip any resizing or optimization of the original image.
-					operations: [ OperationType.Upload ],
-				} );
-			}
+		if (
+			! item.parentId &&
+			( ( item.file instanceof ImageFile && item.file?.wasResized ) ||
+				args?.force )
+		) {
+			const originalBaseName = getFileBasename(
+				attachment.mexp_filename || item.file.name
+			);
+
+			dispatch.addSideloadItem( {
+				file: renameFile(
+					item.sourceFile,
+					`${ originalBaseName }-original.${ getFileExtension(
+						item.sourceFile.name
+					) }`
+				),
+				parentId: item.id,
+				additionalData: {
+					// Sideloading does not use the parent post ID but the
+					// attachment ID as the image sizes need to be added to it.
+					post: attachment.id,
+					// Reference the same upload_request if needed.
+					upload_request: item.additionalData.upload_request,
+					image_size: 'original',
+					convert_format: false,
+				},
+				// Skip any resizing or optimization of the original image.
+				operations: [ OperationType.Upload ],
+			} );
 		}
 
 		dispatch.finishOperation( id, {} );
@@ -1919,7 +1927,7 @@ type FetchRemoteFileArgs = OperationArgs[ OperationType.FetchRemoteFile ];
  * Fetches a remote file from another server and adds it to the item.
  *
  * @param id   Item ID.
- * @param args Additional arguments for the operation.
+ * @param [args] Additional arguments for the operation.
  */
 export function fetchRemoteFile( id: QueueItemId, args: FetchRemoteFileArgs ) {
 	return async ( { select, dispatch }: ThunkArgs ) => {
