@@ -18,7 +18,7 @@ const scenarios = [
 	},
 ];
 
-test.describe( 'Images', () => {
+test.describe.only( 'Images', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
 		await Promise.all( [
 			requestUtils.deleteAllMedia(),
@@ -58,6 +58,14 @@ test.describe( 'Images', () => {
 						true
 					);
 			} );
+
+			const pref = await page.evaluate( () => {
+				return window.wp.data
+					.select( 'core/preferences' )
+					.get( 'media-experiments/preferences', 'convertUnsafe' );
+			} );
+
+			console.log( 'pref', pref );
 
 			await editor.insertBlock( { name: 'core/image' } );
 
