@@ -1018,7 +1018,7 @@ export function uploadPoster( id: QueueItemId ) {
 						{ outputFormat, outputQuality, interlaced },
 					],
 					OperationType.Upload,
-					OperationType.ThumbnailGeneration,
+					OperationType.ThumbnailGeneration
 				);
 
 				// Adding the poster to the queue on its own allows for it to be optimized, etc.
@@ -1926,7 +1926,7 @@ type FetchRemoteFileArgs = OperationArgs[ OperationType.FetchRemoteFile ];
 /**
  * Fetches a remote file from another server and adds it to the item.
  *
- * @param id   Item ID.
+ * @param id     Item ID.
  * @param [args] Additional arguments for the operation.
  */
 export function fetchRemoteFile( id: QueueItemId, args: FetchRemoteFileArgs ) {
