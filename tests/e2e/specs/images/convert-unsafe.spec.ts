@@ -18,7 +18,7 @@ const scenarios = [
 	},
 ];
 
-test.describe.only( 'Images', () => {
+test.describe( 'Images', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
 		await Promise.all( [
 			requestUtils.deleteAllMedia(),

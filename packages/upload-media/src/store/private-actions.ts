@@ -1207,8 +1207,6 @@ export function uploadOriginal( id: QueueItemId, args?: UploadOriginalArgs ) {
 		 or if it was converted to be web-safe (e.g. HEIC, JPEG XL) and thus
 		 uploading the original is "forced".
 		*/
-
-
 		if (
 			! item.parentId &&
 			( ( item.file instanceof ImageFile && item.file?.wasResized ) ||
