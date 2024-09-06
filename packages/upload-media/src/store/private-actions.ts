@@ -804,6 +804,10 @@ export function prepareItem( id: QueueItemId ) {
 					break;
 				}
 
+				let optimizeOnUpload: boolean = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'optimizeOnUpload' );
+
 				const convertUnsafe: boolean | undefined = registry
 					.select( preferencesStore )
 					.get( PREFERENCES_NAME, 'convertUnsafe' );
@@ -818,12 +822,12 @@ export function prepareItem( id: QueueItemId ) {
 						'image/avif',
 					].includes( item.file.type );
 
-				let uploadOriginalUnsafe = false;
+				let uploadOriginalImage = false;
 
 				if ( convertUnsafe ) {
 					if ( isHeif ) {
 						operations.push( OperationType.TranscodeHeif );
-						uploadOriginalUnsafe = true;
+						uploadOriginalImage = true;
 					} else if ( ! isWebSafe ) {
 						operations.push( [
 							OperationType.TranscodeImage,
@@ -833,9 +837,18 @@ export function prepareItem( id: QueueItemId ) {
 								interlaced,
 							},
 						] );
-						uploadOriginalUnsafe = true;
+						uploadOriginalImage = true;
+						optimizeOnUpload = false;
 					}
 				}
+
+				console.log(
+					'convertUnsafe',
+					isWebSafe,
+					outputFormat,
+					outputQuality,
+					interlaced
+				);
 
 				const imageSizeThreshold: number = registry
 					.select( preferencesStore )
@@ -852,10 +865,6 @@ export function prepareItem( id: QueueItemId ) {
 						},
 					] );
 				}
-
-				const optimizeOnUpload: boolean = registry
-					.select( preferencesStore )
-					.get( PREFERENCES_NAME, 'optimizeOnUpload' );
 
 				if ( optimizeOnUpload ) {
 					operations.push( OperationType.TranscodeImage );
@@ -882,11 +891,11 @@ export function prepareItem( id: QueueItemId ) {
 
 				if (
 					( imageSizeThreshold && keepOriginal ) ||
-					uploadOriginalUnsafe
+					uploadOriginalImage
 				) {
 					operations.push( [
 						OperationType.UploadOriginal,
-						{ force: uploadOriginalUnsafe },
+						{ force: uploadOriginalImage },
 					] );
 				}
 
