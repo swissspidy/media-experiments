@@ -27,9 +27,10 @@ import {
 	getPosterFromVideo,
 	isAnimatedGif,
 	isHeifImage,
+	isImageTypeSupported,
 	renameFile,
-	videoHasAudio,
 	validateMimeType,
+	videoHasAudio,
 } from '../utils';
 import { PREFERENCES_NAME } from '../constants';
 import { StubFile } from '../stub-file';
@@ -493,7 +494,10 @@ export function processItem( id: QueueItemId ) {
 				break;
 
 			case OperationType.UploadOriginal:
-				dispatch.uploadOriginal( id );
+				dispatch.uploadOriginal(
+					id,
+					operationArgs as OperationArgs[ OperationType.UploadOriginal ]
+				);
 				break;
 
 			case OperationType.UploadPoster:
@@ -759,10 +763,28 @@ export function prepareItem( id: QueueItemId ) {
 				? 'pdf'
 				: file.type.split( '/' )[ 0 ];
 
+		const outputFormat: ImageFormat = registry
+			.select( preferencesStore )
+			.get( PREFERENCES_NAME, 'default_outputFormat' );
+
+		const outputQuality: number = registry
+			.select( preferencesStore )
+			.get( PREFERENCES_NAME, 'default_quality' );
+
+		const interlaced: boolean = registry
+			.select( preferencesStore )
+			.get( PREFERENCES_NAME, 'default_interlaced' );
+
 		const operations: Operation[] = [];
 
 		switch ( mediaType ) {
 			case 'image':
+				// Short-circuit for file types such as SVG or ICO.
+				if ( ! isImageTypeSupported( file.type ) ) {
+					operations.push( OperationType.Upload );
+					break;
+				}
+
 				const fileBuffer = await file.arrayBuffer();
 
 				const isGif = isAnimatedGif( fileBuffer );
@@ -789,10 +811,42 @@ export function prepareItem( id: QueueItemId ) {
 					break;
 				}
 
-				const isHeif = isHeifImage( fileBuffer );
+				let optimizeOnUpload: boolean = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'optimizeOnUpload' );
 
-				if ( isHeif ) {
-					operations.push( OperationType.TranscodeHeif );
+				const convertUnsafe: boolean | undefined = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'convertUnsafe' );
+				const isHeif = isHeifImage( fileBuffer );
+				const isWebSafe =
+					item.file.type.startsWith( 'image/' ) &&
+					[
+						'image/png',
+						'image/gif',
+						'image/jpeg',
+						'image/webp',
+						'image/avif',
+					].includes( item.file.type );
+
+				let uploadOriginalImage = false;
+
+				if ( convertUnsafe ) {
+					if ( isHeif ) {
+						operations.push( OperationType.TranscodeHeif );
+						uploadOriginalImage = true;
+					} else if ( ! isWebSafe ) {
+						operations.push( [
+							OperationType.TranscodeImage,
+							{
+								outputFormat,
+								outputQuality,
+								interlaced,
+							},
+						] );
+						uploadOriginalImage = true;
+						optimizeOnUpload = false;
+					}
 				}
 
 				const imageSizeThreshold: number = registry
@@ -811,17 +865,21 @@ export function prepareItem( id: QueueItemId ) {
 					] );
 				}
 
-				const optimizeOnUpload: boolean = registry
-					.select( preferencesStore )
-					.get( PREFERENCES_NAME, 'optimizeOnUpload' );
-
 				if ( optimizeOnUpload ) {
 					operations.push( OperationType.TranscodeImage );
 				}
 
+				operations.push( OperationType.GenerateMetadata );
+
+				const useAi: boolean = registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'useAi' );
+
+				if ( useAi ) {
+					operations.push( OperationType.GenerateCaptions );
+				}
+
 				operations.push(
-					OperationType.GenerateMetadata,
-					OperationType.GenerateCaptions,
 					OperationType.Upload,
 					OperationType.ThumbnailGeneration
 				);
@@ -830,8 +888,14 @@ export function prepareItem( id: QueueItemId ) {
 					.select( preferencesStore )
 					.get( PREFERENCES_NAME, 'keepOriginal' );
 
-				if ( ( imageSizeThreshold && keepOriginal ) || isHeif ) {
-					operations.push( OperationType.UploadOriginal );
+				if (
+					( imageSizeThreshold && keepOriginal ) ||
+					uploadOriginalImage
+				) {
+					operations.push( [
+						OperationType.UploadOriginal,
+						{ force: uploadOriginalImage },
+					] );
 				}
 
 				break;
@@ -962,8 +1026,7 @@ export function uploadPoster( id: QueueItemId ) {
 						{ outputFormat, outputQuality, interlaced },
 					],
 					OperationType.Upload,
-					OperationType.ThumbnailGeneration,
-					OperationType.UploadOriginal
+					OperationType.ThumbnailGeneration
 				);
 
 				// Adding the poster to the queue on its own allows for it to be optimized, etc.
@@ -1121,56 +1184,57 @@ export function generateThumbnails( id: QueueItemId ) {
 	};
 }
 
+type UploadOriginalArgs = OperationArgs[ OperationType.UploadOriginal ];
+
 /**
  * Adds the original file to the queue for sideloading.
  *
  * If an item was downsized due to the big image size threshold,
  * this adds the original file for storing.
  *
- * @param id Item ID.
+ * @param id     Item ID.
+ * @param [args] Additional arguments for the operation.
  */
-export function uploadOriginal( id: QueueItemId ) {
+export function uploadOriginal( id: QueueItemId, args?: UploadOriginalArgs ) {
 	return async ( { select, dispatch }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
 
 		const attachment: Attachment = item.attachment as Attachment;
 
 		/*
-		 Upload the original image file if it was a HEIF image,
-		 or if it was resized because of the big image size threshold.
+		 Upload the original image file if it was resized because of the big image size threshold,
+		 or if it was converted to be web-safe (e.g. HEIC, JPEG XL) and thus
+		 uploading the original is "forced".
 		*/
+		if (
+			! item.parentId &&
+			( ( item.file instanceof ImageFile && item.file?.wasResized ) ||
+				args?.force )
+		) {
+			const originalBaseName = getFileBasename(
+				attachment.mexp_filename || item.file.name
+			);
 
-		if ( item.file.type.startsWith( 'image/' ) ) {
-			if (
-				! item.parentId &&
-				( ( item.file instanceof ImageFile && item.file?.wasResized ) ||
-					isHeifImage( await item.sourceFile.arrayBuffer() ) )
-			) {
-				const originalBaseName = getFileBasename(
-					attachment.mexp_filename || item.file.name
-				);
-
-				dispatch.addSideloadItem( {
-					file: renameFile(
-						item.sourceFile,
-						`${ originalBaseName }-original.${ getFileExtension(
-							item.sourceFile.name
-						) }`
-					),
-					parentId: item.id,
-					additionalData: {
-						// Sideloading does not use the parent post ID but the
-						// attachment ID as the image sizes need to be added to it.
-						post: attachment.id,
-						// Reference the same upload_request if needed.
-						upload_request: item.additionalData.upload_request,
-						image_size: 'original',
-						convert_format: false,
-					},
-					// Skip any resizing or optimization of the original image.
-					operations: [ OperationType.Upload ],
-				} );
-			}
+			dispatch.addSideloadItem( {
+				file: renameFile(
+					item.sourceFile,
+					`${ originalBaseName }-original.${ getFileExtension(
+						item.sourceFile.name
+					) }`
+				),
+				parentId: item.id,
+				additionalData: {
+					// Sideloading does not use the parent post ID but the
+					// attachment ID as the image sizes need to be added to it.
+					post: attachment.id,
+					// Reference the same upload_request if needed.
+					upload_request: item.additionalData.upload_request,
+					image_size: 'original',
+					convert_format: false,
+				},
+				// Skip any resizing or optimization of the original image.
+				operations: [ OperationType.Upload ],
+			} );
 		}
 
 		dispatch.finishOperation( id, {} );
@@ -1194,38 +1258,54 @@ export function optimizeImageItem(
 
 		const startTime = performance.now();
 
-		const imageLibrary: ImageLibrary =
+		const inputFormat = item.file.type.split( '/' )[ 1 ];
+
+		let stop: undefined | ( () => void );
+
+		const outputFormat: ImageFormat =
+			args?.outputFormat ||
+			registry
+				.select( preferencesStore )
+				.get( PREFERENCES_NAME, `${ inputFormat }_outputFormat` ) ||
+			inputFormat;
+
+		const outputQuality: number =
+			args?.outputQuality ||
+			registry
+				.select( preferencesStore )
+				.get( PREFERENCES_NAME, `${ inputFormat }_quality` ) ||
+			80;
+
+		const interlaced: boolean =
+			args?.interlaced ||
+			registry
+				.select( preferencesStore )
+				.get( PREFERENCES_NAME, `${ inputFormat }_interlaced` ) ||
+			false;
+
+		let imageLibrary: ImageLibrary =
 			registry
 				.select( preferencesStore )
 				.get( PREFERENCES_NAME, 'imageLibrary' ) || 'vips';
 
-		let stop: undefined | ( () => void );
+		if (
+			! [ 'png', 'jpeg', 'webp' ].includes( inputFormat ) ||
+			! [ 'png', 'jpeg', 'webp' ].includes( inputFormat )
+		) {
+			imageLibrary = 'vips';
+		}
+
+		// Safari doesn't support WebP in HTMLCanvasElement.toBlob().
+		// See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
+		if (
+			isSafari &&
+			( 'webp' === inputFormat || 'webp' === outputFormat )
+		) {
+			imageLibrary = 'vips';
+		}
 
 		try {
 			let file: File;
-
-			const inputFormat = item.file.type.split( '/' )[ 1 ];
-
-			const outputFormat: ImageFormat =
-				args?.outputFormat ||
-				registry
-					.select( preferencesStore )
-					.get( PREFERENCES_NAME, `${ inputFormat }_outputFormat` ) ||
-				inputFormat;
-
-			const outputQuality: number =
-				args?.outputQuality ||
-				registry
-					.select( preferencesStore )
-					.get( PREFERENCES_NAME, `${ inputFormat }_quality` ) ||
-				80;
-
-			const interlaced: boolean =
-				args?.interlaced ||
-				registry
-					.select( preferencesStore )
-					.get( PREFERENCES_NAME, `${ inputFormat }_interlaced` ) ||
-				false;
 
 			stop = start(
 				`Optimize Item: ${ item.file.name } | ${ imageLibrary } | ${ inputFormat } | ${ outputFormat } | ${ outputQuality }`
@@ -1250,9 +1330,7 @@ export function optimizeImageItem(
 					break;
 
 				case 'webp':
-					// Safari doesn't support WebP in HTMLCanvasElement.toBlob().
-					// See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
-					if ( 'browser' === imageLibrary && ! isSafari ) {
+					if ( 'browser' === imageLibrary ) {
 						file = await canvasConvertImageFormat(
 							item.file,
 							'image/webp',
@@ -1854,8 +1932,8 @@ type FetchRemoteFileArgs = OperationArgs[ OperationType.FetchRemoteFile ];
 /**
  * Fetches a remote file from another server and adds it to the item.
  *
- * @param id   Item ID.
- * @param args Additional arguments for the operation.
+ * @param id     Item ID.
+ * @param [args] Additional arguments for the operation.
  */
 export function fetchRemoteFile( id: QueueItemId, args: FetchRemoteFileArgs ) {
 	return async ( { select, dispatch }: ThunkArgs ) => {

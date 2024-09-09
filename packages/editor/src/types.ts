@@ -179,6 +179,8 @@ export type MediaPreferences = {
 	bigImageSizeThreshold: number;
 	bigVideoSizeThreshold: number;
 	keepOriginal: boolean;
+	convertUnsafe: boolean;
+	useAi: boolean;
 	// Formats.
 	default_outputFormat: ImageFormat;
 	default_quality: number;
@@ -195,9 +197,6 @@ export type MediaPreferences = {
 	avif_outputFormat: ImageFormat;
 	avif_quality: number;
 	avif_interlaced: boolean;
-	heic_outputFormat: ImageFormat;
-	heic_quality: number;
-	heic_interlaced: boolean;
 	gif_outputFormat: ImageFormat;
 	gif_quality: number;
 	gif_interlaced: boolean;

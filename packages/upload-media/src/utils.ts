@@ -401,3 +401,34 @@ export function validateMimeType( file: File, allowedTypes?: string[] ) {
 		} );
 	}
 }
+
+/**
+ * Determines whether a given file type is supported for client-side processing.
+ *
+ * @param type Mime type.
+ * @return Whether the file type is supported.
+ */
+export function isImageTypeSupported(
+	type: string
+): type is
+	| 'image/avif'
+	| 'image/gif'
+	| 'image/heic'
+	| 'image/heif'
+	| 'image/jpeg'
+	| 'image/jxl'
+	| 'image/png'
+	| 'image/tiff'
+	| 'image/webp' {
+	return [
+		'image/avif',
+		'image/gif',
+		'image/heic',
+		'image/heif',
+		'image/jpeg',
+		'image/jxl',
+		'image/png',
+		'image/tiff',
+		'image/webp',
+	].includes( type );
+}

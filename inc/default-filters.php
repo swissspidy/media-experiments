@@ -31,6 +31,12 @@ add_filter( 'mod_rewrite_rules', __NAMESPACE__ . '\filter_mod_rewrite_rules' );
 add_filter( 'big_image_size_threshold', __NAMESPACE__ . '\filter_big_image_size_threshold' );
 add_filter( 'image_save_progressive', __NAMESPACE__ . '\filter_image_save_progressive', 10, 2 );
 
+// Allow uploading JPEG XL originals.
+add_filter( 'mime_types', __NAMESPACE__ . '\filter_mime_types' );
+add_filter( 'ext2type', __NAMESPACE__ . '\filter_ext2type' );
+add_filter( 'getimagesize_mimes_to_exts', __NAMESPACE__ . '\filter_getimagesize_mimes_to_exts' );
+add_filter( 'wp_check_filetype_and_ext', __NAMESPACE__ . '\filter_wp_check_filetype_and_ext', 10, 4 );
+
 // REST API.
 
 add_filter( 'register_post_type_args', __NAMESPACE__ . '\filter_attachment_post_type_args', 10, 2 );
