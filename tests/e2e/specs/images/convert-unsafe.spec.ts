@@ -9,8 +9,11 @@ import { join } from 'node:path';
  */
 import { expect, test } from '../../fixtures';
 
-// Not using simple strings because the browser might not recognize the mime type
-// in the <input> and thus the upload would fail.
+/*
+ Not using simple strings because the browser might not recognize the mime type
+ in the <input> causing file.type to be empty and thus failing the upload.
+ See https://github.com/swissspidy/media-experiments/pull/657.
+*/
 const scenarios = [
 	{
 		name: 'HEIC',
@@ -44,7 +47,7 @@ const scenarios = [
 	},
 ];
 
-test.describe.only( 'Images', () => {
+test.describe( 'Images', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
 		await Promise.all( [
 			requestUtils.deleteAllMedia(),
@@ -85,33 +88,12 @@ test.describe.only( 'Images', () => {
 					);
 			} );
 
-			page.on( 'console', async ( msg ) => {
-				const values = [];
-				for ( const arg of msg.args() ) {
-					values.push( await arg.jsonValue() );
-				}
-				console.log( ...values );
-			} );
-
 			await editor.insertBlock( { name: 'core/image' } );
 
 			const imageBlock = editor.canvas.locator(
 				'role=document[name="Block: Image"i]'
 			);
 			await expect( imageBlock ).toBeVisible();
-
-			await imageBlock
-				.locator( 'data-testid=form-file-upload-input' )
-				.evaluate( ( input: HTMLInputElement ) => {
-					input.addEventListener( 'change', () => {
-						console.log(
-							'input files',
-							input?.files,
-							input?.files[ 0 ].type,
-							input?.files[ 0 ].size
-						);
-					} );
-				} );
 
 			await mediaUtils.upload(
 				imageBlock.locator( 'data-testid=form-file-upload-input' ),

@@ -777,15 +777,6 @@ export function prepareItem( id: QueueItemId ) {
 
 		const operations: Operation[] = [];
 
-		console.log(
-			'isImageTypeSupported',
-			file.name,
-			typeof file.type,
-			`"""${ file.type }"""`,
-			mediaType,
-			isImageTypeSupported( file.type )
-		);
-
 		switch ( mediaType ) {
 			case 'image':
 				// Short-circuit for file types such as SVG or ICO.
@@ -857,14 +848,6 @@ export function prepareItem( id: QueueItemId ) {
 						optimizeOnUpload = false;
 					}
 				}
-
-				console.log(
-					'convertUnsafe',
-					isWebSafe,
-					outputFormat,
-					outputQuality,
-					interlaced
-				);
 
 				const imageSizeThreshold: number = registry
 					.select( preferencesStore )
@@ -974,8 +957,6 @@ export function prepareItem( id: QueueItemId ) {
 
 				break;
 		}
-
-		console.log( 'AddOperationsAction', ...operations );
 
 		dispatch< AddOperationsAction >( {
 			type: Type.AddOperations,
@@ -1322,13 +1303,6 @@ export function optimizeImageItem(
 		) {
 			imageLibrary = 'vips';
 		}
-
-		console.log(
-			'optimizeImageItem',
-			imageLibrary,
-			inputFormat,
-			outputFormat
-		);
 
 		try {
 			let file: File;
