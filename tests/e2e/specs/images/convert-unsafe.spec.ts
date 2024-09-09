@@ -1,21 +1,47 @@
 /**
+ * External dependencies
+ */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+/**
  * Internal dependencies
  */
 import { expect, test } from '../../fixtures';
 
+// Not using simple strings because the browser might not recognize the mime type
+// in the <input> and thus the upload would fail.
 const scenarios = [
-	// {
-	// 	name: 'HEIC',
-	// 	file: 'hill-800x600.heic',
-	// },
+	{
+		name: 'HEIC',
+		file: {
+			name: 'hill-800x600.heic',
+			mimeType: 'image/heic',
+			buffer: readFileSync(
+				join( __dirname, '..', '..', 'assets', 'hill-800x600.heic' )
+			),
+		},
+	},
 	{
 		name: 'JPEG XL',
-		file: 'hill-800x600.jxl',
+		file: {
+			name: 'hill-800x600.jxl',
+			mimeType: 'image/jxl',
+			buffer: readFileSync(
+				join( __dirname, '..', '..', 'assets', 'hill-800x600.jxl' )
+			),
+		},
 	},
-	// {
-	// 	name: 'TIFF',
-	// 	file: 'hill-800x600.tiff',
-	// },
+	{
+		name: 'TIFF',
+		file: {
+			name: 'hill-800x600.tiff',
+			mimeType: 'image/tiff',
+			buffer: readFileSync(
+				join( __dirname, '..', '..', 'assets', 'hill-800x600.tiff' )
+			),
+		},
+	},
 ];
 
 test.describe.only( 'Images', () => {
