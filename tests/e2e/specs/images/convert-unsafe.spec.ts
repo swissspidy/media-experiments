@@ -35,14 +35,6 @@ test.describe.only( 'Images', () => {
 		} ) => {
 			await admin.createNewPost();
 
-			page.on( 'console', async ( msg ) => {
-				const values = [];
-				for ( const arg of msg.args() ) {
-					values.push( await arg.jsonValue() );
-				}
-				console.log( ...values );
-			} );
-
 			await page.evaluate( () => {
 				window.wp.data
 					.dispatch( 'core/preferences' )
@@ -67,6 +59,14 @@ test.describe.only( 'Images', () => {
 					);
 			} );
 
+			page.on( 'console', async ( msg ) => {
+				const values = [];
+				for ( const arg of msg.args() ) {
+					values.push( await arg.jsonValue() );
+				}
+				console.log( ...values );
+			} );
+
 			await editor.insertBlock( { name: 'core/image' } );
 
 			const imageBlock = editor.canvas.locator(
@@ -74,30 +74,14 @@ test.describe.only( 'Images', () => {
 			);
 			await expect( imageBlock ).toBeVisible();
 
-			const defaultFormat = await page.evaluate( () => {
+			await page.evaluate( () => {
 				const val = window.wp.data
-					.select( 'core/preferences' )
-					.get(
-						'media-experiments/preferences',
-						'default_outputFormat'
-					);
+					.select( 'core/block-editor' )
+					.getSettings()
+					.mediaUpload.toString();
 
-				console.log( 'evaluate defaultFormat', val );
-
-				return val;
+				console.log( 'upload func', val );
 			} );
-			console.log( 'defaultFormat', defaultFormat );
-			const convertUnsafe = await page.evaluate( () => {
-				const val = window.wp.data
-					.select( 'core/preferences' )
-					.get( 'media-experiments/preferences', 'convertUnsafe' );
-
-				console.log( 'evaluate convertUnsafe', val );
-
-				return val;
-			} );
-
-			console.log( 'convertUnsafe', convertUnsafe );
 
 			await mediaUtils.upload(
 				imageBlock.locator( 'data-testid=form-file-upload-input' ),

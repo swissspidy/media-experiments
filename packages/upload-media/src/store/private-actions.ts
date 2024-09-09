@@ -966,6 +966,8 @@ export function prepareItem( id: QueueItemId ) {
 				break;
 		}
 
+		console.log( 'AddOperationsAction', ...operations );
+
 		dispatch< AddOperationsAction >( {
 			type: Type.AddOperations,
 			id,
