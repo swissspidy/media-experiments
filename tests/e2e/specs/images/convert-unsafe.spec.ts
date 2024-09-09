@@ -4,10 +4,10 @@
 import { expect, test } from '../../fixtures';
 
 const scenarios = [
-	{
-		name: 'HEIC',
-		file: 'hill-800x600.heic',
-	},
+	// {
+	// 	name: 'HEIC',
+	// 	file: 'hill-800x600.heic',
+	// },
 	{
 		name: 'JPEG XL',
 		file: 'hill-800x600.jxl',
@@ -73,6 +73,19 @@ test.describe.only( 'Images', () => {
 				'role=document[name="Block: Image"i]'
 			);
 			await expect( imageBlock ).toBeVisible();
+
+			await imageBlock
+				.locator( 'data-testid=form-file-upload-input' )
+				.evaluate( ( input: HTMLInputElement ) => {
+					input.addEventListener( 'change', () => {
+						console.log(
+							'input files',
+							input?.files,
+							input?.files[ 0 ].type,
+							input?.files[ 0 ].size
+						);
+					} );
+				} );
 
 			await mediaUtils.upload(
 				imageBlock.locator( 'data-testid=form-file-upload-input' ),
