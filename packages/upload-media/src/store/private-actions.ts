@@ -27,6 +27,7 @@ import {
 	getPosterFromVideo,
 	isAnimatedGif,
 	isHeifImage,
+	isImageTypeSupported,
 	renameFile,
 	validateMimeType,
 	videoHasAudio,
@@ -778,6 +779,12 @@ export function prepareItem( id: QueueItemId ) {
 
 		switch ( mediaType ) {
 			case 'image':
+				// Short-circuit for file types such as SVG or ICO.
+				if ( ! isImageTypeSupported( file.type ) ) {
+					operations.push( OperationType.Upload );
+					break;
+				}
+
 				const fileBuffer = await file.arrayBuffer();
 
 				const isGif = isAnimatedGif( fileBuffer );
