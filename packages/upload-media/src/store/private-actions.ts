@@ -779,9 +779,10 @@ export function prepareItem( id: QueueItemId ) {
 
 		console.log(
 			'isImageTypeSupported',
-			mediaType,
 			file.type,
-			isImageTypeSupported( file.type )
+			mediaType,
+			isImageTypeSupported( file.type ),
+			file
 		);
 
 		switch ( mediaType ) {
