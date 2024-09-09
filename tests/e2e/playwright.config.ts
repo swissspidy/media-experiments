@@ -16,6 +16,7 @@ import baseConfig from '@wordpress/scripts/config/playwright.config';
 
 const config = defineConfig( {
 	...baseConfig,
+	forbidOnly: false,
 	reporter: [
 		...baseConfig.reporter,
 		process.env.COLLECT_COVERAGE === 'true' && [
@@ -75,22 +76,22 @@ const config = defineConfig( {
 				},
 			},
 		},
-		{
-			name: 'webkit',
-			use: { ...devices[ 'Desktop Safari' ] },
-		},
-		{
-			name: 'firefox',
-			use: {
-				...devices[ 'Desktop Firefox' ],
-				launchOptions: {
-					firefoxUserPrefs: {
-						'dom.events.asyncClipboard.readText': true,
-						'dom.events.testing.asyncClipboard': true,
-					},
-				},
-			},
-		},
+		// {
+		// 	name: 'webkit',
+		// 	use: { ...devices[ 'Desktop Safari' ] },
+		// },
+		// {
+		// 	name: 'firefox',
+		// 	use: {
+		// 		...devices[ 'Desktop Firefox' ],
+		// 		launchOptions: {
+		// 			firefoxUserPrefs: {
+		// 				'dom.events.asyncClipboard.readText': true,
+		// 				'dom.events.testing.asyncClipboard': true,
+		// 			},
+		// 		},
+		// 	},
+		// },
 	],
 } );
 

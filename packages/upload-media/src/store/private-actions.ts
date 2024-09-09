@@ -1305,6 +1305,13 @@ export function optimizeImageItem(
 			imageLibrary = 'vips';
 		}
 
+		console.log(
+			'optimizeImageItem',
+			imageLibrary,
+			inputFormat,
+			outputFormat
+		);
+
 		try {
 			let file: File;
 

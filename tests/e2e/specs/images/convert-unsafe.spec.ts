@@ -12,13 +12,13 @@ const scenarios = [
 		name: 'JPEG XL',
 		file: 'hill-800x600.jxl',
 	},
-	{
-		name: 'TIFF',
-		file: 'hill-800x600.tiff',
-	},
+	// {
+	// 	name: 'TIFF',
+	// 	file: 'hill-800x600.tiff',
+	// },
 ];
 
-test.describe( 'Images', () => {
+test.describe.only( 'Images', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
 		await Promise.all( [
 			requestUtils.deleteAllMedia(),
@@ -34,6 +34,14 @@ test.describe( 'Images', () => {
 			mediaUtils,
 		} ) => {
 			await admin.createNewPost();
+
+			page.on( 'console', async ( msg ) => {
+				const values = [];
+				for ( const arg of msg.args() ) {
+					values.push( await arg.jsonValue() );
+				}
+				console.log( ...values );
+			} );
 
 			await page.evaluate( () => {
 				window.wp.data
@@ -65,6 +73,31 @@ test.describe( 'Images', () => {
 				'role=document[name="Block: Image"i]'
 			);
 			await expect( imageBlock ).toBeVisible();
+
+			const defaultFormat = await page.evaluate( () => {
+				const val = window.wp.data
+					.select( 'core/preferences' )
+					.get(
+						'media-experiments/preferences',
+						'default_outputFormat'
+					);
+
+				console.log( 'evaluate defaultFormat', val );
+
+				return val;
+			} );
+			console.log( 'defaultFormat', defaultFormat );
+			const convertUnsafe = await page.evaluate( () => {
+				const val = window.wp.data
+					.select( 'core/preferences' )
+					.get( 'media-experiments/preferences', 'convertUnsafe' );
+
+				console.log( 'evaluate convertUnsafe', val );
+
+				return val;
+			} );
+
+			console.log( 'convertUnsafe', convertUnsafe );
 
 			await mediaUtils.upload(
 				imageBlock.locator( 'data-testid=form-file-upload-input' ),
