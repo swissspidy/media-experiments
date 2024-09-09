@@ -74,15 +74,6 @@ test.describe.only( 'Images', () => {
 			);
 			await expect( imageBlock ).toBeVisible();
 
-			await page.evaluate( () => {
-				const val = window.wp.data
-					.select( 'core/block-editor' )
-					.getSettings()
-					.mediaUpload.toString();
-
-				console.log( 'upload func', val );
-			} );
-
 			await mediaUtils.upload(
 				imageBlock.locator( 'data-testid=form-file-upload-input' ),
 				file

@@ -777,6 +777,13 @@ export function prepareItem( id: QueueItemId ) {
 
 		const operations: Operation[] = [];
 
+		console.log(
+			'isImageTypeSupported',
+			mediaType,
+			file.type,
+			isImageTypeSupported( file.type )
+		);
+
 		switch ( mediaType ) {
 			case 'image':
 				// Short-circuit for file types such as SVG or ICO.

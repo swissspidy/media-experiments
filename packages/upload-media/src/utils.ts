@@ -413,6 +413,7 @@ export function isImageTypeSupported(
 ): type is
 	| 'image/avif'
 	| 'image/gif'
+	| 'image/heic'
 	| 'image/heif'
 	| 'image/jpeg'
 	| 'image/jxl'
@@ -422,6 +423,7 @@ export function isImageTypeSupported(
 	return [
 		'image/avif',
 		'image/gif',
+		'image/heic',
 		'image/heif',
 		'image/jpeg',
 		'image/jxl',
