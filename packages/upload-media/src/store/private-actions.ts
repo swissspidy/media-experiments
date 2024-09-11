@@ -730,7 +730,7 @@ export function addPosterForItem( id: QueueItemId ) {
 					},
 				} );
 			}
-		} catch ( err ) {
+		} catch {
 			// Do not throw error. Could be a simple error such as video playback not working in tests.
 
 			dispatch.finishOperation( id, {} );
@@ -1067,7 +1067,7 @@ export function uploadPoster( id: QueueItemId ) {
 					abortController,
 					operations,
 				} );
-			} catch ( err ) {
+			} catch {
 				// TODO: Debug & catch & throw.
 			}
 		}
@@ -2136,7 +2136,7 @@ export function generateMetadata( id: QueueItemId ) {
 			try {
 				additionalData.mexp_dominant_color =
 					await dominantColorWorker.getDominantColor( stillUrl );
-			} catch ( err ) {
+			} catch {
 				// No big deal if this fails, we can still continue uploading.
 				// TODO: Debug & catch & throw.
 			}
@@ -2150,7 +2150,7 @@ export function generateMetadata( id: QueueItemId ) {
 			try {
 				additionalData.mexp_has_transparency =
 					await vipsHasTransparency( stillUrl );
-			} catch ( err ) {
+			} catch {
 				// No big deal if this fails, we can still continue uploading.
 				// TODO: Debug & catch & throw.
 			}
@@ -2166,7 +2166,7 @@ export function generateMetadata( id: QueueItemId ) {
 			try {
 				additionalData.mexp_blurhash =
 					await blurhashWorker.getBlurHash( stillUrl );
-			} catch ( err ) {
+			} catch {
 				// No big deal if this fails, we can still continue uploading.
 				// TODO: Debug & catch & throw.
 			}
