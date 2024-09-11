@@ -1157,6 +1157,13 @@ export function generateThumbnails( id: QueueItemId ) {
 				dispatch.addSideloadItem( {
 					file,
 					onChange: ( [ updatedAttachment ] ) => {
+						// If the sub-size is still being generated, there is no need
+						// to invoke the callback below. It would just override
+						// the main image in the editor with the sub-size.
+						if ( isBlobURL( updatedAttachment.url ) ) {
+							return;
+						}
+
 						// This might be confusing, but the idea is to update the original
 						// image item in the editor with the new one with the added sub-size.
 						item.onChange?.( [ updatedAttachment ] );
