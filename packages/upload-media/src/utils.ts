@@ -124,7 +124,7 @@ export async function fetchFile( url: string, nameOverride?: string ) {
 
 	const file = new File( [ blob ], name, { type } );
 
-	if ( ! guessedMimeType ) {
+	if ( ! type ) {
 		throw new UploadError( {
 			code: 'FETCH_REMOTE_FILE_ERROR',
 			message: 'File could not be downloaded',
