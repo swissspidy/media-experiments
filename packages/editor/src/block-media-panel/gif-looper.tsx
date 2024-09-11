@@ -6,7 +6,7 @@ import { useLayoutEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { isGifVariation } from '../gif-block/utils';
+import { isGifVariation } from '../utils';
 import type { VideoBlock } from '../types';
 
 interface GifLooperProps {

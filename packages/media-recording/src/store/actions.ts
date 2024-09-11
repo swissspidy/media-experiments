@@ -21,10 +21,8 @@ import {
 } from './constants';
 import {
 	type LeaveRecordingModeAction,
-	type SetGifModeAction,
 	type SetHasAudioAction,
 	type State,
-	type ToggleGifModeAction,
 	type ToggleHasAudioAction,
 	Type,
 	type VideoEffect,
@@ -41,7 +39,6 @@ type Selectors = {
 type ActionCreators = {
 	invalidateResolutionForStoreSelector: ( selector: keyof Selectors ) => void;
 	setVideoEffect: typeof setVideoEffect;
-	setGifMode: typeof setGifMode;
 	setHasAudio: typeof setHasAudio;
 	stopRecording: typeof stopRecording;
 	countDuration: typeof countDuration;
@@ -106,27 +103,6 @@ export function toggleBlurEffect() {
 		} );
 
 		dispatch.invalidateResolutionForStoreSelector( 'getMediaStream' );
-	};
-}
-
-/**
- * Returns an action object signalling the new value for the GIF mode.
- *
- * @param value New value.
- */
-export function setGifMode( value: boolean ): SetGifModeAction {
-	return {
-		type: Type.SetGifMode,
-		value,
-	};
-}
-
-/**
- * Returns an action object signalling that GIF mode should be toggled.
- */
-export function toggleGifMode(): ToggleGifModeAction {
-	return {
-		type: Type.ToggleGifMode,
 	};
 }
 

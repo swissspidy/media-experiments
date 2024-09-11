@@ -9,7 +9,7 @@ import type { Block } from '@wordpress/blocks';
  * Internal dependencies
  */
 import type { VideoBlock } from '../types';
-import { isGifVariation } from './utils';
+import { isGifVariation } from '../utils';
 
 type Writable< T > = { -readonly [ P in keyof T ]: Writable< T[ P ] > };
 type FilterableBlock = Writable< Block >;
