@@ -31,7 +31,7 @@ export function getDevices() {
 					// remove these devices from the list.
 					.filter( ( device ) => device.label ),
 			} );
-		} catch ( err ) {
+		} catch {
 			// Do nothing for now.
 		}
 	};
@@ -210,7 +210,7 @@ export function getMediaStream() {
 
 					try {
 						await selfieSegmentation.send( { image: video } );
-					} catch ( e ) {
+					} catch {
 						// We can't do much about the WASM memory issue.
 					}
 
