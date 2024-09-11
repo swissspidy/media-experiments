@@ -404,7 +404,7 @@ test.describe( 'Images', () => {
 				.filter( {
 					hasText: 'File upload was cancelled',
 				} )
-		).toBeVisible();
+		).toBeHidden();
 
 		await expect( settingsPanel ).toHaveText( /Mime type: image\/png/ );
 
