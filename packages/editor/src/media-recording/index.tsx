@@ -21,7 +21,8 @@ import './blocks.css';
 import { formatSecondsToMinutesSeconds } from './utils';
 import { UnfinishedRecordingWarning } from './unfinished-recording-warning';
 import AudioAnalyzer from './audio-analyzer';
-import { isGifVariation } from '../utils';
+import { useIsGifVariation } from '../utils/hooks';
+import { GifLooper } from '../utils/gif-looper';
 
 const SUPPORTED_BLOCKS = [
 	'core/image',
@@ -115,7 +116,7 @@ function OverlayText() {
 	return null;
 }
 
-function Recorder( props: MediaPanelProps ) {
+function Recorder( { clientId }: MediaPanelProps ) {
 	const [ streamNode, setStreamNode ] = useState< HTMLVideoElement | null >();
 	const {
 		videoInput,
@@ -143,6 +144,8 @@ function Recorder( props: MediaPanelProps ) {
 		};
 	}, [] );
 
+	const isGif = useIsGifVariation( clientId );
+
 	useEffect( () => {
 		if ( ! streamNode ) {
 			return;
@@ -169,9 +172,6 @@ function Recorder( props: MediaPanelProps ) {
 		return <PermissionsDialog />;
 	}
 
-	const isGif =
-		props.name === 'core/video' && isGifVariation( props.attributes );
-
 	if ( url ) {
 		switch ( mediaType ) {
 			case 'image':
@@ -187,13 +187,16 @@ function Recorder( props: MediaPanelProps ) {
 
 			case 'video':
 				return (
-					<video
-						controls={ ! isGif }
-						muted={ isMuted || isGif }
-						loop={ isGif }
-						src={ url }
-						autoPlay={ isGif }
-					/>
+					<>
+						<video
+							controls={ ! isGif }
+							muted={ isMuted || isGif }
+							loop={ isGif }
+							src={ url }
+							autoPlay={ isGif }
+						/>
+						<GifLooper clientId={ clientId } />
+					</>
 				);
 
 			case 'audio':

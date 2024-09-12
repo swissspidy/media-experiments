@@ -12,6 +12,7 @@ import { isBlobURL } from '@wordpress/blob';
 /**
  * Internal dependencies
  */
+import { GifLooper } from '../utils/gif-looper';
 import { UploadIndicator } from './upload-indicator';
 import { RecordingControls } from './recording-controls';
 import { ImportMedia } from './import-media';
@@ -21,7 +22,6 @@ import { AddPoster } from './add-poster';
 import { DebugInfo } from './debug-info';
 import type { VideoBlock } from '../types';
 import { UploadRequestControls } from './upload-requests/controls';
-import { GifLooper } from './gif-looper';
 
 type VideoControlsProps = VideoBlock &
 	Pick< BlockEditProps< VideoBlock[ 'attributes' ] >, 'setAttributes' >;
@@ -72,7 +72,9 @@ export function VideoControls( props: VideoControlsProps ) {
 
 	return (
 		<>
-			<GifLooper attributes={ props.attributes } />
+			{ props.attributes ? (
+				<GifLooper clientId={ props.clientId } />
+			) : null }
 			<UploadIndicator
 				id={ props.attributes.id }
 				url={ props.attributes.src }
