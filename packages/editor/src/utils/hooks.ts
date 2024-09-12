@@ -17,6 +17,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { isBlobURL } from '@wordpress/blob';
 import { store as editorStore } from '@wordpress/editor';
 import { store as blockEditorStore } from '@wordpress/block-editor';
+import { store as blocksStore } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -25,6 +26,7 @@ import type {
 	BulkOptimizationAttachmentData,
 	MediaSourceTerm,
 	RestBaseRecord,
+	VideoBlock,
 } from '../types';
 
 export function useIsUploadingByUrl( url?: string ) {
@@ -344,5 +346,31 @@ export function useBlockAttachments( clientId?: string ) {
 	return useAttachmentsWithEntityRecords(
 		attachmentsToQuery,
 		attachmentsToQuery.length > 0
+	);
+}
+
+export function useIsGifVariation( clientId?: string ) {
+	return useSelect(
+		( select ) => {
+			if ( ! clientId ) {
+				return false;
+			}
+			const { getBlockName, getBlockAttributes } =
+				select( blockEditorStore );
+			const name = getBlockName( clientId );
+
+			if ( ! name ) {
+				return false;
+			}
+
+			const activeBlockVariation = select(
+				blocksStore
+			).getActiveBlockVariation(
+				name,
+				getBlockAttributes( clientId ) as VideoBlock[ 'attributes' ]
+			);
+			return 'gif' === activeBlockVariation?.name;
+		},
+		[ clientId ]
 	);
 }

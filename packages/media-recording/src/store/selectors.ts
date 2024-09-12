@@ -49,15 +49,6 @@ export function getDevices( state: State ): MediaDeviceInfo[] {
 }
 
 /**
- * Whether GIF mode is active.
- *
- * @param state Recording state.
- */
-export function isGifMode( state: State ): boolean {
-	return state.isGifMode;
-}
-
-/**
  * Whether there is any video device available.
  *
  * @param state Recording state.

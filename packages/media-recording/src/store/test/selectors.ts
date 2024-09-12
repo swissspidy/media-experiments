@@ -10,7 +10,6 @@ import {
 	hasAudio,
 	hasVideo,
 	isBlockInRecordingMode,
-	isGifMode,
 	isInRecordingMode,
 } from '../selectors';
 import type { State } from '../types';
@@ -23,7 +22,6 @@ const defaultState: State = {
 	recordingTypes: [ 'video' ],
 	devices: [],
 	hasAudio: true,
-	isGifMode: false,
 	countdown: 0,
 	duration: 0,
 	recordingStatus: 'idle',
@@ -68,12 +66,6 @@ describe( 'selectors', () => {
 	describe( 'getDevices', () => {
 		it( 'should return empty array by default', () => {
 			expect( getDevices( defaultState ) ).toStrictEqual( [] );
-		} );
-	} );
-
-	describe( 'isGifMode', () => {
-		it( 'should return false by default', () => {
-			expect( isGifMode( defaultState ) ).toBe( false );
 		} );
 	} );
 

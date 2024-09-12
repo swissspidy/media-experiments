@@ -21,6 +21,8 @@ import './blocks.css';
 import { formatSecondsToMinutesSeconds } from './utils';
 import { UnfinishedRecordingWarning } from './unfinished-recording-warning';
 import AudioAnalyzer from './audio-analyzer';
+import { useIsGifVariation } from '../utils/hooks';
+import { GifLooper } from '../utils/gif-looper';
 
 const SUPPORTED_BLOCKS = [
 	'core/image',
@@ -114,7 +116,7 @@ function OverlayText() {
 	return null;
 }
 
-function Recorder() {
+function Recorder( { clientId }: MediaPanelProps ) {
 	const [ streamNode, setStreamNode ] = useState< HTMLVideoElement | null >();
 	const {
 		videoInput,
@@ -125,11 +127,9 @@ function Recorder() {
 		recordingTypes,
 		mediaType,
 		dimensions,
-		isGifMode,
 		isMuted,
 	} = useSelect( ( select ) => {
 		const file = select( recordingStore ).getFile();
-		const isGif = select( recordingStore ).isGifMode();
 
 		return {
 			videoInput: select( recordingStore ).getVideoInput(),
@@ -140,10 +140,11 @@ function Recorder() {
 			mediaType: file ? file.type.split( '/' )[ 0 ] : null,
 			url: select( recordingStore ).getUrl(),
 			dimensions: select( recordingStore ).getDimensions(),
-			isGifMode: isGif,
-			isMuted: ! select( recordingStore ).hasAudio || isGif,
+			isMuted: ! select( recordingStore ).hasAudio,
 		};
 	}, [] );
+
+	const isGif = useIsGifVariation( clientId );
 
 	useEffect( () => {
 		if ( ! streamNode ) {
@@ -186,12 +187,16 @@ function Recorder() {
 
 			case 'video':
 				return (
-					<video
-						controls
-						muted={ isMuted }
-						loop={ isGifMode }
-						src={ url }
-					/>
+					<>
+						<video
+							controls={ ! isGif }
+							muted={ isMuted || isGif }
+							loop={ isGif }
+							src={ url }
+							autoPlay={ isGif }
+						/>
+						<GifLooper clientId={ clientId } />
+					</>
 				);
 
 			case 'audio':
@@ -285,7 +290,7 @@ const addMediaRecorder = createHigherOrderComponent(
 		return (
 			<div { ...blockProps }>
 				<UnfinishedRecordingWarning />
-				<Recorder />
+				<Recorder { ...props } />
 			</div>
 		);
 	},
