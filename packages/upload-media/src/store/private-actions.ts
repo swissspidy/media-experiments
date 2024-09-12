@@ -730,7 +730,7 @@ export function addPosterForItem( id: QueueItemId ) {
 					},
 				} );
 			}
-		} catch ( err ) {
+		} catch {
 			// Do not throw error. Could be a simple error such as video playback not working in tests.
 
 			dispatch.finishOperation( id, {} );
@@ -1067,7 +1067,7 @@ export function uploadPoster( id: QueueItemId ) {
 					abortController,
 					operations,
 				} );
-			} catch ( err ) {
+			} catch {
 				// TODO: Debug & catch & throw.
 			}
 		}
@@ -1157,6 +1157,13 @@ export function generateThumbnails( id: QueueItemId ) {
 				dispatch.addSideloadItem( {
 					file,
 					onChange: ( [ updatedAttachment ] ) => {
+						// If the sub-size is still being generated, there is no need
+						// to invoke the callback below. It would just override
+						// the main image in the editor with the sub-size.
+						if ( isBlobURL( updatedAttachment.url ) ) {
+							return;
+						}
+
 						// This might be confusing, but the idea is to update the original
 						// image item in the editor with the new one with the added sub-size.
 						item.onChange?.( [ updatedAttachment ] );
@@ -2136,7 +2143,7 @@ export function generateMetadata( id: QueueItemId ) {
 			try {
 				additionalData.mexp_dominant_color =
 					await dominantColorWorker.getDominantColor( stillUrl );
-			} catch ( err ) {
+			} catch {
 				// No big deal if this fails, we can still continue uploading.
 				// TODO: Debug & catch & throw.
 			}
@@ -2150,7 +2157,7 @@ export function generateMetadata( id: QueueItemId ) {
 			try {
 				additionalData.mexp_has_transparency =
 					await vipsHasTransparency( stillUrl );
-			} catch ( err ) {
+			} catch {
 				// No big deal if this fails, we can still continue uploading.
 				// TODO: Debug & catch & throw.
 			}
@@ -2166,7 +2173,7 @@ export function generateMetadata( id: QueueItemId ) {
 			try {
 				additionalData.mexp_blurhash =
 					await blurhashWorker.getBlurHash( stillUrl );
-			} catch ( err ) {
+			} catch {
 				// No big deal if this fails, we can still continue uploading.
 				// TODO: Debug & catch & throw.
 			}

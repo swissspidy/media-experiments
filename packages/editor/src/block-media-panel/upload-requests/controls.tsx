@@ -197,7 +197,7 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 		try {
 			await createNewUploadRequest();
 			void openModal( 'media-experiments/upload-request' );
-		} catch ( err ) {
+		} catch {
 			void createErrorNotice(
 				__(
 					'Could not start upload process. Please try again.',

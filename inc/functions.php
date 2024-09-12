@@ -710,24 +710,28 @@ function filter_rest_index( WP_REST_Response $response ): WP_REST_Response {
 /**
  * Returns the attachment's original file name.
  *
+ * Strips any "-original" or "-scaled" suffix from the file name.
+ *
  * @param array $post Post data.
  * @return string|null Attachment file name.
  * @phpstan-param array{id: int} $post
  */
 function rest_get_attachment_filename( array $post ): ?string {
-	$path = wp_get_original_image_path( $post['id'] );
-
-	if ( $path ) {
-		return basename( $path );
-	}
-
 	$path = get_attached_file( $post['id'] );
 
-	if ( $path ) {
-		return basename( $path );
+	if ( ! $path ) {
+		return null;
 	}
 
-	return null;
+	$basename = strtolower( pathinfo( $path, PATHINFO_FILENAME ) );
+	$ext      = strtolower( pathinfo( $path, PATHINFO_EXTENSION ) );
+
+	$suffix = '-scaled';
+	if ( str_ends_with( $basename, $suffix ) ) {
+		$basename = substr( $basename, 0, - strlen( $suffix ) );
+	}
+
+	return "$basename.$ext";
 }
 
 /**

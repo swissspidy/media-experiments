@@ -502,6 +502,24 @@ HTML;
 	}
 
 	/**
+	 * @covers \MediaExperiments\rest_get_attachment_filename
+	 */
+	public function test_rest_get_attachment_filename_removes_suffix() {
+		$attachment_id = self::factory()->attachment->create_object(
+			self::$image_file,
+			0,
+			array(
+				'post_mime_type' => 'image/jpeg',
+				'post_excerpt'   => 'A sample caption',
+			)
+		);
+
+		update_post_meta( $attachment_id, '_wp_attached_file', 'canola-scaled.jpg' );
+
+		$this->assertSame( 'canola.jpg', rest_get_attachment_filename( [ 'id' => $attachment_id ] ) );
+	}
+
+	/**
 	 * @covers \MediaExperiments\rest_get_attachment_blurhash
 	 */
 	public function test_rest_get_attachment_blurhash() {
