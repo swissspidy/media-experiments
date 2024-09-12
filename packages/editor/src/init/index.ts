@@ -144,6 +144,7 @@ const unsubscribeCoreStore = subscribe( () => {
 
 	const defaultPreferences: MediaPreferences = {
 		// General.
+		welcomeGuide: true,
 		requireApproval: true,
 		optimizeOnUpload: true,
 		thumbnailGeneration: 'smart',
