@@ -76,6 +76,7 @@ _Parameters_
 
 -   _id_ `QueueItemId`: Item ID.
 -   _error_ `Error`: Error instance.
+-   _silent_ Whether to cancel the item silently, without invoking its `onError` callback.
 
 #### grantApproval
 
