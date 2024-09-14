@@ -24,7 +24,11 @@
 		"szepeviktor/phpstan-wordpress": "^v1.3.2",
 		"wp-coding-standards/wpcs": "^3.0.1",
 		"yoast/phpunit-polyfills": "^2.0.1",
-		"johnbillion/wp-compat": "dev-trunk"
+		"johnbillion/wp-compat": "dev-trunk",
+		"phpstan/phpstan-strict-rules": "1.6.x-dev",
+		"phpstan/phpstan-phpunit": "1.4.x-dev",
+		"phpstan/phpstan-deprecation-rules": "1.2.x-dev",
+		"swissspidy/phpstan-no-private": "dev-main"
 	},
 	"minimum-stability": "dev",
 	"config": {
