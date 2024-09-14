@@ -23,7 +23,8 @@
 		"roave/security-advisories": "dev-latest",
 		"szepeviktor/phpstan-wordpress": "^v1.3.2",
 		"wp-coding-standards/wpcs": "^3.0.1",
-		"yoast/phpunit-polyfills": "^2.0.1"
+		"yoast/phpunit-polyfills": "^2.0.1",
+		"johnbillion/wp-compat": "dev-trunk"
 	},
 	"minimum-stability": "dev",
 	"config": {

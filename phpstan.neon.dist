@@ -7,6 +7,8 @@ parameters:
 		- vendor/php-stubs/wordpress-tests-stubs/wordpress-tests-stubs.php
 	bootstrapFiles:
 		- tests/phpstan/bootstrap.php
+	WPCompat:
+		requiresAtLeast: '6.6'
 	ignoreErrors:
 		# TODO: Revisit ArrayAccess types in WP_REST_Request
 		# See https://github.com/php-stubs/wordpress-stubs/pull/66
