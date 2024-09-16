@@ -32,7 +32,7 @@
 		"@shopify/web-worker": "^6.3.0",
 		"@testing-library/jest-dom": "^6.5.0",
 		"@testing-library/react": "^16.0.1",
-		"@types/jest": "^29.5.12",
+		"@types/jest": "^29.5.13",
 		"@types/mime": "^3.0.4",
 		"@types/node": "^22.5.4",
 		"@types/uuid": "^10.0.0",
