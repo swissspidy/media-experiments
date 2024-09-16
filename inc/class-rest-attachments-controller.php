@@ -89,8 +89,13 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 *                       checked for required values and may fall-back to a given default, this is not done
 	 *                       on `EDITABLE` requests. Default WP_REST_Server::CREATABLE.
 	 * @return array Endpoint arguments.
+	 *
+	 * @phpstan-return array{string: array<string,mixed>}
 	 */
 	public function get_endpoint_args_for_item_schema( $method = WP_REST_Server::CREATABLE ) {
+		/**
+		 * @phpstan-var array{string: array<string,mixed>} $args
+		 */
 		$args = rest_get_endpoint_args_for_schema( $this->get_item_schema(), $method );
 
 		if ( WP_REST_Server::CREATABLE === $method ) {

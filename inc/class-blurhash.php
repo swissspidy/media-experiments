@@ -179,7 +179,7 @@ class BlurHash {
 	 * @phpstan-return array<int, array<int, array<int, float>>>
 	 */
 	public static function decode( string $blurhash, int $width, int $height, float $punch = 1.0, bool $linear = false ): array {
-		if ( empty( $blurhash ) || strlen( $blurhash ) < 6 ) {
+		if ( strlen( $blurhash ) < 6 ) {
 			throw new InvalidArgumentException( 'Blurhash string must be at least 6 characters' );
 		}
 
@@ -188,7 +188,7 @@ class BlurHash {
 		$size_x    = ( $size_info % 9 ) + 1;
 
 		$length          = strlen( $blurhash );
-		$expected_length = (int) ( 4 + ( 2 * $size_y * $size_x ) );
+		$expected_length = ( 4 + ( 2 * $size_y * $size_x ) );
 		if ( $length !== $expected_length ) {
 			throw new InvalidArgumentException( "Blurhash length mismatch: length is {$length} but it should be {$expected_length}" );
 		}
