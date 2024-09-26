@@ -384,7 +384,7 @@ function filter_wp_check_filetype_and_ext( $wp_check_filetype_and_ext, $file, $f
 	$wp_filetype = wp_check_filetype( $filename, $mimes );
 	$type        = $wp_filetype['type'];
 
-	if ( ! $type && ! str_starts_with( $type, 'image/' ) ) {
+	if ( ! $type || ! str_starts_with( $type, 'image/' ) ) {
 		return $wp_check_filetype_and_ext;
 	}
 
