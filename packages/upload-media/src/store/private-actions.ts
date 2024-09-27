@@ -2054,6 +2054,12 @@ export function generateImageCaptions( id: QueueItemId ) {
 	return async ( { select, dispatch }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
 
+		// Item already has both caption and alt text, do nothing.
+		if ( item.additionalData?.caption && item.additionalData.alt_text ) {
+			dispatch.finishOperation( id, {} );
+			return;
+		}
+
 		try {
 			let url = item.attachment?.url;
 
@@ -2067,11 +2073,14 @@ export function generateImageCaptions( id: QueueItemId ) {
 				} );
 			}
 
-			const caption = await aiWorker.generateCaption( url );
-			const alt = await aiWorker.generateCaption(
-				url,
-				'<DETAILED_CAPTION>'
-			);
+			// Do not override existing caption or alt text.
+			const caption =
+				item.additionalData?.caption ||
+				( await aiWorker.generateCaption( url ) );
+
+			const alt =
+				item.additionalData?.alt_text ||
+				( await aiWorker.generateCaption( url, '<DETAILED_CAPTION>' ) );
 
 			dispatch.finishOperation( id, {
 				// For updating in the editor straight away.
