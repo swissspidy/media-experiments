@@ -21,6 +21,7 @@ import { UploadError } from '../upload-error';
 import {
 	canProcessWithFFmpeg,
 	cloneFile,
+	convertBlobToFile,
 	fetchFile,
 	getFileBasename,
 	getFileExtension,
@@ -153,7 +154,8 @@ type ThunkArgs = {
 };
 
 interface AddItemArgs {
-	file: File;
+	// It should always be a File, but some consumers might still pass Blobs only.
+	file: File | Blob;
 	batchId?: BatchId;
 	onChange?: OnChangeHandler;
 	onSuccess?: OnSuccessHandler;
@@ -183,7 +185,7 @@ interface AddItemArgs {
  * @param [$0.operations]         List of operations to perform. Defaults to automatically determined list, based on the file.
  */
 export function addItem( {
-	file,
+	file: fileOrBlob,
 	batchId,
 	onChange,
 	onSuccess,
@@ -201,6 +203,10 @@ export function addItem( {
 			.get( PREFERENCES_NAME, 'thumbnailGeneration' );
 
 		const itemId = uuidv4();
+
+		// Hardening in case a Blob is passed instead of a File.
+		// See https://github.com/WordPress/gutenberg/pull/65693 for an example.
+		const file = convertBlobToFile( fileOrBlob );
 
 		let blobUrl;
 
