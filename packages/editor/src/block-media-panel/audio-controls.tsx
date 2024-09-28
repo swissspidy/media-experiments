@@ -39,6 +39,8 @@ export function AudioControls( props: AudioControlsProps ) {
 		if ( url ) {
 			props.setAttributes( {
 				src: url,
+				// New local attribute in WordPress 6.7.
+				blob: url,
 			} );
 		}
 	}

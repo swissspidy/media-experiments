@@ -45,6 +45,8 @@ export function ImageControls( props: ImageControlsProps ) {
 		if ( url ) {
 			props.setAttributes( {
 				url,
+				// New local attribute in WordPress 6.7.
+				blob: url,
 			} );
 		}
 	}
