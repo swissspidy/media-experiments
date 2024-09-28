@@ -16,7 +16,7 @@ permissions: {}
 
 jobs:
     e2e-tests:
-        name: 'E2E Tests (${{ matrix.wp }})${{ matrix.gb && " + GB" }} (${{ matrix.shard }})'
+        name: 'E2E Tests (${{ matrix.wp }}${{ matrix.gb && \' + GB \' }}) (${{ matrix.shard }})'
         runs-on: ubuntu-latest
         continue-on-error: ${{ matrix.experimental == true }}
         strategy:
