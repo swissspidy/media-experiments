@@ -56,7 +56,10 @@ test.describe( 'Site Logo', () => {
 
 				await editor.selectBlocks( siteLogoBlock );
 
-				await editor.canvas.getByLabel( 'Add a site logo' ).click();
+				// Renamed to "Choose logo" in WP 6.7 / GB 19.0.
+				await editor.canvas
+					.getByLabel( /Add a site logo|Choose logo/ )
+					.click();
 
 				await page.getByRole( 'tab', { name: 'Upload files' } ).click();
 
