@@ -332,7 +332,9 @@ export function RecordingControls( {
 	onInsert,
 	recordingTypes,
 }: RecordingControlsProps ) {
-	const { baseControlProps, controlProps } = useBaseControlProps( {} );
+	const { baseControlProps, controlProps } = useBaseControlProps( {
+		__nextHasNoMarginBottom: true,
+	} );
 
 	const { enterRecordingMode, leaveRecordingMode } =
 		useDispatch( recordingStore );

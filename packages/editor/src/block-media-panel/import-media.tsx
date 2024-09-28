@@ -34,7 +34,9 @@ export function ImportMedia( {
 	onChange,
 	allowedTypes,
 }: ImportMediaProps ) {
-	const { baseControlProps, controlProps } = useBaseControlProps( {} );
+	const { baseControlProps, controlProps } = useBaseControlProps( {
+		__nextHasNoMarginBottom: true,
+	} );
 
 	const { addItemFromUrl } = useDispatch( uploadStore );
 	const { createErrorNotice } = useDispatch( noticesStore );

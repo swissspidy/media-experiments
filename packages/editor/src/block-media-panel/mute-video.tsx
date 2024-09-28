@@ -30,7 +30,9 @@ interface MuteVideoProps {
 }
 
 export function MuteVideo( { id, url, poster, onChange }: MuteVideoProps ) {
-	const { baseControlProps, controlProps } = useBaseControlProps( {} );
+	const { baseControlProps, controlProps } = useBaseControlProps( {
+		__nextHasNoMarginBottom: true,
+	} );
 
 	const { record: post } = useEntityRecord< RestAttachment | null >(
 		'postType',
