@@ -38,6 +38,22 @@ jobs:
                     - wp: 'trunk'
                       shard: '4/4'
                       experimental: true
+                    - wp: 'trunk'
+                      gutenberg: true
+                      shard: '1/4'
+                      experimental: true
+                    - wp: 'trunk'
+                      gutenberg: true
+                      shard: '2/4'
+                      experimental: true
+                    - wp: 'trunk'
+                      gutenberg: true
+                      shard: '3/4'
+                      experimental: true
+                    - wp: 'trunk'
+                      gutenberg: true
+                      shard: '4/4'
+                      experimental: true
 
         steps:
             - name: Checkout
@@ -71,8 +87,14 @@ jobs:
 
                   chmod -R 767 ./
                   npm run wp-env start
+
+                if [[ $GUTENBERG != 'true' ]]; then
+                  echo "Deactivating Gutenberg plugin"
+                  npm run wp-env --silent -- run tests-cli wp plugin deactivate gutenberg
+                fi
               env:
                   WP_VERSION: ${{ matrix.wp }}
+                  GUTENBERG: ${{ matrix.gutenberg == 'true' }}
 
             - name: Run tests
               run: |
