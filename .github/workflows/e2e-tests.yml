@@ -16,7 +16,7 @@ permissions: {}
 
 jobs:
     e2e-tests:
-        name: 'E2E Tests (${{ matrix.wp }}) (${{ matrix.shard }})'
+        name: E2E Tests (${{ matrix.wp }}${{ matrix.gb && ' + GB ' }}) (${{ matrix.shard }})
         runs-on: ubuntu-latest
         continue-on-error: ${{ matrix.experimental == true }}
         strategy:
@@ -36,6 +36,22 @@ jobs:
                       shard: '3/4'
                       experimental: true
                     - wp: 'trunk'
+                      shard: '4/4'
+                      experimental: true
+                    - wp: 'trunk'
+                      gb: true
+                      shard: '1/4'
+                      experimental: true
+                    - wp: 'trunk'
+                      gb: true
+                      shard: '2/4'
+                      experimental: true
+                    - wp: 'trunk'
+                      gb: true
+                      shard: '3/4'
+                      experimental: true
+                    - wp: 'trunk'
+                      gb: true
                       shard: '4/4'
                       experimental: true
 
@@ -71,8 +87,14 @@ jobs:
 
                   chmod -R 767 ./
                   npm run wp-env start
+
+                  if [[ $GUTENBERG != 'true' ]]; then
+                    echo "Deactivating Gutenberg plugin"
+                    npm run wp-env --silent -- run tests-cli wp plugin deactivate gutenberg
+                  fi
               env:
                   WP_VERSION: ${{ matrix.wp }}
+                  GUTENBERG: ${{ matrix.gb == 'true' }}
 
             - name: Run tests
               run: |
@@ -94,7 +116,7 @@ jobs:
                   ARTIFACT_NAME=${ARTIFACT_NAME//\//-}
                   echo "ARTIFACT_NAME=${ARTIFACT_NAME}" >> $GITHUB_ENV
               env:
-                  ARTIFACT_NAME: failures-artifacts-${{ matrix.wp }}-${{ matrix.shard }}
+                  ARTIFACT_NAME: failures-artifacts-${{ matrix.wp }}${{ matrix.gb && '-gb' }}-${{ matrix.shard }}
 
             - name: Archive debug artifacts (screenshots, HTML snapshots)
               uses: actions/upload-artifact@v4

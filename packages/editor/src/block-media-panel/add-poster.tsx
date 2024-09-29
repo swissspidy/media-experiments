@@ -34,7 +34,9 @@ interface AddPosterProps {
 }
 
 export function AddPoster( { attributes, setAttributes }: AddPosterProps ) {
-	const { baseControlProps, controlProps } = useBaseControlProps( {} );
+	const { baseControlProps, controlProps } = useBaseControlProps( {
+		__nextHasNoMarginBottom: true,
+	} );
 
 	const [ posterId, setPosterId ] = useState< number | undefined >();
 

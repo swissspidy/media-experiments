@@ -32,7 +32,9 @@ export function GenerateSubtitles( {
 	attributes,
 	setAttributes,
 }: GenerateSubtitlesProps ) {
-	const { baseControlProps, controlProps } = useBaseControlProps( {} );
+	const { baseControlProps, controlProps } = useBaseControlProps( {
+		__nextHasNoMarginBottom: true,
+	} );
 
 	const { record: post } = useEntityRecord< RestAttachment | null >(
 		'postType',

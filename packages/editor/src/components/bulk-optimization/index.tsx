@@ -267,7 +267,9 @@ export function BulkOptimization( {
 }: {
 	attachments: BulkOptimizationAttachmentData[];
 } ) {
-	const { baseControlProps, controlProps } = useBaseControlProps( {} );
+	const { baseControlProps, controlProps } = useBaseControlProps( {
+		__nextHasNoMarginBottom: true,
+	} );
 
 	const [ isBulkUploading, setIsBulkUploading ] = useState( false );
 

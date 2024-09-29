@@ -41,7 +41,9 @@ const UPLOAD_REQUEST_CHECK_INTERVAL = 5; // Seconds.
 const UPLOAD_REQUEST_MAX_LIFETIME = 15 * 60; // Seconds.
 
 export function UploadRequestControls( props: UploadRequestControlsProps ) {
-	const { baseControlProps, controlProps } = useBaseControlProps( {} );
+	const { baseControlProps, controlProps } = useBaseControlProps( {
+		__nextHasNoMarginBottom: true,
+	} );
 
 	const { openModal, closeModal } = useDispatch( interfaceStore );
 	// @ts-ignore -- invalidateResolution is not yet exposed in GB types.
