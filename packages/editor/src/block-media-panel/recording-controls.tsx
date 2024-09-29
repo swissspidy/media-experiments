@@ -210,9 +210,8 @@ function ToolbarControls( { onInsert }: ToolbarControlsProps ) {
 									void startRecording();
 								}
 							} }
-							extraProps={ {
-								disabled: ! isReady && ! isRecording,
-							} }
+							disabled={ ! isReady && ! isRecording }
+							accessibleWhenDisabled={ true }
 							icon={
 								! isRecordingOrCountdown ? (
 									<StartRecording
@@ -244,9 +243,8 @@ function ToolbarControls( { onInsert }: ToolbarControlsProps ) {
 									void resumeRecording();
 								}
 							} }
-							extraProps={ {
-								disabled: ! isRecording && ! isPaused,
-							} }
+							disabled={ ! isRecording && ! isPaused }
+							accessibleWhenDisabled={ true }
 							icon={
 								isPaused ? (
 									<ResumeRecording
@@ -261,7 +259,7 @@ function ToolbarControls( { onInsert }: ToolbarControlsProps ) {
 								)
 							}
 							label={
-								isRecording
+								! isPaused
 									? __(
 											'Pause recording',
 											'media-experiments'
