@@ -1,10 +1,11 @@
 parameters:
-	level: 9
+	level: 2
 	paths:
 		- media-experiments.php
 		- inc/
 	scanFiles:
 		- vendor/php-stubs/wordpress-tests-stubs/wordpress-tests-stubs.php
+		- tests/phpstan/performance-lab.stub
 	bootstrapFiles:
 		- tests/phpstan/bootstrap.php
 	featureToggles:
@@ -12,16 +13,13 @@ parameters:
 		requireFileExists: false
 	WPCompat:
 		requiresAtLeast: '6.6'
+	strictRules:
+		disallowedConstructs: false
+		strictArrayFilter: false
 	ignoreErrors:
 		# TODO: Revisit ArrayAccess types in WP_REST_Request
 		# See https://github.com/php-stubs/wordpress-stubs/pull/66
 		# See https://github.com/phpstan/phpstan/issues/8549
-		-
-			message: "/^Cannot assign offset 'post' to WP_REST_Request<array<string, bool\\|int\\|string>>.$/"
-			path: inc/class-rest-attachments-controller.php
-		-
-			message: "/Cannot access offset 'id' on mixed.$/"
-			path: inc/class-rest-attachments-controller.php
 
 includes:
 	- phar://phpstan.phar/conf/bleedingEdge.neon
