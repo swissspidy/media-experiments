@@ -17,7 +17,7 @@
 	},
 	"require-dev": {
 		"dealerdirect/phpcodesniffer-composer-installer": "^1.0.0",
-		"php-stubs/wordpress-tests-stubs": "dev-master",
+		"php-stubs/wordpress-tests-stubs": "^v6.6.0",
 		"phpcompatibility/phpcompatibility-wp": "^2.0",
 		"phpstan/extension-installer": "^1.3",
 		"roave/security-advisories": "dev-latest",
@@ -28,9 +28,8 @@
 		"phpstan/phpstan-strict-rules": "1.6.x-dev",
 		"phpstan/phpstan-phpunit": "1.4.x-dev",
 		"phpstan/phpstan-deprecation-rules": "1.2.x-dev",
-		"swissspidy/phpstan-no-private": "dev-main"
+		"swissspidy/phpstan-no-private": "v0.2.1"
 	},
-	"minimum-stability": "dev",
 	"config": {
 		"allow-plugins": {
 			"dealerdirect/phpcodesniffer-composer-installer": true,
