@@ -29,7 +29,7 @@
 	"dependencies": {},
 	"devDependencies": {
 		"@playwright/test": "^1.47.2",
-		"@shopify/web-worker": "^6.3.1",
+		"@shopify/web-worker": "^6.4.0",
 		"@testing-library/jest-dom": "^6.5.0",
 		"@testing-library/react": "^16.0.1",
 		"@types/jest": "^29.5.13",

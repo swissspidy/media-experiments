@@ -37,7 +37,7 @@
 		"@mexp/log": "file:../log",
 		"@mexp/pdf": "file:../pdf",
 		"@mexp/vips": "file:../vips",
-		"@shopify/web-worker": "^6.3.1",
+		"@shopify/web-worker": "^6.4.0",
 		"@wordpress/api-fetch": "^7.0.0",
 		"@wordpress/blob": "^4.8.0",
 		"@wordpress/data": "^10.0.0",
