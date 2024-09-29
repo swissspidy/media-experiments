@@ -15,11 +15,14 @@ sequenceDiagram
 
 	create participant G as Imagick/GD
 
-	loop For every image size
-        S->>G: Crop image
-		destroy G
-	    G-->>S: Return cropped image
-    end
+	Note right of G: Slow!
+	rect rgba(255, 180, 180, 0.5)
+		loop For every image size
+	        S->>G: Crop image
+			destroy G
+		    G-->>S: Return cropped image
+	    end
+	end
 
 	S-->>E: Returns attachment
 	E-->>U: Updates image
@@ -36,17 +39,20 @@ sequenceDiagram
 
 	U->>E: Drops image
 
-	loop For every image size
-        E->>W: Create thumbnail
-		destroy W
-	    W-->>E: Return image
-		E-->>U: Updates image
-
-		E->>S: Upload thumbnail
-	    S-->>E: Returns partial attachment
-		E-->>U: Updates image
-    end
-
+	rect rgba(100, 180, 255, 0.2)
+		loop For every image size
+			
+	        E->>W: Crop image
+			note right of W: in parallel
+			destroy W
+		    W-->>E: Return image
+			E-->>U: Updates image
+	
+			E->>S: Upload thumbnail
+		    S-->>E: Returns partial attachment
+			E-->>U: Updates image
+	    end
+	end
 ```
 
 ## Why client-side media processing

@@ -19,7 +19,6 @@ import type {
 	SetDurationAction,
 	SetErrorAction,
 	SetFileAction,
-	SetGifModeAction,
 	SetHasAudioAction,
 	SetMediaDevicesAction,
 	SetMediaStreamAction,
@@ -28,7 +27,6 @@ import type {
 	State,
 	StopRecordingAction,
 	ToggleBlurVideoEffectAction,
-	ToggleGifModeAction,
 	ToggleHasAudioAction,
 	UnknownAction,
 } from './types';
@@ -42,7 +40,6 @@ const DEFAULT_STATE: State = {
 	recordingTypes: [ 'video' ],
 	devices: [],
 	hasAudio: true,
-	isGifMode: false,
 	countdown: 0,
 	duration: 0,
 	recordingStatus: 'idle',
@@ -64,8 +61,6 @@ type Action =
 	| ResumeRecordingAction
 	| FinishRecordingAction
 	| StartCapturingAction
-	| SetGifModeAction
-	| ToggleGifModeAction
 	| SetHasAudioAction
 	| ToggleHasAudioAction
 	| SetFileAction
@@ -207,18 +202,6 @@ function reducer(
 			return {
 				...state,
 				videoEffect: state.videoEffect === 'none' ? 'blur' : 'none',
-			};
-
-		case Type.SetGifMode:
-			return {
-				...state,
-				isGifMode: action.value,
-			};
-
-		case Type.ToggleGifMode:
-			return {
-				...state,
-				isGifMode: ! state.isGifMode,
 			};
 
 		case Type.SetHasAudio:

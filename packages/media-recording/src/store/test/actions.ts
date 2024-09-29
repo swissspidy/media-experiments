@@ -67,17 +67,6 @@ describe( 'actions', () => {
 		} );
 	} );
 
-	describe( 'toggleGifMode', () => {
-		it( `should return the ${ Type.ToggleGifMode } action`, async () => {
-			const result = await registry
-				.dispatch( recordingStore )
-				.toggleGifMode();
-
-			expect( result ).toStrictEqual( {
-				type: Type.ToggleGifMode,
-			} );
-		} );
-	} );
 	describe( 'toggleHasAudio', () => {
 		it( `should return the ${ Type.ToggleHasAudio } action`, async () => {
 			const result = await registry

@@ -22,9 +22,11 @@ async function loadModel() {
 	env.allowRemoteModels = true;
 	// Could be 'verbose', 'info', 'warning', 'error', 'fatal'.
 	env.backends.onnx.logLevel = 'fatal';
-	env.backends.onnx.wasm.proxy = false;
-	// Workaround since we're using cross-origin isolation and are already within a worker.
-	env.backends.onnx.wasm.numThreads = 1;
+	if ( env.backends.onnx.wasm ) {
+		env.backends.onnx.wasm.proxy = false;
+		// Workaround since we're using cross-origin isolation and are already within a worker.
+		env.backends.onnx.wasm.numThreads = 1;
+	}
 
 	const modelId = 'onnx-community/Florence-2-base-ft';
 	model = await Florence2ForConditionalGeneration.from_pretrained( modelId, {

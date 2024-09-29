@@ -53,14 +53,6 @@ _Parameters_
 
 -   _deviceId_ `string`: Device ID.
 
-#### setGifMode
-
-Returns an action object signalling the new value for the GIF mode.
-
-_Parameters_
-
--   _value_ `boolean`: New value.
-
 #### setHasAudio
 
 Returns an action object signalling the new value for whether audio should be recorded.
@@ -96,10 +88,6 @@ Stops recording.
 #### toggleBlurEffect
 
 Toggles the blur video effect and triggers a media stream update.
-
-#### toggleGifMode
-
-Returns an action object signalling that GIF mode should be toggled.
 
 #### toggleHasAudio
 
@@ -279,14 +267,6 @@ _Parameters_
 
 -   _state_ `State`: Recording state.
 -   _clientId_ `string`: Block client ID.
-
-#### isGifMode
-
-Whether GIF mode is active.
-
-_Parameters_
-
--   _state_ `State`: Recording state.
 
 #### isInRecordingMode
 

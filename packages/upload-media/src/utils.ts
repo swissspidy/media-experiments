@@ -19,6 +19,31 @@ import {
 import { UploadError } from './upload-error';
 
 /**
+ * Converts a Blob to a File with a default name like "image.png".
+ *
+ * If it is already a File object, it is returned unchanged.
+ *
+ * @param fileOrBlob Blob object.
+ * @return File object.
+ */
+export function convertBlobToFile( fileOrBlob: Blob | File ): File {
+	if ( fileOrBlob instanceof File ) {
+		return fileOrBlob;
+	}
+
+	// Extension is only an approximation.
+	// The server will override it if incorrect.
+	const ext = fileOrBlob.type.split( '/' )[ 1 ];
+	const mediaType =
+		'application/pdf' == fileOrBlob.type
+			? 'document'
+			: fileOrBlob.type.split( '/' )[ 0 ];
+	return new File( [ fileOrBlob ], `${ mediaType }.${ ext }`, {
+		type: fileOrBlob.type,
+	} );
+}
+
+/**
  * Renames a given file and returns a new file.
  *
  * Copies over the last modified time.
@@ -124,10 +149,10 @@ export async function fetchFile( url: string, nameOverride?: string ) {
 
 	const file = new File( [ blob ], name, { type } );
 
-	if ( ! guessedMimeType ) {
+	if ( ! type ) {
 		throw new UploadError( {
 			code: 'FETCH_REMOTE_FILE_ERROR',
-			message: 'File could not be uploaded',
+			message: 'File could not be downloaded',
 			file,
 		} );
 	}
@@ -400,4 +425,35 @@ export function validateMimeType( file: File, allowedTypes?: string[] ) {
 			file,
 		} );
 	}
+}
+
+/**
+ * Determines whether a given file type is supported for client-side processing.
+ *
+ * @param type Mime type.
+ * @return Whether the file type is supported.
+ */
+export function isImageTypeSupported(
+	type: string
+): type is
+	| 'image/avif'
+	| 'image/gif'
+	| 'image/heic'
+	| 'image/heif'
+	| 'image/jpeg'
+	| 'image/jxl'
+	| 'image/png'
+	| 'image/tiff'
+	| 'image/webp' {
+	return [
+		'image/avif',
+		'image/gif',
+		'image/heic',
+		'image/heif',
+		'image/jpeg',
+		'image/jxl',
+		'image/png',
+		'image/tiff',
+		'image/webp',
+	].includes( type );
 }

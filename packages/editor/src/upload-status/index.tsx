@@ -9,7 +9,7 @@ import {
 } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { registerPlugin } from '@wordpress/plugins';
-import { store as coreStore } from '@wordpress/core-data';
+import { store as coreStore, type Type } from '@wordpress/core-data';
 import { store as editorStore } from '@wordpress/editor';
 
 /**
@@ -24,15 +24,16 @@ function WrappedUploadStatusIndicator() {
 	const [ , setHasNode ] = useState( false );
 
 	const { isSaveable, isViewable } = useSelect( ( select ) => {
+		// @ts-ignore
+		const currentPostType = select( coreStore ).getPostType(
+			select( editorStore ).getCurrentPostType()
+		) as Type | null;
+
 		return {
 			isSaveable:
 				select( editorStore ).isEditedPostSaveable() ||
 				select( editorStore ).hasNonPostEntityChanges(),
-			isViewable: Boolean(
-				select( coreStore ).getPostType(
-					select( editorStore ).getCurrentPostType()
-				)?.viewable
-			),
+			isViewable: Boolean( currentPostType?.viewable ),
 		};
 	}, [] );
 

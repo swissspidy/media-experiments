@@ -76,6 +76,7 @@ _Parameters_
 
 -   _id_ `QueueItemId`: Item ID.
 -   _error_ `Error`: Error instance.
+-   _silent_ Whether to cancel the item silently, without invoking its `onError` callback.
 
 #### grantApproval
 
@@ -216,7 +217,7 @@ Fetches a remote file from another server and adds it to the item.
 _Parameters_
 
 -   _id_ `QueueItemId`: Item ID.
--   _args_ `FetchRemoteFileArgs`: Additional arguments for the operation.
+-   _args_ `[FetchRemoteFileArgs]`: Additional arguments for the operation.
 
 #### finishOperation
 
@@ -391,6 +392,7 @@ If an item was downsized due to the big image size threshold, this adds the orig
 _Parameters_
 
 -   _id_ `QueueItemId`: Item ID.
+-   _args_ `[UploadOriginalArgs]`: Additional arguments for the operation.
 
 #### uploadPoster
 

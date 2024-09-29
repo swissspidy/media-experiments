@@ -19,6 +19,8 @@ import type { BlockInstance, BlockEditProps } from '@wordpress/blocks';
 export type ImageBlock = BlockInstance< {
 	id: number;
 	url: string;
+	// New local attribute in WordPress 6.7.
+	blob: string;
 	caption: string;
 	alt: string;
 } > & { name: 'core/image' };
@@ -26,11 +28,15 @@ export type ImageBlock = BlockInstance< {
 export type AudioBlock = BlockInstance< {
 	id: number;
 	src: string;
+	// New local attribute in WordPress 6.7.
+	blob: string;
 } > & { name: 'core/audio' };
 
 export type VideoBlock = BlockInstance< {
 	id: number;
 	src: string;
+	// New local attribute in WordPress 6.7.
+	blob: string;
 	poster: string;
 	muted: boolean;
 	caption: string;
@@ -172,6 +178,7 @@ export type BulkOptimizationAttachmentData = {
 
 export type MediaPreferences = {
 	// General.
+	welcomeGuide: boolean;
 	requireApproval: boolean;
 	optimizeOnUpload: boolean;
 	thumbnailGeneration: ThumbnailGeneration;
@@ -179,6 +186,8 @@ export type MediaPreferences = {
 	bigImageSizeThreshold: number;
 	bigVideoSizeThreshold: number;
 	keepOriginal: boolean;
+	convertUnsafe: boolean;
+	useAi: boolean;
 	// Formats.
 	default_outputFormat: ImageFormat;
 	default_quality: number;
@@ -195,9 +204,6 @@ export type MediaPreferences = {
 	avif_outputFormat: ImageFormat;
 	avif_quality: number;
 	avif_interlaced: boolean;
-	heic_outputFormat: ImageFormat;
-	heic_quality: number;
-	heic_interlaced: boolean;
 	gif_outputFormat: ImageFormat;
 	gif_quality: number;
 	gif_interlaced: boolean;

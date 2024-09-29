@@ -15,8 +15,8 @@ import { useDispatch, useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
+import { PREFERENCES_NAME } from '../constants';
 import { Modal } from './modal';
-import { PREFERENCES_NAME } from './constants';
 
 import './editor.css';
 
