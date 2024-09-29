@@ -1,5 +1,5 @@
 diff --git a/node_modules/@wordpress/core-data/build-types/index.d.ts b/node_modules/@wordpress/core-data/build-types/index.d.ts
-index 6ee547a..36002f4 100644
+index 6ee547a..4039a5f 100644
 --- a/node_modules/@wordpress/core-data/build-types/index.d.ts
 +++ b/node_modules/@wordpress/core-data/build-types/index.d.ts
 @@ -33,7 +33,7 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<

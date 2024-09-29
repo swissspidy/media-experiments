@@ -1,21 +1,21 @@
 diff --git a/node_modules/@wordpress/components/build-types/card/card-divider/hook.d.ts b/node_modules/@wordpress/components/build-types/card/card-divider/hook.d.ts
-index a13724a..2663152 100644
+index 2da775e..4fda49b 100644
 --- a/node_modules/@wordpress/components/build-types/card/card-divider/hook.d.ts
 +++ b/node_modules/@wordpress/components/build-types/card/card-divider/hook.d.ts
-@@ -272,7 +272,7 @@ export declare function useCardDivider(props: WordPressComponentProps<DividerPro
+@@ -270,7 +270,7 @@ export declare function useCardDivider(props: WordPressComponentProps<DividerPro
      unselectable?: "on" | "off" | undefined;
-     inputMode?: "none" | "text" | "numeric" | "search" | "tel" | "url" | "email" | "decimal" | undefined;
+     inputMode?: "none" | "text" | "tel" | "url" | "email" | "numeric" | "decimal" | "search" | undefined;
      is?: string | undefined;
--    wrapElement?: import("@ariakit/react-core/cjs/utils/types").WrapElement | undefined;
+-    wrapElement?: import("@ariakit/react-core/cjs/utils/types").WrapElement;
 +    wrapElement?: undefined;
-     margin?: import("../../utils/space").SpaceInput | undefined;
-     marginEnd?: import("../../utils/space").SpaceInput | undefined;
-     marginStart?: import("../../utils/space").SpaceInput | undefined;
+     margin?: import("../../utils/space").SpaceInput;
+     marginEnd?: import("../../utils/space").SpaceInput;
+     marginStart?: import("../../utils/space").SpaceInput;
 diff --git a/node_modules/@wordpress/components/build-types/item-group/types.d.ts b/node_modules/@wordpress/components/build-types/item-group/types.d.ts
-index 96fc577..b4966fd 100644
+index bcad8c9..ecf8972 100644
 --- a/node_modules/@wordpress/components/build-types/item-group/types.d.ts
 +++ b/node_modules/@wordpress/components/build-types/item-group/types.d.ts
-@@ -41,6 +41,7 @@ export interface ItemProps {
+@@ -40,6 +40,7 @@ export interface ItemProps {
       * The children elements.
       */
      children: React.ReactNode;

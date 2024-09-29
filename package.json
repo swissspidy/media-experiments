@@ -37,11 +37,11 @@
 		"@types/node": "^22.5.5",
 		"@types/uuid": "^10.0.0",
 		"@types/wordpress__blocks": "^12.5.14",
-		"@wordpress/dependency-extraction-webpack-plugin": "^6.7.0",
-		"@wordpress/docgen": "^2.7.0",
-		"@wordpress/env": "^10.7.0",
-		"@wordpress/eslint-plugin": "^21.0.0",
-		"@wordpress/scripts": "^29.0.0",
+		"@wordpress/dependency-extraction-webpack-plugin": "^6.8.0",
+		"@wordpress/docgen": "^2.8.0",
+		"@wordpress/env": "^10.8.0",
+		"@wordpress/eslint-plugin": "^21.1.2",
+		"@wordpress/scripts": "^30.0.2",
 		"@wp-now/wp-now": "^0.1.74",
 		"eslint": "^8.57.1",
 		"eslint-plugin-oxlint": "^0.9.9",
@@ -58,9 +58,9 @@
 		"webpack-virtual-modules": "^0.6.2"
 	},
 	"overrides": {
-		"@wordpress/components": "^28.3.0",
-		"@wordpress/data": "^10.3.0",
-		"playwright-core": "^1.44.0",
+		"@wordpress/components": "^28.8.0",
+		"@wordpress/data": "^10.8.0",
+		"playwright-core": "^1.47.2",
 		"@playwright/test": "$@playwright/test"
 	},
 	"scripts": {
