@@ -12,14 +12,14 @@ index 2da775e..4fda49b 100644
      marginEnd?: import("../../utils/space").SpaceInput;
      marginStart?: import("../../utils/space").SpaceInput;
 diff --git a/node_modules/@wordpress/components/build-types/item-group/types.d.ts b/node_modules/@wordpress/components/build-types/item-group/types.d.ts
-index bcad8c9..ec053b1 100644
+index bcad8c9..ecf8972 100644
 --- a/node_modules/@wordpress/components/build-types/item-group/types.d.ts
 +++ b/node_modules/@wordpress/components/build-types/item-group/types.d.ts
-@@ -28,6 +28,7 @@ export interface ItemGroupProps {
+@@ -40,6 +40,7 @@ export interface ItemProps {
       * The children elements.
       */
      children: React.ReactNode;
 +	wrapperClassName?: string;
  }
- export interface ItemProps {
+ export type ItemGroupContext = {
      /**
