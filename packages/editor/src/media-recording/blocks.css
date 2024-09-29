@@ -12,6 +12,9 @@
 	left: 1em;
 	display: flex;
 	align-items: center;
+}
+
+.mexp-recording__wrapper--video .mexp-recording__rec {
 	color: #fff;
 }
 
@@ -29,6 +32,9 @@
 	position: absolute;
 	top: 1em;
 	right: 1em;
+}
+
+.mexp-recording__wrapper--video .mexp-recording__duration {
 	color: #fff;
 }
 
@@ -43,5 +49,8 @@
 	justify-content: center;
 	font-size: 70px;
 	font-weight: 700;
+}
+
+.mexp-recording__wrapper--video .mexp-recording__countdown {
 	color: #fff;
 }

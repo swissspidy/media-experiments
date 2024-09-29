@@ -160,6 +160,10 @@ function Recorder( { clientId }: MediaPanelProps ) {
 		}
 	}, [ streamNode, liveStream ] );
 
+	const wrapperClassName = recordingTypes.includes( 'audio' )
+		? 'mexp-recording__wrapper mexp-recording__wrapper--audio'
+		: 'mexp-recording__wrapper mexp-recording__wrapper--video';
+
 	const isFailed = 'failed' === status || Boolean( error );
 	const needsPermissions =
 		( 'idle' === status || 'acquiringMedia' === status ) && ! videoInput;
@@ -212,7 +216,7 @@ function Recorder( { clientId }: MediaPanelProps ) {
 
 	if ( liveStream ) {
 		return (
-			<div className="mexp-recording__wrapper">
+			<div className={ wrapperClassName }>
 				<Countdown />
 				<OverlayText />
 				{ recordingTypes.includes( 'audio' ) ? (
@@ -231,7 +235,7 @@ function Recorder( { clientId }: MediaPanelProps ) {
 
 	// TODO: Maybe show fallback loading state or something.
 	return (
-		<div className="mexp-recording__wrapper">
+		<div className={ wrapperClassName }>
 			<Countdown />
 			<OverlayText />
 			{ __( 'Loading…', 'media-experiments' ) }
