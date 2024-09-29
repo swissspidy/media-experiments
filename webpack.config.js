@@ -44,6 +44,8 @@ module.exports = {
 	},
 	output: {
 		filename: '[name].js',
+		// TODO: Maybe make [chunkhash] a part of the filename?
+		chunkFilename: '[name].js?v=[chunkhash]',
 		path: resolve( __dirname, 'build' ),
 		globalObject: 'self', // This is the default, but required for @shopify/web-worker.
 	},

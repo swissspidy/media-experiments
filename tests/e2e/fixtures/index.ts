@@ -16,10 +16,12 @@ import { test as base } from '@wordpress/e2e-test-utils-playwright';
  * Internal dependencies
  */
 import { MediaUtils } from './media-utils';
+import { Admin } from './admin';
 
 type E2EFixture = {
 	mediaUtils: MediaUtils;
 	secondPage: Page;
+	admin: Admin;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -144,6 +146,9 @@ export const test = base.extend< E2EFixture, {} >( {
 	},
 	mediaUtils: async ( { page }, use ) => {
 		await use( new MediaUtils( { page } ) );
+	},
+	admin: async ( { page, pageUtils, editor }, use ) => {
+		await use( new Admin( { page, pageUtils, editor } ) );
 	},
 } );
 

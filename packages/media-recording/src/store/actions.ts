@@ -21,10 +21,8 @@ import {
 } from './constants';
 import {
 	type LeaveRecordingModeAction,
-	type SetGifModeAction,
 	type SetHasAudioAction,
 	type State,
-	type ToggleGifModeAction,
 	type ToggleHasAudioAction,
 	Type,
 	type VideoEffect,
@@ -41,7 +39,6 @@ type Selectors = {
 type ActionCreators = {
 	invalidateResolutionForStoreSelector: ( selector: keyof Selectors ) => void;
 	setVideoEffect: typeof setVideoEffect;
-	setGifMode: typeof setGifMode;
 	setHasAudio: typeof setHasAudio;
 	stopRecording: typeof stopRecording;
 	countDuration: typeof countDuration;
@@ -106,27 +103,6 @@ export function toggleBlurEffect() {
 		} );
 
 		dispatch.invalidateResolutionForStoreSelector( 'getMediaStream' );
-	};
-}
-
-/**
- * Returns an action object signalling the new value for the GIF mode.
- *
- * @param value New value.
- */
-export function setGifMode( value: boolean ): SetGifModeAction {
-	return {
-		type: Type.SetGifMode,
-		value,
-	};
-}
-
-/**
- * Returns an action object signalling that GIF mode should be toggled.
- */
-export function toggleGifMode(): ToggleGifModeAction {
-	return {
-		type: Type.ToggleGifMode,
 	};
 }
 
@@ -196,7 +172,7 @@ export function updateMediaDevices() {
 					// remove these devices from the list.
 					.filter( ( device ) => device.label ),
 			} );
-		} catch ( err ) {
+		} catch {
 			// Do nothing for now.
 		}
 	};
@@ -400,9 +376,16 @@ export function stopRecording() {
 		dispatch: ActionCreators;
 	} ) => {
 		const mediaRecorder = select.getMediaRecorder();
+		const mediaStream = select.getMediaStream();
 
 		if ( mediaRecorder ) {
 			mediaRecorder.stop();
+		}
+
+		if ( mediaStream ) {
+			for ( const track of mediaStream.getTracks() ) {
+				track.stop();
+			}
 		}
 
 		dispatch( {

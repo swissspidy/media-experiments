@@ -10,34 +10,28 @@ import { store as recordingStore } from '@mexp/media-recording';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useMemo } from '@wordpress/element';
 import { __, _x, sprintf } from '@wordpress/i18n';
+import {
+	__experimentalHStack as HStack, // eslint-disable-line @wordpress/no-unsafe-wp-apis
+	FlexItem,
+} from '@wordpress/components';
+import { store as preferencesStore } from '@wordpress/preferences';
 
 /**
  * Internal dependencies
  */
+import { PREFERENCES_NAME } from '../constants';
+import type { MediaPreferences } from '../types';
 import { FeatureNumberControl } from './number-control';
 import { SelectFeature } from './select-feature';
 import { EnableFeature } from './enable-feature';
 import { PreferencesModal } from './preferences-modal';
 import { PreferencesModalSection } from './preferences-modal-section';
 import { PreferencesModalTabs } from './preferences-modal-tabs';
-import {
-	__experimentalHStack as HStack, // eslint-disable-line @wordpress/no-unsafe-wp-apis
-	FlexItem,
-} from '@wordpress/components';
-import { store as preferencesStore } from '@wordpress/preferences';
-import { PREFERENCES_NAME } from './constants';
-import type { MediaPreferences } from '../types';
 
-type InputFormat = 'jpeg' | 'webp' | 'avif' | 'png' | 'heic' | 'gif';
-type InputFormatLabel = 'JPEG' | 'PNG' | 'WebP' | 'AVIF' | 'HEIC' | 'GIF';
+type InputFormat = 'jpeg' | 'webp' | 'avif' | 'png' | 'gif';
+type InputFormatLabel = 'JPEG' | 'PNG' | 'WebP' | 'AVIF' | 'GIF';
 
-const inputFormats: InputFormatLabel[] = [
-	'JPEG',
-	'PNG',
-	'WebP',
-	'HEIC',
-	'GIF',
-];
+const inputFormats: InputFormatLabel[] = [ 'JPEG', 'PNG', 'WebP', 'GIF' ];
 
 if ( window.crossOriginIsolated ) {
 	inputFormats.push( 'AVIF' );
@@ -317,6 +311,17 @@ export function Modal() {
 						) }
 					>
 						<EnableFeature
+							featureName="optimizeOnUpload"
+							help={ __(
+								'Compress and optimize media items before uploading to the server.',
+								'media-experiments'
+							) }
+							label={ __(
+								'Pre-upload compression',
+								'media-experiments'
+							) }
+						/>
+						<EnableFeature
 							featureName="requireApproval"
 							help={ __(
 								'Require approval step when optimizing existing videos or images.',
@@ -325,13 +330,24 @@ export function Modal() {
 							label={ __( 'Approval step', 'media-experiments' ) }
 						/>
 						<EnableFeature
-							featureName="optimizeOnUpload"
+							featureName="convertUnsafe"
 							help={ __(
-								'Compress and optimize media items before uploading to the server.',
+								'Convert incompatible images to a web safe format.',
 								'media-experiments'
 							) }
 							label={ __(
-								'Pre-upload compression',
+								'Prefer web safe images',
+								'media-experiments'
+							) }
+						/>
+						<EnableFeature
+							featureName="useAi"
+							help={ __(
+								'Use additional AI features for things like caption generation.',
+								'media-experiments'
+							) }
+							label={ __(
+								'AI integrations',
 								'media-experiments'
 							) }
 						/>

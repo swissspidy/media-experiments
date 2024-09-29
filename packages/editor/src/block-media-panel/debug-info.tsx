@@ -65,7 +65,9 @@ class HideOnError extends Component< PropsWithChildren< {} > > {
 }
 
 export function DebugInfo( { id }: DebugInfoProps ) {
-	const { baseControlProps, controlProps } = useBaseControlProps( {} );
+	const { baseControlProps, controlProps } = useBaseControlProps( {
+		__nextHasNoMarginBottom: true,
+	} );
 
 	const { record: attachment } = useEntityRecord< RestAttachment | null >(
 		'postType',

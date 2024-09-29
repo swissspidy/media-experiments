@@ -16,8 +16,8 @@ import { store as preferencesStore } from '@wordpress/preferences';
 /**
  * Internal dependencies
  */
+import { PREFERENCES_NAME } from '../constants';
 import type { MediaPreferences } from '../types';
-import { PREFERENCES_NAME } from './constants';
 
 type FeatureNumberControlProps = PropsWithChildren<
 	Omit<

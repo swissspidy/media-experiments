@@ -13,8 +13,8 @@ import { SelectControl } from '@wordpress/components';
 /**
  * Internal dependencies
  */
+import { PREFERENCES_NAME } from '../constants';
 import type { MediaPreferences } from '../types';
-import { PREFERENCES_NAME } from './constants';
 
 function BaseSelectOption( {
 	help,

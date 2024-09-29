@@ -99,26 +99,6 @@ jobs:
               if: ${{ env.CURRENT_TAG != 'nightly' }}
               uses: actions/upload-pages-artifact@v3
 
-            - name: Delete existing release
-              uses: actions/github-script@v7
-              if: ${{ env.CURRENT_TAG != 'nightly' }}
-              with:
-                  github-token: ${{secrets.GITHUB_TOKEN}}
-                  script: |
-                      try {
-                        const response = await github.rest.repos.getReleaseByTag({
-                          owner: context.repo.owner,
-                          repo: context.repo.repo,
-                          tag: "nightly"
-                        });
-
-                        github.rest.repos.deleteRelease({
-                          owner: context.repo.owner,
-                          repo: context.repo.repo,
-                          release_id: response.data.id,
-                        });
-                      } catch {}
-
             - name: Tag current commit
               if: ${{ env.CURRENT_TAG != 'nightly' }}
               run: |

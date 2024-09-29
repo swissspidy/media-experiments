@@ -9,10 +9,16 @@ import type { Block } from '@wordpress/blocks';
  * Internal dependencies
  */
 import type { VideoBlock } from '../types';
-import { isGifVariation } from './utils';
 
 type Writable< T > = { -readonly [ P in keyof T ]: Writable< T[ P ] > };
 type FilterableBlock = Writable< Block >;
+
+function isGifVariation(
+	blockAttributes: VideoBlock[ 'attributes' ]
+): boolean {
+	const { controls, loop, autoplay, muted, playsInline } = blockAttributes;
+	return ! controls && loop && autoplay && muted && playsInline;
+}
 
 function addGifBlockVariationToVideoBlock(
 	settings: FilterableBlock,

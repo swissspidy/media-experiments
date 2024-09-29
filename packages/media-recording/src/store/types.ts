@@ -10,7 +10,6 @@ export interface State {
 	recordingTypes: RecordingType[];
 	devices: MediaDeviceInfo[];
 	hasAudio: boolean;
-	isGifMode: boolean;
 	file?: File;
 	originalFile?: File;
 	url?: string;
@@ -56,8 +55,6 @@ export enum Type {
 	ResumeRecording = 'RESUME_RECORDING',
 	FinishRecording = 'FINISH_RECORDING',
 	StartCapturing = 'START_CAPTURING',
-	SetGifMode = 'SET_GIF_MODE',
-	ToggleGifMode = 'TOGGLE_GIF_MODE',
 	SetHasAudio = 'SET_HAS_AUDIO',
 	ToggleHasAudio = 'TOGGLE_HAS_AUDIO',
 	SetMediaDevices = 'SET_MEDIA_DEVICES',
@@ -108,8 +105,6 @@ export type FinishRecordingAction = Action<
 	{ file: File; url: string; width: number; height: number }
 >;
 export type StartCapturingAction = Action< Type.StartCapturing >;
-export type SetGifModeAction = Action< Type.SetGifMode, { value: boolean } >;
-export type ToggleGifModeAction = Action< Type.ToggleGifMode >;
 export type SetHasAudioAction = Action< Type.SetHasAudio, { value: boolean } >;
 export type ToggleHasAudioAction = Action< Type.ToggleHasAudio >;
 export type SetFileAction = Action< Type.SetFile, { file: File; url: string } >;

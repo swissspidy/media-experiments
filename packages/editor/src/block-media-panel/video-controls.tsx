@@ -12,6 +12,7 @@ import { isBlobURL } from '@wordpress/blob';
 /**
  * Internal dependencies
  */
+import { GifLooper } from '../utils/gif-looper';
 import { UploadIndicator } from './upload-indicator';
 import { RecordingControls } from './recording-controls';
 import { ImportMedia } from './import-media';
@@ -55,6 +56,8 @@ export function VideoControls( props: VideoControlsProps ) {
 		if ( url ) {
 			props.setAttributes( {
 				src: url,
+				// New local attribute in WordPress 6.7.
+				blob: url,
 			} );
 		}
 	}
@@ -71,6 +74,9 @@ export function VideoControls( props: VideoControlsProps ) {
 
 	return (
 		<>
+			{ props.attributes ? (
+				<GifLooper clientId={ props.clientId } />
+			) : null }
 			<UploadIndicator
 				id={ props.attributes.id }
 				url={ props.attributes.src }

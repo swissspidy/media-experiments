@@ -1,5 +1,60 @@
 # Technical Overview
 
+## Server-side vs. client-side processing
+
+Traditional media processing on the server:
+
+```mermaid
+sequenceDiagram
+	participant U as User
+	participant E as Editor
+    participant S as Server
+
+	U->>E: Drops image
+    E->>S: Upload image
+
+	create participant G as Imagick/GD
+
+	Note right of G: Slow!
+	rect rgba(255, 180, 180, 0.5)
+		loop For every image size
+	        S->>G: Crop image
+			destroy G
+		    G-->>S: Return cropped image
+	    end
+	end
+
+	S-->>E: Returns attachment
+	E-->>U: Updates image
+```
+
+Versus on the client:
+
+```mermaid
+sequenceDiagram
+	participant U as User
+	participant E as Editor
+	participant W as Worker
+	participant S as Server
+
+	U->>E: Drops image
+
+	rect rgba(100, 180, 255, 0.2)
+		loop For every image size
+			
+	        E->>W: Crop image
+			note right of W: in parallel
+			destroy W
+		    W-->>E: Return image
+			E-->>U: Updates image
+	
+			E->>S: Upload thumbnail
+		    S-->>E: Returns partial attachment
+			E-->>U: Updates image
+	    end
+	end
+```
+
 ## Why client-side media processing
 
 Current image processing in WordPress relies on server-side resources and older image libraries, leading to potential performance issues and limited support for modern image formats such as AVIF.

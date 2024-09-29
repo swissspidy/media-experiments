@@ -1,10 +1,6 @@
 /**
  * External dependencies
  */
-import {
-	uploadMedia as originalUploadMedia,
-	sideloadMedia as originalSideloadMedia,
-} from '@mexp/media-utils';
 import { type ImageFormat, store as uploadStore } from '@mexp/upload-media';
 
 /**
@@ -24,87 +20,44 @@ import { store as preferencesStore } from '@wordpress/preferences';
 /**
  * Internal dependencies
  */
-import { PREFERENCES_NAME } from '../preferences-modal/constants';
+import { PREFERENCES_NAME } from '../constants';
 import type { MediaPreferences, RestBaseRecord } from '../types';
-import {
-	editorUploadMedia,
-	editorValidateFileSize,
-	editorValidateMimeType,
-} from './media-utils';
-
-const noop = () => {};
+import { mediaUpload, mediaSideload } from './editor/media-utils';
+import { uploadMedia as originalUploadMedia } from './editor/media-upload';
 
 /**
  * Upload a media file when the file upload button is activated
  * or when adding a file to the editor via drag & drop.
  *
  * This function is intended to eventually live
- * in the `@wordpress/block-editor` package, allowing
- * to perform the client-side file processing before eventually
- * uploading the media to WordPress.
+ * in the `@wordpress/editor` package, wrapping the one
+ * from `@wordpress/block-editor`.
  *
- * @param $0                Parameters object passed to the function.
- * @param $0.allowedTypes   Array with the types of media that can be uploaded, if unset all types are allowed.
- * @param $0.additionalData Additional data to include in the request.
- * @param $0.filesList      List of files.
- * @param $0.onError        Function called when an error happens.
- * @param $0.onFileChange   Function called each time a file or a temporary representation of the file is available.
- * @param $0.onSuccess      Function called once a file has completely finished uploading, including thumbnails.
- * @param $0.onBatchSuccess Function called once all files in a group have completely finished uploading, including thumbnails.
+ * @param args Parameters object passed to the function.
  */
-export default function blockEditorUploadMedia( {
-	allowedTypes,
-	additionalData = {},
-	filesList,
-	onError = noop,
-	onFileChange,
-	onSuccess,
-	onBatchSuccess,
-}: Parameters< typeof originalUploadMedia >[ 0 ] & {
-	onError?: ( message: string ) => void;
-	onBatchSuccess: () => void;
-} ) {
-	const validFiles = [];
-
-	for ( const mediaFile of filesList ) {
-		// TODO: Consider using the _async_ isHeifImage() function from `@mexp/upload-media`
-		const isHeifImage = [ 'image/heic', 'image/heif' ].includes(
-			mediaFile.type
-		);
-
-		/*
-		 Check if the caller (e.g. a block) supports this mime type.
-		 Special case for file types such as HEIC which will be converted before upload anyway.
-		 Another check will be done before upload.
-		*/
-		if ( ! isHeifImage ) {
-			try {
-				editorValidateMimeType( mediaFile, allowedTypes );
-			} catch ( error: unknown ) {
-				onError( error as Error );
-				continue;
-			}
-		}
-
-		// Verify if file is greater than the maximum file upload size allowed for the site.
-		// TODO: Consider removing, as file could potentially be compressed first.
-		try {
-			editorValidateFileSize( mediaFile );
-		} catch ( error: unknown ) {
-			onError( error as Error );
-			continue;
-		}
-
-		validFiles.push( mediaFile );
+export default function uploadMedia(
+	args: Parameters< typeof originalUploadMedia >[ 0 ] & {
+		onSuccess?: Parameters<
+			typeof originalUploadMedia
+		>[ 0 ][ 'onFileChange' ];
 	}
+) {
+	// @ts-ignore -- invalidateResolution missing from types.
+	const { invalidateResolution } = dispatch( coreStore );
 
-	void dispatch( uploadStore ).addItems( {
-		files: validFiles,
-		onChange: onFileChange,
-		onSuccess,
-		onBatchSuccess,
-		onError: ( { message }: Error ) => onError( message ),
-		additionalData,
+	originalUploadMedia( {
+		...args,
+		onSuccess: ( attachments ) => {
+			for ( const media of attachments ) {
+				if ( media.id ) {
+					void invalidateResolution( 'getMedia', [
+						media.id,
+						{ context: 'view' },
+					] );
+				}
+			}
+			args.onSuccess?.( attachments );
+		},
 	} );
 }
 
@@ -135,6 +88,7 @@ const unsubscribeCoreStore = subscribe( () => {
 
 	const defaultPreferences: MediaPreferences = {
 		// General.
+		welcomeGuide: true,
 		requireApproval: true,
 		optimizeOnUpload: true,
 		thumbnailGeneration: 'smart',
@@ -142,6 +96,8 @@ const unsubscribeCoreStore = subscribe( () => {
 		bigImageSizeThreshold: siteData.image_size_threshold,
 		bigVideoSizeThreshold: siteData.video_size_threshold,
 		keepOriginal: false,
+		convertUnsafe: true,
+		useAi: true,
 		// Formats.
 		default_outputFormat: 'jpeg',
 		default_quality: 82,
@@ -166,11 +122,6 @@ const unsubscribeCoreStore = subscribe( () => {
 		),
 		avif_quality: 80,
 		avif_interlaced: false,
-		heic_outputFormat: getExtension(
-			siteData.image_output_formats[ 'image/heic' ] || 'image/jpeg'
-		),
-		heic_quality: 80,
-		heic_interlaced: siteData.jpeg_interlaced,
 		gif_outputFormat: getExtension(
 			siteData.image_output_formats[ 'image/gif' ] || 'image/webp'
 		),
@@ -201,8 +152,8 @@ const unsubscribeCoreStore = subscribe( () => {
  Make the upload queue aware of the function for uploading to the server.
 */
 void dispatch( uploadStore ).updateSettings( {
-	mediaUpload: editorUploadMedia,
-	mediaSideload: originalSideloadMedia,
+	mediaUpload,
+	mediaSideload,
 } );
 
 // Subscribe to state updates so that we can override the mediaUpload() function at the right time.
@@ -216,14 +167,13 @@ subscribe( () => {
 	}
 
 	if (
-		select( blockEditorStore ).getSettings().mediaUpload ===
-		blockEditorUploadMedia
+		select( blockEditorStore ).getSettings().mediaUpload === uploadMedia
 	) {
 		return;
 	}
 
 	// Update block-editor with the new function that moves everything through a queue.
 	void dispatch( blockEditorStore ).updateSettings( {
-		mediaUpload: blockEditorUploadMedia,
+		mediaUpload: uploadMedia,
 	} );
 }, blockEditorStore );

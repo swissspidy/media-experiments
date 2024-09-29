@@ -549,7 +549,8 @@ export function rejectApproval( id: number ) {
 				code: 'UPLOAD_CANCELLED',
 				message: 'File upload was cancelled',
 				file: item.file,
-			} )
+			} ),
+			true
 		);
 	};
 }
@@ -579,10 +580,12 @@ export function grantApproval( id: number ) {
 /**
  * Cancels an item in the queue based on an error.
  *
- * @param id    Item ID.
- * @param error Error instance.
+ * @param id     Item ID.
+ * @param error  Error instance.
+ * @param silent Whether to cancel the item silently,
+ *               without invoking its `onError` callback.
  */
-export function cancelItem( id: QueueItemId, error: Error ) {
+export function cancelItem( id: QueueItemId, error: Error, silent = false ) {
 	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id );
 
@@ -599,7 +602,7 @@ export function cancelItem( id: QueueItemId, error: Error ) {
 
 		// When cancelling a parent item, cancel all the children too.
 		for ( const child of select.getChildItems( id ) ) {
-			dispatch.cancelItem( child.id, error );
+			dispatch.cancelItem( child.id, error, silent );
 		}
 
 		const imageLibrary: ImageLibrary =
@@ -613,13 +616,15 @@ export function cancelItem( id: QueueItemId, error: Error ) {
 
 		item.abortController?.abort();
 
-		// TODO: Do not log error for children if cancelling a parent and all its children.
-		const { onError } = item;
-		onError?.( error ?? new Error( 'Upload cancelled' ) );
-		if ( ! onError && error ) {
-			// TODO: Find better way to surface errors with sideloads etc.
-			// eslint-disable-next-line no-console -- Deliberately log errors here.
-			console.error( 'Upload cancelled', error );
+		if ( ! silent ) {
+			// TODO: Do not log error for children if cancelling a parent and all its children.
+			const { onError } = item;
+			onError?.( error ?? new Error( 'Upload cancelled' ) );
+			if ( ! onError && error ) {
+				// TODO: Find better way to surface errors with sideloads etc.
+				// eslint-disable-next-line no-console -- Deliberately log errors here.
+				console.error( 'Upload cancelled', error );
+			}
 		}
 
 		dispatch< CancelAction >( {

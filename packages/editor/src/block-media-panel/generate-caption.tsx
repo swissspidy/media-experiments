@@ -11,11 +11,13 @@ import { BlockControls } from '@wordpress/block-editor';
 import { ToolbarDropdownMenu } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { store as noticesStore } from '@wordpress/notices';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { store as preferencesStore } from '@wordpress/preferences';
 
 /**
  * Internal dependencies
  */
+import { PREFERENCES_NAME } from '../constants';
 import { ReactComponent as PhotoSpark } from '../icons/photo-spark.svg';
 
 const createAiWorker = createWorkerFactory(
@@ -40,7 +42,14 @@ export function GenerateCaptions( {
 
 	const { createErrorNotice } = useDispatch( noticesStore );
 
-	if ( ! url ) {
+	const useAi = useSelect( ( select ) => {
+		return select( preferencesStore ).get(
+			PREFERENCES_NAME,
+			'useAi'
+		) as boolean;
+	}, [] );
+
+	if ( ! url || ! useAi ) {
 		return null;
 	}
 

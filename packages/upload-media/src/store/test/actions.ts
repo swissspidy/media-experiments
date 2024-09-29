@@ -303,7 +303,9 @@ describe( 'actions', () => {
 			expect( registry.select( uploadStore ).getItems() ).toHaveLength(
 				0
 			);
-			expect( onError ).toHaveBeenCalled();
+
+			// Manual cancellation should not trigger the callback to avoid an unnecessary snackbar notice.
+			expect( onError ).not.toHaveBeenCalled();
 		} );
 
 		it( 'should do nothing for an invalid attachment ID', async () => {
