@@ -10,23 +10,23 @@ import { store as recordingStore } from '@mexp/media-recording';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useMemo } from '@wordpress/element';
 import { __, _x, sprintf } from '@wordpress/i18n';
+import {
+	__experimentalHStack as HStack, // eslint-disable-line @wordpress/no-unsafe-wp-apis
+	FlexItem,
+} from '@wordpress/components';
+import { store as preferencesStore } from '@wordpress/preferences';
 
 /**
  * Internal dependencies
  */
+import { PREFERENCES_NAME } from '../constants';
+import type { MediaPreferences } from '../types';
 import { FeatureNumberControl } from './number-control';
 import { SelectFeature } from './select-feature';
 import { EnableFeature } from './enable-feature';
 import { PreferencesModal } from './preferences-modal';
 import { PreferencesModalSection } from './preferences-modal-section';
 import { PreferencesModalTabs } from './preferences-modal-tabs';
-import {
-	__experimentalHStack as HStack, // eslint-disable-line @wordpress/no-unsafe-wp-apis
-	FlexItem,
-} from '@wordpress/components';
-import { store as preferencesStore } from '@wordpress/preferences';
-import { PREFERENCES_NAME } from './constants';
-import type { MediaPreferences } from '../types';
 
 type InputFormat = 'jpeg' | 'webp' | 'avif' | 'png' | 'gif';
 type InputFormatLabel = 'JPEG' | 'PNG' | 'WebP' | 'AVIF' | 'GIF';

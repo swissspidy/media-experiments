@@ -12,7 +12,7 @@ import { speak } from '@wordpress/a11y';
 /**
  * Internal dependencies
  */
-import { PREFERENCES_NAME } from '../preferences-modal/constants';
+import { PREFERENCES_NAME } from '../constants';
 import { WelcomeGuide } from './welcome-guide';
 
 function WelcomeGuideMenuItem() {

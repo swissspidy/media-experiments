@@ -6,12 +6,7 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import type {
-	AdditionalData,
-	OnChangeHandler,
-	OnErrorHandler,
-	OnSuccessHandler,
-} from './types';
+import type { AdditionalData, OnChangeHandler, OnErrorHandler } from './types';
 import { uploadToServer } from './upload-to-server';
 import { validateMimeType } from './validate-mime-type';
 import { validateMimeTypeForUser } from './validate-mime-type-for-user';
@@ -33,8 +28,6 @@ interface UploadMediaArgs {
 	onError?: OnErrorHandler;
 	// Function called each time a file or a temporary representation of the file is available.
 	onFileChange?: OnChangeHandler;
-	// Function called once a file has completely finished uploading, including thumbnails.
-	onSuccess?: OnSuccessHandler;
 	// List of allowed mime types and file extensions.
 	wpAllowedMimeTypes?: Record< string, string > | null;
 	// Abort signal.

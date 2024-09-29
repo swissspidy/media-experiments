@@ -5,12 +5,12 @@ import { useDispatch } from '@wordpress/data';
 import { ExternalLink, Guide } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { createInterpolateElement } from '@wordpress/element';
+import { store as preferencesStore } from '@wordpress/preferences';
 
 /**
  * Internal dependencies
  */
-import { store as preferencesStore } from '@wordpress/preferences';
-import { PREFERENCES_NAME } from '../preferences-modal/constants';
+import { PREFERENCES_NAME } from '../constants';
 
 export function WelcomeGuide() {
 	const { toggle } = useDispatch( preferencesStore );

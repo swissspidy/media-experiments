@@ -17,7 +17,7 @@ import { store as preferencesStore } from '@wordpress/preferences';
 /**
  * Internal dependencies
  */
-import { PREFERENCES_NAME } from '../preferences-modal/constants';
+import { PREFERENCES_NAME } from '../constants';
 import { ReactComponent as PhotoSpark } from '../icons/photo-spark.svg';
 
 const createAiWorker = createWorkerFactory(
