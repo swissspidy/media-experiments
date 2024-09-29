@@ -58,9 +58,9 @@
 		"webpack-virtual-modules": "^0.6.2"
 	},
 	"overrides": {
-		"@wordpress/components": "^28.3.0",
-		"@wordpress/data": "^10.3.0",
-		"playwright-core": "^1.44.0",
+		"@wordpress/components": "^28.8.0",
+		"@wordpress/data": "^10.8.0",
+		"playwright-core": "^1.47.2",
 		"@playwright/test": "$@playwright/test"
 	},
 	"scripts": {
