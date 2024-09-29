@@ -376,9 +376,16 @@ export function stopRecording() {
 		dispatch: ActionCreators;
 	} ) => {
 		const mediaRecorder = select.getMediaRecorder();
+		const mediaStream = select.getMediaStream();
 
 		if ( mediaRecorder ) {
 			mediaRecorder.stop();
+		}
+
+		if ( mediaStream ) {
+			for ( const track of mediaStream.getTracks() ) {
+				track.stop();
+			}
 		}
 
 		dispatch( {
