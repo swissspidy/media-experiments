@@ -42,27 +42,18 @@ export default function uploadMedia(
 		>[ 0 ][ 'onFileChange' ];
 	}
 ) {
-	// @ts-ignore -- invalidateResolution is not yet exposed in GB types.
-	const { invalidateResolution, invalidateResolutionForStoreSelector } =
-		dispatch( coreStore );
+	// @ts-ignore -- invalidateResolution missing from types.
+	const { invalidateResolution } = dispatch( coreStore );
 
 	originalUploadMedia( {
 		...args,
 		onSuccess: ( attachments ) => {
 			for ( const media of attachments ) {
 				if ( media.id ) {
-					// FIXME: Needs testing.
 					void invalidateResolution( 'getMedia', [
 						media.id,
 						{ context: 'view' },
 					] );
-					void invalidateResolution( 'getMedia', [
-						media.id,
-						{ context: 'edit' },
-					] );
-					void invalidateResolutionForStoreSelector( 'getMedia' );
-
-					// TODO: Trigger new call here.
 				}
 			}
 			args.onSuccess?.( attachments );
