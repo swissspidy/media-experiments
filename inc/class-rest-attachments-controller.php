@@ -31,15 +31,19 @@ use WP_REST_Server;
  *   upload_request?: string,
  *   author?: int,
  *   sticky?: bool,
+ *   caption?: string,
+ *   alt_text?: string,
  *   generate_sub_sizes: bool,
  *   convert_format: bool,
- *   meta: AttachmentMeta
+ *   meta: AttachmentMeta,
+ *   _fields?: string|string[],
  * }
  * @phpstan-type Sideload array{
  *   id: int,
  *   image_size: string,
  *   upload_request?: string,
  *   convert_format: bool,
+ *   _fields?: string|string[],
  * }
  */
 class REST_Attachments_Controller extends WP_REST_Attachments_Controller {

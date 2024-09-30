@@ -810,7 +810,7 @@ function rest_get_attachment_is_muted( array $post ): bool {
  */
 function rest_get_attachment_has_transparency( array $post ): ?bool {
 	$meta = wp_get_attachment_metadata( $post['id'] );
-	return isset( $meta['has_transparency'] ) ? (bool) $meta['has_transparency'] : null;
+	return $meta['has_transparency'] ?? null;
 }
 
 /**
@@ -945,15 +945,12 @@ function rest_after_insert_attachment_handle_pdf_poster( WP_Post $attachment, WP
 	if ( is_array( $pdf_metadata ) && is_array( $poster_metadata ) ) {
 		$pdf_metadata['sizes']         = $poster_metadata['sizes'];
 		$pdf_metadata['sizes']['full'] = [
+			'file'      => basename( $poster_metadata['file'] ),
 			'width'     => $poster_metadata['width'],
 			'height'    => $poster_metadata['height'],
 			'mime_type' => $poster->post_mime_type,
 			'filesize'  => $poster_metadata['filesize'],
 		];
-
-		if ( isset( $poster_metadata['file'] ) ) {
-			$pdf_metadata['sizes']['full']['file'] = basename( $poster_metadata['file'] );
-		}
 
 		wp_update_attachment_metadata( $attachment->ID, $pdf_metadata );
 	}

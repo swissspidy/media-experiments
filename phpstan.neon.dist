@@ -1,10 +1,11 @@
 parameters:
-	level: 3
+	level: 4
 	paths:
 		- media-experiments.php
 		- inc/
 	scanFiles:
 		- vendor/php-stubs/wordpress-tests-stubs/wordpress-tests-stubs.php
+		- tests/phpstan/filtered-functions.stub
 		- tests/phpstan/performance-lab.stub
 	bootstrapFiles:
 		- tests/phpstan/bootstrap.php
