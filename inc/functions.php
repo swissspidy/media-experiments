@@ -50,7 +50,14 @@ function filter_update_plugins( $update, $plugin_data, string $plugin_file ) {
 		return $update;
 	}
 
-	return json_decode( $response, true );
+	/**
+	 * Encoded update data.
+	 *
+	 * @var array<string,mixed> $result
+	 */
+	$result = json_decode( $response, true );
+
+	return $result;
 }
 
 /**
@@ -826,7 +833,7 @@ function rest_get_attachment_has_transparency( array $post ): ?bool {
 function rest_get_attachment_original_url( array $post ): ?string {
 	$original_id = get_post_meta( $post['id'], 'mexp_original_id', true );
 
-	if ( empty( $original_id ) ) {
+	if ( ! is_int( $original_id ) ) {
 		return null;
 	}
 

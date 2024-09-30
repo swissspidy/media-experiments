@@ -202,6 +202,13 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		$fields   = $this->get_fields_for_response( $request );
 		$response = parent::prepare_item_for_response( $item, $request );
 
+		/**
+		 * Response data.
+		 *
+		 * @phpstan-var array{
+		 *     missing_image_sizes?: string[],
+		 * }
+		 */
 		$data = $response->get_data();
 
 		if (
@@ -352,6 +359,11 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		$filter_upload_mimes = null;
 
 		if ( $upload_request instanceof WP_Post ) {
+			/**
+			 * Allowed file types.
+			 *
+			 * @var string[] $allowed_types
+			 */
 			$allowed_types = get_post_meta( $upload_request->ID, 'mexp_allowed_types', true );
 
 			/**
@@ -401,11 +413,18 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		if ( $upload_request instanceof WP_Post && $response instanceof WP_REST_Response ) {
 			/**
+			 * Response data
+			 *
+			 * @phpstan-var array{id: int} $response_data
+			 */
+			$response_data = $response->get_data();
+
+			/**
 			 * Uploaded attachment ID.
 			 *
 			 * @var int $attachment_id
 			 */
-			$attachment_id = $response->get_data()['id'];
+			$attachment_id = $response_data['id'];
 
 			add_post_meta(
 				$upload_request->ID,

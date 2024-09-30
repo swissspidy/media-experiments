@@ -1,5 +1,5 @@
 parameters:
-	level: 8
+	level: 9
 	paths:
 		- media-experiments.php
 		- inc/
@@ -35,5 +35,8 @@ parameters:
 		-
 			identifier: method.childParameterType
 			path: inc/class-rest-upload-requests-controller.php
+		-
+			identifier: offsetAccess.nonOffsetAccessible
+			path: inc/functions.php
 includes:
 	- phar://phpstan.phar/conf/bleedingEdge.neon
