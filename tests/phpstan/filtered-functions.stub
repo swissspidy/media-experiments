@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * Retrieves attachment metadata for attachment ID.
+ *
+ * This is a wrapper for {@see wp_get_attachment_metadata()} to add the typing
+ * which is augmented by  Media Experiments.
+ *
+ * @param int  $attachment_id Attachment post ID. Defaults to global $post.
+ * @param bool $unfiltered    Optional. If true, filters are not run. Default false.
+ * @return array{
+ *     width: int,
+ *     height: int,
+ *     file: string,
+ *     sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string, sources?: array<string, array{ file: string, filesize: int }> }>,
+ *     image_meta: array<string, mixed>,
+ *     filesize: int,
+ *     sources?: array<string, array{ file: string, filesize: int }>,
+ *     has_transparency?: bool,
+ *     dominant_color?: string,
+ *     blurhash?: string,
+ *     is_muted?: bool
+ * }|false Attachment metadata. False on failure.
+ */
+function wp_get_attachment_metadata( int $attachment_id = 0, bool $unfiltered = false ): array|false {
+}

@@ -18,7 +18,11 @@ use WP_REST_Response;
 use WP_REST_Server;
 
 /**
- * Class REST_Upload_Requests_Controller
+ * Class REST_Upload_Requests_Controller.
+ *
+ * @phpstan-type UploadRequest array{
+ *   slug: string
+ * }
  */
 class REST_Upload_Requests_Controller extends WP_REST_Posts_Controller {
 	/**
@@ -68,6 +72,7 @@ class REST_Upload_Requests_Controller extends WP_REST_Posts_Controller {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 * @phpstan-param WP_REST_Request<UploadRequest> $request
 	 */
 	public function create_item( $request ) {
 		$request['slug'] = uniqid();

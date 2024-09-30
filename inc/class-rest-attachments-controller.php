@@ -9,8 +9,10 @@ declare(strict_types = 1);
 
 namespace MediaExperiments;
 
+use Perflab_Server_Timing_Metric;
 use WP_Error;
 use WP_Post;
+use WP_Post_Type;
 use WP_REST_Attachments_Controller;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -19,19 +21,31 @@ use WP_REST_Server;
 /**
  * Class REST_Attachments_Controller.
  *
- * @phpstan-type UploadRequest array{
+ * @phpstan-type AttachmentMeta array{
+ *   mexp_original_id: int,
+ * }
+ *
+ * @phpstan-type Upload array{
+ *   context: string,
  *   id?: int,
  *   post: int,
  *   upload_request?: string,
  *   author?: int,
  *   sticky?: bool,
- *   generate_sub_sizes?: bool,
- *   convert_format?: bool,
+ *   caption?: string,
+ *   alt_text?: string,
+ *   generate_sub_sizes: bool,
+ *   convert_format: bool,
+ *   meta: AttachmentMeta,
+ *   _fields?: string|string[],
  * }
- * @phpstan-type SideloadRequest array{
+ * @phpstan-type Sideload array{
+ *   context: string,
  *   id: int,
  *   image_size: string,
  *   upload_request?: string,
+ *   convert_format: bool,
+ *   _fields?: string|string[],
  * }
  */
 class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
@@ -89,8 +103,15 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 *                       checked for required values and may fall-back to a given default, this is not done
 	 *                       on `EDITABLE` requests. Default WP_REST_Server::CREATABLE.
 	 * @return array Endpoint arguments.
+	 *
+	 * @phpstan-return array{string: array<string,mixed>}
 	 */
 	public function get_endpoint_args_for_item_schema( $method = WP_REST_Server::CREATABLE ) {
+		/**
+		 * Endpoint arguments.
+		 *
+		 * @phpstan-var array{string: array<string,mixed>} $args
+		 */
 		$args = rest_get_endpoint_args_for_schema( $this->get_item_schema(), $method );
 
 		if ( WP_REST_Server::CREATABLE === $method ) {
@@ -135,7 +156,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 * @param WP_REST_Request $request       Optional. Request to prepare items for.
 	 * @return array Array of query arguments.
 	 * @phpstan-param array<string, mixed> $prepared_args
-	 * @phpstan-param WP_REST_Request<UploadRequest> $request
+	 * @phpstan-param WP_REST_Request<Upload> $request
 	 * @phpstan-return array<string, mixed>
 	 */
 	protected function prepare_items_query( $prepared_args = [], $request = null ): array {
@@ -144,7 +165,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		if ( ! empty( $request['upload_request'] ) ) {
 			$upload_request = $this->get_upload_request_post( $request );
 
-			if ( $upload_request ) {
+			if ( $upload_request instanceof WP_Post ) {
 				$attachment_ids = get_post_meta(
 					$upload_request->ID,
 					'mexp_attachment_id'
@@ -175,11 +196,19 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 * @param WP_Post         $item    Attachment object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response Response object.
+	 * @phpstan-param WP_REST_Request<Upload> $request
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		$fields   = $this->get_fields_for_response( $request );
 		$response = parent::prepare_item_for_response( $item, $request );
 
+		/**
+		 * Response data.
+		 *
+		 * @phpstan-var array{
+		 *     missing_image_sizes?: string[],
+		 * }
+		 */
 		$data = $response->get_data();
 
 		if (
@@ -240,16 +269,15 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error Response object on success, WP_Error object on failure.
-	 * @phpstan-param WP_REST_Request<UploadRequest> $request
+	 * @phpstan-param WP_REST_Request<Upload> $request
 	 */
 	public function create_item( $request ): WP_Error|WP_REST_Response {
-		if ( ! $request['generate_sub_sizes'] ) {
+		if ( false === $request['generate_sub_sizes'] ) {
 			add_filter( 'intermediate_image_sizes_advanced', '__return_empty_array', 100 );
 			add_filter( 'fallback_intermediate_image_sizes', '__return_empty_array', 100 );
-
 		}
 
-		if ( ! $request['convert_format'] ) {
+		if ( false === $request['convert_format'] ) {
 			// Prevent image conversion as that is done client-side.
 			add_filter( 'image_editor_output_format', '__return_empty_array', 100 );
 		}
@@ -259,7 +287,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			$original_id = $request['meta']['mexp_original_id'];
 
 			$original_attachment = get_post( $original_id );
-			if ( $original_attachment ) {
+			if ( $original_attachment instanceof WP_Post ) {
 				if ( ! isset( $request['caption'] ) ) {
 					$request['caption'] = $original_attachment->post_excerpt;
 				}
@@ -285,11 +313,11 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			return $caps;
 		};
 
-		if ( $upload_request ) {
+		if ( $upload_request instanceof WP_Post ) {
 			add_filter( 'map_meta_cap', $grant_meta_update, 10, 4 );
 
 			// Set the attachment's parent post to the one associated with the upload request.
-			if ( $upload_request->post_parent ) {
+			if ( $upload_request->post_parent > 0 ) {
 				$request['post'] = $upload_request->post_parent;
 			}
 		}
@@ -307,7 +335,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			perflab_server_timing_register_metric(
 				'upload',
 				array(
-					'measure_callback' => function ( \Perflab_Server_Timing_Metric $metric ) use ( $before_upload ) {
+					'measure_callback' => function ( Perflab_Server_Timing_Metric $metric ) use ( $before_upload ) {
 						add_action(
 							'rest_insert_attachment',
 							static function () use ( $metric, $before_upload ) {
@@ -330,7 +358,12 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		$filter_upload_mimes = null;
 
-		if ( $upload_request ) {
+		if ( $upload_request instanceof WP_Post ) {
+			/**
+			 * Allowed file types.
+			 *
+			 * @var string[] $allowed_types
+			 */
 			$allowed_types = get_post_meta( $upload_request->ID, 'mexp_allowed_types', true );
 
 			/**
@@ -355,7 +388,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		$response = parent::create_item( $request );
 
-		if ( $upload_request ) {
+		if ( $upload_request instanceof WP_Post ) {
 			remove_filter( 'upload_mimes', $filter_upload_mimes );
 		}
 
@@ -364,7 +397,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			perflab_server_timing_register_metric(
 				'generate-metadata',
 				array(
-					'measure_callback' => function ( \Perflab_Server_Timing_Metric $metric ) use ( $before_metadata ) {
+					'measure_callback' => function ( Perflab_Server_Timing_Metric $metric ) use ( $before_metadata ) {
 						$metric->set_value( microtime( true ) - $before_metadata );
 					},
 					'access_cap'       => 'exist',
@@ -378,13 +411,20 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		remove_filter( 'image_editor_output_format', '__return_empty_array', 100 );
 		remove_filter( 'map_meta_cap', $grant_meta_update );
 
-		if ( $upload_request && $response instanceof WP_REST_Response ) {
+		if ( $upload_request instanceof WP_Post && $response instanceof WP_REST_Response ) {
+			/**
+			 * Response data
+			 *
+			 * @phpstan-var array{id: int} $response_data
+			 */
+			$response_data = $response->get_data();
+
 			/**
 			 * Uploaded attachment ID.
 			 *
 			 * @var int $attachment_id
 			 */
-			$attachment_id = $response->get_data()['id'];
+			$attachment_id = $response_data['id'];
 
 			add_post_meta(
 				$upload_request->ID,
@@ -401,7 +441,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return true|WP_Error Boolean true if the attachment may be created, or a WP_Error if not.
-	 * @phpstan-param WP_REST_Request<UploadRequest> $request
+	 * @phpstan-param WP_REST_Request<Upload> $request
 	 */
 	public function create_item_permissions_check( $request ): bool|WP_Error {
 		if ( ! empty( $request['id'] ) ) {
@@ -414,7 +454,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		$post_type = get_post_type_object( $this->post_type );
 
-		if ( ! $post_type ) {
+		if ( ! $post_type instanceof WP_Post_Type ) {
 			return new WP_Error(
 				'rest_cannot_edit_others',
 				__( 'Sorry, you are not allowed to create posts as this user.', 'media-experiments' ),
@@ -469,8 +509,8 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		if (
 			! empty( $request['post'] ) &&
-			! current_user_can( 'edit_post', (int) $request['post'] ) &&
-			( ! $upload_request || $upload_request->post_parent !== $request['post'] )
+			! current_user_can( 'edit_post', $request['post'] ) &&
+			( ! $upload_request instanceof WP_Post || $upload_request->post_parent !== $request['post'] )
 		) {
 			return new WP_Error(
 				'rest_cannot_edit',
@@ -487,7 +527,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return bool Whether this request is for a valid media upload request.
-	 * @phpstan-param WP_REST_Request<UploadRequest> $request
+	 * @phpstan-param WP_REST_Request<Upload>|WP_REST_Request<Sideload> $request
 	 */
 	protected function is_valid_upload_request( WP_REST_Request $request ): bool {
 		$post = $this->get_upload_request_post( $request );
@@ -501,7 +541,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 *
 	 * @return WP_Post|null Media upload request if valid, null otherwise.
-	 * @phpstan-param WP_REST_Request<UploadRequest> $request
+	 * @phpstan-param WP_REST_Request<Upload>|WP_REST_Request<Sideload> $request
 	 */
 	protected function get_upload_request_post( WP_REST_Request $request ): ?WP_Post {
 		if ( empty( $request['upload_request'] ) ) {
@@ -533,9 +573,10 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return true|WP_Error True if the request has access to update the item, WP_Error object otherwise.
+	 * @phpstan-param WP_REST_Request<Sideload> $request
 	 */
 	public function sideload_item_permissions_check( $request ): WP_Error|bool {
-		$post = $this->get_post( $request['id'] );
+		$post = $this->get_post( (int) $request['id'] );
 
 		if ( is_wp_error( $post ) ) {
 			return $post;
@@ -591,8 +632,8 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		 *
 		 * @return string Filtered file name.
 		 */
-		return static function ( $filename, $ext, $dir, $unique_filename_callback, $alt_filenames, $number ) use ( $attachment_filename ) {
-			if ( empty( $number ) || ! $attachment_filename ) {
+		return static function ( string $filename, string $ext, string $dir, ?callable $unique_filename_callback, array $alt_filenames, int|string $number ) use ( $attachment_filename ) {
+			if ( empty( $number ) || empty( $attachment_filename ) ) {
 				return $filename;
 			}
 
@@ -600,12 +641,12 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			$name      = pathinfo( $filename, PATHINFO_FILENAME );
 			$orig_name = pathinfo( $attachment_filename, PATHINFO_FILENAME );
 
-			if ( ! $ext || ! $name ) {
+			if ( empty( $ext ) || empty( $name ) ) {
 				return $filename;
 			}
 
 			$matches = array();
-			if ( preg_match( '/(.*)(-\d+x\d+)-' . $number . '$/', $name, $matches ) ) {
+			if ( 1 === preg_match( '/(.*)(-\d+x\d+)-' . $number . '$/', $name, $matches ) ) {
 				$filename_without_suffix = $matches[1] . $matches[2] . ".$ext";
 				if ( $matches[1] === $orig_name && ! file_exists( "$dir/$filename_without_suffix" ) ) {
 					return $filename_without_suffix;
@@ -621,12 +662,30 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error Response object on success, WP_Error object on failure.
-	 * @phpstan-param WP_REST_Request<SideloadRequest> $request
+	 * @phpstan-param WP_REST_Request<Sideload> $request
 	 */
 	public function sideload_item( WP_REST_Request $request ): WP_Error|WP_REST_Response {
 		$attachment_id = $request['id'];
 
-		if ( 'attachment' !== get_post_type( $attachment_id ) ) {
+		if ( ! is_int( $attachment_id ) ) {
+			return new WP_Error(
+				'rest_post_invalid_id',
+				__( 'Invalid post ID.', 'media-experiments' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$attachment = get_post( $attachment_id );
+
+		if ( ! $attachment instanceof WP_Post ) {
+			return new WP_Error(
+				'rest_post_invalid_id',
+				__( 'Invalid post ID.', 'media-experiments' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		if ( 'attachment' !== $attachment->post_type ) {
 			return new WP_Error(
 				'rest_invalid_param',
 				__( 'Invalid parent type.', 'media-experiments' ),
@@ -634,7 +693,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			);
 		}
 
-		if ( ! $request['convert_format'] ) {
+		if ( true !== $request['convert_format'] ) {
 			// Prevent image conversion as that is done client-side.
 			add_filter( 'image_editor_output_format', '__return_empty_array', 100 );
 		}
@@ -650,7 +709,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		// With this filter we can work around this safeguard.
 
 		$attachment_filename = get_attached_file( $attachment_id, true );
-		$attachment_filename = $attachment_filename ? wp_basename( $attachment_filename ) : null;
+		$attachment_filename = is_string( $attachment_filename ) ? wp_basename( $attachment_filename ) : '';
 
 		$filter_filename = $this->get_wp_unique_filename_filter( $attachment_filename );
 
@@ -662,7 +721,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		// Matches logic in media_handle_upload().
 		// The post date doesn't usually matter for pages, so don't backdate this upload.
-		if ( $parent_post && 'page' !== $parent_post->post_type && substr( $parent_post->post_date, 0, 4 ) > 0 ) {
+		if ( $parent_post instanceof WP_Post && 'page' !== $parent_post->post_type && substr( $parent_post->post_date, 0, 4 ) > 0 ) {
 			$time = $parent_post->post_date;
 		}
 
@@ -686,7 +745,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		$metadata = wp_get_attachment_metadata( $attachment_id, true );
 
-		if ( ! $metadata ) {
+		if ( false === $metadata ) {
 			$metadata = [];
 		}
 
@@ -698,8 +757,8 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			$size = wp_getimagesize( $path );
 
 			$metadata['sizes'][ $image_size ] = [
-				'width'     => $size ? $size[0] : 0,
-				'height'    => $size ? $size[1] : 0,
+				'width'     => is_array( $size ) ? $size[0] : 0,
+				'height'    => is_array( $size ) ? $size[1] : 0,
 				'file'      => wp_basename( $path ),
 				'mime-type' => $type,
 				'filesize'  => wp_filesize( $path ),
@@ -708,6 +767,11 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		wp_update_attachment_metadata( $attachment_id, $metadata );
 
+		/**
+		 * Response request.
+		 *
+		 * @phpstan-var WP_REST_Request<Upload> $response_request
+		 */
 		$response_request = new WP_REST_Request(
 			WP_REST_Server::READABLE,
 			rest_get_route_for_post( $attachment_id )
@@ -719,7 +783,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			$response_request['_fields'] = $request['_fields'];
 		}
 
-		$response = $this->prepare_item_for_response( get_post( $attachment_id ), $response_request );
+		$response = $this->prepare_item_for_response( $attachment, $response_request );
 
 		$response->header( 'Location', rest_url( rest_get_route_for_post( $attachment_id ) ) );
 
@@ -728,7 +792,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			perflab_server_timing_register_metric(
 				'upload',
 				array(
-					'measure_callback' => function ( \Perflab_Server_Timing_Metric $metric ) use ( $before_upload ) {
+					'measure_callback' => function ( Perflab_Server_Timing_Metric $metric ) use ( $before_upload ) {
 						$metric->set_value( microtime( true ) - $before_upload );
 					},
 					'access_cap'       => 'exist',

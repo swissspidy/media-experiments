@@ -9,6 +9,7 @@ declare(strict_types = 1);
 
 namespace MediaExperiments;
 
+use InvalidArgumentException;
 use WP_Error;
 use WP_Post;
 use WP_REST_Request;
@@ -45,11 +46,18 @@ function filter_update_plugins( $update, $plugin_data, string $plugin_file ) {
 	$response = wp_remote_get( $plugin_data['UpdateURI'] );
 	$response = wp_remote_retrieve_body( $response );
 
-	if ( ! $response ) {
+	if ( '' === $response ) {
 		return $update;
 	}
 
-	return json_decode( $response, true );
+	/**
+	 * Encoded update data.
+	 *
+	 * @var array<string,mixed> $result
+	 */
+	$result = json_decode( $response, true );
+
+	return $result;
 }
 
 /**
@@ -76,7 +84,7 @@ function needs_cross_origin_isolation(): bool {
 	}
 
 	$user_id = get_current_user_id();
-	if ( ! $user_id ) {
+	if ( 0 === $user_id ) {
 		return false;
 	}
 
@@ -192,7 +200,7 @@ function add_crossorigin_attributes( string $html ): string {
 function set_up_cross_origin_isolation_editor(): void {
 	$screen = get_current_screen();
 
-	if ( ! $screen ) {
+	if ( ! $screen instanceof WP_Screen ) {
 		return;
 	}
 
@@ -229,7 +237,7 @@ function override_media_templates(): void {
 			];
 
 			foreach ( $tags as $tag ) {
-				$html = (string) str_replace( "<$tag", "<$tag crossorigin=\"anonymous\"", $html );
+				$html = str_replace( "<$tag", "<$tag crossorigin=\"anonymous\"", $html );
 			}
 
 			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -269,11 +277,11 @@ function get_user_media_preferences( int $user_id ) {
 	 * @var false|array<string, array<string, array{bigImageSizeThreshold?: int}>> $preferences
 	 */
 	$preferences = get_user_meta( $user_id, 'wp_persisted_preferences', true );
-	if ( ! $preferences ) {
+	if ( empty( $preferences ) ) {
 		return [];
 	}
 
-	return (array) ( $preferences['media-experiments/preferences'] ?? [] );
+	return ( $preferences['media-experiments/preferences'] ?? [] );
 }
 
 /**
@@ -282,10 +290,10 @@ function get_user_media_preferences( int $user_id ) {
  * @param int $threshold The threshold value in pixels.
  * @return int The filtered threshold value.
  */
-function filter_big_image_size_threshold( $threshold ) {
+function filter_big_image_size_threshold( int $threshold ): int {
 	$user_id = get_current_user_id();
 
-	if ( ! $user_id ) {
+	if ( 0 === $user_id ) {
 		return $threshold;
 	}
 
@@ -308,7 +316,7 @@ function filter_big_image_size_threshold( $threshold ) {
 function filter_image_save_progressive( bool $interlace, string $mime_type ): bool {
 	$user_id = get_current_user_id();
 
-	if ( ! $user_id ) {
+	if ( 0 === $user_id ) {
 		return $interlace;
 	}
 
@@ -328,11 +336,11 @@ function filter_image_save_progressive( bool $interlace, string $mime_type ): bo
  *
  * Adds support for JPEG XL (JXL).
  *
- * @param array $mime_types Mime types keyed by the file extension regex
- *                                    corresponding to those types.
- * @return array Filtered list of mime types
+ * @param array<string, string> $mime_types Mime types keyed by the file extension regex
+ *                                          corresponding to those types.
+ * @return array<string, string> Filtered list of mime types
  */
-function filter_mime_types( $mime_types ) {
+function filter_mime_types( array $mime_types ): array {
 	$mime_types['jxl'] = 'image/jxl';
 	return $mime_types;
 }
@@ -342,10 +350,10 @@ function filter_mime_types( $mime_types ) {
  *
  * Adds support for JPEG XL (JXL).
  *
- * @param array[] $ext2type Multi-dimensional array of file extensions types keyed by the type of file.
- * @return array[] Filtered array of file extensions.
+ * @param array<string, string[]> $ext2type Multi-dimensional array of file extensions types keyed by the type of file.
+ * @return array<string, string[]> Filtered array of file extensions.
  */
-function filter_ext2type( $ext2type ) {
+function filter_ext2type( array $ext2type ): array {
 	$ext2type['image'][] = 'jxl';
 	return $ext2type;
 }
@@ -355,9 +363,10 @@ function filter_ext2type( $ext2type ) {
  *
  * Adds support for JPEG XL (JXL).
  *
- * @param array $mime_to_ext Array of image mime types and their matching extensions.
+ * @param array<string, string> $mime_to_ext Array of image mime types and their matching extensions.
+ * @return array<string, string> Filtered array of mime types and their extensions.
  */
-function filter_getimagesize_mimes_to_exts( array $mime_to_ext ) {
+function filter_getimagesize_mimes_to_exts( array $mime_to_ext ): array {
 	$mime_to_ext['image/jxl'] = 'jxl';
 	return $mime_to_ext;
 }
@@ -374,8 +383,11 @@ function filter_getimagesize_mimes_to_exts( array $mime_to_ext ) {
  * @param string[]|null $mimes                     Array of mime types keyed by their file extension regex, or null if
  *                                                 none were provided.
  * @return array Filtered values.
+ *
+ * @phpstan-param array{ext: string|false, type: string|false, proper_filename: string|false} $wp_check_filetype_and_ext
+ * @phpstan-return array{ext: string|false, type: string|false, proper_filename: string|false}
  */
-function filter_wp_check_filetype_and_ext( $wp_check_filetype_and_ext, $file, $filename, $mimes ) {
+function filter_wp_check_filetype_and_ext( array $wp_check_filetype_and_ext, string $file, string $filename, ?array $mimes ): array {
 	if ( false !== $wp_check_filetype_and_ext['ext'] && false !== $wp_check_filetype_and_ext['type'] ) {
 		return $wp_check_filetype_and_ext;
 	}
@@ -384,7 +396,7 @@ function filter_wp_check_filetype_and_ext( $wp_check_filetype_and_ext, $file, $f
 	$wp_filetype = wp_check_filetype( $filename, $mimes );
 	$type        = $wp_filetype['type'];
 
-	if ( ! $type || ! str_starts_with( $type, 'image/' ) ) {
+	if ( false === $type || ! str_starts_with( $type, 'image/' ) ) {
 		return $wp_check_filetype_and_ext;
 	}
 
@@ -673,27 +685,27 @@ function filter_rest_index( WP_REST_Response $response ): WP_REST_Response {
 	 *
 	 * @param int $threshold The threshold value in pixels. Default 1920.
 	 */
-	$video_size_threshold = (int) apply_filters( 'mexp_big_video_size_threshold', 1920 );
+	$video_size_threshold = apply_filters( 'mexp_big_video_size_threshold', 1920 );
 
 	$default_image_output_formats = get_default_image_output_formats();
 
-	$media_source_terms = array_flip(
-		get_terms(
-			[
-				'taxonomy'   => 'mexp_media_source',
-				'hide_empty' => false,
-				'orderby'    => false,
-				'fields'     => 'id=>slug',
-			]
-		)
+	$media_source_terms = get_terms(
+		[
+			'taxonomy'   => 'mexp_media_source',
+			'hide_empty' => false,
+			'orderby'    => 'none',
+			'fields'     => 'id=>slug',
+		]
 	);
 
+	$media_source_terms = ! is_wp_error( $media_source_terms ) ? array_flip( $media_source_terms ) : [];
+
 	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
-	$jpeg_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/jpeg' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+	$jpeg_interlaced = apply_filters( 'image_save_progressive', false, 'image/jpeg' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
-	$png_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/png' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+	$png_interlaced = apply_filters( 'image_save_progressive', false, 'image/png' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
-	$gif_interlaced = (bool) apply_filters( 'image_save_progressive', false, 'image/gif' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+	$gif_interlaced = apply_filters( 'image_save_progressive', false, 'image/gif' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 
 	$response->data['image_sizes']          = get_all_image_sizes();
 	$response->data['image_size_threshold'] = $image_size_threshold;
@@ -719,7 +731,7 @@ function filter_rest_index( WP_REST_Response $response ): WP_REST_Response {
 function rest_get_attachment_filename( array $post ): ?string {
 	$path = get_attached_file( $post['id'] );
 
-	if ( ! $path ) {
+	if ( false === $path ) {
 		return null;
 	}
 
@@ -759,7 +771,7 @@ function get_attachment_filesize( int $attachment_id ): ?int {
 	}
 
 	$original_path = wp_get_original_image_path( $attachment_id );
-	$attached_file = $original_path ? $original_path : get_attached_file( $attachment_id );
+	$attached_file = is_string( $original_path ) ? $original_path : get_attached_file( $attachment_id );
 
 	if ( is_string( $attached_file ) && file_exists( $attached_file ) ) {
 		return wp_filesize( $attached_file );
@@ -809,7 +821,7 @@ function rest_get_attachment_is_muted( array $post ): bool {
  */
 function rest_get_attachment_has_transparency( array $post ): ?bool {
 	$meta = wp_get_attachment_metadata( $post['id'] );
-	return isset( $meta['has_transparency'] ) ? (bool) $meta['has_transparency'] : null;
+	return $meta['has_transparency'] ?? null;
 }
 
 /**
@@ -821,13 +833,13 @@ function rest_get_attachment_has_transparency( array $post ): ?bool {
 function rest_get_attachment_original_url( array $post ): ?string {
 	$original_id = get_post_meta( $post['id'], 'mexp_original_id', true );
 
-	if ( empty( $original_id ) ) {
+	if ( ! is_int( $original_id ) ) {
 		return null;
 	}
 
 	$original_url = wp_get_attachment_url( $original_id );
 
-	return $original_url ? $original_url : null;
+	return is_string( $original_url ) ? $original_url : null;
 }
 
 /**
@@ -911,7 +923,7 @@ function register_media_source_taxonomy(): void {
 function is_upload_screen(): bool {
 	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
 
-	return $screen && 'upload' === $screen->id;
+	return $screen instanceof WP_Screen && 'upload' === $screen->id;
 }
 
 /**
@@ -934,7 +946,7 @@ function rest_after_insert_attachment_handle_pdf_poster( WP_Post $attachment, WP
 
 	$poster = get_post( $poster_id );
 
-	if ( ! $poster ) {
+	if ( ! $poster instanceof WP_Post ) {
 		return;
 	}
 
@@ -944,15 +956,12 @@ function rest_after_insert_attachment_handle_pdf_poster( WP_Post $attachment, WP
 	if ( is_array( $pdf_metadata ) && is_array( $poster_metadata ) ) {
 		$pdf_metadata['sizes']         = $poster_metadata['sizes'];
 		$pdf_metadata['sizes']['full'] = [
+			'file'      => basename( $poster_metadata['file'] ),
 			'width'     => $poster_metadata['width'],
 			'height'    => $poster_metadata['height'],
 			'mime_type' => $poster->post_mime_type,
 			'filesize'  => $poster_metadata['filesize'],
 		];
-
-		if ( isset( $poster_metadata['file'] ) ) {
-			$pdf_metadata['sizes']['full']['file'] = basename( $poster_metadata['file'] );
-		}
 
 		wp_update_attachment_metadata( $attachment->ID, $pdf_metadata );
 	}
@@ -980,7 +989,7 @@ function rest_after_insert_attachment_copy_metadata( WP_Post $attachment, WP_RES
 
 	$original_attachment = get_post( $original_id );
 
-	if ( ! $original_attachment ) {
+	if ( ! $original_attachment instanceof WP_Post ) {
 		return;
 	}
 
@@ -1009,7 +1018,8 @@ function rest_after_insert_attachment_copy_metadata( WP_Post $attachment, WP_RES
 
 		if ( ! isset( $metadata['file'] ) ) {
 			$attached_file = get_attached_file( $attachment_id );
-			if ( $attached_file ) {
+			if ( false !== $attached_file ) {
+				// @phpstan-ignore no.private.function
 				$metadata['file'] = _wp_relative_upload_path( $attached_file );
 			}
 		}
@@ -1103,20 +1113,20 @@ function filter_wp_content_img_tag_add_placeholders( string $content, string $co
 		return $content;
 	}
 
-	if ( ! $processor->get_attribute( 'src' ) ) {
+	if ( ! is_string( $processor->get_attribute( 'src' ) ) ) {
 		return $content;
 	}
 
 	$class_name = 'mexp-placeholder-' . $attachment_id;
 
 	// Ensure to not run the logic below in case relevant attributes are already present.
-	if ( $processor->has_class( $class_name ) ) {
+	if ( true === $processor->has_class( $class_name ) ) {
 		return $content;
 	}
 
 	$meta = wp_get_attachment_metadata( $attachment_id );
 
-	if ( ! $meta ) {
+	if ( false === $meta ) {
 		return $content;
 	}
 
@@ -1171,7 +1181,7 @@ function filter_wp_content_img_tag_add_placeholders( string $content, string $co
 			wp_enqueue_style( 'mexp-placeholder' );
 
 			wp_add_inline_style( 'mexp-placeholder', sprintf( '.mexp-placeholder-%1$s { background-image: %2$s; }', $attachment_id, join( ',', $gradients ) ) );
-		} catch ( \InvalidArgumentException $exception ) {
+		} catch ( InvalidArgumentException $exception ) {
 			// TODO: Investigate error, which is likely because of a blurhash length mismatch.
 		}
 	}
