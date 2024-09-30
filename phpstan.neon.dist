@@ -32,5 +32,8 @@ parameters:
 			paths:
 				- inc/class-rest-attachments-controller.php
 				- inc/class-rest-upload-requests-controller.php
+		-
+			identifier: method.childParameterType
+			path: inc/class-rest-upload-requests-controller.php
 includes:
 	- phar://phpstan.phar/conf/bleedingEdge.neon

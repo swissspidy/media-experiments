@@ -658,7 +658,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		$attachment = get_post( $attachment_id );
 
-		if ( ! $attachment instanceof WP_Post) {
+		if ( ! $attachment instanceof WP_Post ) {
 			return new WP_Error(
 				'rest_post_invalid_id',
 				__( 'Invalid post ID.', 'media-experiments' ),
