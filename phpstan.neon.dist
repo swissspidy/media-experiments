@@ -1,5 +1,5 @@
 parameters:
-	level: 2
+	level: 3
 	paths:
 		- media-experiments.php
 		- inc/
@@ -8,6 +8,7 @@ parameters:
 		- tests/phpstan/performance-lab.stub
 	bootstrapFiles:
 		- tests/phpstan/bootstrap.php
+	reportMaybesInMethodSignatures: false
 	featureToggles:
 		# Ignore errors related to the plugin not running from inside a WP environment, so paths like ABSPATH . WPINC don't resolve.
 		requireFileExists: false
@@ -20,6 +21,15 @@ parameters:
 		# TODO: Revisit ArrayAccess types in WP_REST_Request
 		# See https://github.com/php-stubs/wordpress-stubs/pull/66
 		# See https://github.com/phpstan/phpstan/issues/8549
-
+		-
+			message: "/^Cannot assign offset '.*' to WP_REST_Request/"
+			paths:
+				- inc/class-rest-attachments-controller.php
+				- inc/class-rest-upload-requests-controller.php
+		-
+			message: "/^WP_REST_Request<.*> does not accept/"
+			paths:
+				- inc/class-rest-attachments-controller.php
+				- inc/class-rest-upload-requests-controller.php
 includes:
 	- phar://phpstan.phar/conf/bleedingEdge.neon

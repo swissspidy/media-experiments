@@ -25,7 +25,7 @@ use WP_REST_Server;
  *   mexp_original_id: int,
  * }
  *
- * @phpstan-type UploadRequest array{
+ * @phpstan-type Upload array{
  *   id?: int,
  *   post: int,
  *   upload_request?: string,
@@ -35,10 +35,11 @@ use WP_REST_Server;
  *   convert_format: bool,
  *   meta: AttachmentMeta
  * }
- * @phpstan-type SideloadRequest array{
+ * @phpstan-type Sideload array{
  *   id: int,
  *   image_size: string,
  *   upload_request?: string,
+ *   convert_format: bool,
  * }
  */
 class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
@@ -149,7 +150,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 * @param WP_REST_Request $request       Optional. Request to prepare items for.
 	 * @return array Array of query arguments.
 	 * @phpstan-param array<string, mixed> $prepared_args
-	 * @phpstan-param WP_REST_Request<UploadRequest> $request
+	 * @phpstan-param WP_REST_Request<Upload> $request
 	 * @phpstan-return array<string, mixed>
 	 */
 	protected function prepare_items_query( $prepared_args = [], $request = null ): array {
@@ -254,7 +255,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error Response object on success, WP_Error object on failure.
-	 * @phpstan-param WP_REST_Request<UploadRequest> $request
+	 * @phpstan-param WP_REST_Request<Upload> $request
 	 */
 	public function create_item( $request ): WP_Error|WP_REST_Response {
 		if ( ! $request['generate_sub_sizes'] ) {
@@ -415,7 +416,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return true|WP_Error Boolean true if the attachment may be created, or a WP_Error if not.
-	 * @phpstan-param WP_REST_Request<UploadRequest> $request
+	 * @phpstan-param WP_REST_Request<Upload> $request
 	 */
 	public function create_item_permissions_check( $request ): bool|WP_Error {
 		if ( ! empty( $request['id'] ) ) {
@@ -501,7 +502,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return bool Whether this request is for a valid media upload request.
-	 * @phpstan-param WP_REST_Request<UploadRequest> $request
+	 * @phpstan-param WP_REST_Request<Upload> $request
 	 */
 	protected function is_valid_upload_request( WP_REST_Request $request ): bool {
 		$post = $this->get_upload_request_post( $request );
@@ -515,7 +516,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 *
 	 * @return WP_Post|null Media upload request if valid, null otherwise.
-	 * @phpstan-param WP_REST_Request<UploadRequest> $request
+	 * @phpstan-param WP_REST_Request<Upload> $request
 	 */
 	protected function get_upload_request_post( WP_REST_Request $request ): ?WP_Post {
 		if ( empty( $request['upload_request'] ) ) {
@@ -635,7 +636,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error Response object on success, WP_Error object on failure.
-	 * @phpstan-param WP_REST_Request<SideloadRequest> $request
+	 * @phpstan-param WP_REST_Request<Sideload> $request
 	 */
 	public function sideload_item( WP_REST_Request $request ): WP_Error|WP_REST_Response {
 		$attachment_id = $request['id'];
