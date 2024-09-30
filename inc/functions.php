@@ -1113,7 +1113,7 @@ function filter_wp_content_img_tag_add_placeholders( string $content, string $co
 	$class_name = 'mexp-placeholder-' . $attachment_id;
 
 	// Ensure to not run the logic below in case relevant attributes are already present.
-	if ( $processor->has_class( $class_name ) ) {
+	if ( true === $processor->has_class( $class_name ) ) {
 		return $content;
 	}
 

@@ -265,13 +265,12 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 * @phpstan-param WP_REST_Request<Upload> $request
 	 */
 	public function create_item( $request ): WP_Error|WP_REST_Response {
-		if ( ! $request['generate_sub_sizes'] ) {
+		if ( false === $request['generate_sub_sizes'] ) {
 			add_filter( 'intermediate_image_sizes_advanced', '__return_empty_array', 100 );
 			add_filter( 'fallback_intermediate_image_sizes', '__return_empty_array', 100 );
-
 		}
 
-		if ( ! $request['convert_format'] ) {
+		if ( false === $request['convert_format'] ) {
 			// Prevent image conversion as that is done client-side.
 			add_filter( 'image_editor_output_format', '__return_empty_array', 100 );
 		}
@@ -558,7 +557,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 * @phpstan-param WP_REST_Request<Sideload> $request
 	 */
 	public function sideload_item_permissions_check( $request ): WP_Error|bool {
-		$post = $this->get_post( $request['id'] );
+		$post = $this->get_post( (int) $request['id'] );
 
 		if ( is_wp_error( $post ) ) {
 			return $post;
@@ -649,7 +648,25 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	public function sideload_item( WP_REST_Request $request ): WP_Error|WP_REST_Response {
 		$attachment_id = $request['id'];
 
-		if ( 'attachment' !== get_post_type( $attachment_id ) ) {
+		if ( ! is_int( $attachment_id ) ) {
+			return new WP_Error(
+				'rest_post_invalid_id',
+				__( 'Invalid post ID.', 'media-experiments' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$attachment = get_post( $attachment_id );
+
+		if ( ! $attachment instanceof WP_Post) {
+			return new WP_Error(
+				'rest_post_invalid_id',
+				__( 'Invalid post ID.', 'media-experiments' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		if ( 'attachment' !== $attachment->post_type ) {
 			return new WP_Error(
 				'rest_invalid_param',
 				__( 'Invalid parent type.', 'media-experiments' ),
@@ -673,7 +690,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		// With this filter we can work around this safeguard.
 
 		$attachment_filename = get_attached_file( $attachment_id, true );
-		$attachment_filename = is_string( $attachment_filename ) ? wp_basename( $attachment_filename ) : null;
+		$attachment_filename = is_string( $attachment_filename ) ? wp_basename( $attachment_filename ) : '';
 
 		$filter_filename = $this->get_wp_unique_filename_filter( $attachment_filename );
 
@@ -747,7 +764,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			$response_request['_fields'] = $request['_fields'];
 		}
 
-		$response = $this->prepare_item_for_response( get_post( $attachment_id ), $response_request );
+		$response = $this->prepare_item_for_response( $attachment, $response_request );
 
 		$response->header( 'Location', rest_url( rest_get_route_for_post( $attachment_id ) ) );
 
