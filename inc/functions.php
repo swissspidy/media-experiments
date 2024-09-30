@@ -683,7 +683,7 @@ function filter_rest_index( WP_REST_Response $response ): WP_REST_Response {
 			[
 				'taxonomy'   => 'mexp_media_source',
 				'hide_empty' => false,
-				'orderby'    => false,
+				'orderby'    => 'none',
 				'fields'     => 'id=>slug',
 			]
 		)
