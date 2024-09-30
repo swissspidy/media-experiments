@@ -628,7 +628,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			}
 
 			$matches = array();
-			if ( preg_match( '/(.*)(-\d+x\d+)-' . $number . '$/', $name, $matches ) ) {
+			if ( 1 === preg_match( '/(.*)(-\d+x\d+)-' . $number . '$/', $name, $matches ) ) {
 				$filename_without_suffix = $matches[1] . $matches[2] . ".$ext";
 				if ( $matches[1] === $orig_name && ! file_exists( "$dir/$filename_without_suffix" ) ) {
 					return $filename_without_suffix;
@@ -673,7 +673,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		// With this filter we can work around this safeguard.
 
 		$attachment_filename = get_attached_file( $attachment_id, true );
-		$attachment_filename = $attachment_filename ? wp_basename( $attachment_filename ) : null;
+		$attachment_filename = is_string( $attachment_filename ) ? wp_basename( $attachment_filename ) : null;
 
 		$filter_filename = $this->get_wp_unique_filename_filter( $attachment_filename );
 

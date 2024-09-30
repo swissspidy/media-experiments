@@ -83,10 +83,10 @@ class REST_Upload_Requests_Controller extends WP_REST_Posts_Controller {
 	/**
 	 * Gets an upload request by its slug.
 	 *
-	 * @param string|int $slug Supplied slug.
+	 * @param string $slug Supplied slug.
 	 * @return WP_Post|WP_Error Post object if slug is valid, WP_Error otherwise.
 	 */
-	protected function get_post( $slug ) {
+	protected function get_post( $slug ) { // @phpstan-ignore method.childParameterType
 		$args = [
 			'name'             => $slug,
 			'post_type'        => 'mexp-upload-request',

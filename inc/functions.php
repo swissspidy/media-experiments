@@ -270,7 +270,7 @@ function get_user_media_preferences( int $user_id ) {
 	 * @var false|array<string, array<string, array{bigImageSizeThreshold?: int}>> $preferences
 	 */
 	$preferences = get_user_meta( $user_id, 'wp_persisted_preferences', true );
-	if ( ! $preferences ) {
+	if ( empty( $preferences ) ) {
 		return [];
 	}
 
@@ -389,7 +389,7 @@ function filter_wp_check_filetype_and_ext( array $wp_check_filetype_and_ext, str
 	$wp_filetype = wp_check_filetype( $filename, $mimes );
 	$type        = $wp_filetype['type'];
 
-	if ( ! $type || ! str_starts_with( $type, 'image/' ) ) {
+	if ( false === $type || ! str_starts_with( $type, 'image/' ) ) {
 		return $wp_check_filetype_and_ext;
 	}
 
@@ -682,16 +682,16 @@ function filter_rest_index( WP_REST_Response $response ): WP_REST_Response {
 
 	$default_image_output_formats = get_default_image_output_formats();
 
-	$media_source_terms = array_flip(
-		get_terms(
-			[
-				'taxonomy'   => 'mexp_media_source',
-				'hide_empty' => false,
-				'orderby'    => 'none',
-				'fields'     => 'id=>slug',
-			]
-		)
+	$media_source_terms = get_terms(
+		[
+			'taxonomy'   => 'mexp_media_source',
+			'hide_empty' => false,
+			'orderby'    => 'none',
+			'fields'     => 'id=>slug',
+		]
 	);
+
+	$media_source_terms = ! is_wp_error( $media_source_terms ) ? array_flip( $media_source_terms ) : [];
 
 	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
 	$jpeg_interlaced = apply_filters( 'image_save_progressive', false, 'image/jpeg' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
@@ -724,7 +724,7 @@ function filter_rest_index( WP_REST_Response $response ): WP_REST_Response {
 function rest_get_attachment_filename( array $post ): ?string {
 	$path = get_attached_file( $post['id'] );
 
-	if ( ! $path ) {
+	if ( false === $path ) {
 		return null;
 	}
 
@@ -764,7 +764,7 @@ function get_attachment_filesize( int $attachment_id ): ?int {
 	}
 
 	$original_path = wp_get_original_image_path( $attachment_id );
-	$attached_file = $original_path ? $original_path : get_attached_file( $attachment_id );
+	$attached_file = is_string( $original_path ) ? $original_path : get_attached_file( $attachment_id );
 
 	if ( is_string( $attached_file ) && file_exists( $attached_file ) ) {
 		return wp_filesize( $attached_file );
@@ -832,7 +832,7 @@ function rest_get_attachment_original_url( array $post ): ?string {
 
 	$original_url = wp_get_attachment_url( $original_id );
 
-	return $original_url ? $original_url : null;
+	return is_string( $original_url ) ? $original_url : null;
 }
 
 /**
@@ -1011,7 +1011,7 @@ function rest_after_insert_attachment_copy_metadata( WP_Post $attachment, WP_RES
 
 		if ( ! isset( $metadata['file'] ) ) {
 			$attached_file = get_attached_file( $attachment_id );
-			if ( $attached_file ) {
+			if ( false !== $attached_file ) {
 				// @phpstan-ignore no.private.function
 				$metadata['file'] = _wp_relative_upload_path( $attached_file );
 			}
@@ -1106,7 +1106,7 @@ function filter_wp_content_img_tag_add_placeholders( string $content, string $co
 		return $content;
 	}
 
-	if ( ! $processor->get_attribute( 'src' ) ) {
+	if ( ! is_string( $processor->get_attribute( 'src' ) ) ) {
 		return $content;
 	}
 
@@ -1119,7 +1119,7 @@ function filter_wp_content_img_tag_add_placeholders( string $content, string $co
 
 	$meta = wp_get_attachment_metadata( $attachment_id );
 
-	if ( ! $meta ) {
+	if ( false === $meta ) {
 		return $content;
 	}
 
