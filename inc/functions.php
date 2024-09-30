@@ -356,7 +356,8 @@ function filter_ext2type( array $ext2type ): array {
  *
  * Adds support for JPEG XL (JXL).
  *
- * @param array $mime_to_ext Array of image mime types and their matching extensions.
+ * @param array<string, string> $mime_to_ext Array of image mime types and their matching extensions.
+ * @return array<string, string> Filtered array of mime types and their extensions.
  */
 function filter_getimagesize_mimes_to_exts( array $mime_to_ext ): array {
 	$mime_to_ext['image/jxl'] = 'jxl';
@@ -375,6 +376,9 @@ function filter_getimagesize_mimes_to_exts( array $mime_to_ext ): array {
  * @param string[]|null $mimes                     Array of mime types keyed by their file extension regex, or null if
  *                                                 none were provided.
  * @return array Filtered values.
+ *
+ * @phpstan-param array{ext: string|false, type: string|false, proper_filename: string|false} $wp_check_filetype_and_ext
+ * @phpstan-return array{ext: string|false, type: string|false, proper_filename: string|false}
  */
 function filter_wp_check_filetype_and_ext( array $wp_check_filetype_and_ext, string $file, string $filename, ?array $mimes ): array {
 	if ( false !== $wp_check_filetype_and_ext['ext'] && false !== $wp_check_filetype_and_ext['type'] ) {

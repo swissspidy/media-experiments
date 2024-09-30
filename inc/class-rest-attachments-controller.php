@@ -26,6 +26,7 @@ use WP_REST_Server;
  * }
  *
  * @phpstan-type Upload array{
+ *   context: string,
  *   id?: int,
  *   post: int,
  *   upload_request?: string,
@@ -39,6 +40,7 @@ use WP_REST_Server;
  *   _fields?: string|string[],
  * }
  * @phpstan-type Sideload array{
+ *   context: string,
  *   id: int,
  *   image_size: string,
  *   upload_request?: string,
@@ -194,6 +196,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 * @param WP_Post         $item    Attachment object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response Response object.
+	 * @phpstan-param WP_REST_Request<Upload> $request
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		$fields   = $this->get_fields_for_response( $request );
@@ -506,7 +509,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return bool Whether this request is for a valid media upload request.
-	 * @phpstan-param WP_REST_Request<Upload> $request
+	 * @phpstan-param WP_REST_Request<Upload>|WP_REST_Request<Sideload> $request
 	 */
 	protected function is_valid_upload_request( WP_REST_Request $request ): bool {
 		$post = $this->get_upload_request_post( $request );
@@ -520,7 +523,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 *
 	 * @return WP_Post|null Media upload request if valid, null otherwise.
-	 * @phpstan-param WP_REST_Request<Upload> $request
+	 * @phpstan-param WP_REST_Request<Upload>|WP_REST_Request<Sideload> $request
 	 */
 	protected function get_upload_request_post( WP_REST_Request $request ): ?WP_Post {
 		if ( empty( $request['upload_request'] ) ) {
@@ -552,6 +555,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return true|WP_Error True if the request has access to update the item, WP_Error object otherwise.
+	 * @phpstan-param WP_REST_Request<Sideload> $request
 	 */
 	public function sideload_item_permissions_check( $request ): WP_Error|bool {
 		$post = $this->get_post( $request['id'] );
@@ -727,6 +731,11 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		wp_update_attachment_metadata( $attachment_id, $metadata );
 
+		/**
+		 * Response request.
+		 *
+		 * @phpstan-var WP_REST_Request<Upload> $response_request
+		 */
 		$response_request = new WP_REST_Request(
 			WP_REST_Server::READABLE,
 			rest_get_route_for_post( $attachment_id )
