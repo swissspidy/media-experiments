@@ -37,7 +37,7 @@
 		"@types/node": "^22.7.4",
 		"@types/uuid": "^10.0.0",
 		"@types/wordpress__blocks": "^12.5.14",
-		"@wordpress/dependency-extraction-webpack-plugin": "^6.8.0",
+		"@wordpress/dependency-extraction-webpack-plugin": "^6.8.3",
 		"@wordpress/docgen": "^2.8.0",
 		"@wordpress/env": "^10.8.0",
 		"@wordpress/eslint-plugin": "^21.1.2",
