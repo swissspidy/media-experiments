@@ -39,7 +39,7 @@
 		"@mexp/vips": "file:../vips",
 		"@shopify/web-worker": "^6.4.0",
 		"@wordpress/api-fetch": "^7.0.0",
-		"@wordpress/blob": "^4.8.0",
+		"@wordpress/blob": "^4.9.0",
 		"@wordpress/data": "^10.0.0",
 		"@wordpress/i18n": "^5.0.0",
 		"@wordpress/preferences": "^4.0.0",
