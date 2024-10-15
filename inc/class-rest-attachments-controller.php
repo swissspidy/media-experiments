@@ -118,12 +118,12 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			$args['generate_sub_sizes'] = array(
 				'type'        => 'boolean',
 				'default'     => true,
-				'description' => __( 'Whether to generate image sub sizes.', 'gutenberg' ),
+				'description' => __( 'Whether to generate image sub sizes.', 'media-experiments' ),
 			);
 			$args['convert_format']     = array(
 				'type'        => 'boolean',
 				'default'     => true,
-				'description' => __( 'Whether to convert image formats.', 'gutenberg' ),
+				'description' => __( 'Whether to convert image formats.', 'media-experiments' ),
 			);
 		}
 

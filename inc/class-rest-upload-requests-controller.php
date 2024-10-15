@@ -57,7 +57,7 @@ class REST_Upload_Requests_Controller extends WP_REST_Posts_Controller {
 				],
 				'args'        => [
 					'slug' => [
-						'description' => __( 'Unique alphanumeric identifier for the upload request.' ),
+						'description' => __( 'Unique alphanumeric identifier for the upload request.', 'media-experiments' ),
 						'type'        => 'string',
 					],
 				],
@@ -100,7 +100,7 @@ class REST_Upload_Requests_Controller extends WP_REST_Posts_Controller {
 		if ( empty( $posts ) || $this->post_type !== $posts[0]->post_type ) {
 			return new WP_Error(
 				'rest_post_invalid_id',
-				__( 'Invalid post ID.' ),
+				__( 'Invalid post ID.', 'media-experiments' ),
 				[ 'status' => 404 ]
 			);
 		}
@@ -125,26 +125,26 @@ class REST_Upload_Requests_Controller extends WP_REST_Posts_Controller {
 			'type'       => 'object',
 			'properties' => [
 				'date'     => [
-					'description' => __( "The date the post was published, in the site's timezone." ),
+					'description' => __( "The date the post was published, in the site's timezone.", 'media-experiments' ),
 					'type'        => [ 'string', 'null' ],
 					'format'      => 'date-time',
 					'context'     => [ 'view', 'edit', 'embed' ],
 				],
 				'date_gmt' => [
-					'description' => __( 'The date the post was published, as GMT.' ),
+					'description' => __( 'The date the post was published, as GMT.', 'media-experiments' ),
 					'type'        => [ 'string', 'null' ],
 					'format'      => 'date-time',
 					'context'     => [ 'view', 'edit' ],
 				],
 				'link'     => [
-					'description' => __( 'URL to the post.' ),
+					'description' => __( 'URL to the post.', 'media-experiments' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 				],
 				'slug'     => [
-					'description' => __( 'Unique alphanumeric identifier for the upload request.' ),
+					'description' => __( 'Unique alphanumeric identifier for the upload request.', 'media-experiments' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'arg_options' => [
@@ -152,7 +152,7 @@ class REST_Upload_Requests_Controller extends WP_REST_Posts_Controller {
 					],
 				],
 				'status'   => [
-					'description' => __( 'A named status for the post.' ),
+					'description' => __( 'A named status for the post.', 'media-experiments' ),
 					'type'        => 'string',
 					'enum'        => array_keys( get_post_stati( [ 'internal' => false ] ) ),
 					'context'     => [ 'view', 'edit' ],
@@ -161,12 +161,12 @@ class REST_Upload_Requests_Controller extends WP_REST_Posts_Controller {
 					],
 				],
 				'parent'   => [
-					'description' => __( 'The ID for the parent of the post.' ),
+					'description' => __( 'The ID for the parent of the post.', 'media-experiments' ),
 					'type'        => 'integer',
 					'context'     => [ 'view', 'edit' ],
 				],
 				'author'   => [
-					'description' => __( 'The ID for the author of the post.' ),
+					'description' => __( 'The ID for the author of the post.', 'media-experiments' ),
 					'type'        => 'integer',
 					'context'     => [ 'view', 'edit', 'embed' ],
 				],
