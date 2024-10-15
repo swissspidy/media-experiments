@@ -199,6 +199,7 @@ export enum OperationType {
 	Prepare = 'PREPARE',
 	AddPoster = 'ADD_POSTER',
 	UploadPoster = 'UPLOAD_POSTER',
+	UploadSubtitles = 'UPLOAD_SUBTITLES',
 	UploadOriginal = 'UPLOAD_ORIGINAL',
 	ThumbnailGeneration = 'THUMBNAIL_GENERATION',
 	ResizeCrop = 'RESIZE_CROP',
