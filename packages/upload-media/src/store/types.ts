@@ -9,7 +9,7 @@ export type QueueStatus = 'active' | 'paused';
 
 export type BatchId = string;
 
-export type QueueItem = {
+export interface QueueItem {
 	id: QueueItemId;
 	sourceFile: File;
 	file: File;
@@ -153,14 +153,14 @@ interface SideloadMediaArgs {
 	signal?: AbortSignal;
 }
 
-export type Settings = {
+export interface Settings {
 	mediaUpload: ( args: UploadMediaArgs ) => void;
 	mediaSideload: ( args: SideloadMediaArgs ) => void;
 	imageSizes: Record< string, ImageSizeCrop >;
-};
+}
 
 // Must match the Attachment type from the media-utils package.
-export type Attachment = {
+export interface Attachment {
 	id: number;
 	alt: string;
 	caption: string;
@@ -182,7 +182,7 @@ export type Attachment = {
 	featured_media?: number;
 	missing_image_sizes?: string[];
 	poster?: string;
-};
+}
 
 export type OnChangeHandler = ( attachments: Partial< Attachment >[] ) => void;
 export type OnSuccessHandler = ( attachments: Partial< Attachment >[] ) => void;
@@ -216,7 +216,7 @@ export enum OperationType {
 	Upload = 'UPLOAD',
 }
 
-export type OperationArgs = {
+export interface OperationArgs {
 	[ OperationType.Compress ]: {
 		requireApproval?: boolean;
 	};
@@ -236,7 +236,7 @@ export type OperationArgs = {
 	[ OperationType.ResizeCrop ]: { resize?: ImageSizeCrop };
 	[ OperationType.TranscodeVideo ]: { continueOnError?: boolean };
 	[ OperationType.UploadOriginal ]: { force?: boolean };
-};
+}
 
 type OperationWithArgs< T extends keyof OperationArgs = keyof OperationArgs > =
 	[ T, OperationArgs[ T ] ];
@@ -247,14 +247,14 @@ export type AdditionalData = Record< string, unknown >;
 
 export type SideloadAdditionalData = Record< string, unknown >;
 
-export type ImageSizeCrop = {
+export interface ImageSizeCrop {
 	name?: string; // Only set if dealing with sub-sizes, not for general cropping.
 	width: number;
 	height: number;
 	crop?:
 		| boolean
 		| [ 'left' | 'center' | 'right', 'top' | 'center' | 'bottom' ];
-};
+}
 
 export type ImageLibrary = 'browser' | 'vips';
 
