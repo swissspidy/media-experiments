@@ -34,7 +34,7 @@ export interface QueueItem {
 	abortController?: AbortController;
 	startTime?: number;
 	timings?: MeasureOptions[];
-};
+}
 
 export interface State {
 	queue: QueueItem[];
