@@ -35,7 +35,7 @@ export function convertBlobToFile( fileOrBlob: Blob | File ): File {
 	// The server will override it if incorrect.
 	const ext = fileOrBlob.type.split( '/' )[ 1 ];
 	const mediaType =
-		'application/pdf' == fileOrBlob.type
+		'application/pdf' === fileOrBlob.type
 			? 'document'
 			: fileOrBlob.type.split( '/' )[ 0 ];
 	return new File( [ fileOrBlob ], `${ mediaType }.${ ext }`, {

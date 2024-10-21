@@ -36,6 +36,7 @@
 				"allowedTextDomain": "media-experiments"
 			}
 		],
+		"eqeqeq": "error",
 		"camelcase": [
 			"error",
 			{
