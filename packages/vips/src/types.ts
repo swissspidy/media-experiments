@@ -137,7 +137,8 @@ export interface ThumbnailOptions {
 	 */
 	height?: number;
 	/**
-	 * Only upsize, only downsize, or both.
+	 * Whether to upsize, downsize, both up and
+	 * downsize, or force a size (breaks aspect ratio).
 	 */
 	size?: 'both' | 'up' | 'down' | 'force';
 	/**
