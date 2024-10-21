@@ -225,13 +225,13 @@ export type AdditionalData = BetterOmit<
 	'meta' | 'mexp_media_source'
 >;
 
-export type CreateSideloadFile = {
+export interface CreateSideloadFile {
 	image_size?: string;
 	upload_request?: string;
-};
+}
 
-export type SideloadAdditionalData = {
+export interface SideloadAdditionalData {
 	post: RestAttachment[ 'id' ];
 	image_size?: string;
 	upload_request?: string;
-};
+}
