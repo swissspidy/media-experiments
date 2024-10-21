@@ -1376,7 +1376,7 @@ export function optimizeImageItem(
 					file = await vipsConvertImageFormat(
 						item.id,
 						item.file,
-						'image/avif',
+						'image/gif',
 						outputQuality / 100,
 						interlaced
 					);
