@@ -12,7 +12,7 @@
 		}
 	],
 	"require": {
-		"php": ">=8.0",
+		"php": "^7.4 || ^8.0",
 		"ext-json": "*"
 	},
 	"require-dev": {
@@ -28,7 +28,8 @@
 		"phpstan/phpstan-strict-rules": "1.6.x-dev",
 		"phpstan/phpstan-phpunit": "1.4.x-dev",
 		"phpstan/phpstan-deprecation-rules": "1.2.x-dev",
-		"swissspidy/phpstan-no-private": "v0.2.1"
+		"swissspidy/phpstan-no-private": "v0.2.1",
+		"phpstan/php-8-stubs": "^0.4.3"
 	},
 	"config": {
 		"allow-plugins": {
@@ -36,7 +37,7 @@
 			"phpstan/extension-installer": true
 		},
 		"platform": {
-			"php": "8.0.28"
+			"php": "7.4"
 		}
 	},
 	"scripts": {

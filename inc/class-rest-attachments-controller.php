@@ -271,7 +271,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 * @return WP_REST_Response|WP_Error Response object on success, WP_Error object on failure.
 	 * @phpstan-param WP_REST_Request<Upload> $request
 	 */
-	public function create_item( $request ): WP_Error|WP_REST_Response {
+	public function create_item( $request ) {
 		if ( false === $request['generate_sub_sizes'] ) {
 			add_filter( 'intermediate_image_sizes_advanced', '__return_empty_array', 100 );
 			add_filter( 'fallback_intermediate_image_sizes', '__return_empty_array', 100 );
@@ -443,7 +443,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 * @return true|WP_Error Boolean true if the attachment may be created, or a WP_Error if not.
 	 * @phpstan-param WP_REST_Request<Upload> $request
 	 */
-	public function create_item_permissions_check( $request ): bool|WP_Error {
+	public function create_item_permissions_check( $request ) {
 		if ( ! empty( $request['id'] ) ) {
 			return new WP_Error(
 				'rest_post_exists',
@@ -575,7 +575,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 * @return true|WP_Error True if the request has access to update the item, WP_Error object otherwise.
 	 * @phpstan-param WP_REST_Request<Sideload> $request
 	 */
-	public function sideload_item_permissions_check( $request ): WP_Error|bool {
+	public function sideload_item_permissions_check( $request ) {
 		$post = $this->get_post( (int) $request['id'] );
 
 		if ( is_wp_error( $post ) ) {
@@ -632,7 +632,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		 *
 		 * @return string Filtered file name.
 		 */
-		return static function ( string $filename, string $ext, string $dir, ?callable $unique_filename_callback, array $alt_filenames, int|string $number ) use ( $attachment_filename ) {
+		return static function ( string $filename, string $ext, string $dir, ?callable $unique_filename_callback, array $alt_filenames, $number ) use ( $attachment_filename ) {
 			if ( empty( $number ) || empty( $attachment_filename ) ) {
 				return $filename;
 			}
@@ -664,7 +664,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 * @return WP_REST_Response|WP_Error Response object on success, WP_Error object on failure.
 	 * @phpstan-param WP_REST_Request<Sideload> $request
 	 */
-	public function sideload_item( WP_REST_Request $request ): WP_Error|WP_REST_Response {
+	public function sideload_item( WP_REST_Request $request ) {
 		$attachment_id = $request['id'];
 
 		if ( ! is_int( $attachment_id ) ) {

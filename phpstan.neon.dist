@@ -7,6 +7,11 @@ parameters:
 		- vendor/php-stubs/wordpress-tests-stubs/wordpress-tests-stubs.php
 		- tests/phpstan/filtered-functions.stub
 		- tests/phpstan/performance-lab.stub
+		# These are needed due config.platform.php being 7.4 in composer.json and wordpress-stubs not including polyfills.
+		# See <https://github.com/php-stubs/wordpress-stubs/issues/100>.
+		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_contains.php
+		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_starts_with.php
+		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_ends_with.php
 	bootstrapFiles:
 		- tests/phpstan/bootstrap.php
 	reportMaybesInMethodSignatures: false
