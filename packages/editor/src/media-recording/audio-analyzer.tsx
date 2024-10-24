@@ -47,10 +47,10 @@ interface AudioAnalyzerProps {
 
 function AudioAnalyzer( { source }: AudioAnalyzerProps ) {
 	const [ data, setData ] = useState< Uint8Array >( new Uint8Array( [] ) );
-	const raf = useRef< number >();
+	const rafRef = useRef< number >();
 	const audioContextRef = useRef< AudioContext >();
 	const analyzerRef = useRef< AnalyserNode >();
-	const prevRafTime = useRef< number >();
+	const prevRafTimeRef = useRef< number >();
 
 	useEffect( () => {
 		if ( ! analyzerRef.current ) {
@@ -81,18 +81,18 @@ function AudioAnalyzer( { source }: AudioAnalyzerProps ) {
 		audioNode.connect( analyzer );
 
 		const tick = ( time: DOMHighResTimeStamp ) => {
-			if ( prevRafTime.current !== undefined ) {
+			if ( prevRafTimeRef.current !== undefined ) {
 				const dataArray = new Uint8Array( analyzer.frequencyBinCount );
 				analyzer.getByteTimeDomainData( dataArray );
 				setData( dataArray );
 			}
-			prevRafTime.current = time;
-			raf.current = requestAnimationFrame( tick );
+			prevRafTimeRef.current = time;
+			rafRef.current = requestAnimationFrame( tick );
 		};
 
-		raf.current = requestAnimationFrame( tick );
+		rafRef.current = requestAnimationFrame( tick );
 
-		const requestId = raf.current;
+		const requestId = rafRef.current;
 
 		return () => {
 			if ( requestId ) {
