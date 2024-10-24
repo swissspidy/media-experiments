@@ -137,10 +137,10 @@ export function App() {
 		( select ) => select( uploadStore ).getItems().length > 0,
 		[]
 	);
-	const wasUploading = useRef( false );
+	const wasUploadingRef = useRef( false );
 
 	useEffect( () => {
-		if ( ! isUploading && wasUploading.current ) {
+		if ( ! isUploading && wasUploadingRef.current ) {
 			void createSuccessNotice(
 				__(
 					'Media successfully uploaded. You may now close this page.',
@@ -150,7 +150,7 @@ export function App() {
 			);
 		}
 
-		wasUploading.current = isUploading;
+		wasUploadingRef.current = isUploading;
 	}, [ createSuccessNotice, isUploading ] );
 
 	const notices = useSelect(

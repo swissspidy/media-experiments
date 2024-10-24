@@ -1,5 +1,7 @@
 // eslint-disable-next-line
 import * as Ariakit from '@ariakit/react';
+// eslint-disable-next-line
+import { useStoreState } from '@ariakit/react';
 
 /**
  * WordPress dependencies
@@ -41,15 +43,15 @@ export function Tabs( {
 
 	const isControlled = selectedTabId !== undefined;
 
-	const { items, selectedId } = store.useState();
+	const { items, selectedId } = useStoreState( store );
 	const { setSelectedId, move } = store;
 
 	// Keep track of whether tabs have been populated. This is used to prevent
 	// certain effects from firing too early while tab data and relevant
 	// variables are undefined during the initial render.
-	const tabsHavePopulated = useRef( false );
+	const tabsHavePopulatedRef = useRef( false );
 	if ( items.length > 0 ) {
-		tabsHavePopulated.current = true;
+		tabsHavePopulatedRef.current = true;
 	}
 
 	const selectedTab = items.find( ( item ) => item.id === selectedId );
@@ -86,7 +88,7 @@ export function Tabs( {
 
 			if ( firstEnabledTab ) {
 				setSelectedId( firstEnabledTab.id );
-			} else if ( tabsHavePopulated.current ) {
+			} else if ( tabsHavePopulatedRef.current ) {
 				setSelectedId( null );
 			}
 		}
@@ -140,7 +142,11 @@ export function Tabs( {
 
 		// Once the tabs have populated, if the `selectedTabId` still can't be
 		// found, clear the selection.
-		if ( tabsHavePopulated.current && !! selectedTabId && ! selectedTab ) {
+		if (
+			tabsHavePopulatedRef.current &&
+			!! selectedTabId &&
+			! selectedTab
+		) {
 			setSelectedId( null );
 		}
 	}, [

@@ -10,7 +10,7 @@ import { createHigherOrderComponent } from '@wordpress/compose';
 import { Warning, useBlockProps } from '@wordpress/block-editor';
 import { addFilter } from '@wordpress/hooks';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -117,7 +117,7 @@ function OverlayText() {
 }
 
 function Recorder( { clientId }: MediaPanelProps ) {
-	const [ streamNode, setStreamNode ] = useState< HTMLVideoElement | null >();
+	const streamNodeRef = useRef< HTMLVideoElement >( null );
 	const {
 		videoInput,
 		status,
@@ -147,18 +147,18 @@ function Recorder( { clientId }: MediaPanelProps ) {
 	const isGif = useIsGifVariation( clientId );
 
 	useEffect( () => {
-		if ( ! streamNode ) {
+		if ( ! streamNodeRef.current ) {
 			return;
 		}
 
 		if ( liveStream ) {
-			streamNode.srcObject = liveStream;
+			streamNodeRef.current.srcObject = liveStream;
 		}
 
 		if ( ! liveStream ) {
-			streamNode.srcObject = null;
+			streamNodeRef.current.srcObject = null;
 		}
-	}, [ streamNode, liveStream ] );
+	}, [ liveStream ] );
 
 	const wrapperClassName = recordingTypes.includes( 'audio' )
 		? 'mexp-recording__wrapper mexp-recording__wrapper--audio'
@@ -223,7 +223,7 @@ function Recorder( { clientId }: MediaPanelProps ) {
 					<AudioAnalyzer source={ liveStream } />
 				) : (
 					<video
-						ref={ setStreamNode }
+						ref={ streamNodeRef }
 						disablePictureInPicture
 						autoPlay
 						muted

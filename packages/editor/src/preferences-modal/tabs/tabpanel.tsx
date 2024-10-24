@@ -1,7 +1,12 @@
 /**
+ * External dependencies
+ */
+// eslint-disable-next-line
+import { useStoreState } from '@ariakit/react';
+
+/**
  * WordPress dependencies
  */
-
 import { forwardRef } from '@wordpress/element';
 
 /**
@@ -22,13 +27,13 @@ export const TabPanel = forwardRef<
 	ref
 ) {
 	const context = useTabsContext();
+	const selectedId = useStoreState( context?.store, 'selectedId' );
 	if ( ! context ) {
 		warning( '`Tabs.TabPanel` must be wrapped in a `Tabs` component.' );
 		return null;
 	}
 	const { store, instanceId } = context;
 	const instancedTabId = `${ instanceId }-${ tabId }`;
-	const selectedId = store.useState( ( state ) => state.selectedId );
 
 	return (
 		<StyledTabPanel
