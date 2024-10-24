@@ -5,7 +5,7 @@
 		"plugin:@wordpress/eslint-plugin/i18n",
 		"plugin:oxlint/all"
 	],
-	"plugins": [ "oxlint" ],
+	"plugins": [ "oxlint", "react-compiler" ],
 	"parserOptions": {
 		"requireConfigFile": false,
 		"babelOptions": {
@@ -61,6 +61,15 @@
 					"media_details",
 					"option_string"
 				]
+			}
+		],
+		"react-compiler/react-compiler": [
+			"error",
+			{
+				"environment": {
+					"enableTreatRefLikeIdentifiersAsRefs": true,
+					"validateRefAccessDuringRender": false
+				}
 			}
 		]
 	},

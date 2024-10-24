@@ -9,5 +9,8 @@ module.exports = ( api ) => {
 
 	return {
 		presets: [ '@wordpress/babel-preset-default' ],
+		plugins: [
+			['babel-plugin-react-compiler', { target: '18' }],
+		]
 	};
 };
