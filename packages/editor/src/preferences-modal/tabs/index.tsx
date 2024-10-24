@@ -1,5 +1,7 @@
 // eslint-disable-next-line
 import * as Ariakit from '@ariakit/react';
+// eslint-disable-next-line
+import { useStoreState } from '@ariakit/react';
 
 /**
  * WordPress dependencies
@@ -41,7 +43,7 @@ export function Tabs( {
 
 	const isControlled = selectedTabId !== undefined;
 
-	const { items, selectedId } = store.useState();
+	const { items, selectedId } = useStoreState( store );
 	const { setSelectedId, move } = store;
 
 	// Keep track of whether tabs have been populated. This is used to prevent
