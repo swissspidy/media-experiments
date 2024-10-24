@@ -32,10 +32,8 @@ import type {
 	OnSuccessHandler,
 	QueueItem,
 	QueueItemId,
-	Settings,
 	State,
 	ThumbnailGeneration,
-	UpdateSettingsAction,
 } from './types';
 import { ItemStatus, OperationType, Type } from './types';
 import type {
