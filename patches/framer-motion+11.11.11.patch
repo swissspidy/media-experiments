@@ -1,0 +1,12 @@
+diff --git a/node_modules/framer-motion/dist/index.d.ts b/node_modules/framer-motion/dist/index.d.ts
+index 062b4a6..a11000f 100644
+--- a/node_modules/framer-motion/dist/index.d.ts
++++ b/node_modules/framer-motion/dist/index.d.ts
+@@ -3821,7 +3821,6 @@ declare class GroupPlaybackControls implements AnimationPlaybackControls {
+      */
+     private getAll;
+     private setAll;
+-    attachTimeline(timeline: any, fallback: (animation: AnimationPlaybackControls) => VoidFunction): () => void;
+     get time(): number;
+     set time(time: number);
+     get speed(): number;

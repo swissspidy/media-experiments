@@ -1,17 +1,17 @@
 diff --git a/node_modules/@wordpress/core-data/build-types/index.d.ts b/node_modules/@wordpress/core-data/build-types/index.d.ts
-index 6ee547a..4039a5f 100644
+index 0f1e08f..5c1bf62 100644
 --- a/node_modules/@wordpress/core-data/build-types/index.d.ts
 +++ b/node_modules/@wordpress/core-data/build-types/index.d.ts
-@@ -33,7 +33,7 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
-     } | undefined) => ({ dispatch }: {
+@@ -34,7 +34,7 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
          dispatch: any;
+         resolveSelect: any;
      }) => Promise<boolean | undefined>;
 -    editEntityRecord: (kind: string, name: string, recordId: number | string, edits: any, options?: {
 +    editEntityRecord: (kind: string, name: string, recordId: number | string | undefined, edits: any, options?: {
          undoIgnore?: boolean | undefined;
      }) => any;
      undo: () => ({ select, dispatch }: {
-@@ -140,7 +140,7 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
+@@ -144,7 +144,7 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
          kind: string;
      }>) & import("rememo").EnhancedSelector;
      getEntityRecordNonTransientEdits: ((state: selectors.State, kind: string, name: string, recordId: string | number) => any) & import("rememo").EnhancedSelector;
