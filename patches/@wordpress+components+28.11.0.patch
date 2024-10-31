@@ -1,5 +1,5 @@
 diff --git a/node_modules/@wordpress/components/build-types/card/card-divider/hook.d.ts b/node_modules/@wordpress/components/build-types/card/card-divider/hook.d.ts
-index 2da775e..4fda49b 100644
+index 2da775e..4b6718f 100644
 --- a/node_modules/@wordpress/components/build-types/card/card-divider/hook.d.ts
 +++ b/node_modules/@wordpress/components/build-types/card/card-divider/hook.d.ts
 @@ -270,7 +270,7 @@ export declare function useCardDivider(props: WordPressComponentProps<DividerPro
@@ -12,7 +12,7 @@ index 2da775e..4fda49b 100644
      marginEnd?: import("../../utils/space").SpaceInput;
      marginStart?: import("../../utils/space").SpaceInput;
 diff --git a/node_modules/@wordpress/components/build-types/item-group/types.d.ts b/node_modules/@wordpress/components/build-types/item-group/types.d.ts
-index bcad8c9..ecf8972 100644
+index bcad8c9..6a83ae5 100644
 --- a/node_modules/@wordpress/components/build-types/item-group/types.d.ts
 +++ b/node_modules/@wordpress/components/build-types/item-group/types.d.ts
 @@ -40,6 +40,7 @@ export interface ItemProps {

@@ -31,9 +31,9 @@
 	},
 	"dependencies": {
 		"@mediapipe/selfie_segmentation": "^0.1.1675465747",
-		"@wordpress/blob": "^4.10.0",
-		"@wordpress/data": "^10.0.0",
-		"@wordpress/date": "^5.0.0",
+		"@wordpress/blob": "^4.11.0",
+		"@wordpress/data": "^10.11.0",
+		"@wordpress/date": "^5.11.0",
 		"image-capture": "^0.4.0"
 	}
 }

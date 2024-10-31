@@ -31,6 +31,10 @@ updates:
             - 'eslint'
             - 'oxlint'
             - 'eslint-plugin-*'
+          react-compiler:
+            patterns:
+              - 'babel-plugin-react-compiler'
+              - 'eslint-plugin-react-compiler'
 
       ignore:
           # ESLint v9 requires manual upgrade
