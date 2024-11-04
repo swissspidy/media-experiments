@@ -976,16 +976,16 @@
         },
         {
             "name": "phpstan/php-8-stubs",
-            "version": "0.4.3",
+            "version": "0.4.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/php-8-stubs.git",
-                "reference": "b30c6975205b4b51e7d8c635f57d29b869220a9e"
+                "reference": "c42f6e278d600b219b76d20f80f8455259bcd593"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/php-8-stubs/zipball/b30c6975205b4b51e7d8c635f57d29b869220a9e",
-                "reference": "b30c6975205b4b51e7d8c635f57d29b869220a9e",
+                "url": "https://api.github.com/repos/phpstan/php-8-stubs/zipball/c42f6e278d600b219b76d20f80f8455259bcd593",
+                "reference": "c42f6e278d600b219b76d20f80f8455259bcd593",
                 "shasum": ""
             },
             "type": "library",
@@ -1002,9 +1002,9 @@
             "description": "PHP stubs extracted from php-src",
             "support": {
                 "issues": "https://github.com/phpstan/php-8-stubs/issues",
-                "source": "https://github.com/phpstan/php-8-stubs/tree/0.4.3"
+                "source": "https://github.com/phpstan/php-8-stubs/tree/0.4.4"
             },
-            "time": "2024-10-18T00:19:10+00:00"
+            "time": "2024-11-01T00:22:02+00:00"
         },
         {
             "name": "phpstan/phpstan",
@@ -3883,11 +3883,11 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
+        "roave/security-advisories": 20,
         "johnbillion/wp-compat": 20,
-        "phpstan/phpstan-deprecation-rules": 20,
-        "phpstan/phpstan-phpunit": 20,
         "phpstan/phpstan-strict-rules": 20,
-        "roave/security-advisories": 20
+        "phpstan/phpstan-phpunit": 20,
+        "phpstan/phpstan-deprecation-rules": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
