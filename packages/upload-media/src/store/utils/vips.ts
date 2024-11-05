@@ -15,8 +15,6 @@ const createVipsWorker = createWorkerFactory(
 );
 const vipsWorker = createVipsWorker();
 
-void vipsWorker.setLocation( __webpack_public_path__ );
-
 export async function vipsConvertImageFormat(
 	id: QueueItemId,
 	file: File,
