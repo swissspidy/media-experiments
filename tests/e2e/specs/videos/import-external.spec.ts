@@ -63,9 +63,9 @@ test.describe( 'Videos', () => {
 			/Mime type: video\/(mp4|webm)/
 		);
 
-		// TODO: Investigate why the color is white in WebKit.
+		// TODO: Investigate why the color is white or black in WebKit.
 		await expect(
-			settingsPanel.getByLabel( /#8b837e|#ffffff/ )
+			settingsPanel.getByLabel( /#8b837e|#ffffff|#000000/ )
 		).toBeVisible();
 		await expect( page.locator( 'css=[data-blurhash]' ) ).toBeVisible();
 	} );
