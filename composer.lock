@@ -157,16 +157,16 @@
         },
         {
             "name": "johnbillion/wp-compat",
-            "version": "1.0.0",
+            "version": "1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/johnbillion/wp-compat.git",
-                "reference": "f278d54131af7716033d8c3297b5f4343d83df25"
+                "reference": "c86aa3c71b560817689723f41bd551f5c10e2a22"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/johnbillion/wp-compat/zipball/f278d54131af7716033d8c3297b5f4343d83df25",
-                "reference": "f278d54131af7716033d8c3297b5f4343d83df25",
+                "url": "https://api.github.com/repos/johnbillion/wp-compat/zipball/c86aa3c71b560817689723f41bd551f5c10e2a22",
+                "reference": "c86aa3c71b560817689723f41bd551f5c10e2a22",
                 "shasum": ""
             },
             "require": {
@@ -188,16 +188,17 @@
             },
             "suggest": {
                 "phpstan/phpstan-deprecation-rules": "PHPStan rules for detecting usage of deprecated symbols",
+                "swissspidy/phpstan-no-private": "PHPStan rules for detecting usage of pseudo-private functions, classes, and methods",
                 "szepeviktor/phpstan-wordpress": "WordPress extensions for PHPStan"
             },
             "type": "phpstan-extension",
             "extra": {
-                "wordpress-install-dir": "vendor/wordpress/wordpress",
                 "phpstan": {
                     "includes": [
                         "extension.neon"
                     ]
-                }
+                },
+                "wordpress-install-dir": "vendor/wordpress/wordpress"
             },
             "autoload": {
                 "psr-4": {
@@ -229,7 +230,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-11-25T14:44:28+00:00"
+            "time": "2024-11-30T19:24:46+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -3822,7 +3823,7 @@
         "php": "^7.4 || ^8.0",
         "ext-json": "*"
     },
-    "platform-dev": {},
+    "platform-dev": [],
     "platform-overrides": {
         "php": "7.4"
     },
