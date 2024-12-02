@@ -27,7 +27,7 @@
 		]
 	},
 	"devDependencies": {
-		"@playwright/test": "^1.48.2",
+		"@playwright/test": "^1.49.0",
 		"@shopify/web-worker": "^6.4.0",
 		"@testing-library/jest-dom": "^6.6.3",
 		"@testing-library/react": "^16.0.1",
