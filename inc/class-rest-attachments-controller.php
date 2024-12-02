@@ -745,7 +745,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		$metadata = wp_get_attachment_metadata( $attachment_id, true );
 
-		if ( false === $metadata ) {
+		if ( ! is_array( $metadata ) ) {
 			$metadata = [];
 		}
 

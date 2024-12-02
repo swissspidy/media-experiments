@@ -1126,7 +1126,7 @@ function filter_wp_content_img_tag_add_placeholders( string $content, string $co
 
 	$meta = wp_get_attachment_metadata( $attachment_id );
 
-	if ( false === $meta ) {
+	if ( ! is_array( $meta ) ) {
 		return $content;
 	}
 
