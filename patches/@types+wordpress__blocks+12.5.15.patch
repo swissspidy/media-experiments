@@ -1,40 +1,36 @@
 diff --git a/node_modules/@types/wordpress__blocks/index.d.ts b/node_modules/@types/wordpress__blocks/index.d.ts
-index 6bfba5e..e1683f6 100644
+index de142a4..a23842e 100644
 --- a/node_modules/@types/wordpress__blocks/index.d.ts
 +++ b/node_modules/@types/wordpress__blocks/index.d.ts
-@@ -1,7 +1,7 @@
+@@ -1,5 +1,5 @@
  import { IconType } from "@wordpress/components";
 -import { StoreDescriptor } from "@wordpress/data";
++import { ReduxStoreConfig, StoreDescriptor } from '@wordpress/data/build-types/types';
  import { ShortcodeMatch } from "@wordpress/shortcode";
  import { ComponentType, ReactElement } from "react";
-+import { ReduxStoreConfig, StoreDescriptor } from '@wordpress/data/build-types/types';
-
- export * from "./api";
- export { withBlockContentContext } from "./block-content-provider";
-@@ -11,13 +11,17 @@ declare module "@wordpress/data" {
+ 
+@@ -11,11 +11,15 @@ declare module "@wordpress/data" {
      function select(key: "core/blocks"): typeof import("./store/selectors");
  }
-
+ 
 -export interface BlocksStoreDescriptor extends StoreDescriptor {
 -    name: "core/blocks";
 -}
 -
- // eslint-disable-next-line @definitelytyped/no-declare-current-package
- declare module "@wordpress/blocks" {
--    const store: BlocksStoreDescriptor;
-+	const store: {
-+		name: 'core/blocks';
-+	} & StoreDescriptor<
-+		ReduxStoreConfig<
-+			unknown,
-+			typeof import('./store/actions'),
-+			typeof import('./store/selectors')
-+		>
-+	>;
- }
-
+-export const store: BlocksStoreDescriptor;
++export const store: {
++    name: 'core/blocks';
++} & StoreDescriptor<
++    ReduxStoreConfig<
++        unknown,
++        typeof import('./store/actions'),
++        typeof import('./store/selectors')
++    >
++>;
+ 
  export type AxialDirection = "horizontal" | "vertical";
-@@ -294,6 +298,7 @@ export interface Block<T extends Record<string, any> = {}> {
+ 
+@@ -291,6 +295,7 @@ export interface Block<T extends Record<string, any> = {}> {
       * @see {@link https://developer.wordpress.org/block-editor/reference-guides/block-api/block-metadata/#context}
       */
      readonly usesContext?: string[];
@@ -43,16 +39,16 @@ index 6bfba5e..e1683f6 100644
       * The current version number of the block, such as 1.0 or 1.0.3.
       *
 diff --git a/node_modules/@types/wordpress__blocks/store/selectors.d.ts b/node_modules/@types/wordpress__blocks/store/selectors.d.ts
-index 892c09e..c979564 100644
+index 892c09e..1fee899 100644
 --- a/node_modules/@types/wordpress__blocks/store/selectors.d.ts
 +++ b/node_modules/@types/wordpress__blocks/store/selectors.d.ts
-@@ -1,4 +1,5 @@
- import { Block, BlockStyle } from "../";
-+import { BlockAttributes, BlockVariation, BlockVariationScope } from '@wordpress/blocks';
-
+@@ -1,4 +1,4 @@
+-import { Block, BlockStyle } from "../";
++import { Block, BlockStyle, BlockVariation } from '../';
+ 
  export {
      getBlockSupport,
-@@ -33,3 +34,8 @@ export function getUnregisteredFallbackBlockName(): string | undefined;
+@@ -33,3 +33,8 @@ export function getUnregisteredFallbackBlockName(): string | undefined;
   * search term, or false otherwise.
   */
  export function isMatchingSearchTerm(nameOrType: string | Block<any>, searchTerm: string): boolean;
@@ -60,4 +56,4 @@ index 892c09e..c979564 100644
 +/**
 + * Returns the active block variation for a given block based on its attributes.
 + */
-+export function getActiveBlockVariation( state: any, blockName: string, attributes: BlockAttributes, scope?: BlockVariationScope ): BlockVariation | undefined;
++export function getActiveBlockVariation( blockName: string, attributes: any, scope: any ): BlockVariation | undefined;
