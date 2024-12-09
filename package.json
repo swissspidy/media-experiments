@@ -30,7 +30,7 @@
 		"@playwright/test": "^1.49.0",
 		"@shopify/web-worker": "^6.4.0",
 		"@testing-library/jest-dom": "^6.6.3",
-		"@testing-library/react": "^16.0.1",
+		"@testing-library/react": "^16.1.0",
 		"@types/jest": "^29.5.14",
 		"@types/mime": "^3.0.4",
 		"@types/node": "^22.10.1",
