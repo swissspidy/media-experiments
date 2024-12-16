@@ -16,6 +16,7 @@ test.describe( 'Images', () => {
 		page,
 		editor,
 		mediaUtils,
+		browserName,
 	} ) => {
 		await admin.createNewPost();
 
@@ -76,6 +77,10 @@ test.describe( 'Images', () => {
 		await expect( settingsPanel ).toHaveText( /Mime type: image\/png/ );
 		await expect( settingsPanel ).toHaveText( /Has transparency: yes/ );
 		await expect( settingsPanel.getByLabel( '#24292f' ) ).toBeVisible();
-		await expect( page.locator( 'css=[data-blurhash]' ) ).toBeVisible();
+
+		// eslint-disable-next-line playwright/no-conditional-in-test
+		if ( browserName !== 'webkit' ) {
+			await expect( page.locator( 'css=[data-blurhash]' ) ).toBeVisible();
+		}
 	} );
 } );

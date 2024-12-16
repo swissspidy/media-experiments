@@ -58,6 +58,7 @@ const config = defineConfig( {
 			name: 'chromium',
 			use: {
 				...devices[ 'Desktop Chrome' ],
+				channel: 'chromium',
 				permissions: [ 'clipboard-read', 'camera', 'microphone' ],
 				launchOptions: {
 					args: [
