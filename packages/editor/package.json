@@ -56,7 +56,7 @@
 		"@wordpress/notices": "^5.13.0",
 		"@wordpress/plugins": "^7.13.0",
 		"@wordpress/preferences": "^4.13.0",
-		"qrcode.react": "^4.1.0",
+		"qrcode.react": "^4.2.0",
 		"react-blurhash": "^0.3.0",
 		"react-compare-slider": "^3.1.0",
 		"uuid": "^11.0.3"
