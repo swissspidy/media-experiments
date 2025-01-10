@@ -1144,7 +1144,7 @@ function filter_wp_content_img_tag_add_placeholders( string $content, string $co
 	if ( is_string( $dominant_color ) ) {
 		wp_register_style( 'mexp-placeholder', false ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 		wp_enqueue_style( 'mexp-placeholder' );
-		wp_add_inline_style( 'mexp-placeholder', sprintf( '.mexp-placeholder-%1$s { background-color: %2$s; }', $attachment_id, $dominant_color ) );
+		wp_add_inline_style( 'mexp-placeholder', sprintf( '.mexp-placeholder-%1$s { background-color: %2$s; }', $attachment_id, maybe_hash_hex_color( $dominant_color ) ) );
 	}
 
 	// BlurHash conversion is completely untested. Probably contains faulty logic.
