@@ -47,7 +47,7 @@
 		"blurhash": "^2.0.5",
 		"fast-average-color": "^9.3.0",
 		"mime": "^3.0.0",
-		"uuid": "^11.0.3",
+		"uuid": "^11.0.5",
 		"vosk-browser": "^0.0.8"
 	}
 }
