@@ -22,7 +22,6 @@
 		"node": ">=20"
 	},
 	"main": "dist/index.js",
-	"types": "dist-types/index.d.ts",
 	"source": "src/index.ts",
 	"exports": {
 		".": {
@@ -31,5 +30,6 @@
 		"./babel-plugin": {
 			"default": "./src/babel-plugin.js"
 		}
-	}
+	},
+	"types": "dist-types/index.d.ts"
 }
