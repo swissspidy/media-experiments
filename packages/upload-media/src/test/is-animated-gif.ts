@@ -18,6 +18,7 @@ describe( 'isAnimatedGif', () => {
 			buffer.byteOffset,
 			buffer.byteOffset + buffer.byteLength
 		);
+		// @ts-ignore
 		const result = isAnimatedGif( arrayBuffer );
 
 		expect( result ).toStrictEqual( true );
@@ -29,6 +30,7 @@ describe( 'isAnimatedGif', () => {
 			buffer.byteOffset,
 			buffer.byteOffset + buffer.byteLength
 		);
+		// @ts-ignore
 		const result = isAnimatedGif( arrayBuffer );
 
 		expect( result ).toStrictEqual( false );
