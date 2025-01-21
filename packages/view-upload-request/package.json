@@ -23,13 +23,13 @@
 		"node": ">=20"
 	},
 	"main": "dist/index.js",
-	"types": "dist-types/index.d.ts",
 	"source": "src/index.ts",
 	"exports": {
 		".": {
 			"default": "./src/index.ts"
 		}
 	},
+	"types": "dist-types/index.d.ts",
 	"dependencies": {
 		"@mexp/media-utils": "file:../media-utils",
 		"@mexp/upload-media": "file:../upload-media",

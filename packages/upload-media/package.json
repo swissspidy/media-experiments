@@ -22,13 +22,13 @@
 		"node": ">=20"
 	},
 	"main": "dist/index.js",
-	"types": "dist-types/index.d.ts",
 	"source": "src/index.ts",
 	"exports": {
 		".": {
 			"default": "./src/index.ts"
 		}
 	},
+	"types": "dist-types/index.d.ts",
 	"dependencies": {
 		"@audapolis/webvtt-writer": "^1.0.6",
 		"@mexp/ai": "file:../ai",
