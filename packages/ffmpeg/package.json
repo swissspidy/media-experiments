@@ -31,8 +31,8 @@
 	},
 	"types": "dist-types/index.d.ts",
 	"dependencies": {
-		"@ffmpeg/core": "^0.11.0",
-		"@ffmpeg/ffmpeg": "^0.11.6",
+		"@ffmpeg/core": "^0.12.10",
+		"@ffmpeg/ffmpeg": "^0.12.15",
 		"uuid": "^11.0.5"
 	}
 }
