@@ -41,7 +41,7 @@
 		"@wordpress/eslint-plugin": "^22.4.0",
 		"@wordpress/scripts": "^30.11.0",
 		"@wp-now/wp-now": "^0.1.74",
-		"babel-plugin-react-compiler": "^19.0.0-beta-30d8a17-20250209",
+		"babel-plugin-react-compiler": "^19.0.0-beta-714736e-20250131",
 		"eslint": "^8.57.1",
 		"eslint-plugin-oxlint": "^0.15.10",
 		"eslint-plugin-react-compiler": "^19.0.0-beta-30d8a17-20250209",
