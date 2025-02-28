@@ -3,7 +3,7 @@
 	"extends": [
 		"plugin:@wordpress/eslint-plugin/recommended",
 		"plugin:@wordpress/eslint-plugin/i18n",
-		"plugin:oxlint/all"
+		"plugin:oxlint/recommended"
 	],
 	"plugins": [ "oxlint", "react-compiler" ],
 	"parserOptions": {

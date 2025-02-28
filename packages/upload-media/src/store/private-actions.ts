@@ -1529,6 +1529,7 @@ export function optimizeVideoItem(
 			const isChunkLoadError =
 				error instanceof Error && error.name === 'ChunkLoadError';
 			if ( isChunkLoadError ) {
+				// eslint-disable-next-line no-console -- Deliberately log errors here.
 				console.error( error );
 			}
 
@@ -1706,6 +1707,7 @@ export function convertGifItem( id: QueueItemId ) {
 			} );
 		} catch ( error ) {
 			if ( error instanceof Error && error.name === 'ChunkLoadError' ) {
+				// eslint-disable-next-line no-console -- Deliberately log errors here.
 				console.error( error );
 			}
 			dispatch.cancelItem(
