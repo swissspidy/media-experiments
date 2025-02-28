@@ -24,20 +24,20 @@ updates:
               patterns:
                   - '@wordpress/*'
           ffmpeg:
-            patterns:
-            - '@ffmpeg/*'
+              patterns:
+                  - '@ffmpeg/*'
           types:
-            patterns:
-            - '@types/*'
+              patterns:
+                  - '@types/*'
           lint:
-            patterns:
-            - 'eslint'
-            - 'oxlint'
-            - 'eslint-plugin-*'
+              patterns:
+                  - 'eslint'
+                  - 'oxlint'
+                  - 'eslint-plugin-*'
           react-compiler:
-            patterns:
-              - 'babel-plugin-react-compiler'
-              - 'eslint-plugin-react-compiler'
+              patterns:
+                  - 'babel-plugin-react-compiler'
+                  - 'eslint-plugin-react-compiler'
 
       ignore:
           # ESLint v9 requires manual upgrade
