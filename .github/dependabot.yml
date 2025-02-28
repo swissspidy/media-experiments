@@ -44,6 +44,13 @@ updates:
           - dependency-name: 'eslint'
             versions:
                 - '>= 9'
+          # See https://github.com/swissspidy/media-experiments/issues/175
+          - dependency-name: '@ffmpeg/core'
+            versions:
+                - '>= 0.12.0'
+          - dependency-name: '@ffmpeg/ffmpeg'
+            versions:
+                - '>= 0.12.0'
 
     - package-ecosystem: composer
       directory: '/'
