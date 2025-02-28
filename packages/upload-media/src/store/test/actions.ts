@@ -2,7 +2,6 @@
  * WordPress dependencies
  */
 import { createRegistry } from '@wordpress/data';
-import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
 import { store as preferencesStore } from '@wordpress/preferences';
 
 /**
@@ -10,6 +9,8 @@ import { store as preferencesStore } from '@wordpress/preferences';
  */
 import { store as uploadStore } from '..';
 import { ItemStatus, OperationType, type QueueItem } from '../types';
+
+type WPDataRegistry = ReturnType< typeof createRegistry >;
 
 jest.mock( '@wordpress/blob', () => ( {
 	__esModule: true,
