@@ -27,7 +27,6 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { __, sprintf } from '@wordpress/i18n';
 import { filterURLForDisplay } from '@wordpress/url';
 import { store as noticesStore } from '@wordpress/notices';
-import apiFetch from '@wordpress/api-fetch';
 import { useState } from '@wordpress/element';
 
 /**
