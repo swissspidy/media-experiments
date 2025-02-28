@@ -1168,7 +1168,7 @@ function filter_wp_content_img_tag_add_placeholders( string $content, string $co
 				}
 			}
 
-			// $style = sprintf( 'background-image: %1$s; %2$s }', join( ',', $gradients ), $style );
+			$style = sprintf( 'background-image: %1$s; %2$s }', join( ',', $gradients ), $style );
 		} catch ( InvalidArgumentException $exception ) {
 			// TODO: Investigate error, which is likely because of a blurhash length mismatch.
 		}
