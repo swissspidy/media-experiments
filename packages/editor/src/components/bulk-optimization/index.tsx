@@ -74,16 +74,6 @@ function Row(
 			onSuccess: ( [ media ] ) => {
 				props.onChange( media );
 
-				void apiFetch( {
-					path: `/wp/v2/media/${ props.id }`,
-					data: {
-						meta: {
-							mexp_optimized_id: media.id,
-						},
-					},
-					method: 'POST',
-				} );
-
 				void createSuccessNotice(
 					__( 'File successfully optimized.', 'media-experiments' ),
 					{
@@ -196,16 +186,6 @@ function CompressAll( props: {
 				fileName: attachment.filename || undefined,
 				onSuccess: ( [ media ] ) => {
 					attachment.onChange( media );
-
-					void apiFetch( {
-						path: `/wp/v2/media/${ attachment.id }`,
-						data: {
-							meta: {
-								mexp_optimized_id: media.id,
-							},
-						},
-						method: 'POST',
-					} );
 				},
 				onError: ( err: Error | UploadError ) => {
 					if (

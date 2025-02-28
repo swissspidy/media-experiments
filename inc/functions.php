@@ -863,19 +863,6 @@ function register_attachment_post_meta(): void {
 
 	register_post_meta(
 		'attachment',
-		'mexp_optimized_id',
-		[
-			'type'              => 'integer',
-			'description'       => __( 'The ID of the optimized version for the object.', 'media-experiments' ),
-			'show_in_rest'      => true,
-			'single'            => true,
-			'default'           => 0,
-			'sanitize_callback' => 'absint',
-		]
-	);
-
-	register_post_meta(
-		'attachment',
 		'mexp_original_id',
 		[
 			'type'              => 'integer',
