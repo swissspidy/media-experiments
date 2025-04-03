@@ -1,5 +1,5 @@
 diff --git a/node_modules/@huggingface/transformers/types/models/auto/processing_auto.d.ts b/node_modules/@huggingface/transformers/types/models/auto/processing_auto.d.ts
-index a1178c7..b5fa5a3 100644
+index a1178c7..06d53f9 100644
 --- a/node_modules/@huggingface/transformers/types/models/auto/processing_auto.d.ts
 +++ b/node_modules/@huggingface/transformers/types/models/auto/processing_auto.d.ts
 @@ -28,8 +28,9 @@
@@ -13,8 +13,9 @@ index a1178c7..b5fa5a3 100644
  }
  import { Processor } from '../../base/processing_utils.js';
  //# sourceMappingURL=processing_auto.d.ts.map
+\ No newline at end of file
 diff --git a/node_modules/@huggingface/transformers/types/models/mgp_str/processing_mgp_str.d.ts b/node_modules/@huggingface/transformers/types/models/mgp_str/processing_mgp_str.d.ts
-index 4e40812..2d0f239 100644
+index 4e40812..b6a3c6e 100644
 --- a/node_modules/@huggingface/transformers/types/models/mgp_str/processing_mgp_str.d.ts
 +++ b/node_modules/@huggingface/transformers/types/models/mgp_str/processing_mgp_str.d.ts
 @@ -38,7 +38,7 @@ export class MgpstrProcessor extends Processor {
