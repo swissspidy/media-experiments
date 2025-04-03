@@ -65,24 +65,37 @@ function getExtension( mimeType: string ): ImageFormat {
 	return ( mimeType.split( '/' )[ 1 ] || 'jpeg' ) as ImageFormat;
 }
 
+const siteDataFields: Array< keyof RestBaseRecord > = [
+	'image_size_threshold',
+	'video_size_threshold',
+	'image_output_formats',
+	'jpeg_interlaced',
+	'png_interlaced',
+	'gif_interlaced',
+	'image_sizes',
+];
+
 // Initialize default settings as soon as base data is available.
 const unsubscribeCoreStore = subscribe( () => {
 	const siteData = select( coreStore ).getEntityRecord<
 		// @ts-ignore
 		RestBaseRecord | undefined
 	>( 'root', '__unstableBase', undefined, {
-		_fields: [
-			'image_size_threshold',
-			'video_size_threshold',
-			'image_output_formats',
-			'jpeg_interlaced',
-			'png_interlaced',
-			'gif_interlaced',
-			'image_sizes',
-		],
+		_fields: siteDataFields,
 	} );
 
 	if ( ! siteData ) {
+		return;
+	}
+
+	// For some reason in WP 6.8+ the fields can be returned, but they are all undefined.
+	if (
+		siteDataFields.every(
+			( field ) =>
+				Object.hasOwn( siteData, field ) &&
+				typeof siteData[ field ] === 'undefined'
+		)
+	) {
 		return;
 	}
 
