@@ -45,7 +45,7 @@
 		"@wordpress/preferences": "^4.13.0",
 		"@wordpress/url": "^4.13.0",
 		"blurhash": "^2.0.5",
-		"fast-average-color": "^9.3.0",
+		"fast-average-color": "^9.5.0",
 		"mime": "^3.0.0",
 		"uuid": "^11.1.0",
 		"vosk-browser": "^0.0.8"
