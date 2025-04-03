@@ -121,7 +121,7 @@ jobs:
             - name: Upload code coverage report
               uses: codecov/codecov-action@v5.4.0
               with:
-                  file: artifacts/logs/lcov.info
+                  files: artifacts/logs/lcov.info
                   flags: js
                   token: ${{ secrets.CODECOV_TOKEN }}
 
@@ -221,14 +221,14 @@ jobs:
 
             - name: Run tests with coverage
               run: |
-                  composer test -- --coverage-clover coverage.xml
-                  composer test:multisite -- --coverage-clover coverage-multisite.xml
+                  composer test -- --coverage-clover artifacts/coverage.xml
+                  composer test:multisite -- --coverage-clover artifacts/coverage-multisite.xml
               if: ${{ matrix.coverage }}
 
             - name: Upload code coverage report
               uses: codecov/codecov-action@v5.4.0
               with:
-                  file: artifacts/coverage.xml
+                  files: artifacts/coverage.xml
                   flags: default
                   token: ${{ secrets.CODECOV_TOKEN }}
               if: ${{ matrix.coverage }}
@@ -236,7 +236,7 @@ jobs:
             - name: Upload code coverage report
               uses: codecov/codecov-action@v5.4.0
               with:
-                  file: coverage-multisite.xml
+                  files: artifacts/coverage-multisite.xml
                   flags: multisite
                   token: ${{ secrets.CODECOV_TOKEN }}
               if: ${{ matrix.coverage }}
