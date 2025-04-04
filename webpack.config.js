@@ -107,12 +107,7 @@ module.exports = {
 			},
 			{
 				test: /\.wasm$/,
-				type: 'asset/resource',
-				generator: {
-					// Use [contenthash:8] to help with cache busting.
-					filename: '[name].[contenthash:8].wasm',
-					publicPath: '',
-				},
+				type: 'asset/inline',
 			},
 			...defaultConfig.module.rules.slice( 1 ),
 		],
