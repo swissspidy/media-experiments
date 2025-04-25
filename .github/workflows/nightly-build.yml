@@ -74,7 +74,7 @@ jobs:
                         "version": "0.1.$CURRENT_DATE-${GITHUB_SHA::7}",
                         "url": "https://github.com/swissspidy/media-experiments",
                         "package": "https://swissspidy.github.io/media-experiments/nightly.zip",
-                        "tested": "6.6",
+                        "tested": "6.8",
                         "requires_php": "8.0",
                         "autoupdate": true
                     }
