@@ -689,6 +689,7 @@ function filter_rest_index( WP_REST_Response $response ): WP_REST_Response {
 
 	$default_image_output_formats = get_default_image_output_formats();
 
+	// @phpstan-ignore function.internal (false positive)
 	$media_source_terms = get_terms(
 		[
 			'taxonomy'   => 'mexp_media_source',
