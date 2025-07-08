@@ -1,5 +1,5 @@
 diff --git a/node_modules/@wordpress/notices/build-types/store/actions.d.ts b/node_modules/@wordpress/notices/build-types/store/actions.d.ts
-index 3a43825..288062b 100644
+index 72066b8..80d4dbd 100644
 --- a/node_modules/@wordpress/notices/build-types/store/actions.d.ts
 +++ b/node_modules/@wordpress/notices/build-types/store/actions.d.ts
 @@ -1,3 +1,5 @@

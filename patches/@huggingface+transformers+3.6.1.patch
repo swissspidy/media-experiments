@@ -1,37 +1,21 @@
 diff --git a/node_modules/@huggingface/transformers/types/models/auto/processing_auto.d.ts b/node_modules/@huggingface/transformers/types/models/auto/processing_auto.d.ts
-index a1178c7..06d53f9 100644
+index b8e76a2..9289cca 100644
 --- a/node_modules/@huggingface/transformers/types/models/auto/processing_auto.d.ts
 +++ b/node_modules/@huggingface/transformers/types/models/auto/processing_auto.d.ts
-@@ -28,8 +28,9 @@
-  * // }
-  * ```
-  */
+@@ -1,3 +1,4 @@
 +import type { PretrainedProcessorOptions } from '../../base/processing_utils';
- export class AutoProcessor {
--    static from_pretrained(pretrained_model_name_or_path: string, options: PretrainedProcessorOptions): Promise<Processor>;
-+    static from_pretrained(pretrained_model_name_or_path: string, options?: PretrainedProcessorOptions): Promise<Processor>;
- }
- import { Processor } from '../../base/processing_utils.js';
- //# sourceMappingURL=processing_auto.d.ts.map
-\ No newline at end of file
+ /**
+  * Helper class which is used to instantiate pretrained processors with the `from_pretrained` function.
+  * The chosen processor class is determined by the type specified in the processor config.
 diff --git a/node_modules/@huggingface/transformers/types/models/mgp_str/processing_mgp_str.d.ts b/node_modules/@huggingface/transformers/types/models/mgp_str/processing_mgp_str.d.ts
-index 4e40812..b6a3c6e 100644
+index 4e40812..b830b6f 100644
 --- a/node_modules/@huggingface/transformers/types/models/mgp_str/processing_mgp_str.d.ts
 +++ b/node_modules/@huggingface/transformers/types/models/mgp_str/processing_mgp_str.d.ts
-@@ -38,7 +38,7 @@ export class MgpstrProcessor extends Processor {
-      * @returns {string[]} The list of wp decoded sentences.
-      */
-     wp_decode(sequences: number[][]): string[];
--    /**
-+	/**
-      * Convert a list of lists of token ids into a list of strings by calling decode.
-      * @param {import('../../utils/tensor.js').Tensor[]} sequences List of tokenized input ids.
-      * @returns {{generated_text: string[], scores: number[], char_preds: string[], bpe_preds: string[], wp_preds: string[]}}
 @@ -49,6 +49,7 @@ export class MgpstrProcessor extends Processor {
       * - bpe_preds: The list of BPE decoded sentences.
       * - wp_preds: The list of wp decoded sentences.
       */
-+    // @ts-ignore
++	// @ts-ignore
      batch_decode([char_logits, bpe_logits, wp_logits]: import("../../utils/tensor.js").Tensor[]): {
          generated_text: string[];
          scores: number[];
