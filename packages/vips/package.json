@@ -31,6 +31,6 @@
 	},
 	"types": "dist-types/index.d.ts",
 	"dependencies": {
-		"wasm-vips": "^0.0.13"
+		"wasm-vips": "^0.0.14"
 	}
 }
