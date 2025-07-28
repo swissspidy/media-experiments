@@ -73,6 +73,7 @@ export async function getImageFromPdf(
 
 	await pdfPage.render( {
 		canvasContext: ctx,
+		canvas: null,
 		transform: [ outputScale, 0, 0, outputScale, 0, 0 ],
 		viewport,
 	} ).promise;
