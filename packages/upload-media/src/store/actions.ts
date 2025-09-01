@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 /**
  * WordPress dependencies
  */
-import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
+import type { createRegistry } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
 
 import { type MeasureOptions } from '@mexp/log';
@@ -42,6 +42,8 @@ import type {
 	removeItem,
 	revokeBlobUrls,
 } from './private-actions';
+
+type WPDataRegistry = ReturnType< typeof createRegistry >;
 
 type ActionCreators = {
 	addItem: typeof addItem;

@@ -426,7 +426,6 @@ HTML;
 		$registered = get_registered_meta_keys( 'post', 'attachment' );
 
 		$this->assertArrayHasKey( 'mexp_generated_poster_id', $registered );
-		$this->assertArrayHasKey( 'mexp_optimized_id', $registered );
 		$this->assertArrayHasKey( 'mexp_original_id', $registered );
 	}
 

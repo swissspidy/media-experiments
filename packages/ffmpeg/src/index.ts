@@ -128,8 +128,9 @@ async function runFFmpegWithConfig(
 			throw new Error( `File ${ fileName } could not be processed` );
 		}
 
+		const bufferView = new Uint8Array( data.buffer as ArrayBuffer );
 		return new File(
-			[ new Blob( [ data.buffer ], { type: mimeType } ) ],
+			[ new Blob( [ bufferView ], { type: mimeType } ) ],
 			fileName,
 			{ type: mimeType }
 		);

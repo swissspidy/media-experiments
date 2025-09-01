@@ -185,7 +185,6 @@ export interface RestAttachment extends WP_REST_API_Attachment {
 	meta: {
 		mexp_generated_poster_id?: number;
 		mexp_original_id?: number;
-		mexp_optimized_id?: number;
 	};
 	mexp_blurhash?: string;
 	mexp_dominant_color?: string;

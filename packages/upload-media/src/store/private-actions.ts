@@ -8,7 +8,7 @@ import { createWorkerFactory } from '@shopify/web-worker';
  * WordPress dependencies
  */
 import { createBlobURL, isBlobURL, revokeBlobURL } from '@wordpress/blob';
-import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
+import type { createRegistry } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
 
 import { measure, type MeasureOptions, start } from '@mexp/log';
@@ -81,6 +81,8 @@ import type {
 } from './types';
 import { ItemStatus, OperationType, Type } from './types';
 import type { cancelItem } from './actions';
+
+type WPDataRegistry = ReturnType< typeof createRegistry >;
 
 const createDominantColorWorker = createWorkerFactory(
 	() =>
@@ -1527,6 +1529,7 @@ export function optimizeVideoItem(
 			const isChunkLoadError =
 				error instanceof Error && error.name === 'ChunkLoadError';
 			if ( isChunkLoadError ) {
+				// eslint-disable-next-line no-console -- Deliberately log errors here.
 				console.error( error );
 			}
 
@@ -1704,6 +1707,7 @@ export function convertGifItem( id: QueueItemId ) {
 			} );
 		} catch ( error ) {
 			if ( error instanceof Error && error.name === 'ChunkLoadError' ) {
+				// eslint-disable-next-line no-console -- Deliberately log errors here.
 				console.error( error );
 			}
 			dispatch.cancelItem(

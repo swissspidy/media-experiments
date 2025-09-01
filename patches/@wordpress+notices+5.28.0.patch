@@ -1,5 +1,5 @@
 diff --git a/node_modules/@wordpress/notices/build-types/store/actions.d.ts b/node_modules/@wordpress/notices/build-types/store/actions.d.ts
-index 20d4bb7..46d4c89 100644
+index 72066b8..80d4dbd 100644
 --- a/node_modules/@wordpress/notices/build-types/store/actions.d.ts
 +++ b/node_modules/@wordpress/notices/build-types/store/actions.d.ts
 @@ -1,3 +1,5 @@
@@ -11,7 +11,7 @@ index 20d4bb7..46d4c89 100644
 @@ -336,23 +338,45 @@ export function removeAllNotices(noticeType?: string, context?: string): Object;
   * @return {Object} Action object.
   */
- export function removeNotices(ids: string[], context?: string | undefined): Object;
+ export function removeNotices(ids: string[], context?: string): Object;
 +
 +// `url` and `onClick` can both be provided, but `url` takes precedence. If
 +// `url` is provided, the action's button will be rendered as an anchor and
@@ -72,7 +72,7 @@ index 20d4bb7..46d4c89 100644
  //# sourceMappingURL=actions.d.ts.map
 \ No newline at end of file
 diff --git a/node_modules/@wordpress/notices/build-types/store/selectors.d.ts b/node_modules/@wordpress/notices/build-types/store/selectors.d.ts
-index f6a683a..5cdf11d 100644
+index f6a683a..feefe8d 100644
 --- a/node_modules/@wordpress/notices/build-types/store/selectors.d.ts
 +++ b/node_modules/@wordpress/notices/build-types/store/selectors.d.ts
 @@ -63,7 +63,7 @@ export type WPNotice = {
@@ -80,7 +80,7 @@ index f6a683a..5cdf11d 100644
       * to `info`.
       */
 -    status: string;
-+    status: 'info' | 'warning' | 'error' | 'success';
++	status: 'info' | 'warning' | 'error' | 'success';
      /**
       * Notice message.
       */

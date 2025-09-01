@@ -257,6 +257,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		foreach ( $links as $rel => $rel_links ) {
 			foreach ( $rel_links as $link ) {
+				// @phpstan-ignore method.internal (false positive)
 				$response->add_link( $rel, $link['href'], $link['attributes'] );
 			}
 		}

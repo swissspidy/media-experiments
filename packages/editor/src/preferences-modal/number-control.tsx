@@ -47,6 +47,7 @@ export function FeatureNumberControl( props: FeatureNumberControlProps ) {
 	};
 	return (
 		<UnitControl
+			__next40pxDefaultSize
 			onChange={ onChange }
 			value={ value }
 			{ ...remainingProps }

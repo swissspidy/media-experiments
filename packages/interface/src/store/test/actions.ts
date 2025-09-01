@@ -2,13 +2,14 @@
  * WordPress dependencies
  */
 import { createRegistry } from '@wordpress/data';
-import { type WPDataRegistry } from '@wordpress/data/build-types/registry';
 
 /**
  * Internal dependencies
  */
 import { store as interfaceStore } from '../';
 import { Type } from '../types';
+
+type WPDataRegistry = ReturnType< typeof createRegistry >;
 
 function createRegistryWithStores() {
 	// Create a registry and register used stores.

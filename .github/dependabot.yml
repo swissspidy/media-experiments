@@ -23,24 +23,34 @@ updates:
           wp-packages:
               patterns:
                   - '@wordpress/*'
+          ffmpeg:
+              patterns:
+                  - '@ffmpeg/*'
           types:
-            patterns:
-            - '@types/*'
+              patterns:
+                  - '@types/*'
           lint:
-            patterns:
-            - 'eslint'
-            - 'oxlint'
-            - 'eslint-plugin-*'
+              patterns:
+                  - 'eslint'
+                  - 'oxlint'
+                  - 'eslint-plugin-*'
           react-compiler:
-            patterns:
-              - 'babel-plugin-react-compiler'
-              - 'eslint-plugin-react-compiler'
+              patterns:
+                  - 'babel-plugin-react-compiler'
+                  - 'eslint-plugin-react-compiler'
 
       ignore:
           # ESLint v9 requires manual upgrade
           - dependency-name: 'eslint'
             versions:
                 - '>= 9'
+          # See https://github.com/swissspidy/media-experiments/issues/175
+          - dependency-name: '@ffmpeg/core'
+            versions:
+                - '>= 0.12.0'
+          - dependency-name: '@ffmpeg/ffmpeg'
+            versions:
+                - '>= 0.12.0'
 
     - package-ecosystem: composer
       directory: '/'

@@ -27,7 +27,6 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { __, sprintf } from '@wordpress/i18n';
 import { filterURLForDisplay } from '@wordpress/url';
 import { store as noticesStore } from '@wordpress/notices';
-import apiFetch from '@wordpress/api-fetch';
 import { useState } from '@wordpress/element';
 
 /**
@@ -73,16 +72,6 @@ function Row(
 			fileName: props.filename || undefined,
 			onSuccess: ( [ media ] ) => {
 				props.onChange( media );
-
-				void apiFetch( {
-					path: `/wp/v2/media/${ props.id }`,
-					data: {
-						meta: {
-							mexp_optimized_id: media.id,
-						},
-					},
-					method: 'POST',
-				} );
 
 				void createSuccessNotice(
 					__( 'File successfully optimized.', 'media-experiments' ),
@@ -196,16 +185,6 @@ function CompressAll( props: {
 				fileName: attachment.filename || undefined,
 				onSuccess: ( [ media ] ) => {
 					attachment.onChange( media );
-
-					void apiFetch( {
-						path: `/wp/v2/media/${ attachment.id }`,
-						data: {
-							meta: {
-								mexp_optimized_id: media.id,
-							},
-						},
-						method: 'POST',
-					} );
 				},
 				onError: ( err: Error | UploadError ) => {
 					if (

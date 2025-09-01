@@ -27,7 +27,8 @@ import { UploadError } from './upload-error';
  * @return File object.
  */
 export function convertBlobToFile( fileOrBlob: Blob | File ): File {
-	if ( fileOrBlob instanceof File ) {
+	// Because an instanceof check is not reliable.
+	if ( 'name' in fileOrBlob && 'type' in fileOrBlob ) {
 		return fileOrBlob;
 	}
 

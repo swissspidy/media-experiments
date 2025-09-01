@@ -1,5 +1,5 @@
 diff --git a/node_modules/@wordpress/core-data/build-types/index.d.ts b/node_modules/@wordpress/core-data/build-types/index.d.ts
-index 3afda7e..4d48cf9 100644
+index 1a345ff..c426d85 100644
 --- a/node_modules/@wordpress/core-data/build-types/index.d.ts
 +++ b/node_modules/@wordpress/core-data/build-types/index.d.ts
 @@ -34,7 +34,7 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
@@ -11,12 +11,12 @@ index 3afda7e..4d48cf9 100644
          undoIgnore?: boolean | undefined;
      }) => any;
      undo: () => ({ select, dispatch }: {
-@@ -143,7 +143,7 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
+@@ -291,7 +291,7 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
          kind: string;
      }>) & import("rememo").EnhancedSelector;
      getEntityRecordNonTransientEdits: ((state: selectors.State, kind: string, name: string, recordId: string | number) => any) & import("rememo").EnhancedSelector;
 -    getEditedEntityRecord: (<EntityRecord extends import("./entity-types").EntityRecord<any>>(state: selectors.State, kind: string, name: string, recordId: string | number) => import("./entity-types").Updatable<EntityRecord> | false) & import("rememo").EnhancedSelector;
 +    getEditedEntityRecord: (<EntityRecord extends import("./entity-types").EntityRecord<any>>(state: selectors.State, kind: string, name: string, recordId: string | number | undefined) => import("./entity-types").Updatable<EntityRecord> | false) & import("rememo").EnhancedSelector;
-     hasFetchedAutosaves: Function;
-     getRevisions: (state: selectors.State, kind: string, name: string, recordKey: string | number, query?: {
-         [x: string]: any;
+     hasFetchedAutosaves: {
+         (state: selectors.State, postType: string, postId: string | number): boolean;
+         isRegistrySelector?: boolean;

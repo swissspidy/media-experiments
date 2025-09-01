@@ -24,7 +24,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - name: Get current tag for HEAD
               run: |
@@ -74,7 +74,7 @@ jobs:
                         "version": "0.1.$CURRENT_DATE-${GITHUB_SHA::7}",
                         "url": "https://github.com/swissspidy/media-experiments",
                         "package": "https://swissspidy.github.io/media-experiments/nightly.zip",
-                        "tested": "6.6",
+                        "tested": "6.8",
                         "requires_php": "8.0",
                         "autoupdate": true
                     }
@@ -97,7 +97,7 @@ jobs:
 
             - name: Upload artifact
               if: ${{ env.CURRENT_TAG != 'nightly' }}
-              uses: actions/upload-pages-artifact@v3
+              uses: actions/upload-pages-artifact@v4
 
             - name: Tag current commit
               if: ${{ env.CURRENT_TAG != 'nightly' }}

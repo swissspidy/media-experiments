@@ -20,7 +20,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - name: Setup Node
               uses: actions/setup-node@v4
@@ -53,7 +53,7 @@ jobs:
             pull-requests: write
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - name: Setup Node
               uses: actions/setup-node@v4
@@ -76,7 +76,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
@@ -104,7 +104,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - name: Setup Node
               uses: actions/setup-node@v4
@@ -119,9 +119,9 @@ jobs:
               run: npm run test:unit -- --collectCoverage
 
             - name: Upload code coverage report
-              uses: codecov/codecov-action@v5.1.1
+              uses: codecov/codecov-action@v5.5.0
               with:
-                  file: artifacts/logs/lcov.info
+                  files: artifacts/logs/lcov.info
                   flags: js
                   token: ${{ secrets.CODECOV_TOKEN }}
 
@@ -162,7 +162,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
@@ -180,6 +180,11 @@ jobs:
                   while ! mysqladmin ping -h"127.0.0.1" -P"${{ job.services.mysql.ports[3306] }}" --silent; do
                     sleep 1
                   done
+
+            - name: Install svn
+              run: |
+                  sudo apt update -y --allow-releaseinfo-change
+                  sudo apt install -y subversion
 
             - name: Set up tests
               run: bash bin/install-wp-tests.sh wordpress_test root '' 127.0.0.1:${{ job.services.mysql.ports['3306'] }} ${{ matrix.wp }} true
@@ -216,22 +221,22 @@ jobs:
 
             - name: Run tests with coverage
               run: |
-                  composer test -- --coverage-clover coverage.xml
-                  composer test:multisite -- --coverage-clover coverage-multisite.xml
+                  composer test -- --coverage-clover artifacts/coverage.xml
+                  composer test:multisite -- --coverage-clover artifacts/coverage-multisite.xml
               if: ${{ matrix.coverage }}
 
             - name: Upload code coverage report
-              uses: codecov/codecov-action@v5.1.1
+              uses: codecov/codecov-action@v5.5.0
               with:
-                  file: artifacts/coverage.xml
+                  files: artifacts/coverage.xml
                   flags: default
                   token: ${{ secrets.CODECOV_TOKEN }}
               if: ${{ matrix.coverage }}
 
             - name: Upload code coverage report
-              uses: codecov/codecov-action@v5.1.1
+              uses: codecov/codecov-action@v5.5.0
               with:
-                  file: coverage-multisite.xml
+                  files: artifacts/coverage-multisite.xml
                   flags: multisite
                   token: ${{ secrets.CODECOV_TOKEN }}
               if: ${{ matrix.coverage }}
@@ -242,7 +247,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2

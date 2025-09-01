@@ -148,7 +148,7 @@ export async function convertImageFormat(
 	}
 
 	const outBuffer = image.writeToBuffer( `.${ ext }`, saveOptions );
-	const result = outBuffer.buffer;
+	const result = outBuffer.buffer as ArrayBuffer;
 
 	cleanup?.();
 
@@ -320,7 +320,7 @@ export async function resizeImage(
 	const outBuffer = image.writeToBuffer( `.${ ext }`, saveOptions );
 
 	const result = {
-		buffer: outBuffer.buffer,
+		buffer: outBuffer.buffer as ArrayBuffer,
 		width: image.width,
 		height: image.pageHeight,
 		originalWidth: width,
