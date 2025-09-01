@@ -61,7 +61,8 @@ const unsubscribeCoreStore = subscribe( () => {
 		bigVideoSizeThreshold: siteData.video_size_threshold,
 		keepOriginal: false,
 		convertUnsafe: true,
-		useAi: true,
+		// TODO: Revisit implementation.
+		useAi: false,
 		// Formats.
 		default_outputFormat: 'jpeg',
 		default_quality: 82,
