@@ -16,7 +16,7 @@ parameters:
 		- tests/phpstan/bootstrap.php
 	reportMaybesInMethodSignatures: false
 	WPCompat:
-		requiresAtLeast: '6.6'
+		requiresAtLeast: '6.7'
 	strictRules:
 		disallowedEmpty: false
 		strictArrayFilter: false
