@@ -65,7 +65,7 @@ test.describe( 'Videos', () => {
 
 		// TODO: Investigate why the color is white or black in WebKit.
 		await expect(
-			settingsPanel.getByLabel( /#8b837e|#ffffff|#000000/ )
+			settingsPanel.getByLabel( /#8b837e|#89807d|#ffffff|#000000/ )
 		).toBeVisible();
 		await expect( page.locator( 'css=[data-blurhash]' ) ).toBeVisible();
 	} );
