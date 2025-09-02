@@ -20,7 +20,6 @@ const config = defineConfig( {
 		...baseConfig.reporter,
 		process.env.COLLECT_COVERAGE === 'true' && [
 			'monocart-reporter',
-			/** @type {CoverageReportOptions} **/
 			{
 				outputFile: './artifacts/e2e-coverage/report.html',
 				coverage: {
@@ -50,7 +49,7 @@ const config = defineConfig( {
 						return filePath.replace( 'media-experiments/', '' );
 					},
 				},
-			},
+			} as CoverageReportOptions,
 		],
 	].filter( Boolean ),
 	projects: [
