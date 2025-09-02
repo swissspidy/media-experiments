@@ -1,18 +1,29 @@
 /**
  * External dependencies
  */
-import { createWorkerFactory } from '@shopify/web-worker';
+import { createWorkerFactory, type WorkerCreator } from '@shopify/web-worker';
 
 /**
  * Internal dependencies
  */
 import { getFileBasename } from '../../utils';
 
-const createHeifWorker = createWorkerFactory(
-	() => import( /* webpackChunkName: 'heif' */ '@mexp/heif' )
-);
+let heifWorker:
+	| ReturnType< WorkerCreator< typeof import('@mexp/heif') > >
+	| undefined;
 
-const heifWorker = createHeifWorker();
+function getHeifWorker() {
+	if ( heifWorker !== undefined ) {
+		return heifWorker;
+	}
+
+	const createWorker = createWorkerFactory(
+		() => import( /* webpackChunkName: 'heif' */ '@mexp/heif' )
+	);
+	heifWorker = createWorker();
+
+	return heifWorker;
+}
 
 /**
  * Creates a Blob from a given ArrayBuffer.
@@ -54,7 +65,7 @@ export async function transcodeHeifImage(
 	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/jpeg',
 	quality = 0.82
 ) {
-	const { buffer, width, height } = await heifWorker.transcodeHeifImage(
+	const { buffer, width, height } = await getHeifWorker().transcodeHeifImage(
 		await file.arrayBuffer()
 	);
 

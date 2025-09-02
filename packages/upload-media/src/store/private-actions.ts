@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { v4 as uuidv4 } from 'uuid';
-import { createWorkerFactory } from '@shopify/web-worker';
+import { createWorkerFactory, type WorkerCreator } from '@shopify/web-worker';
 
 /**
  * WordPress dependencies
@@ -84,24 +84,59 @@ import type { cancelItem } from './actions';
 
 type WPDataRegistry = ReturnType< typeof createRegistry >;
 
-const createDominantColorWorker = createWorkerFactory(
-	() =>
-		import(
-			/* webpackChunkName: 'dominant-color' */ './workers/dominant-color'
-		)
-);
-const dominantColorWorker = createDominantColorWorker();
+let dominantColorWorker:
+	| ReturnType< WorkerCreator< typeof import('./workers/dominant-color') > >
+	| undefined;
 
-const createBlurhashWorker = createWorkerFactory(
-	() => import( /* webpackChunkName: 'blurhash' */ './workers/blurhash' )
-);
-const blurhashWorker = createBlurhashWorker();
+function getDominantColorWorker() {
+	if ( dominantColorWorker !== undefined ) {
+		return dominantColorWorker;
+	}
 
-const createAiWorker = createWorkerFactory(
-	() => import( /* webpackChunkName: 'ai' */ '@mexp/ai' )
-);
+	const createWorker = createWorkerFactory(
+		() =>
+			import(
+				/* webpackChunkName: 'dominant-color' */ './workers/dominant-color'
+			)
+	);
+	dominantColorWorker = createWorker();
 
-const aiWorker = createAiWorker();
+	return dominantColorWorker;
+}
+
+let blurhashWorker:
+	| ReturnType< WorkerCreator< typeof import('./workers/blurhash') > >
+	| undefined;
+
+function getBlurhashWorker() {
+	if ( blurhashWorker !== undefined ) {
+		return blurhashWorker;
+	}
+
+	const createWorker = createWorkerFactory(
+		() => import( /* webpackChunkName: 'blurhash' */ './workers/blurhash' )
+	);
+	blurhashWorker = createWorker();
+
+	return blurhashWorker;
+}
+
+let aiWorker:
+	| ReturnType< WorkerCreator< typeof import('@mexp/ai') > >
+	| undefined;
+
+function getAiWorker() {
+	if ( aiWorker !== undefined ) {
+		return aiWorker;
+	}
+
+	const createWorker = createWorkerFactory(
+		() => import( /* webpackChunkName: 'ai' */ '@mexp/ai' )
+	);
+	aiWorker = createWorker();
+
+	return aiWorker;
+}
 
 // Safari does not currently support WebP in HTMLCanvasElement.toBlob()
 // See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
@@ -2082,11 +2117,14 @@ export function generateImageCaptions( id: QueueItemId ) {
 			// Do not override existing caption or alt text.
 			const caption =
 				item.additionalData?.caption ||
-				( await aiWorker.generateCaption( url ) );
+				( await getAiWorker().generateCaption( url ) );
 
 			const alt =
 				item.additionalData?.alt_text ||
-				( await aiWorker.generateCaption( url, '<DETAILED_CAPTION>' ) );
+				( await getAiWorker().generateCaption(
+					url,
+					'<DETAILED_CAPTION>'
+				) );
 
 			dispatch.finishOperation( id, {
 				// For updating in the editor straight away.
@@ -2163,7 +2201,7 @@ export function generateMetadata( id: QueueItemId ) {
 		) {
 			try {
 				additionalData.mexp_dominant_color =
-					await dominantColorWorker.getDominantColor( stillUrl );
+					await getDominantColorWorker().getDominantColor( stillUrl );
 			} catch {
 				// No big deal if this fails, we can still continue uploading.
 				// TODO: Debug & catch & throw.
@@ -2193,7 +2231,7 @@ export function generateMetadata( id: QueueItemId ) {
 		) {
 			try {
 				additionalData.mexp_blurhash =
-					await blurhashWorker.getBlurHash( stillUrl );
+					await getBlurhashWorker().getBlurHash( stillUrl );
 			} catch {
 				// No big deal if this fails, we can still continue uploading.
 				// TODO: Debug & catch & throw.
