@@ -1,13 +1,31 @@
 /**
+ * External dependencies
+ */
+import { createWorkerFactory, type WorkerCreator } from '@shopify/web-worker';
+
+/**
  * Internal dependencies
  */
 import { ImageFile } from '../../image-file';
-import { createWorkerGetter, getFileBasename } from '../../utils';
+import { getFileBasename } from '../../utils';
 import type { ImageSizeCrop, QueueItemId } from '../types';
 
-const getVipsWorker = createWorkerGetter(
-	() => import( /* webpackChunkName: 'vips' */ '@mexp/vips' )
-);
+let vipsWorker:
+	| ReturnType< WorkerCreator< typeof import('@mexp/vips') > >
+	| undefined;
+
+function getVipsWorker() {
+	if ( vipsWorker !== undefined ) {
+		return vipsWorker;
+	}
+
+	const createWorker = createWorkerFactory(
+		() => import( /* webpackChunkName: 'vips' */ '@mexp/vips' )
+	);
+	vipsWorker = createWorker();
+
+	return vipsWorker;
+}
 
 export async function vipsConvertImageFormat(
 	id: QueueItemId,

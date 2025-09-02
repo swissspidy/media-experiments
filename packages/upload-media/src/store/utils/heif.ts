@@ -1,11 +1,29 @@
 /**
+ * External dependencies
+ */
+import { createWorkerFactory, type WorkerCreator } from '@shopify/web-worker';
+
+/**
  * Internal dependencies
  */
-import { createWorkerGetter, getFileBasename } from '../../utils';
+import { getFileBasename } from '../../utils';
 
-const getHeifWorker = createWorkerGetter(
-	() => import( /* webpackChunkName: 'heif' */ '@mexp/heif' )
-);
+let heifWorker:
+	| ReturnType< WorkerCreator< typeof import('@mexp/heif') > >
+	| undefined;
+
+function getHeifWorker() {
+	if ( heifWorker !== undefined ) {
+		return heifWorker;
+	}
+
+	const createWorker = createWorkerFactory(
+		() => import( /* webpackChunkName: 'heif' */ '@mexp/heif' )
+	);
+	heifWorker = createWorker();
+
+	return heifWorker;
+}
 
 /**
  * Creates a Blob from a given ArrayBuffer.
