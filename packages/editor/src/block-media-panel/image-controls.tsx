@@ -19,7 +19,7 @@ import { DebugInfo } from './debug-info';
 import type { ImageBlock } from '../types';
 import { AnimatedGifConverter } from './animated-gif-converter';
 import { UploadRequestControls } from './upload-requests/controls';
-import { GenerateCaptions } from './generate-caption';
+import { ImageBlockControls } from './image-block-controls';
 import { BulkOptimization } from '../components/bulk-optimization';
 import { useBlockAttachments } from '../utils/hooks';
 
@@ -108,7 +108,8 @@ export function ImageControls( props: ImageControlsProps ) {
 				/>
 			) : null }
 			<BulkOptimization attachments={ attachments } />
-			<GenerateCaptions
+			<ImageBlockControls
+				id={ props.attributes.id }
 				url={ props.attributes.url }
 				onUpdateCaption={ onUpdateCaption }
 				onUpdateAltText={ onUpdateAltText }
