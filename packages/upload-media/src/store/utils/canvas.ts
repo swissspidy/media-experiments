@@ -1,31 +1,13 @@
 /**
- * External dependencies
- */
-import { createWorkerFactory, type WorkerCreator } from '@shopify/web-worker';
-
-/**
  * Internal dependencies
  */
 import { ImageFile } from '../../image-file';
-import { getFileBasename } from '../../utils';
+import { createWorkerGetter, getFileBasename } from '../../utils';
 import type { ImageSizeCrop } from '../types';
 
-let canvasWorker:
-	| ReturnType< WorkerCreator< typeof import('../workers/canvas') > >
-	| undefined;
-
-function getCanvasWorker() {
-	if ( canvasWorker !== undefined ) {
-		return canvasWorker;
-	}
-
-	const createWorker = createWorkerFactory(
-		() => import( /* webpackChunkName: 'canvas' */ '../workers/canvas' )
-	);
-	canvasWorker = createWorker();
-
-	return canvasWorker;
-}
+const getCanvasWorker = createWorkerGetter(
+	() => import( /* webpackChunkName: 'canvas' */ '../workers/canvas' )
+);
 
 export async function compressImage( file: File, quality = 0.82 ) {
 	return new File(

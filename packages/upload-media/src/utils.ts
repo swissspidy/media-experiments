@@ -8,6 +8,7 @@ import mime from 'mime/lite';
  */
 import { getFilename } from '@wordpress/url';
 import { __, _x, sprintf } from '@wordpress/i18n';
+import { createWorkerFactory, type WorkerCreator } from '@shopify/web-worker';
 
 /**
  * Internal dependencies
@@ -457,4 +458,21 @@ export function isImageTypeSupported(
 		'image/tiff',
 		'image/webp',
 	].includes( type );
+}
+
+export function createWorkerGetter< TModule >(
+	importer: () => Promise< TModule >
+) {
+	let worker: ReturnType< WorkerCreator< TModule > > | undefined;
+
+	return function getWorker(): ReturnType< WorkerCreator< TModule > > {
+		if ( worker !== undefined ) {
+			return worker;
+		}
+
+		const createWorker = createWorkerFactory( importer );
+		worker = createWorker();
+
+		return worker;
+	};
 }

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { v4 as uuidv4 } from 'uuid';
-import { createWorkerFactory, type WorkerCreator } from '@shopify/web-worker';
 
 /**
  * WordPress dependencies
@@ -22,6 +21,7 @@ import {
 	canProcessWithFFmpeg,
 	cloneFile,
 	convertBlobToFile,
+	createWorkerGetter,
 	fetchFile,
 	getFileBasename,
 	getFileExtension,
@@ -84,59 +84,20 @@ import type { cancelItem } from './actions';
 
 type WPDataRegistry = ReturnType< typeof createRegistry >;
 
-let dominantColorWorker:
-	| ReturnType< WorkerCreator< typeof import('./workers/dominant-color') > >
-	| undefined;
+const getDominantColorWorker = createWorkerGetter(
+	() =>
+		import(
+			/* webpackChunkName: 'dominant-color' */ './workers/dominant-color'
+		)
+);
 
-function getDominantColorWorker() {
-	if ( dominantColorWorker !== undefined ) {
-		return dominantColorWorker;
-	}
+const getBlurhashWorker = createWorkerGetter(
+	() => import( /* webpackChunkName: 'blurhash' */ './workers/blurhash' )
+);
 
-	const createWorker = createWorkerFactory(
-		() =>
-			import(
-				/* webpackChunkName: 'dominant-color' */ './workers/dominant-color'
-			)
-	);
-	dominantColorWorker = createWorker();
-
-	return dominantColorWorker;
-}
-
-let blurhashWorker:
-	| ReturnType< WorkerCreator< typeof import('./workers/blurhash') > >
-	| undefined;
-
-function getBlurhashWorker() {
-	if ( blurhashWorker !== undefined ) {
-		return blurhashWorker;
-	}
-
-	const createWorker = createWorkerFactory(
-		() => import( /* webpackChunkName: 'blurhash' */ './workers/blurhash' )
-	);
-	blurhashWorker = createWorker();
-
-	return blurhashWorker;
-}
-
-let aiWorker:
-	| ReturnType< WorkerCreator< typeof import('@mexp/ai') > >
-	| undefined;
-
-function getAiWorker() {
-	if ( aiWorker !== undefined ) {
-		return aiWorker;
-	}
-
-	const createWorker = createWorkerFactory(
-		() => import( /* webpackChunkName: 'ai' */ '@mexp/ai' )
-	);
-	aiWorker = createWorker();
-
-	return aiWorker;
-}
+const getAiWorker = createWorkerGetter(
+	() => import( /* webpackChunkName: 'ai' */ '@mexp/ai' )
+);
 
 // Safari does not currently support WebP in HTMLCanvasElement.toBlob()
 // See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
