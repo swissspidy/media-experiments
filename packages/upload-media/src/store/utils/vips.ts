@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createWorkerFactory } from '@shopify/web-worker';
+import { createWorkerFactory, type WorkerCreator } from '@shopify/web-worker';
 
 /**
  * Internal dependencies
@@ -10,10 +10,22 @@ import { ImageFile } from '../../image-file';
 import { getFileBasename } from '../../utils';
 import type { ImageSizeCrop, QueueItemId } from '../types';
 
-const createVipsWorker = createWorkerFactory(
-	() => import( /* webpackChunkName: 'vips' */ '@mexp/vips' )
-);
-const vipsWorker = createVipsWorker();
+let vipsWorker:
+	| ReturnType< WorkerCreator< typeof import('@mexp/vips') > >
+	| undefined;
+
+function getVipsWorker() {
+	if ( vipsWorker !== undefined ) {
+		return vipsWorker;
+	}
+
+	const createWorker = createWorkerFactory(
+		() => import( /* webpackChunkName: 'vips' */ '@mexp/vips' )
+	);
+	vipsWorker = createWorker();
+
+	return vipsWorker;
+}
 
 export async function vipsConvertImageFormat(
 	id: QueueItemId,
@@ -27,7 +39,7 @@ export async function vipsConvertImageFormat(
 	quality: number,
 	interlaced?: boolean
 ) {
-	const buffer = await vipsWorker.convertImageFormat(
+	const buffer = await getVipsWorker().convertImageFormat(
 		id,
 		await file.arrayBuffer(),
 		file.type,
@@ -46,7 +58,7 @@ export async function vipsCompressImage(
 	quality: number,
 	interlaced?: boolean
 ) {
-	const buffer = await vipsWorker.compressImage(
+	const buffer = await getVipsWorker().compressImage(
 		id,
 		await file.arrayBuffer(),
 		file.type,
@@ -61,7 +73,7 @@ export async function vipsCompressImage(
 }
 
 export async function vipsHasTransparency( url: string ) {
-	return vipsWorker.hasTransparency(
+	return getVipsWorker().hasTransparency(
 		await ( await fetch( url ) ).arrayBuffer()
 	);
 }
@@ -74,7 +86,7 @@ export async function vipsResizeImage(
 	addSuffix: boolean
 ) {
 	const { buffer, width, height, originalWidth, originalHeight } =
-		await vipsWorker.resizeImage(
+		await getVipsWorker().resizeImage(
 			id,
 			await file.arrayBuffer(),
 			file.type,
@@ -109,5 +121,5 @@ export async function vipsResizeImage(
  * @param id Queue item ID to cancel operations for.
  */
 export async function vipsCancelOperations( id: QueueItemId ) {
-	return vipsWorker.cancelOperations( id );
+	return getVipsWorker().cancelOperations( id );
 }
