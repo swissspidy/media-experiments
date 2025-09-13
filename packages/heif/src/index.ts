@@ -62,7 +62,7 @@ function getDimensions( image: DecodeResult ): {
  *
  * @param image Decode result.
  */
-async function decodeImage( image: DecodeResult ) {
+function decodeImage( image: DecodeResult ) {
 	const dimensions = getDimensions( image );
 	const { width, height } = dimensions;
 
