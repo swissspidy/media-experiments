@@ -1,4 +1,23 @@
 {
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"categories": {
+		"correctness": "error",
+		"nursery": "error",
+		"pedantic": "error",
+		"perf": "off",
+		"restriction": "error",
+		"suspicious": "error"
+	},
+	"plugins": [
+		"import",
+		"jest",
+		"jsdoc",
+		"promise",
+		"react-perf"
+	],
+	"ignorePatterns": [
+		"@types"
+	],
 	"settings": {
 		"jsdoc": {
 			"tagNamePreference": {
@@ -6,5 +25,31 @@
 				"yields": "yield"
 			}
 		}
+	},
+	"rules": {
+		"default-case": "off",
+		"max-classes-per-file": "off",
+		"max-lines": "off",
+		"max-lines-per-function": "off",
+		"no-case-declarations": "off",
+		"no-empty-function": "off",
+		"no-negated-condition": "off",
+		"no-plusplus": "off",
+		"no-undef": "off",
+		"no-undefined": "off",
+		"no-void": ["error", { "allowAsStatement": true }],
+		"require-await": "off",
+		"import/extensions": "off",
+		"import/max-dependencies": "off",
+		"import/no-commonjs": "off",
+		"import/no-default-export": "off",
+		"import/no-unassigned-import": "off",
+		"import/unambiguous": "off",
+		"jest/no-conditional-in-test": "off",
+		"jsdoc/require-param-description": "off",
+		"jsdoc/require-param-type": "off",
+		"jsdoc/require-returns": "off",
+		"jsdoc/require-returns-type": "off",
+		"promise/catch-or-return": "off"
 	}
 }

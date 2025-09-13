@@ -173,7 +173,7 @@ function getScaleArg( threshold: number ) {
  * @param threshold Big video size threshold.
  * @return Processed video file object.
  */
-export async function transcodeVideo(
+export function transcodeVideo(
 	file: File,
 	basename: string,
 	mimeType: string,
@@ -207,7 +207,7 @@ export async function transcodeVideo(
  * @param file Original video file object.
  * @return Processed video file object.
  */
-export async function muteVideo( file: File ): Promise< File > {
+export function muteVideo( file: File ): Promise< File > {
 	return runFFmpegWithConfig(
 		file,
 		[
@@ -233,7 +233,7 @@ export async function muteVideo( file: File ): Promise< File > {
  * @param mimeType Desired mime type.
  * @return Processed audio file object.
  */
-export async function transcodeAudio(
+export function transcodeAudio(
 	file: File,
 	basename: string,
 	mimeType: string
@@ -269,7 +269,7 @@ export async function transcodeAudio(
  * @param threshold Big video size threshold.
  * @return File object for the video frame.
  */
-export async function getFirstFrameOfVideo(
+export function getFirstFrameOfVideo(
 	file: File,
 	basename: string,
 	threshold: number
@@ -301,7 +301,7 @@ export async function getFirstFrameOfVideo(
  * @param threshold Big video size threshold.
  * @return Converted video file object.
  */
-export async function convertGifToVideo(
+export function convertGifToVideo(
 	file: File,
 	basename: string,
 	mimeType: string,
