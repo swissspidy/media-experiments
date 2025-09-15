@@ -46,7 +46,7 @@
 		"eslint-plugin-oxlint": "^1.14.0",
 		"eslint-plugin-react-compiler": "^19.0.0-beta-714736e-20250131",
 		"mini-css-extract-plugin": "^2.9.4",
-		"monocart-reporter": "^2.9.21",
+		"monocart-reporter": "^2.9.22",
 		"npm-run-all": "^4.1.5",
 		"oxlint": "^1.14.0",
 		"patch-package": "^8.0.0",
