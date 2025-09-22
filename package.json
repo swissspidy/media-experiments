@@ -33,7 +33,7 @@
 		"@testing-library/react": "^16.3.0",
 		"@types/jest": "^30.0.0",
 		"@types/mime": "^3.0.4",
-		"@types/node": "^24.4.0",
+		"@types/node": "^24.5.2",
 		"@types/wordpress__blocks": "^12.5.18",
 		"@wordpress/dependency-extraction-webpack-plugin": "^6.31.0",
 		"@wordpress/docgen": "^2.31.0",
