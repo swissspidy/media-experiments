@@ -52,7 +52,7 @@
 		"patch-package": "^8.0.0",
 		"prettier": "npm:wp-prettier@3.0.3",
 		"typescript": "^5.9.2",
-		"uuid": "^11.1.0",
+		"uuid": "^13.0.0",
 		"webpack": "^5.99.9",
 		"webpack-cli": "^6.0.1",
 		"webpack-virtual-modules": "^0.6.2"
