@@ -27,6 +27,7 @@
 		}
 	},
 	"rules": {
+		"class-methods-use-this":"off",
 		"default-case": "off",
 		"max-classes-per-file": "off",
 		"max-lines": "off",
