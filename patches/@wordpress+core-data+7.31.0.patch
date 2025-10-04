@@ -1,5 +1,5 @@
 diff --git a/node_modules/@wordpress/core-data/build-types/index.d.ts b/node_modules/@wordpress/core-data/build-types/index.d.ts
-index 1a345ff..c426d85 100644
+index f094d74..afce542 100644
 --- a/node_modules/@wordpress/core-data/build-types/index.d.ts
 +++ b/node_modules/@wordpress/core-data/build-types/index.d.ts
 @@ -34,7 +34,7 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
@@ -11,7 +11,7 @@ index 1a345ff..c426d85 100644
          undoIgnore?: boolean | undefined;
      }) => any;
      undo: () => ({ select, dispatch }: {
-@@ -291,7 +291,7 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
+@@ -292,7 +292,7 @@ export const store: import("@wordpress/data/build-types/types").StoreDescriptor<
          kind: string;
      }>) & import("rememo").EnhancedSelector;
      getEntityRecordNonTransientEdits: ((state: selectors.State, kind: string, name: string, recordId: string | number) => any) & import("rememo").EnhancedSelector;
