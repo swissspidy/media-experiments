@@ -1158,7 +1158,7 @@ function filter_wp_content_img_tag_add_placeholders( string $content, string $co
 					$percent_y = round( ( $r / ( $rows - 1 ) ) * 100 );
 
 					[ $r, $g, $b ] = $pixel;
-					$rgb           = sprintf( '#%02x%02x%02x', $r, $g, $b );
+					$rgb           = sprintf( '#%02x%02x%02x', (int) $r, (int) $g, (int) $b );
 
 					$gradients[] = sprintf(
 						'radial-gradient(at %1$s%% %2$s%%, %3$s, #00000000 50%%)',

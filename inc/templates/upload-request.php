@@ -87,12 +87,12 @@ $mexp_request_parent_url = $mexp_request_parent instanceof WP_Post && ( is_post_
 			window.mediaExperiments.accept = %4$s;
 			window.mediaExperiments.multiple = %5$s;
 			window.mediaExperiments.maxUploadFileSize = %6$s;',
-			wp_json_encode( get_allowed_mime_types() ),
-			wp_json_encode( $post->post_name ),
-			wp_json_encode( (array) $allowed_types ),
-			wp_json_encode( (array) $accept ),
-			wp_json_encode( $multiple ),
-			wp_json_encode( $max_upload_size )
+			(string) wp_json_encode( get_allowed_mime_types() ),
+			(string) wp_json_encode( $post->post_name ),
+			(string) wp_json_encode( (array) $allowed_types ),
+			(string) wp_json_encode( (array) $accept ),
+			(string) wp_json_encode( $multiple ),
+			(string) wp_json_encode( $max_upload_size )
 		),
 		'before'
 	);
