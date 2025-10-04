@@ -46,10 +46,12 @@
 		"import/no-unassigned-import": "off",
 		"import/unambiguous": "off",
 		"jest/no-conditional-in-test": "off",
+		"jsdoc/require-param": "off",
 		"jsdoc/require-param-description": "off",
 		"jsdoc/require-param-type": "off",
 		"jsdoc/require-returns": "off",
 		"jsdoc/require-returns-type": "off",
-		"promise/catch-or-return": "off"
+		"promise/catch-or-return": "off",
+		"promise/no-multiple-resolved": "off"
 	}
 }

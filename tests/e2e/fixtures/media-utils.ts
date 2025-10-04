@@ -70,7 +70,7 @@ export class MediaUtils {
 	 * @param buffer The GIF ArrayBuffer instance.
 	 * @return Whether this is an animated GIF or not.
 	 */
-	async isAnimatedGif( buffer: ArrayBuffer ) {
+	static async isAnimatedGif( buffer: ArrayBuffer ) {
 		// See http://www.matthewflickinger.com/lab/whatsinagif/bits_and_bytes.asp.
 		const BLOCK_TERMINATOR = 0x00;
 		const EXTENSION_INTRODUCER = 0x21;
@@ -112,7 +112,7 @@ export class MediaUtils {
 	 * @param buffer The PNG ArrayBuffer instance.
 	 * @return Whether this is an interlaced (progressive) PNG.
 	 */
-	isInterlacedPng( buffer: ArrayBuffer ) {
+	static isInterlacedPng( buffer: ArrayBuffer ) {
 		// See https://www.w3.org/TR/png/#5PNG-file-signature.
 
 		const arr = new Uint8Array( buffer );
