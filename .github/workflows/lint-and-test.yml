@@ -23,7 +23,7 @@ jobs:
               uses: actions/checkout@v5
 
             - name: Setup Node
-              uses: actions/setup-node@v5
+              uses: actions/setup-node@v6
               with:
                   node-version-file: '.nvmrc'
                   cache: npm
@@ -56,7 +56,7 @@ jobs:
               uses: actions/checkout@v5
 
             - name: Setup Node
-              uses: actions/setup-node@v5
+              uses: actions/setup-node@v6
               with:
                   node-version-file: '.nvmrc'
                   cache: npm
@@ -107,7 +107,7 @@ jobs:
               uses: actions/checkout@v5
 
             - name: Setup Node
-              uses: actions/setup-node@v5
+              uses: actions/setup-node@v6
               with:
                   node-version-file: '.nvmrc'
                   cache: npm
@@ -260,7 +260,7 @@ jobs:
               run: wp package install wp-cli/dist-archive-command:dev-main
 
             - name: Setup Node
-              uses: actions/setup-node@v5
+              uses: actions/setup-node@v6
               with:
                   node-version-file: '.nvmrc'
                   cache: npm
