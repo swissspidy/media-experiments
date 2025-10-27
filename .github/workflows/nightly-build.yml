@@ -43,7 +43,7 @@ jobs:
               run: wp package install wp-cli/dist-archive-command:dev-main
 
             - name: Setup Node
-              uses: actions/setup-node@v5
+              uses: actions/setup-node@v6
               if: ${{ env.CURRENT_TAG != 'nightly' }}
               with:
                   node-version-file: '.nvmrc'
