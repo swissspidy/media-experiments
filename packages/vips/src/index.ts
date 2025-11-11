@@ -21,6 +21,7 @@ import VipsJxlModule from 'wasm-vips/vips-jxl.wasm';
 import type {
 	ItemId,
 	ImageSizeCrop,
+	ImageMetadata,
 	LoadOptions,
 	SaveOptions,
 	ThumbnailOptions,
@@ -349,4 +350,81 @@ export async function hasTransparency(
 	cleanup?.();
 
 	return hasAlpha;
+}
+
+/**
+ * Extracts image metadata (EXIF, IPTC, XMP) from an image buffer.
+ *
+ * This matches the metadata fields that WordPress core extracts via wp_read_image_metadata().
+ *
+ * @param buffer Original file buffer.
+ * @return Extracted metadata object.
+ */
+export async function extractImageMetadata(
+	buffer: ArrayBuffer
+): Promise< ImageMetadata > {
+	const vips = await getVips();
+	const image = vips.Image.newFromBuffer( buffer );
+
+	const metadata: ImageMetadata = {};
+
+	/**
+	 * Safely get a string value from image metadata.
+	 *
+	 * @param name The metadata field name.
+	 * @return The field value or undefined.
+	 */
+	const getStringField = ( name: string ): string | undefined => {
+		try {
+			const value = image.getString( name );
+			return value && value.trim() !== '' ? value.trim() : undefined;
+		} catch ( error ) {
+			// Field doesn't exist or isn't a string
+			return undefined;
+		}
+	};
+
+	// Title: Try EXIF, IPTC, then XMP
+	metadata.title =
+		getStringField( 'exif-ifd0-ImageDescription' ) ||
+		getStringField( 'iptc-Headline' ) ||
+		getStringField( 'xmp-dc-Title' );
+
+	// Caption: Try EXIF, IPTC, then XMP
+	metadata.caption =
+		getStringField( 'exif-ifd2-UserComment' ) ||
+		getStringField( 'iptc-Caption-Abstract' ) ||
+		getStringField( 'xmp-dc-Description' );
+
+	// Copyright: Try EXIF, IPTC, then XMP
+	metadata.copyright =
+		getStringField( 'exif-ifd0-Copyright' ) ||
+		getStringField( 'iptc-CopyrightNotice' ) ||
+		getStringField( 'xmp-dc-Rights' );
+
+	// Credit: Try EXIF, IPTC, then XMP
+	metadata.credit =
+		getStringField( 'exif-ifd0-Artist' ) ||
+		getStringField( 'iptc-Credit' ) ||
+		getStringField( 'xmp-dc-Creator' );
+
+	// Created timestamp
+	metadata.created_timestamp = getStringField( 'exif-ifd2-DateTimeOriginal' );
+
+	// Camera information
+	metadata.camera = getStringField( 'exif-ifd0-Model' );
+	metadata.aperture = getStringField( 'exif-ifd2-FNumber' );
+	metadata.focal_length = getStringField( 'exif-ifd2-FocalLength' );
+	metadata.iso = getStringField( 'exif-ifd2-ISOSpeedRatings' );
+	metadata.shutter_speed = getStringField( 'exif-ifd2-ExposureTime' );
+
+	// Orientation
+	const orientationValue = getStringField( 'exif-ifd0-Orientation' );
+	if ( orientationValue ) {
+		metadata.orientation = orientationValue;
+	}
+
+	cleanup?.();
+
+	return metadata;
 }

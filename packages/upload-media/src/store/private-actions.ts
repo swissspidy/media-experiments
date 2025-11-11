@@ -41,6 +41,7 @@ import {
 	vipsConvertImageFormat,
 	vipsHasTransparency,
 	vipsResizeImage,
+	vipsExtractImageMetadata,
 } from './utils/vips';
 import {
 	compressImage as canvasCompressImage,
@@ -2155,6 +2156,72 @@ export function generateMetadata( id: QueueItemId ) {
 		const item = select.getItem( id ) as QueueItem;
 
 		const additionalData: AdditionalData = {};
+
+		// Extract EXIF metadata from images before processing
+		// This matches what WordPress core does with wp_read_image_metadata()
+		if (
+			item.file.type.startsWith( 'image/' ) &&
+			window.crossOriginIsolated
+		) {
+			try {
+				const imageMetadata =
+					await vipsExtractImageMetadata( item.sourceFile );
+
+				// Map extracted EXIF fields to additionalData
+				// Title and caption will be used by WordPress for attachment title/caption
+				if ( imageMetadata.title ) {
+					additionalData.title = imageMetadata.title;
+				}
+
+				if ( imageMetadata.caption ) {
+					additionalData.caption = imageMetadata.caption;
+				}
+
+				// Store all metadata in a nested object for potential future use
+				if (
+					imageMetadata.credit ||
+					imageMetadata.copyright ||
+					imageMetadata.created_timestamp ||
+					imageMetadata.camera ||
+					imageMetadata.aperture ||
+					imageMetadata.focal_length ||
+					imageMetadata.iso ||
+					imageMetadata.shutter_speed ||
+					imageMetadata.orientation
+				) {
+					additionalData.mexp_image_metadata = {
+						...( imageMetadata.credit && {
+							credit: imageMetadata.credit,
+						} ),
+						...( imageMetadata.copyright && {
+							copyright: imageMetadata.copyright,
+						} ),
+						...( imageMetadata.created_timestamp && {
+							created_timestamp: imageMetadata.created_timestamp,
+						} ),
+						...( imageMetadata.camera && {
+							camera: imageMetadata.camera,
+						} ),
+						...( imageMetadata.aperture && {
+							aperture: imageMetadata.aperture,
+						} ),
+						...( imageMetadata.focal_length && {
+							focal_length: imageMetadata.focal_length,
+						} ),
+						...( imageMetadata.iso && { iso: imageMetadata.iso } ),
+						...( imageMetadata.shutter_speed && {
+							shutter_speed: imageMetadata.shutter_speed,
+						} ),
+						...( imageMetadata.orientation && {
+							orientation: imageMetadata.orientation,
+						} ),
+					};
+				}
+			} catch ( error ) {
+				// If metadata extraction fails, continue without it
+				// This is not critical for the upload to succeed
+			}
+		}
 
 		if (
 			typeof additionalData.mexp_is_muted === 'undefined' &&

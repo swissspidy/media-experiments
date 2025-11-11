@@ -11,6 +11,23 @@ export interface ImageSizeCrop {
 }
 
 /**
+ * Image metadata extracted from EXIF, IPTC, and XMP data.
+ */
+export interface ImageMetadata {
+	title?: string;
+	caption?: string;
+	credit?: string;
+	copyright?: string;
+	created_timestamp?: string;
+	aperture?: string;
+	camera?: string;
+	focal_length?: string;
+	iso?: string;
+	shutter_speed?: string;
+	orientation?: string;
+}
+
+/**
  * none: Do nothing. Same as low.
  * centre: Just take the centre.
  * entropy: Use an entropy measure
