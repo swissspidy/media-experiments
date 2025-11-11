@@ -1362,7 +1362,9 @@ export function optimizeImageItem(
 		let hasTransparency: boolean | undefined;
 		if ( 'browser' === imageLibrary && window.crossOriginIsolated ) {
 			try {
-				hasTransparency = await vipsHasTransparencyFromFile( item.file );
+				hasTransparency = await vipsHasTransparencyFromFile(
+					item.file
+				);
 			} catch {
 				// If this fails, fall back to mime type check.
 				hasTransparency = undefined;
@@ -1854,7 +1856,9 @@ export function resizeCropItem( id: QueueItemId, args?: ResizeCropItemArgs ) {
 		let hasTransparency: boolean | undefined;
 		if ( 'browser' === imageLibrary && window.crossOriginIsolated ) {
 			try {
-				hasTransparency = await vipsHasTransparencyFromFile( item.file );
+				hasTransparency = await vipsHasTransparencyFromFile(
+					item.file
+				);
 			} catch {
 				// If this fails, fall back to mime type check.
 				hasTransparency = undefined;

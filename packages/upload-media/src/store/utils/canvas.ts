@@ -27,7 +27,11 @@ function getCanvasWorker() {
 	return canvasWorker;
 }
 
-export async function compressImage( file: File, quality = 0.82, hasTransparency?: boolean ) {
+export async function compressImage(
+	file: File,
+	quality = 0.82,
+	hasTransparency?: boolean
+) {
 	return new File(
 		[
 			new Blob(

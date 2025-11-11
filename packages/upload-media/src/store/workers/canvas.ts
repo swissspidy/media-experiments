@@ -21,7 +21,9 @@ export async function convertImageFormat(
 	const canvas = new OffscreenCanvas( width, height );
 
 	const ctx = canvas.getContext( '2d', {
-		alpha: hasTransparency ?? [ 'image/png', 'image/webp' ].includes( sourceType ),
+		alpha:
+			hasTransparency ??
+			[ 'image/png', 'image/webp' ].includes( sourceType ),
 	} );
 
 	// If the contextType doesn't match a possible drawing context,
@@ -46,7 +48,13 @@ export async function compressImage(
 	quality = 0.82,
 	hasTransparency?: boolean
 ) {
-	return convertImageFormat( buffer, sourceType, sourceType, quality, hasTransparency );
+	return convertImageFormat(
+		buffer,
+		sourceType,
+		sourceType,
+		quality,
+		hasTransparency
+	);
 }
 
 /**
@@ -174,7 +182,9 @@ export async function resizeImage(
 
 	const canvas = new OffscreenCanvas( expectedWidth, expectedHeight );
 	const ctx = canvas.getContext( '2d', {
-		alpha: hasTransparency ?? [ 'image/png', 'image/webp' ].includes( sourceType ),
+		alpha:
+			hasTransparency ??
+			[ 'image/png', 'image/webp' ].includes( sourceType ),
 	} );
 
 	// If the contextType doesn't match a possible drawing context,
