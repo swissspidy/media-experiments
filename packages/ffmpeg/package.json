@@ -1,14 +1,15 @@
 {
 	"name": "@mexp/ffmpeg",
 	"version": "0.0.1",
-	"description": "FFmpeg utils",
+	"description": "Media transcoding utils using Mediabunny",
 	"private": true,
 	"author": "",
 	"license": "GPL-2.0-or-later",
 	"keywords": [
 		"wordpress",
 		"media",
-		"ffmpeg"
+		"mediabunny",
+		"transcode"
 	],
 	"homepage": "https://github.com/swissspidy/media-experiments/tree/HEAD/packages/ffmpeg/README.md",
 	"repository": {
@@ -31,8 +32,7 @@
 	},
 	"types": "dist-types/index.d.ts",
 	"dependencies": {
-		"@ffmpeg/core": "^0.11.0",
-		"@ffmpeg/ffmpeg": "^0.11.6",
+		"mediabunny": "^1.24.6",
 		"uuid": "^11.1.0"
 	}
 }
