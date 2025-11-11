@@ -147,3 +147,61 @@ flowchart TD
 ## Web Workers
 
 All the heavy image processing is offloaded to web workers using the [`@shopify/web-worker`](https://www.npmjs.com/package/@shopify/web-worker) package, which makes it easy to load any code in a web worker in a type-safe way.
+
+## EXIF Metadata Handling
+
+WordPress core extracts EXIF, IPTC, and XMP metadata from uploaded images using the `wp_read_image_metadata()` function. This metadata is stored in the database and can be used to populate fields like title, caption, copyright, and more.
+
+However, when images are processed client-side, the metadata would normally be lost before WordPress can extract it. To address this, the plugin now extracts metadata **before** client-side processing:
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant E as Editor
+    participant V as Vips Worker
+    participant S as Server
+
+    U->>E: Uploads image with EXIF data
+    E->>V: Extract metadata from original file
+    V-->>E: Returns title, caption, copyright, etc.
+    
+    Note over E: Metadata saved to additionalData
+    
+    E->>V: Process image (compress/convert)
+    Note right of V: Metadata stripped during processing
+    V-->>E: Returns processed image
+    
+    E->>S: Upload processed image + metadata
+    Note right of S: WordPress stores metadata in database
+    S-->>E: Returns attachment with metadata
+```
+
+### How It Works
+
+1. **Extraction**: When an image is uploaded, the `extractImageMetadata()` function reads EXIF, IPTC, and XMP fields from the original file using wasm-vips
+2. **Storage**: Extracted fields (title, caption, copyright, credit, camera info, timestamps) are stored in `additionalData`
+3. **Processing**: Image is compressed/converted/resized, which strips metadata from the file
+4. **Upload**: Both the processed image and extracted metadata are sent to WordPress
+5. **Database**: WordPress stores the metadata in the database (title → `post_title`, caption → `post_excerpt`, etc.)
+
+### Extracted Fields
+
+The plugin extracts the same fields that WordPress core's `wp_read_image_metadata()` reads:
+
+- **Title**: EXIF ImageDescription, IPTC Headline, or XMP dc:Title
+- **Caption**: EXIF UserComment, IPTC Caption-Abstract, or XMP dc:Description
+- **Copyright**: EXIF Copyright, IPTC CopyrightNotice, or XMP dc:Rights
+- **Credit**: EXIF Artist, IPTC Credit, or XMP dc:Creator
+- **Created Timestamp**: EXIF DateTimeOriginal
+- **Camera Info**: Model, Aperture (FNumber), Focal Length, ISO, Shutter Speed (Exposure Time)
+- **Orientation**: EXIF Orientation
+
+### Privacy & Security
+
+By default, metadata is **stripped from the uploaded file** during processing. This is a deliberate security and privacy feature that:
+
+- Prevents leaking sensitive information (GPS coordinates, camera serial numbers, etc.)
+- Follows modern web best practices
+- Reduces file size
+
+The important metadata (title, caption, etc.) is preserved in WordPress's database where it can be properly managed and displayed.
