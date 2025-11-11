@@ -105,8 +105,13 @@ export async function getTextFromPdf( url: string ): Promise< string[] > {
 				}
 				return '';
 			} )
-			.join( ' ' );
-		texts.push( pageText );
+			.filter( ( str ) => str.trim().length > 0 )
+			.join( ' ' )
+			.trim();
+
+		if ( pageText.length > 0 ) {
+			texts.push( pageText );
+		}
 	}
 
 	return texts;

@@ -7,6 +7,7 @@ import { __ } from '@wordpress/i18n';
 import { createBlock } from '@wordpress/blocks';
 import { useDispatch } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
+import { store as noticesStore } from '@wordpress/notices';
 import { useState } from '@wordpress/element';
 
 /**
@@ -20,6 +21,8 @@ type FileControlsProps = FileBlock &
 export function FileControls( props: FileControlsProps ) {
 	const [ isConverting, setIsConverting ] = useState( false );
 	const { replaceBlocks } = useDispatch( blockEditorStore );
+	const { createErrorNotice, createSuccessNotice } =
+		useDispatch( noticesStore );
 
 	async function handleConvertToBlocks() {
 		if ( ! props.attributes.id || ! props.attributes.href ) {
@@ -36,21 +39,36 @@ export function FileControls( props: FileControlsProps ) {
 			const texts = await getTextFromPdf( props.attributes.href );
 
 			// Create paragraph blocks from the extracted text
-			const blocks = texts
-				.filter( ( text ) => text.trim().length > 0 )
-				.map( ( text ) => {
-					return createBlock( 'core/paragraph', {
-						content: text,
-					} );
+			const blocks = texts.map( ( text ) => {
+				return createBlock( 'core/paragraph', {
+					content: text,
 				} );
+			} );
 
 			if ( blocks.length > 0 ) {
 				// Replace the file block with the new paragraph blocks
 				replaceBlocks( props.clientId, blocks );
+				createSuccessNotice(
+					__( 'PDF converted to blocks', 'media-experiments' ),
+					{
+						type: 'snackbar',
+					}
+				);
+			} else {
+				createErrorNotice(
+					__( 'No text content found in PDF', 'media-experiments' ),
+					{
+						type: 'snackbar',
+					}
+				);
 			}
-		} catch ( error ) {
-			// eslint-disable-next-line no-console
-			console.error( 'Error converting PDF to blocks:', error );
+		} catch {
+			createErrorNotice(
+				__( 'Error converting PDF to blocks', 'media-experiments' ),
+				{
+					type: 'snackbar',
+				}
+			);
 		} finally {
 			setIsConverting( false );
 		}
