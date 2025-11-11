@@ -83,3 +83,31 @@ export async function getImageFromPdf(
 
 	return new File( [ blob ], `${ basename }.${ ext }`, { type: blob.type } );
 }
+
+/**
+ * Extracts text content from a PDF file.
+ *
+ * @param url PDF URL.
+ * @return Array of text strings, one per page.
+ */
+export async function getTextFromPdf( url: string ): Promise< string[] > {
+	const pdf = await getDocument( url ).promise;
+	const numPages = pdf.numPages;
+	const texts: string[] = [];
+
+	for ( let i = 1; i <= numPages; i++ ) {
+		const page = await pdf.getPage( i );
+		const textContent = await page.getTextContent();
+		const pageText = textContent.items
+			.map( ( item ) => {
+				if ( 'str' in item ) {
+					return item.str;
+				}
+				return '';
+			} )
+			.join( ' ' );
+		texts.push( pageText );
+	}
+
+	return texts;
+}
