@@ -2164,8 +2164,9 @@ export function generateMetadata( id: QueueItemId ) {
 			window.crossOriginIsolated
 		) {
 			try {
-				const imageMetadata =
-					await vipsExtractImageMetadata( item.sourceFile );
+				const imageMetadata = await vipsExtractImageMetadata(
+					item.sourceFile
+				);
 
 				// Map extracted EXIF fields to additionalData
 				// Title and caption will be used by WordPress for attachment title/caption
@@ -2189,6 +2190,7 @@ export function generateMetadata( id: QueueItemId ) {
 					imageMetadata.shutter_speed ||
 					imageMetadata.orientation
 				) {
+					/* eslint-disable camelcase */
 					additionalData.mexp_image_metadata = {
 						...( imageMetadata.credit && {
 							credit: imageMetadata.credit,
@@ -2216,8 +2218,9 @@ export function generateMetadata( id: QueueItemId ) {
 							orientation: imageMetadata.orientation,
 						} ),
 					};
+					/* eslint-enable camelcase */
 				}
-			} catch ( error ) {
+			} catch {
 				// If metadata extraction fails, continue without it
 				// This is not critical for the upload to succeed
 			}

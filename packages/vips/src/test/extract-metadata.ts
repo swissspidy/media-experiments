@@ -101,9 +101,7 @@ describe( 'extractImageMetadata', () => {
 		const metadata = await extractImageMetadata( buffer );
 
 		expect( metadata.caption ).toBe( 'Test image caption' );
-		expect( mockGetString ).toHaveBeenCalledWith(
-			'exif-ifd2-UserComment'
-		);
+		expect( mockGetString ).toHaveBeenCalledWith( 'exif-ifd2-UserComment' );
 	} );
 
 	it( 'extracts copyright information', async () => {

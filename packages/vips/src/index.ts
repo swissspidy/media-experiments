@@ -378,7 +378,7 @@ export async function extractImageMetadata(
 		try {
 			const value = image.getString( name );
 			return value && value.trim() !== '' ? value.trim() : undefined;
-		} catch ( error ) {
+		} catch {
 			// Field doesn't exist or isn't a string
 			return undefined;
 		}
@@ -409,13 +409,16 @@ export async function extractImageMetadata(
 		getStringField( 'xmp-dc-Creator' );
 
 	// Created timestamp
+	// eslint-disable-next-line camelcase
 	metadata.created_timestamp = getStringField( 'exif-ifd2-DateTimeOriginal' );
 
 	// Camera information
 	metadata.camera = getStringField( 'exif-ifd0-Model' );
 	metadata.aperture = getStringField( 'exif-ifd2-FNumber' );
+	// eslint-disable-next-line camelcase
 	metadata.focal_length = getStringField( 'exif-ifd2-FocalLength' );
 	metadata.iso = getStringField( 'exif-ifd2-ISOSpeedRatings' );
+	// eslint-disable-next-line camelcase
 	metadata.shutter_speed = getStringField( 'exif-ifd2-ExposureTime' );
 
 	// Orientation
