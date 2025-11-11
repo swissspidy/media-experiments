@@ -72,6 +72,8 @@ export function AudioControls( props: AudioControlsProps ) {
 					onInsert={ onInsertFromUploadRequest }
 					allowedTypes={ [ 'audio' ] }
 					accept={ [ 'audio/*' ] }
+					inline={ true }
+					clientId={ props.clientId }
 				/>
 			) : null }
 			{ ! props.attributes.id ? (

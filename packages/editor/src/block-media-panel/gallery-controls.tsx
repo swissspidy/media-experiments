@@ -49,6 +49,8 @@ export function GalleryControls( props: GalleryControlsProps ) {
 					allowedTypes={ [ 'image' ] }
 					accept={ [ 'image/*' ] }
 					multiple
+					inline={ true }
+					clientId={ props.clientId }
 				/>
 			) : null }
 		</>
