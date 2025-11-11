@@ -45,7 +45,7 @@ const UPLOAD_REQUEST_MAX_LIFETIME = 15 * 60; // Seconds.
 
 export function UploadRequestControls( props: UploadRequestControlsProps ) {
 	// Default to inline mode when clientId is provided and inline is not explicitly set
-	const inline = props.inline ?? ( props.clientId ? true : false );
+	const inline = props.inline ?? Boolean( props.clientId );
 
 	const { baseControlProps, controlProps } = useBaseControlProps( {
 		__nextHasNoMarginBottom: true,
@@ -71,9 +71,8 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 				? `media-experiments/upload-request-${ props.clientId }`
 				: 'media-experiments/upload-request';
 			return {
-				isModalActive: select( interfaceStore ).isModalActive(
-					modalName
-				),
+				isModalActive:
+					select( interfaceStore ).isModalActive( modalName ),
 				hasUploadPermissions: Boolean( getSettings().mediaUpload ),
 				currentPostId: select( editorStore ).getCurrentPostId(),
 				getEntityRecords: select( coreStore ).getEntityRecords,

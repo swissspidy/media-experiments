@@ -80,10 +80,7 @@ export function InlinePlaceholder( {
 							onFocus={ ( event ) => {
 								event.target.select();
 							} }
-							label={ __(
-								'Upload URL',
-								'media-experiments'
-							) }
+							label={ __( 'Upload URL', 'media-experiments' ) }
 							hideLabelFromVision
 						/>
 
@@ -92,13 +89,16 @@ export function InlinePlaceholder( {
 							ref={ copyRef }
 							icon={ copy }
 							showTooltip={ true }
-							label={ __( 'Copy to clipboard', 'media-experiments' ) }
+							label={ __(
+								'Copy to clipboard',
+								'media-experiments'
+							) }
 						/>
 					</div>
 
 					<Text className="mexp-upload-requests-placeholder__notice">
 						{ __(
-							'Waiting for upload... You can continue editing other parts of your post.',
+							'Waiting for upload… You can continue editing other parts of your post.',
 							'media-experiments'
 						) }
 					</Text>
