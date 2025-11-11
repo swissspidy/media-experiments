@@ -27,7 +27,7 @@ function getCanvasWorker() {
 	return canvasWorker;
 }
 
-export async function compressImage( file: File, quality = 0.82 ) {
+export async function compressImage( file: File, quality = 0.82, hasTransparency?: boolean ) {
 	return new File(
 		[
 			new Blob(
@@ -35,7 +35,8 @@ export async function compressImage( file: File, quality = 0.82 ) {
 					await getCanvasWorker().compressImage(
 						await file.arrayBuffer(),
 						file.type,
-						quality
+						quality,
+						hasTransparency
 					),
 				],
 				{ type: file.type }
@@ -49,7 +50,8 @@ export async function compressImage( file: File, quality = 0.82 ) {
 export async function convertImageFormat(
 	file: File,
 	mimeType: string,
-	quality = 0.82
+	quality = 0.82,
+	hasTransparency?: boolean
 ) {
 	return new File(
 		[
@@ -59,7 +61,8 @@ export async function convertImageFormat(
 						await file.arrayBuffer(),
 						file.type,
 						mimeType,
-						quality
+						quality,
+						hasTransparency
 					),
 				],
 				{ type: mimeType }
@@ -73,12 +76,14 @@ export async function convertImageFormat(
 export async function resizeImage(
 	file: File,
 	resize: ImageSizeCrop,
-	addSuffix: boolean
+	addSuffix: boolean,
+	hasTransparency?: boolean
 ) {
 	const result = await getCanvasWorker().resizeImage(
 		await file.arrayBuffer(),
 		file.type,
-		resize
+		resize,
+		hasTransparency
 	);
 	const basename = getFileBasename( file.name );
 	const ext = file.type.split( '/' )[ 1 ];

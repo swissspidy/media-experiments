@@ -40,6 +40,7 @@ import {
 	vipsCompressImage,
 	vipsConvertImageFormat,
 	vipsHasTransparency,
+	vipsHasTransparencyFromFile,
 	vipsResizeImage,
 } from './utils/vips';
 import {
@@ -1356,6 +1357,18 @@ export function optimizeImageItem(
 			imageLibrary = 'vips';
 		}
 
+		// Check for transparency early when using browser-based canvas processing.
+		// This ensures the canvas context is created with the correct alpha setting.
+		let hasTransparency: boolean | undefined;
+		if ( 'browser' === imageLibrary && window.crossOriginIsolated ) {
+			try {
+				hasTransparency = await vipsHasTransparencyFromFile( item.file );
+			} catch {
+				// If this fails, fall back to mime type check.
+				hasTransparency = undefined;
+			}
+		}
+
 		try {
 			let file: File;
 
@@ -1369,7 +1382,8 @@ export function optimizeImageItem(
 					if ( 'browser' === imageLibrary ) {
 						file = await canvasCompressImage(
 							item.file,
-							outputQuality / 100
+							outputQuality / 100,
+							hasTransparency
 						);
 					} else {
 						file = await vipsCompressImage(
@@ -1386,7 +1400,8 @@ export function optimizeImageItem(
 						file = await canvasConvertImageFormat(
 							item.file,
 							'image/webp',
-							outputQuality / 100
+							outputQuality / 100,
+							hasTransparency
 						);
 					} else {
 						file = await vipsConvertImageFormat(
@@ -1427,7 +1442,8 @@ export function optimizeImageItem(
 						file = await canvasConvertImageFormat(
 							item.file,
 							`image/${ outputFormat }`,
-							outputQuality / 100
+							outputQuality / 100,
+							hasTransparency
 						);
 					} else {
 						file = await vipsConvertImageFormat(
@@ -1833,6 +1849,18 @@ export function resizeCropItem( id: QueueItemId, args?: ResizeCropItemArgs ) {
 			`Resize Item: ${ item.file.name } | ${ imageLibrary } | ${ thumbnailGeneration } | ${ args.resize.width }x${ args.resize.height }`
 		);
 
+		// Check for transparency early when using browser-based canvas processing.
+		// This ensures the canvas context is created with the correct alpha setting.
+		let hasTransparency: boolean | undefined;
+		if ( 'browser' === imageLibrary && window.crossOriginIsolated ) {
+			try {
+				hasTransparency = await vipsHasTransparencyFromFile( item.file );
+			} catch {
+				// If this fails, fall back to mime type check.
+				hasTransparency = undefined;
+			}
+		}
+
 		try {
 			let file: File;
 
@@ -1847,7 +1875,8 @@ export function resizeCropItem( id: QueueItemId, args?: ResizeCropItemArgs ) {
 				file = await canvasResizeImage(
 					item.file,
 					args.resize,
-					addSuffix
+					addSuffix,
+					hasTransparency
 				);
 			} else {
 				file = await vipsResizeImage(
