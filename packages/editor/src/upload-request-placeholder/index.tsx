@@ -23,6 +23,12 @@ const SUPPORTED_BLOCKS = [
 	'core/gallery',
 ];
 
+/**
+ * Higher-order component that adds upload request placeholder to blocks.
+ *
+ * When an upload request is active for a block, this replaces the block's
+ * content with an inline placeholder showing the QR code and upload URL.
+ */
 const addUploadRequestPlaceholder = createHigherOrderComponent(
 	( BlockEdit ) => ( props: MediaPanelProps ) => {
 		const isInUploadMode = useSelect(
