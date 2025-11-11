@@ -93,7 +93,6 @@ export function VideoControls( props: VideoControlsProps ) {
 					onInsert={ onInsertFromUploadRequest }
 					allowedTypes={ [ 'video' ] }
 					accept={ [ 'video/*' ] }
-					inline={ true }
 					clientId={ props.clientId }
 				/>
 			) : null }

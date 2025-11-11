@@ -44,6 +44,9 @@ const UPLOAD_REQUEST_CHECK_INTERVAL = 5; // Seconds.
 const UPLOAD_REQUEST_MAX_LIFETIME = 15 * 60; // Seconds.
 
 export function UploadRequestControls( props: UploadRequestControlsProps ) {
+	// Default to inline mode when clientId is provided and inline is not explicitly set
+	const inline = props.inline ?? ( props.clientId ? true : false );
+
 	const { baseControlProps, controlProps } = useBaseControlProps( {
 		__nextHasNoMarginBottom: true,
 	} );
@@ -64,7 +67,7 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 	} = useSelect(
 		( select ) => {
 			const { getSettings } = select( blockEditorStore );
-			const modalName = props.inline
+			const modalName = inline
 				? `media-experiments/upload-request-${ props.clientId }`
 				: 'media-experiments/upload-request';
 			return {
@@ -76,7 +79,7 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 				getEntityRecords: select( coreStore ).getEntityRecords,
 			};
 		},
-		[ props.inline, props.clientId ]
+		[ inline, props.clientId ]
 	);
 
 	const [ uploadRequest, setUploadRequest ] = useState< Post | null >( null );
@@ -212,7 +215,7 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 	async function onClick() {
 		try {
 			await createNewUploadRequest();
-			const modalName = props.inline
+			const modalName = inline
 				? `media-experiments/upload-request-${ props.clientId }`
 				: 'media-experiments/upload-request';
 			void openModal( modalName );
@@ -241,7 +244,7 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 	}
 
 	// Inline mode - show placeholder in the block
-	if ( props.inline ) {
+	if ( inline ) {
 		if ( isModalActive && uploadRequest ) {
 			return (
 				<InlinePlaceholder

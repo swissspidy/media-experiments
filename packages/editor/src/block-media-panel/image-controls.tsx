@@ -98,7 +98,6 @@ export function ImageControls( props: ImageControlsProps ) {
 					onInsert={ onInsertFromUploadRequest }
 					allowedTypes={ [ 'image' ] }
 					accept={ [ 'image/*' ] }
-					inline={ true }
 					clientId={ props.clientId }
 				/>
 			) : null }
