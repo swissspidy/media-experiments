@@ -458,3 +458,35 @@ export function isImageTypeSupported(
 		'image/webp',
 	].includes( type );
 }
+
+/**
+ * Preloads an image or video resource before using it.
+ *
+ * This helps prevent flickering when swapping URLs (e.g., from blob URL to final URL)
+ * by ensuring the new resource is fully loaded before the DOM is updated.
+ *
+ * @param url  URL of the image or video to preload.
+ * @param type Type of resource: 'image' or 'video'.
+ * @return Promise that resolves when the resource is loaded.
+ */
+export async function preloadMedia(
+	url: string,
+	type: 'image' | 'video'
+): Promise< void > {
+	return new Promise( ( resolve, reject ) => {
+		if ( type === 'image' ) {
+			const img = new Image();
+			img.onload = () => resolve();
+			img.onerror = () =>
+				reject( new Error( 'Failed to preload image' ) );
+			img.src = url;
+		} else {
+			const video = document.createElement( 'video' );
+			video.onloadeddata = () => resolve();
+			video.onerror = () =>
+				reject( new Error( 'Failed to preload video' ) );
+			video.src = url;
+			video.load();
+		}
+	} );
+}
