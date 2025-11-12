@@ -202,4 +202,109 @@ describe( 'extractImageMetadata', () => {
 
 		expect( metadata.title ).toBeUndefined();
 	} );
+
+	it( 'extracts GPS coordinates', async () => {
+		mockGetString.mockImplementation( ( name: string ) => {
+			const fields: Record< string, string > = {
+				'exif-ifd2-GPSLatitude': '51, 30, 0',
+				'exif-ifd2-GPSLatitudeRef': 'N',
+				'exif-ifd2-GPSLongitude': '0, 7, 30',
+				'exif-ifd2-GPSLongitudeRef': 'W',
+			};
+			if ( name in fields ) {
+				return fields[ name ];
+			}
+			throw new Error( 'Field not found' );
+		} );
+
+		const jpegFile = new File( [ '<BLOB>' ], 'example.jpg', {
+			type: 'image/jpeg',
+		} );
+		const buffer = await jpegFile.arrayBuffer();
+
+		const metadata = await extractImageMetadata( buffer );
+
+		// 51°30'0"N = 51.5°N
+		expect( metadata.latitude ).toBeCloseTo( 51.5, 4 );
+		// 0°7'30"W = -0.125°
+		expect( metadata.longitude ).toBeCloseTo( -0.125, 4 );
+	} );
+
+	it( 'handles GPS coordinates with fractions', async () => {
+		mockGetString.mockImplementation( ( name: string ) => {
+			const fields: Record< string, string > = {
+				'exif-ifd2-GPSLatitude': '37/1, 46/1, 30/1',
+				'exif-ifd2-GPSLatitudeRef': 'N',
+				'exif-ifd2-GPSLongitude': '122/1, 25/1, 15/1',
+				'exif-ifd2-GPSLongitudeRef': 'W',
+			};
+			if ( name in fields ) {
+				return fields[ name ];
+			}
+			throw new Error( 'Field not found' );
+		} );
+
+		const jpegFile = new File( [ '<BLOB>' ], 'example.jpg', {
+			type: 'image/jpeg',
+		} );
+		const buffer = await jpegFile.arrayBuffer();
+
+		const metadata = await extractImageMetadata( buffer );
+
+		// 37°46'30"N = 37.775°N
+		expect( metadata.latitude ).toBeCloseTo( 37.775, 3 );
+		// 122°25'15"W = -122.420833°
+		expect( metadata.longitude ).toBeCloseTo( -122.420833, 4 );
+	} );
+
+	it( 'handles southern and eastern hemispheres', async () => {
+		mockGetString.mockImplementation( ( name: string ) => {
+			const fields: Record< string, string > = {
+				'exif-ifd2-GPSLatitude': '33, 52, 0',
+				'exif-ifd2-GPSLatitudeRef': 'S',
+				'exif-ifd2-GPSLongitude': '151, 12, 0',
+				'exif-ifd2-GPSLongitudeRef': 'E',
+			};
+			if ( name in fields ) {
+				return fields[ name ];
+			}
+			throw new Error( 'Field not found' );
+		} );
+
+		const jpegFile = new File( [ '<BLOB>' ], 'example.jpg', {
+			type: 'image/jpeg',
+		} );
+		const buffer = await jpegFile.arrayBuffer();
+
+		const metadata = await extractImageMetadata( buffer );
+
+		// 33°52'0"S = -33.866667°
+		expect( metadata.latitude ).toBeCloseTo( -33.866667, 4 );
+		// 151°12'0"E = 151.2°
+		expect( metadata.longitude ).toBeCloseTo( 151.2, 4 );
+	} );
+
+	it( 'does not extract GPS when data is incomplete', async () => {
+		mockGetString.mockImplementation( ( name: string ) => {
+			const fields: Record< string, string > = {
+				'exif-ifd2-GPSLatitude': '51, 30, 0',
+				'exif-ifd2-GPSLatitudeRef': 'N',
+				// Missing longitude data
+			};
+			if ( name in fields ) {
+				return fields[ name ];
+			}
+			throw new Error( 'Field not found' );
+		} );
+
+		const jpegFile = new File( [ '<BLOB>' ], 'example.jpg', {
+			type: 'image/jpeg',
+		} );
+		const buffer = await jpegFile.arrayBuffer();
+
+		const metadata = await extractImageMetadata( buffer );
+
+		expect( metadata.latitude ).toBeUndefined();
+		expect( metadata.longitude ).toBeUndefined();
+	} );
 } );

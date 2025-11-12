@@ -427,7 +427,88 @@ export async function extractImageMetadata(
 		metadata.orientation = orientationValue;
 	}
 
+	// GPS coordinates
+	// GPS data is stored in EXIF as degrees, minutes, seconds
+	// We need to convert to decimal degrees
+	try {
+		const gpsLatitude = image.getString( 'exif-ifd2-GPSLatitude' );
+		const gpsLatitudeRef = image.getString( 'exif-ifd2-GPSLatitudeRef' );
+		const gpsLongitude = image.getString( 'exif-ifd2-GPSLongitude' );
+		const gpsLongitudeRef = image.getString( 'exif-ifd2-GPSLongitudeRef' );
+
+		if (
+			gpsLatitude &&
+			gpsLatitudeRef &&
+			gpsLongitude &&
+			gpsLongitudeRef
+		) {
+			// Convert GPS coordinates from DMS to decimal degrees
+			const latDecimal = parseGPSCoordinate(
+				gpsLatitude,
+				gpsLatitudeRef
+			);
+			const lonDecimal = parseGPSCoordinate(
+				gpsLongitude,
+				gpsLongitudeRef
+			);
+
+			if ( latDecimal !== null && lonDecimal !== null ) {
+				metadata.latitude = latDecimal;
+				metadata.longitude = lonDecimal;
+			}
+		}
+	} catch {
+		// GPS data not available or parsing failed
+	}
+
 	cleanup?.();
 
 	return metadata;
+}
+
+/**
+ * Converts GPS coordinates from degrees/minutes/seconds format to decimal degrees.
+ *
+ * EXIF GPS data is stored as "degrees, minutes, seconds" (e.g., "51, 30, 0").
+ * Reference is "N", "S", "E", or "W".
+ *
+ * @param coordinate GPS coordinate string (e.g., "51, 30, 0").
+ * @param ref        Reference direction ("N", "S", "E", or "W").
+ * @return Decimal degrees or null if parsing fails.
+ */
+function parseGPSCoordinate( coordinate: string, ref: string ): number | null {
+	try {
+		// Split the coordinate string (format: "degrees, minutes, seconds")
+		const parts = coordinate.split( ',' ).map( ( part ) => {
+			const trimmed = part.trim();
+			// Handle fractions (e.g., "30/1")
+			if ( trimmed.includes( '/' ) ) {
+				const [ numerator, denominator ] = trimmed
+					.split( '/' )
+					.map( Number );
+				return denominator !== 0 ? numerator / denominator : 0;
+			}
+			return parseFloat( trimmed );
+		} );
+
+		if ( parts.length < 2 || parts.some( isNaN ) ) {
+			return null;
+		}
+
+		const degrees = parts[ 0 ];
+		const minutes = parts[ 1 ] || 0;
+		const seconds = parts[ 2 ] || 0;
+
+		// Convert to decimal degrees
+		let decimal = degrees + minutes / 60 + seconds / 3600;
+
+		// Apply sign based on hemisphere
+		if ( ref === 'S' || ref === 'W' ) {
+			decimal = -decimal;
+		}
+
+		return decimal;
+	} catch {
+		return null;
+	}
 }

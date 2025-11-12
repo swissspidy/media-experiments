@@ -179,14 +179,14 @@ sequenceDiagram
 ### How It Works
 
 1. **Extraction**: When an image is uploaded, the `extractImageMetadata()` function reads EXIF, IPTC, and XMP fields from the original file using wasm-vips
-2. **Storage**: Extracted fields (title, caption, copyright, credit, camera info, timestamps) are stored in `additionalData`
+2. **Storage**: Extracted fields (title, caption, copyright, credit, camera info, GPS coordinates, timestamps) are stored in `additionalData`
 3. **Processing**: Image is compressed/converted/resized, which strips metadata from the file
 4. **Upload**: Both the processed image and extracted metadata are sent to WordPress
 5. **Database**: WordPress stores the metadata in the database (title → `post_title`, caption → `post_excerpt`, etc.)
 
 ### Extracted Fields
 
-The plugin extracts the same fields that WordPress core's `wp_read_image_metadata()` reads:
+The plugin extracts the same fields that WordPress core's `wp_read_image_metadata()` reads, plus GPS coordinates:
 
 - **Title**: EXIF ImageDescription, IPTC Headline, or XMP dc:Title
 - **Caption**: EXIF UserComment, IPTC Caption-Abstract, or XMP dc:Description
@@ -195,6 +195,7 @@ The plugin extracts the same fields that WordPress core's `wp_read_image_metadat
 - **Created Timestamp**: EXIF DateTimeOriginal
 - **Camera Info**: Model, Aperture (FNumber), Focal Length, ISO, Shutter Speed (Exposure Time)
 - **Orientation**: EXIF Orientation
+- **GPS Coordinates**: Latitude and Longitude (converted from EXIF GPS DMS format to decimal degrees)
 
 ### Privacy & Security
 

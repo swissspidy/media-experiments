@@ -25,6 +25,8 @@ export interface ImageMetadata {
 	iso?: string;
 	shutter_speed?: string;
 	orientation?: string;
+	latitude?: number;
+	longitude?: number;
 }
 
 /**
