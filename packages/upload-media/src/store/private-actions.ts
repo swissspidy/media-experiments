@@ -876,10 +876,16 @@ export function prepareItem( id: QueueItemId ) {
 
 				let uploadOriginalImage = false;
 
+				const supportsHeicOnServer = select.getSettings().supportsHeic;
+
 				if ( convertUnsafe ) {
 					if ( isHeif ) {
-						operations.push( OperationType.TranscodeHeif );
-						uploadOriginalImage = true;
+						// If server supports HEIC, upload the file directly and let the server handle conversion.
+						// Otherwise, do client-side conversion.
+						if ( ! supportsHeicOnServer ) {
+							operations.push( OperationType.TranscodeHeif );
+							uploadOriginalImage = true;
+						}
 					} else if ( ! isWebSafe ) {
 						operations.push( [
 							OperationType.TranscodeImage,
