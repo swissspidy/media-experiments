@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import type { ImageSegmenterResult } from '@mediapipe/tasks-vision';
-
-/**
  * Internal dependencies
  */
 import { BACKGROUND_BLUR_PX } from './constants';
@@ -143,11 +138,15 @@ export function getMediaStream() {
 					`${ MEDIAPIPE_CDN_URL }/wasm`
 				);
 
+				// Use the selfie segmentation model from MediaPipe solutions
+				const modelAssetPath =
+					'https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/latest/selfie_segmenter.tflite';
+
 				const imageSegmenter = await ImageSegmenter.createFromOptions(
 					vision,
 					{
 						baseOptions: {
-							modelAssetPath: `${ MEDIAPIPE_CDN_URL }/image_segmenter.tflite`,
+							modelAssetPath,
 							delegate: 'GPU',
 						},
 						runningMode: 'VIDEO',
