@@ -877,6 +877,7 @@ export function prepareItem( id: QueueItemId ) {
 				let uploadOriginalImage = false;
 
 				const supportsHeicOnServer = select.getSettings().supportsHeic;
+				const serverWillConvertHeic = isHeif && convertUnsafe && supportsHeicOnServer;
 
 				if ( convertUnsafe ) {
 					if ( isHeif ) {
@@ -898,6 +899,27 @@ export function prepareItem( id: QueueItemId ) {
 						uploadOriginalImage = true;
 						optimizeOnUpload = false;
 					}
+				}
+
+				// For HEIC files that will be converted server-side,
+				// upload first, then do all processing on the converted file.
+				if ( serverWillConvertHeic ) {
+					operations.push( OperationType.Upload );
+					
+					operations.push( OperationType.GenerateMetadata );
+
+					const useAi: boolean = registry
+						.select( preferencesStore )
+						.get( PREFERENCES_NAME, 'useAi' );
+
+					if ( useAi ) {
+						operations.push( OperationType.GenerateCaptions );
+					}
+
+					operations.push( OperationType.ThumbnailGeneration );
+
+					// Done with server-side HEIC conversion flow.
+					break;
 				}
 
 				const imageSizeThreshold: number = registry
@@ -1944,6 +1966,32 @@ export function uploadItem( id: QueueItemId ) {
 							blobUrl: attachment.poster,
 						} );
 					}
+				}
+
+				// If this was a HEIC file uploaded to a server that supports HEIC conversion,
+				// we need to fetch the converted JPEG file back to use for thumbnail generation.
+				const isHeicFile = item.sourceFile.type === 'image/heic' || item.sourceFile.type === 'image/heif';
+				const supportsHeicOnServer = select.getSettings().supportsHeic;
+				
+				if ( isHeicFile && supportsHeicOnServer && attachment.url ) {
+					// Add a FetchRemoteFile operation to get the converted JPEG.
+					// This will update item.file to the converted file so thumbnails can be generated.
+					const fileName = attachment.mexp_filename || item.sourceFile.name;
+					
+					dispatch< AddOperationsAction >( {
+						type: Type.AddOperations,
+						id,
+						operations: [
+							[
+								OperationType.FetchRemoteFile,
+								{
+									url: attachment.url,
+									fileName,
+									skipAttachment: true,
+								},
+							],
+						],
+					} );
 				}
 
 				dispatch.finishOperation( id, {
