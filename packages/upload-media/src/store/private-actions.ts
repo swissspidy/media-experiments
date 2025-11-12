@@ -1320,9 +1320,8 @@ async function findBestImageFormat(
 	imageLibrary: ImageLibrary,
 	interlaced: boolean
 ): Promise< FormatComparisonResult > {
-	const results: FormatComparisonResult[] = [];
-
-	for ( const format of formats ) {
+	// Convert all formats in parallel for better performance
+	const conversionPromises = formats.map( async ( format ) => {
 		try {
 			let convertedFile: File;
 			const mimeType = `image/${ format }` as
@@ -1362,11 +1361,11 @@ async function findBestImageFormat(
 				);
 			}
 
-			results.push( {
+			return {
 				format,
 				file: convertedFile,
 				size: convertedFile.size,
-			} );
+			};
 		} catch ( error ) {
 			// If conversion fails for a format, skip it
 			// eslint-disable-next-line no-console -- Deliberately log errors here.
@@ -1374,8 +1373,13 @@ async function findBestImageFormat(
 				`Failed to convert to ${ format }:`,
 				error instanceof Error ? error.message : error
 			);
+			return null;
 		}
-	}
+	} );
+
+	const results = ( await Promise.all( conversionPromises ) ).filter(
+		( result ): result is FormatComparisonResult => result !== null
+	);
 
 	// If no conversions succeeded, throw an error
 	if ( results.length === 0 ) {
