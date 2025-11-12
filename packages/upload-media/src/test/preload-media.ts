@@ -5,7 +5,6 @@ import { preloadMedia } from '../utils';
 
 // Mock the Image constructor
 const mockImageLoadTrigger = jest.fn();
-const mockImageErrorTrigger = jest.fn();
 
 global.Image = class {
 	onload: ( () => void ) | null = null;
@@ -28,7 +27,6 @@ global.Image = class {
 
 // Mock the document.createElement for video elements
 const mockVideoLoadTrigger = jest.fn();
-const mockVideoErrorTrigger = jest.fn();
 
 const originalCreateElement = document.createElement.bind( document );
 document.createElement = jest.fn( ( tagName: string ) => {
@@ -57,9 +55,7 @@ document.createElement = jest.fn( ( tagName: string ) => {
 describe( 'preloadMedia', () => {
 	beforeEach( () => {
 		mockImageLoadTrigger.mockReset();
-		mockImageErrorTrigger.mockReset();
 		mockVideoLoadTrigger.mockReset();
-		mockVideoErrorTrigger.mockReset();
 	} );
 
 	it( 'should preload an image successfully', async () => {

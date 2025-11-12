@@ -476,15 +476,29 @@ export async function preloadMedia(
 	return new Promise( ( resolve, reject ) => {
 		if ( type === 'image' ) {
 			const img = new Image();
-			img.onload = () => resolve();
-			img.onerror = () =>
+			img.onload = () => {
+				img.onload = null;
+				img.onerror = null;
+				resolve();
+			};
+			img.onerror = () => {
+				img.onload = null;
+				img.onerror = null;
 				reject( new Error( 'Failed to preload image' ) );
+			};
 			img.src = url;
 		} else {
 			const video = document.createElement( 'video' );
-			video.onloadeddata = () => resolve();
-			video.onerror = () =>
+			video.onloadeddata = () => {
+				video.onloadeddata = null;
+				video.onerror = null;
+				resolve();
+			};
+			video.onerror = () => {
+				video.onloadeddata = null;
+				video.onerror = null;
 				reject( new Error( 'Failed to preload video' ) );
+			};
 			video.src = url;
 			video.load();
 		}
