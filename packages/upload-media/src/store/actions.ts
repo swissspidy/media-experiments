@@ -54,6 +54,7 @@ type ActionCreators = {
 	cancelItem: typeof cancelItem;
 	rejectApproval: typeof rejectApproval;
 	grantApproval: typeof grantApproval;
+	reoptimizeItem: typeof reoptimizeItem;
 	muteExistingVideo: typeof muteExistingVideo;
 	addSubtitlesForExistingVideo: typeof addSubtitlesForExistingVideo;
 	addPosterForExistingVideo: typeof addPosterForExistingVideo;
@@ -557,6 +558,29 @@ export function grantApproval( id: number ) {
 		} );
 
 		dispatch.processItem( item.id );
+	};
+}
+
+/**
+ * Re-optimizes an item that is pending approval with a new quality setting.
+ *
+ * @param id            Item ID.
+ * @param outputQuality New quality setting (1-100).
+ */
+export function reoptimizeItem(
+	id: QueueItemId,
+	{ outputQuality }: { outputQuality: number }
+) {
+	return async ( { select, dispatch }: ThunkArgs ) => {
+		const item = select.getItem( id );
+		if ( ! item || ! item.sourceFile ) {
+			return;
+		}
+
+		// Re-run the optimization with the new quality setting.
+		await dispatch.optimizeImageItem( id, {
+			outputQuality,
+		} );
 	};
 }
 

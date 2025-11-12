@@ -11,9 +11,14 @@ import { store as uploadStore } from '@mexp/upload-media';
 /**
  * WordPress dependencies
  */
-import { Button, Modal } from '@wordpress/components';
+import {
+	Button,
+	Modal,
+	RangeControl,
+	ToggleControl,
+} from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
-import { createInterpolateElement, useState } from '@wordpress/element';
+import { createInterpolateElement, useCallback, useState } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEntityRecord } from '@wordpress/core-data';
 
@@ -48,7 +53,7 @@ export function ApprovalDialog( { id }: ApprovalDialogProps ) {
 		'attachment',
 		id
 	);
-	const { isPendingApproval, comparison } = useSelect(
+	const { isPendingApproval, comparison, item } = useSelect(
 		( select ) => ( {
 			// This allows showing only one approval modal at a time if there
 			// are multiple pending items.
@@ -58,12 +63,22 @@ export function ApprovalDialog( { id }: ApprovalDialogProps ) {
 			comparison: id
 				? select( uploadStore ).getComparisonDataForApproval( id )
 				: null,
+			item: id
+				? select( uploadStore ).getItemByAttachmentId( id )
+				: null,
 		} ),
 		[ id ]
 	);
 
-	const { rejectApproval, grantApproval } = useDispatch( uploadStore );
+	const { rejectApproval, grantApproval, reoptimizeItem } =
+		useDispatch( uploadStore );
 	const [ , setOpen ] = useState( false );
+	const [ showAdvanced, setShowAdvanced ] = useState( false );
+	const [ quality, setQuality ] = useState(
+		comparison?.currentQuality || 82
+	);
+	const [ isReoptimizing, setIsReoptimizing ] = useState( false );
+
 	const closeModal = () => setOpen( false );
 	const onApprove = () => {
 		closeModal();
@@ -74,6 +89,26 @@ export function ApprovalDialog( { id }: ApprovalDialogProps ) {
 		closeModal();
 		void rejectApproval( id );
 	};
+
+	const handleQualityChange = useCallback(
+		async ( newQuality: number | undefined ) => {
+			if ( ! newQuality || ! item || isReoptimizing ) {
+				return;
+			}
+
+			setQuality( newQuality );
+			setIsReoptimizing( true );
+
+			try {
+				await reoptimizeItem( item.id, {
+					outputQuality: newQuality,
+				} );
+			} finally {
+				setIsReoptimizing( false );
+			}
+		},
+		[ item, reoptimizeItem, isReoptimizing ]
+	);
 
 	if ( ! post || ! isPendingApproval || ! comparison ) {
 		return null;
@@ -146,6 +181,39 @@ export function ApprovalDialog( { id }: ApprovalDialogProps ) {
 						/>
 					}
 				/>
+			</div>
+			<div className="mexp-comparison-modal__advanced">
+				<ToggleControl
+					__nextHasNoMarginBottom
+					label={ __( 'Advanced options', 'media-experiments' ) }
+					checked={ showAdvanced }
+					onChange={ setShowAdvanced }
+				/>
+				{ showAdvanced && (
+					<div className="mexp-comparison-modal__quality-control">
+						<RangeControl
+							__nextHasNoMarginBottom
+							label={ __( 'Quality', 'media-experiments' ) }
+							value={ quality }
+							onChange={ handleQualityChange }
+							min={ 1 }
+							max={ 100 }
+							disabled={ isReoptimizing }
+							help={ __(
+								'Adjust the quality to find the best balance between file size and visual fidelity.',
+								'media-experiments'
+							) }
+						/>
+						{ isReoptimizing && (
+							<p className="mexp-comparison-modal__reoptimizing-notice">
+								{ __(
+									'Reoptimizing image...',
+									'media-experiments'
+								) }
+							</p>
+						) }
+					</div>
+				) }
 			</div>
 			<div className="mexp-comparison-modal__buttons">
 				<Button variant="secondary" onClick={ onReject }>

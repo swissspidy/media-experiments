@@ -71,6 +71,7 @@ export function getComparisonDataForApproval(
 	newSize: number;
 	newUrl: string | undefined;
 	sizeDiff: number;
+	currentQuality: number;
 } | null {
 	const foundItem = state.queue.find(
 		( item ) =>
@@ -83,12 +84,17 @@ export function getComparisonDataForApproval(
 		return null;
 	}
 
+	// Default quality - this will be the initial value for the slider
+	// The actual quality used may vary, but 82 is a common default
+	const currentQuality = 82;
+
 	return {
 		oldUrl: foundItem.sourceUrl,
 		oldSize: foundItem.sourceFile.size,
 		newSize: foundItem.file.size,
 		newUrl: foundItem.attachment?.url,
 		sizeDiff: foundItem.file.size / foundItem.sourceFile.size - 1,
+		currentQuality,
 	};
 }
 
