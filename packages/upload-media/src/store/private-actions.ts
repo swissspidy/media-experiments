@@ -1295,6 +1295,99 @@ export function uploadOriginal( id: QueueItemId, args?: UploadOriginalArgs ) {
 
 type OptimizeImageItemArgs = OperationArgs[ OperationType.TranscodeImage ];
 
+interface FormatComparisonResult {
+	format: ImageFormat;
+	file: File;
+	size: number;
+}
+
+/**
+ * Tries converting an image to multiple formats and returns the best one based on file size.
+ *
+ * @param id            Item ID.
+ * @param file          The image file to convert.
+ * @param formats       Array of formats to try.
+ * @param quality       Output quality (0-1).
+ * @param imageLibrary  Image library to use (browser or vips).
+ * @param interlaced    Whether to use interlaced encoding.
+ * @return The best format result.
+ */
+async function findBestImageFormat(
+	id: QueueItemId,
+	file: File,
+	formats: ImageFormat[],
+	quality: number,
+	imageLibrary: ImageLibrary,
+	interlaced: boolean
+): Promise< FormatComparisonResult > {
+	const results: FormatComparisonResult[] = [];
+
+	for ( const format of formats ) {
+		try {
+			let convertedFile: File;
+			const mimeType = `image/${ format }` as
+				| 'image/jpeg'
+				| 'image/png'
+				| 'image/webp'
+				| 'image/avif'
+				| 'image/gif';
+
+			// Convert to the target format
+			if (
+				format === 'avif' ||
+				format === 'gif' ||
+				( format === 'webp' && isSafari )
+			) {
+				// AVIF, GIF, and WebP on Safari require vips
+				convertedFile = await vipsConvertImageFormat(
+					id,
+					file,
+					mimeType,
+					quality,
+					interlaced
+				);
+			} else if ( 'browser' === imageLibrary ) {
+				convertedFile = await canvasConvertImageFormat(
+					file,
+					mimeType,
+					quality
+				);
+			} else {
+				convertedFile = await vipsConvertImageFormat(
+					id,
+					file,
+					mimeType,
+					quality,
+					interlaced
+				);
+			}
+
+			results.push( {
+				format,
+				file: convertedFile,
+				size: convertedFile.size,
+			} );
+		} catch ( error ) {
+			// If conversion fails for a format, skip it
+			// eslint-disable-next-line no-console -- Deliberately log errors here.
+			console.warn(
+				`Failed to convert to ${ format }:`,
+				error instanceof Error ? error.message : error
+			);
+		}
+	}
+
+	// If no conversions succeeded, throw an error
+	if ( results.length === 0 ) {
+		throw new Error( 'All format conversions failed' );
+	}
+
+	// Find the format with the smallest file size
+	results.sort( ( a, b ) => a.size - b.size );
+
+	return results[ 0 ];
+}
+
 /**
  * Optimizes/Compresses an existing image item.
  *
@@ -1314,7 +1407,13 @@ export function optimizeImageItem(
 
 		let stop: undefined | ( () => void );
 
-		const outputFormat: ImageFormat =
+		// Check if automatic format selection is enabled
+		const autoSelectFormat: boolean =
+			registry
+				.select( preferencesStore )
+				.get( PREFERENCES_NAME, 'image_autoSelectFormat' ) || false;
+
+		let outputFormat: ImageFormat =
 			args?.outputFormat ||
 			registry
 				.select( preferencesStore )
@@ -1359,85 +1458,116 @@ export function optimizeImageItem(
 		try {
 			let file: File;
 
-			stop = start(
-				`Optimize Item: ${ item.file.name } | ${ imageLibrary } | ${ inputFormat } | ${ outputFormat } | ${ outputQuality }`
-			);
+			// If auto-select is enabled and no explicit output format is specified, try multiple formats
+			if ( autoSelectFormat && ! args?.outputFormat ) {
+				const formatsToTry: ImageFormat[] = [ 'jpeg', 'webp' ];
 
-			switch ( outputFormat ) {
-				case inputFormat:
-				default:
-					if ( 'browser' === imageLibrary ) {
-						file = await canvasCompressImage(
-							item.file,
-							outputQuality / 100
-						);
-					} else {
-						file = await vipsCompressImage(
-							item.id,
-							item.file,
-							outputQuality / 100,
-							interlaced
-						);
-					}
-					break;
+				// Add AVIF if available (requires crossOriginIsolated)
+				if ( window.crossOriginIsolated ) {
+					formatsToTry.push( 'avif' );
+				}
 
-				case 'webp':
-					if ( 'browser' === imageLibrary ) {
-						file = await canvasConvertImageFormat(
-							item.file,
-							'image/webp',
-							outputQuality / 100
-						);
-					} else {
+				// Add PNG if the original is PNG (to preserve transparency if needed)
+				if ( inputFormat === 'png' ) {
+					formatsToTry.unshift( 'png' );
+				}
+
+				stop = start(
+					`Auto-select best format for: ${ item.file.name } | ${ imageLibrary } | trying ${ formatsToTry.join( ', ' ) }`
+				);
+
+				const result = await findBestImageFormat(
+					item.id,
+					item.file,
+					formatsToTry,
+					outputQuality / 100,
+					imageLibrary,
+					interlaced
+				);
+
+				file = result.file;
+				outputFormat = result.format;
+			} else {
+				stop = start(
+					`Optimize Item: ${ item.file.name } | ${ imageLibrary } | ${ inputFormat } | ${ outputFormat } | ${ outputQuality }`
+				);
+
+				switch ( outputFormat ) {
+					case inputFormat:
+					default:
+						if ( 'browser' === imageLibrary ) {
+							file = await canvasCompressImage(
+								item.file,
+								outputQuality / 100
+							);
+						} else {
+							file = await vipsCompressImage(
+								item.id,
+								item.file,
+								outputQuality / 100,
+								interlaced
+							);
+						}
+						break;
+
+					case 'webp':
+						if ( 'browser' === imageLibrary ) {
+							file = await canvasConvertImageFormat(
+								item.file,
+								'image/webp',
+								outputQuality / 100
+							);
+						} else {
+							file = await vipsConvertImageFormat(
+								item.id,
+								item.file,
+								'image/webp',
+								outputQuality / 100
+							);
+						}
+						break;
+
+					case 'avif':
+						// No browsers support AVIF in HTMLCanvasElement.toBlob() yet, so always use vips.
+						// See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
 						file = await vipsConvertImageFormat(
 							item.id,
 							item.file,
-							'image/webp',
+							'image/avif',
 							outputQuality / 100
 						);
-					}
-					break;
+						break;
 
-				case 'avif':
-					// No browsers support AVIF in HTMLCanvasElement.toBlob() yet, so always use vips.
-					// See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
-					file = await vipsConvertImageFormat(
-						item.id,
-						item.file,
-						'image/avif',
-						outputQuality / 100
-					);
-					break;
-
-				case 'gif':
-					// Browsers don't typically support image/gif in HTMLCanvasElement.toBlob() yet, so always use vips.
-					// See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
-					file = await vipsConvertImageFormat(
-						item.id,
-						item.file,
-						'image/gif',
-						outputQuality / 100,
-						interlaced
-					);
-					break;
-
-				case 'jpeg':
-				case 'png':
-					if ( 'browser' === imageLibrary ) {
-						file = await canvasConvertImageFormat(
-							item.file,
-							`image/${ outputFormat }`,
-							outputQuality / 100
-						);
-					} else {
+					case 'gif':
+						// Browsers don't typically support image/gif in HTMLCanvasElement.toBlob() yet, so always use vips.
+						// See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
 						file = await vipsConvertImageFormat(
 							item.id,
 							item.file,
-							`image/${ outputFormat }`,
+							'image/gif',
 							outputQuality / 100,
 							interlaced
 						);
-					}
+						break;
+
+					case 'jpeg':
+					case 'png':
+						if ( 'browser' === imageLibrary ) {
+							file = await canvasConvertImageFormat(
+								item.file,
+								`image/${ outputFormat }`,
+								outputQuality / 100
+							);
+						} else {
+							file = await vipsConvertImageFormat(
+								item.id,
+								item.file,
+								`image/${ outputFormat }`,
+								outputQuality / 100,
+								interlaced
+							);
+						}
+				}
 			}
 
 			if ( item.file instanceof ImageFile ) {
