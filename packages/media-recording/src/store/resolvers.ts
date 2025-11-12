@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Results } from '@mediapipe/selfie_segmentation';
+import type { ImageSegmenterResult } from '@mediapipe/tasks-vision';
 
 /**
  * Internal dependencies
@@ -135,62 +135,30 @@ export function getMediaStream() {
 			// See https://googlechrome.github.io/samples/image-capture/background-blur.html
 
 			if ( videoEffect === 'blur' ) {
-				const { SelfieSegmentation } = await import(
-					/* webpackChunkName: "chunk-selfie-segmentation" */ '@mediapipe/selfie_segmentation'
+				const { ImageSegmenter, FilesetResolver } = await import(
+					/* webpackChunkName: "chunk-image-segmenter" */ '@mediapipe/tasks-vision'
 				);
 
-				const selfieSegmentation = new SelfieSegmentation( {
-					locateFile: ( file ) => `${ MEDIAPIPE_CDN_URL }/${ file }`,
-				} );
+				const vision = await FilesetResolver.forVisionTasks(
+					`${ MEDIAPIPE_CDN_URL }/wasm`
+				);
 
-				selfieSegmentation.setOptions( {
-					modelSelection: 1,
-				} );
-
-				await selfieSegmentation.initialize();
-
-				const onSelfieSegmentationResults = ( results: Results ) => {
-					if ( ! results.image || results.image.width === 0 ) {
-						return;
+				const imageSegmenter = await ImageSegmenter.createFromOptions(
+					vision,
+					{
+						baseOptions: {
+							modelAssetPath: `${ MEDIAPIPE_CDN_URL }/image_segmenter.tflite`,
+							delegate: 'GPU',
+						},
+						runningMode: 'VIDEO',
+						outputCategoryMask: true,
+						outputConfidenceMasks: false,
 					}
+				);
 
-					ctx.save();
+				let lastVideoTime = -1;
 
-					ctx.globalCompositeOperation = 'copy';
-					ctx.filter = `blur(${ BACKGROUND_BLUR_PX }px)`;
-					ctx.drawImage(
-						results.segmentationMask,
-						0,
-						0,
-						canvas.width,
-						canvas.height
-					);
-
-					ctx.globalCompositeOperation = 'source-in';
-					ctx.filter = 'none';
-					ctx.drawImage(
-						results.image,
-						0,
-						0,
-						canvas.width,
-						canvas.height
-					);
-
-					ctx.globalCompositeOperation = 'destination-over';
-					ctx.filter = `blur(${ BACKGROUND_BLUR_PX }px)`;
-					ctx.drawImage(
-						results.image,
-						0,
-						0,
-						canvas.width,
-						canvas.height
-					);
-
-					ctx.restore();
-				};
-
-				selfieSegmentation.onResults( onSelfieSegmentationResults );
-				const sendFrame = async () => {
+				const sendFrame = () => {
 					if (
 						select.getVideoEffect() !== 'blur' ||
 						! [
@@ -202,21 +170,120 @@ export function getMediaStream() {
 							'countdown',
 						].includes( select.getRecordingStatus() )
 					) {
+						imageSegmenter.close();
 						for ( const track of stream.getTracks() ) {
 							track.stop();
 						}
 						return;
 					}
 
-					try {
-						await selfieSegmentation.send( { image: video } );
-					} catch {
-						// We can't do much about the WASM memory issue.
+					const startTimeMs = performance.now();
+
+					if ( video.currentTime !== lastVideoTime ) {
+						lastVideoTime = video.currentTime;
+						try {
+							imageSegmenter.segmentForVideo(
+								video,
+								startTimeMs
+							);
+						} catch {
+							// We can't do much about the WASM memory issue.
+						}
+					}
+
+					const categoryMask = imageSegmenter.categoryMask;
+
+					if ( categoryMask ) {
+						const maskData = categoryMask.getAsUint8Array();
+
+						// Draw the blurred background first
+						ctx.save();
+						ctx.filter = `blur(${ BACKGROUND_BLUR_PX }px)`;
+						ctx.drawImage(
+							video,
+							0,
+							0,
+							canvas.width,
+							canvas.height
+						);
+						ctx.restore();
+
+						// Get the blurred background
+						const blurredBackground = ctx.getImageData(
+							0,
+							0,
+							canvas.width,
+							canvas.height
+						);
+
+						// Get the original (sharp) video frame
+						ctx.save();
+						ctx.filter = 'none';
+						ctx.drawImage(
+							video,
+							0,
+							0,
+							canvas.width,
+							canvas.height
+						);
+						ctx.restore();
+
+						const originalFrame = ctx.getImageData(
+							0,
+							0,
+							canvas.width,
+							canvas.height
+						);
+
+						// Composite the images based on the mask
+						const outputData = new Uint8ClampedArray(
+							canvas.width * canvas.height * 4
+						);
+
+						for (
+							let i = 0;
+							i < canvas.width * canvas.height;
+							i++
+						) {
+							const maskValue = maskData[ i ];
+							const pixelIndex = i * 4;
+
+							// If mask value is 0, it's the person (foreground)
+							// Otherwise it's the background
+							if ( maskValue === 0 ) {
+								// Use original (sharp) pixels for the person
+								outputData[ pixelIndex ] =
+									originalFrame.data[ pixelIndex ];
+								outputData[ pixelIndex + 1 ] =
+									originalFrame.data[ pixelIndex + 1 ];
+								outputData[ pixelIndex + 2 ] =
+									originalFrame.data[ pixelIndex + 2 ];
+								outputData[ pixelIndex + 3 ] =
+									originalFrame.data[ pixelIndex + 3 ];
+							} else {
+								// Use blurred pixels for the background
+								outputData[ pixelIndex ] =
+									blurredBackground.data[ pixelIndex ];
+								outputData[ pixelIndex + 1 ] =
+									blurredBackground.data[ pixelIndex + 1 ];
+								outputData[ pixelIndex + 2 ] =
+									blurredBackground.data[ pixelIndex + 2 ];
+								outputData[ pixelIndex + 3 ] =
+									blurredBackground.data[ pixelIndex + 3 ];
+							}
+						}
+
+						const outputImageData = new ImageData(
+							outputData,
+							canvas.width,
+							canvas.height
+						);
+						ctx.putImageData( outputImageData, 0, 0 );
 					}
 
 					requestAnimationFrame( sendFrame );
 				};
-				await sendFrame();
+				sendFrame();
 			} else {
 				const sendFrame = () => {
 					if (
