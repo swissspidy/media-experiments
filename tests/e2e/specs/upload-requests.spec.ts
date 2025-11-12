@@ -46,10 +46,10 @@ test.describe( 'Upload Requests', () => {
 				'Safari only allows reading from clipboard upon user interaction'
 			);
 
-			// TODO: Investigate.
+			// TODO: Re-test with inline placeholder to see if Firefox issue is resolved.
 			test.skip(
 				browserName === 'firefox',
-				'For some reason the modal is closed when the new page is opened, cancelling the upload request'
+				'Previously, the modal was closed when the new page was opened. Needs re-testing with inline placeholder.'
 			);
 
 			await admin.createNewPost();
@@ -71,12 +71,14 @@ test.describe( 'Upload Requests', () => {
 				.getByRole( 'button', { name: 'Upload' } )
 				.click();
 
-			const dialog = page.getByRole( 'dialog', {
-				name: 'Upload from device',
-			} );
-			await expect( dialog ).toBeVisible();
+			// With inline mode, the placeholder appears within the block instead of a modal
+			const placeholder = editor.canvas.locator(
+				'.mexp-upload-requests-placeholder'
+			);
+			await expect( placeholder ).toBeVisible();
 
-			await dialog
+			// Find the copy button within the placeholder
+			await placeholder
 				.getByRole( 'button', { name: 'Copy to clipboard' } )
 				.click();
 
