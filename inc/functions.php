@@ -79,7 +79,7 @@ function needs_cross_origin_isolation(): bool {
 		return false;
 	}
 
-	if ( is_singular( 'mexp-upload-request' ) ) {
+	if ( is_singular( 'mexp-upload-request' ) || is_singular( 'mexp-collab-request' ) ) {
 		return true;
 	}
 
@@ -258,6 +258,12 @@ function load_upload_request_template( string $template ): string {
 		start_cross_origin_isolation_output_buffer();
 
 		return __DIR__ . '/templates/upload-request.php';
+	}
+
+	if ( is_singular( 'mexp-collab-request' ) ) {
+		start_cross_origin_isolation_output_buffer();
+
+		return __DIR__ . '/templates/collaboration-request.php';
 	}
 
 	return $template;
@@ -1335,6 +1341,195 @@ function register_upload_request_post_type(): void {
 }
 
 /**
+ * Registers post type and post meta for collaboration requests.
+ *
+ * @return void
+ */
+function register_collaboration_request_post_type(): void {
+	require_once __DIR__ . '/class-rest-collaboration-requests-controller.php';
+
+	register_post_type(
+		'mexp-collab-request',
+		[
+			'labels'                => [
+				'name'                     => _x( 'Collaboration Requests', 'post type general name', 'media-experiments' ),
+				'singular_name'            => _x( 'Collaboration Request', 'post type singular name', 'media-experiments' ),
+				'add_new'                  => __( 'Add New Collaboration Request', 'media-experiments' ),
+				'add_new_item'             => __( 'Add New Collaboration Request', 'media-experiments' ),
+				'edit_item'                => __( 'Edit Collaboration Request', 'media-experiments' ),
+				'new_item'                 => __( 'New Collaboration Request', 'media-experiments' ),
+				'view_item'                => __( 'View Collaboration Request', 'media-experiments' ),
+				'view_items'               => __( 'View Collaboration Requests', 'media-experiments' ),
+				'search_items'             => __( 'Search Collaboration Requests', 'media-experiments' ),
+				'not_found'                => __( 'No collaboration requests found.', 'media-experiments' ),
+				'not_found_in_trash'       => __( 'No collaboration requests found in Trash.', 'media-experiments' ),
+				'all_items'                => __( 'All Collaboration Requests', 'media-experiments' ),
+				'archives'                 => __( 'Collaboration Request Archives', 'media-experiments' ),
+				'attributes'               => __( 'Collaboration Request Attributes', 'media-experiments' ),
+				'insert_into_item'         => __( 'Insert into collaboration request', 'media-experiments' ),
+				'uploaded_to_this_item'    => __( 'Uploaded to this collaboration request', 'media-experiments' ),
+				'featured_image'           => _x( 'Featured Image', 'collaboration request', 'media-experiments' ),
+				'set_featured_image'       => _x( 'Set featured image', 'collaboration request', 'media-experiments' ),
+				'remove_featured_image'    => _x( 'Remove featured image', 'collaboration request', 'media-experiments' ),
+				'use_featured_image'       => _x( 'Use as featured image', 'collaboration request', 'media-experiments' ),
+				'filter_items_list'        => __( 'Filter collaboration requests list', 'media-experiments' ),
+				'filter_by_date'           => __( 'Filter by date', 'media-experiments' ),
+				'items_list_navigation'    => __( 'Collaboration Requests list navigation', 'media-experiments' ),
+				'items_list'               => __( 'Collaboration Requests list', 'media-experiments' ),
+				'item_published'           => __( 'Collaboration Request published.', 'media-experiments' ),
+				'item_published_privately' => __( 'Collaboration Request published privately.', 'media-experiments' ),
+				'item_reverted_to_draft'   => __( 'Collaboration Request reverted to draft.', 'media-experiments' ),
+				'item_scheduled'           => __( 'Collaboration Request scheduled', 'media-experiments' ),
+				'item_updated'             => __( 'Collaboration Request updated.', 'media-experiments' ),
+				'menu_name'                => _x( 'Collaboration Requests', 'admin menu', 'media-experiments' ),
+				'name_admin_bar'           => _x( 'Collaboration Request', 'add new on admin bar', 'media-experiments' ),
+				'item_link'                => _x( 'Collaboration Request Link', 'navigation link block title', 'media-experiments' ),
+				'item_link_description'    => _x( 'A link to a collaboration request.', 'navigation link block description', 'media-experiments' ),
+				'item_trashed'             => __( 'Collaboration Request trashed.', 'media-experiments' ),
+			],
+			'supports'              => [
+				'author',
+				'custom-fields',
+			],
+			'map_meta_cap'          => true,
+			'capabilities'          => [
+				// You need to be able to edit posts in order to create collaboration requests.
+				'create_posts'           => 'edit_posts',
+				// Anyone can read a collaboration request to collaborate on a post.
+				'read'                   => 'read',
+				// You need to be able to edit posts to manage collaboration requests.
+				'edit_posts'             => 'edit_posts',
+				'edit_published_posts'   => 'edit_published_posts',
+				'delete_published_posts' => 'delete_published_posts',
+				// Enables trashing draft posts as well.
+				'delete_posts'           => 'delete_posts',
+				'edit_others_posts'      => 'edit_others_posts',
+				'delete_others_posts'    => 'delete_others_posts',
+			],
+			'rewrite'               => [
+				'slug'       => 'collaborate',
+				'with_front' => false,
+				'feeds'      => false,
+			],
+			'public'                => false,
+			'has_archive'           => false,
+			'show_ui'               => false,
+			'can_export'            => false,
+			'exclude_from_search'   => true,
+			'publicly_queryable'    => true,
+			'show_in_rest'          => true,
+			'delete_with_user'      => true,
+			'rest_base'             => 'collaboration-requests',
+			'rest_controller_class' => REST_Collaboration_Requests_Controller::class,
+		]
+	);
+
+	register_post_meta(
+		'mexp-collab-request',
+		'mexp_allowed_capabilities',
+		[
+			'type'         => 'string',
+			'description'  => __( 'Allowed capabilities for temporary collaborator.', 'media-experiments' ),
+			'show_in_rest' => [
+				'schema' => [
+					'type'  => 'array',
+					'items' => [
+						'type' => 'string',
+						'enum' => [ 'edit_post', 'upload_files', 'read' ],
+					],
+				],
+			],
+			'single'       => true,
+		]
+	);
+}
+
+/**
+ * Gets the current collaboration request slug from the query string.
+ *
+ * @return string|null The collaboration request slug or null.
+ */
+function get_current_collaboration_request_slug(): ?string {
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	return isset( $_GET['collaboration_request'] ) ? sanitize_text_field( wp_unslash( $_GET['collaboration_request'] ) ) : null;
+}
+
+/**
+ * Gets the collaboration request post by slug.
+ *
+ * @param string $slug The collaboration request slug.
+ * @return WP_Post|null The collaboration request post or null.
+ */
+function get_collaboration_request_by_slug( string $slug ): ?WP_Post {
+	$args = [
+		'name'             => $slug,
+		'post_type'        => 'mexp-collab-request',
+		'post_status'      => 'publish',
+		'numberposts'      => 1,
+		'suppress_filters' => false,
+	];
+
+	$posts = get_posts( $args );
+
+	if ( empty( $posts ) ) {
+		return null;
+	}
+
+	return $posts[0];
+}
+
+/**
+ * Filters user capabilities to grant temporary collaboration permissions.
+ *
+ * @param array    $allcaps All capabilities.
+ * @param string[] $caps    Required capabilities.
+ * @param array    $args    Arguments.
+ * @param \WP_User $user    User object.
+ * @return array Modified capabilities.
+ * @phpstan-param array<string,bool> $allcaps
+ * @phpstan-return array<string,bool>
+ */
+function filter_user_has_cap_for_collaboration( array $allcaps, array $caps, array $args, $user ): array {
+	$collab_slug = get_current_collaboration_request_slug();
+
+	if ( ! $collab_slug ) {
+		return $allcaps;
+	}
+
+	$collab_request = get_collaboration_request_by_slug( $collab_slug );
+
+	if ( ! $collab_request instanceof WP_Post ) {
+		return $allcaps;
+	}
+
+	// Only apply if we're checking capabilities for the specific post
+	$post_id = isset( $args[2] ) ? $args[2] : 0;
+
+	if ( $post_id !== $collab_request->post_parent ) {
+		return $allcaps;
+	}
+
+	$allowed_capabilities = get_post_meta( $collab_request->ID, 'mexp_allowed_capabilities', true );
+
+	if ( ! is_array( $allowed_capabilities ) ) {
+		$allowed_capabilities = [];
+	}
+
+	// Grant the allowed capabilities for this specific post
+	foreach ( $caps as $cap ) {
+		if ( in_array( $cap, $allowed_capabilities, true ) ) {
+			$allcaps[ $cap ] = true;
+		}
+	}
+
+	// Always grant read capability for the post
+	$allcaps['read'] = true;
+	$allcaps['read_post'] = true;
+
+	return $allcaps;
+}
+
+/**
  * Filters the REST API route for a post.
 
  * @param string  $route The route path.
@@ -1343,6 +1538,12 @@ function register_upload_request_post_type(): void {
  */
 function filter_rest_route_for_post_for_upload_requests( string $route, WP_Post $post ): string {
 	if ( 'mexp-upload-request' === $post->post_type ) {
+		$post_type_route = rest_get_route_for_post_type_items( $post->post_type );
+
+		return sprintf( '%s/%s', $post_type_route, $post->post_name );
+	}
+
+	if ( 'mexp-collab-request' === $post->post_type ) {
 		$post_type_route = rest_get_route_for_post_type_items( $post->post_type );
 
 		return sprintf( '%s/%s', $post_type_route, $post->post_name );
@@ -1395,6 +1596,32 @@ function delete_old_upload_requests(): void {
 }
 
 /**
+ * Delete old collaboration requests that are older than 15 minutes.
+ *
+ * @return void
+ */
+function delete_old_collaboration_requests(): void {
+	$args = [
+		'post_type'        => 'mexp-collab-request',
+		'post_status'      => 'publish',
+		'numberposts'      => -1,
+		'date_query'       => [
+			[
+				'before'    => '15 minutes ago',
+				'inclusive' => true,
+			],
+		],
+		'suppress_filters' => false,
+	];
+
+	$posts = get_posts( $args );
+
+	foreach ( $posts as $post ) {
+		wp_delete_post( $post->ID, true );
+	}
+}
+
+/**
  * Plugin activation hook.
  *
  * @codeCoverageIgnore
@@ -1403,11 +1630,16 @@ function delete_old_upload_requests(): void {
  */
 function activate_plugin(): void {
 	register_upload_request_post_type();
+	register_collaboration_request_post_type();
 
 	flush_rewrite_rules( false );
 
 	if ( false === wp_next_scheduled( 'mexp_upload_requests_cleanup' ) ) {
 		wp_schedule_event( time(), 'quarter_hourly', 'mexp_upload_requests_cleanup' );
+	}
+
+	if ( false === wp_next_scheduled( 'mexp_collaboration_requests_cleanup' ) ) {
+		wp_schedule_event( time(), 'quarter_hourly', 'mexp_collaboration_requests_cleanup' );
 	}
 }
 
@@ -1420,12 +1652,18 @@ function activate_plugin(): void {
  */
 function deactivate_plugin(): void {
 	unregister_post_type( 'mexp-upload-request' );
+	unregister_post_type( 'mexp-collab-request' );
 
 	flush_rewrite_rules( false );
 
 	$timestamp = wp_next_scheduled( 'mexp_upload_requests_cleanup' );
 	if ( false !== $timestamp ) {
 		wp_unschedule_event( $timestamp, 'mexp_upload_requests_cleanup' );
+	}
+
+	$timestamp = wp_next_scheduled( 'mexp_collaboration_requests_cleanup' );
+	if ( false !== $timestamp ) {
+		wp_unschedule_event( $timestamp, 'mexp_collaboration_requests_cleanup' );
 	}
 }
 
