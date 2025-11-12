@@ -10,14 +10,11 @@ import { media as mediaIcon } from '@wordpress/icons';
  * Internal dependencies
  */
 import { BulkOptimization } from '../components/bulk-optimization';
+import { CollaborationRequestControls } from '../block-media-panel/collaboration-requests/controls';
 import { useBlockAttachments } from '../utils/hooks';
 
 function DocumentMediaPanel() {
 	const attachments = useBlockAttachments();
-
-	if ( ! attachments.length ) {
-		return null;
-	}
 
 	return (
 		<PluginDocumentSettingPanel
@@ -25,7 +22,10 @@ function DocumentMediaPanel() {
 			icon={ mediaIcon }
 			title={ __( 'Media Experiments', 'media-experiments' ) }
 		>
-			<BulkOptimization attachments={ attachments } />
+			<CollaborationRequestControls />
+			{ attachments.length > 0 && (
+				<BulkOptimization attachments={ attachments } />
+			) }
 		</PluginDocumentSettingPanel>
 	);
 }

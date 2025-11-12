@@ -1445,13 +1445,27 @@ function register_collaboration_request_post_type(): void {
 }
 
 /**
- * Gets the current collaboration request slug from the query string.
+ * Gets the current collaboration request slug from the query string or REST request.
  *
  * @return string|null The collaboration request slug or null.
  */
 function get_current_collaboration_request_slug(): ?string {
+	// Check query string first
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	return isset( $_GET['collaboration_request'] ) ? sanitize_text_field( wp_unslash( $_GET['collaboration_request'] ) ) : null;
+	if ( isset( $_GET['collaboration_request'] ) ) {
+		return sanitize_text_field( wp_unslash( $_GET['collaboration_request'] ) );
+	}
+
+	// Check if this is a REST request
+	if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+		global $wp;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['collaboration_request'] ) ) {
+			return sanitize_text_field( wp_unslash( $_GET['collaboration_request'] ) );
+		}
+	}
+
+	return null;
 }
 
 /**
