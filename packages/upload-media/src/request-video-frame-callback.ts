@@ -20,6 +20,8 @@
  * @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLVideoElement/requestVideoFrameCallback
  */
 
+/// <reference path="./@types/dom.d.ts" />
+
 /**
  * Checks if requestVideoFrameCallback is supported by the browser.
  *
