@@ -6,7 +6,7 @@ import type { Results } from '@mediapipe/selfie_segmentation';
 /**
  * Internal dependencies
  */
-import { BACKGROUND_BLUR_PX } from './constants';
+import { BACKGROUND_BLUR_PX, CANVAS_CAPTURE_FRAME_RATE } from './constants';
 import { type State, Type } from './types';
 
 type AllSelectors = typeof import('./selectors');
@@ -112,7 +112,7 @@ export function getMediaStream() {
 			canvas.width = video.videoWidth;
 			canvas.height = video.videoHeight;
 
-			const canvasStream = canvas.captureStream();
+			const canvasStream = canvas.captureStream( CANVAS_CAPTURE_FRAME_RATE );
 			for ( const track of stream.getAudioTracks() ) {
 				canvasStream.addTrack( track );
 			}
