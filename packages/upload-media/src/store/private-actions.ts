@@ -1993,7 +1993,6 @@ export function uploadItem( id: QueueItemId ) {
 								{
 									url: attachment.url,
 									fileName,
-									skipAttachment: true,
 								},
 							],
 						],
