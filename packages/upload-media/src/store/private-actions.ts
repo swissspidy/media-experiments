@@ -236,7 +236,7 @@ export function addItem( {
 	abortController,
 	operations,
 }: AddItemArgs ) {
-	return async ( { dispatch, registry }: ThunkArgs ) => {
+	return async ( { dispatch, registry, select }: ThunkArgs ) => {
 		const thumbnailGeneration: ThumbnailGeneration = registry
 			.select( preferencesStore )
 			.get( PREFERENCES_NAME, 'thumbnailGeneration' );
@@ -259,6 +259,12 @@ export function addItem( {
 			} );
 		}
 
+		// Check if this is a HEIC file that the server can convert.
+		// If so, we don't want the server to generate thumbnails - we'll do it client-side.
+		const isHeicFile = file.type === 'image/heic' || file.type === 'image/heif';
+		const supportsHeicOnServer = select.getSettings().supportsHeic;
+		const shouldDisableServerThumbnails = isHeicFile && supportsHeicOnServer;
+
 		dispatch< AddAction >( {
 			type: Type.Add,
 			item: {
@@ -271,7 +277,7 @@ export function addItem( {
 					url: blobUrl,
 				},
 				additionalData: {
-					generate_sub_sizes: 'server' === thumbnailGeneration,
+					generate_sub_sizes: shouldDisableServerThumbnails ? false : 'server' === thumbnailGeneration,
 					convert_format: false,
 					...additionalData,
 				},
