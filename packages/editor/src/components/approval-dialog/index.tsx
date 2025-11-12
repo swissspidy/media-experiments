@@ -75,7 +75,7 @@ export function ApprovalDialog( { id }: ApprovalDialogProps ) {
 	const [ , setOpen ] = useState( false );
 	const [ showAdvanced, setShowAdvanced ] = useState( false );
 	const [ quality, setQuality ] = useState(
-		comparison?.currentQuality || 82
+		() => comparison?.currentQuality || 82
 	);
 	const [ isReoptimizing, setIsReoptimizing ] = useState( false );
 

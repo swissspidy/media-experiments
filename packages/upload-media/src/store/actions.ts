@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
  */
 import type { createRegistry } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
+import { isBlobURL, revokeBlobURL } from '@wordpress/blob';
 
 import { type MeasureOptions } from '@mexp/log';
 
@@ -30,6 +31,7 @@ import type {
 	OnChangeHandler,
 	OnErrorHandler,
 	OnSuccessHandler,
+	OperationFinishAction,
 	QueueItem,
 	QueueItemId,
 	State,
@@ -577,9 +579,26 @@ export function reoptimizeItem(
 			return;
 		}
 
+		// Revoke the old blob URL if it exists to free memory.
+		if ( item.attachment?.url && isBlobURL( item.attachment.url ) ) {
+			revokeBlobURL( item.attachment.url );
+		}
+
+		// Temporarily restore the file to the source file so we re-optimize from the original.
+		// This is necessary because optimizeImageItem uses item.file as input.
+		dispatch< OperationFinishAction >( {
+			type: Type.OperationFinish,
+			id,
+			item: {
+				file: item.sourceFile,
+			},
+		} );
+
 		// Re-run the optimization with the new quality setting.
+		// Keep requireApproval true so it stays in pending approval state.
 		await dispatch.optimizeImageItem( id, {
 			outputQuality,
+			requireApproval: true,
 		} );
 	};
 }
