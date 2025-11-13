@@ -40,6 +40,7 @@ import type {
 import { ItemStatus, OperationType, Type } from './types';
 import type {
 	addItem,
+	optimizeImageItem,
 	processItem,
 	removeItem,
 	revokeBlobUrls,
@@ -53,6 +54,7 @@ type ActionCreators = {
 	addItemFromUrl: typeof addItemFromUrl;
 	removeItem: typeof removeItem;
 	processItem: typeof processItem;
+	optimizeImageItem: typeof optimizeImageItem;
 	cancelItem: typeof cancelItem;
 	rejectApproval: typeof rejectApproval;
 	grantApproval: typeof grantApproval;
