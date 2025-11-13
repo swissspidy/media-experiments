@@ -559,13 +559,11 @@ test.describe( 'Images', () => {
 		await qualitySlider.fill( '50' );
 
 		// Wait for re-optimization to complete
-		await expect(
-			dialog.getByText( 'Reoptimizing image…' )
-		).toBeVisible();
+		await expect( dialog.getByText( 'Reoptimizing image…' ) ).toBeVisible();
 
-		await expect(
-			dialog.getByText( 'Reoptimizing image…' )
-		).toBeHidden( { timeout: 120_000 } );
+		await expect( dialog.getByText( 'Reoptimizing image…' ) ).toBeHidden( {
+			timeout: 120_000,
+		} );
 
 		// Check that the file size has changed
 		const newSizeText = await dialog
@@ -597,9 +595,7 @@ test.describe( 'Images', () => {
 				name: 'Settings',
 			} );
 
-		await expect( settingsPanel ).toHaveText(
-			/Mime type: image\/jpeg/
-		);
+		await expect( settingsPanel ).toHaveText( /Mime type: image\/jpeg/ );
 	} );
 
 	test.describe( 'optimizes a file on upload', () => {
