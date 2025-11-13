@@ -19,22 +19,6 @@ type Selectors = {
 
 type ActionCreators = ( args: Record< string, unknown > ) => void;
 
-/**
- * Checks if requestVideoFrameCallback is supported by the browser.
- *
- * @return Whether requestVideoFrameCallback is supported.
- */
-function supportsRequestVideoFrameCallback(): boolean {
-	if ( typeof HTMLVideoElement === 'undefined' ) {
-		return false;
-	}
-	return (
-		'requestVideoFrameCallback' in HTMLVideoElement.prototype &&
-		typeof HTMLVideoElement.prototype.requestVideoFrameCallback ===
-			'function'
-	);
-}
-
 export function getDevices() {
 	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
 		try {
@@ -207,9 +191,6 @@ export function getMediaStream() {
 
 				selfieSegmentation.onResults( onSelfieSegmentationResults );
 
-				// Use requestVideoFrameCallback for better performance and accuracy when available
-				const useRVFC = supportsRequestVideoFrameCallback() && video.requestVideoFrameCallback;
-
 				const sendFrame = async () => {
 					if (
 						select.getVideoEffect() !== 'blur' ||
@@ -234,17 +215,10 @@ export function getMediaStream() {
 						// We can't do much about the WASM memory issue.
 					}
 
-					if ( useRVFC ) {
-						video.requestVideoFrameCallback!( sendFrame );
-					} else {
-						requestAnimationFrame( sendFrame );
-					}
+					video.requestVideoFrameCallback!( sendFrame );
 				};
 				await sendFrame();
 			} else {
-				// Use requestVideoFrameCallback for better performance when available
-				const useRVFC = supportsRequestVideoFrameCallback() && video.requestVideoFrameCallback;
-
 				const sendFrame = () => {
 					if (
 						select.getVideoEffect() !== 'none' ||
@@ -269,11 +243,7 @@ export function getMediaStream() {
 
 					ctx.restore();
 
-					if ( useRVFC ) {
-						video.requestVideoFrameCallback!( sendFrame );
-					} else {
-						requestAnimationFrame( sendFrame );
-					}
+					video.requestVideoFrameCallback!( sendFrame );
 				};
 				sendFrame();
 			}

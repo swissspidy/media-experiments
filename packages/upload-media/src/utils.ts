@@ -17,7 +17,6 @@ import {
 	FFMPEG_SUPPORTED_AUDIO_VIDEO_MIME_TYPES,
 } from './constants';
 import { UploadError } from './upload-error';
-import { supportsRequestVideoFrameCallback } from './request-video-frame-callback';
 
 /**
  * Converts a Blob to a File with a default name like "image.png".
@@ -281,9 +280,8 @@ export async function getPosterFromVideo(
  * Preloads the video and seeks to a very early offset before attempting
  * to capture the frame.
  *
- * When available, uses requestVideoFrameCallback for more accurate frame capture
- * that's synchronized with the video's frame presentation. This provides better
- * quality and accuracy compared to capturing at arbitrary times.
+ * Uses requestVideoFrameCallback for accurate frame capture that's synchronized
+ * with the video's frame presentation.
  *
  * @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
  * @see https://web.dev/articles/requestvideoframecallback-rvfc
@@ -300,20 +298,16 @@ export async function getFirstFrameOfVideo(
 	const video = await preloadVideo( src );
 	await seekVideo( video );
 
-	// Use requestVideoFrameCallback for more accurate frame capture when available
-	if ( supportsRequestVideoFrameCallback() && video.requestVideoFrameCallback ) {
-		return new Promise< Blob >( ( resolve, reject ) => {
-			video.requestVideoFrameCallback!( () => {
-				try {
-					resolve( getImageFromVideo( video, type, quality ) );
-				} catch ( error ) {
-					reject( error );
-				}
-			} );
+	// Use requestVideoFrameCallback for accurate frame capture
+	return new Promise< Blob >( ( resolve, reject ) => {
+		video.requestVideoFrameCallback!( () => {
+			try {
+				resolve( getImageFromVideo( video, type, quality ) );
+			} catch ( error ) {
+				reject( error );
+			}
 		} );
-	}
-
-	return getImageFromVideo( video, type, quality );
+	} );
 }
 
 /**
