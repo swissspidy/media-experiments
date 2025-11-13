@@ -415,6 +415,193 @@ test.describe( 'Images', () => {
 		).toBeVisible();
 	} );
 
+	test( 'adjust quality with slider in approval dialog', async ( {
+		admin,
+		page,
+		editor,
+		mediaUtils,
+		browserName,
+	} ) => {
+		// TODO: Investigate.
+		test.skip(
+			browserName === 'webkit',
+			'Works locally but is flaky on CI'
+		);
+
+		await admin.createNewPost();
+
+		// Ensure the initially uploaded PNG is left untouched.
+		await page.evaluate( () => {
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
+					'optimizeOnUpload',
+					false
+				);
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
+					'png_outputFormat',
+					'png'
+				);
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
+					'imageLibrary',
+					'browser'
+				);
+		} );
+
+		await editor.insertBlock( { name: 'core/image' } );
+
+		const imageBlock = editor.canvas.locator(
+			'role=document[name="Block: Image"i]'
+		);
+		await expect( imageBlock ).toBeVisible();
+
+		await mediaUtils.upload(
+			imageBlock.locator( 'data-testid=form-file-upload-input' ),
+			'wordpress-logo-512x512.png'
+		);
+
+		await page.waitForFunction(
+			() =>
+				window.wp.data.select( 'media-experiments/upload' ).getItems()
+					.length === 0,
+			undefined,
+			{
+				timeout: 30_000,
+			}
+		);
+
+		await page.evaluate( () => {
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
+					'optimizeOnUpload',
+					true
+				);
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
+					'png_outputFormat',
+					'jpeg'
+				);
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
+					'imageLibrary',
+					'browser'
+				);
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
+					'requireApproval',
+					true
+				);
+		} );
+
+		await page
+			.getByRole( 'region', { name: 'Editor settings' } )
+			.getByRole( 'button', { name: 'Compress' } )
+			.click();
+
+		await page.waitForFunction(
+			() =>
+				window.wp.data
+					.select( 'media-experiments/upload' )
+					.isPendingApproval(),
+			undefined,
+			{
+				timeout: 120_000,
+			}
+		);
+
+		const dialog = page.getByRole( 'dialog', {
+			name: 'Compare media quality',
+		} );
+
+		await expect( dialog ).toBeVisible();
+
+		// Check that Advanced options toggle is present
+		const advancedToggle = dialog.getByRole( 'checkbox', {
+			name: 'Advanced options',
+		} );
+		await expect( advancedToggle ).toBeVisible();
+
+		// Initially, the quality slider should not be visible
+		await expect(
+			dialog.getByRole( 'slider', { name: 'Quality' } )
+		).toBeHidden();
+
+		// Click on Advanced options to reveal the quality slider
+		await advancedToggle.click();
+
+		// Now the quality slider should be visible
+		const qualitySlider = dialog.getByRole( 'slider', {
+			name: 'Quality',
+		} );
+		await expect( qualitySlider ).toBeVisible();
+
+		// Get the initial file size
+		const initialSizeText = await dialog
+			.getByText( /New version:/ )
+			.textContent();
+
+		// Adjust the quality slider to a lower value (e.g., 50)
+		await qualitySlider.fill( '50' );
+
+		// Wait for re-optimization to complete
+		await expect(
+			dialog.getByText( 'Reoptimizing image…' )
+		).toBeVisible();
+
+		await expect(
+			dialog.getByText( 'Reoptimizing image…' )
+		).toBeHidden( { timeout: 120_000 } );
+
+		// Check that the file size has changed
+		const newSizeText = await dialog
+			.getByText( /New version:/ )
+			.textContent();
+
+		expect( newSizeText ).not.toBe( initialSizeText );
+
+		// Approve the optimization
+		await dialog
+			.getByRole( 'button', { name: 'Use optimized version' } )
+			.click();
+
+		await page.waitForFunction(
+			() =>
+				window.wp.data.select( 'media-experiments/upload' ).getItems()
+					.length === 0,
+			undefined,
+			{
+				timeout: 120_000,
+			}
+		);
+
+		const settingsPanel = page
+			.getByRole( 'region', {
+				name: 'Editor settings',
+			} )
+			.getByRole( 'tabpanel', {
+				name: 'Settings',
+			} );
+
+		await expect( settingsPanel ).toHaveText(
+			/Mime type: image\/jpeg/
+		);
+	} );
+
 	test.describe( 'optimizes a file on upload', () => {
 		for ( const {
 			outputFormat,

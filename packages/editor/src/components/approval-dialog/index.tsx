@@ -18,7 +18,11 @@ import {
 	ToggleControl,
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
-import { createInterpolateElement, useCallback, useState } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useCallback,
+	useState,
+} from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEntityRecord } from '@wordpress/core-data';
 
@@ -63,9 +67,7 @@ export function ApprovalDialog( { id }: ApprovalDialogProps ) {
 			comparison: id
 				? select( uploadStore ).getComparisonDataForApproval( id )
 				: null,
-			item: id
-				? select( uploadStore ).getItemByAttachmentId( id )
-				: null,
+			item: id ? select( uploadStore ).getItemByAttachmentId( id ) : null,
 		} ),
 		[ id ]
 	);
@@ -207,7 +209,7 @@ export function ApprovalDialog( { id }: ApprovalDialogProps ) {
 						{ isReoptimizing && (
 							<p className="mexp-comparison-modal__reoptimizing-notice">
 								{ __(
-									'Reoptimizing image...',
+									'Reoptimizing image…',
 									'media-experiments'
 								) }
 							</p>

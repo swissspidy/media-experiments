@@ -568,8 +568,9 @@ export function grantApproval( id: number ) {
 /**
  * Re-optimizes an item that is pending approval with a new quality setting.
  *
- * @param id            Item ID.
- * @param outputQuality New quality setting (1-100).
+ * @param id                    Item ID.
+ * @param options               Options object.
+ * @param options.outputQuality New quality setting (1-100).
  */
 export function reoptimizeItem(
 	id: QueueItemId,
