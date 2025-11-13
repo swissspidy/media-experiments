@@ -112,7 +112,9 @@ export function getMediaStream() {
 			canvas.width = video.videoWidth;
 			canvas.height = video.videoHeight;
 
-			const canvasStream = canvas.captureStream( CANVAS_CAPTURE_FRAME_RATE );
+			const canvasStream = canvas.captureStream(
+				CANVAS_CAPTURE_FRAME_RATE
+			);
 			for ( const track of stream.getAudioTracks() ) {
 				canvasStream.addTrack( track );
 			}
