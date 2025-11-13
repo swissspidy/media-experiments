@@ -1450,13 +1450,13 @@ function register_collaboration_request_post_type(): void {
  * @return string|null The collaboration request slug or null.
  */
 function get_current_collaboration_request_slug(): ?string {
-	// Check query string first
+	// Check query string first.
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	if ( isset( $_GET['collaboration_request'] ) ) {
 		return sanitize_text_field( wp_unslash( $_GET['collaboration_request'] ) );
 	}
 
-	// Check if this is a REST request
+	// Check if this is a REST request.
 	if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
 		global $wp;
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -1516,7 +1516,7 @@ function filter_user_has_cap_for_collaboration( array $allcaps, array $caps, arr
 		return $allcaps;
 	}
 
-	// Only apply if we're checking capabilities for the specific post
+	// Only apply if we're checking capabilities for the specific post.
 	$post_id = isset( $args[2] ) ? $args[2] : 0;
 
 	if ( $post_id !== $collab_request->post_parent ) {
@@ -1529,15 +1529,15 @@ function filter_user_has_cap_for_collaboration( array $allcaps, array $caps, arr
 		$allowed_capabilities = [];
 	}
 
-	// Grant the allowed capabilities for this specific post
+	// Grant the allowed capabilities for this specific post.
 	foreach ( $caps as $cap ) {
 		if ( in_array( $cap, $allowed_capabilities, true ) ) {
 			$allcaps[ $cap ] = true;
 		}
 	}
 
-	// Always grant read capability for the post
-	$allcaps['read'] = true;
+	// Always grant read capability for the post.
+	$allcaps['read']      = true;
 	$allcaps['read_post'] = true;
 
 	return $allcaps;

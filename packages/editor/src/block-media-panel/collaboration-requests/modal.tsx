@@ -49,11 +49,11 @@ const CAPABILITY_OPTIONS = [
  *
  * Displays a QR code and an input field to copy the collaboration request URL.
  *
- * @param props Component props.
- * @param props.onRequestClose         Callback for when the modal is closed.
- * @param props.collaborationRequest   The current collaboration request.
- * @param props.allowedCapabilities    Currently allowed capabilities.
- * @param props.onCapabilitiesChange   Callback when capabilities change.
+ * @param props                      Component props.
+ * @param props.onRequestClose       Callback for when the modal is closed.
+ * @param props.collaborationRequest The current collaboration request.
+ * @param props.allowedCapabilities  Currently allowed capabilities.
+ * @param props.onCapabilitiesChange Callback when capabilities change.
  */
 export function Modal( {
 	onRequestClose,
@@ -131,9 +131,7 @@ export function Modal( {
 						key={ option.value }
 						__nextHasNoMarginBottom
 						label={ option.label }
-						checked={ allowedCapabilities.includes(
-							option.value
-						) }
+						checked={ allowedCapabilities.includes( option.value ) }
 						onChange={ ( checked ) => {
 							if ( checked ) {
 								onCapabilitiesChange( [

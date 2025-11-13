@@ -26,17 +26,17 @@ if ( ! $mexp_request_parent instanceof WP_Post ) {
 
 $mexp_request_parent_url = ( is_post_publicly_viewable( $mexp_request_parent ) || current_user_can( 'read', $mexp_request_parent ) ) ? get_permalink( $mexp_request_parent ) : null;
 
-// Redirect to the block editor for the target post
+// Redirect to the block editor for the target post.
 if ( is_string( $mexp_request_parent_url ) ) {
-	// Add collaboration request slug as query parameter
-	$edit_url = add_query_arg(
+	// Add collaboration request slug as query parameter.
+	$mexp_edit_url = add_query_arg(
 		[
 			'collaboration_request' => $post->post_name,
 		],
 		get_edit_post_link( $mexp_request_parent->ID, 'raw' )
 	);
-	
-	wp_safe_redirect( $edit_url );
+
+	wp_safe_redirect( $mexp_edit_url );
 	exit;
 }
 

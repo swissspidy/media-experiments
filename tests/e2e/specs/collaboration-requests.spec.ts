@@ -50,9 +50,8 @@ test.describe( 'Collaboration Requests', () => {
 		} );
 
 		if ( await mediaExperimentsPanel.isVisible() ) {
-			const isExpanded = await mediaExperimentsPanel.getAttribute(
-				'aria-expanded'
-			);
+			const isExpanded =
+				await mediaExperimentsPanel.getAttribute( 'aria-expanded' );
 			if ( isExpanded === 'false' ) {
 				await mediaExperimentsPanel.click();
 			}
@@ -87,15 +86,13 @@ test.describe( 'Collaboration Requests', () => {
 		expect( copiedURL ).toContain( '/collaborate/' );
 
 		// Verify capability checkboxes are present
-		await expect(
-			dialog.getByLabel( 'Edit post content' )
-		).toBeVisible();
+		await expect( dialog.getByLabel( 'Edit post content' ) ).toBeVisible();
 		await expect( dialog.getByLabel( 'Upload media files' ) ).toBeVisible();
 
 		// Close the modal
 		await dialog.getByRole( 'button', { name: 'Close' } ).click();
 
-		await expect( dialog ).not.toBeVisible();
+		await expect( dialog ).toBeHidden();
 
 		// Verify success notice
 		await expect(
@@ -141,9 +138,8 @@ test.describe( 'Collaboration Requests', () => {
 		} );
 
 		if ( await mediaExperimentsPanel.isVisible() ) {
-			const isExpanded = await mediaExperimentsPanel.getAttribute(
-				'aria-expanded'
-			);
+			const isExpanded =
+				await mediaExperimentsPanel.getAttribute( 'aria-expanded' );
 			if ( isExpanded === 'false' ) {
 				await mediaExperimentsPanel.click();
 			}

@@ -43,9 +43,7 @@ export function CollaborationRequestControls() {
 				isModalActive: select( interfaceStore ).isModalActive(
 					'media-experiments/collaboration-request'
 				),
-				hasEditPermissions: select( editorStore ).isEditedPostNew()
-					? false
-					: true,
+				hasEditPermissions: ! select( editorStore ).isEditedPostNew(),
 				currentPostId: select( editorStore ).getCurrentPostId(),
 			};
 		},
@@ -54,9 +52,9 @@ export function CollaborationRequestControls() {
 
 	const [ collaborationRequest, setCollaborationRequest ] =
 		useState< Post | null >( null );
-	const [ allowedCapabilities, setAllowedCapabilities ] = useState< string[] >(
-		[ 'edit_post', 'upload_files' ]
-	);
+	const [ allowedCapabilities, setAllowedCapabilities ] = useState<
+		string[]
+	>( [ 'edit_post', 'upload_files' ] );
 
 	const collaborationRequestSlug = collaborationRequest
 		? collaborationRequest.slug
