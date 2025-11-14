@@ -384,6 +384,35 @@ export function processItem( id: QueueItemId ) {
 			? item.operations[ 0 ][ 1 ]
 			: undefined;
 
+		// Check concurrency limit before starting a new operation.
+		// Only applies to operations that are potentially resource-intensive.
+		if ( operation && ! item.currentOperation ) {
+			const resourceIntensiveOperations = [
+				OperationType.Compress,
+				OperationType.TranscodeHeif,
+				OperationType.TranscodeGif,
+				OperationType.TranscodeVideo,
+				OperationType.TranscodeAudio,
+				OperationType.TranscodeImage,
+				OperationType.MuteVideo,
+				OperationType.GenerateCaptions,
+			];
+
+			if ( resourceIntensiveOperations.includes( operation ) ) {
+				const activeCount = select.getActiveProcessingCount();
+				const concurrencyLimit = select.getConcurrencyLimit();
+
+				if ( activeCount >= concurrencyLimit ) {
+					// Pause this item temporarily to respect concurrency limit.
+					dispatch< PauseItemAction >( {
+						type: Type.PauseItem,
+						id,
+					} );
+					return;
+				}
+			}
+		}
+
 		// If we're sideloading a thumbnail, pause upload to avoid race conditions.
 		// It will be resumed after the previous upload finishes.
 		if (
@@ -651,12 +680,52 @@ export function finishOperation(
 	id: QueueItemId,
 	updates: Partial< QueueItem >
 ) {
-	return async ( { dispatch }: ThunkArgs ) => {
+	return async ( { select, dispatch }: ThunkArgs ) => {
+		const item = select.getItem( id );
+
+		if ( ! item ) {
+			return;
+		}
+
+		const remainingOperations = item.operations?.slice( 1 );
+
 		dispatch< OperationFinishAction >( {
 			type: Type.OperationFinish,
 			id,
-			item: updates,
+			item: {
+				...updates,
+				operations: remainingOperations,
+			},
 		} );
+
+		// Resume any paused items if there are now available processing slots.
+		const activeCount = select.getActiveProcessingCount();
+		const concurrencyLimit = select.getConcurrencyLimit();
+
+		if ( activeCount < concurrencyLimit ) {
+			// Find paused items that were waiting for a processing slot.
+			const pausedItems = select
+				.getAllItems()
+				.filter(
+					( pausedItem ) =>
+						pausedItem.status === ItemStatus.Paused &&
+						pausedItem.id !== id &&
+						pausedItem.operations &&
+						pausedItem.operations.length > 0
+				);
+
+			// Resume up to the number of available slots.
+			const availableSlots = concurrencyLimit - activeCount;
+			const itemsToResume = pausedItems.slice( 0, availableSlots );
+
+			for ( const pausedItem of itemsToResume ) {
+				dispatch< ResumeItemAction >( {
+					type: Type.ResumeItem,
+					id: pausedItem.id,
+				} );
+				dispatch.processItem( pausedItem.id );
+			}
+		}
 
 		dispatch.processItem( id );
 	};
