@@ -20,6 +20,10 @@ const scenarios = [
 		blockType: 'gallery',
 		fileNames: [ 'github-mark.png', 'wordpress-logo-512x512.png' ],
 	},
+	{
+		blockType: 'cover',
+		fileNames: [ 'github-mark.png' ],
+	},
 ];
 
 test.describe( 'Upload Requests', () => {
