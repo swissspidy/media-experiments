@@ -73,6 +73,7 @@ const siteDataFields: Array< keyof RestBaseRecord > = [
 	'png_interlaced',
 	'gif_interlaced',
 	'image_sizes',
+	'video_sizes',
 ];
 
 // Initialize default settings as soon as base data is available.
@@ -157,6 +158,7 @@ const unsubscribeCoreStore = subscribe( () => {
 
 	void dispatch( uploadStore ).updateSettings( {
 		imageSizes: siteData.image_sizes,
+		videoSizes: siteData.video_sizes,
 	} );
 
 	unsubscribeCoreStore();

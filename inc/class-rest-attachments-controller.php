@@ -64,6 +64,11 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		// Used for PDF thumbnails.
 		$valid_image_sizes[] = 'full';
 
+		$valid_video_sizes = array_keys( \MediaExperiments\get_all_video_sizes() );
+
+		// Combine image and video sizes for the sideload endpoint.
+		$valid_sizes = array_merge( $valid_image_sizes, $valid_video_sizes );
+
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)/sideload',
@@ -78,9 +83,9 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 							'type'        => 'integer',
 						),
 						'image_size'     => [
-							'description' => __( 'Image size.', 'media-experiments' ),
+							'description' => __( 'Image or video size.', 'media-experiments' ),
 							'type'        => 'string',
-							'enum'        => $valid_image_sizes,
+							'enum'        => $valid_sizes,
 							'required'    => true,
 						],
 						'upload_request' => [
@@ -192,6 +197,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 * Prepares a single attachment output for response.
 	 *
 	 * Ensures 'missing_image_sizes' is set for PDFs and not just images.
+	 * Also adds 'missing_video_sizes' for video attachments.
 	 *
 	 * @param WP_Post         $item    Attachment object.
 	 * @param WP_REST_Request $request Request object.
@@ -207,6 +213,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		 *
 		 * @phpstan-var array{
 		 *     missing_image_sizes?: string[],
+		 *     missing_video_sizes?: string[],
 		 * }
 		 */
 		$data = $response->get_data();
@@ -243,6 +250,38 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 				$missing_image_sizes         = array_diff( $merged_sizes, array_keys( $metadata['sizes'] ) );
 				$data['missing_image_sizes'] = $missing_image_sizes;
+			}
+		}
+
+		if ( rest_is_field_included( 'missing_video_sizes', $fields ) ) {
+			$mime_type = get_post_mime_type( $item );
+			if ( is_string( $mime_type ) && str_starts_with( $mime_type, 'video/' ) ) {
+				// Determine missing video sizes for video attachments.
+
+				$metadata = wp_get_attachment_metadata( $item->ID, true );
+
+				if ( ! is_array( $metadata ) ) {
+					$metadata = [];
+				}
+
+				$metadata['sizes'] = $metadata['sizes'] ?? [];
+
+				$video_sizes = \MediaExperiments\get_all_video_sizes();
+
+				// Only generate sizes that are smaller than the original video.
+				$original_width  = $metadata['width'] ?? 0;
+				$original_height = $metadata['height'] ?? 0;
+
+				$applicable_sizes = [];
+				foreach ( $video_sizes as $name => $size ) {
+					if ( $size['width'] < $original_width || $size['height'] < $original_height ) {
+						$applicable_sizes[] = $name;
+					}
+				}
+
+				$existing_sizes              = array_keys( $metadata['sizes'] );
+				$missing_video_sizes         = array_diff( $applicable_sizes, $existing_sizes );
+				$data['missing_video_sizes'] = array_values( $missing_video_sizes );
 			}
 		}
 
@@ -755,11 +794,24 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		} else {
 			$metadata['sizes'] = $metadata['sizes'] ?? [];
 
-			$size = wp_getimagesize( $path );
+			// For video files, we need to extract dimensions from the video metadata
+			// instead of using wp_getimagesize which only works for images.
+			if ( str_starts_with( $type, 'video/' ) ) {
+				// For videos, try to get dimensions from the uploaded file.
+				// In most cases, the dimensions should already be set during the initial upload,
+				// but we'll try to extract them if needed.
+				$video_meta = wp_read_video_metadata( $path );
+				$width      = $video_meta['width'] ?? 0;
+				$height     = $video_meta['height'] ?? 0;
+			} else {
+				$size   = wp_getimagesize( $path );
+				$width  = is_array( $size ) ? $size[0] : 0;
+				$height = is_array( $size ) ? $size[1] : 0;
+			}
 
 			$metadata['sizes'][ $image_size ] = [
-				'width'     => is_array( $size ) ? $size[0] : 0,
-				'height'    => is_array( $size ) ? $size[1] : 0,
+				'width'     => $width,
+				'height'    => $height,
 				'file'      => wp_basename( $path ),
 				'mime-type' => $type,
 				'filesize'  => wp_filesize( $path ),

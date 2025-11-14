@@ -4,6 +4,7 @@
 import {
 	type BatchId,
 	type ImageSizeCrop,
+	type VideoSizeCrop,
 	ItemStatus,
 	OperationType,
 	type QueueItem,
@@ -160,6 +161,34 @@ export function isPaused( state: State ): boolean {
  */
 export function getImageSize( state: State, name: string ): ImageSizeCrop {
 	return state.settings.imageSizes[ name ];
+}
+
+/**
+ * Returns all registered video sizes.
+ *
+ * @param state Upload state.
+ *
+ * @return Video sizes.
+ */
+export function getVideoSizes(
+	state: State
+): Record< string, { name: string; width: number; height: number } > {
+	return state.settings.videoSizes || {};
+}
+
+/**
+ * Returns a video size given its name.
+ *
+ * @param state Upload state.
+ * @param name  Video size name.
+ *
+ * @return Video size data.
+ */
+export function getVideoSize(
+	state: State,
+	name: string
+): { name: string; width: number; height: number } | undefined {
+	return state.settings.videoSizes?.[ name ];
 }
 
 /**

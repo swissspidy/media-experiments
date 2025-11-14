@@ -562,6 +562,57 @@ function get_all_image_sizes(): array {
 }
 
 /**
+ * Returns a list of all available video sizes.
+ *
+ * Similar to image sizes, but for videos to enable responsive video delivery.
+ *
+ * @return array Available video sizes.
+ * @phpstan-return array<string, array<string,string|int>>
+ */
+function get_all_video_sizes(): array {
+	/**
+	 * Filters the list of video sizes.
+	 *
+	 * Allows plugins to customize the available video sizes for responsive video delivery.
+	 *
+	 * @param array $sizes Video sizes keyed by name.
+	 * @phpstan-param array<string, array{width: int, height: int, name: string}> $sizes
+	 */
+	$sizes = apply_filters(
+		'mexp_video_sizes',
+		[
+			'mexp-video-240'  => [
+				'width'  => 426,
+				'height' => 240,
+				'name'   => 'mexp-video-240',
+			],
+			'mexp-video-360'  => [
+				'width'  => 640,
+				'height' => 360,
+				'name'   => 'mexp-video-360',
+			],
+			'mexp-video-480'  => [
+				'width'  => 854,
+				'height' => 480,
+				'name'   => 'mexp-video-480',
+			],
+			'mexp-video-720'  => [
+				'width'  => 1280,
+				'height' => 720,
+				'name'   => 'mexp-video-720',
+			],
+			'mexp-video-1080' => [
+				'width'  => 1920,
+				'height' => 1080,
+				'name'   => 'mexp-video-1080',
+			],
+		]
+	);
+
+	return $sizes;
+}
+
+/**
  * Register additional REST fields for attachments.
  *
  * @todo Expose these in embed context as well?
@@ -709,6 +760,7 @@ function filter_rest_index( WP_REST_Response $response ): WP_REST_Response {
 	$gif_interlaced = apply_filters( 'image_save_progressive', false, 'image/gif' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 
 	$response->data['image_sizes']          = get_all_image_sizes();
+	$response->data['video_sizes']          = get_all_video_sizes();
 	$response->data['image_size_threshold'] = $image_size_threshold;
 	$response->data['video_size_threshold'] = $video_size_threshold;
 	$response->data['image_output_formats'] = (object) $default_image_output_formats;
