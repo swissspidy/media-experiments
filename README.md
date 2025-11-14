@@ -74,6 +74,12 @@ During upload, a poster image (thumbnail) of the video is automatically taken an
 
 https://github.com/swissspidy/media-experiments/assets/841956/ba082f49-145e-441e-89c5-a63acdd039bd
 
+### Responsive Video Sizes
+
+Similar to image thumbnails, the plugin automatically generates multiple smaller versions of videos (240p, 360p, 480p, 720p, 1080p) for responsive delivery.
+This enables serving appropriately-sized videos based on viewport and device capabilities, reducing bandwidth usage and improving load times on mobile devices.
+These video size variants are generated client-side during upload and stored in the attachment metadata, just like image thumbnails.
+
 #### Preview image generation for PDFs
 
 In addition to that, poster images are automatically generated for PDFs as well (powered by [`PDF.js`](https://github.com/mozilla/pdf.js)).
