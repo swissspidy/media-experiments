@@ -24,6 +24,7 @@ import type {
 	LoadOptions,
 	SaveOptions,
 	ThumbnailOptions,
+	FocalPoint,
 } from './types';
 import { supportsAnimation, supportsInterlace, supportsQuality } from './utils';
 
@@ -179,11 +180,12 @@ export async function compressImage(
 /**
  * Resizes an image using vips.
  *
- * @param id        Item ID.
- * @param buffer    Original file buffer.
- * @param type      Mime type.
- * @param resize    Resize options.
- * @param smartCrop Whether to use smart cropping (i.e. saliency-aware).
+ * @param id         Item ID.
+ * @param buffer     Original file buffer.
+ * @param type       Mime type.
+ * @param resize     Resize options.
+ * @param smartCrop  Whether to use smart cropping (i.e. saliency-aware).
+ * @param focalPoint Optional focal point for manual cropping.
  * @return Processed file data plus the old and new dimensions.
  */
 export async function resizeImage(
@@ -191,7 +193,8 @@ export async function resizeImage(
 	buffer: ArrayBuffer,
 	type: string,
 	resize: ImageSizeCrop,
-	smartCrop = false
+	smartCrop = false,
+	focalPoint?: FocalPoint
 ): Promise< {
 	buffer: ArrayBuffer;
 	width: number;
@@ -289,17 +292,35 @@ export async function resizeImage(
 		image.onProgress = onProgress;
 
 		let left = 0;
-		if ( 'center' === resize.crop[ 0 ] ) {
-			left = ( image.width - resize.width ) / 2;
-		} else if ( 'right' === resize.crop[ 0 ] ) {
-			left = image.width - resize.width;
-		}
-
 		let top = 0;
-		if ( 'center' === resize.crop[ 1 ] ) {
-			top = ( image.height - resize.height ) / 2;
-		} else if ( 'bottom' === resize.crop[ 1 ] ) {
-			top = image.height - resize.height;
+
+		// Use focal point if provided, otherwise use crop position
+		if ( focalPoint ) {
+			// Convert focal point (0-1 range) to pixel coordinates
+			// Focal point represents the center of what should be kept
+			const focalX = focalPoint.x * image.width;
+			const focalY = focalPoint.y * image.height;
+
+			// Calculate crop position to center on focal point
+			left = Math.max( 0, focalX - resize.width / 2 );
+			top = Math.max( 0, focalY - resize.height / 2 );
+
+			// Ensure we don't go beyond image boundaries
+			left = Math.min( left, image.width - resize.width );
+			top = Math.min( top, image.height - resize.height );
+		} else {
+			// Use the existing crop position logic
+			if ( 'center' === resize.crop[ 0 ] ) {
+				left = ( image.width - resize.width ) / 2;
+			} else if ( 'right' === resize.crop[ 0 ] ) {
+				left = image.width - resize.width;
+			}
+
+			if ( 'center' === resize.crop[ 1 ] ) {
+				top = ( image.height - resize.height ) / 2;
+			} else if ( 'bottom' === resize.crop[ 1 ] ) {
+				top = image.height - resize.height;
+			}
 		}
 
 		// Address rounding errors where `left` or `top` become negative integers

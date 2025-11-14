@@ -1829,6 +1829,9 @@ export function resizeCropItem( id: QueueItemId, args?: ResizeCropItemArgs ) {
 
 		const addSuffix = Boolean( item.parentId );
 
+		// Get focal point from attachment if available
+		const focalPoint = item.attachment?.meta?.mexp_focal_point;
+
 		const stop = start(
 			`Resize Item: ${ item.file.name } | ${ imageLibrary } | ${ thumbnailGeneration } | ${ args.resize.width }x${ args.resize.height }`
 		);
@@ -1855,7 +1858,8 @@ export function resizeCropItem( id: QueueItemId, args?: ResizeCropItemArgs ) {
 					item.file,
 					args.resize,
 					smartCrop,
-					addSuffix
+					addSuffix,
+					focalPoint
 				);
 			}
 

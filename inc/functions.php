@@ -879,9 +879,9 @@ function register_attachment_post_meta(): void {
 		'attachment',
 		'mexp_focal_point',
 		[
-			'type'              => 'object',
-			'description'       => __( 'The focal point for the image.', 'media-experiments' ),
-			'show_in_rest'      => [
+			'type'         => 'object',
+			'description'  => __( 'The focal point for the image.', 'media-experiments' ),
+			'show_in_rest' => [
 				'schema' => [
 					'type'       => 'object',
 					'properties' => [
@@ -894,8 +894,11 @@ function register_attachment_post_meta(): void {
 					],
 				],
 			],
-			'single'            => true,
-			'default'           => [ 'x' => 0.5, 'y' => 0.5 ],
+			'single'       => true,
+			'default'      => [
+				'x' => 0.5,
+				'y' => 0.5,
+			],
 		]
 	);
 }

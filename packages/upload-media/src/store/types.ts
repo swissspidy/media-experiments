@@ -170,6 +170,7 @@ export interface Attachment {
 	meta: {
 		mexp_generated_poster_id?: number;
 		mexp_original_id?: number;
+		mexp_focal_point?: { x: number; y: number };
 	};
 	mexp_blurhash?: string;
 	mexp_dominant_color?: string;
