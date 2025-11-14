@@ -874,6 +874,30 @@ function register_attachment_post_meta(): void {
 			'sanitize_callback' => 'absint',
 		]
 	);
+
+	register_post_meta(
+		'attachment',
+		'mexp_focal_point',
+		[
+			'type'              => 'object',
+			'description'       => __( 'The focal point for the image.', 'media-experiments' ),
+			'show_in_rest'      => [
+				'schema' => [
+					'type'       => 'object',
+					'properties' => [
+						'x' => [
+							'type' => 'number',
+						],
+						'y' => [
+							'type' => 'number',
+						],
+					],
+				],
+			],
+			'single'            => true,
+			'default'           => [ 'x' => 0.5, 'y' => 0.5 ],
+		]
+	);
 }
 
 /**
