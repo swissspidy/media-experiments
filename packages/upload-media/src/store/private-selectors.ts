@@ -4,7 +4,6 @@
 import {
 	type BatchId,
 	type ImageSizeCrop,
-	type VideoSizeCrop,
 	ItemStatus,
 	OperationType,
 	type QueueItem,

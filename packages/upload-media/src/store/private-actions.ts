@@ -1253,7 +1253,7 @@ export function generateThumbnails( id: QueueItemId ) {
  * @param id Item ID.
  */
 export function generateVideoSizes( id: QueueItemId ) {
-	return async ( { select, dispatch, registry }: ThunkArgs ) => {
+	return async ( { select, dispatch }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
 
 		const attachment: Attachment = item.attachment as Attachment;
@@ -1304,10 +1304,7 @@ export function generateVideoSizes( id: QueueItemId ) {
 						convert_format: false,
 					},
 					operations: [
-						[
-							OperationType.TranscodeVideo,
-							{ videoSize },
-						],
+						[ OperationType.TranscodeVideo, { videoSize } ],
 						OperationType.Upload,
 					],
 				} );
