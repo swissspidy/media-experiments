@@ -18,6 +18,7 @@ import type { CoverBlock } from '../types';
 import { UploadIndicator } from './upload-indicator';
 import { BulkOptimization } from '../components/bulk-optimization';
 import { useBlockAttachments } from '../utils/hooks';
+import { UploadRequestControls } from './upload-requests/controls';
 
 type CoverControlsProps = CoverBlock &
 	Pick< BlockEditProps< CoverBlock[ 'attributes' ] >, 'setAttributes' >;
@@ -44,6 +45,16 @@ export function CoverControls( props: CoverControlsProps ) {
 		}
 	}
 
+	function onInsertFromUploadRequest( [ media ]: Partial< Attachment >[] ) {
+		if ( ! media || ! media.url ) {
+			return;
+		}
+		props.setAttributes( {
+			id: media.id,
+			url: media.url,
+		} );
+	}
+
 	return (
 		<>
 			<UploadIndicator
@@ -56,6 +67,13 @@ export function CoverControls( props: CoverControlsProps ) {
 				onInsert={ onInsertRecording }
 				recordingTypes={ [ 'image', 'video' ] }
 			/>
+			{ ! props.attributes.url ? (
+				<UploadRequestControls
+					onInsert={ onInsertFromUploadRequest }
+					allowedTypes={ [ 'image', 'video' ] }
+					accept={ [ 'image/*', 'video/*' ] }
+				/>
+			) : null }
 			<BulkOptimization attachments={ attachments } />
 			{ 'video' === props.attributes.backgroundType ? (
 				<MuteVideo
