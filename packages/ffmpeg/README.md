@@ -1,6 +1,6 @@
 # `@mexp/ffmpeg`
 
-Helper package to interact with [`ffmpeg.wasm`](https://github.com/ffmpegwasm/ffmpeg.wasm).
+Helper package to interact with [`Mediabunny`](https://mediabunny.dev/).
 
 ## API Reference
 

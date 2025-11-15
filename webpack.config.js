@@ -23,12 +23,8 @@ const {
 // eslint-disable-next-line import/no-extraneous-dependencies
 const { version: pdfJsVersion } = require( 'pdfjs-dist/package.json' );
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-const { version: ffmpegVersion } = require( '@ffmpeg/core/package.json' );
-
 const mediapipeCdnUrl = `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@${ mediaPipeVersion }`;
 const pdfJsCdnUrl = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${ pdfJsVersion }/build/pdf.worker.mjs`;
-const ffmpegCdnUrl = `https://cdn.jsdelivr.net/npm/@ffmpeg/core@${ ffmpegVersion }/dist/ffmpeg-core.js`;
 
 module.exports = {
 	...defaultConfig,
@@ -121,7 +117,6 @@ module.exports = {
 			filename: '[name].css',
 		} ),
 		new DefinePlugin( {
-			FFMPEG_CDN_URL: JSON.stringify( ffmpegCdnUrl ),
 			MEDIAPIPE_CDN_URL: JSON.stringify( mediapipeCdnUrl ),
 			PDFJS_CDN_URL: JSON.stringify( pdfJsCdnUrl ),
 		} ),

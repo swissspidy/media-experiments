@@ -1,14 +1,15 @@
 const GB_IN_BYTES = 1024 * 1024 * 1024;
 export const WASM_MEMORY_LIMIT = 2 * GB_IN_BYTES;
 
-// Roughly what ffmpeg.wasm supports.
-// See https://github.com/ffmpegwasm/ffmpeg.wasm-core#configuration
+// Supported audio and video MIME types for in-browser transcoding.
+// Based on Mediabunny capabilities and browser codec support via WebCodecs API.
 export const FFMPEG_SUPPORTED_AUDIO_VIDEO_MIME_TYPES = [
 	'audio/aac',
 	'audio/mp3',
 	'audio/mpeg',
 	'audio/ogg',
 	'audio/wav',
+	'audio/flac',
 	'video/3gpp',
 	'video/3gpp2',
 	'video/MP2T',
