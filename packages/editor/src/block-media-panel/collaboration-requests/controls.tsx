@@ -103,7 +103,13 @@ export function CollaborationRequestControls() {
 					method: 'POST',
 				} );
 			} catch {
-				// Silently fail
+				createErrorNotice(
+					__(
+						'Failed to update collaboration request capabilities.',
+						'media-experiments'
+					),
+					{ type: 'snackbar' }
+				);
 			}
 		}
 
