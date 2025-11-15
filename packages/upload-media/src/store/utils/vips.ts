@@ -83,7 +83,8 @@ export async function vipsResizeImage(
 	file: File,
 	resize: ImageSizeCrop,
 	smartCrop: boolean,
-	addSuffix: boolean
+	addSuffix: boolean,
+	focalPoint?: { x: number; y: number }
 ) {
 	const { buffer, width, height, originalWidth, originalHeight } =
 		await getVipsWorker().resizeImage(
@@ -91,7 +92,8 @@ export async function vipsResizeImage(
 			await file.arrayBuffer(),
 			file.type,
 			resize,
-			smartCrop
+			smartCrop,
+			focalPoint
 		);
 
 	let fileName = file.name;

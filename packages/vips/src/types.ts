@@ -1,5 +1,10 @@
 export type ItemId = string;
 
+export interface FocalPoint {
+	x: number;
+	y: number;
+}
+
 // Same type as in @mexp/upload-media
 // TODO: Move to shared package?
 export interface ImageSizeCrop {

@@ -1829,6 +1829,19 @@ export function resizeCropItem( id: QueueItemId, args?: ResizeCropItemArgs ) {
 
 		const addSuffix = Boolean( item.parentId );
 
+		// Get focal point from attachment if available, with validation
+		const rawFocalPoint = item.attachment?.meta?.mexp_focal_point;
+		const focalPoint =
+			rawFocalPoint &&
+			typeof rawFocalPoint.x === 'number' &&
+			typeof rawFocalPoint.y === 'number' &&
+			rawFocalPoint.x >= 0 &&
+			rawFocalPoint.x <= 1 &&
+			rawFocalPoint.y >= 0 &&
+			rawFocalPoint.y <= 1
+				? rawFocalPoint
+				: undefined;
+
 		const stop = start(
 			`Resize Item: ${ item.file.name } | ${ imageLibrary } | ${ thumbnailGeneration } | ${ args.resize.width }x${ args.resize.height }`
 		);
@@ -1855,7 +1868,8 @@ export function resizeCropItem( id: QueueItemId, args?: ResizeCropItemArgs ) {
 					item.file,
 					args.resize,
 					smartCrop,
-					addSuffix
+					addSuffix,
+					focalPoint
 				);
 			}
 

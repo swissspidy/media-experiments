@@ -22,6 +22,7 @@ import { UploadRequestControls } from './upload-requests/controls';
 import { GenerateCaptions } from './generate-caption';
 import { BulkOptimization } from '../components/bulk-optimization';
 import { useBlockAttachments } from '../utils/hooks';
+import { FocalPointControl } from './focal-point-control';
 
 type ImageControlsProps = ImageBlock &
 	Pick< BlockEditProps< ImageBlock[ 'attributes' ] >, 'setAttributes' >;
@@ -108,6 +109,12 @@ export function ImageControls( props: ImageControlsProps ) {
 				/>
 			) : null }
 			<BulkOptimization attachments={ attachments } />
+			{ props.attributes.id ? (
+				<FocalPointControl
+					id={ props.attributes.id }
+					url={ props.attributes.url }
+				/>
+			) : null }
 			<GenerateCaptions
 				url={ props.attributes.url }
 				onUpdateCaption={ onUpdateCaption }
