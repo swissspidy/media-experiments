@@ -2188,7 +2188,9 @@ export function generateMetadata( id: QueueItemId ) {
 					imageMetadata.focal_length ||
 					imageMetadata.iso ||
 					imageMetadata.shutter_speed ||
-					imageMetadata.orientation
+					imageMetadata.orientation ||
+					imageMetadata.latitude !== undefined ||
+					imageMetadata.longitude !== undefined
 				) {
 					/* eslint-disable camelcase */
 					additionalData.mexp_image_metadata = {
@@ -2216,6 +2218,12 @@ export function generateMetadata( id: QueueItemId ) {
 						} ),
 						...( imageMetadata.orientation && {
 							orientation: imageMetadata.orientation,
+						} ),
+						...( imageMetadata.latitude !== undefined && {
+							latitude: imageMetadata.latitude,
+						} ),
+						...( imageMetadata.longitude !== undefined && {
+							longitude: imageMetadata.longitude,
 						} ),
 					};
 					/* eslint-enable camelcase */
