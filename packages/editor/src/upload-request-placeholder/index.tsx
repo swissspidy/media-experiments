@@ -50,7 +50,44 @@ const addUploadRequestPlaceholder = createHigherOrderComponent(
 			// We pass inline explicitly to make sure it uses inline mode
 			return (
 				<UploadRequestControls
-					onInsert={ () => {} }
+					onInsert={ ( media ) => {
+						switch ( props.name ) {
+							case 'core/image':
+								props.setAttributes( {
+									url: media.url,
+									id: media.id,
+									alt: media.alt || '',
+								} );
+								break;
+							case 'core/audio':
+								props.setAttributes( {
+									src: media.url,
+									id: media.id,
+								} );
+								break;
+							case 'core/video':
+								props.setAttributes( {
+									src: media.url,
+									id: media.id,
+								} );
+								break;
+							case 'core/gallery':
+								// For gallery, append the new image to the images array
+								props.setAttributes( {
+									images: [
+										...( props.attributes.images || [] ),
+										{
+											url: media.url,
+											id: media.id,
+											alt: media.alt || '',
+										},
+									],
+								} );
+								break;
+							default:
+								break;
+						}
+					} }
 					inline={ true }
 					clientId={ props.clientId }
 				/>
