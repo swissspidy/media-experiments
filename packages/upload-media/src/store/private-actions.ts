@@ -147,6 +147,16 @@ const isSafari = Boolean(
 		! window.navigator.userAgent.includes( 'Chromium' )
 );
 
+/**
+ * Checks if a file is a HEIC/HEIF image.
+ *
+ * @param file File to check.
+ * @return Whether the file is a HEIC/HEIF image.
+ */
+function isHeicFile( file: File ): boolean {
+	return file.type === 'image/heic' || file.type === 'image/heif';
+}
+
 type ActionCreators = {
 	cancelItem: typeof cancelItem;
 	addItem: typeof addItem;
@@ -261,11 +271,9 @@ export function addItem( {
 
 		// Check if this is a HEIC file that the server can convert.
 		// If so, we don't want the server to generate thumbnails - we'll do it client-side.
-		const isHeicFile =
-			file.type === 'image/heic' || file.type === 'image/heif';
 		const supportsHeicOnServer = select.getSettings().supportsHeic;
 		const shouldDisableServerThumbnails =
-			isHeicFile && supportsHeicOnServer;
+			isHeicFile( file ) && supportsHeicOnServer;
 
 		dispatch< AddAction >( {
 			type: Type.Add,
@@ -913,23 +921,12 @@ export function prepareItem( id: QueueItemId ) {
 				}
 
 				// For HEIC files that will be converted server-side,
-				// upload first, then do all processing on the converted file.
+				// upload first, then dynamically add operations to fetch the converted file
+				// and do all processing on it.
 				if ( serverWillConvertHeic ) {
 					operations.push( OperationType.Upload );
-
-					operations.push( OperationType.GenerateMetadata );
-
-					const useAi: boolean = registry
-						.select( preferencesStore )
-						.get( PREFERENCES_NAME, 'useAi' );
-
-					if ( useAi ) {
-						operations.push( OperationType.GenerateCaptions );
-					}
-
-					operations.push( OperationType.ThumbnailGeneration );
-
-					// Done with server-side HEIC conversion flow.
+					// The rest of the operations (FetchRemoteFile, GenerateMetadata, GenerateCaptions, ThumbnailGeneration)
+					// will be added dynamically in uploadItem() after the upload completes.
 					break;
 				}
 
@@ -1933,7 +1930,7 @@ export function resizeCropItem( id: QueueItemId, args?: ResizeCropItemArgs ) {
  * @param id Item ID.
  */
 export function uploadItem( id: QueueItemId ) {
-	return async ( { select, dispatch }: ThunkArgs ) => {
+	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
 
 		const startTime = performance.now();
@@ -1980,30 +1977,43 @@ export function uploadItem( id: QueueItemId ) {
 				}
 
 				// If this was a HEIC file uploaded to a server that supports HEIC conversion,
-				// we need to fetch the converted JPEG file back to use for thumbnail generation.
-				const isHeicFile =
-					item.sourceFile.type === 'image/heic' ||
-					item.sourceFile.type === 'image/heif';
+				// we need to fetch the converted JPEG file back and then do all processing on it.
 				const supportsHeicOnServer = select.getSettings().supportsHeic;
 
-				if ( isHeicFile && supportsHeicOnServer && attachment.url ) {
-					// Add a FetchRemoteFile operation to get the converted JPEG.
-					// This will update item.file to the converted file so thumbnails can be generated.
+				if (
+					isHeicFile( item.sourceFile ) &&
+					supportsHeicOnServer &&
+					attachment.url
+				) {
+					// Add operations to fetch the converted JPEG and then process it.
 					const fileName =
 						attachment.mexp_filename || item.sourceFile.name;
+
+					const operations: Operation[] = [
+						[
+							OperationType.FetchRemoteFile,
+							{
+								url: attachment.url,
+								fileName,
+							},
+						],
+						OperationType.GenerateMetadata,
+					];
+
+					const useAi: boolean = registry
+						.select( preferencesStore )
+						.get( PREFERENCES_NAME, 'useAi' );
+
+					if ( useAi ) {
+						operations.push( OperationType.GenerateCaptions );
+					}
+
+					operations.push( OperationType.ThumbnailGeneration );
 
 					dispatch< AddOperationsAction >( {
 						type: Type.AddOperations,
 						id,
-						operations: [
-							[
-								OperationType.FetchRemoteFile,
-								{
-									url: attachment.url,
-									fileName,
-								},
-							],
-						],
+						operations,
 					} );
 				}
 
