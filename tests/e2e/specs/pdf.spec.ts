@@ -104,4 +104,102 @@ test.describe( 'PDF', () => {
 			maxDiffPixelRatio: 0.05,
 		} );
 	} );
+
+	test( 'PDF.js viewer for inline embeds', async ( {
+		admin,
+		page,
+		editor,
+		mediaUtils,
+	} ) => {
+		await admin.createNewPost();
+
+		await page.evaluate( () => {
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
+					'jpeg_outputFormat',
+					'jpeg'
+				);
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
+					'default_outputFormat',
+					'jpeg'
+				);
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set(
+					'media-experiments/preferences',
+					'imageLibrary',
+					'browser'
+				);
+		} );
+
+		// Verify cross-origin isolation is enabled
+		const crossOriginIsolated = await page.evaluate( () => {
+			return Boolean( window.crossOriginIsolated );
+		} );
+		expect( crossOriginIsolated ).toBe( true );
+
+		// Insert file block
+		await editor.insertBlock( { name: 'core/file' } );
+
+		const fileBlock = editor.canvas.locator(
+			'role=document[name="Block: File"i]'
+		);
+		await expect( fileBlock ).toBeVisible();
+
+		// Upload PDF
+		await mediaUtils.upload(
+			fileBlock.locator( 'data-testid=form-file-upload-input' ),
+			'wordpress-gsoc-flyer.pdf'
+		);
+
+		// Wait for upload to complete
+		await page.waitForFunction(
+			() =>
+				window.wp.data.select( 'media-experiments/upload' ).getItems()
+					.length === 0,
+			undefined,
+			{
+				timeout: 30_000,
+			}
+		);
+
+		// Enable display preview
+		await editor.clickBlockToolbarButton( 'Show more options' );
+		const showInlinePreviewButton = page.getByRole( 'menuitem', {
+			name: /Show inline preview/i,
+		} );
+		await showInlinePreviewButton.click();
+
+		// Wait for the PDF viewer to appear
+		const pdfViewer = editor.canvas.locator( '.mexp-pdf-viewer' );
+		await expect( pdfViewer ).toBeVisible( { timeout: 10000 } );
+
+		// Check that the load button is visible (lazy loading)
+		const loadButton = editor.canvas.locator(
+			'.mexp-pdf-viewer__load-button'
+		);
+		await expect( loadButton ).toBeVisible();
+
+		// Click load button
+		await loadButton.click();
+
+		// Wait for PDF to load and canvas to appear
+		const canvas = editor.canvas.locator( '.mexp-pdf-viewer__canvas' );
+		await expect( canvas ).toBeVisible( { timeout: 10000 } );
+
+		// Check that navigation controls appear
+		const controls = editor.canvas.locator( '.mexp-pdf-viewer__controls' );
+		await expect( controls ).toBeVisible();
+
+		// Verify the original object element is hidden
+		const objectElement = editor.canvas.locator(
+			'object[type="application/pdf"]'
+		);
+		await expect( objectElement ).toHaveCSS( 'display', 'none' );
+	} );
 } );
