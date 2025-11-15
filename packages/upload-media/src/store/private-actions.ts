@@ -1301,7 +1301,7 @@ export function generateVideoSizes( id: QueueItemId ) {
 						post: attachment.id,
 						// Reference the same upload_request if needed.
 						upload_request: item.additionalData.upload_request,
-						image_size: name, // We reuse image_size for video sizes
+						media_size: name, // 'media_size' is used for both image and video sizes
 						convert_format: false,
 					},
 					operations: [
