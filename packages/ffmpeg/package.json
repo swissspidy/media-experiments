@@ -32,7 +32,6 @@
 	},
 	"types": "dist-types/index.d.ts",
 	"dependencies": {
-		"mediabunny": "^1.24.6",
-		"uuid": "^11.1.0"
+		"mediabunny": "^1.24.6"
 	}
 }
