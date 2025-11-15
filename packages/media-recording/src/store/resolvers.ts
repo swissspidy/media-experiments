@@ -210,6 +210,16 @@ export function getMediaStream() {
 					if ( categoryMask ) {
 						const maskData = categoryMask.getAsUint8Array();
 
+						// Validate mask dimensions match canvas dimensions
+						const expectedLength = canvas.width * canvas.height;
+						if (maskData.length !== expectedLength) {
+							console.warn(
+								`Mask dimension mismatch: expected ${expectedLength}, got ${maskData.length}`
+							);
+							// Skip this frame and schedule the next one
+							requestAnimationFrame(sendFrame);
+							return;
+						}
 						// Draw the blurred background first
 						ctx.save();
 						ctx.filter = `blur(${ BACKGROUND_BLUR_PX }px)`;
