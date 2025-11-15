@@ -86,9 +86,24 @@ class REST_Collaboration_Requests_Controller extends WP_REST_Posts_Controller {
 	 * @phpstan-param WP_REST_Request<CollaborationRequest> $request
 	 */
 	public function create_item( $request ) {
-		$request['slug'] = uniqid();
+		$request['slug'] = wp_generate_password( 32, false );
 
-		return parent::create_item( $request );
+		$response = parent::create_item( $request );
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		// Create a temporary user for this collaboration request.
+		$post_id = $response->data['id'] ?? 0;
+		if ( $post_id > 0 ) {
+			$user_id = \MediaExperiments\create_temporary_collaboration_user( $post_id );
+			if ( ! is_wp_error( $user_id ) ) {
+				update_post_meta( $post_id, 'mexp_temp_user_id', $user_id );
+			}
+		}
+
+		return $response;
 	}
 
 	/**

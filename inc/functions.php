@@ -1442,6 +1442,58 @@ function register_collaboration_request_post_type(): void {
 			'single'       => true,
 		]
 	);
+
+	register_post_meta(
+		'mexp-collab-request',
+		'mexp_temp_user_id',
+		[
+			'type'         => 'integer',
+			'description'  => __( 'Temporary user ID for this collaboration request.', 'media-experiments' ),
+			'show_in_rest' => false,
+			'single'       => true,
+		]
+	);
+}
+
+/**
+ * Creates a temporary collaboration user.
+ *
+ * @param int $collab_request_id The collaboration request post ID.
+ * @return int|\WP_Error User ID on success, WP_Error on failure.
+ */
+function create_temporary_collaboration_user( int $collab_request_id ) {
+	// Generate a random username like "Guest_abc123".
+	$random_suffix = wp_generate_password( 8, false, false );
+	$username      = 'mexp_guest_' . strtolower( $random_suffix );
+
+	// Generate a random password.
+	$password = wp_generate_password( 32, true, true );
+
+	// Generate a random display name.
+	$adjectives   = [ 'Happy', 'Clever', 'Swift', 'Bright', 'Noble', 'Wise', 'Bold', 'Keen' ];
+	$animals      = [ 'Panda', 'Fox', 'Owl', 'Dolphin', 'Eagle', 'Tiger', 'Wolf', 'Bear' ];
+	$display_name = $adjectives[ array_rand( $adjectives ) ] . ' ' . $animals[ array_rand( $animals ) ];
+
+	$user_id = wp_create_user( $username, $password );
+
+	if ( is_wp_error( $user_id ) ) {
+		return $user_id;
+	}
+
+	// Update user meta.
+	wp_update_user(
+		[
+			'ID'           => $user_id,
+			'display_name' => $display_name,
+			'role'         => '', // No role assigned.
+		]
+	);
+
+	// Store collaboration request ID in user meta.
+	update_user_meta( $user_id, 'mexp_collaboration_request_id', $collab_request_id );
+	update_user_meta( $user_id, 'mexp_is_temp_collab_user', true );
+
+	return $user_id;
 }
 
 /**
@@ -1504,29 +1556,47 @@ function get_collaboration_request_by_slug( string $slug ): ?WP_Post {
  * @phpstan-return array<string,bool>
  */
 function filter_user_has_cap_for_collaboration( array $allcaps, array $caps, array $args, $user ): array {
-	$collab_slug = get_current_collaboration_request_slug();
+	// Check if this is a temporary collaboration user.
+	$is_temp_user = get_user_meta( $user->ID, 'mexp_is_temp_collab_user', true );
 
-	if ( ! $collab_slug ) {
+	if ( ! $is_temp_user ) {
 		return $allcaps;
 	}
 
-	$collab_request = get_collaboration_request_by_slug( $collab_slug );
+	// Get the collaboration request ID from user meta.
+	$collab_request_id = get_user_meta( $user->ID, 'mexp_collaboration_request_id', true );
 
-	if ( ! $collab_request instanceof WP_Post ) {
+	if ( ! $collab_request_id ) {
 		return $allcaps;
+	}
+
+	$collab_request = get_post( $collab_request_id );
+
+	if ( ! $collab_request instanceof WP_Post || 'mexp-collab-request' !== $collab_request->post_type ) {
+		return $allcaps;
+	}
+
+	// Get the target post ID from user meta.
+	$target_post_id = get_user_meta( $user->ID, 'mexp_target_post_id', true );
+
+	if ( ! $target_post_id ) {
+		// Fallback to post_parent if not set yet.
+		$target_post_id = $collab_request->post_parent;
 	}
 
 	// Only apply if we're checking capabilities for the specific post.
 	$post_id = isset( $args[2] ) ? $args[2] : 0;
 
-	if ( $post_id !== $collab_request->post_parent ) {
+	if ( $post_id !== (int) $target_post_id ) {
 		return $allcaps;
 	}
 
 	$allowed_capabilities = get_post_meta( $collab_request->ID, 'mexp_allowed_capabilities', true );
 
-	if ( ! is_array( $allowed_capabilities ) ) {
+	if ( ! is_string( $allowed_capabilities ) || '' === $allowed_capabilities ) {
 		$allowed_capabilities = [];
+	} else {
+		$allowed_capabilities = explode( ',', $allowed_capabilities );
 	}
 
 	// Grant the allowed capabilities for this specific post.
@@ -1631,6 +1701,14 @@ function delete_old_collaboration_requests(): void {
 	$posts = get_posts( $args );
 
 	foreach ( $posts as $post ) {
+		// Delete associated temporary user.
+		$temp_user_id = get_post_meta( $post->ID, 'mexp_temp_user_id', true );
+
+		if ( $temp_user_id && is_numeric( $temp_user_id ) ) {
+			require_once ABSPATH . 'wp-admin/includes/user.php';
+			wp_delete_user( (int) $temp_user_id );
+		}
+
 		wp_delete_post( $post->ID, true );
 	}
 }
