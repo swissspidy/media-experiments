@@ -165,6 +165,13 @@ function useAttachmentsWithEntityRecords(
 		.filter( ( attachment ) => attachment !== undefined );
 }
 
+/**
+ * Hook to fetch attachment data from one or more blocks.
+ *
+ * @param {string|string[]|undefined} clientIds - Optional. A single client ID string, an array of client IDs,
+ *        or undefined to fetch all blocks. For gallery blocks, their inner blocks are automatically expanded.
+ * @return {Array} Array of attachment data with server-side metadata.
+ */
 export function useBlockAttachments( clientIds?: string | string[] ) {
 	const { updateBlockAttributes } = useDispatch( blockEditorStore );
 	const { editEntityRecord } = useDispatch( coreStore );
