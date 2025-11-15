@@ -879,9 +879,9 @@ function register_attachment_post_meta(): void {
 		'attachment',
 		'mexp_focal_point',
 		[
-			'type'         => 'object',
-			'description'  => __( 'The focal point for the image.', 'media-experiments' ),
-			'show_in_rest' => [
+			'type'              => 'object',
+			'description'       => __( 'The focal point for the image.', 'media-experiments' ),
+			'show_in_rest'      => [
 				'schema' => [
 					'type'       => 'object',
 					'properties' => [
@@ -894,14 +894,17 @@ function register_attachment_post_meta(): void {
 					],
 				],
 			],
-			'single'       => true,
-			'default'      => [
+			'single'            => true,
+			'default'           => [
 				'x' => 0.5,
 				'y' => 0.5,
 			],
-			'sanitize_callback' => function( $meta_value ) {
+			'sanitize_callback' => function ( $meta_value ) {
 				if ( ! is_array( $meta_value ) ) {
-					return [ 'x' => 0.5, 'y' => 0.5 ];
+					return [
+						'x' => 0.5,
+						'y' => 0.5,
+					];
 				}
 				$x = isset( $meta_value['x'] ) ? (float) $meta_value['x'] : 0.5;
 				$y = isset( $meta_value['y'] ) ? (float) $meta_value['y'] : 0.5;
@@ -910,6 +913,7 @@ function register_attachment_post_meta(): void {
 					'y' => max( 0, min( 1, $y ) ),
 				];
 			},
+		]
 	);
 }
 

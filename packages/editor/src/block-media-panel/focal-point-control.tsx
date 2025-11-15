@@ -35,9 +35,23 @@ export function FocalPointControl( { id, url }: FocalPointControlProps ) {
 
 	const { mediaFocalPoint, isLoading, isSaving } = useSelect(
 		( select ) => {
-			// @ts-ignore
 			const { getEntityRecord, isResolving, isSavingEntityRecord } =
-				select( coreStore );
+				select( coreStore ) as {
+					getEntityRecord: (
+						entityType: string,
+						entityName: string,
+						id: number
+					) => any;
+					isResolving: (
+						selectorName: string,
+						args: any[]
+					) => boolean;
+					isSavingEntityRecord: (
+						entityType: string,
+						entityName: string,
+						id: number
+					) => boolean;
+				};
 			const attachment = getEntityRecord( 'postType', 'attachment', id );
 
 			return {
@@ -86,7 +100,9 @@ export function FocalPointControl( { id, url }: FocalPointControlProps ) {
 
 			setHasChanged( false );
 			setSuccess( true );
-		} catch {
+		} catch ( err ) {
+			// eslint-disable-next-line no-console
+			console.error( 'Failed to save focal point:', err );
 			setError(
 				__(
 					'Failed to save focal point. Please try again.',

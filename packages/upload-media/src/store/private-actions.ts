@@ -1835,8 +1835,10 @@ export function resizeCropItem( id: QueueItemId, args?: ResizeCropItemArgs ) {
 			rawFocalPoint &&
 			typeof rawFocalPoint.x === 'number' &&
 			typeof rawFocalPoint.y === 'number' &&
-			rawFocalPoint.x >= 0 && rawFocalPoint.x <= 1 &&
-			rawFocalPoint.y >= 0 && rawFocalPoint.y <= 1
+			rawFocalPoint.x >= 0 &&
+			rawFocalPoint.x <= 1 &&
+			rawFocalPoint.y >= 0 &&
+			rawFocalPoint.y <= 1
 				? rawFocalPoint
 				: undefined;
 

@@ -294,8 +294,12 @@ export async function resizeImage(
 		let left = 0;
 		let top = 0;
 
-		// Use focal point if provided, otherwise use crop position
-		if ( focalPoint ) {
+		// Use focal point if provided and image is larger than crop dimensions
+		if (
+			focalPoint &&
+			image.width >= resize.width &&
+			image.height >= resize.height
+		) {
 			// Convert focal point (0-1 range) to pixel coordinates
 			// Focal point represents the center of what should be kept
 			const focalX = focalPoint.x * image.width;
