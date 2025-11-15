@@ -31,6 +31,7 @@
 		"no-undef": "off",
 		"no-undefined": "off",
 		"no-void": [ "error", { "allowAsStatement": true } ],
+		"no-warning-comments": "off",
 		"require-await": "off",
 		"import/extensions": "off",
 		"import/max-dependencies": "off",
