@@ -81,19 +81,23 @@ function PerBlockControls( props: PerBlockControlsProps ) {
 	}
 }
 
-function MultiSelectionControls() {
-	const { selectedClientIds, selectedBlockNames } = useSelect( ( select ) => {
-		const { getSelectedBlockClientIds, getBlockName } =
-			select( blockEditorStore );
-		const clientIds = getSelectedBlockClientIds();
+function MultiSelectionControls( {
+	selectedClientIds,
+}: {
+	selectedClientIds: string[];
+} ) {
+	const { selectedBlockNames } = useSelect(
+		( select ) => {
+			const { getBlockName } = select( blockEditorStore );
 
-		return {
-			selectedClientIds: clientIds,
-			selectedBlockNames: clientIds
-				.map( ( clientId ) => getBlockName( clientId ) )
-				.filter( ( name ): name is string => name !== null ),
-		};
-	}, [] );
+			return {
+				selectedBlockNames: selectedClientIds
+					.map( ( clientId ) => getBlockName( clientId ) )
+					.filter( ( name ): name is string => name !== null ),
+			};
+		},
+		[ selectedClientIds ]
+	);
 
 	// Always call hooks unconditionally
 	const attachments = useBlockAttachments( selectedClientIds );
@@ -143,7 +147,9 @@ const addMediaPanel = createHigherOrderComponent(
 								'media-experiments'
 							) }
 						>
-							<MultiSelectionControls />
+							<MultiSelectionControls
+								selectedClientIds={ selectedClientIds }
+							/>
 						</PanelBody>
 					</InspectorControls>
 				</>

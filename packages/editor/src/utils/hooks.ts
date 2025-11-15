@@ -18,6 +18,7 @@ import { isBlobURL } from '@wordpress/blob';
 import { store as editorStore } from '@wordpress/editor';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as blocksStore } from '@wordpress/blocks';
+import { useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -169,7 +170,7 @@ function useAttachmentsWithEntityRecords(
  * Hook to fetch attachment data from one or more blocks.
  *
  * @param {string|string[]|undefined} clientIds - Optional. A single client ID string, an array of client IDs,
- *        or undefined to fetch all blocks. For gallery blocks, their inner blocks are automatically expanded.
+ *                                              or undefined to fetch all blocks. For gallery blocks, their inner blocks are automatically expanded.
  * @return {Array} Array of attachment data with server-side metadata.
  */
 export function useBlockAttachments( clientIds?: string | string[] ) {
@@ -197,16 +198,29 @@ export function useBlockAttachments( clientIds?: string | string[] ) {
 		return canUserEdit ? siteSettings?.site_logo : undefined;
 	}, [] );
 
+	// Memoize the clientIds to avoid unnecessary re-renders when an array is passed
+	const memoizedClientIds = useMemo( () => {
+		if ( ! clientIds ) {
+			return null;
+		}
+		if ( Array.isArray( clientIds ) ) {
+			return clientIds.length === 0 ? null : clientIds;
+		}
+		return clientIds;
+	}, [ Array.isArray( clientIds ) ? clientIds.join( ',' ) : clientIds ] );
+
 	const blocks = useSelect(
 		( select ) => {
-			if ( ! clientIds ) {
+			if ( ! memoizedClientIds ) {
 				return select( blockEditorStore )
 					.getClientIdsWithDescendants()
 					.map( ( id ) => select( blockEditorStore ).getBlock( id ) )
 					.filter( ( block ) => block !== null );
 			}
 
-			const ids = Array.isArray( clientIds ) ? clientIds : [ clientIds ];
+			const ids = Array.isArray( memoizedClientIds )
+				? memoizedClientIds
+				: [ memoizedClientIds ];
 			const allBlocks = [];
 
 			for ( const id of ids ) {
@@ -225,7 +239,7 @@ export function useBlockAttachments( clientIds?: string | string[] ) {
 
 			return allBlocks;
 		},
-		[ clientIds ]
+		[ memoizedClientIds ]
 	);
 
 	let attachments = blocks
@@ -315,7 +329,7 @@ export function useBlockAttachments( clientIds?: string | string[] ) {
 		} )
 		.filter( ( attachment ) => attachment !== null );
 
-	if ( ! clientIds && featuredImage ) {
+	if ( ! memoizedClientIds && featuredImage ) {
 		attachments.unshift( {
 			filesize: 0,
 			filename: '',
