@@ -89,9 +89,9 @@ function MultiSelectionControls() {
 
 		return {
 			selectedClientIds: clientIds,
-			selectedBlockNames: clientIds.map( ( clientId ) =>
-				getBlockName( clientId )
-			),
+			selectedBlockNames: clientIds
+				.map( ( clientId ) => getBlockName( clientId ) )
+				.filter( ( name ): name is string => name !== null ),
 		};
 	}, [] );
 
