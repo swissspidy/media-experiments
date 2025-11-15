@@ -165,7 +165,7 @@ function useAttachmentsWithEntityRecords(
 		.filter( ( attachment ) => attachment !== undefined );
 }
 
-export function useBlockAttachments( clientId?: string ) {
+export function useBlockAttachments( clientIds?: string | string[] ) {
 	const { updateBlockAttributes } = useDispatch( blockEditorStore );
 	const { editEntityRecord } = useDispatch( coreStore );
 
@@ -192,26 +192,33 @@ export function useBlockAttachments( clientId?: string ) {
 
 	const blocks = useSelect(
 		( select ) => {
-			if ( ! clientId ) {
+			if ( ! clientIds ) {
 				return select( blockEditorStore )
 					.getClientIdsWithDescendants()
 					.map( ( id ) => select( blockEditorStore ).getBlock( id ) )
 					.filter( ( block ) => block !== null );
 			}
 
-			const block = select( blockEditorStore ).getBlock( clientId );
+			const ids = Array.isArray( clientIds ) ? clientIds : [ clientIds ];
+			const allBlocks = [];
 
-			if ( ! block ) {
-				return EMPTY_ARRAY;
+			for ( const id of ids ) {
+				const block = select( blockEditorStore ).getBlock( id );
+
+				if ( ! block ) {
+					continue;
+				}
+
+				if ( block.name === 'core/gallery' ) {
+					allBlocks.push( ...block.innerBlocks );
+				} else {
+					allBlocks.push( block );
+				}
 			}
 
-			if ( block.name === 'core/gallery' ) {
-				return block.innerBlocks;
-			}
-
-			return [ block ];
+			return allBlocks;
 		},
-		[ clientId ]
+		[ clientIds ]
 	);
 
 	let attachments = blocks
@@ -301,7 +308,7 @@ export function useBlockAttachments( clientId?: string ) {
 		} )
 		.filter( ( attachment ) => attachment !== null );
 
-	if ( ! clientId && featuredImage ) {
+	if ( ! clientIds && featuredImage ) {
 		attachments.unshift( {
 			filesize: 0,
 			filename: '',

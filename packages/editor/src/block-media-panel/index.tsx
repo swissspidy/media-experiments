@@ -4,9 +4,13 @@
 import { addFilter } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { InspectorControls } from '@wordpress/block-editor';
+import {
+	InspectorControls,
+	store as blockEditorStore,
+} from '@wordpress/block-editor';
 import { PanelBody } from '@wordpress/components';
 import { media } from '@wordpress/icons';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -20,12 +24,24 @@ import { GalleryControls } from './gallery-controls';
 import { MediaTextControls } from './media-text-controls';
 import { PostFeaturedImageControls } from './post-featured-image-controls';
 import { SiteLogoControls } from './site-logo-controls';
+import { BulkOptimization } from '../components/bulk-optimization';
+import { useBlockAttachments } from '../utils/hooks';
 import type { MediaPanelProps } from '../types';
 
 const SUPPORTED_BLOCKS = [
 	'core/image',
 	'core/audio',
 	'core/video',
+	'core/media-text',
+	'core/gallery',
+	'core/cover',
+	'core/post-featured-image',
+	'core/site-logo',
+];
+
+// Blocks that can have image attachments for bulk optimization
+const IMAGE_BLOCKS = [
+	'core/image',
 	'core/media-text',
 	'core/gallery',
 	'core/cover',
@@ -65,8 +81,75 @@ function PerBlockControls( props: PerBlockControlsProps ) {
 	}
 }
 
+function MultiSelectionControls() {
+	const { selectedClientIds, selectedBlockNames } = useSelect( ( select ) => {
+		const { getSelectedBlockClientIds, getBlockName } =
+			select( blockEditorStore );
+		const clientIds = getSelectedBlockClientIds();
+
+		return {
+			selectedClientIds: clientIds,
+			selectedBlockNames: clientIds.map( ( clientId ) =>
+				getBlockName( clientId )
+			),
+		};
+	}, [] );
+
+	// Always call hooks unconditionally
+	const attachments = useBlockAttachments( selectedClientIds );
+
+	// Check if we have multiple blocks selected
+	if ( selectedClientIds.length <= 1 ) {
+		return null;
+	}
+
+	// Check if all selected blocks are image blocks
+	const allImageBlocks = selectedBlockNames.every( ( name ) =>
+		IMAGE_BLOCKS.includes( name )
+	);
+
+	if ( ! allImageBlocks ) {
+		return null;
+	}
+
+	if ( ! attachments.length ) {
+		return null;
+	}
+
+	return <BulkOptimization attachments={ attachments } />;
+}
+
 const addMediaPanel = createHigherOrderComponent(
 	( BlockEdit ) => ( props: PerBlockControlsProps ) => {
+		const { selectedClientIds } = useSelect(
+			( select ) => ( {
+				selectedClientIds:
+					select( blockEditorStore ).getSelectedBlockClientIds(),
+			} ),
+			[]
+		);
+
+		// If multiple blocks are selected, show multi-selection controls
+		if ( selectedClientIds.length > 1 ) {
+			return (
+				<>
+					<BlockEdit { ...props } />
+					<InspectorControls>
+						<PanelBody
+							initialOpen={ true }
+							icon={ media }
+							title={ __(
+								'Media Experiments',
+								'media-experiments'
+							) }
+						>
+							<MultiSelectionControls />
+						</PanelBody>
+					</InspectorControls>
+				</>
+			);
+		}
+
 		if ( ! SUPPORTED_BLOCKS.includes( props.name ) ) {
 			return <BlockEdit { ...props } />;
 		}
