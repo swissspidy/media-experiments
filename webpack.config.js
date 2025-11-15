@@ -18,7 +18,7 @@ const hasReactFastRefresh = hasArgInCLI( '--hot' ) && ! isProduction;
 const {
 	version: mediaPipeVersion,
 	// eslint-disable-next-line import/no-extraneous-dependencies
-} = require( '@mediapipe/selfie_segmentation/package.json' );
+} = require( '@mediapipe/tasks-vision/package.json' );
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 const { version: pdfJsVersion } = require( 'pdfjs-dist/package.json' );
@@ -26,7 +26,7 @@ const { version: pdfJsVersion } = require( 'pdfjs-dist/package.json' );
 // eslint-disable-next-line import/no-extraneous-dependencies
 const { version: ffmpegVersion } = require( '@ffmpeg/core/package.json' );
 
-const mediapipeCdnUrl = `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@${ mediaPipeVersion }`;
+const mediapipeCdnUrl = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${ mediaPipeVersion }`;
 const pdfJsCdnUrl = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${ pdfJsVersion }/build/pdf.worker.mjs`;
 const ffmpegCdnUrl = `https://cdn.jsdelivr.net/npm/@ffmpeg/core@${ ffmpegVersion }/dist/ffmpeg-core.js`;
 

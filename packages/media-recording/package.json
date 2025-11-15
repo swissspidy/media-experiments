@@ -30,7 +30,7 @@
 	},
 	"types": "dist-types/index.d.ts",
 	"dependencies": {
-		"@mediapipe/selfie_segmentation": "^0.1.1675465747",
+		"@mediapipe/tasks-vision": "^0.10.22-rc.20250304",
 		"@wordpress/blob": "^4.34.0",
 		"@wordpress/data": "^10.11.0",
 		"@wordpress/date": "^5.13.0",

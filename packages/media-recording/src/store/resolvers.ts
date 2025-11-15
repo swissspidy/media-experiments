@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import type { Results } from '@mediapipe/selfie_segmentation';
-
-/**
  * Internal dependencies
  */
 import { BACKGROUND_BLUR_PX } from './constants';
@@ -135,62 +130,49 @@ export function getMediaStream() {
 			// See https://googlechrome.github.io/samples/image-capture/background-blur.html
 
 			if ( videoEffect === 'blur' ) {
-				const { SelfieSegmentation } = await import(
-					/* webpackChunkName: "chunk-selfie-segmentation" */ '@mediapipe/selfie_segmentation'
+				const { ImageSegmenter, FilesetResolver } = await import(
+					/* webpackChunkName: "chunk-image-segmenter" */ '@mediapipe/tasks-vision'
 				);
 
-				const selfieSegmentation = new SelfieSegmentation( {
-					locateFile: ( file ) => `${ MEDIAPIPE_CDN_URL }/${ file }`,
-				} );
+				const vision = await FilesetResolver.forVisionTasks(
+					`${ MEDIAPIPE_CDN_URL }/wasm`
+				);
 
-				selfieSegmentation.setOptions( {
-					modelSelection: 1,
-				} );
+				// Use the selfie segmentation model from MediaPipe solutions
+				const modelAssetPath =
+					'https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/latest/selfie_segmenter.tflite';
 
-				await selfieSegmentation.initialize();
-
-				const onSelfieSegmentationResults = ( results: Results ) => {
-					if ( ! results.image || results.image.width === 0 ) {
-						return;
+				const imageSegmenter = await ImageSegmenter.createFromOptions(
+					vision,
+					{
+						baseOptions: {
+							modelAssetPath,
+							delegate: 'GPU',
+						},
+						runningMode: 'VIDEO',
+						outputCategoryMask: true,
+						outputConfidenceMasks: false,
 					}
-
-					ctx.save();
-
-					ctx.globalCompositeOperation = 'copy';
-					ctx.filter = `blur(${ BACKGROUND_BLUR_PX }px)`;
-					ctx.drawImage(
-						results.segmentationMask,
-						0,
-						0,
-						canvas.width,
-						canvas.height
+				).catch(async (error) => {
+					// Fallback to CPU if GPU fails
+					console.warn('GPU delegate failed, falling back to CPU:', error);
+					return ImageSegmenter.createFromOptions(
+						vision,
+						{
+							baseOptions: {
+								modelAssetPath,
+								delegate: 'CPU',
+							},
+							runningMode: 'VIDEO',
+							outputCategoryMask: true,
+							outputConfidenceMasks: false,
+						}
 					);
+				});
 
-					ctx.globalCompositeOperation = 'source-in';
-					ctx.filter = 'none';
-					ctx.drawImage(
-						results.image,
-						0,
-						0,
-						canvas.width,
-						canvas.height
-					);
+				let lastVideoTime = -1;
 
-					ctx.globalCompositeOperation = 'destination-over';
-					ctx.filter = `blur(${ BACKGROUND_BLUR_PX }px)`;
-					ctx.drawImage(
-						results.image,
-						0,
-						0,
-						canvas.width,
-						canvas.height
-					);
-
-					ctx.restore();
-				};
-
-				selfieSegmentation.onResults( onSelfieSegmentationResults );
-				const sendFrame = async () => {
+				const sendFrame = () => {
 					if (
 						select.getVideoEffect() !== 'blur' ||
 						! [
@@ -202,21 +184,96 @@ export function getMediaStream() {
 							'countdown',
 						].includes( select.getRecordingStatus() )
 					) {
+						imageSegmenter.close();
 						for ( const track of stream.getTracks() ) {
 							track.stop();
 						}
 						return;
 					}
 
-					try {
-						await selfieSegmentation.send( { image: video } );
-					} catch {
-						// We can't do much about the WASM memory issue.
+					const startTimeMs = video.currentTime * 1000;
+
+					if ( video.currentTime !== lastVideoTime ) {
+						lastVideoTime = video.currentTime;
+						try {
+							imageSegmenter.segmentForVideo(
+								video,
+								startTimeMs
+							);
+						} catch {
+							// We can't do much about the WASM memory issue.
+						}
+					}
+
+					const categoryMask = imageSegmenter.categoryMask;
+
+					if ( categoryMask ) {
+						const maskData = categoryMask.getAsUint8Array();
+
+						// Validate mask dimensions match canvas dimensions
+						const expectedLength = canvas.width * canvas.height;
+						if ( maskData.length !== expectedLength ) {
+							console.warn(
+								`Mask dimension mismatch: expected ${ expectedLength }, got ${ maskData.length }`
+							);
+							// Skip this frame and schedule the next one
+							requestAnimationFrame( sendFrame );
+							return;
+						}
+
+						// Draw blurred background
+						ctx.filter = `blur(${ BACKGROUND_BLUR_PX }px)`;
+						ctx.drawImage(
+							video,
+							0,
+							0,
+							canvas.width,
+							canvas.height
+						);
+						ctx.filter = 'none';
+
+						// Create a temporary canvas for the mask
+						const maskCanvas = document.createElement( 'canvas' );
+						maskCanvas.width = canvas.width;
+						maskCanvas.height = canvas.height;
+						const maskCtx = maskCanvas.getContext( '2d' );
+
+						if ( ! maskCtx ) {
+							requestAnimationFrame( sendFrame );
+							return;
+						}
+
+						// Draw mask to temporary canvas
+						const maskImageData = maskCtx.createImageData(
+							canvas.width,
+							canvas.height
+						);
+						for ( let i = 0; i < maskData.length; i++ ) {
+							const alpha = maskData[ i ] === 0 ? 255 : 0; // Invert: 0 = person (opaque), other = background (transparent)
+							const pixelIndex = i * 4;
+							maskImageData.data[ pixelIndex + 3 ] = alpha; // Alpha channel only
+						}
+						maskCtx.putImageData( maskImageData, 0, 0 );
+
+						// Use compositing to apply sharp foreground
+						ctx.globalCompositeOperation = 'destination-in';
+						ctx.drawImage( maskCanvas, 0, 0 );
+
+						ctx.globalCompositeOperation = 'destination-over';
+						ctx.drawImage(
+							video,
+							0,
+							0,
+							canvas.width,
+							canvas.height
+						);
+
+						ctx.globalCompositeOperation = 'source-over';
 					}
 
 					requestAnimationFrame( sendFrame );
 				};
-				await sendFrame();
+				sendFrame();
 			} else {
 				const sendFrame = () => {
 					if (
