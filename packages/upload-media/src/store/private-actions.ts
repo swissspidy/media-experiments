@@ -1383,7 +1383,7 @@ async function findBestImageFormat(
 
 	// If no conversions succeeded, throw an error
 	if ( results.length === 0 ) {
-		throw new Error( 'All format conversions failed' );
+		throw new Error( `All format conversions failed. Attempted formats: ${ formats.join(', ') }` );
 	}
 
 	// Find the format with the smallest file size
