@@ -76,7 +76,6 @@ export function InlinePlaceholder( {
 							__nextHasNoMarginBottom
 							value={ uploadRequest.link }
 							readOnly={ true }
-							onChange={ () => {} }
 							onFocus={ ( event ) => {
 								event.target.select();
 							} }
