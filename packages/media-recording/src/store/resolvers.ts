@@ -212,16 +212,16 @@ export function getMediaStream() {
 
 						// Validate mask dimensions match canvas dimensions
 						const expectedLength = canvas.width * canvas.height;
-						if (maskData.length !== expectedLength) {
+						if ( maskData.length !== expectedLength ) {
 							console.warn(
-								`Mask dimension mismatch: expected ${expectedLength}, got ${maskData.length}`
+								`Mask dimension mismatch: expected ${ expectedLength }, got ${ maskData.length }`
 							);
 							// Skip this frame and schedule the next one
-							requestAnimationFrame(sendFrame);
+							requestAnimationFrame( sendFrame );
 							return;
 						}
-						// Draw the blurred background first
-						ctx.save();
+
+						// Draw blurred background
 						ctx.filter = `blur(${ BACKGROUND_BLUR_PX }px)`;
 						ctx.drawImage(
 							video,
@@ -230,19 +230,36 @@ export function getMediaStream() {
 							canvas.width,
 							canvas.height
 						);
-						ctx.restore();
+						ctx.filter = 'none';
 
-						// Get the blurred background
-						const blurredBackground = ctx.getImageData(
-							0,
-							0,
+						// Create a temporary canvas for the mask
+						const maskCanvas = document.createElement( 'canvas' );
+						maskCanvas.width = canvas.width;
+						maskCanvas.height = canvas.height;
+						const maskCtx = maskCanvas.getContext( '2d' );
+
+						if ( ! maskCtx ) {
+							requestAnimationFrame( sendFrame );
+							return;
+						}
+
+						// Draw mask to temporary canvas
+						const maskImageData = maskCtx.createImageData(
 							canvas.width,
 							canvas.height
 						);
+						for ( let i = 0; i < maskData.length; i++ ) {
+							const alpha = maskData[ i ] === 0 ? 255 : 0; // Invert: 0 = person (opaque), other = background (transparent)
+							const pixelIndex = i * 4;
+							maskImageData.data[ pixelIndex + 3 ] = alpha; // Alpha channel only
+						}
+						maskCtx.putImageData( maskImageData, 0, 0 );
 
-						// Get the original (sharp) video frame
-						ctx.save();
-						ctx.filter = 'none';
+						// Use compositing to apply sharp foreground
+						ctx.globalCompositeOperation = 'destination-in';
+						ctx.drawImage( maskCanvas, 0, 0 );
+
+						ctx.globalCompositeOperation = 'destination-over';
 						ctx.drawImage(
 							video,
 							0,
@@ -250,59 +267,8 @@ export function getMediaStream() {
 							canvas.width,
 							canvas.height
 						);
-						ctx.restore();
 
-						const originalFrame = ctx.getImageData(
-							0,
-							0,
-							canvas.width,
-							canvas.height
-						);
-
-						// Composite the images based on the mask
-						const outputData = new Uint8ClampedArray(
-							canvas.width * canvas.height * 4
-						);
-
-						for (
-							let i = 0;
-							i < canvas.width * canvas.height;
-							i++
-						) {
-							const maskValue = maskData[ i ];
-							const pixelIndex = i * 4;
-
-							// If mask value is 0, it's the person (foreground)
-							// Otherwise it's the background
-							if ( maskValue === 0 ) {
-								// Use original (sharp) pixels for the person
-								outputData[ pixelIndex ] =
-									originalFrame.data[ pixelIndex ];
-								outputData[ pixelIndex + 1 ] =
-									originalFrame.data[ pixelIndex + 1 ];
-								outputData[ pixelIndex + 2 ] =
-									originalFrame.data[ pixelIndex + 2 ];
-								outputData[ pixelIndex + 3 ] =
-									originalFrame.data[ pixelIndex + 3 ];
-							} else {
-								// Use blurred pixels for the background
-								outputData[ pixelIndex ] =
-									blurredBackground.data[ pixelIndex ];
-								outputData[ pixelIndex + 1 ] =
-									blurredBackground.data[ pixelIndex + 1 ];
-								outputData[ pixelIndex + 2 ] =
-									blurredBackground.data[ pixelIndex + 2 ];
-								outputData[ pixelIndex + 3 ] =
-									blurredBackground.data[ pixelIndex + 3 ];
-							}
-						}
-
-						const outputImageData = new ImageData(
-							outputData,
-							canvas.width,
-							canvas.height
-						);
-						ctx.putImageData( outputImageData, 0, 0 );
+						ctx.globalCompositeOperation = 'source-over';
 					}
 
 					requestAnimationFrame( sendFrame );
