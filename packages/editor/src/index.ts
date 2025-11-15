@@ -5,6 +5,7 @@
 import './init';
 import './transforms';
 import './gif-block';
+import './file-block';
 import './cross-origin-isolation';
 import './block-media-panel';
 import './document-media-panel';
