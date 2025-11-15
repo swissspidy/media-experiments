@@ -714,19 +714,19 @@ export function finishOperation(
 						pausedItem.operations.length > 0
 				);
 
-			// Resume up to the number of available slots.
-			// Account for items that are being resumed but haven't started their operation yet
-			// by only resuming one at a time in this pass. Subsequent operations finishing
-			// will trigger more resumes as needed.
-			const availableSlots = concurrencyLimit - activeCount;
-			const itemsToResume = pausedItems.slice( 0, availableSlots );
-
-			for ( const pausedItem of itemsToResume ) {
+			// Resume only one item at a time to avoid race conditions.
+			// Between resuming an item and it starting its operation (with currentOperation set),
+			// there's a gap where it's marked as Processing but doesn't count toward activeCount.
+			// If we resumed multiple items at once, and another operation finished quickly,
+			// it could resume more items before these have started, exceeding the concurrency limit.
+			// By resuming one at a time, subsequent operation completions will handle additional resumes.
+			if ( pausedItems.length > 0 ) {
+				const itemToResume = pausedItems[ 0 ];
 				dispatch< ResumeItemAction >( {
 					type: Type.ResumeItem,
-					id: pausedItem.id,
+					id: itemToResume.id,
 				} );
-				dispatch.processItem( pausedItem.id );
+				dispatch.processItem( itemToResume.id );
 			}
 		}
 	};
