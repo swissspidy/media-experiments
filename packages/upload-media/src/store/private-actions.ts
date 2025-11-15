@@ -687,17 +687,19 @@ export function finishOperation(
 			return;
 		}
 
-		const remainingOperations = item.operations?.slice( 1 );
-
 		dispatch< OperationFinishAction >( {
 			type: Type.OperationFinish,
 			id,
-			item: {
-				...updates,
-			},
+			item: updates,
 		} );
 
+		// Process the current item first before resuming others.
+		// This ensures the item is removed from the queue if it has no more operations,
+		// preventing potential race conditions with resumed items.
+		dispatch.processItem( id );
+
 		// Resume any paused items if there are now available processing slots.
+		// We check this after processing the current item to get an accurate count.
 		const activeCount = select.getActiveProcessingCount();
 		const concurrencyLimit = select.getConcurrencyLimit();
 
@@ -708,12 +710,14 @@ export function finishOperation(
 				.filter(
 					( pausedItem ) =>
 						pausedItem.status === ItemStatus.Paused &&
-						pausedItem.id !== id &&
 						pausedItem.operations &&
 						pausedItem.operations.length > 0
 				);
 
 			// Resume up to the number of available slots.
+			// Account for items that are being resumed but haven't started their operation yet
+			// by only resuming one at a time in this pass. Subsequent operations finishing
+			// will trigger more resumes as needed.
 			const availableSlots = concurrencyLimit - activeCount;
 			const itemsToResume = pausedItems.slice( 0, availableSlots );
 
@@ -725,8 +729,6 @@ export function finishOperation(
 				dispatch.processItem( pausedItem.id );
 			}
 		}
-
-		dispatch.processItem( id );
 	};
 }
 
