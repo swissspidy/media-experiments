@@ -29,6 +29,7 @@ import {
 	isAnimatedGif,
 	isHeifImage,
 	isImageTypeSupported,
+	preloadMedia,
 	renameFile,
 	validateMimeType,
 	videoHasAudio,
@@ -1077,12 +1078,20 @@ export function uploadPoster( id: QueueItemId ) {
 				// Adding the poster to the queue on its own allows for it to be optimized, etc.
 				dispatch.addItem( {
 					file: item.poster,
-					onChange: ( [ posterAttachment ] ) => {
+					onChange: async ( [ posterAttachment ] ) => {
 						if (
 							! posterAttachment.url ||
 							isBlobURL( posterAttachment.url )
 						) {
 							return;
+						}
+
+						// Preload the poster image before swapping to prevent flickering.
+						try {
+							await preloadMedia( posterAttachment.url, 'image' );
+						} catch {
+							// Continue even if preloading fails - the image will still load,
+							// just potentially with a flicker.
 						}
 
 						// TODO: Pass poster ID as well so that the video block can update `featured_media` via the REST API.
@@ -1201,12 +1210,23 @@ export function generateThumbnails( id: QueueItemId ) {
 
 				dispatch.addSideloadItem( {
 					file,
-					onChange: ( [ updatedAttachment ] ) => {
+					onChange: async ( [ updatedAttachment ] ) => {
 						// If the sub-size is still being generated, there is no need
 						// to invoke the callback below. It would just override
 						// the main image in the editor with the sub-size.
 						if ( isBlobURL( updatedAttachment.url ) ) {
 							return;
+						}
+
+						// Preload the image before swapping to prevent flickering.
+						try {
+							await preloadMedia(
+								updatedAttachment.url,
+								'image'
+							);
+						} catch {
+							// Continue even if preloading fails - the image will still load,
+							// just potentially with a flicker.
 						}
 
 						// This might be confusing, but the idea is to update the original
