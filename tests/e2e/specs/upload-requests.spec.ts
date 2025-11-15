@@ -140,13 +140,20 @@ test.describe( 'Upload Requests', () => {
 
 			// Simple verification that the upload request was successful.
 
-			// eslint-disable-next-line playwright/no-conditional-in-test
+			/* eslint-disable playwright/no-conditional-in-test */
 			if ( 'gallery' === blockType ) {
 				await page.waitForFunction(
 					() =>
 						window.wp.data
 							.select( 'core/block-editor' )
 							.getSelectedBlock()?.innerBlocks.length >= 1
+				);
+			} else if ( 'cover' === blockType ) {
+				await page.waitForFunction(
+					() =>
+						window.wp.data
+							.select( 'core/block-editor' )
+							.getBlocks()?.[ 0 ].attributes?.id
 				);
 			} else {
 				await page.waitForFunction(
@@ -156,6 +163,7 @@ test.describe( 'Upload Requests', () => {
 							.getSelectedBlock()?.attributes?.id
 				);
 			}
+			/* eslint-enable playwright/no-conditional-in-test */
 
 			// Verifies that the upload request was properly deleted.
 			const response = await request.head( secondPage.url() );
