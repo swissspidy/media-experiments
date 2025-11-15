@@ -274,7 +274,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 				$applicable_sizes = [];
 				foreach ( $video_sizes as $name => $size ) {
-					if ( $size['width'] < $original_width || $size['height'] < $original_height ) {
+					if ( $size['width'] < $original_width && $size['height'] < $original_height ) {
 						$applicable_sizes[] = $name;
 					}
 				}
