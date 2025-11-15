@@ -76,7 +76,7 @@ https://github.com/swissspidy/media-experiments/assets/841956/ba082f49-145e-441e
 
 ### Responsive Video Sizes
 
-Similar to image thumbnails, the plugin automatically generates multiple smaller versions of videos (240p, 360p, 480p, 720p, 1080p) for responsive delivery.
+Similar to image thumbnails, the plugin automatically generates multiple smaller versions of videos during upload (240p, 360p, 480p, 720p, 1080p) for responsive delivery.
 This enables serving appropriately-sized videos based on viewport and device capabilities, reducing bandwidth usage and improving load times on mobile devices.
 These video size variants are generated client-side during upload and stored in the attachment metadata, just like image thumbnails.
 
