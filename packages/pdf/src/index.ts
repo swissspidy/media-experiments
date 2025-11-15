@@ -101,16 +101,16 @@ export async function getTextFromPdf( url: string ): Promise< string[] > {
 		const pageText = textContent.items
 			.map( ( item ) => {
 				if ( 'str' in item ) {
-					return item.str;
+					return `${ item.str }<br>`;
 				}
 				return '';
 			} )
 			.filter( ( str ) => str.trim().length > 0 )
-			.join( ' ' )
+			.join( '' )
 			.trim();
 
 		if ( pageText.length > 0 ) {
-			texts.push( pageText );
+			texts.push( `<p>${ pageText }</p>` );
 		}
 	}
 

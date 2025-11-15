@@ -4,7 +4,7 @@
 import type { BlockEditProps } from '@wordpress/blocks';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { createBlock } from '@wordpress/blocks';
+import { createBlock, rawHandler } from '@wordpress/blocks';
 import { useDispatch } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as noticesStore } from '@wordpress/notices';
@@ -39,11 +39,7 @@ export function FileControls( props: FileControlsProps ) {
 			const texts = await getTextFromPdf( props.attributes.href );
 
 			// Create paragraph blocks from the extracted text
-			const blocks = texts.map( ( text ) => {
-				return createBlock( 'core/paragraph', {
-					content: text,
-				} );
-			} );
+			const blocks = rawHandler( { HTML: texts.join( '\n\n' ) } );
 
 			if ( blocks.length > 0 ) {
 				// Replace the file block with the new paragraph blocks
