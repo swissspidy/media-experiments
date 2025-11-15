@@ -109,7 +109,7 @@ export async function transcodeVideo(
 		conversionOptions.video = {
 			...conversionOptions.video,
 			width: threshold,
-			// height will be deduced automatically to retain aspect ratio
+			height: undefined, // height will be deduced automatically to retain aspect ratio
 		};
 	}
 
