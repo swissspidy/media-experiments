@@ -1998,9 +1998,25 @@ export function fetchRemoteFile( id: QueueItemId, args: FetchRemoteFileArgs ) {
 
 			validateMimeType( sourceFile, args.allowedTypes );
 
+			// Also fetch poster if provided
+			let posterFile: File | undefined;
+			if ( args.posterUrl ) {
+				try {
+					const posterFileName = getFileNameFromUrl( args.posterUrl );
+					posterFile = await fetchFile(
+						args.posterUrl,
+						posterFileName
+					);
+				} catch {
+					// If poster fetch fails, continue without it
+					// This is not critical for the main operation
+				}
+			}
+
 			if ( args.skipAttachment ) {
 				dispatch.finishOperation( id, {
 					sourceFile,
+					...( posterFile ? { poster: posterFile } : {} ),
 				} );
 			} else {
 				const file = args.newFileName
@@ -2020,6 +2036,7 @@ export function fetchRemoteFile( id: QueueItemId, args: FetchRemoteFileArgs ) {
 					attachment: {
 						url: blobUrl,
 					},
+					...( posterFile ? { poster: posterFile } : {} ),
 				} );
 			}
 		} catch ( error ) {
