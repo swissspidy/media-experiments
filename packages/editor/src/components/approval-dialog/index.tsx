@@ -109,7 +109,7 @@ export function ApprovalDialog( { id }: ApprovalDialogProps ) {
 				setIsReoptimizing( false );
 			}
 		},
-		[ item, reoptimizeItem, isReoptimizing ]
+		[ item, reoptimizeItem ]
 	);
 
 	if ( ! post || ! isPendingApproval || ! comparison ) {
