@@ -153,7 +153,22 @@ export function getMediaStream() {
 						outputCategoryMask: true,
 						outputConfidenceMasks: false,
 					}
-				);
+				).catch(async (error) => {
+					// Fallback to CPU if GPU fails
+					console.warn('GPU delegate failed, falling back to CPU:', error);
+					return ImageSegmenter.createFromOptions(
+						vision,
+						{
+							baseOptions: {
+								modelAssetPath,
+								delegate: 'CPU',
+							},
+							runningMode: 'VIDEO',
+							outputCategoryMask: true,
+							outputConfidenceMasks: false,
+						}
+					);
+				});
 
 				let lastVideoTime = -1;
 
