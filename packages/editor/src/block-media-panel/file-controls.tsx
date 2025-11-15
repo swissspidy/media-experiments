@@ -1,14 +1,20 @@
 /**
+ * External dependencies
+ */
+import type { RestAttachment } from '@mexp/media-utils';
+
+/**
  * WordPress dependencies
  */
 import type { BlockEditProps } from '@wordpress/blocks';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { createBlock, rawHandler } from '@wordpress/blocks';
+import { rawHandler } from '@wordpress/blocks';
 import { useDispatch } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as noticesStore } from '@wordpress/notices';
 import { useState } from '@wordpress/element';
+import { useEntityRecord } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -23,6 +29,14 @@ export function FileControls( props: FileControlsProps ) {
 	const { replaceBlocks } = useDispatch( blockEditorStore );
 	const { createErrorNotice, createSuccessNotice } =
 		useDispatch( noticesStore );
+
+	const { record: attachment } = useEntityRecord< RestAttachment | null >(
+		'postType',
+		'attachment',
+		props.attributes.id
+	);
+
+	const isPdf = attachment?.mime_type === 'application/pdf';
 
 	async function handleConvertToBlocks() {
 		if ( ! props.attributes.id || ! props.attributes.href ) {
@@ -59,6 +73,7 @@ export function FileControls( props: FileControlsProps ) {
 				);
 			}
 		} catch ( error ) {
+			// eslint-disable-next-line no-console -- Deliberately log errors for debugging.
 			console.error( 'PDF conversion error:', error );
 			createErrorNotice(
 				__( 'Error converting PDF to blocks', 'media-experiments' ),
@@ -70,11 +85,6 @@ export function FileControls( props: FileControlsProps ) {
 			setIsConverting( false );
 		}
 	}
-
-	// Only show the button if this is a PDF file
-	const isPdf =
-		props.attributes.href &&
-		props.attributes.href.toLowerCase().endsWith( '.pdf' );
 
 	if ( ! isPdf ) {
 		return null;

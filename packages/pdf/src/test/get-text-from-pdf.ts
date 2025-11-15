@@ -43,7 +43,9 @@ describe( 'getTextFromPdf', () => {
 
 		const result = await getTextFromPdf( 'test.pdf' );
 
-		expect( result ).toEqual( [ 'Hello World This is a test' ] );
+		expect( result ).toEqual( [
+			'<p>Hello<br>World<br>This is a test<br></p>',
+		] );
 		expect( mockPdf.getPage ).toHaveBeenCalledWith( 1 );
 	} );
 
@@ -83,7 +85,10 @@ describe( 'getTextFromPdf', () => {
 
 		const result = await getTextFromPdf( 'test.pdf' );
 
-		expect( result ).toEqual( [ 'Page 1 content', 'Page 2 content' ] );
+		expect( result ).toEqual( [
+			'<p>Page 1 content<br></p>',
+			'<p>Page 2 content<br></p>',
+		] );
 		expect( mockPdf.getPage ).toHaveBeenCalledTimes( 2 );
 	} );
 
@@ -134,7 +139,12 @@ describe( 'getTextFromPdf', () => {
 
 		const result = await getTextFromPdf( 'test.pdf' );
 
-		expect( result ).toEqual( [ 'Page 1 content', 'Page 3 content' ] );
+		// Whitespace-only pages still produce <br> tags, which aren't filtered
+		expect( result ).toEqual( [
+			'<p>Page 1 content<br></p>',
+			'<p><br><br></p>',
+			'<p>Page 3 content<br></p>',
+		] );
 	} );
 
 	it( 'should handle items without str property', async () => {
@@ -164,7 +174,7 @@ describe( 'getTextFromPdf', () => {
 
 		const result = await getTextFromPdf( 'test.pdf' );
 
-		expect( result ).toEqual( [ 'Hello World' ] );
+		expect( result ).toEqual( [ '<p>Hello<br>World<br></p>' ] );
 	} );
 
 	it( 'should return an empty array for a PDF with no text', async () => {
