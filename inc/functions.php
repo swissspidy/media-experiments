@@ -708,6 +708,8 @@ function filter_rest_index( WP_REST_Response $response ): WP_REST_Response {
 	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
 	$gif_interlaced = apply_filters( 'image_save_progressive', false, 'image/gif' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 
+	$supports_heic = wp_image_editor_supports( [ 'mime_type' => 'image/heic' ] );
+
 	$response->data['image_sizes']          = get_all_image_sizes();
 	$response->data['image_size_threshold'] = $image_size_threshold;
 	$response->data['video_size_threshold'] = $video_size_threshold;
@@ -716,6 +718,7 @@ function filter_rest_index( WP_REST_Response $response ): WP_REST_Response {
 	$response->data['png_interlaced']       = $png_interlaced;
 	$response->data['gif_interlaced']       = $gif_interlaced;
 	$response->data['media_source_terms']   = $media_source_terms;
+	$response->data['supports_heic']        = $supports_heic;
 
 	return $response;
 }
