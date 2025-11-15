@@ -104,7 +104,6 @@ export function Modal( {
 					__nextHasNoMarginBottom
 					value={ collaborationRequest.link }
 					readOnly={ true }
-					onChange={ () => {} }
 					onFocus={ ( event ) => {
 						event.target.select();
 					} }
