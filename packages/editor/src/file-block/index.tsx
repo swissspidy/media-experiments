@@ -3,13 +3,14 @@
  */
 import { addFilter } from '@wordpress/hooks';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { createPortal, useEffect, useRef, useState } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { PDFViewer } from './pdf-viewer';
 import type { MediaPanelProps } from '../types';
+import './editor.css';
 
 interface FileBlockAttributes {
 	id?: number;
@@ -31,9 +32,8 @@ interface FileBlockAttributes {
  */
 const withPDFViewer = createHigherOrderComponent(
 	( BlockEdit ) => ( props: MediaPanelProps ) => {
-		const { name, attributes } = props;
-		const [ embedElement, setEmbedElement ] =
-			useState< HTMLObjectElement | null >( null );
+		const { name, attributes, clientId } = props;
+		const [ shouldShowViewer, setShouldShowViewer ] = useState( false );
 		const observerRef = useRef< MutationObserver | null >( null );
 
 		if ( 'core/file' !== name ) {
@@ -53,31 +53,41 @@ const withPDFViewer = createHigherOrderComponent(
 
 		useEffect( () => {
 			if ( ! shouldReplace ) {
+				setShouldShowViewer( false );
 				return;
 			}
 
-			// Find the object element in the DOM
-			const findObjectElement = () => {
+			// Find and add class to hide the object element
+			const processObjectElement = () => {
 				const blockElement = document.querySelector(
-					`[data-block="${ props.clientId }"]`
+					`[data-block="${ clientId }"]`
 				);
 				if ( blockElement ) {
+					const embedContainer = blockElement.querySelector(
+						'.wp-block-file__embed'
+					);
 					const objectEl = blockElement.querySelector(
 						'object[type="application/pdf"]'
 					);
-					if ( objectEl instanceof HTMLObjectElement ) {
-						setEmbedElement( objectEl );
+					if (
+						objectEl instanceof HTMLObjectElement &&
+						embedContainer instanceof HTMLElement
+					) {
+						embedContainer.classList.add(
+							'mexp-pdf-viewer-active'
+						);
+						setShouldShowViewer( true );
 						return true;
 					}
 				}
 				return false;
 			};
 
-			// Try to find the element immediately
-			if ( ! findObjectElement() ) {
+			// Try immediately
+			if ( ! processObjectElement() ) {
 				// If not found, observe DOM changes
 				observerRef.current = new MutationObserver( () => {
-					if ( findObjectElement() && observerRef.current ) {
+					if ( processObjectElement() && observerRef.current ) {
 						observerRef.current.disconnect();
 					}
 				} );
@@ -86,6 +96,20 @@ const withPDFViewer = createHigherOrderComponent(
 					childList: true,
 					subtree: true,
 				} );
+
+				// Clean up after 5 seconds if element is never found
+				const timeoutId = setTimeout( () => {
+					if ( observerRef.current ) {
+						observerRef.current.disconnect();
+					}
+				}, 5000 );
+
+				return () => {
+					clearTimeout( timeoutId );
+					if ( observerRef.current ) {
+						observerRef.current.disconnect();
+					}
+				};
 			}
 
 			return () => {
@@ -93,7 +117,7 @@ const withPDFViewer = createHigherOrderComponent(
 					observerRef.current.disconnect();
 				}
 			};
-		}, [ shouldReplace, props.clientId ] );
+		}, [ shouldReplace, clientId ] );
 
 		// Get poster URL from media details if available
 		const getPosterUrl = (): string | undefined => {
@@ -123,17 +147,15 @@ const withPDFViewer = createHigherOrderComponent(
 		return (
 			<>
 				<BlockEdit { ...props } />
-				{ shouldReplace &&
-					embedElement &&
-					fileAttributes.href &&
-					createPortal(
+				{ shouldReplace && shouldShowViewer && fileAttributes.href && (
+					<div className="mexp-pdf-viewer-container">
 						<PDFViewer
 							url={ fileAttributes.href }
 							posterUrl={ getPosterUrl() }
 							className="wp-block-file__embed"
-						/>,
-						embedElement.parentElement || document.body
-					) }
+						/>
+					</div>
+				) }
 			</>
 		);
 	},
