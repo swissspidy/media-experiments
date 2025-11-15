@@ -1318,7 +1318,8 @@ async function findBestImageFormat(
 	formats: ImageFormat[],
 	quality: number,
 	imageLibrary: ImageLibrary,
-	interlaced: boolean
+	interlaced: boolean,
+	inputFormat: string
 ): Promise< FormatComparisonResult > {
 	// Convert all formats in parallel for better performance
 	const conversionPromises = formats.map( async ( format ) => {
@@ -1331,8 +1332,23 @@ async function findBestImageFormat(
 				| 'image/avif'
 				| 'image/gif';
 
-			// Convert to the target format
-			if (
+			// If converting to the same format, use compress instead of convert
+			// to preserve format-specific features
+			if ( format === inputFormat ) {
+				if ( 'browser' === imageLibrary ) {
+					convertedFile = await canvasCompressImage(
+						file,
+						quality
+					);
+				} else {
+					convertedFile = await vipsCompressImage(
+						id,
+						file,
+						quality,
+						interlaced
+					);
+				}
+			} else if (
 				format === 'avif' ||
 				format === 'gif' ||
 				( format === 'webp' && isSafari )
@@ -1383,7 +1399,7 @@ async function findBestImageFormat(
 
 	// If no conversions succeeded, throw an error
 	if ( results.length === 0 ) {
-		throw new Error( `All format conversions failed. Attempted formats: ${ formats.join(', ') }` );
+		throw new Error( `All format conversions failed. Attempted formats: ${ formats.join( ', ' ) }` );
 	}
 
 	// Find the format with the smallest file size
@@ -1486,7 +1502,8 @@ export function optimizeImageItem(
 					formatsToTry,
 					outputQuality / 100,
 					imageLibrary,
-					interlaced
+					interlaced,
+					inputFormat
 				);
 
 				file = result.file;

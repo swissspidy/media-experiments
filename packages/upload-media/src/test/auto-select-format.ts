@@ -3,37 +3,6 @@
  */
 import type { ImageFormat } from '../store/types';
 
-/**
- * Mock data for testing auto-select format functionality.
- */
-export const mockJpegFile = new File( [ new ArrayBuffer( 10000 ) ], 'example.jpg', {
-	lastModified: 1234567891,
-	type: 'image/jpeg',
-} );
-
-export const mockPngFile = new File( [ new ArrayBuffer( 15000 ) ], 'example.png', {
-	lastModified: 1234567891,
-	type: 'image/png',
-} );
-
-export const mockWebpFile = new File( [ new ArrayBuffer( 8000 ) ], 'example.webp', {
-	lastModified: 1234567891,
-	type: 'image/webp',
-} );
-
-/**
- * Creates a mock file with a specified size.
- *
- * @param size   File size in bytes.
- * @param format Image format.
- * @return Mock file.
- */
-export function createMockFileWithSize( size: number, format: ImageFormat ): File {
-	return new File( [ new ArrayBuffer( size ) ], `example.${ format }`, {
-		type: `image/${ format }`,
-	} );
-}
-
 describe( 'Auto-select format', () => {
 	it( 'should select the format with smallest file size', () => {
 		const formats = [
