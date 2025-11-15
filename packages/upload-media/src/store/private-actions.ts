@@ -694,7 +694,6 @@ export function finishOperation(
 			id,
 			item: {
 				...updates,
-				operations: remainingOperations,
 			},
 		} );
 
