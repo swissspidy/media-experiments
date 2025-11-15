@@ -12,6 +12,8 @@ import {
 	Mp3OutputFormat,
 	WebMOutputFormat,
 	OggOutputFormat,
+	WavOutputFormat,
+	FlacOutputFormat,
 	QUALITY_MEDIUM,
 	type ConversionOptions,
 } from 'mediabunny';
@@ -50,10 +52,14 @@ async function convertWithMediabunny(
 		outputFormat = new Mp3OutputFormat();
 	} else if ( outputMimeType.startsWith( 'audio/ogg' ) ) {
 		outputFormat = new OggOutputFormat();
+	} else if ( outputMimeType.startsWith( 'audio/wav' ) ) {
+		outputFormat = new WavOutputFormat();
+	} else if ( outputMimeType.startsWith( 'audio/flac' ) ) {
+		outputFormat = new FlacOutputFormat();
 	} else if ( outputMimeType.startsWith( 'audio/' ) ) {
 		// For unsupported audio formats, throw an error
 		throw new Error(
-			`Unsupported audio format: ${ outputMimeType }. Supported formats: mp3, mpeg, ogg`
+			`Unsupported audio format: ${ outputMimeType }. Supported formats: mp3, mpeg, ogg, wav, flac`
 		);
 	} else if ( outputMimeType.startsWith( 'video/' ) ) {
 		// For unsupported video formats, throw an error
