@@ -272,6 +272,10 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 				$original_width  = $metadata['width'] ?? 0;
 				$original_height = $metadata['height'] ?? 0;
 
+				if ( $original_width === 0 || $original_height === 0 ) {
+					$data['missing_video_sizes'] = [];
+					return $response;
+				}
 				$applicable_sizes = [];
 				foreach ( $video_sizes as $name => $size ) {
 					if ( $size['width'] < $original_width && $size['height'] < $original_height ) {
