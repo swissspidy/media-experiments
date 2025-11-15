@@ -1264,6 +1264,7 @@ export function generateVideoSizes( id: QueueItemId ) {
 		if (
 			! item.parentId &&
 			attachment.missing_video_sizes &&
+			attachment.missing_video_sizes.length > 0 &&
 			item.file.type.startsWith( 'video/' )
 		) {
 			const file = attachment.mexp_filename
