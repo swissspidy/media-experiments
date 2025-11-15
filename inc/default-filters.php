@@ -54,10 +54,13 @@ add_filter( 'wp_content_img_tag', __NAMESPACE__ . '\filter_wp_content_img_tag_ad
 // Upload requests, see https://github.com/swissspidy/media-experiments/issues/246.
 
 add_action( 'init', __NAMESPACE__ . '\register_upload_request_post_type' );
+add_action( 'init', __NAMESPACE__ . '\register_collaboration_request_post_type' );
 add_filter( 'template_include', __NAMESPACE__ . '\load_upload_request_template' );
 add_filter( 'cron_schedules', __NAMESPACE__ . '\add_quarter_hourly_cron_interval' );
 add_action( 'mexp_upload_requests_cleanup', __NAMESPACE__ . '\delete_old_upload_requests' );
+add_action( 'mexp_collaboration_requests_cleanup', __NAMESPACE__ . '\delete_old_collaboration_requests' );
 add_filter( 'rest_route_for_post', __NAMESPACE__ . '\filter_rest_route_for_post_for_upload_requests', 10, 2 );
+add_filter( 'user_has_cap', __NAMESPACE__ . '\filter_user_has_cap_for_collaboration', 10, 4 );
 
 // Plugin compat.
 
