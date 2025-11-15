@@ -104,7 +104,7 @@
 
 .mexp-upload-requests-placeholder__notice {
 	font-size: 0.9em;
-	color: #757575;
+	color: var(--wp-components-color-foreground-subtle, #757575);
 	text-align: center;
 }
 
