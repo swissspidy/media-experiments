@@ -58,7 +58,8 @@ export function FileControls( props: FileControlsProps ) {
 					}
 				);
 			}
-		} catch {
+		} catch ( error ) {
+			console.error( 'PDF conversion error:', error );
 			createErrorNotice(
 				__( 'Error converting PDF to blocks', 'media-experiments' ),
 				{
