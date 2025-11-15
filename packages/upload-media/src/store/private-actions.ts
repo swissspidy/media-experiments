@@ -1614,7 +1614,7 @@ export function optimizeVideoItem(
 		// If videoSize is specified, use its dimensions as the threshold.
 		// Otherwise, use the global videoSizeThreshold setting.
 		const videoSizeThreshold: number = args?.videoSize
-			? Math.max( args.videoSize.width, args.videoSize.height )
+			? Math.min( args.videoSize.width, args.videoSize.height )
 			: registry
 					.select( preferencesStore )
 					.get( PREFERENCES_NAME, 'bigVideoSizeThreshold' );
