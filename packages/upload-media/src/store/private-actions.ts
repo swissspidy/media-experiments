@@ -261,9 +261,11 @@ export function addItem( {
 
 		// Check if this is a HEIC file that the server can convert.
 		// If so, we don't want the server to generate thumbnails - we'll do it client-side.
-		const isHeicFile = file.type === 'image/heic' || file.type === 'image/heif';
+		const isHeicFile =
+			file.type === 'image/heic' || file.type === 'image/heif';
 		const supportsHeicOnServer = select.getSettings().supportsHeic;
-		const shouldDisableServerThumbnails = isHeicFile && supportsHeicOnServer;
+		const shouldDisableServerThumbnails =
+			isHeicFile && supportsHeicOnServer;
 
 		dispatch< AddAction >( {
 			type: Type.Add,
@@ -277,7 +279,9 @@ export function addItem( {
 					url: blobUrl,
 				},
 				additionalData: {
-					generate_sub_sizes: shouldDisableServerThumbnails ? false : 'server' === thumbnailGeneration,
+					generate_sub_sizes: shouldDisableServerThumbnails
+						? false
+						: 'server' === thumbnailGeneration,
 					convert_format: false,
 					...additionalData,
 				},
@@ -883,7 +887,8 @@ export function prepareItem( id: QueueItemId ) {
 				let uploadOriginalImage = false;
 
 				const supportsHeicOnServer = select.getSettings().supportsHeic;
-				const serverWillConvertHeic = isHeif && convertUnsafe && supportsHeicOnServer;
+				const serverWillConvertHeic =
+					isHeif && convertUnsafe && supportsHeicOnServer;
 
 				if ( convertUnsafe ) {
 					if ( isHeif ) {
@@ -911,7 +916,7 @@ export function prepareItem( id: QueueItemId ) {
 				// upload first, then do all processing on the converted file.
 				if ( serverWillConvertHeic ) {
 					operations.push( OperationType.Upload );
-					
+
 					operations.push( OperationType.GenerateMetadata );
 
 					const useAi: boolean = registry
@@ -1976,14 +1981,17 @@ export function uploadItem( id: QueueItemId ) {
 
 				// If this was a HEIC file uploaded to a server that supports HEIC conversion,
 				// we need to fetch the converted JPEG file back to use for thumbnail generation.
-				const isHeicFile = item.sourceFile.type === 'image/heic' || item.sourceFile.type === 'image/heif';
+				const isHeicFile =
+					item.sourceFile.type === 'image/heic' ||
+					item.sourceFile.type === 'image/heif';
 				const supportsHeicOnServer = select.getSettings().supportsHeic;
-				
+
 				if ( isHeicFile && supportsHeicOnServer && attachment.url ) {
 					// Add a FetchRemoteFile operation to get the converted JPEG.
 					// This will update item.file to the converted file so thumbnails can be generated.
-					const fileName = attachment.mexp_filename || item.sourceFile.name;
-					
+					const fileName =
+						attachment.mexp_filename || item.sourceFile.name;
+
 					dispatch< AddOperationsAction >( {
 						type: Type.AddOperations,
 						id,
