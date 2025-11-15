@@ -84,9 +84,9 @@ export function getComparisonDataForApproval(
 		return null;
 	}
 
-	// Default quality - this will be the initial value for the slider
-	// The actual quality used may vary, but 82 is a common default
-	const currentQuality = 82;
+	// Use the actual quality used during optimization if available.
+	// Fallback to 80 (the default in optimizeImageItem) if not present.
+	const currentQuality = typeof foundItem.quality === 'number' ? foundItem.quality : 80;
 
 	return {
 		oldUrl: foundItem.sourceUrl,
