@@ -21,6 +21,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import {
 	createInterpolateElement,
 	useCallback,
+	useEffect,
 	useState,
 } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -76,10 +77,15 @@ export function ApprovalDialog( { id }: ApprovalDialogProps ) {
 		useDispatch( uploadStore );
 	const [ , setOpen ] = useState( false );
 	const [ showAdvanced, setShowAdvanced ] = useState( false );
-	const [ quality, setQuality ] = useState(
-		() => comparison?.currentQuality || 82
-	);
+	const [ quality, setQuality ] = useState( 82 );
 	const [ isReoptimizing, setIsReoptimizing ] = useState( false );
+
+	// Sync quality state when comparison data becomes available
+	useEffect( () => {
+		if ( comparison?.currentQuality ) {
+			setQuality( comparison.currentQuality );
+		}
+	}, [ comparison?.currentQuality ] );
 
 	const closeModal = () => setOpen( false );
 	const onApprove = () => {

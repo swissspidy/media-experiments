@@ -86,7 +86,8 @@ export function getComparisonDataForApproval(
 
 	// Use the actual quality used during optimization if available.
 	// Fallback to 80 (the default in optimizeImageItem) if not present.
-	const currentQuality = typeof foundItem.quality === 'number' ? foundItem.quality : 80;
+	const currentQuality =
+		typeof foundItem.quality === 'number' ? foundItem.quality : 80;
 
 	return {
 		oldUrl: foundItem.sourceUrl,
