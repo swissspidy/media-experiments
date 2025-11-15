@@ -1415,7 +1415,7 @@ export function optimizeImageItem(
 		const autoSelectFormat: boolean =
 			registry
 				.select( preferencesStore )
-				.get( PREFERENCES_NAME, 'image_autoSelectFormat' ) || false;
+				.get( PREFERENCES_NAME, 'image_autoSelectFormat' ) ?? false;
 
 		let outputFormat: ImageFormat =
 			args?.outputFormat ||
