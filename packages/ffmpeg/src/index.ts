@@ -50,9 +50,19 @@ async function convertWithMediabunny(
 		outputFormat = new Mp3OutputFormat();
 	} else if ( outputMimeType.startsWith( 'audio/ogg' ) ) {
 		outputFormat = new OggOutputFormat();
+	} else if ( outputMimeType.startsWith( 'audio/' ) ) {
+		// For unsupported audio formats, throw an error
+		throw new Error(
+			`Unsupported audio format: ${ outputMimeType }. Supported formats: mp3, mpeg, ogg`
+		);
+	} else if ( outputMimeType.startsWith( 'video/' ) ) {
+		// For unsupported video formats, throw an error
+		throw new Error(
+			`Unsupported video format: ${ outputMimeType }. Supported formats: mp4, webm`
+		);
 	} else {
-		// Default to MP4
-		outputFormat = new Mp4OutputFormat();
+		// For unknown formats, throw an error
+		throw new Error( `Unsupported MIME type: ${ outputMimeType }` );
 	}
 
 	// Create output
@@ -139,9 +149,9 @@ export async function muteVideo( file: File ): Promise< File > {
 	let outputFormat;
 
 	// Use appropriate output format based on input
-	if (file.type.startsWith('video/webm')) {
+	if ( file.type.startsWith( 'video/webm' ) ) {
 		outputFormat = new WebMOutputFormat();
-	} else if (file.type === 'video/x-matroska') {
+	} else if ( file.type === 'video/x-matroska' ) {
 		outputFormat = new WebMOutputFormat();
 	} else {
 		outputFormat = new Mp4OutputFormat();
@@ -157,10 +167,7 @@ export async function muteVideo( file: File ): Promise< File > {
 	const conversionOptions: Partial< ConversionOptions > = {
 		input,
 		output,
-		video: {
-			// Copy video settings from input
-			codec: videoTrack?.codec ?? undefined,
-		},
+		video: videoTrack?.codec ? { codec: videoTrack.codec } : {},
 		audio: {
 			discard: true, // Discard all audio tracks
 		},
@@ -206,7 +213,7 @@ export async function transcodeAudio(
 }
 
 /**
- * Extracts a video's first frame using Mediabunny.
+ * Extracts a video's first frame as an image using canvas.
  *
  * Note: Exact seeking is not possible in most formats.
  *
@@ -215,7 +222,7 @@ export async function transcodeAudio(
  * @param file      Original video file object.
  * @param basename  Video file name without extension.
  * @param threshold Big video size threshold.
- * @return File object for the video frame.
+ * @return File object for the video frame as a JPEG image.
  */
 export async function getFirstFrameOfVideo(
 	file: File,
@@ -224,50 +231,91 @@ export async function getFirstFrameOfVideo(
 ): Promise< File > {
 	const outputFileName = `${ basename }-poster.jpeg`;
 
-	// Create input from the file
-	const input = new Input( {
-		source: new BlobSource( file ),
-		formats: ALL_FORMATS,
-	} );
+	// Create a blob URL from the file
+	const videoUrl = URL.createObjectURL( file );
 
-	// Create output
-	const output = new Output( {
-		format: new Mp4OutputFormat(),
-		target: new BufferTarget(),
-	} );
+	try {
+		// Create a video element and load the file
+		const video = document.createElement( 'video' );
+		video.preload = 'metadata';
+		video.muted = true;
+		video.playsInline = true;
 
-	const conversionOptions: Partial< ConversionOptions > = {
-		input,
-		output,
-		video: {
-			bitrate: QUALITY_MEDIUM,
-		},
-		audio: {
-			discard: true,
-		},
-		// TODO: Add frame extraction options when available in Mediabunny
-		// For now, we'll convert the first second and extract first frame
-	};
+		// Wait for video to load
+		await new Promise< void >( ( resolve, reject ) => {
+			video.addEventListener( 'loadedmetadata', () => resolve(), {
+				once: true,
+			} );
+			video.addEventListener( 'error', reject, { once: true } );
+			video.src = videoUrl;
+		} );
 
-	if ( threshold > 0 ) {
-		conversionOptions.video = {
-			...conversionOptions.video,
-			width: threshold,
-		};
+		// Seek to a very early frame (0.99 seconds like in utils.ts)
+		video.currentTime = 0.99;
+		await new Promise< void >( ( resolve, reject ) => {
+			const timeout = setTimeout( () => {
+				reject( new Error( 'Video seek timeout' ) );
+			}, 3000 );
+
+			video.addEventListener(
+				'seeked',
+				() => {
+					clearTimeout( timeout );
+					resolve();
+				},
+				{ once: true }
+			);
+			video.addEventListener(
+				'error',
+				( err ) => {
+					clearTimeout( timeout );
+					reject( err );
+				},
+				{ once: true }
+			);
+		} );
+
+		// Create canvas and draw the video frame
+		const canvas = document.createElement( 'canvas' );
+		let width = video.videoWidth;
+		let height = video.videoHeight;
+
+		// Apply threshold if specified
+		if ( threshold > 0 && ( width > threshold || height > threshold ) ) {
+			const aspectRatio = width / height;
+			if ( width > height ) {
+				width = threshold;
+				height = Math.round( threshold / aspectRatio );
+			} else {
+				height = threshold;
+				width = Math.round( threshold * aspectRatio );
+			}
+		}
+
+		canvas.width = width;
+		canvas.height = height;
+
+		const ctx = canvas.getContext( '2d' );
+		if ( ! ctx ) {
+			throw new Error( 'Could not get canvas context' );
+		}
+
+		ctx.drawImage( video, 0, 0, width, height );
+
+		// Convert canvas to blob
+		const blob = await new Promise< Blob | null >( ( resolve ) => {
+			canvas.toBlob( resolve, 'image/jpeg', 0.82 );
+		} );
+
+		if ( ! blob ) {
+			throw new Error( 'Could not create image blob' );
+		}
+
+		return new File( [ blob ], outputFileName, { type: 'image/jpeg' } );
+	} finally {
+		// Clean up the blob URL
+		URL.revokeObjectURL( videoUrl );
 	}
-
-	const conversion = await Conversion.init( conversionOptions );
-
-	await conversion.execute();
-
-	const buffer = output.target.buffer;
-	if ( ! buffer || buffer.byteLength === 0 ) {
-		throw new Error( `File ${ outputFileName } could not be processed` );
-	}
-
-	// For now, return the processed video
-	// TODO: Implement proper frame extraction when Mediabunny supports it
-	return new File( [ buffer ], outputFileName, { type: 'image/jpeg' } );
 }
 
 /**
