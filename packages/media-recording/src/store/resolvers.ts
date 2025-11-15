@@ -191,7 +191,7 @@ export function getMediaStream() {
 						return;
 					}
 
-					const startTimeMs = performance.now();
+					const startTimeMs = video.currentTime * 1000;
 
 					if ( video.currentTime !== lastVideoTime ) {
 						lastVideoTime = video.currentTime;
