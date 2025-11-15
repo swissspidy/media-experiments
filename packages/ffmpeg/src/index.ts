@@ -139,7 +139,9 @@ export async function muteVideo( file: File ): Promise< File > {
 	let outputFormat;
 
 	// Use appropriate output format based on input
-	if ( file.type.includes( 'webm' ) || file.type.includes( 'matroska' ) ) {
+	if (file.type.startsWith('video/webm')) {
+		outputFormat = new WebMOutputFormat();
+	} else if (file.type === 'video/x-matroska') {
 		outputFormat = new WebMOutputFormat();
 	} else {
 		outputFormat = new Mp4OutputFormat();
