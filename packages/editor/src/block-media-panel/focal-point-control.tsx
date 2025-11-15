@@ -112,12 +112,35 @@ export function FocalPointControl( { id, url }: FocalPointControlProps ) {
 		}
 	};
 
-	const handleReset = () => {
+	const handleReset = async () => {
 		const defaultFocalPoint = { x: 0.5, y: 0.5 };
 		setFocalPoint( defaultFocalPoint );
-		setHasChanged( true );
 		setError( null );
 		setSuccess( false );
+
+		try {
+			// Auto-save the reset value
+			await editEntityRecord( 'postType', 'attachment', id, {
+				meta: {
+					mexp_focal_point: defaultFocalPoint,
+				},
+			} );
+
+			await saveEditedEntityRecord( 'postType', 'attachment', id );
+
+			setHasChanged( false );
+			setSuccess( true );
+		} catch ( err ) {
+			// eslint-disable-next-line no-console
+			console.error( 'Failed to reset focal point:', err );
+			setError(
+				__(
+					'Failed to reset focal point. Please try again.',
+					'media-experiments'
+				)
+			);
+			setHasChanged( true );
+		}
 	};
 
 	return (
