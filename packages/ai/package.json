@@ -33,6 +33,6 @@
 	},
 	"types": "dist-types/index.d.ts",
 	"dependencies": {
-		"@huggingface/transformers": "^3.7.5"
+		"@huggingface/transformers": "^3.7.6"
 	}
 }
