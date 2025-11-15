@@ -712,6 +712,22 @@ function register_rest_fields(): void {
 			'get_callback' => __NAMESPACE__ . '\rest_get_attachment_original_url',
 		]
 	);
+
+	register_rest_field(
+		'attachment',
+		'missing_video_sizes',
+		[
+			'schema'       => [
+				'description' => __( 'List of video sizes that are missing for the attachment', 'media-experiments' ),
+				'type'        => 'array',
+				'items'       => [
+					'type' => 'string',
+				],
+				'context'     => [ 'edit' ],
+			],
+			'get_callback' => __NAMESPACE__ . '\rest_get_attachment_missing_video_sizes',
+		]
+	);
 }
 
 /**
@@ -893,6 +909,50 @@ function rest_get_attachment_original_url( array $post ): ?string {
 	$original_url = wp_get_attachment_url( $original_id );
 
 	return is_string( $original_url ) ? $original_url : null;
+}
+
+/**
+ * Returns the list of missing video sizes for a video attachment.
+ *
+ * @param array{id: int} $post Post data.
+ * @return string[] List of missing video size names.
+ */
+function rest_get_attachment_missing_video_sizes( array $post ): array {
+	$mime_type = get_post_mime_type( $post['id'] );
+	
+	if ( ! is_string( $mime_type ) || ! str_starts_with( $mime_type, 'video/' ) ) {
+		return [];
+	}
+
+	$metadata = wp_get_attachment_metadata( $post['id'], true );
+
+	if ( ! is_array( $metadata ) ) {
+		return [];
+	}
+
+	$metadata['sizes'] = $metadata['sizes'] ?? [];
+
+	$video_sizes = get_all_video_sizes();
+
+	// Only generate sizes that are smaller than the original video.
+	$original_width  = $metadata['width'] ?? 0;
+	$original_height = $metadata['height'] ?? 0;
+
+	if ( $original_width === 0 || $original_height === 0 ) {
+		return [];
+	}
+
+	$applicable_sizes = [];
+	foreach ( $video_sizes as $name => $size ) {
+		if ( $size['width'] < $original_width && $size['height'] < $original_height ) {
+			$applicable_sizes[] = $name;
+		}
+	}
+
+	$existing_sizes  = array_keys( $metadata['sizes'] );
+	$missing_sizes   = array_diff( $applicable_sizes, $existing_sizes );
+	
+	return array_values( $missing_sizes );
 }
 
 /**
