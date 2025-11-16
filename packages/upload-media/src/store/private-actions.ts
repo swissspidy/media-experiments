@@ -1304,13 +1304,13 @@ interface FormatComparisonResult {
 /**
  * Converts or compresses an image file to a specific format.
  *
- * @param id            Item ID.
- * @param file          The image file to convert.
- * @param format        Target format.
- * @param inputFormat   Original format.
- * @param quality       Output quality (0-1).
- * @param imageLibrary  Image library to use (browser or vips).
- * @param interlaced    Whether to use interlaced encoding.
+ * @param id           Item ID.
+ * @param file         The image file to convert.
+ * @param format       Target format.
+ * @param inputFormat  Original format.
+ * @param quality      Output quality (0-1).
+ * @param imageLibrary Image library to use (browser or vips).
+ * @param interlaced   Whether to use interlaced encoding.
  * @return The converted file.
  */
 async function convertToFormat(
@@ -1363,12 +1363,12 @@ async function convertToFormat(
 /**
  * Tries converting an image to multiple formats and returns the best one based on file size.
  *
- * @param id            Item ID.
- * @param file          The image file to convert.
- * @param formats       Array of formats to try.
- * @param quality       Output quality (0-1).
- * @param imageLibrary  Image library to use (browser or vips).
- * @param interlaced    Whether to use interlaced encoding.
+ * @param id           Item ID.
+ * @param file         The image file to convert.
+ * @param formats      Array of formats to try.
+ * @param quality      Output quality (0-1).
+ * @param imageLibrary Image library to use (browser or vips).
+ * @param interlaced   Whether to use interlaced encoding.
  * @return The best format result.
  */
 async function findBestImageFormat(
@@ -1380,9 +1380,23 @@ async function findBestImageFormat(
 	interlaced: boolean,
 	inputFormat: string
 ): Promise< FormatComparisonResult > {
+	const numberFormatter = Intl.NumberFormat( 'en', {
+		notation: 'compact',
+		style: 'unit',
+		unit: 'byte',
+		unitDisplay: 'narrow',
+		roundingPriority: 'lessPrecision',
+		maximumSignificantDigits: 2,
+		maximumFractionDigits: 2,
+	} );
+
 	// Convert all formats in parallel for better performance
 	const conversionPromises = formats.map( async ( format ) => {
+		let stop: undefined | ReturnType< typeof start >;
 		try {
+			stop = start(
+				`Testing Format: ${ file.name } | ${ imageLibrary } | ${ format }`
+			);
 			const convertedFile = await convertToFormat(
 				id,
 				file,
@@ -1393,12 +1407,16 @@ async function findBestImageFormat(
 				interlaced
 			);
 
+			stop?.( numberFormatter.format( convertedFile.size ) );
+
 			return {
 				format,
 				file: convertedFile,
 				size: convertedFile.size,
 			};
 		} catch ( error ) {
+			stop?.();
+
 			// If conversion fails for a format, skip it
 			// eslint-disable-next-line no-console -- Deliberately log errors here.
 			console.warn(
@@ -1438,6 +1456,16 @@ export function optimizeImageItem(
 	id: QueueItemId,
 	args?: OptimizeImageItemArgs
 ) {
+	const numberFormatter = Intl.NumberFormat( 'en', {
+		notation: 'compact',
+		style: 'unit',
+		unit: 'byte',
+		unitDisplay: 'narrow',
+		roundingPriority: 'lessPrecision',
+		maximumSignificantDigits: 2,
+		maximumFractionDigits: 2,
+	} );
+
 	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
 
@@ -1445,7 +1473,7 @@ export function optimizeImageItem(
 
 		const inputFormat = item.file.type.split( '/' )[ 1 ];
 
-		let stop: undefined | ( () => void );
+		let stop: undefined | ReturnType< typeof start >;
 
 		// Check if automatic format selection is enabled
 		const autoSelectFormat: boolean =
@@ -1495,9 +1523,9 @@ export function optimizeImageItem(
 			imageLibrary = 'vips';
 		}
 
-		try {
-			let file: File;
+		let file: File;
 
+		try {
 			// If auto-select is enabled and no explicit output format is specified, try multiple formats
 			if ( autoSelectFormat && ! args?.outputFormat ) {
 				const formatsToTry: ImageFormat[] = [ 'jpeg', 'webp' ];
@@ -1515,7 +1543,7 @@ export function optimizeImageItem(
 				stop = start(
 					`Auto-select best format for: ${
 						item.file.name
-					} | ${ imageLibrary } | trying ${ formatsToTry.join(
+					} | ${ imageLibrary } | Options: ${ formatsToTry.join(
 						', '
 					) }`
 				);
@@ -1603,7 +1631,14 @@ export function optimizeImageItem(
 					timings,
 				} );
 			}
+
+			stop?.(
+				`Winner: ${ outputFormat } | ${ numberFormatter.format(
+					file.size
+				) }`
+			);
 		} catch ( error ) {
+			stop?.();
 			dispatch.cancelItem(
 				id,
 				new UploadError( {
@@ -1613,8 +1648,6 @@ export function optimizeImageItem(
 					cause: error instanceof Error ? error : undefined,
 				} )
 			);
-		} finally {
-			stop?.();
 		}
 	};
 }
