@@ -24,14 +24,14 @@
 		"node": ">=20"
 	},
 	"main": "dist/index.js",
-	"types": "dist-types/index.d.ts",
 	"source": "src/index.ts",
 	"exports": {
 		".": {
 			"default": "./src/index.ts"
 		}
 	},
+	"types": "dist-types/index.d.ts",
 	"dependencies": {
-		"pdfjs-dist": "^4.8.69"
+		"pdfjs-dist": "^5.4.394"
 	}
 }

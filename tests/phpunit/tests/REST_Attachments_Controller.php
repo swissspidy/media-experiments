@@ -504,10 +504,6 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 	 * @covers ::sideload_item_permissions_check
 	 */
 	public function test_sideload_item_year_month_based_folders() {
-		if ( version_compare( get_bloginfo( 'version' ), '6.6-beta1', '<' ) ) {
-			$this->markTestSkipped( 'This test requires WordPress 6.6+' );
-		}
-
 		update_option( 'uploads_use_yearmonth_folders', 1 );
 
 		wp_set_current_user( self::$admin_id );
@@ -559,10 +555,6 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 	 * @covers ::sideload_item_permissions_check
 	 */
 	public function test_sideload_item_year_month_based_folders_page_post_type() {
-		if ( version_compare( get_bloginfo( 'version' ), '6.6-beta1', '<' ) ) {
-			$this->markTestSkipped( 'This test requires WordPress 6.6+' );
-		}
-
 		update_option( 'uploads_use_yearmonth_folders', 1 );
 
 		wp_set_current_user( self::$admin_id );

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createWorkerFactory } from '@shopify/web-worker';
+import { createWorkerFactory, type WorkerCreator } from '@shopify/web-worker';
 
 /**
  * Internal dependencies
@@ -10,17 +10,29 @@ import { ImageFile } from '../../image-file';
 import { getFileBasename } from '../../utils';
 import type { ImageSizeCrop } from '../types';
 
-const createCanvasWorker = createWorkerFactory(
-	() => import( /* webpackChunkName: 'canvas' */ '../workers/canvas' )
-);
-const canvasWorker = createCanvasWorker();
+let canvasWorker:
+	| ReturnType< WorkerCreator< typeof import('../workers/canvas') > >
+	| undefined;
+
+function getCanvasWorker() {
+	if ( canvasWorker !== undefined ) {
+		return canvasWorker;
+	}
+
+	const createWorker = createWorkerFactory(
+		() => import( /* webpackChunkName: 'canvas' */ '../workers/canvas' )
+	);
+	canvasWorker = createWorker();
+
+	return canvasWorker;
+}
 
 export async function compressImage( file: File, quality = 0.82 ) {
 	return new File(
 		[
 			new Blob(
 				[
-					await canvasWorker.compressImage(
+					await getCanvasWorker().compressImage(
 						await file.arrayBuffer(),
 						file.type,
 						quality
@@ -43,7 +55,7 @@ export async function convertImageFormat(
 		[
 			new Blob(
 				[
-					await canvasWorker.convertImageFormat(
+					await getCanvasWorker().convertImageFormat(
 						await file.arrayBuffer(),
 						file.type,
 						mimeType,
@@ -63,7 +75,7 @@ export async function resizeImage(
 	resize: ImageSizeCrop,
 	addSuffix: boolean
 ) {
-	const result = await canvasWorker.resizeImage(
+	const result = await getCanvasWorker().resizeImage(
 		await file.arrayBuffer(),
 		file.type,
 		resize

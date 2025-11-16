@@ -9,7 +9,7 @@ import type { Attachment, RestAttachment } from './types';
  * @param attachment REST API attachment object.
  */
 export function transformAttachment( attachment: RestAttachment ): Attachment {
-	const { alt_text, source_url, ...savedMediaProps } = attachment;
+	const { alt_text: _1, source_url: _2, ...savedMediaProps } = attachment;
 	return {
 		...savedMediaProps,
 		alt: attachment.alt_text,

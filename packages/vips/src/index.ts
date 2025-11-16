@@ -32,20 +32,6 @@ interface EmscriptenModule {
 	setDelayFunction: ( fn: ( fn: () => void ) => void ) => void;
 }
 
-let location = '';
-
-/**
- * Dynamically sets the location / public path to use for loading the WASM files.
- *
- * This is required when loading this module in an inline worker,
- * where globals such as __webpack_public_path__ are not available.
- *
- * @param newLocation Location, typically a base URL such as "https://example.com/path/to/js/...".
- */
-export function setLocation( newLocation: string ) {
-	location = newLocation;
-}
-
 let cleanup: () => void;
 
 let vipsInstance: typeof Vips;
@@ -74,7 +60,7 @@ async function getVips(): Promise< typeof Vips > {
 				fileName = VipsJxlModule;
 			}
 
-			return location + fileName;
+			return fileName;
 		},
 		preRun: ( module: EmscriptenModule ) => {
 			// https://github.com/kleisauke/wasm-vips/issues/13#issuecomment-1073246828
@@ -166,7 +152,7 @@ export async function convertImageFormat(
 	}
 
 	const outBuffer = image.writeToBuffer( `.${ ext }`, saveOptions );
-	const result = outBuffer.buffer;
+	const result = outBuffer.buffer as ArrayBuffer;
 
 	cleanup?.();
 
@@ -338,7 +324,7 @@ export async function resizeImage(
 	const outBuffer = image.writeToBuffer( `.${ ext }`, saveOptions );
 
 	const result = {
-		buffer: outBuffer.buffer,
+		buffer: outBuffer.buffer as ArrayBuffer,
 		width: image.width,
 		height: image.pageHeight,
 		originalWidth: width,

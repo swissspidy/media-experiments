@@ -22,13 +22,13 @@
 		"node": ">=20"
 	},
 	"main": "dist/index.js",
-	"types": "dist-types/index.d.ts",
 	"source": "src/index.ts",
 	"exports": {
 		".": {
 			"default": "./src/index.ts"
 		}
 	},
+	"types": "dist-types/index.d.ts",
 	"dependencies": {
 		"@audapolis/webvtt-writer": "^1.0.6",
 		"@mexp/ai": "file:../ai",
@@ -38,16 +38,16 @@
 		"@mexp/pdf": "file:../pdf",
 		"@mexp/vips": "file:../vips",
 		"@shopify/web-worker": "^6.4.0",
-		"@wordpress/api-fetch": "^7.11.0",
-		"@wordpress/blob": "^4.11.0",
+		"@wordpress/api-fetch": "^7.13.0",
+		"@wordpress/blob": "^4.34.0",
 		"@wordpress/data": "^10.11.0",
-		"@wordpress/i18n": "^5.11.0",
-		"@wordpress/preferences": "^4.11.0",
-		"@wordpress/url": "^4.11.0",
+		"@wordpress/i18n": "^6.1.0",
+		"@wordpress/preferences": "^4.13.0",
+		"@wordpress/url": "^4.13.0",
 		"blurhash": "^2.0.5",
-		"fast-average-color": "^9.3.0",
+		"fast-average-color": "^9.5.0",
 		"mime": "^3.0.0",
-		"uuid": "^11.0.2",
+		"uuid": "^11.1.0",
 		"vosk-browser": "^0.0.8"
 	}
 }

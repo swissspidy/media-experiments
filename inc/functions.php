@@ -696,6 +696,7 @@ function filter_rest_index( WP_REST_Response $response ): WP_REST_Response {
 
 	$default_image_output_formats = get_default_image_output_formats();
 
+	// @phpstan-ignore function.internal (false positive)
 	$media_source_terms = get_terms(
 		[
 			'taxonomy'   => 'mexp_media_source',
@@ -861,19 +862,6 @@ function register_attachment_post_meta(): void {
 		[
 			'type'              => 'integer',
 			'description'       => __( 'The ID of the generated poster image for the object.', 'media-experiments' ),
-			'show_in_rest'      => true,
-			'single'            => true,
-			'default'           => 0,
-			'sanitize_callback' => 'absint',
-		]
-	);
-
-	register_post_meta(
-		'attachment',
-		'mexp_optimized_id',
-		[
-			'type'              => 'integer',
-			'description'       => __( 'The ID of the optimized version for the object.', 'media-experiments' ),
 			'show_in_rest'      => true,
 			'single'            => true,
 			'default'           => 0,
@@ -1133,7 +1121,7 @@ function filter_wp_content_img_tag_add_placeholders( string $content, string $co
 
 	$meta = wp_get_attachment_metadata( $attachment_id );
 
-	if ( false === $meta ) {
+	if ( ! is_array( $meta ) ) {
 		return $content;
 	}
 
@@ -1148,10 +1136,14 @@ function filter_wp_content_img_tag_add_placeholders( string $content, string $co
 		return $content;
 	}
 
+	$style = $processor->get_attribute( 'style' );
+
+	if ( ! is_string( $style ) ) {
+		$style = '';
+	}
+
 	if ( is_string( $dominant_color ) ) {
-		wp_register_style( 'mexp-placeholder', false ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
-		wp_enqueue_style( 'mexp-placeholder' );
-		wp_add_inline_style( 'mexp-placeholder', sprintf( '.mexp-placeholder-%1$s { background-color: %2$s; }', $attachment_id, $dominant_color ) );
+		$style = sprintf( 'background-color: %1$s; %2$s }', maybe_hash_hex_color( $dominant_color ), $style );
 	}
 
 	// BlurHash conversion is completely untested. Probably contains faulty logic.
@@ -1173,7 +1165,7 @@ function filter_wp_content_img_tag_add_placeholders( string $content, string $co
 					$percent_y = round( ( $r / ( $rows - 1 ) ) * 100 );
 
 					[ $r, $g, $b ] = $pixel;
-					$rgb           = sprintf( '#%02x%02x%02x', $r, $g, $b );
+					$rgb           = sprintf( '#%02x%02x%02x', (int) $r, (int) $g, (int) $b );
 
 					$gradients[] = sprintf(
 						'radial-gradient(at %1$s%% %2$s%%, %3$s, #00000000 50%%)',
@@ -1184,14 +1176,13 @@ function filter_wp_content_img_tag_add_placeholders( string $content, string $co
 				}
 			}
 
-			wp_register_style( 'mexp-placeholder', false ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
-			wp_enqueue_style( 'mexp-placeholder' );
-
-			wp_add_inline_style( 'mexp-placeholder', sprintf( '.mexp-placeholder-%1$s { background-image: %2$s; }', $attachment_id, join( ',', $gradients ) ) );
+			$style = sprintf( 'background-image: %1$s; %2$s }', join( ',', $gradients ), $style );
 		} catch ( InvalidArgumentException $exception ) {
 			// TODO: Investigate error, which is likely because of a blurhash length mismatch.
 		}
 	}
+
+	$processor->set_attribute( 'style', $style );
 
 	$processor->add_class( $class_name );
 

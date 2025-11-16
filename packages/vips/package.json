@@ -25,14 +25,14 @@
 	"type": "module",
 	"main": "dist/index.js",
 	"module": "dist/index.js",
-	"types": "dist-types/index.d.ts",
 	"source": "src/index.ts",
 	"exports": {
 		".": {
 			"default": "./src/index.ts"
 		}
 	},
+	"types": "dist-types/index.d.ts",
 	"dependencies": {
-		"wasm-vips": "^0.0.11"
+		"wasm-vips": "^0.0.16"
 	}
 }

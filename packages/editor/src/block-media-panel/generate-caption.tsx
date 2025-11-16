@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createWorkerFactory } from '@shopify/web-worker';
+import { createWorkerFactory, type WorkerCreator } from '@shopify/web-worker';
 
 /**
  * WordPress dependencies
@@ -20,11 +20,22 @@ import { store as preferencesStore } from '@wordpress/preferences';
 import { PREFERENCES_NAME } from '../constants';
 import { ReactComponent as PhotoSpark } from '../icons/photo-spark.svg';
 
-const createAiWorker = createWorkerFactory(
-	() => import( /* webpackChunkName: 'ai' */ '@mexp/ai' )
-);
+let aiWorker:
+	| ReturnType< WorkerCreator< typeof import('@mexp/ai') > >
+	| undefined;
 
-const aiWorker = createAiWorker();
+function getAiWorker() {
+	if ( aiWorker !== undefined ) {
+		return aiWorker;
+	}
+
+	const createWorker = createWorkerFactory(
+		() => import( /* webpackChunkName: 'ai' */ '@mexp/ai' )
+	);
+	aiWorker = createWorker();
+
+	return aiWorker;
+}
 
 interface GenerateCaptionsProps {
 	url?: string;
@@ -60,7 +71,7 @@ export function GenerateCaptions( {
 				setCaptionInProgress( true );
 
 				try {
-					const result = await aiWorker.generateCaption(
+					const result = await getAiWorker().generateCaption(
 						url,
 						'<CAPTION>'
 					);
@@ -89,7 +100,7 @@ export function GenerateCaptions( {
 				setAltInProgress( true );
 
 				try {
-					const result = await aiWorker.generateCaption(
+					const result = await getAiWorker().generateCaption(
 						url,
 						'<DETAILED_CAPTION>'
 					);
