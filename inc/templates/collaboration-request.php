@@ -47,7 +47,8 @@ if ( $mexp_current_user_id !== (int) $mexp_temp_user_id ) {
 	wp_set_current_user( $mexp_temp_user_id );
 	wp_set_auth_cookie( $mexp_temp_user_id, true );
 	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core hook.
-	do_action( 'wp_login', get_userdata( $mexp_temp_user_id )->user_login, get_userdata( $mexp_temp_user_id ) );
+	$mexp_temp_user = get_userdata( $mexp_temp_user_id );
+	do_action( 'wp_login', $mexp_temp_user->user_login, $mexp_temp_user );
 }
 
 // Redirect to the block editor for the target post.
