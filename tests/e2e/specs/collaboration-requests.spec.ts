@@ -49,6 +49,7 @@ test.describe( 'Collaboration Requests', () => {
 			name: 'Media Experiments',
 		} );
 
+		/* eslint-disable playwright/no-conditional-in-test */
 		if ( await mediaExperimentsPanel.isVisible() ) {
 			const isExpanded =
 				await mediaExperimentsPanel.getAttribute( 'aria-expanded' );
@@ -56,6 +57,7 @@ test.describe( 'Collaboration Requests', () => {
 				await mediaExperimentsPanel.click();
 			}
 		}
+		/* eslint-enable playwright/no-conditional-in-test */
 
 		// Click the share link button
 		await page
@@ -137,6 +139,7 @@ test.describe( 'Collaboration Requests', () => {
 			name: 'Media Experiments',
 		} );
 
+		/* eslint-disable playwright/no-conditional-in-test */
 		if ( await mediaExperimentsPanel.isVisible() ) {
 			const isExpanded =
 				await mediaExperimentsPanel.getAttribute( 'aria-expanded' );
@@ -144,6 +147,7 @@ test.describe( 'Collaboration Requests', () => {
 				await mediaExperimentsPanel.click();
 			}
 		}
+		/* eslint-enable playwright/no-conditional-in-test */
 
 		// Click the share link button
 		await page
