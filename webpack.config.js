@@ -217,4 +217,4 @@ const modules = {
 	],
 };
 
-module.exports = [ regular ];
+module.exports = [ regular, modules ];
