@@ -114,7 +114,7 @@ export function CollaborationRequestControls() {
 		}
 
 		void updateRequest();
-	}, [ allowedCapabilities, collaborationRequest ] );
+	}, [ allowedCapabilities, collaborationRequest, createErrorNotice ] );
 
 	// Auto-expire after max lifetime
 	useEffect( () => {
