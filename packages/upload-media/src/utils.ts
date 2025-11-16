@@ -27,7 +27,8 @@ import { UploadError } from './upload-error';
  * @return File object.
  */
 export function convertBlobToFile( fileOrBlob: Blob | File ): File {
-	if ( fileOrBlob instanceof File ) {
+	// Because an instanceof check is not reliable.
+	if ( 'name' in fileOrBlob && 'type' in fileOrBlob ) {
 		return fileOrBlob;
 	}
 
@@ -35,7 +36,7 @@ export function convertBlobToFile( fileOrBlob: Blob | File ): File {
 	// The server will override it if incorrect.
 	const ext = fileOrBlob.type.split( '/' )[ 1 ];
 	const mediaType =
-		'application/pdf' == fileOrBlob.type
+		'application/pdf' === fileOrBlob.type
 			? 'document'
 			: fileOrBlob.type.split( '/' )[ 0 ];
 	return new File( [ fileOrBlob ], `${ mediaType }.${ ext }`, {

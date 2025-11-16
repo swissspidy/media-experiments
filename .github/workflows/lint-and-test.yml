@@ -20,10 +20,10 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - name: Setup Node
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v6
               with:
                   node-version-file: '.nvmrc'
                   cache: npm
@@ -53,10 +53,10 @@ jobs:
             pull-requests: write
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - name: Setup Node
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v6
               with:
                   node-version-file: '.nvmrc'
                   cache: npm
@@ -76,7 +76,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
@@ -86,7 +86,7 @@ jobs:
                   tools: composer, cs2pr
 
             - name: Install PHP dependencies
-              uses: ramsey/composer-install@83af392bf5f031813d25e6fe4cd626cdba9a2df6
+              uses: ramsey/composer-install@v3
               with:
                   composer-options: '--prefer-dist --no-scripts'
 
@@ -96,15 +96,18 @@ jobs:
             - name: Lint PHP
               run: composer lint
 
+            - name: PHPStan
+              run: composer phpstan
+
     unit-js:
         name: JS Tests
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - name: Setup Node
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v6
               with:
                   node-version-file: '.nvmrc'
                   cache: npm
@@ -116,9 +119,9 @@ jobs:
               run: npm run test:unit -- --collectCoverage
 
             - name: Upload code coverage report
-              uses: codecov/codecov-action@v4.5.0
+              uses: codecov/codecov-action@v5.5.1
               with:
-                  file: artifacts/logs/lcov.info
+                  files: artifacts/logs/lcov.info
                   flags: js
                   token: ${{ secrets.CODECOV_TOKEN }}
 
@@ -139,7 +142,7 @@ jobs:
         continue-on-error: ${{ matrix.experimental }}
         strategy:
             matrix:
-                php: ['8.2', '8.1', '8.0']
+                php: ['8.2', '8.1', '8.0', '7.4']
                 wp: ['latest']
                 coverage: [false]
                 experimental: [false]
@@ -159,7 +162,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
@@ -178,11 +181,16 @@ jobs:
                     sleep 1
                   done
 
+            - name: Install svn
+              run: |
+                  sudo apt update -y --allow-releaseinfo-change
+                  sudo apt install -y subversion
+
             - name: Set up tests
               run: bash bin/install-wp-tests.sh wordpress_test root '' 127.0.0.1:${{ job.services.mysql.ports['3306'] }} ${{ matrix.wp }} true
 
             - name: Install PHP dependencies
-              uses: 'ramsey/composer-install@v2'
+              uses: ramsey/composer-install@v3
               with:
                   composer-options: '--prefer-dist --no-progress --no-interaction --no-scripts'
 
@@ -213,22 +221,22 @@ jobs:
 
             - name: Run tests with coverage
               run: |
-                  composer test -- --coverage-clover coverage.xml
-                  composer test:multisite -- --coverage-clover coverage-multisite.xml
+                  composer test -- --coverage-clover artifacts/coverage.xml
+                  composer test:multisite -- --coverage-clover artifacts/coverage-multisite.xml
               if: ${{ matrix.coverage }}
 
             - name: Upload code coverage report
-              uses: codecov/codecov-action@v4.5.0
+              uses: codecov/codecov-action@v5.5.1
               with:
-                  file: artifacts/coverage.xml
+                  files: artifacts/coverage.xml
                   flags: default
                   token: ${{ secrets.CODECOV_TOKEN }}
               if: ${{ matrix.coverage }}
 
             - name: Upload code coverage report
-              uses: codecov/codecov-action@v4.5.0
+              uses: codecov/codecov-action@v5.5.1
               with:
-                  file: coverage-multisite.xml
+                  files: artifacts/coverage-multisite.xml
                   flags: multisite
                   token: ${{ secrets.CODECOV_TOKEN }}
               if: ${{ matrix.coverage }}
@@ -239,7 +247,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
@@ -252,7 +260,7 @@ jobs:
               run: wp package install wp-cli/dist-archive-command:dev-main
 
             - name: Setup Node
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v6
               with:
                   node-version-file: '.nvmrc'
                   cache: npm

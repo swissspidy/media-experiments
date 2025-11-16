@@ -23,14 +23,14 @@ jobs:
                 shard: ['1/4', '2/4', '3/4', '4/4']
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
               with:
                   # 0 indicates all history for all branches and tags.
                   fetch-depth: 0
                   token: ${{ secrets.WORKFLOWS_TOKEN }}
 
             - name: Setup Node
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v6
               with:
                   node-version-file: '.nvmrc'
                   cache: npm

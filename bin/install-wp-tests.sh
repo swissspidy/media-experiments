@@ -154,8 +154,11 @@ install_db() {
 	fi
 
 	# create database
-	mariadb-admin create $DB_NAME --user="$DB_USER" --password="$DB_PASS"$EXTRA || \
+	if [ `which mariadb-admin` ]; then
+		mariadb-admin create $DB_NAME --user="$DB_USER" --password="$DB_PASS"$EXTRA
+	else
 		mysqladmin create $DB_NAME --user="$DB_USER" --password="$DB_PASS"$EXTRA
+	fi
 }
 
 install_wp

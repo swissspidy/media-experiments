@@ -5,15 +5,21 @@
  * @package MediaExperiments
  */
 
-	$post = get_post();
-
-if ( $post instanceof WP_Post ) {
-	global $authordata;
-	$authordata = get_userdata( (int) $post->post_author );
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
 }
 
-	$mexp_request_parent     = $post instanceof WP_Post && $post->post_parent > 0 ? get_post( $post->post_parent ) : null;
-	$mexp_request_parent_url = $mexp_request_parent instanceof WP_Post && ( is_post_publicly_viewable( $mexp_request_parent ) || current_user_can( 'read', $mexp_request_parent ) ) ? get_permalink( $mexp_request_parent ) : null;
+$post = get_post();
+
+if ( ! $post instanceof WP_Post ) {
+	exit;
+}
+
+global $authordata;
+$authordata = get_userdata( (int) $post->post_author );
+
+$mexp_request_parent     = $post->post_parent > 0 ? get_post( $post->post_parent ) : null;
+$mexp_request_parent_url = $mexp_request_parent instanceof WP_Post && ( is_post_publicly_viewable( $mexp_request_parent ) || current_user_can( 'read', $mexp_request_parent ) ) ? get_permalink( $mexp_request_parent ) : null;
 ?><!DOCTYPE html>
 <html <?php language_attributes(); ?>>
 <head>
@@ -42,12 +48,9 @@ if ( $post instanceof WP_Post ) {
 	$multiple      = (bool) get_post_meta( $post->ID, 'mexp_multiple', true );
 
 	$max_upload_size = wp_max_upload_size();
-	if ( ! $max_upload_size ) {
-		$max_upload_size = 0;
-	}
 
-	$post_title = get_the_title( $mexp_request_parent );
-	if ( empty( $post_title ) ) {
+	$post_title = $mexp_request_parent instanceof WP_Post ? get_the_title( $mexp_request_parent ) : '';
+	if ( '' === $post_title ) {
 		$post_title = __( '(no title)', 'media-experiments' );
 	}
 
@@ -65,7 +68,7 @@ if ( $post instanceof WP_Post ) {
 				$types,
 				static function ( $mime_type ) use ( $allowed_types ) {
 					$file_type = explode( '/', $mime_type )[0];
-					return in_array( $file_type, $allowed_types, true );
+					return in_array( $file_type, (array) $allowed_types, true );
 				}
 			);
 		}
@@ -84,12 +87,12 @@ if ( $post instanceof WP_Post ) {
 			window.mediaExperiments.accept = %4$s;
 			window.mediaExperiments.multiple = %5$s;
 			window.mediaExperiments.maxUploadFileSize = %6$s;',
-			wp_json_encode( get_allowed_mime_types() ),
-			wp_json_encode( $post->post_name ),
-			wp_json_encode( $allowed_types ? (array) $allowed_types : null ),
-			wp_json_encode( $accept ? (array) $accept : null ),
-			wp_json_encode( $multiple ),
-			wp_json_encode( $max_upload_size )
+			(string) wp_json_encode( get_allowed_mime_types() ),
+			(string) wp_json_encode( $post->post_name ),
+			(string) wp_json_encode( (array) $allowed_types ),
+			(string) wp_json_encode( (array) $accept ),
+			(string) wp_json_encode( $multiple ),
+			(string) wp_json_encode( $max_upload_size )
 		),
 		'before'
 	);

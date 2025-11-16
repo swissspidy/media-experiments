@@ -5,18 +5,42 @@ parameters:
 		- inc/
 	scanFiles:
 		- vendor/php-stubs/wordpress-tests-stubs/wordpress-tests-stubs.php
+		- tests/phpstan/filtered-functions.stub
+		- tests/phpstan/performance-lab.stub
+		# These are needed due config.platform.php being 7.4 in composer.json and wordpress-stubs not including polyfills.
+		# See <https://github.com/php-stubs/wordpress-stubs/issues/100>.
+		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_contains.php
+		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_starts_with.php
+		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_ends_with.php
 	bootstrapFiles:
 		- tests/phpstan/bootstrap.php
+	reportMaybesInMethodSignatures: false
+	WPCompat:
+		requiresAtLeast: '6.7'
+	strictRules:
+		disallowedEmpty: false
+		strictArrayFilter: false
 	ignoreErrors:
 		# TODO: Revisit ArrayAccess types in WP_REST_Request
 		# See https://github.com/php-stubs/wordpress-stubs/pull/66
 		# See https://github.com/phpstan/phpstan/issues/8549
 		-
-			message: "/^Cannot assign offset 'post' to WP_REST_Request<array<string, bool\\|int\\|string>>.$/"
-			path: inc/class-rest-attachments-controller.php
+			message: "/^Cannot assign offset '.*' to WP_REST_Request/"
+			paths:
+				- inc/class-rest-attachments-controller.php
+				- inc/class-rest-upload-requests-controller.php
 		-
-			message: "/Cannot access offset 'id' on mixed.$/"
-			path: inc/class-rest-attachments-controller.php
-
+			message: "/^WP_REST_Request<.*> does not accept/"
+			paths:
+				- inc/class-rest-attachments-controller.php
+				- inc/class-rest-upload-requests-controller.php
+		-
+			identifier: method.childParameterType
+			path: inc/class-rest-upload-requests-controller.php
+		-
+			identifier: offsetAccess.nonOffsetAccessible
+			path: inc/functions.php
+		-
+			identifier: requireOnce.fileNotFound
 includes:
 	- phar://phpstan.phar/conf/bleedingEdge.neon

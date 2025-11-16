@@ -27,7 +27,6 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { __, sprintf } from '@wordpress/i18n';
 import { filterURLForDisplay } from '@wordpress/url';
 import { store as noticesStore } from '@wordpress/notices';
-import apiFetch from '@wordpress/api-fetch';
 import { useState } from '@wordpress/element';
 
 /**
@@ -74,16 +73,6 @@ function Row(
 			onSuccess: ( [ media ] ) => {
 				props.onChange( media );
 
-				void apiFetch( {
-					path: `/wp/v2/media/${ props.id }`,
-					data: {
-						meta: {
-							mexp_optimized_id: media.id,
-						},
-					},
-					method: 'POST',
-				} );
-
 				void createSuccessNotice(
 					__( 'File successfully optimized.', 'media-experiments' ),
 					{
@@ -117,13 +106,15 @@ function Row(
 	return (
 		<>
 			<Flex direction={ [ 'column', 'row' ] }>
-				<img
-					src={ props.url }
-					width={ 32 }
-					height={ 32 }
-					alt=""
-					className="mexp-bulk-optimization-row__image"
-				/>
+				{ props.url && (
+					<img
+						src={ props.url }
+						width={ 32 }
+						height={ 32 }
+						alt=""
+						className="mexp-bulk-optimization-row__image"
+					/>
+				) }
 				<Tooltip text={ props.url }>
 					<Text
 						aria-label={ props.url }
@@ -132,14 +123,12 @@ function Row(
 						{ filterURLForDisplay( props.url, 15 ) }
 					</Text>
 				</Tooltip>
-				{ ! isUploading || props.isBulkUploading ? (
-					<Text variant="muted">
-						{ props.filesize
-							? numberFormatter.format( props.filesize )
-							: /* translators: unknown file size */
-							  __( '? KB', 'media-experiments' ) }
-					</Text>
-				) : null }
+				<Text variant="muted">
+					{ props.filesize
+						? numberFormatter.format( props.filesize )
+						: /* translators: unknown file size */
+						  __( '? KB', 'media-experiments' ) }
+				</Text>
 				<div className="mexp-bulk-optimization-row__action">
 					{ isUploading && ! props.isBulkUploading ? (
 						<Spinner />
@@ -196,16 +185,6 @@ function CompressAll( props: {
 				fileName: attachment.filename || undefined,
 				onSuccess: ( [ media ] ) => {
 					attachment.onChange( media );
-
-					void apiFetch( {
-						path: `/wp/v2/media/${ attachment.id }`,
-						data: {
-							meta: {
-								mexp_optimized_id: media.id,
-							},
-						},
-						method: 'POST',
-					} );
 				},
 				onError: ( err: Error | UploadError ) => {
 					if (

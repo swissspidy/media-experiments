@@ -25,6 +25,7 @@ import {
 	FormFileUpload,
 	SnackbarList,
 	Spinner,
+	DropZone,
 } from '@wordpress/components';
 
 /**
@@ -137,10 +138,10 @@ export function App() {
 		( select ) => select( uploadStore ).getItems().length > 0,
 		[]
 	);
-	const wasUploading = useRef( false );
+	const wasUploadingRef = useRef( false );
 
 	useEffect( () => {
-		if ( ! isUploading && wasUploading.current ) {
+		if ( ! isUploading && wasUploadingRef.current ) {
 			void createSuccessNotice(
 				__(
 					'Media successfully uploaded. You may now close this page.',
@@ -150,7 +151,7 @@ export function App() {
 			);
 		}
 
-		wasUploading.current = isUploading;
+		wasUploadingRef.current = isUploading;
 	}, [ createSuccessNotice, isUploading ] );
 
 	const notices = useSelect(
@@ -184,34 +185,59 @@ export function App() {
 		} );
 	};
 
+	const onFilesDrop = ( files: File[] ) => {
+		uploadRequestUploadMedia( {
+			filesList: files,
+			onError: ( error ) => {
+				void createErrorNotice( error.message, { type: 'snackbar' } );
+			},
+			additionalData: {
+				upload_request: window.mediaExperiments.uploadRequest,
+			},
+			onFileChange: ( [ media ] ) => {
+				if ( ! media.id ) {
+					return;
+				}
+
+				setAttachment( media );
+			},
+		} );
+	};
+
 	return (
 		<>
 			{ ! attachment.id ? (
-				<FormFileUpload
-					onChange={ onUpload }
-					accept={
-						window.mediaExperiments.accept
-							? window.mediaExperiments.accept.join( ',' )
-							: '*'
-					}
-					multiple={ window.mediaExperiments.multiple }
-					render={ ( { openFileDialog } ) => (
-						<Button
-							variant="secondary"
-							onClick={ openFileDialog }
-							disabled={ isUploading }
-						>
-							{ isUploading ? (
-								<>
-									<Spinner />
-									{ __( 'Uploading…', 'media-experiments' ) }
-								</>
-							) : (
-								__( 'Upload media', 'media-experiments' )
-							) }
-						</Button>
-					) }
-				/>
+				<>
+					<DropZone onFilesDrop={ onFilesDrop } />
+					<FormFileUpload
+						onChange={ onUpload }
+						accept={
+							window.mediaExperiments.accept
+								? window.mediaExperiments.accept.join( ',' )
+								: '*'
+						}
+						multiple={ window.mediaExperiments.multiple }
+						render={ ( { openFileDialog } ) => (
+							<Button
+								variant="secondary"
+								onClick={ openFileDialog }
+								disabled={ isUploading }
+							>
+								{ isUploading ? (
+									<>
+										<Spinner />
+										{ __(
+											'Uploading…',
+											'media-experiments'
+										) }
+									</>
+								) : (
+									__( 'Upload media', 'media-experiments' )
+								) }
+							</Button>
+						) }
+					/>
+				</>
 			) : (
 				<Text>
 					{ __(

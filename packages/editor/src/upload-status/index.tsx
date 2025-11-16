@@ -18,8 +18,8 @@ import { store as editorStore } from '@wordpress/editor';
 import { UploadStatusIndicator } from './indicator';
 
 function WrappedUploadStatusIndicator() {
-	const root = useRef< HTMLDivElement | null >( null );
-	const referenceNode = useRef< HTMLDivElement | null >( null );
+	const rootRef = useRef< HTMLDivElement | null >( null );
+	const targetRef = useRef< HTMLDivElement | null >( null );
 
 	const [ , setHasNode ] = useState( false );
 
@@ -39,25 +39,25 @@ function WrappedUploadStatusIndicator() {
 
 	useLayoutEffect( () => {
 		// The upload status indicator should always be inserted right before any other buttons.
-		referenceNode.current = document.querySelector(
+		targetRef.current = document.querySelector(
 			'.editor-header__settings, .edit-widgets-header__actions'
 		);
 
-		if ( referenceNode.current ) {
-			if ( ! root.current ) {
-				root.current = document.createElement( 'div' );
-				root.current.className = 'media-experiments-upload-status';
+		if ( targetRef.current ) {
+			if ( ! rootRef.current ) {
+				rootRef.current = document.createElement( 'div' );
+				rootRef.current.className = 'media-experiments-upload-status';
 			}
 
-			referenceNode.current.prepend( root.current );
+			targetRef.current.prepend( rootRef.current );
 
 			setHasNode( true );
 		}
 
 		return () => {
-			if ( referenceNode.current && root.current ) {
-				referenceNode.current.removeChild( root.current );
-				referenceNode.current = null;
+			if ( targetRef.current && rootRef.current ) {
+				targetRef.current.removeChild( rootRef.current );
+				targetRef.current = null;
 				setHasNode( false );
 			}
 		};
@@ -68,8 +68,8 @@ function WrappedUploadStatusIndicator() {
 		// - When saveable property changes, the toolbar is reshuffled heavily.
 	}, [ isSaveable, isViewable ] );
 
-	return root.current
-		? createPortal( <UploadStatusIndicator />, root.current )
+	return rootRef.current
+		? createPortal( <UploadStatusIndicator />, rootRef.current )
 		: null;
 }
 

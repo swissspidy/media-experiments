@@ -185,7 +185,6 @@ export interface RestAttachment extends WP_REST_API_Attachment {
 	meta: {
 		mexp_generated_poster_id?: number;
 		mexp_original_id?: number;
-		mexp_optimized_id?: number;
 	};
 	mexp_blurhash?: string;
 	mexp_dominant_color?: string;
@@ -225,13 +224,13 @@ export type AdditionalData = BetterOmit<
 	'meta' | 'mexp_media_source'
 >;
 
-export type CreateSideloadFile = {
+export interface CreateSideloadFile {
 	image_size?: string;
 	upload_request?: string;
-};
+}
 
-export type SideloadAdditionalData = {
+export interface SideloadAdditionalData {
 	post: RestAttachment[ 'id' ];
 	image_size?: string;
 	upload_request?: string;
-};
+}

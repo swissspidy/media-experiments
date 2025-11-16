@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 /**
  * WordPress dependencies
  */
-import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
+import type { createRegistry } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
 
 import { type MeasureOptions } from '@mexp/log';
@@ -32,10 +32,8 @@ import type {
 	OnSuccessHandler,
 	QueueItem,
 	QueueItemId,
-	Settings,
 	State,
 	ThumbnailGeneration,
-	UpdateSettingsAction,
 } from './types';
 import { ItemStatus, OperationType, Type } from './types';
 import type {
@@ -44,6 +42,8 @@ import type {
 	removeItem,
 	revokeBlobUrls,
 } from './private-actions';
+
+type WPDataRegistry = ReturnType< typeof createRegistry >;
 
 type ActionCreators = {
 	addItem: typeof addItem;
@@ -77,23 +77,6 @@ type ThunkArgs = {
 	registry: WPDataRegistry;
 };
 
-/**
- * Returns an action object that pauses all processing in the queue.
- *
- * Useful for testing purposes.
- *
- * @param settings
- * @return Action object.
- */
-export function updateSettings(
-	settings: Partial< Settings >
-): UpdateSettingsAction {
-	return {
-		type: Type.UpdateSettings,
-		settings,
-	};
-}
-
 interface AddItemsArgs {
 	files: File[];
 	onChange?: OnChangeHandler;
@@ -122,7 +105,7 @@ export function addItems( {
 	onBatchSuccess,
 	additionalData,
 }: AddItemsArgs ) {
-	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
+	return async ( { dispatch }: ThunkArgs ) => {
 		const batchId = uuidv4();
 		for ( const file of files ) {
 			dispatch.addItem( {
@@ -166,7 +149,7 @@ export function addItemFromUrl( {
 	additionalData,
 	allowedTypes,
 }: AddItemFromUrlArgs ) {
-	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
+	return async ( { dispatch }: ThunkArgs ) => {
 		const fileName = getFileNameFromUrl( url );
 
 		dispatch.addItem( {
@@ -224,7 +207,7 @@ export function muteExistingVideo( {
 	onError,
 	additionalData = {} as AdditionalData,
 }: MuteExistingVideoArgs ) {
-	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
+	return async ( { dispatch }: ThunkArgs ) => {
 		fileName = fileName || getFileNameFromUrl( url );
 		const baseName = getFileBasename( fileName );
 		const newFileName = fileName.replace( baseName, `${ baseName }-muted` );
@@ -307,7 +290,7 @@ export function addSubtitlesForExistingVideo( {
 	onError,
 	additionalData = {} as AdditionalData,
 }: AddSubtitlesForExistingVideoArgs ) {
-	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
+	return async ( { dispatch }: ThunkArgs ) => {
 		fileName = fileName || getFileNameFromUrl( url );
 
 		const itemId = uuidv4();
@@ -378,7 +361,7 @@ export function addPosterForExistingVideo( {
 	onError,
 	additionalData = {} as AdditionalData,
 }: AddPosterForExistingVideoArgs ) {
-	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
+	return async ( { dispatch }: ThunkArgs ) => {
 		fileName = fileName || getFileNameFromUrl( url );
 
 		const itemId = uuidv4();

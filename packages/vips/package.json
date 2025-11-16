@@ -23,14 +23,14 @@
 		"node": ">=20"
 	},
 	"main": "dist/index.js",
-	"types": "dist-types/index.d.ts",
 	"source": "src/index.ts",
 	"exports": {
 		".": {
 			"default": "./src/index.ts"
 		}
 	},
+	"types": "dist-types/index.d.ts",
 	"dependencies": {
-		"wasm-vips": "^0.0.10"
+		"wasm-vips": "^0.0.16"
 	}
 }

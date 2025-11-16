@@ -23,20 +23,20 @@
 		"node": ">=20"
 	},
 	"main": "dist/index.js",
-	"types": "dist-types/index.d.ts",
 	"source": "src/index.ts",
 	"exports": {
 		".": {
 			"default": "./src/index.ts"
 		}
 	},
+	"types": "dist-types/index.d.ts",
 	"dependencies": {
 		"@mexp/media-utils": "file:../media-utils",
 		"@mexp/upload-media": "file:../upload-media",
-		"@wordpress/components": "^28.0.0",
-		"@wordpress/compose": "^7.0.0",
-		"@wordpress/core-data": "^7.8.0",
-		"@wordpress/data": "^10.0.0",
-		"@wordpress/preferences": "^4.0.0"
+		"@wordpress/components": "^29.3.0",
+		"@wordpress/compose": "^7.13.0",
+		"@wordpress/core-data": "^7.34.0",
+		"@wordpress/data": "^10.11.0",
+		"@wordpress/preferences": "^4.13.0"
 	}
 }

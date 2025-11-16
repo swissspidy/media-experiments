@@ -2,14 +2,14 @@
  * External dependencies
  */
 import { v4 as uuidv4 } from 'uuid';
-import { createWorkerFactory } from '@shopify/web-worker';
 import { measure, type MeasureOptions, start } from '@mexp/log';
+import { createWorkerFactory, type WorkerCreator } from '@shopify/web-worker';
 
 /**
  * WordPress dependencies
  */
 import { createBlobURL, isBlobURL, revokeBlobURL } from '@wordpress/blob';
-import type { WPDataRegistry } from '@wordpress/data/build-types/registry';
+import type { createRegistry } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
 import { __ } from '@wordpress/i18n';
 
@@ -72,6 +72,8 @@ import type {
 	ResumeItemAction,
 	ResumeQueueAction,
 	RevokeBlobUrlsAction,
+	Settings,
+	UpdateSettingsAction,
 	SideloadAdditionalData,
 	State,
 	ThumbnailGeneration,
@@ -80,24 +82,61 @@ import type {
 import { ItemStatus, OperationType, Type } from './types';
 import type { cancelItem } from './actions';
 
-const createDominantColorWorker = createWorkerFactory(
-	() =>
-		import(
-			/* webpackChunkName: 'dominant-color' */ './workers/dominant-color'
-		)
-);
-const dominantColorWorker = createDominantColorWorker();
+type WPDataRegistry = ReturnType< typeof createRegistry >;
 
-const createBlurhashWorker = createWorkerFactory(
-	() => import( /* webpackChunkName: 'blurhash' */ './workers/blurhash' )
-);
-const blurhashWorker = createBlurhashWorker();
+let dominantColorWorker:
+	| ReturnType< WorkerCreator< typeof import('./workers/dominant-color') > >
+	| undefined;
 
-const createAiWorker = createWorkerFactory(
-	() => import( /* webpackChunkName: 'ai' */ '@mexp/ai' )
-);
+function getDominantColorWorker() {
+	if ( dominantColorWorker !== undefined ) {
+		return dominantColorWorker;
+	}
 
-const aiWorker = createAiWorker();
+	const createWorker = createWorkerFactory(
+		() =>
+			import(
+				/* webpackChunkName: 'dominant-color' */ './workers/dominant-color'
+			)
+	);
+	dominantColorWorker = createWorker();
+
+	return dominantColorWorker;
+}
+
+let blurhashWorker:
+	| ReturnType< WorkerCreator< typeof import('./workers/blurhash') > >
+	| undefined;
+
+function getBlurhashWorker() {
+	if ( blurhashWorker !== undefined ) {
+		return blurhashWorker;
+	}
+
+	const createWorker = createWorkerFactory(
+		() => import( /* webpackChunkName: 'blurhash' */ './workers/blurhash' )
+	);
+	blurhashWorker = createWorker();
+
+	return blurhashWorker;
+}
+
+let aiWorker:
+	| ReturnType< WorkerCreator< typeof import('@mexp/ai') > >
+	| undefined;
+
+function getAiWorker() {
+	if ( aiWorker !== undefined ) {
+		return aiWorker;
+	}
+
+	const createWorker = createWorkerFactory(
+		() => import( /* webpackChunkName: 'ai' */ '@mexp/ai' )
+	);
+	aiWorker = createWorker();
+
+	return aiWorker;
+}
 
 // Safari does not currently support WebP in HTMLCanvasElement.toBlob()
 // See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
@@ -284,7 +323,7 @@ export function addSideloadItem( {
 	batchId,
 	parentId,
 }: AddSideloadItemArgs ) {
-	return async ( { dispatch }: { dispatch: ActionCreators } ) => {
+	return async ( { dispatch }: ThunkArgs ) => {
 		const itemId = uuidv4();
 		dispatch< AddAction >( {
 			type: Type.Add,
@@ -770,7 +809,7 @@ export function prepareItem( id: QueueItemId ) {
 		const { file } = item;
 
 		const mediaType =
-			'application/pdf' == file.type
+			'application/pdf' === file.type
 				? 'pdf'
 				: file.type.split( '/' )[ 0 ];
 
@@ -1452,7 +1491,7 @@ export function optimizeImageItem(
 					file = await vipsConvertImageFormat(
 						item.id,
 						item.file,
-						'image/avif',
+						'image/gif',
 						outputQuality / 100,
 						interlaced
 					);
@@ -1601,6 +1640,7 @@ export function optimizeVideoItem(
 			const isChunkLoadError =
 				error instanceof Error && error.name === 'ChunkLoadError';
 			if ( isChunkLoadError ) {
+				// eslint-disable-next-line no-console -- Deliberately log errors here.
 				console.error( error );
 			}
 
@@ -1778,6 +1818,7 @@ export function convertGifItem( id: QueueItemId ) {
 			} );
 		} catch ( error ) {
 			if ( error instanceof Error && error.name === 'ChunkLoadError' ) {
+				// eslint-disable-next-line no-console -- Deliberately log errors here.
 				console.error( error );
 			}
 			dispatch.cancelItem(
@@ -2152,11 +2193,14 @@ export function generateImageCaptions( id: QueueItemId ) {
 			// Do not override existing caption or alt text.
 			const caption =
 				item.additionalData?.caption ||
-				( await aiWorker.generateCaption( url ) );
+				( await getAiWorker().generateCaption( url ) );
 
 			const alt =
 				item.additionalData?.alt_text ||
-				( await aiWorker.generateCaption( url, '<DETAILED_CAPTION>' ) );
+				( await getAiWorker().generateCaption(
+					url,
+					'<DETAILED_CAPTION>'
+				) );
 
 			dispatch.finishOperation( id, {
 				// For updating in the editor straight away.
@@ -2233,7 +2277,7 @@ export function generateMetadata( id: QueueItemId ) {
 		) {
 			try {
 				additionalData.mexp_dominant_color =
-					await dominantColorWorker.getDominantColor( stillUrl );
+					await getDominantColorWorker().getDominantColor( stillUrl );
 			} catch {
 				// No big deal if this fails, we can still continue uploading.
 				// TODO: Debug & catch & throw.
@@ -2263,7 +2307,7 @@ export function generateMetadata( id: QueueItemId ) {
 		) {
 			try {
 				additionalData.mexp_blurhash =
-					await blurhashWorker.getBlurHash( stillUrl );
+					await getBlurhashWorker().getBlurHash( stillUrl );
 			} catch {
 				// No big deal if this fails, we can still continue uploading.
 				// TODO: Debug & catch & throw.
@@ -2293,5 +2337,22 @@ export function revokeBlobUrls( id: QueueItemId ) {
 			type: Type.RevokeBlobUrls,
 			id,
 		} );
+	};
+}
+
+/**
+ * Returns an action object that pauses all processing in the queue.
+ *
+ * Useful for testing purposes.
+ *
+ * @param settings
+ * @return Action object.
+ */
+export function updateSettings(
+	settings: Partial< Settings >
+): UpdateSettingsAction {
+	return {
+		type: Type.UpdateSettings,
+		settings,
 	};
 }

@@ -25,14 +25,14 @@
 		"node": ">=20"
 	},
 	"main": "dist/index.js",
-	"types": "dist-types/index.d.ts",
 	"source": "src/index.ts",
 	"exports": {
 		".": {
 			"default": "./src/index.ts"
 		}
 	},
+	"types": "dist-types/index.d.ts",
 	"dependencies": {
-		"@huggingface/transformers": "^3.0.0-alpha.9"
+		"@huggingface/transformers": "^3.7.5"
 	}
 }

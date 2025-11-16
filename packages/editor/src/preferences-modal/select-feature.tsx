@@ -35,6 +35,7 @@ function BaseSelectOption( {
 			{ /* @ts-ignore -- TODO: Fix type */ }
 			<SelectControl
 				__nextHasNoMarginBottom
+				__next40pxDefaultSize
 				help={ help }
 				label={ label }
 				value={ value }

@@ -1,0 +1,119 @@
+<?php
+
+
+/**
+ * Class representing a single Server-Timing metric.
+ *
+ * @since 1.8.0
+ */
+class Perflab_Server_Timing_Metric {
+
+	/**
+	 * Constructor.
+	 *
+	 * @param string $slug The metric slug.
+	 *
+	 * @since 1.8.0
+	 *
+	 */
+	public function __construct( string $slug ) {
+	}
+
+	/**
+	 * Gets the metric slug.
+	 *
+	 * @return string The metric slug.
+	 * @since 1.8.0
+	 *
+	 */
+	public function get_slug(): string {
+	}
+
+	/**
+	 * Sets the metric value.
+	 *
+	 * Alternatively to setting the metric value directly, the {@see Perflab_Server_Timing_Metric::measure_before()}
+	 * and {@see Perflab_Server_Timing_Metric::measure_after()} methods can be used to further simplify measuring.
+	 *
+	 * @param int|float|mixed $value The metric value to set, in milliseconds.
+	 *
+	 * @since 1.8.0
+	 *
+	 */
+	public function set_value( $value ): void {
+	}
+
+	/**
+	 * Gets the metric value.
+	 *
+	 * @return int|float|null The metric value, or null if none set.
+	 * @since 1.8.0
+	 *
+	 */
+	public function get_value() {
+	}
+
+	/**
+	 * Captures the current time, as a reference point to calculate the duration of a task afterward.
+	 *
+	 * This should be used in combination with {@see Perflab_Server_Timing_Metric::measure_after()}. Alternatively,
+	 * {@see Perflab_Server_Timing_Metric::set_value()} can be used to set a calculated value manually.
+	 *
+	 * @since 1.8.0
+	 */
+	public function measure_before(): void {
+	}
+
+	/**
+	 * Captures the current time and compares it to the reference point to calculate a task's duration.
+	 *
+	 * This should be used in combination with {@see Perflab_Server_Timing_Metric::measure_before()}. Alternatively,
+	 * {@see Perflab_Server_Timing_Metric::set_value()} can be used to set a calculated value manually.
+	 *
+	 * @since 1.8.0
+	 */
+	public function measure_after(): void {
+	}
+}
+
+/**
+ * Registers a metric to calculate for the Server-Timing header.
+ *
+ * This method must be called before the {@see 'perflab_server_timing_send_header'} hook.
+ *
+ * @since 1.8.0
+ *
+ * @param string $metric_slug
+ * @param array{measure_callback: callable(Perflab_Server_Timing_Metric): void, access_cap: string} $args
+ */
+function perflab_server_timing_register_metric( string $metric_slug, array $args ): void {
+}
+
+/**
+ * Class controlling the Server-Timing header.
+ *
+ * @since 1.8.0
+ */
+class Perflab_Server_Timing {
+	/**
+	 * Gets the value for the Server-Timing header.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @return string The Server-Timing header value.
+	 */
+	public function get_header(): string {
+	}
+}
+
+/**
+ * Provides access the Server-Timing API.
+ *
+ * When called for the first time, this also initializes the API to schedule the header for output.
+ * In case that no metrics are registered, this is still called on {@see 'wp_loaded'}, so that even then it still fires
+ * its action hooks as expected.
+ *
+ * @since 1.8.0
+ */
+function perflab_server_timing(): Perflab_Server_Timing {
+}

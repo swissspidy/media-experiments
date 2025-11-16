@@ -12,7 +12,7 @@ const pkg = require( '../package.json' );
  * @return {import('@babel/core').PluginObj} Babel plugin object.
  */
 function babelPlugin( { types: t } ) {
-	const seen = Symbol();
+	const seen = Symbol( 'seen' );
 
 	const typeofProcessExpression = t.binaryExpression(
 		'!==',

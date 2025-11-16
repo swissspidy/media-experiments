@@ -1,14 +1,14 @@
 export type ItemId = string;
 
-// Same type as in @mextp/upload-media
+// Same type as in @mexp/upload-media
 // TODO: Move to shared package?
-export type ImageSizeCrop = {
+export interface ImageSizeCrop {
 	width: number;
 	height: number;
 	crop?:
 		| boolean
 		| [ 'left' | 'center' | 'right', 'top' | 'center' | 'bottom' ];
-};
+}
 
 /**
  * none: Do nothing. Same as low.
@@ -76,7 +76,7 @@ type FailOn = 'none' | 'truncated' | 'error' | 'warning';
  */
 type Access = 'random' | 'sequential' | 'sequential-unbuffered';
 
-export type LoadOptions< T extends string > = {
+export interface LoadOptions< T extends string > {
 	/**
 	 * Number of pages to load, -1 for all.
 	 */
@@ -97,9 +97,9 @@ export type LoadOptions< T extends string > = {
 	 * Don't use a cached result for this operation.
 	 */
 	revalidate?: boolean;
-};
+}
 
-export type SaveOptions< T extends string > = {
+export interface SaveOptions< T extends string > {
 	/**
 	 * Quality factor.
 	 */
@@ -125,9 +125,9 @@ export type SaveOptions< T extends string > = {
 	 * it is most relevant for AVIF, as it is slow by default.
 	 */
 	effort?: number;
-};
+}
 
-export type ThumbnailOptions = {
+export interface ThumbnailOptions {
 	/**
 	 * Options that are passed on to the underlying loader.
 	 */
@@ -137,7 +137,8 @@ export type ThumbnailOptions = {
 	 */
 	height?: number;
 	/**
-	 * Only upsize, only downsize, or both.
+	 * Whether to upsize, downsize, both up and
+	 * downsize, or force a size (breaks aspect ratio).
 	 */
 	size?: 'both' | 'up' | 'down' | 'force';
 	/**
@@ -168,4 +169,4 @@ export type ThumbnailOptions = {
 	 * Error level to fail on.
 	 */
 	fail_on?: FailOn;
-};
+}
