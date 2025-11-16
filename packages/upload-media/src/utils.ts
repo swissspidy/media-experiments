@@ -460,47 +460,29 @@ export function isImageTypeSupported(
 }
 
 /**
- * Preloads an image or video resource before using it.
+ * Preloads an image before using it.
  *
  * This helps prevent flickering when swapping URLs (e.g., from blob URL to final URL)
  * by ensuring the new resource is fully loaded before the DOM is updated.
  *
- * @param url  URL of the image or video to preload.
- * @param type Type of resource: 'image' or 'video'.
+ * @param url URL of the image to preload.
  * @return Promise that resolves when the resource is loaded.
  */
-export async function preloadMedia(
-	url: string,
-	type: 'image' | 'video'
-): Promise< void > {
+export async function preloadImage( url: string ): Promise< void > {
 	return new Promise( ( resolve, reject ) => {
-		if ( type === 'image' ) {
-			const img = new Image();
-			img.onload = () => {
-				img.onload = null;
-				img.onerror = null;
-				resolve();
-			};
-			img.onerror = () => {
-				img.onload = null;
-				img.onerror = null;
-				reject( new Error( 'Failed to preload image' ) );
-			};
-			img.src = url;
-		} else {
-			const video = document.createElement( 'video' );
-			video.onloadeddata = () => {
-				video.onloadeddata = null;
-				video.onerror = null;
-				resolve();
-			};
-			video.onerror = () => {
-				video.onloadeddata = null;
-				video.onerror = null;
-				reject( new Error( 'Failed to preload video' ) );
-			};
-			video.src = url;
-			video.load();
-		}
+		const img = new Image();
+		img.onload = () => {
+			img.onload = null;
+			img.onerror = null;
+			resolve();
+		};
+		img.onerror = () => {
+			img.onload = null;
+			img.onerror = null;
+			reject( new Error( 'Failed to preload image' ) );
+		};
+		img.decoding = 'async';
+		img.crossOrigin = 'anonymous';
+		img.src = url;
 	} );
 }

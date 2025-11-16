@@ -29,7 +29,7 @@ import {
 	isAnimatedGif,
 	isHeifImage,
 	isImageTypeSupported,
-	preloadMedia,
+	preloadImage,
 	renameFile,
 	validateMimeType,
 	videoHasAudio,
@@ -1088,7 +1088,7 @@ export function uploadPoster( id: QueueItemId ) {
 
 						// Preload the poster image before swapping to prevent flickering.
 						try {
-							await preloadMedia( posterAttachment.url, 'image' );
+							await preloadImage( posterAttachment.url );
 						} catch {
 							// Continue even if preloading fails - the image will still load,
 							// just potentially with a flicker.
@@ -1221,10 +1221,7 @@ export function generateThumbnails( id: QueueItemId ) {
 						// Preload the image before swapping to prevent flickering.
 						if ( updatedAttachment.url ) {
 							try {
-								await preloadMedia(
-									updatedAttachment.url,
-									'image'
-								);
+								await preloadImage( updatedAttachment.url );
 							} catch {
 								// Continue even if preloading fails - the image will still load,
 								// just potentially with a flicker.
