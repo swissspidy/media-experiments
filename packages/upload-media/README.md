@@ -404,7 +404,7 @@ _Parameters_
 
 #### uploadSubtitles
 
-Adds a new item to the queue for generating an uploading a video's subtitles.
+Adds a new item to the queue for generating and uploading a video's subtitles.
 
 Similar to `addSubtitlesForExistingVideo()` but without first downloading a video file from a URL, as the file is already in memory.
 
