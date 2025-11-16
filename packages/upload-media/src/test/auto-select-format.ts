@@ -18,9 +18,7 @@ describe( 'Auto-select format', () => {
 	} );
 
 	it( 'should handle when only one format succeeds', () => {
-		const formats = [
-			{ format: 'jpeg' as ImageFormat, size: 10000 },
-		];
+		const formats = [ { format: 'jpeg' as ImageFormat, size: 10000 } ];
 
 		const sorted = [ ...formats ].sort( ( a, b ) => a.size - b.size );
 

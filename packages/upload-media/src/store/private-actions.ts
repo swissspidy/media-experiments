@@ -1415,7 +1415,11 @@ async function findBestImageFormat(
 
 	// If no conversions succeeded, throw an error
 	if ( results.length === 0 ) {
-		throw new Error( `All format conversions failed. Attempted formats: ${ formats.join( ', ' ) }` );
+		throw new Error(
+			`All format conversions failed. Attempted formats: ${ formats.join(
+				', '
+			) }`
+		);
 	}
 
 	// Find the format with the smallest file size
@@ -1509,7 +1513,11 @@ export function optimizeImageItem(
 				}
 
 				stop = start(
-					`Auto-select best format for: ${ item.file.name } | ${ imageLibrary } | trying ${ formatsToTry.join( ', ' ) }`
+					`Auto-select best format for: ${
+						item.file.name
+					} | ${ imageLibrary } | trying ${ formatsToTry.join(
+						', '
+					) }`
 				);
 
 				const result = await findBestImageFormat(
