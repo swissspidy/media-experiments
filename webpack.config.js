@@ -210,6 +210,7 @@ const modules = {
 				if ( request === '@mexp/vips' ) {
 					return request;
 				}
+				return undefined;
 			},
 		} ),
 	],
