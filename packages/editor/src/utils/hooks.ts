@@ -116,13 +116,6 @@ function useAttachmentsWithEntityRecords(
 		{ enabled }
 	);
 
-	if (
-		( isResolving || ! records ) &&
-		cachedRecords.length !== attachments.length
-	) {
-		return EMPTY_ARRAY;
-	}
-
 	// Add server-side data but remove the ones not found on the server anymore.
 	return attachments
 		.map( ( attachment ) => {
@@ -160,6 +153,17 @@ function useAttachmentsWithEntityRecords(
 				};
 
 				return attachment as BulkOptimizationAttachmentData;
+			}
+			// During loading, keep the attachment with basic data to prevent unmounting
+			if ( isResolving || ! records ) {
+				return {
+					id: attachment.id,
+					url: attachment.url || '',
+					filesize: attachment.filesize ?? null,
+					filename: attachment.filename ?? null,
+					onChange: attachment.onChange,
+					additionalData: attachment.additionalData,
+				} as BulkOptimizationAttachmentData;
 			}
 			return undefined;
 		} )
@@ -251,6 +255,7 @@ export function useBlockAttachments( clientIds?: string | string[] ) {
 
 			if ( block.name === 'core/image' && block.attributes.id ) {
 				attachment.id = block.attributes.id;
+				attachment.url = block.attributes.url;
 				attachment.onChange = ( media: Partial< Attachment > ) => {
 					void updateBlockAttributes( block.clientId, {
 						id: media.id,
@@ -267,6 +272,7 @@ export function useBlockAttachments( clientIds?: string | string[] ) {
 				block.attributes.mediaType === 'image'
 			) {
 				attachment.id = block.attributes.mediaId;
+				attachment.url = block.attributes.mediaUrl;
 				attachment.onChange = ( media: Partial< Attachment > ) => {
 					void updateBlockAttributes( block.clientId, {
 						mediaId: media.id,
@@ -283,6 +289,7 @@ export function useBlockAttachments( clientIds?: string | string[] ) {
 				block.attributes.backgroundType === 'image'
 			) {
 				attachment.id = block.attributes.id;
+				attachment.url = block.attributes.url;
 				attachment.onChange = ( media: Partial< Attachment > ) => {
 					void updateBlockAttributes( block.clientId, {
 						id: media.id,
