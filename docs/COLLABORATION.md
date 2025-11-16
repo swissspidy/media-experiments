@@ -56,9 +56,9 @@ When someone accesses your collaboration link:
 - Permissions are checked on every request
 
 ### No Persistent Accounts
-- No WordPress user accounts are created
-- Access is temporary and non-persistent
-- Once the session expires, there's no residual access
+- Temporary WordPress user accounts are created for collaborators
+- These accounts are automatically deleted after the session expires
+- Access is temporary and non-persistent; once the session expires, there's no residual access
 
 ### Capability Control
 - You explicitly choose what capabilities to grant
