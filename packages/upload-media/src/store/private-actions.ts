@@ -1219,14 +1219,16 @@ export function generateThumbnails( id: QueueItemId ) {
 						}
 
 						// Preload the image before swapping to prevent flickering.
-						try {
-							await preloadMedia(
-								updatedAttachment.url,
-								'image'
-							);
-						} catch {
-							// Continue even if preloading fails - the image will still load,
-							// just potentially with a flicker.
+						if ( updatedAttachment.url ) {
+							try {
+								await preloadMedia(
+									updatedAttachment.url,
+									'image'
+								);
+							} catch {
+								// Continue even if preloading fails - the image will still load,
+								// just potentially with a flicker.
+							}
 						}
 
 						// This might be confusing, but the idea is to update the original
