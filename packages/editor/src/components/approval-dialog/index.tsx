@@ -22,10 +22,12 @@ import {
 	createInterpolateElement,
 	useCallback,
 	useEffect,
+	useMemo,
 	useState,
 } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEntityRecord } from '@wordpress/core-data';
+import { debounce } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -98,24 +100,35 @@ export function ApprovalDialog( { id }: ApprovalDialogProps ) {
 		void rejectApproval( id );
 	};
 
+	// Debounced reoptimization function
+	const debouncedReoptimize = useMemo(
+		() =>
+			debounce( async ( itemId: string, newQuality: number ) => {
+				setIsReoptimizing( true );
+				try {
+					await reoptimizeItem( itemId, {
+						outputQuality: newQuality,
+					} );
+				} finally {
+					setIsReoptimizing( false );
+				}
+			}, 500 ),
+		[ reoptimizeItem ]
+	);
+
 	const handleQualityChange = useCallback(
-		async ( newQuality: number | undefined ) => {
-			if ( ! newQuality || ! item || isReoptimizing ) {
+		( newQuality: number | undefined ) => {
+			if ( ! newQuality || ! item ) {
 				return;
 			}
 
+			// Update quality state immediately for responsive UI
 			setQuality( newQuality );
-			setIsReoptimizing( true );
 
-			try {
-				await reoptimizeItem( item.id, {
-					outputQuality: newQuality,
-				} );
-			} finally {
-				setIsReoptimizing( false );
-			}
+			// Debounce the actual reoptimization
+			debouncedReoptimize( item.id, newQuality );
 		},
-		[ item, reoptimizeItem ]
+		[ item, debouncedReoptimize ]
 	);
 
 	if ( ! post || ! isPendingApproval || ! comparison ) {
@@ -206,20 +219,18 @@ export function ApprovalDialog( { id }: ApprovalDialogProps ) {
 							onChange={ handleQualityChange }
 							min={ 1 }
 							max={ 100 }
-							disabled={ isReoptimizing }
-							help={ __(
-								'Adjust the quality to find the best balance between file size and visual fidelity.',
-								'media-experiments'
-							) }
+							help={
+								isReoptimizing
+									? __(
+											'Reoptimizing image…',
+											'media-experiments'
+									  )
+									: __(
+											'Adjust the quality to find the best balance between file size and visual fidelity.',
+											'media-experiments'
+									  )
+							}
 						/>
-						{ isReoptimizing && (
-							<p className="mexp-comparison-modal__reoptimizing-notice">
-								{ __(
-									'Reoptimizing image…',
-									'media-experiments'
-								) }
-							</p>
-						) }
 					</div>
 				) }
 			</div>
