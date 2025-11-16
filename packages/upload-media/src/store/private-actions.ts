@@ -25,6 +25,7 @@ import {
 	fetchFile,
 	getFileBasename,
 	getFileExtension,
+	getFileNameFromUrl,
 	getPosterFromVideo,
 	isAnimatedGif,
 	isHeifImage,
