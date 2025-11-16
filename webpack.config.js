@@ -126,6 +126,7 @@ const regular = {
 				if ( request === '@mexp/vips' ) {
 					return `import ${ request }`;
 				}
+				return undefined;
 			},
 		} ),
 		new WebWorkerPlugin(),
