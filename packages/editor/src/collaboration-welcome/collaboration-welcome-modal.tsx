@@ -7,7 +7,13 @@ import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { store as noticesStore } from '@wordpress/notices';
+import { store as preferencesStore } from '@wordpress/preferences';
 import apiFetch from '@wordpress/api-fetch';
+
+/**
+ * Internal dependencies
+ */
+import { PREFERENCES_NAME } from '../constants';
 
 export function CollaborationWelcomeModal() {
 	const [ isOpen, setIsOpen ] = useState( false );
@@ -16,10 +22,15 @@ export function CollaborationWelcomeModal() {
 
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( noticesStore );
+	const { set: setPreference } = useDispatch( preferencesStore );
 
-	const { currentUser } = useSelect( ( select ) => {
+	const { currentUser, welcomeShown } = useSelect( ( select ) => {
 		return {
 			currentUser: select( coreStore ).getCurrentUser(),
+			welcomeShown: select( preferencesStore ).get(
+				PREFERENCES_NAME,
+				'collabWelcomeShown'
+			),
 		};
 	}, [] );
 
@@ -32,8 +43,9 @@ export function CollaborationWelcomeModal() {
 
 			try {
 				const userMeta = await apiFetch< {
-					mexp_is_temp_collab_user?: boolean;
-					mexp_collab_welcome_shown?: boolean;
+					meta?: {
+						mexp_is_temp_collab_user?: boolean;
+					};
 				} >( {
 					path: `/wp/v2/users/${ currentUser.id }?context=edit`,
 					method: 'GET',
@@ -41,8 +53,6 @@ export function CollaborationWelcomeModal() {
 
 				const isTempUser =
 					userMeta?.meta?.mexp_is_temp_collab_user || false;
-				const welcomeShown =
-					userMeta?.meta?.mexp_collab_welcome_shown || false;
 
 				if ( isTempUser && ! welcomeShown ) {
 					setIsOpen( true );
@@ -54,7 +64,7 @@ export function CollaborationWelcomeModal() {
 		};
 
 		void checkTempUser();
-	}, [ currentUser ] );
+	}, [ currentUser, welcomeShown ] );
 
 	const handleSave = async () => {
 		if ( ! currentUser?.id ) {
@@ -83,16 +93,8 @@ export function CollaborationWelcomeModal() {
 				);
 			}
 
-			// Mark welcome as shown
-			await apiFetch( {
-				path: `/wp/v2/users/${ currentUser.id }`,
-				method: 'POST',
-				data: {
-					meta: {
-						mexp_collab_welcome_shown: true,
-					},
-				},
-			} );
+			// Mark welcome as shown in preferences
+			void setPreference( PREFERENCES_NAME, 'collabWelcomeShown', true );
 
 			setIsOpen( false );
 		} catch {
@@ -105,28 +107,10 @@ export function CollaborationWelcomeModal() {
 		}
 	};
 
-	const handleSkip = async () => {
-		if ( ! currentUser?.id ) {
-			return;
-		}
-
-		try {
-			// Mark welcome as shown without updating name
-			await apiFetch( {
-				path: `/wp/v2/users/${ currentUser.id }`,
-				method: 'POST',
-				data: {
-					meta: {
-						mexp_collab_welcome_shown: true,
-					},
-				},
-			} );
-
-			setIsOpen( false );
-		} catch {
-			// Silently fail, just close the modal
-			setIsOpen( false );
-		}
+	const handleSkip = () => {
+		// Mark welcome as shown in preferences
+		void setPreference( PREFERENCES_NAME, 'collabWelcomeShown', true );
+		setIsOpen( false );
 	};
 
 	if ( ! isOpen ) {

@@ -1515,17 +1515,6 @@ function register_collaboration_user_meta(): void {
 
 	register_meta(
 		'user',
-		'mexp_collab_welcome_shown',
-		[
-			'type'         => 'boolean',
-			'description'  => __( 'Whether the collaboration welcome modal has been shown.', 'media-experiments' ),
-			'single'       => true,
-			'show_in_rest' => true,
-		]
-	);
-
-	register_meta(
-		'user',
 		'mexp_collaboration_request_id',
 		[
 			'type'         => 'integer',
