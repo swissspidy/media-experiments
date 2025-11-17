@@ -36,6 +36,7 @@ function filter_update_plugins( $update, $plugin_data, string $plugin_file ) {
 		return $update;
 	}
 
+	// @phpstan-ignore requireOnce.fileNotFound
 	require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 	$updater = new \WP_Automatic_Updater();
 
@@ -1744,7 +1745,8 @@ function delete_old_collaboration_requests(): void {
 		// Delete associated temporary user.
 		$temp_user_id = get_post_meta( $post->ID, 'mexp_temp_user_id', true );
 
-		if ( $temp_user_id && is_numeric( $temp_user_id ) ) {
+		if ( is_numeric( $temp_user_id ) ) {
+			// @phpstan-ignore requireOnce.fileNotFound
 			require_once ABSPATH . 'wp-admin/includes/user.php';
 			wp_delete_user( (int) $temp_user_id );
 		}

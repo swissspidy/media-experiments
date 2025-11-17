@@ -51,17 +51,6 @@ class REST_Collaboration_Requests_Controller extends WP_REST_Posts_Controller {
 			'/' . $this->rest_base . '/(?P<slug>[\w]+)',
 			[
 				[
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'get_item' ],
-					'permission_callback' => [ $this, 'get_item_permissions_check' ],
-					'args'                => [
-						'slug' => [
-							'description' => __( 'Unique alphanumeric identifier for the collaboration request.', 'media-experiments' ),
-							'type'        => 'string',
-						],
-					],
-				],
-				[
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => [ $this, 'delete_item' ],
 					'permission_callback' => [ $this, 'delete_item_permissions_check' ],
@@ -132,17 +121,6 @@ class REST_Collaboration_Requests_Controller extends WP_REST_Posts_Controller {
 		}
 
 		return $posts[0];
-	}
-
-	/**
-	 * Checks if a given request has access to read a collaboration request.
-	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
-	 */
-	public function get_item_permissions_check( $request ) {
-		// Anyone can read a collaboration request to collaborate on a post.
-		return true;
 	}
 
 	/**
