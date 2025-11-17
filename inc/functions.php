@@ -1497,6 +1497,57 @@ function create_temporary_collaboration_user( int $collab_request_id ) {
 }
 
 /**
+ * Registers user meta fields for collaboration.
+ *
+ * @return void
+ */
+function register_collaboration_user_meta(): void {
+	register_meta(
+		'user',
+		'mexp_is_temp_collab_user',
+		[
+			'type'         => 'boolean',
+			'description'  => __( 'Whether this is a temporary collaboration user.', 'media-experiments' ),
+			'single'       => true,
+			'show_in_rest' => true,
+		]
+	);
+
+	register_meta(
+		'user',
+		'mexp_collab_welcome_shown',
+		[
+			'type'         => 'boolean',
+			'description'  => __( 'Whether the collaboration welcome modal has been shown.', 'media-experiments' ),
+			'single'       => true,
+			'show_in_rest' => true,
+		]
+	);
+
+	register_meta(
+		'user',
+		'mexp_collaboration_request_id',
+		[
+			'type'         => 'integer',
+			'description'  => __( 'The collaboration request ID for this user.', 'media-experiments' ),
+			'single'       => true,
+			'show_in_rest' => false,
+		]
+	);
+
+	register_meta(
+		'user',
+		'mexp_target_post_id',
+		[
+			'type'         => 'integer',
+			'description'  => __( 'The target post ID for this collaboration user.', 'media-experiments' ),
+			'single'       => true,
+			'show_in_rest' => false,
+		]
+	);
+}
+
+/**
  * Gets the current collaboration request slug from the query string or REST request.
  *
  * @return string|null The collaboration request slug or null.

@@ -12,3 +12,4 @@ import './media-recording';
 import './preferences-modal';
 import './upload-status';
 import './welcome-guide';
+import './collaboration-welcome';

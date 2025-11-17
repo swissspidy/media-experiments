@@ -55,6 +55,7 @@ add_filter( 'wp_content_img_tag', __NAMESPACE__ . '\filter_wp_content_img_tag_ad
 
 add_action( 'init', __NAMESPACE__ . '\register_upload_request_post_type' );
 add_action( 'init', __NAMESPACE__ . '\register_collaboration_request_post_type' );
+add_action( 'init', __NAMESPACE__ . '\register_collaboration_user_meta' );
 add_filter( 'template_include', __NAMESPACE__ . '\load_upload_request_template' );
 add_filter( 'cron_schedules', __NAMESPACE__ . '\add_quarter_hourly_cron_interval' );
 add_action( 'mexp_upload_requests_cleanup', __NAMESPACE__ . '\delete_old_upload_requests' );
