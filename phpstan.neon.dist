@@ -40,7 +40,5 @@ parameters:
 		-
 			identifier: offsetAccess.nonOffsetAccessible
 			path: inc/functions.php
-		-
-			identifier: requireOnce.fileNotFound
 includes:
 	- phar://phpstan.phar/conf/bleedingEdge.neon
