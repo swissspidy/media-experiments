@@ -109,7 +109,7 @@ Share link (edit only) → Reviewer adds comments/edits → Review complete
 **Security Measures**:
 - POST meta: `mexp_allowed_capabilities`
 - Parent post: Stored in `post_parent`
-- URL slug: Unique identifier via `uniqid()`
+- URL slug: Unique identifier via `wp_generate_password(32, false)`
 
 ### REST API Endpoints
 
