@@ -220,11 +220,11 @@ export function ImageBlockControls( {
 
 					// If mask pixel is background...
 					if ( maskVal === 255 ) {
-						// Copy pixel colors from imageData to backgroundData
-						newCanvasImageData[ j ] = imageData[ j ];
-						newCanvasImageData[ j + 1 ] = imageData[ j + 1 ];
-						newCanvasImageData[ j + 2 ] = imageData[ j + 2 ];
-						newCanvasImageData[ j + 3 ] = imageData[ j + 3 ];
+						// Set background pixel to transparent
+						newCanvasImageData[ j ] = 0;
+						newCanvasImageData[ j + 1 ] = 0;
+						newCanvasImageData[ j + 2 ] = 0;
+						newCanvasImageData[ j + 3 ] = 0;
 					}
 				}
 
