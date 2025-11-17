@@ -137,7 +137,7 @@ export function ImageBlockControls( {
 					)?.contentDocument || document;
 
 				const imgElement = editorCanvas.querySelector(
-					`img[src="${ url }"]`
+					`img[src="${ CSS.escape(url) }"]`
 				) as HTMLImageElement;
 
 				const { FilesetResolver, ImageSegmenter } = await import(
