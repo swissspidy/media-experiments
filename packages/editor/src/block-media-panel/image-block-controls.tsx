@@ -20,7 +20,6 @@ import { store as preferencesStore } from '@wordpress/preferences';
 import { PREFERENCES_NAME } from '../constants';
 import { ReactComponent as PhotoSpark } from '../icons/photo-spark.svg';
 import { store as uploadStore } from '@mexp/upload-media';
-import { image } from '@wordpress/icons';
 import { createBlobURL } from '@wordpress/blob';
 
 const createAiWorker = createWorkerFactory(
