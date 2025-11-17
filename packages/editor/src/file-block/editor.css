@@ -1,0 +1,8 @@
+/* Hide the original object embed when PDF.js viewer is active */
+.wp-block-file__embed.mexp-pdf-viewer-active object {
+	display: none !important;
+}
+
+.mexp-pdf-viewer-container {
+	margin-top: 16px;
+}
