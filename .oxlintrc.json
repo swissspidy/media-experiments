@@ -8,16 +8,8 @@
 		"restriction": "error",
 		"suspicious": "error"
 	},
-	"plugins": [
-		"import",
-		"jest",
-		"jsdoc",
-		"promise",
-		"react-perf"
-	],
-	"ignorePatterns": [
-		"@types"
-	],
+	"plugins": [ "import", "jest", "jsdoc", "promise", "react-perf" ],
+	"ignorePatterns": [ "@types" ],
 	"settings": {
 		"jsdoc": {
 			"tagNamePreference": {
@@ -27,7 +19,7 @@
 		}
 	},
 	"rules": {
-		"class-methods-use-this":"off",
+		"class-methods-use-this": "off",
 		"default-case": "off",
 		"max-classes-per-file": "off",
 		"max-lines": "off",
@@ -35,10 +27,12 @@
 		"no-case-declarations": "off",
 		"no-empty-function": "off",
 		"no-negated-condition": "off",
+		"no-param-reassign": "off",
 		"no-plusplus": "off",
 		"no-undef": "off",
 		"no-undefined": "off",
-		"no-void": ["error", { "allowAsStatement": true }],
+		"no-void": [ "error", { "allowAsStatement": true } ],
+		"no-warning-comments": "off",
 		"require-await": "off",
 		"import/extensions": "off",
 		"import/max-dependencies": "off",
