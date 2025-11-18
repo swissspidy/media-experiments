@@ -18,6 +18,7 @@ import { isBlobURL } from '@wordpress/blob';
 import { store as editorStore } from '@wordpress/editor';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as blocksStore } from '@wordpress/blocks';
+import { useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -115,13 +116,6 @@ function useAttachmentsWithEntityRecords(
 		{ enabled }
 	);
 
-	if (
-		( isResolving || ! records ) &&
-		cachedRecords.length !== attachments.length
-	) {
-		return EMPTY_ARRAY;
-	}
-
 	// Add server-side data but remove the ones not found on the server anymore.
 	return attachments
 		.map( ( attachment ) => {
@@ -160,12 +154,30 @@ function useAttachmentsWithEntityRecords(
 
 				return attachment as BulkOptimizationAttachmentData;
 			}
+			// During loading, keep the attachment with basic data to prevent unmounting
+			if ( isResolving || ! records ) {
+				return {
+					id: attachment.id,
+					url: attachment.url || '',
+					filesize: attachment.filesize ?? null,
+					filename: attachment.filename ?? null,
+					onChange: attachment.onChange,
+					additionalData: attachment.additionalData,
+				} as BulkOptimizationAttachmentData;
+			}
 			return undefined;
 		} )
 		.filter( ( attachment ) => attachment !== undefined );
 }
 
-export function useBlockAttachments( clientId?: string ) {
+/**
+ * Hook to fetch attachment data from one or more blocks.
+ *
+ * @param {string|string[]|undefined} clientIds - Optional. A single client ID string, an array of client IDs,
+ *                                              or undefined to fetch all blocks. For gallery blocks, their inner blocks are automatically expanded.
+ * @return {Array} Array of attachment data with server-side metadata.
+ */
+export function useBlockAttachments( clientIds?: string | string[] ) {
 	const { updateBlockAttributes } = useDispatch( blockEditorStore );
 	const { editEntityRecord } = useDispatch( coreStore );
 
@@ -190,28 +202,48 @@ export function useBlockAttachments( clientId?: string ) {
 		return canUserEdit ? siteSettings?.site_logo : undefined;
 	}, [] );
 
+	// Memoize the clientIds to avoid unnecessary re-renders when an array is passed
+	const memoizedClientIds = useMemo( () => {
+		if ( ! clientIds ) {
+			return null;
+		}
+		if ( Array.isArray( clientIds ) ) {
+			return clientIds.length === 0 ? null : clientIds;
+		}
+		return clientIds;
+	}, [ Array.isArray( clientIds ) ? clientIds.join( ',' ) : clientIds ] );
+
 	const blocks = useSelect(
 		( select ) => {
-			if ( ! clientId ) {
+			if ( ! memoizedClientIds ) {
 				return select( blockEditorStore )
 					.getClientIdsWithDescendants()
 					.map( ( id ) => select( blockEditorStore ).getBlock( id ) )
 					.filter( ( block ) => block !== null );
 			}
 
-			const block = select( blockEditorStore ).getBlock( clientId );
+			const ids = Array.isArray( memoizedClientIds )
+				? memoizedClientIds
+				: [ memoizedClientIds ];
+			const allBlocks = [];
 
-			if ( ! block ) {
-				return EMPTY_ARRAY;
+			for ( const id of ids ) {
+				const block = select( blockEditorStore ).getBlock( id );
+
+				if ( ! block ) {
+					continue;
+				}
+
+				if ( block.name === 'core/gallery' ) {
+					allBlocks.push( ...block.innerBlocks );
+				} else {
+					allBlocks.push( block );
+				}
 			}
 
-			if ( block.name === 'core/gallery' ) {
-				return block.innerBlocks;
-			}
-
-			return [ block ];
+			return allBlocks;
 		},
-		[ clientId ]
+		[ memoizedClientIds ]
 	);
 
 	let attachments = blocks
@@ -223,6 +255,7 @@ export function useBlockAttachments( clientId?: string ) {
 
 			if ( block.name === 'core/image' && block.attributes.id ) {
 				attachment.id = block.attributes.id;
+				attachment.url = block.attributes.url;
 				attachment.onChange = ( media: Partial< Attachment > ) => {
 					void updateBlockAttributes( block.clientId, {
 						id: media.id,
@@ -239,6 +272,7 @@ export function useBlockAttachments( clientId?: string ) {
 				block.attributes.mediaType === 'image'
 			) {
 				attachment.id = block.attributes.mediaId;
+				attachment.url = block.attributes.mediaUrl;
 				attachment.onChange = ( media: Partial< Attachment > ) => {
 					void updateBlockAttributes( block.clientId, {
 						mediaId: media.id,
@@ -255,6 +289,7 @@ export function useBlockAttachments( clientId?: string ) {
 				block.attributes.backgroundType === 'image'
 			) {
 				attachment.id = block.attributes.id;
+				attachment.url = block.attributes.url;
 				attachment.onChange = ( media: Partial< Attachment > ) => {
 					void updateBlockAttributes( block.clientId, {
 						id: media.id,
@@ -301,7 +336,7 @@ export function useBlockAttachments( clientId?: string ) {
 		} )
 		.filter( ( attachment ) => attachment !== null );
 
-	if ( ! clientId && featuredImage ) {
+	if ( ! memoizedClientIds && featuredImage ) {
 		attachments.unshift( {
 			filesize: 0,
 			filename: '',
