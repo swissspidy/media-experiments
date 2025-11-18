@@ -36,7 +36,7 @@ function filter_update_plugins( $update, $plugin_data, string $plugin_file ) {
 		return $update;
 	}
 
-	// @phpstan-ignore requireOnce.fileNotFound
+	// phpstan:ignore requireOnce.fileNotFound -- WordPress core file.
 	require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 	$updater = new \WP_Automatic_Updater();
 
@@ -1481,7 +1481,7 @@ function create_temporary_collaboration_user( int $collab_request_id ) {
 		return $user_id;
 	}
 
-	// Update user meta.
+	// Update user meta and set persisted preferences.
 	wp_update_user(
 		[
 			'ID'           => $user_id,
@@ -1493,6 +1493,17 @@ function create_temporary_collaboration_user( int $collab_request_id ) {
 	// Store collaboration request ID in user meta.
 	update_user_meta( $user_id, 'mexp_collaboration_request_id', $collab_request_id );
 	update_user_meta( $user_id, 'mexp_is_temp_collab_user', true );
+
+	// Set persisted preferences to hide welcome dialog for this temp user.
+	update_user_meta(
+		$user_id,
+		'persisted_preferences',
+		[
+			'media-experiments/preferences' => [
+				'collabWelcomeShown' => true,
+			],
+		]
+	);
 
 	return $user_id;
 }
@@ -1546,15 +1557,30 @@ function get_current_collaboration_request_slug(): ?string {
 	// Check query string first.
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	if ( isset( $_GET['collaboration_request'] ) ) {
-		return sanitize_text_field( wp_unslash( $_GET['collaboration_request'] ) );
+		/**
+		 * Query parameter value.
+		 *
+		 * @var mixed $value
+		 */
+		$value = wp_unslash( $_GET['collaboration_request'] );
+		if ( is_string( $value ) ) {
+			return sanitize_text_field( $value );
+		}
 	}
 
 	// Check if this is a REST request.
 	if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
-		global $wp;
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_GET['collaboration_request'] ) ) {
-			return sanitize_text_field( wp_unslash( $_GET['collaboration_request'] ) );
+			/**
+			 * Query parameter value.
+			 *
+			 * @var mixed $value
+			 */
+			$value = wp_unslash( $_GET['collaboration_request'] );
+			if ( is_string( $value ) ) {
+				return sanitize_text_field( $value );
+			}
 		}
 	}
 
@@ -1588,45 +1614,43 @@ function get_collaboration_request_by_slug( string $slug ): ?WP_Post {
 /**
  * Filters user capabilities to grant temporary collaboration permissions.
  *
- * @param array    $allcaps All capabilities.
- * @param string[] $caps    Required capabilities.
- * @param array    $args    Arguments.
- * @param \WP_User $user    User object.
- * @return array Modified capabilities.
- * @phpstan-param array<string,bool> $allcaps
- * @phpstan-return array<string,bool>
+ * @param array<string,bool> $allcaps All capabilities.
+ * @param string[]           $caps    Required capabilities.
+ * @param array<int,mixed>   $args    Arguments.
+ * @param \WP_User           $user    User object.
+ * @return array<string,bool> Modified capabilities.
  */
 function filter_user_has_cap_for_collaboration( array $allcaps, array $caps, array $args, $user ): array {
 	// Check if this is a temporary collaboration user.
 	$is_temp_user = get_user_meta( $user->ID, 'mexp_is_temp_collab_user', true );
 
-	if ( ! $is_temp_user ) {
+	if ( true !== $is_temp_user ) {
 		return $allcaps;
 	}
 
 	// Get the collaboration request ID from user meta.
 	$collab_request_id = get_user_meta( $user->ID, 'mexp_collaboration_request_id', true );
 
-	if ( ! $collab_request_id ) {
+	if ( empty( $collab_request_id ) || ! is_numeric( $collab_request_id ) ) {
 		return $allcaps;
 	}
 
-	$collab_request = get_post( $collab_request_id );
+	$collab_request = get_post( (int) $collab_request_id );
 
-	if ( ! $collab_request instanceof WP_Post || 'mexp-collab-request' !== $collab_request->post_type ) {
+	if ( ! $collab_request instanceof \WP_Post || 'mexp-collab-request' !== $collab_request->post_type ) {
 		return $allcaps;
 	}
 
 	// Get the target post ID from user meta.
 	$target_post_id = get_user_meta( $user->ID, 'mexp_target_post_id', true );
 
-	if ( ! $target_post_id ) {
+	if ( empty( $target_post_id ) || ! is_numeric( $target_post_id ) ) {
 		// Fallback to post_parent if not set yet.
 		$target_post_id = $collab_request->post_parent;
 	}
 
 	// Only apply if we're checking capabilities for the specific post.
-	$post_id = isset( $args[2] ) ? $args[2] : 0;
+	$post_id = isset( $args[2] ) && is_numeric( $args[2] ) ? (int) $args[2] : 0;
 
 	if ( $post_id !== (int) $target_post_id ) {
 		return $allcaps;
@@ -1746,7 +1770,7 @@ function delete_old_collaboration_requests(): void {
 		$temp_user_id = get_post_meta( $post->ID, 'mexp_temp_user_id', true );
 
 		if ( is_numeric( $temp_user_id ) ) {
-			// @phpstan-ignore requireOnce.fileNotFound
+			// phpstan:ignore requireOnce.fileNotFound -- WordPress core file.
 			require_once ABSPATH . 'wp-admin/includes/user.php';
 			wp_delete_user( (int) $temp_user_id );
 		}

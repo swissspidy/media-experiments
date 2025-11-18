@@ -84,7 +84,13 @@ class REST_Collaboration_Requests_Controller extends WP_REST_Posts_Controller {
 		}
 
 		// Create a temporary user for this collaboration request.
-		$post_id = $response->data['id'] ?? 0;
+		/**
+		 * Response data.
+		 *
+		 * @var array{id?: int} $data
+		 */
+		$data    = $response->data;
+		$post_id = $data['id'] ?? 0;
 		if ( $post_id > 0 ) {
 			$user_id = \MediaExperiments\create_temporary_collaboration_user( $post_id );
 			if ( ! is_wp_error( $user_id ) ) {

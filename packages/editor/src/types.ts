@@ -179,7 +179,6 @@ export type BulkOptimizationAttachmentData = {
 export type MediaPreferences = {
 	// General.
 	welcomeGuide: boolean;
-	collabWelcomeShown: boolean;
 	requireApproval: boolean;
 	optimizeOnUpload: boolean;
 	thumbnailGeneration: ThumbnailGeneration;
