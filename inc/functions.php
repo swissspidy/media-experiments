@@ -1494,13 +1494,13 @@ function create_temporary_collaboration_user( int $collab_request_id ) {
 	update_user_meta( $user_id, 'mexp_collaboration_request_id', $collab_request_id );
 	update_user_meta( $user_id, 'mexp_is_temp_collab_user', true );
 
-	// Set persisted preferences to hide welcome dialog for this temp user.
+	// Set persisted preferences to hide welcome guides for this temp user.
 	update_user_meta(
 		$user_id,
 		'persisted_preferences',
 		[
 			'media-experiments/preferences' => [
-				'collabWelcomeShown' => true,
+				'welcomeGuide' => false, // Hide Media Experiments welcome guide.
 			],
 		]
 	);
