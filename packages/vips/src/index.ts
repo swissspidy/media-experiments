@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import Vips from 'wasm-vips';
+import type Vips from 'wasm-vips';
 
 // @ts-expect-error
 // eslint-disable-next-line import/no-unresolved
@@ -45,6 +45,10 @@ async function getVips(): Promise< typeof Vips > {
 	if ( vipsInstance ) {
 		return vipsInstance;
 	}
+
+	const { default: Vips } = await import(
+		/* webpackChunkName: "chunk-wasm-vips" */ 'wasm-vips'
+	);
 
 	vipsInstance = await Vips( {
 		locateFile: ( fileName: string ) => {
