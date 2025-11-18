@@ -224,6 +224,7 @@ export interface OperationArgs {
 		newFileName?: string;
 		skipAttachment?: boolean;
 		allowedTypes?: string[];
+		posterUrl?: string;
 	};
 	[ OperationType.TranscodeImage ]: {
 		requireApproval?: boolean;

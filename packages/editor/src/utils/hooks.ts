@@ -140,6 +140,14 @@ function useAttachmentsWithEntityRecords(
 					attachment.filename = media.mexp_filename;
 				}
 
+				// For videos, populate poster from media_details or featured_media
+				if ( media.media_type === 'video' ) {
+					// Try to get poster from media_details first
+					if ( media.media_details?.image?.src ) {
+						attachment.poster = media.media_details.image.src;
+					}
+				}
+
 				attachment.additionalData = {
 					meta: {
 						mexp_original_id:
@@ -284,6 +292,22 @@ export function useBlockAttachments( clientIds?: string | string[] ) {
 			}
 
 			if (
+				block.name === 'core/media-text' &&
+				block.attributes.mediaId &&
+				block.attributes.mediaType === 'video'
+			) {
+				attachment.id = block.attributes.mediaId;
+				attachment.onChange = ( media: Partial< Attachment > ) => {
+					void updateBlockAttributes( block.clientId, {
+						mediaId: media.id,
+						mediaUrl: media.url,
+					} );
+				};
+
+				return attachment;
+			}
+
+			if (
 				block.name === 'core/cover' &&
 				block.attributes.id &&
 				block.attributes.backgroundType === 'image'
@@ -294,6 +318,35 @@ export function useBlockAttachments( clientIds?: string | string[] ) {
 					void updateBlockAttributes( block.clientId, {
 						id: media.id,
 						url: media.url,
+					} );
+				};
+
+				return attachment;
+			}
+
+			if (
+				block.name === 'core/cover' &&
+				block.attributes.id &&
+				block.attributes.backgroundType === 'video'
+			) {
+				attachment.id = block.attributes.id;
+				attachment.onChange = ( media: Partial< Attachment > ) => {
+					void updateBlockAttributes( block.clientId, {
+						id: media.id,
+						url: media.url,
+					} );
+				};
+
+				return attachment;
+			}
+
+			if ( block.name === 'core/video' && block.attributes.id ) {
+				attachment.id = block.attributes.id;
+				attachment.onChange = ( media: Partial< Attachment > ) => {
+					void updateBlockAttributes( block.clientId, {
+						id: media.id,
+						src: media.url,
+						poster: media.poster,
 					} );
 				};
 
