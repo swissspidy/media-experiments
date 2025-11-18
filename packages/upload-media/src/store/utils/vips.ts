@@ -78,6 +78,10 @@ export async function vipsHasTransparency( url: string ) {
 	);
 }
 
+export async function vipsHasTransparencyFromFile( file: File ) {
+	return getVipsWorker().hasTransparency( await file.arrayBuffer() );
+}
+
 export async function vipsResizeImage(
 	id: QueueItemId,
 	file: File,
