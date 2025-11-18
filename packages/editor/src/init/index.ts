@@ -110,6 +110,7 @@ const unsubscribeCoreStore = subscribe( () => {
 		bigVideoSizeThreshold: siteData.video_size_threshold,
 		keepOriginal: false,
 		convertUnsafe: true,
+		image_autoSelectFormat: true,
 		// TODO: Revisit implementation.
 		useAi: false,
 		// Formats.
