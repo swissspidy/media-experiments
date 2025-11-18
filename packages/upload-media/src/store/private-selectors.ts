@@ -151,6 +151,34 @@ export function isPaused( state: State ): boolean {
 }
 
 /**
+ * Returns the number of items currently being actively processed.
+ *
+ * An item is considered actively processing if it has a currentOperation set,
+ * meaning it's in the middle of an operation (compression, transcoding, etc).
+ *
+ * @param state Upload state.
+ *
+ * @return Number of items being processed.
+ */
+export function getActiveProcessingCount( state: State ): number {
+	return state.queue.filter(
+		( item ) =>
+			item.status === ItemStatus.Processing && item.currentOperation
+	).length;
+}
+
+/**
+ * Returns the concurrency limit for processing operations.
+ *
+ * @param state Upload state.
+ *
+ * @return Concurrency limit.
+ */
+export function getConcurrencyLimit( state: State ): number {
+	return state.concurrencyLimit;
+}
+
+/**
  * Returns an image size given its name.
  *
  * @param state Upload state.
