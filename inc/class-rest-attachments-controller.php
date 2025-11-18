@@ -811,6 +811,11 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 				$video_meta = wp_read_video_metadata( $path );
 				$width      = $video_meta['width'] ?? 0;
 				$height     = $video_meta['height'] ?? 0;
+				if ( $width === 0 || $height === 0 ) {
+					// Skip adding this size entry if dimensions are invalid.
+					// Optionally, log an error here.
+					break;
+				}
 			} else {
 				$size   = wp_getimagesize( $path );
 				$width  = is_array( $size ) ? $size[0] : 0;
