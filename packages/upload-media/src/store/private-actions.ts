@@ -147,6 +147,16 @@ const isSafari = Boolean(
 		! window.navigator.userAgent.includes( 'Chromium' )
 );
 
+/**
+ * Checks if a file is a HEIC/HEIF image.
+ *
+ * @param file File to check.
+ * @return Whether the file is a HEIC/HEIF image.
+ */
+function isHeicFile( file: File ): boolean {
+	return file.type === 'image/heic' || file.type === 'image/heif';
+}
+
 type ActionCreators = {
 	cancelItem: typeof cancelItem;
 	addItem: typeof addItem;
@@ -236,7 +246,7 @@ export function addItem( {
 	abortController,
 	operations,
 }: AddItemArgs ) {
-	return async ( { dispatch, registry }: ThunkArgs ) => {
+	return async ( { dispatch, registry, select }: ThunkArgs ) => {
 		const thumbnailGeneration: ThumbnailGeneration = registry
 			.select( preferencesStore )
 			.get( PREFERENCES_NAME, 'thumbnailGeneration' );
@@ -259,6 +269,12 @@ export function addItem( {
 			} );
 		}
 
+		// Check if this is a HEIC file that the server can convert.
+		// If so, we don't want the server to generate thumbnails - we'll do it client-side.
+		const supportsHeicOnServer = select.getSettings().supportsHeic;
+		const shouldDisableServerThumbnails =
+			isHeicFile( file ) && supportsHeicOnServer;
+
 		dispatch< AddAction >( {
 			type: Type.Add,
 			item: {
@@ -271,7 +287,9 @@ export function addItem( {
 					url: blobUrl,
 				},
 				additionalData: {
-					generate_sub_sizes: 'server' === thumbnailGeneration,
+					generate_sub_sizes: shouldDisableServerThumbnails
+						? false
+						: 'server' === thumbnailGeneration,
 					convert_format: false,
 					...additionalData,
 				},
@@ -876,10 +894,18 @@ export function prepareItem( id: QueueItemId ) {
 
 				let uploadOriginalImage = false;
 
+				const supportsHeicOnServer = select.getSettings().supportsHeic;
+				const serverWillConvertHeic =
+					isHeif && convertUnsafe && supportsHeicOnServer;
+
 				if ( convertUnsafe ) {
 					if ( isHeif ) {
-						operations.push( OperationType.TranscodeHeif );
-						uploadOriginalImage = true;
+						// If server supports HEIC, upload the file directly and let the server handle conversion.
+						// Otherwise, do client-side conversion.
+						if ( ! supportsHeicOnServer ) {
+							operations.push( OperationType.TranscodeHeif );
+							uploadOriginalImage = true;
+						}
 					} else if ( ! isWebSafe ) {
 						operations.push( [
 							OperationType.TranscodeImage,
@@ -892,6 +918,16 @@ export function prepareItem( id: QueueItemId ) {
 						uploadOriginalImage = true;
 						optimizeOnUpload = false;
 					}
+				}
+
+				// For HEIC files that will be converted server-side,
+				// upload first, then dynamically add operations to fetch the converted file
+				// and do all processing on it.
+				if ( serverWillConvertHeic ) {
+					operations.push( OperationType.Upload );
+					// The rest of the operations (FetchRemoteFile, GenerateMetadata, GenerateCaptions, ThumbnailGeneration)
+					// will be added dynamically in uploadItem() after the upload completes.
+					break;
 				}
 
 				const imageSizeThreshold: number = registry
@@ -1894,7 +1930,7 @@ export function resizeCropItem( id: QueueItemId, args?: ResizeCropItemArgs ) {
  * @param id Item ID.
  */
 export function uploadItem( id: QueueItemId ) {
-	return async ( { select, dispatch }: ThunkArgs ) => {
+	return async ( { select, dispatch, registry }: ThunkArgs ) => {
 		const item = select.getItem( id ) as QueueItem;
 
 		const startTime = performance.now();
@@ -1938,6 +1974,47 @@ export function uploadItem( id: QueueItemId ) {
 							blobUrl: attachment.poster,
 						} );
 					}
+				}
+
+				// If this was a HEIC file uploaded to a server that supports HEIC conversion,
+				// we need to fetch the converted JPEG file back and then do all processing on it.
+				const supportsHeicOnServer = select.getSettings().supportsHeic;
+
+				if (
+					isHeicFile( item.sourceFile ) &&
+					supportsHeicOnServer &&
+					attachment.url
+				) {
+					// Add operations to fetch the converted JPEG and then process it.
+					const fileName =
+						attachment.mexp_filename || item.sourceFile.name;
+
+					const operations: Operation[] = [
+						[
+							OperationType.FetchRemoteFile,
+							{
+								url: attachment.url,
+								fileName,
+							},
+						],
+						OperationType.GenerateMetadata,
+					];
+
+					const useAi: boolean = registry
+						.select( preferencesStore )
+						.get( PREFERENCES_NAME, 'useAi' );
+
+					if ( useAi ) {
+						operations.push( OperationType.GenerateCaptions );
+					}
+
+					operations.push( OperationType.ThumbnailGeneration );
+
+					dispatch< AddOperationsAction >( {
+						type: Type.AddOperations,
+						id,
+						operations,
+					} );
 				}
 
 				dispatch.finishOperation( id, {
