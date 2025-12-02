@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { v4 as uuidv4 } from 'uuid';
+import { measure, type MeasureOptions, start } from '@mexp/log';
 import { createWorkerFactory, type WorkerCreator } from '@shopify/web-worker';
 
 /**
@@ -10,8 +11,7 @@ import { createWorkerFactory, type WorkerCreator } from '@shopify/web-worker';
 import { createBlobURL, isBlobURL, revokeBlobURL } from '@wordpress/blob';
 import type { createRegistry } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
-
-import { measure, type MeasureOptions, start } from '@mexp/log';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -169,6 +169,7 @@ type ActionCreators = {
 	generateThumbnails: typeof generateThumbnails;
 	uploadOriginal: typeof uploadOriginal;
 	uploadPoster: typeof uploadPoster;
+	uploadSubtitles: typeof uploadSubtitles;
 	revokeBlobUrls: typeof revokeBlobUrls;
 	fetchRemoteFile: typeof fetchRemoteFile;
 	generateVideoSubtitles: typeof generateVideoSubtitles;
@@ -547,6 +548,10 @@ export function processItem( id: QueueItemId ) {
 
 			case OperationType.UploadPoster:
 				dispatch.uploadPoster( id );
+				break;
+
+			case OperationType.UploadSubtitles:
+				dispatch.uploadSubtitles( id );
 				break;
 
 			case OperationType.FetchRemoteFile:
@@ -970,7 +975,8 @@ export function prepareItem( id: QueueItemId ) {
 					OperationType.Upload,
 					// Try poster generation again *after* upload if it's still missing.
 					OperationType.AddPoster,
-					OperationType.UploadPoster
+					OperationType.UploadPoster,
+					OperationType.UploadSubtitles
 				);
 
 				break;
@@ -1116,6 +1122,76 @@ export function uploadPoster( id: QueueItemId ) {
 				// TODO: Debug & catch & throw.
 			}
 		}
+
+		dispatch.finishOperation( id, {} );
+	};
+}
+
+/**
+ * Adds a new item to the queue for generating and uploading a video's subtitles.
+ *
+ * Similar to `addSubtitlesForExistingVideo()` but without first downloading
+ * a video file from a URL, as the file is already in memory.
+ *
+ * @param id Item ID.
+ */
+export function uploadSubtitles( id: QueueItemId ) {
+	return async ( { select, dispatch }: ThunkArgs ) => {
+		const item = select.getItem( id ) as QueueItem;
+
+		const itemId = uuidv4();
+
+		dispatch< AddAction >( {
+			type: Type.Add,
+			item: {
+				id: itemId,
+				status: ItemStatus.Processing,
+				file: new StubFile(),
+				sourceFile: item.file,
+				sourceUrl: item.attachment?.url,
+				sourceAttachmentId: item.attachment?.id,
+				onChange: ( [ subtitlesAttachment ] ) => {
+					if (
+						! subtitlesAttachment.url ||
+						isBlobURL( subtitlesAttachment.url )
+					) {
+						return;
+					}
+
+					const updatedAttachment = {
+						...item.attachment,
+						// Not actually used/supported by the video block at the moment.
+						tracks: [
+							{
+								label: __(
+									'Auto-generated captions',
+									'media-experiments'
+								),
+								kind: 'captions',
+								lang: 'en', // TODO: Make dynamic.
+								src: subtitlesAttachment.url,
+							},
+						],
+					};
+
+					// This might be confusing, but the idea is to update the original
+					// video item in the editor with the newly uploaded tracks.
+					item.onChange?.( [ updatedAttachment ] );
+				},
+				additionalData: {
+					// Reminder: Parent post ID might not be set, depending on context,
+					// but should be carried over if it does.
+					post: item.additionalData.post,
+				},
+				abortController: new AbortController(),
+				operations: [
+					OperationType.GenerateSubtitles,
+					OperationType.Upload,
+				],
+			},
+		} );
+
+		dispatch.processItem( itemId );
 
 		dispatch.finishOperation( id, {} );
 	};
