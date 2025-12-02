@@ -6,11 +6,13 @@ const { resolve, dirname, basename } = require( 'node:path' );
 const { DefinePlugin } = require( 'webpack' );
 const MiniCSSExtractPlugin = require( 'mini-css-extract-plugin' );
 const { WebWorkerPlugin } = require( '@shopify/web-worker/webpack' );
+
 /**
  * WordPress dependencies
  */
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 const { hasBabelConfig, hasArgInCLI } = require( '@wordpress/scripts/utils' );
+const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
 
 const isProduction = process.env.NODE_ENV === 'production';
 const hasReactFastRefresh = hasArgInCLI( '--hot' ) && ! isProduction;
@@ -30,7 +32,7 @@ const mediapipeCdnUrl = `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmenta
 const pdfJsCdnUrl = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${ pdfJsVersion }/build/pdf.worker.mjs`;
 const ffmpegCdnUrl = `https://cdn.jsdelivr.net/npm/@ffmpeg/core@${ ffmpegVersion }/dist/ffmpeg-core.js`;
 
-module.exports = {
+const regular = {
 	...defaultConfig,
 	entry: {
 		'media-experiments': resolve(
@@ -50,10 +52,6 @@ module.exports = {
 		globalObject: 'self', // This is the default, but required for @shopify/web-worker.
 	},
 	resolve: {
-		// Ensure "require" has a higher priority when matching export conditions.
-		// https://webpack.js.org/configuration/resolve/#resolveconditionnames
-		// https://github.com/kleisauke/wasm-vips/issues/50#issuecomment-1664118137
-		conditionNames: [ 'require', 'import' ],
 		extensions: [ '.jsx', '.ts', '.tsx', '...' ],
 		fallback: {
 			crypto: false,
@@ -114,8 +112,18 @@ module.exports = {
 	},
 	plugins: [
 		...defaultConfig.plugins.filter(
-			( plugin ) => ! ( plugin instanceof MiniCSSExtractPlugin )
+			( plugin ) =>
+				! ( plugin instanceof MiniCSSExtractPlugin ) &&
+				! ( plugin instanceof DependencyExtractionWebpackPlugin )
 		),
+		new DependencyExtractionWebpackPlugin( {
+			requestToExternal( request ) {
+				if ( request === '@mexp/vips' ) {
+					return `import ${ request }`;
+				}
+				return undefined;
+			},
+		} ),
 		new WebWorkerPlugin(),
 		new MiniCSSExtractPlugin( {
 			filename: '[name].css',
@@ -173,3 +181,35 @@ module.exports = {
 		},
 	},
 };
+
+const modules = {
+	...regular,
+	entry: {
+		vips: resolve( __dirname, 'packages/vips/src/index.ts' ),
+	},
+	output: {
+		...regular.output,
+		module: true,
+	},
+	experiments: { outputModule: true },
+	plugins: [
+		...regular.plugins.filter(
+			( plugin ) =>
+				! [
+					'DependencyExtractionWebpackPlugin',
+					'WebWorkerPlugin',
+				].includes( plugin.constructor.name )
+		),
+		new DependencyExtractionWebpackPlugin( {
+			// With modules, use `requestToExternalModule`:
+			requestToExternalModule( request ) {
+				if ( request === '@mexp/vips' ) {
+					return request;
+				}
+				return undefined;
+			},
+		} ),
+	],
+};
+
+module.exports = [ regular, modules ];
