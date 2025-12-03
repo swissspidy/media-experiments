@@ -261,9 +261,19 @@ function load_upload_request_template( string $template ): string {
 		return __DIR__ . '/templates/upload-request.php';
 	}
 
-	if ( is_singular( 'mexp-collab-request' ) ) {
-		start_cross_origin_isolation_output_buffer();
+	return $template;
+}
 
+/**
+ * Filters the path of the queried template for single collaboration requests.
+ *
+ * @codeCoverageIgnore
+ *
+ * @param string $template Template path.
+ * @return string Filtered template path.
+ */
+function load_collaboration_request_template( string $template ): string {
+	if ( is_singular( 'mexp-collab-request' ) ) {
 		return __DIR__ . '/templates/collaboration-request.php';
 	}
 
@@ -1622,7 +1632,7 @@ function get_collaboration_request_by_slug( string $slug ): ?WP_Post {
  */
 function filter_user_has_cap_for_collaboration( array $allcaps, array $caps, array $args, $user ): array {
 	// Check if this is a temporary collaboration user.
-	$is_temp_user = get_user_meta( $user->ID, 'mexp_is_temp_collab_user', true );
+	$is_temp_user = (bool) get_user_meta( $user->ID, 'mexp_is_temp_collab_user', true );
 
 	if ( true !== $is_temp_user ) {
 		return $allcaps;
@@ -1671,9 +1681,20 @@ function filter_user_has_cap_for_collaboration( array $allcaps, array $caps, arr
 		}
 	}
 
+	$post_type = get_post_type_object( get_post_type( $post_id ) );
+
+	if ( ! $post_type ) {
+		return $allcaps;
+	}
+
+	$allcaps[ $post_type->cap->edit_others_posts ]    = true;
+	$allcaps[ $post_type->cap->edit_published_posts ] = true;
+	$allcaps[ $post_type->cap->edit_private_posts ]   = true;
+
 	// Always grant read capability for the post.
 	$allcaps['read']      = true;
 	$allcaps['read_post'] = true;
+	$allcaps['edit_post'] = true;
 
 	return $allcaps;
 }
@@ -1750,6 +1771,7 @@ function delete_old_upload_requests(): void {
  * @return void
  */
 function delete_old_collaboration_requests(): void {
+	return;
 	$args = [
 		'post_type'        => 'mexp-collab-request',
 		'post_status'      => 'publish',

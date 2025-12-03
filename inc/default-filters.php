@@ -63,6 +63,10 @@ add_action( 'mexp_collaboration_requests_cleanup', __NAMESPACE__ . '\delete_old_
 add_filter( 'rest_route_for_post', __NAMESPACE__ . '\filter_rest_route_for_post_for_upload_requests', 10, 2 );
 add_filter( 'user_has_cap', __NAMESPACE__ . '\filter_user_has_cap_for_collaboration', 10, 4 );
 
+// Collaboration requests.
+
+add_filter( 'template_include', __NAMESPACE__ . '\load_collaboration_request_template' );
+
 // Plugin compat.
 
 add_action( 'admin_print_scripts', __NAMESPACE__ . '\fix_yoast_seo_worker' );

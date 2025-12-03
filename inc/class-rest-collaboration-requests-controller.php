@@ -83,7 +83,6 @@ class REST_Collaboration_Requests_Controller extends WP_REST_Posts_Controller {
 			return $response;
 		}
 
-		// Create a temporary user for this collaboration request.
 		/**
 		 * Response data.
 		 *

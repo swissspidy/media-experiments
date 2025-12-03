@@ -178,6 +178,7 @@ export function CollaborationRequestControls() {
 		}
 	}
 
+	// TODO: Do not revoke.
 	function onClose() {
 		void deleteCollaborationRequest();
 		void closeModal();

@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 $post = get_post();
 
 if ( ! $post instanceof WP_Post ) {
-	exit;
+	wp_die( esc_html__( 'Invalid collaboration request.', 'media-experiments' ) );
 }
 
 global $authordata;
@@ -24,12 +24,23 @@ if ( ! $mexp_request_parent instanceof WP_Post ) {
 	wp_die( esc_html__( 'Invalid collaboration request.', 'media-experiments' ) );
 }
 
-/**
- * Edit post link.
- *
- * @var string $mexp_edit_url
- */
 $mexp_edit_url = get_edit_post_link( $mexp_request_parent->ID, 'raw' );
+
+// If the user already has edit access, redirect right away.
+if ( $mexp_edit_url ) {
+	wp_safe_redirect( esc_url_raw( $mexp_edit_url ) );
+	exit;
+}
+
+// If not, get edit post link without get_edit_post_link() cap checks.
+
+$post_type_object = get_post_type_object( $mexp_request_parent->post_type );
+
+if ( ! $post_type_object ) {
+	return;
+}
+
+$mexp_edit_url = admin_url( sprintf( $post_type_object->_edit_link . '&action=edit', $mexp_request_parent->ID ) );
 
 if ( current_user_can( 'edit_post', $mexp_request_parent->ID ) ) {
 	wp_safe_redirect( esc_url_raw( $mexp_edit_url ) );
@@ -70,6 +81,10 @@ wp_set_auth_cookie( $mexp_temp_user_id, true );
  */
 
 $mexp_temp_user = get_userdata( $mexp_temp_user_id );
+
+var_dump( 'redirect 3', $mexp_edit_url );
+var_dump( wp_get_current_user()->ID );
+die;
 
 // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core hook.
 do_action( 'wp_login', $mexp_temp_user->user_login, $mexp_temp_user );
