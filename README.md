@@ -218,3 +218,26 @@ Show all in-progress items for easier inspection, and allow cancelling individua
 Allows uploading media to the current post from an entirely different device, such as a mobile phone, even when not logged in.
 
 https://github.com/swissspidy/media-experiments/assets/841956/b0b63f19-7f78-4a8d-9255-b59ad996368a
+
+### Temporary Collaboration
+
+Share a link to allow someone to temporarily collaborate on a post without requiring them to login.
+
+This feature extends the upload request functionality by enabling post-level collaboration with configurable capabilities:
+
+- **Edit post content**: Allow the collaborator to edit the post text and structure
+- **Upload media files**: Allow the collaborator to upload and manage media
+
+When you share a collaboration link:
+1. A QR code and shareable URL are generated
+2. You can select which capabilities to grant
+3. The link expires automatically after 15 minutes or when you close the sharing dialog
+4. The temporary collaborator can access the block editor for that specific post only
+
+This is useful for:
+- Getting quick feedback or edits from team members without creating user accounts
+- Allowing clients to upload media directly to their post
+- Temporary collaboration during events or meetings
+- Sharing work-in-progress content with reviewers
+
+**Security Note**: Collaboration links are time-limited (15 minutes) and scoped to a specific post. The temporary collaborator only has access to the capabilities you explicitly grant.
