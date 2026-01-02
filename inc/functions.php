@@ -18,6 +18,10 @@ use WP_Screen;
 use function is_array;
 use function register_post_meta;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Filters the update response for this plugin.
  *

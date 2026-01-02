@@ -11,6 +11,10 @@ namespace MediaExperiments;
 
 use function add_action;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 add_filter( 'update_plugins_swissspidy.github.io', __NAMESPACE__ . '\filter_update_plugins', 10, 3 );
 
 // Cross-origin isolation.

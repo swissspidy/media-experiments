@@ -7,6 +7,10 @@
 
 namespace MediaExperiments;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Force Yoast SEO readability worker to use a blob URL.
  *
