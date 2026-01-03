@@ -34,8 +34,8 @@
 		"@mexp/media-utils": "file:../media-utils",
 		"@mexp/upload-media": "file:../upload-media",
 		"@wordpress/components": "^29.3.0",
-		"@wordpress/compose": "^7.36.0",
-		"@wordpress/core-data": "^7.36.0",
+		"@wordpress/compose": "^7.37.0",
+		"@wordpress/core-data": "^7.37.0",
 		"@wordpress/data": "^10.11.0",
 		"@wordpress/preferences": "^4.13.0"
 	}
