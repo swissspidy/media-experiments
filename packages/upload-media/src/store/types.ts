@@ -156,6 +156,7 @@ export interface Settings {
 	mediaUpload: ( args: UploadMediaArgs ) => void;
 	mediaSideload: ( args: SideloadMediaArgs ) => void;
 	imageSizes: Record< string, ImageSizeCrop >;
+	supportsHeic?: boolean;
 }
 
 // Must match the Attachment type from the media-utils package.
