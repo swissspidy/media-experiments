@@ -7,7 +7,8 @@ export async function convertImageFormat(
 	bufferOrBlob: ArrayBuffer | Blob,
 	sourceType: string,
 	destType: string,
-	quality = 0.82
+	quality = 0.82,
+	hasTransparency?: boolean
 ) {
 	const imgBlob =
 		bufferOrBlob instanceof ArrayBuffer
@@ -20,8 +21,9 @@ export async function convertImageFormat(
 	const canvas = new OffscreenCanvas( width, height );
 
 	const ctx = canvas.getContext( '2d', {
-		// TODO: Make this based on actual opacity.
-		alpha: [ 'image/png', 'image/webp' ].includes( sourceType ),
+		alpha:
+			hasTransparency ??
+			[ 'image/png', 'image/webp' ].includes( sourceType ),
 	} );
 
 	// If the contextType doesn't match a possible drawing context,
@@ -43,22 +45,31 @@ export async function convertImageFormat(
 export async function compressImage(
 	buffer: ArrayBuffer,
 	sourceType: string,
-	quality = 0.82
+	quality = 0.82,
+	hasTransparency?: boolean
 ) {
-	return convertImageFormat( buffer, sourceType, sourceType, quality );
+	return convertImageFormat(
+		buffer,
+		sourceType,
+		sourceType,
+		quality,
+		hasTransparency
+	);
 }
 
 /**
  * Resizes and crops an image using createImageBitmap and canvas.
  *
- * @param buffer     Image buffer.
- * @param sourceType Source mime type.
- * @param resize     Resize options.
+ * @param buffer          Image buffer.
+ * @param sourceType      Source mime type.
+ * @param resize          Resize options.
+ * @param hasTransparency Whether the image has transparency.
  */
 export async function resizeImage(
 	buffer: ArrayBuffer,
 	sourceType: string,
-	resize: ImageSizeCrop
+	resize: ImageSizeCrop,
+	hasTransparency?: boolean
 ) {
 	const imgBlob = new Blob( [ buffer ], { type: sourceType } );
 
@@ -171,8 +182,9 @@ export async function resizeImage(
 
 	const canvas = new OffscreenCanvas( expectedWidth, expectedHeight );
 	const ctx = canvas.getContext( '2d', {
-		// TODO: Make this based on actual opacity.
-		alpha: [ 'image/png', 'image/webp' ].includes( sourceType ),
+		alpha:
+			hasTransparency ??
+			[ 'image/png', 'image/webp' ].includes( sourceType ),
 	} );
 
 	// If the contextType doesn't match a possible drawing context,
