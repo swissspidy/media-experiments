@@ -29,18 +29,24 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import { Modal } from './modal';
+import { InlinePlaceholder } from './placeholder';
 
 interface UploadRequestControlsProps {
 	onInsert: ( media: Partial< Attachment >[] ) => void;
 	allowedTypes?: string[];
 	multiple?: boolean;
 	accept?: string[];
+	inline?: boolean;
+	clientId?: string;
 }
 
 const UPLOAD_REQUEST_CHECK_INTERVAL = 5; // Seconds.
 const UPLOAD_REQUEST_MAX_LIFETIME = 15 * 60; // Seconds.
 
 export function UploadRequestControls( props: UploadRequestControlsProps ) {
+	// Default to inline mode when clientId is provided and inline is not explicitly set
+	const inline = props.inline ?? Boolean( props.clientId );
+
 	const { baseControlProps, controlProps } = useBaseControlProps( {
 		__nextHasNoMarginBottom: true,
 	} );
@@ -51,23 +57,29 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 		useDispatch( coreStore );
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( noticesStore );
+	const { lockPostSaving, unlockPostSaving } = useDispatch( editorStore );
 
 	const {
 		isModalActive,
 		hasUploadPermissions,
 		currentPostId,
 		getEntityRecords,
-	} = useSelect( ( select ) => {
-		const { getSettings } = select( blockEditorStore );
-		return {
-			isModalActive: select( interfaceStore ).isModalActive(
-				'media-experiments/upload-request'
-			),
-			hasUploadPermissions: Boolean( getSettings().mediaUpload ),
-			currentPostId: select( editorStore ).getCurrentPostId(),
-			getEntityRecords: select( coreStore ).getEntityRecords,
-		};
-	}, [] );
+	} = useSelect(
+		( select ) => {
+			const { getSettings } = select( blockEditorStore );
+			const modalName = inline
+				? `media-experiments/upload-request-${ props.clientId }`
+				: 'media-experiments/upload-request';
+			return {
+				isModalActive:
+					select( interfaceStore ).isModalActive( modalName ),
+				hasUploadPermissions: Boolean( getSettings().mediaUpload ),
+				currentPostId: select( editorStore ).getCurrentPostId(),
+				getEntityRecords: select( coreStore ).getEntityRecords,
+			};
+		},
+		[ inline, props.clientId ]
+	);
 
 	const [ uploadRequest, setUploadRequest ] = useState< Post | null >( null );
 
@@ -121,6 +133,7 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 				props.onInsert( attachments.map( transformAttachment ) );
 				void deleteUploadRequest();
 				void closeModal();
+				void unlockPostSaving( 'media-experiments/upload-request' );
 				void createSuccessNotice(
 					__( 'Media successfully uploaded.', 'media-experiments' ),
 					{
@@ -143,6 +156,7 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 		props,
 		deleteUploadRequest,
 		closeModal,
+		unlockPostSaving,
 		createSuccessNotice,
 	] );
 
@@ -154,6 +168,7 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 
 			void deleteUploadRequest();
 			void closeModal();
+			void unlockPostSaving( 'media-experiments/upload-request' );
 			void createErrorNotice(
 				__( 'Upload expired.', 'media-experiments' ),
 				{
@@ -170,6 +185,7 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 		isModalActive,
 		deleteUploadRequest,
 		closeModal,
+		unlockPostSaving,
 		createErrorNotice,
 	] );
 
@@ -198,7 +214,11 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 	async function onClick() {
 		try {
 			await createNewUploadRequest();
-			void openModal( 'media-experiments/upload-request' );
+			const modalName = inline
+				? `media-experiments/upload-request-${ props.clientId }`
+				: 'media-experiments/upload-request';
+			void openModal( modalName );
+			void lockPostSaving( 'media-experiments/upload-request' );
 		} catch {
 			void createErrorNotice(
 				__(
@@ -215,12 +235,27 @@ export function UploadRequestControls( props: UploadRequestControlsProps ) {
 	function onClose() {
 		void deleteUploadRequest();
 		void closeModal();
+		void unlockPostSaving( 'media-experiments/upload-request' );
 	}
 
 	if ( ! hasUploadPermissions ) {
 		return null;
 	}
 
+	// Inline mode - show placeholder in the block
+	if ( inline ) {
+		if ( isModalActive && uploadRequest ) {
+			return (
+				<InlinePlaceholder
+					uploadRequest={ uploadRequest }
+					onCancel={ onClose }
+				/>
+			);
+		}
+		return null;
+	}
+
+	// Modal mode - show button and modal
 	return (
 		<BaseControl { ...baseControlProps }>
 			<BaseControl.VisualLabel>

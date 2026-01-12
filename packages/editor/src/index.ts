@@ -9,6 +9,7 @@ import './cross-origin-isolation';
 import './block-media-panel';
 import './document-media-panel';
 import './media-recording';
+import './upload-request-placeholder';
 import './preferences-modal';
 import './upload-status';
 import './welcome-guide';
