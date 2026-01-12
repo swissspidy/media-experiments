@@ -28,6 +28,11 @@ define( 'MEXP_BASENAME', plugin_basename( __FILE__ ) );
 require_once __DIR__ . '/inc/class-rest-attachments-controller.php';
 
 /**
+ * REST collaboration requests controller.
+ */
+require_once __DIR__ . '/inc/class-rest-collaboration-requests-controller.php';
+
+/**
  * BlurHash decoder.
  */
 require_once __DIR__ . '/inc/class-blurhash.php';

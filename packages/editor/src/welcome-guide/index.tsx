@@ -21,7 +21,9 @@ function WelcomeGuideMenuItem() {
 			select( preferencesStore ).get( PREFERENCES_NAME, 'welcomeGuide' ),
 		[]
 	);
+
 	const { toggle } = useDispatch( preferencesStore );
+
 	const speakMessage = () => {
 		if ( isActive ) {
 			speak(
@@ -31,6 +33,7 @@ function WelcomeGuideMenuItem() {
 			speak( __( 'Media welcome guide activated', 'media-experiments' ) );
 		}
 	};
+
 	return (
 		<>
 			<PluginMoreMenuItem
