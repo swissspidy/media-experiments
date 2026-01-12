@@ -103,6 +103,10 @@ interface WP_REST_API_Attachment {
 	 */
 	missing_image_sizes?: string[];
 	/**
+	 * List of the missing video sizes of the attachment.  Only present when using the 'edit' context.
+	 */
+	missing_video_sizes?: string[];
+	/**
 	 * Permalink template for the attachment. Only present when using the 'edit' context and the post type is public.
 	 */
 	permalink_template?: string;

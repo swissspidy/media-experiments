@@ -156,6 +156,10 @@ export interface Settings {
 	mediaUpload: ( args: UploadMediaArgs ) => void;
 	mediaSideload: ( args: SideloadMediaArgs ) => void;
 	imageSizes: Record< string, ImageSizeCrop >;
+	videoSizes?: Record<
+		string,
+		{ name: string; width: number; height: number }
+	>;
 }
 
 // Must match the Attachment type from the media-utils package.
@@ -179,6 +183,7 @@ export interface Attachment {
 	mime_type: string;
 	featured_media?: number;
 	missing_image_sizes?: string[];
+	missing_video_sizes?: string[];
 	poster?: string;
 }
 
@@ -199,6 +204,7 @@ export enum OperationType {
 	UploadPoster = 'UPLOAD_POSTER',
 	UploadOriginal = 'UPLOAD_ORIGINAL',
 	ThumbnailGeneration = 'THUMBNAIL_GENERATION',
+	VideoSizeGeneration = 'VIDEO_SIZE_GENERATION',
 	ResizeCrop = 'RESIZE_CROP',
 	TranscodeHeif = 'TRANSCODE_HEIF',
 	TranscodeGif = 'TRANSCODE_GIF',
@@ -232,7 +238,10 @@ export interface OperationArgs {
 		interlaced?: boolean;
 	};
 	[ OperationType.ResizeCrop ]: { resize?: ImageSizeCrop };
-	[ OperationType.TranscodeVideo ]: { continueOnError?: boolean };
+	[ OperationType.TranscodeVideo ]: {
+		continueOnError?: boolean;
+		videoSize?: VideoSizeCrop;
+	};
 	[ OperationType.UploadOriginal ]: { force?: boolean };
 }
 
@@ -252,6 +261,12 @@ export interface ImageSizeCrop {
 	crop?:
 		| boolean
 		| [ 'left' | 'center' | 'right', 'top' | 'center' | 'bottom' ];
+}
+
+export interface VideoSizeCrop {
+	name?: string;
+	width: number;
+	height: number;
 }
 
 export type ImageLibrary = 'browser' | 'vips';

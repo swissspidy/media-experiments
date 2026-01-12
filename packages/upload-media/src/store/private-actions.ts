@@ -167,6 +167,7 @@ type ActionCreators = {
 	optimizeAudioItem: typeof optimizeAudioItem;
 	optimizeImageItem: typeof optimizeImageItem;
 	generateThumbnails: typeof generateThumbnails;
+	generateVideoSizes: typeof generateVideoSizes;
 	uploadOriginal: typeof uploadOriginal;
 	uploadPoster: typeof uploadPoster;
 	revokeBlobUrls: typeof revokeBlobUrls;
@@ -536,6 +537,10 @@ export function processItem( id: QueueItemId ) {
 
 			case OperationType.ThumbnailGeneration:
 				dispatch.generateThumbnails( id );
+				break;
+
+			case OperationType.VideoSizeGeneration:
+				dispatch.generateVideoSizes( id );
 				break;
 
 			case OperationType.UploadOriginal:
@@ -970,7 +975,9 @@ export function prepareItem( id: QueueItemId ) {
 					OperationType.Upload,
 					// Try poster generation again *after* upload if it's still missing.
 					OperationType.AddPoster,
-					OperationType.UploadPoster
+					OperationType.UploadPoster,
+					// Generate multiple resolution versions for responsive delivery.
+					OperationType.VideoSizeGeneration
 				);
 
 				break;
@@ -1226,6 +1233,79 @@ export function generateThumbnails( id: QueueItemId ) {
 					},
 					operations: [
 						[ OperationType.ResizeCrop, { resize: imageSize } ],
+						OperationType.Upload,
+					],
+				} );
+			}
+		}
+
+		dispatch.finishOperation( id, {} );
+	};
+}
+
+/**
+ * Adds video size versions to the queue for sideloading.
+ *
+ * Similar to generateThumbnails but for videos.
+ * Generates multiple resolution variants (240p, 480p, 720p, etc.)
+ * for responsive video delivery.
+ *
+ * @param id Item ID.
+ */
+export function generateVideoSizes( id: QueueItemId ) {
+	return async ( { select, dispatch }: ThunkArgs ) => {
+		const item = select.getItem( id ) as QueueItem;
+
+		const attachment: Attachment = item.attachment as Attachment;
+
+		// Client-side video size generation.
+		// Only works for video files.
+
+		if (
+			! item.parentId &&
+			attachment.missing_video_sizes &&
+			attachment.missing_video_sizes.length > 0 &&
+			item.file.type.startsWith( 'video/' )
+		) {
+			const file = attachment.mexp_filename
+				? renameFile( item.file, attachment.mexp_filename )
+				: item.file;
+			const batchId = uuidv4();
+
+			const videoSizes = select.getVideoSizes();
+
+			for ( const name of attachment.missing_video_sizes ) {
+				const videoSize = videoSizes[ name ];
+				if ( ! videoSize ) {
+					continue;
+				}
+
+				dispatch.addSideloadItem( {
+					file,
+					onChange: ( [ updatedAttachment ] ) => {
+						// If the sub-size is still being generated, there is no need
+						// to invoke the callback below. It would just override
+						// the main video in the editor with the sub-size.
+						if ( isBlobURL( updatedAttachment.url ) ) {
+							return;
+						}
+
+						// Update the original video item in the editor with the new one with the added sub-size.
+						item.onChange?.( [ updatedAttachment ] );
+					},
+					batchId,
+					parentId: item.id,
+					additionalData: {
+						// Sideloading does not use the parent post ID but the
+						// attachment ID as the video sizes need to be added to it.
+						post: attachment.id,
+						// Reference the same upload_request if needed.
+						upload_request: item.additionalData.upload_request,
+						image_size: name, // We reuse image_size for video sizes
+						convert_format: false,
+					},
+					operations: [
+						[ OperationType.TranscodeVideo, { videoSize } ],
 						OperationType.Upload,
 					],
 				} );
@@ -1531,9 +1611,13 @@ export function optimizeVideoItem(
 				.select( preferencesStore )
 				.get( PREFERENCES_NAME, 'video_outputFormat' ) || 'mp4';
 
-		const videoSizeThreshold: number = registry
-			.select( preferencesStore )
-			.get( PREFERENCES_NAME, 'bigVideoSizeThreshold' );
+		// If videoSize is specified, use its dimensions as the threshold.
+		// Otherwise, use the global videoSizeThreshold setting.
+		const videoSizeThreshold: number = args?.videoSize
+			? Math.min( args.videoSize.width, args.videoSize.height )
+			: registry
+					.select( preferencesStore )
+					.get( PREFERENCES_NAME, 'bigVideoSizeThreshold' );
 
 		try {
 			const { transcodeVideo } = await import(
