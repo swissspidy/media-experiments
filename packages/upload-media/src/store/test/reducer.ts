@@ -14,6 +14,7 @@ describe( 'reducer', () => {
 	describe( `${ Type.Add }`, () => {
 		it( 'adds an item to the queue', () => {
 			const initialState: State = {
+				concurrencyLimit: 4,
 				queueStatus: 'active',
 				pendingApproval: undefined,
 				blobUrls: {},
@@ -38,6 +39,7 @@ describe( 'reducer', () => {
 			} );
 
 			expect( state ).toEqual( {
+				concurrencyLimit: 4,
 				queueStatus: 'active',
 				pendingApproval: undefined,
 				blobUrls: {},
@@ -63,6 +65,7 @@ describe( 'reducer', () => {
 	describe( `${ Type.Cancel }`, () => {
 		it( 'removes an item from the queue', () => {
 			const initialState: State = {
+				concurrencyLimit: 4,
 				queueStatus: 'active',
 				pendingApproval: undefined,
 				blobUrls: {},
@@ -89,6 +92,7 @@ describe( 'reducer', () => {
 			} );
 
 			expect( state ).toEqual( {
+				concurrencyLimit: 4,
 				queueStatus: 'active',
 				pendingApproval: undefined,
 				blobUrls: {},
@@ -115,6 +119,7 @@ describe( 'reducer', () => {
 	describe( `${ Type.Remove }`, () => {
 		it( 'removes an item from the queue', () => {
 			const initialState: State = {
+				concurrencyLimit: 4,
 				queueStatus: 'active',
 				pendingApproval: undefined,
 				blobUrls: {},
@@ -140,6 +145,7 @@ describe( 'reducer', () => {
 			} );
 
 			expect( state ).toEqual( {
+				concurrencyLimit: 4,
 				queueStatus: 'active',
 				pendingApproval: undefined,
 				blobUrls: {},
@@ -161,6 +167,7 @@ describe( 'reducer', () => {
 	describe( `${ Type.PauseItem }`, () => {
 		it( 'marks an item as paused', () => {
 			const initialState: State = {
+				concurrencyLimit: 4,
 				queueStatus: 'active',
 				pendingApproval: undefined,
 				blobUrls: {},
@@ -186,6 +193,7 @@ describe( 'reducer', () => {
 			} );
 
 			expect( state ).toEqual( {
+				concurrencyLimit: 4,
 				queueStatus: 'active',
 				pendingApproval: undefined,
 				blobUrls: {},
@@ -211,6 +219,7 @@ describe( 'reducer', () => {
 	describe( `${ Type.ResumeItem }`, () => {
 		it( 'marks an item as processing', () => {
 			const initialState: State = {
+				concurrencyLimit: 4,
 				queueStatus: 'active',
 				pendingApproval: undefined,
 				blobUrls: {},
@@ -236,6 +245,7 @@ describe( 'reducer', () => {
 			} );
 
 			expect( state ).toEqual( {
+				concurrencyLimit: 4,
 				queueStatus: 'active',
 				pendingApproval: undefined,
 				blobUrls: {},
@@ -261,6 +271,7 @@ describe( 'reducer', () => {
 	describe( `${ Type.AddOperations }`, () => {
 		it( 'appends operations to the list', () => {
 			const initialState: State = {
+				concurrencyLimit: 4,
 				queueStatus: 'active',
 				pendingApproval: undefined,
 				blobUrls: {},
@@ -284,6 +295,7 @@ describe( 'reducer', () => {
 			} );
 
 			expect( state ).toEqual( {
+				concurrencyLimit: 4,
 				queueStatus: 'active',
 				pendingApproval: undefined,
 				blobUrls: {},
@@ -310,6 +322,7 @@ describe( 'reducer', () => {
 	describe( `${ Type.OperationStart }`, () => {
 		it( 'marks an item as processing', () => {
 			const initialState: State = {
+				concurrencyLimit: 4,
 				queueStatus: 'active',
 				pendingApproval: undefined,
 				blobUrls: {},
@@ -344,6 +357,7 @@ describe( 'reducer', () => {
 			} );
 
 			expect( state ).toEqual( {
+				concurrencyLimit: 4,
 				queueStatus: 'active',
 				pendingApproval: undefined,
 				blobUrls: {},
@@ -378,6 +392,7 @@ describe( 'reducer', () => {
 	describe( `${ Type.OperationFinish }`, () => {
 		it( 'marks an item as processing', () => {
 			const initialState: State = {
+				concurrencyLimit: 4,
 				queueStatus: 'active',
 				pendingApproval: undefined,
 				blobUrls: {},
@@ -407,6 +422,7 @@ describe( 'reducer', () => {
 			} );
 
 			expect( state ).toEqual( {
+				concurrencyLimit: 4,
 				queueStatus: 'active',
 				pendingApproval: undefined,
 				blobUrls: {},

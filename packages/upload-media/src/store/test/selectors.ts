@@ -14,6 +14,7 @@ describe( 'selectors', () => {
 	describe( 'getItems', () => {
 		it( 'should return empty array by default', () => {
 			const state: State = {
+				concurrencyLimit: 4,
 				queue: [],
 				queueStatus: 'paused',
 				pendingApproval: undefined,
@@ -32,6 +33,7 @@ describe( 'selectors', () => {
 	describe( 'isUploading', () => {
 		it( 'should return true if there are items in the pipeline', () => {
 			const state: State = {
+				concurrencyLimit: 4,
 				queue: [
 					{
 						status: ItemStatus.Processing,
@@ -63,6 +65,7 @@ describe( 'selectors', () => {
 	describe( 'isUploadingByUrl', () => {
 		it( 'should return true if there are items in the pipeline', () => {
 			const state: State = {
+				concurrencyLimit: 4,
 				queue: [
 					{
 						status: ItemStatus.Processing,
@@ -103,6 +106,7 @@ describe( 'selectors', () => {
 	describe( 'isUploadingById', () => {
 		it( 'should return true if there are items in the pipeline', () => {
 			const state: State = {
+				concurrencyLimit: 4,
 				queue: [
 					{
 						status: ItemStatus.Processing,
@@ -137,6 +141,7 @@ describe( 'selectors', () => {
 	describe( 'isPendingApproval', () => {
 		it( 'should return true if there are items pending approval', () => {
 			const state: State = {
+				concurrencyLimit: 4,
 				queue: [
 					{
 						status: ItemStatus.Processing,
