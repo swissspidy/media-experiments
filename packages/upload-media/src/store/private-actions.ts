@@ -25,6 +25,7 @@ import {
 	fetchFile,
 	getFileBasename,
 	getFileExtension,
+	getFileNameFromUrl,
 	getPosterFromVideo,
 	isAnimatedGif,
 	isHeifImage,
@@ -1171,7 +1172,7 @@ export function generateThumbnails( id: QueueItemId ) {
 						// Sideloading does not use the parent post ID but the
 						// attachment ID as the image sizes need to be added to it.
 						post: attachment.id,
-						image_size: 'full',
+						image_size: 'large',
 						convert_format: false,
 					},
 					operations: [
@@ -1998,9 +1999,25 @@ export function fetchRemoteFile( id: QueueItemId, args: FetchRemoteFileArgs ) {
 
 			validateMimeType( sourceFile, args.allowedTypes );
 
+			// Also fetch poster if provided
+			let posterFile: File | undefined;
+			if ( args.posterUrl ) {
+				try {
+					const posterFileName = getFileNameFromUrl( args.posterUrl );
+					posterFile = await fetchFile(
+						args.posterUrl,
+						posterFileName
+					);
+				} catch {
+					// If poster fetch fails, continue without it
+					// This is not critical for the main operation
+				}
+			}
+
 			if ( args.skipAttachment ) {
 				dispatch.finishOperation( id, {
 					sourceFile,
+					...( posterFile ? { poster: posterFile } : {} ),
 				} );
 			} else {
 				const file = args.newFileName
@@ -2020,6 +2037,7 @@ export function fetchRemoteFile( id: QueueItemId, args: FetchRemoteFileArgs ) {
 					attachment: {
 						url: blobUrl,
 					},
+					...( posterFile ? { poster: posterFile } : {} ),
 				} );
 			}
 		} catch ( error ) {
