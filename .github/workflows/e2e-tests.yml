@@ -119,7 +119,7 @@ jobs:
                   ARTIFACT_NAME: failures-artifacts-${{ matrix.wp }}${{ matrix.gb && '-gb' }}-${{ matrix.shard }}
 
             - name: Archive debug artifacts (screenshots, HTML snapshots)
-              uses: actions/upload-artifact@v6
+              uses: actions/upload-artifact@v7
               if: always()
               with:
                   name: ${{ env.ARTIFACT_NAME }}
