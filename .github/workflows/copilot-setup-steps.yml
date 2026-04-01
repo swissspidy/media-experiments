@@ -36,6 +36,6 @@ jobs:
                   tools: composer, cs2pr
 
             - name: Install PHP dependencies
-              uses: ramsey/composer-install@v3
+              uses: ramsey/composer-install@v4
               with:
                   composer-options: '--prefer-dist --no-scripts'
