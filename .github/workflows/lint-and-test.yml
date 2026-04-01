@@ -86,7 +86,7 @@ jobs:
                   tools: composer, cs2pr
 
             - name: Install PHP dependencies
-              uses: ramsey/composer-install@v3
+              uses: ramsey/composer-install@v4
               with:
                   composer-options: '--prefer-dist --no-scripts'
 
@@ -119,7 +119,7 @@ jobs:
               run: npm run test:unit -- --collectCoverage
 
             - name: Upload code coverage report
-              uses: codecov/codecov-action@v5.5.2
+              uses: codecov/codecov-action@v6.0.0
               with:
                   files: artifacts/logs/lcov.info
                   flags: js
@@ -190,7 +190,7 @@ jobs:
               run: bash bin/install-wp-tests.sh wordpress_test root '' 127.0.0.1:${{ job.services.mysql.ports['3306'] }} ${{ matrix.wp }} true
 
             - name: Install PHP dependencies
-              uses: ramsey/composer-install@v3
+              uses: ramsey/composer-install@v4
               with:
                   composer-options: '--prefer-dist --no-progress --no-interaction --no-scripts'
 
@@ -226,7 +226,7 @@ jobs:
               if: ${{ matrix.coverage }}
 
             - name: Upload code coverage report
-              uses: codecov/codecov-action@v5.5.2
+              uses: codecov/codecov-action@v6.0.0
               with:
                   files: artifacts/coverage.xml
                   flags: default
@@ -234,7 +234,7 @@ jobs:
               if: ${{ matrix.coverage }}
 
             - name: Upload code coverage report
-              uses: codecov/codecov-action@v5.5.2
+              uses: codecov/codecov-action@v6.0.0
               with:
                   files: artifacts/coverage-multisite.xml
                   flags: multisite
