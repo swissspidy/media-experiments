@@ -22,7 +22,9 @@
 	"engines": {
 		"node": ">=20"
 	},
+	"type": "module",
 	"main": "dist/index.js",
+	"module": "dist/index.js",
 	"source": "src/index.ts",
 	"exports": {
 		".": {
