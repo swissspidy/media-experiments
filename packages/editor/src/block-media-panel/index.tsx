@@ -19,6 +19,7 @@ import { VideoControls } from './video-controls';
 import { ImageControls } from './image-controls';
 import { AudioControls } from './audio-controls';
 import { CoverControls } from './cover-controls';
+import { FileControls } from './file-controls';
 
 import { GalleryControls } from './gallery-controls';
 import { MediaTextControls } from './media-text-controls';
@@ -37,6 +38,7 @@ const SUPPORTED_BLOCKS = [
 	'core/cover',
 	'core/post-featured-image',
 	'core/site-logo',
+	'core/file',
 ];
 
 // Blocks that can have image attachments for bulk optimization
@@ -75,6 +77,9 @@ function PerBlockControls( props: PerBlockControlsProps ) {
 
 		case 'core/site-logo':
 			return <SiteLogoControls { ...props } />;
+
+		case 'core/file':
+			return <FileControls { ...props } />;
 
 		default:
 			return null;
