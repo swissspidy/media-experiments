@@ -30,6 +30,6 @@
 	},
 	"types": "dist-types/index.d.ts",
 	"dependencies": {
-		"@wordpress/data": "^10.0.0"
+		"@wordpress/data": "^10.45.0"
 	}
 }
