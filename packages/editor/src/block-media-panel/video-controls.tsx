@@ -22,11 +22,15 @@ import { AddPoster } from './add-poster';
 import { DebugInfo } from './debug-info';
 import type { VideoBlock } from '../types';
 import { UploadRequestControls } from './upload-requests/controls';
+import { BulkOptimization } from '../components/bulk-optimization';
+import { useBlockAttachments } from '../utils/hooks';
 
 type VideoControlsProps = VideoBlock &
 	Pick< BlockEditProps< VideoBlock[ 'attributes' ] >, 'setAttributes' >;
 
 export function VideoControls( props: VideoControlsProps ) {
+	const attachments = useBlockAttachments( props.clientId );
+
 	function onImportMedia( media: Partial< Attachment > ) {
 		// Ignore blob URLs as otherwise the block tries to upload it again.
 		if ( ! media || ! media.url || isBlobURL( media.url ) ) {
@@ -110,6 +114,7 @@ export function VideoControls( props: VideoControlsProps ) {
 			/>
 			<GenerateSubtitles { ...props } />
 			<AddPoster { ...props } />
+			<BulkOptimization attachments={ attachments } />
 			<DebugInfo id={ props.attributes.id } />
 		</>
 	);
