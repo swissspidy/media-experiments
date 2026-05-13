@@ -165,6 +165,7 @@ export type RestBaseRecord = {
 	gif_interlaced: boolean;
 	image_sizes: Record< string, ImageSizeCrop >;
 	media_source_terms: Record< MediaSourceTerm, number >;
+	supports_heic: boolean;
 };
 
 export type BulkOptimizationAttachmentData = {
