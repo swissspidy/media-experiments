@@ -7,6 +7,7 @@ import './transforms';
 import './gif-block';
 import './cross-origin-isolation';
 import './block-media-panel';
+import './collaboration-welcome';
 import './document-media-panel';
 import './media-recording';
 import './preferences-modal';
