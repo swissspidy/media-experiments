@@ -88,7 +88,9 @@ export function error( message: string ) {
  * stop();
  * ```
  */
-export function start( message: string ): undefined | ( () => void ) {
+export function start(
+	message: string
+): undefined | ( ( stopMessage?: string ) => void ) {
 	if ( ! isDev() ) {
 		// Forces consumer to use optional chaining to avoid errors in prod.
 		return undefined;
@@ -96,12 +98,14 @@ export function start( message: string ): undefined | ( () => void ) {
 
 	const before = performance.now();
 
-	return () => {
+	return ( stopMessage?: string ) => {
 		const elapsed = performance.now() - before;
+
+		stopMessage = stopMessage ? ` | ${ stopMessage }` : '';
 
 		// eslint-disable-next-line no-console
 		console.log(
-			`${ message } | %c${ elapsed.toFixed( 3 ) } ms`,
+			`${ message }${ stopMessage } | %c${ elapsed.toFixed( 3 ) } ms`,
 			'color: lime;'
 		);
 

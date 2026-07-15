@@ -59,7 +59,8 @@
 					"[a-z]+_interlaced",
 					"gif_convert",
 					"media_details",
-					"option_string"
+					"option_string",
+					"image_autoSelectFormat"
 				]
 			}
 		],
