@@ -384,6 +384,35 @@ export function processItem( id: QueueItemId ) {
 			? item.operations[ 0 ][ 1 ]
 			: undefined;
 
+		// Check concurrency limit before starting a new operation.
+		// Only applies to operations that are potentially resource-intensive.
+		if ( operation && ! item.currentOperation ) {
+			const resourceIntensiveOperations = [
+				OperationType.Compress,
+				OperationType.TranscodeHeif,
+				OperationType.TranscodeGif,
+				OperationType.TranscodeVideo,
+				OperationType.TranscodeAudio,
+				OperationType.TranscodeImage,
+				OperationType.MuteVideo,
+				OperationType.GenerateCaptions,
+			];
+
+			if ( resourceIntensiveOperations.includes( operation ) ) {
+				const activeCount = select.getActiveProcessingCount();
+				const concurrencyLimit = select.getConcurrencyLimit();
+
+				if ( activeCount >= concurrencyLimit ) {
+					// Pause this item temporarily to respect concurrency limit.
+					dispatch< PauseItemAction >( {
+						type: Type.PauseItem,
+						id,
+					} );
+					return;
+				}
+			}
+		}
+
 		// If we're sideloading a thumbnail, pause upload to avoid race conditions.
 		// It will be resumed after the previous upload finishes.
 		if (
@@ -651,14 +680,55 @@ export function finishOperation(
 	id: QueueItemId,
 	updates: Partial< QueueItem >
 ) {
-	return async ( { dispatch }: ThunkArgs ) => {
+	return async ( { select, dispatch }: ThunkArgs ) => {
+		const item = select.getItem( id );
+
+		if ( ! item ) {
+			return;
+		}
+
 		dispatch< OperationFinishAction >( {
 			type: Type.OperationFinish,
 			id,
 			item: updates,
 		} );
 
+		// Process the current item first before resuming others.
+		// This ensures the item is removed from the queue if it has no more operations,
+		// preventing potential race conditions with resumed items.
 		dispatch.processItem( id );
+
+		// Resume any paused items if there are now available processing slots.
+		// We check this after processing the current item to get an accurate count.
+		const activeCount = select.getActiveProcessingCount();
+		const concurrencyLimit = select.getConcurrencyLimit();
+
+		if ( activeCount < concurrencyLimit ) {
+			// Find paused items that were waiting for a processing slot.
+			const pausedItems = select
+				.getAllItems()
+				.filter(
+					( pausedItem ) =>
+						pausedItem.status === ItemStatus.Paused &&
+						pausedItem.operations &&
+						pausedItem.operations.length > 0
+				);
+
+			// Resume only one item at a time to avoid race conditions.
+			// Between resuming an item and it starting its operation (with currentOperation set),
+			// there's a gap where it's marked as Processing but doesn't count toward activeCount.
+			// If we resumed multiple items at once, and another operation finished quickly,
+			// it could resume more items before these have started, exceeding the concurrency limit.
+			// By resuming one at a time, subsequent operation completions will handle additional resumes.
+			if ( pausedItems.length > 0 ) {
+				const itemToResume = pausedItems[ 0 ];
+				dispatch< ResumeItemAction >( {
+					type: Type.ResumeItem,
+					id: itemToResume.id,
+				} );
+				dispatch.processItem( itemToResume.id );
+			}
+		}
 	};
 }
 

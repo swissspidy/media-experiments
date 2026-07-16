@@ -25,6 +25,24 @@ import {
 
 const noop = () => {};
 
+/**
+ * Calculates a reasonable concurrency limit based on hardware capabilities.
+ *
+ * Uses navigator.hardwareConcurrency if available, with a sensible fallback.
+ * Limits to a maximum of 8 concurrent operations to prevent overwhelming the system.
+ *
+ * @return The calculated concurrency limit.
+ */
+function calculateConcurrencyLimit(): number {
+	const hardwareConcurrency =
+		typeof navigator !== 'undefined' && navigator.hardwareConcurrency
+			? navigator.hardwareConcurrency
+			: 4;
+
+	// Use half of available cores, with a minimum of 2 and maximum of 8
+	return Math.max( 2, Math.min( 8, Math.floor( hardwareConcurrency / 2 ) ) );
+}
+
 const DEFAULT_STATE: State = {
 	queue: [],
 	queueStatus: 'active',
@@ -35,6 +53,7 @@ const DEFAULT_STATE: State = {
 		mediaSideload: noop,
 		imageSizes: {},
 	},
+	concurrencyLimit: calculateConcurrencyLimit(),
 };
 
 type Action =

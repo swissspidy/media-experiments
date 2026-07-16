@@ -42,6 +42,7 @@ export interface State {
 	pendingApproval: QueueItemId | undefined;
 	blobUrls: Record< QueueItemId, string[] >;
 	settings: Settings;
+	concurrencyLimit: number;
 }
 
 export enum Type {
