@@ -498,14 +498,21 @@ function enqueue_block_editor_assets(): void {
 	$asset['dependencies'] = $asset['dependencies'] ?? [];
 	$asset['version']      = $asset['version'] ?? '';
 
+//	wp_register_script_module(
+//		'media-experiments-vips',
+//		plugins_url( 'build/vips.js', __DIR__ ),
+//		[],
+//		$asset['version']
+//	);
+
 	wp_enqueue_script(
 		'media-experiments',
 		plugins_url( 'build/media-experiments.js', __DIR__ ),
 		$asset['dependencies'],
 		$asset['version'],
-		array(
+		[
 			'strategy' => 'defer',
-		)
+		]
 	);
 
 	wp_set_script_translations( 'media-experiments', 'media-experiments' );
@@ -513,7 +520,7 @@ function enqueue_block_editor_assets(): void {
 	wp_enqueue_style(
 		'media-experiments-editor',
 		plugins_url( 'build/media-experiments.css', __DIR__ ),
-		array( 'wp-components' ),
+		[ 'wp-components' ],
 		$asset['version']
 	);
 
