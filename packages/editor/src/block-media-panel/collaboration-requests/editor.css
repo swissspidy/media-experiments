@@ -1,0 +1,33 @@
+.mexp-collaboration-requests-modal {
+	max-width: 600px;
+}
+
+.mexp-collaboration-requests-modal__qrcode {
+	display: flex;
+	justify-content: center;
+	margin: 1em 0;
+	padding: 1em;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+}
+
+.mexp-collaboration-requests-modal__input_wrapper {
+	display: flex;
+	gap: 8px;
+}
+
+.mexp-collaboration-requests-modal__input_wrapper .components-text-control__input {
+	flex: 1;
+}
+
+.mexp-collaboration-requests-modal__buttons {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+	margin-top: 1em;
+}
+
+.mexp-collaboration-requests-modal__capabilities {
+	margin: 1em 0;
+}
