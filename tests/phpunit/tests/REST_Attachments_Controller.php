@@ -606,4 +606,225 @@ class Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Controller
 		$this->assertStringNotContainsString( '2017/02', $data['source_url'] );
 		$this->assertStringContainsString( $subdir, $data['source_url'] );
 	}
+
+	/**
+	 * Tests that video sizes are properly registered and returned.
+	 *
+	 * @covers \MediaExperiments\get_all_video_sizes
+	 */
+	public function test_get_all_video_sizes() {
+		$video_sizes = \MediaExperiments\get_all_video_sizes();
+
+		$this->assertIsArray( $video_sizes );
+		$this->assertNotEmpty( $video_sizes );
+
+		// Check that expected video sizes exist
+		$this->assertArrayHasKey( 'mexp-video-240', $video_sizes );
+		$this->assertArrayHasKey( 'mexp-video-360', $video_sizes );
+		$this->assertArrayHasKey( 'mexp-video-480', $video_sizes );
+		$this->assertArrayHasKey( 'mexp-video-720', $video_sizes );
+		$this->assertArrayHasKey( 'mexp-video-1080', $video_sizes );
+
+		// Verify structure of a video size
+		$size_240 = $video_sizes['mexp-video-240'];
+		$this->assertArrayHasKey( 'width', $size_240 );
+		$this->assertArrayHasKey( 'height', $size_240 );
+		$this->assertArrayHasKey( 'name', $size_240 );
+		$this->assertSame( 426, $size_240['width'] );
+		$this->assertSame( 240, $size_240['height'] );
+		$this->assertSame( 'mexp-video-240', $size_240['name'] );
+	}
+
+	/**
+	 * Tests that video sizes filter works.
+	 *
+	 * @covers \MediaExperiments\get_all_video_sizes
+	 */
+	public function test_get_all_video_sizes_filter() {
+		$filter = function ( $sizes ) {
+			$sizes['custom-size'] = [
+				'width'  => 1000,
+				'height' => 500,
+				'name'   => 'custom-size',
+			];
+			return $sizes;
+		};
+
+		add_filter( 'mexp_video_sizes', $filter );
+
+		$video_sizes = \MediaExperiments\get_all_video_sizes();
+
+		$this->assertArrayHasKey( 'custom-size', $video_sizes );
+		$this->assertSame( 1000, $video_sizes['custom-size']['width'] );
+		$this->assertSame( 500, $video_sizes['custom-size']['height'] );
+
+		remove_filter( 'mexp_video_sizes', $filter );
+	}
+
+	/**
+	 * Tests that missing_video_sizes field is properly populated for video attachments.
+	 *
+	 * @covers ::prepare_item_for_response
+	 * @covers \MediaExperiments\rest_get_attachment_missing_video_sizes
+	 */
+	public function test_missing_video_sizes_field() {
+		wp_set_current_user( self::$admin_id );
+
+		// Create a mock video attachment with known dimensions
+		$attachment_id = self::factory()->attachment->create_object(
+			[
+				'file'           => 'video.mp4',
+				'post_mime_type' => 'video/mp4',
+			]
+		);
+
+		// Set video metadata with dimensions larger than all predefined sizes
+		$metadata = [
+			'width'    => 1920,
+			'height'   => 1080,
+			'filesize' => 1000000,
+			'sizes'    => [],
+		];
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+
+		$request = new WP_REST_Request( 'GET', sprintf( '/wp/v2/media/%d', $attachment_id ) );
+		$request->set_param( 'context', 'edit' );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertArrayHasKey( 'missing_video_sizes', $data );
+		$this->assertIsArray( $data['missing_video_sizes'] );
+
+		// Should include smaller video sizes
+		$this->assertContains( 'mexp-video-240', $data['missing_video_sizes'] );
+		$this->assertContains( 'mexp-video-360', $data['missing_video_sizes'] );
+		$this->assertContains( 'mexp-video-480', $data['missing_video_sizes'] );
+		$this->assertContains( 'mexp-video-720', $data['missing_video_sizes'] );
+	}
+
+	/**
+	 * Tests that missing_video_sizes is empty when dimensions are 0.
+	 *
+	 * @covers ::prepare_item_for_response
+	 * @covers \MediaExperiments\rest_get_attachment_missing_video_sizes
+	 */
+	public function test_missing_video_sizes_with_zero_dimensions() {
+		wp_set_current_user( self::$admin_id );
+
+		$attachment_id = self::factory()->attachment->create_object(
+			[
+				'file'           => 'video.mp4',
+				'post_mime_type' => 'video/mp4',
+			]
+		);
+
+		// Set metadata with zero dimensions
+		$metadata = [
+			'width'  => 0,
+			'height' => 0,
+			'sizes'  => [],
+		];
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+
+		$request = new WP_REST_Request( 'GET', sprintf( '/wp/v2/media/%d', $attachment_id ) );
+		$request->set_param( 'context', 'edit' );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertArrayHasKey( 'missing_video_sizes', $data );
+		$this->assertEmpty( $data['missing_video_sizes'] );
+	}
+
+	/**
+	 * Tests that missing_video_sizes excludes sizes already generated.
+	 *
+	 * @covers ::prepare_item_for_response
+	 * @covers \MediaExperiments\rest_get_attachment_missing_video_sizes
+	 */
+	public function test_missing_video_sizes_excludes_existing() {
+		wp_set_current_user( self::$admin_id );
+
+		$attachment_id = self::factory()->attachment->create_object(
+			[
+				'file'           => 'video.mp4',
+				'post_mime_type' => 'video/mp4',
+			]
+		);
+
+		// Set metadata with one size already generated
+		$metadata = [
+			'width'    => 1920,
+			'height'   => 1080,
+			'filesize' => 1000000,
+			'sizes'    => [
+				'mexp-video-240' => [
+					'file'      => 'video-240p.mp4',
+					'width'     => 426,
+					'height'    => 240,
+					'mime-type' => 'video/mp4',
+					'filesize'  => 50000,
+				],
+			],
+		];
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+
+		$request = new WP_REST_Request( 'GET', sprintf( '/wp/v2/media/%d', $attachment_id ) );
+		$request->set_param( 'context', 'edit' );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertArrayHasKey( 'missing_video_sizes', $data );
+
+		// Should not include the already-generated 240p size
+		$this->assertNotContains( 'mexp-video-240', $data['missing_video_sizes'] );
+
+		// Should still include other sizes
+		$this->assertContains( 'mexp-video-360', $data['missing_video_sizes'] );
+		$this->assertContains( 'mexp-video-480', $data['missing_video_sizes'] );
+	}
+
+	/**
+	 * Tests that missing_video_sizes only includes sizes smaller than original.
+	 *
+	 * @covers ::prepare_item_for_response
+	 * @covers \MediaExperiments\rest_get_attachment_missing_video_sizes
+	 */
+	public function test_missing_video_sizes_only_smaller_than_original() {
+		wp_set_current_user( self::$admin_id );
+
+		$attachment_id = self::factory()->attachment->create_object(
+			[
+				'file'           => 'video.mp4',
+				'post_mime_type' => 'video/mp4',
+			]
+		);
+
+		// Set metadata with small dimensions (640x360)
+		$metadata = [
+			'width'    => 640,
+			'height'   => 360,
+			'filesize' => 100000,
+			'sizes'    => [],
+		];
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+
+		$request = new WP_REST_Request( 'GET', sprintf( '/wp/v2/media/%d', $attachment_id ) );
+		$request->set_param( 'context', 'edit' );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertArrayHasKey( 'missing_video_sizes', $data );
+
+		// Should only include 240p (426x240), not larger sizes
+		$this->assertContains( 'mexp-video-240', $data['missing_video_sizes'] );
+
+		// Should not include sizes that are larger
+		$this->assertNotContains( 'mexp-video-480', $data['missing_video_sizes'] );
+		$this->assertNotContains( 'mexp-video-720', $data['missing_video_sizes'] );
+		$this->assertNotContains( 'mexp-video-1080', $data['missing_video_sizes'] );
+	}
 }

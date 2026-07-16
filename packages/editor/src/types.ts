@@ -164,6 +164,10 @@ export type RestBaseRecord = {
 	png_interlaced: boolean;
 	gif_interlaced: boolean;
 	image_sizes: Record< string, ImageSizeCrop >;
+	video_sizes?: Record<
+		string,
+		{ name: string; width: number; height: number }
+	>;
 	media_source_terms: Record< MediaSourceTerm, number >;
 };
 
