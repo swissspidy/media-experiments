@@ -70,6 +70,7 @@ function Row(
 			id: props.id,
 			url: props.url,
 			fileName: props.filename || undefined,
+			poster: props.poster,
 			onSuccess: ( [ media ] ) => {
 				props.onChange( media );
 
@@ -183,6 +184,7 @@ function CompressAll( props: {
 				id: attachment.id,
 				url: attachment.url,
 				fileName: attachment.filename || undefined,
+				poster: attachment.poster,
 				onSuccess: ( [ media ] ) => {
 					attachment.onChange( media );
 				},
