@@ -182,7 +182,9 @@ export interface Attachment {
 	poster?: string;
 }
 
-export type OnChangeHandler = ( attachments: Partial< Attachment >[] ) => void;
+export type OnChangeHandler = (
+	attachments: Partial< Attachment >[]
+) => void | Promise< void >;
 export type OnSuccessHandler = ( attachments: Partial< Attachment >[] ) => void;
 export type OnErrorHandler = ( error: Error ) => void;
 export type OnBatchSuccessHandler = () => void;
