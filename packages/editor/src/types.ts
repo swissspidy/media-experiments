@@ -84,6 +84,16 @@ export type SiteLogoBlock = BlockInstance< {
 	name: 'core/site-logo';
 };
 
+export type FileBlock = BlockInstance< {
+	id: number;
+	href: string;
+	fileName: string;
+	textLinkHref: string;
+	textLinkTarget: string;
+} > & {
+	name: 'core/file';
+};
+
 export type EmbedBlock = BlockInstance< {
 	url: string;
 	providerNameSlug: string;
@@ -130,6 +140,11 @@ export type MediaPanelProps =
 	| ( SiteLogoBlock &
 			Pick<
 				BlockEditProps< SiteLogoBlock[ 'attributes' ] >,
+				'setAttributes' | 'className'
+			> )
+	| ( FileBlock &
+			Pick<
+				BlockEditProps< FileBlock[ 'attributes' ] >,
 				'setAttributes' | 'className'
 			> )
 	| ( EmbedBlock &
