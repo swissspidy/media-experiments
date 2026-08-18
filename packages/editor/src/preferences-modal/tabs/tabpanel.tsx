@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-// eslint-disable-next-line
+
 import { useStoreState } from '@ariakit/react';
 
 /**

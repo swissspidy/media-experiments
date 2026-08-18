@@ -24,8 +24,7 @@ type E2EFixture = {
 	admin: Admin;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function getSourceMapForEntry( entry: V8CoverageEntry, index?: number ) {
+function getSourceMapForEntry( entry: V8CoverageEntry ) {
 	if ( entry.sourceMap ) {
 		return entry;
 	}

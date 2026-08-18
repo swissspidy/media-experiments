@@ -11,7 +11,6 @@ import type { MediaPanelProps } from '../types';
 
 type CrossOriginValue = 'anonymous' | 'use-credentials' | '' | undefined;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function forceCrossOrigin( _imgCrossOrigin: CrossOriginValue, _url: string ) {
 	return 'anonymous' as CrossOriginValue;
 }

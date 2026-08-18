@@ -56,7 +56,7 @@ test.describe( 'Videos', () => {
 				window.wp.data.select( 'core/block-editor' ).getSelectedBlock()
 					?.attributes ?? {}
 		);
-		await expect( blockAttributes.poster ).toMatch( /-poster\.jpeg$/ );
+		expect( blockAttributes.poster ).toMatch( /-poster\.jpeg$/ );
 
 		// TODO: Check why mime type is not consistent.
 		await expect( settingsPanel ).toHaveText(

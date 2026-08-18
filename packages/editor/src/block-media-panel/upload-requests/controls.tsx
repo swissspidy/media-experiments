@@ -1,12 +1,8 @@
 /**
  * External dependencies
  */
-import {
-	transformAttachment,
-	type Attachment,
-	type RestAttachment,
-} from '@mexp/media-utils';
 import { store as interfaceStore } from '@mexp/interface';
+import type { Attachment, RestAttachment } from '@mexp/upload-media';
 
 /**
  * WordPress dependencies
@@ -24,6 +20,7 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as editorStore } from '@wordpress/editor';
 import { store as noticesStore } from '@wordpress/notices';
 import apiFetch from '@wordpress/api-fetch';
+import { transformAttachment } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies

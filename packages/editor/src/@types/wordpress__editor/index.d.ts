@@ -2,7 +2,7 @@ declare module '@wordpress/editor' {
 	import type {
 		ReduxStoreConfig,
 		StoreDescriptor,
-	} from '@wordpress/data/build-types/types';
+	} from '@wordpress/data';
 	import type { MenuItem } from '@wordpress/components';
 	import type { ComponentType, ReactNode, ComponentProps } from 'react';
 

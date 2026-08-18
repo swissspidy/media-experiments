@@ -1,4 +1,7 @@
-import type { BlockInstance } from '@wordpress/blocks';
+/**
+ * WordPress dependencies
+ */
+import type { Block } from '@wordpress/blocks';
 
 /**
  * Signals that the block selection is cleared.
@@ -24,14 +27,14 @@ export function hideInsertionPoint(): void;
  * Signals that a single block should be inserted, optionally at a specific index, respective a root
  * block list.
  *
- * @param block - Block object to insert.
- * @param index - Index at which block should be inserted.
- * @param rootClientId - Optional root client ID of block list on which to insert.
+ * @param block           - Block object to insert.
+ * @param index           - Index at which block should be inserted.
+ * @param rootClientId    - Optional root client ID of block list on which to insert.
  * @param updateSelection - If `true` block selection will be updated. If `false`, block selection
- *                          will not change. Defaults to true.
+ *                        will not change. Defaults to true.
  */
 export function insertBlock(
-	block: BlockInstance,
+	block: Block,
 	index?: number,
 	rootClientId?: string,
 	updateSelection?: boolean
@@ -41,14 +44,14 @@ export function insertBlock(
  * Signals that an array of blocks should be inserted, optionally at a specific index respective a
  * root block list.
  *
- * @param blocks - Block objects to insert.
- * @param index - Index at which block should be inserted.
- * @param rootClientId - Optional root client ID of block list on which to insert.
+ * @param blocks          - Block objects to insert.
+ * @param index           - Index at which block should be inserted.
+ * @param rootClientId    - Optional root client ID of block list on which to insert.
  * @param updateSelection - If `true` block selection will be updated. If `false`, block selection will
- *                          not change. Defaults to `true`.
+ *                        not change. Defaults to `true`.
  */
 export function insertBlocks(
-	blocks: BlockInstance[],
+	blocks: Block[],
 	index?: number,
 	rootClientId?: string,
 	updateSelection?: boolean
@@ -58,9 +61,9 @@ export function insertBlocks(
  * Returns an action object used in signalling that a new block of the default type should be added
  * to the block list.
  *
- * @param attributes - Attributes of the block to assign.
+ * @param attributes   - Attributes of the block to assign.
  * @param rootClientId - Root client ID of block list on which to append.
- * @param index - Index where to insert the default block.
+ * @param index        - Index where to insert the default block.
  */
 export function insertDefaultBlock(
 	attributes?: Record< string, any >,
@@ -71,7 +74,7 @@ export function insertDefaultBlock(
 /**
  * Returns an action object used in signalling that two blocks should be merged.
  *
- * @param firstBlockClientId - Client ID of the first block to merge.
+ * @param firstBlockClientId  - Client ID of the first block to merge.
  * @param secondBlockClientId - Client ID of the second block to merge.
  */
 export function mergeBlocks(
@@ -82,10 +85,10 @@ export function mergeBlocks(
 /**
  * Signals that an indexed block should be moved to a new index.
  *
- * @param clientId - The client ID of the block.
+ * @param clientId         - The client ID of the block.
  * @param fromRootClientId - Root client ID source.
- * @param toRootClientId - Root client ID destination.
- * @param index - The index to move the block into.
+ * @param toRootClientId   - Root client ID destination.
+ * @param index            - The index to move the block into.
  */
 export function moveBlockToPosition(
 	clientId: string | undefined,
@@ -108,7 +111,7 @@ export function moveBlocksUp(
  * Signals that block multi-selection changed.
  *
  * @param start - First block of the multi selection.
- * @param end - Last block of the multiselection.
+ * @param end   - Last block of the multiselection.
  */
 export function multiSelect( start: string, end: string ): void;
 
@@ -118,12 +121,12 @@ export function multiSelect( start: string, end: string ): void;
  *
  * @param blocks - Array of block instances.
  */
-export function receiveBlocks( blocks: BlockInstance[] ): void;
+export function receiveBlocks( blocks: Block[] ): void;
 
 /**
  * Signals that the block with the specified client ID is to be removed.
  *
- * @param clientId - Client ID of block to remove.
+ * @param clientId       - Client ID of block to remove.
  * @param selectPrevious - `true` if the previous block should be selected when a block is removed.
  */
 export function removeBlock( clientId: string, selectPrevious?: boolean ): void;
@@ -131,9 +134,9 @@ export function removeBlock( clientId: string, selectPrevious?: boolean ): void;
 /**
  * Signalling that the blocks corresponding to the set of specified client IDs are to be removed.
  *
- * @param clientIds - Client IDs of blocks to remove.
+ * @param clientIds      - Client IDs of blocks to remove.
  * @param selectPrevious - `true` if the previous block should be selected when a block is removed.
- *                          Default: `true`
+ *                       Default: `true`
  */
 export function removeBlocks(
 	clientIds: string | string[],
@@ -145,37 +148,37 @@ export function removeBlocks(
  * with one or more replacement blocks.
  *
  * @param clientId - Block client ID to replace.
- * @param block - Replacement block(s).
+ * @param block    - Replacement block(s).
  */
 export function replaceBlock(
 	clientId: string | string[],
-	block: BlockInstance | BlockInstance[]
+	block: Block | Block[]
 ): void;
 
 /**
  * Signals that a blocks should be replaced with one or more replacement blocks.
  *
- * @param clientIds - Block client ID(s) to replace.
- * @param blocks - Replacement block(s).
+ * @param clientIds     - Block client ID(s) to replace.
+ * @param blocks        - Replacement block(s).
  * @param indexToSelect - Index of replacement block to select.
  */
 export function replaceBlocks(
 	clientIds: string | string[],
-	blocks: BlockInstance | BlockInstance[],
+	blocks: Block | Block[],
 	indexToSelect?: number
 ): IterableIterator< void >;
 
 /**
  * Signals that the inner blocks with the specified client ID should be replaced.
  *
- * @param rootClientId - Client ID of the block whose InnerBlocks will re replaced.
- * @param blocks - Block objects to insert as new InnerBlocks
+ * @param rootClientId    - Client ID of the block whose InnerBlocks will re replaced.
+ * @param blocks          - Block objects to insert as new InnerBlocks
  * @param updateSelection - If `true` block selection will be updated. If `false`, block selection
- *                          will not change. Defaults to `true`.
+ *                        will not change. Defaults to `true`.
  */
 export function replaceInnerBlocks(
 	rootClientId: string,
-	blocks: BlockInstance[],
+	blocks: Block[],
 	updateSelection?: boolean
 ): void;
 
@@ -185,14 +188,14 @@ export function replaceInnerBlocks(
  *
  * @param blocks - Array of blocks.
  */
-export function resetBlocks( blocks: BlockInstance[] ): void;
+export function resetBlocks( blocks: Block[] ): void;
 
 /**
  * Signals that the block with the specified client ID has been selected, optionally accepting a
  * position value reflecting its selection directionality. An initialPosition of `-1` reflects a
  * reverse selection.
  *
- * @param clientId - Block client ID.
+ * @param clientId        - Block client ID.
  * @param initialPosition - Initial position. Pass as `-1` to reflect reverse selection.
  */
 export function selectBlock( clientId: string, initialPosition?: number ): void;
@@ -218,10 +221,10 @@ export function selectPreviousBlock(
 /**
  * Signals that the user caret has changed position.
  *
- * @param clientId - The selected block client ID.
+ * @param clientId     - The selected block client ID.
  * @param attributeKey - The selected block attribute key.
- * @param startOffset - The start offset.
- * @param endOffset - The end offset.
+ * @param startOffset  - The start offset.
+ * @param endOffset    - The end offset.
  */
 export function selectionChange(
 	clientId: string,
@@ -241,7 +244,7 @@ export function setTemplateValidity( isValid: boolean ): void;
  * Signals that the insertion point should be shown.
  *
  * @param rootClientId - Optional root client ID of block list on which to insert.
- * @param index - Index at which block should be inserted.
+ * @param index        - Index at which block should be inserted.
  */
 export function showInsertionPoint(
 	rootClientId?: string,
@@ -291,17 +294,17 @@ export function toggleSelection( isSelectionEnabled?: boolean ): void;
  * Signals that the block with the specified client ID has been updated.
  *
  * @param clientId - Block client ID.
- * @param updates - Block attributes to be merged.
+ * @param updates  - Block attributes to be merged.
  */
 export function updateBlock(
 	clientId: string,
-	updates: Partial< BlockInstance >
+	updates: Partial< Block >
 ): void;
 
 /**
  * Signals that the block attributes with the specified client ID has been updated.
  *
- * @param clientId - Block client ID.
+ * @param clientId   - Block client ID.
  * @param attributes - Block attributes to be merged.
  */
 export function updateBlockAttributes(

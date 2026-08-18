@@ -431,6 +431,10 @@ export function validateMimeType( file: File, allowedTypes?: string[] ) {
 /**
  * Determines whether a given file type is supported for client-side processing.
  *
+ * JPEG XL is deliberately absent: `@wordpress/vips` does not ship the JXL
+ * libvips module, so the format can no longer be decoded in the browser.
+ * Server-side JXL support (see `inc/functions.php`) is unaffected.
+ *
  * @param type Mime type.
  * @return Whether the file type is supported.
  */
@@ -442,7 +446,6 @@ export function isImageTypeSupported(
 	| 'image/heic'
 	| 'image/heif'
 	| 'image/jpeg'
-	| 'image/jxl'
 	| 'image/png'
 	| 'image/tiff'
 	| 'image/webp' {
@@ -452,7 +455,6 @@ export function isImageTypeSupported(
 		'image/heic',
 		'image/heif',
 		'image/jpeg',
-		'image/jxl',
 		'image/png',
 		'image/tiff',
 		'image/webp',

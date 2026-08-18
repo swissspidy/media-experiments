@@ -125,8 +125,8 @@ test.describe( 'Media Recording', () => {
 				window.wp.data.select( 'core/block-editor' ).getSelectedBlock()
 					?.attributes ?? {}
 		);
-		await expect( blockAttributes.src ).toMatch( /\.mp4$/ );
-		await expect( blockAttributes.poster ).toMatch( /-poster\.jpeg$/ );
+		expect( blockAttributes.src ).toMatch( /\.mp4$/ );
+		expect( blockAttributes.poster ).toMatch( /-poster\.jpeg$/ );
 	} );
 
 	test( 'Image', async ( { admin, page, editor, browserName } ) => {
@@ -214,7 +214,7 @@ test.describe( 'Media Recording', () => {
 				window.wp.data.select( 'core/block-editor' ).getSelectedBlock()
 					?.attributes ?? {}
 		);
-		await expect( blockAttributes.url ).toMatch( /\.jpeg$/ );
+		expect( blockAttributes.url ).toMatch( /\.jpeg$/ );
 	} );
 
 	test( 'Audio', async ( { admin, page, editor, browserName } ) => {
@@ -306,6 +306,6 @@ test.describe( 'Media Recording', () => {
 				window.wp.data.select( 'core/block-editor' ).getSelectedBlock()
 					?.attributes ?? {}
 		);
-		await expect( blockAttributes.src ).toMatch( /\.mp3$/ );
+		expect( blockAttributes.src ).toMatch( /\.mp3$/ );
 	} );
 } );

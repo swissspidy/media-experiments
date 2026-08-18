@@ -1,19 +1,19 @@
 /**
  * External dependencies
  */
-import {
-	uploadMedia as originalUploadMedia,
-	sideloadMedia as originalSideloadMedia,
-	validateFileSize as originalValidateFileSize,
-	validateMimeType as originalValidateMimeType,
-	validateMimeTypeForUser as originalValidateMimeTypeForUser,
-} from '@mexp/media-utils';
+import { sideloadMedia as originalSideloadMedia } from '@mexp/upload-media';
 
 /**
  * WordPress dependencies
  */
 import { select } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
+import {
+	uploadMedia as originalUploadMedia,
+	validateFileSize as originalValidateFileSize,
+	validateMimeType as originalValidateMimeType,
+	validateMimeTypeForUser as originalValidateMimeTypeForUser,
+} from '@wordpress/media-utils';
 
 const noop = () => {};
 
@@ -78,7 +78,7 @@ export function mediaUpload( {
  *
  * @todo MERGE NOTE:
  * Intended to live in `@wordpress/editor` as a wrapper around
- * validateFileSize() from `@mexp/media-utils`
+ * validateFileSize() from `@wordpress/media-utils`
  * that injects the current site's file size limit.
  *
  * @param file File object.
@@ -96,7 +96,7 @@ export function validateFileSize( file: File ) {
  *
  * @todo MERGE NOTE:
  * Intended to live in `@wordpress/editor` as a wrapper around
- * validateMimeType() and validateMimeTypeForUser() from `@mexp/media-utils`
+ * validateMimeType() and validateMimeTypeForUser() from `@wordpress/media-utils`
  * that injects the current site's mime type limits.
  *
  * @param file         File object.

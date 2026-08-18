@@ -3,7 +3,7 @@
  */
 import { Blurhash } from 'react-blurhash';
 import type { PropsWithChildren } from 'react';
-import type { RestAttachment } from '@mexp/media-utils';
+import type { RestAttachment } from '@mexp/upload-media';
 
 /**
  * WordPress dependencies
@@ -123,13 +123,9 @@ export function DebugInfo( { id }: DebugInfoProps ) {
 				{ attachment.mexp_dominant_color ? (
 					<PanelRow>
 						{ createInterpolateElement(
-							sprintf(
-								/* translators: %s: Color indicator. */
-								__(
-									'<b>Dominant color:</b> %s',
-									'media-experiments'
-								),
-								'<ColorIndicator />'
+							__(
+								'<b>Dominant color:</b> <ColorIndicator/>',
+								'media-experiments'
 							),
 							{
 								b: <b />,
@@ -176,13 +172,9 @@ export function DebugInfo( { id }: DebugInfoProps ) {
 					<HideOnError>
 						<PanelRow>
 							{ createInterpolateElement(
-								sprintf(
-									/* translators: %s: BlurHash. */
-									__(
-										'<b>BlurHash:</b> %s',
-										'media-experiments'
-									),
-									'<Blurhash />'
+								__(
+									'<b>BlurHash:</b> <Blurhash/>',
+									'media-experiments'
 								),
 								{
 									b: <b />,

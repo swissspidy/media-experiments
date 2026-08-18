@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Attachment, RestAttachment } from '@mexp/media-utils';
+import type { Attachment, RestAttachment } from '@mexp/upload-media';
 import { store as uploadStore } from '@mexp/upload-media';
 
 /**
@@ -193,16 +193,24 @@ export function useBlockAttachments( clientIds?: string | string[] ) {
 		postId as number
 	) as [ number | undefined, ( id: number ) => void, unknown ];
 
+	// The `root`/`site` entity is a singleton: core-data expects no record ID,
+	// which its types do not express.
+	const siteRecordId = undefined as unknown as number;
+
 	const siteLogoId = useSelect( ( select ) => {
 		const { canUser, getEditedEntityRecord } = select( coreStore );
 		const canUserEdit = canUser( 'update', 'settings' );
 		const siteSettings = canUserEdit
-			? ( getEditedEntityRecord( 'root', 'site', undefined ) as Settings )
+			? ( getEditedEntityRecord( 'root', 'site', siteRecordId ) as Settings )
 			: undefined;
 		return canUserEdit ? siteSettings?.site_logo : undefined;
 	}, [] );
 
-	// Memoize the clientIds to avoid unnecessary re-renders when an array is passed
+	// Memoize the clientIds to avoid unnecessary re-renders when an array is passed.
+	// The key is a stable, statically checkable stand-in for the array identity.
+	const clientIdsKey = Array.isArray( clientIds )
+		? clientIds.join( ',' )
+		: clientIds;
 	const memoizedClientIds = useMemo( () => {
 		if ( ! clientIds ) {
 			return null;
@@ -211,7 +219,8 @@ export function useBlockAttachments( clientIds?: string | string[] ) {
 			return clientIds.length === 0 ? null : clientIds;
 		}
 		return clientIds;
-	}, [ Array.isArray( clientIds ) ? clientIds.join( ',' ) : clientIds ] );
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- `clientIdsKey` tracks the contents of `clientIds`.
+	}, [ clientIdsKey ] );
 
 	const blocks = useSelect(
 		( select ) => {
@@ -254,8 +263,8 @@ export function useBlockAttachments( clientIds?: string | string[] ) {
 			};
 
 			if ( block.name === 'core/image' && block.attributes.id ) {
-				attachment.id = block.attributes.id;
-				attachment.url = block.attributes.url;
+				attachment.id = block.attributes.id as number;
+				attachment.url = block.attributes.url as string;
 				attachment.onChange = ( media: Partial< Attachment > ) => {
 					void updateBlockAttributes( block.clientId, {
 						id: media.id,
@@ -271,8 +280,8 @@ export function useBlockAttachments( clientIds?: string | string[] ) {
 				block.attributes.mediaId &&
 				block.attributes.mediaType === 'image'
 			) {
-				attachment.id = block.attributes.mediaId;
-				attachment.url = block.attributes.mediaUrl;
+				attachment.id = block.attributes.mediaId as number;
+				attachment.url = block.attributes.mediaUrl as string;
 				attachment.onChange = ( media: Partial< Attachment > ) => {
 					void updateBlockAttributes( block.clientId, {
 						mediaId: media.id,
@@ -288,8 +297,8 @@ export function useBlockAttachments( clientIds?: string | string[] ) {
 				block.attributes.id &&
 				block.attributes.backgroundType === 'image'
 			) {
-				attachment.id = block.attributes.id;
-				attachment.url = block.attributes.url;
+				attachment.id = block.attributes.id as number;
+				attachment.url = block.attributes.url as string;
 				attachment.onChange = ( media: Partial< Attachment > ) => {
 					void updateBlockAttributes( block.clientId, {
 						id: media.id,
@@ -319,12 +328,12 @@ export function useBlockAttachments( clientIds?: string | string[] ) {
 					}
 
 					if ( block.attributes.shouldSyncIcon ) {
-						void editEntityRecord( 'root', 'site', undefined, {
+						void editEntityRecord( 'root', 'site', siteRecordId, {
 							site_icon: media.id,
 						} );
 					}
 
-					void editEntityRecord( 'root', 'site', undefined, {
+					void editEntityRecord( 'root', 'site', siteRecordId, {
 						site_logo: media.id,
 					} );
 				};

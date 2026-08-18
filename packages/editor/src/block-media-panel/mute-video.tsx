@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Attachment, RestAttachment } from '@mexp/media-utils';
+import type { Attachment, RestAttachment } from '@mexp/upload-media';
 import { store as uploadStore } from '@mexp/upload-media';
 
 /**

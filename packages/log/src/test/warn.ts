@@ -23,7 +23,6 @@ describe( 'warn', () => {
 		SCRIPT_DEBUG = true;
 		warn( 'warning' );
 
-		// eslint-disable-next-line no-console
 		expect( console.warn ).toHaveBeenLastCalledWith( 'warning' );
 	} );
 
@@ -31,7 +30,6 @@ describe( 'warn', () => {
 		SCRIPT_DEBUG = false;
 		warn( 'warning' );
 
-		// eslint-disable-next-line no-console
 		expect( console.warn ).not.toHaveBeenCalled();
 	} );
 
@@ -40,7 +38,6 @@ describe( 'warn', () => {
 		warn( 'warning' );
 		warn( 'warning' );
 
-		// eslint-disable-next-line no-console
 		expect( console.warn ).toHaveBeenCalledTimes( 1 );
 	} );
 } );

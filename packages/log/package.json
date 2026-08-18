@@ -19,7 +19,7 @@
 		"url": "https://github.com/swissspidy/media-experiments/issues"
 	},
 	"engines": {
-		"node": ">=20"
+		"node": ">=22"
 	},
 	"main": "dist/index.js",
 	"source": "src/index.ts",

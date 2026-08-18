@@ -19,7 +19,7 @@
 		"url": "https://github.com/swissspidy/media-experiments/issues"
 	},
 	"engines": {
-		"node": ">=20"
+		"node": ">=22"
 	},
 	"main": "dist/index.js",
 	"source": "src/index.ts",
@@ -31,9 +31,9 @@
 	"types": "dist-types/index.d.ts",
 	"dependencies": {
 		"@mediapipe/selfie_segmentation": "^0.1.1675465747",
-		"@wordpress/blob": "^4.36.0",
-		"@wordpress/data": "^10.11.0",
-		"@wordpress/date": "^5.36.0",
+		"@wordpress/blob": "^4.53.0",
+		"@wordpress/data": "^10.53.0",
+		"@wordpress/date": "^5.53.0",
 		"image-capture": "^0.4.0"
 	}
 }

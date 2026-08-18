@@ -1,6 +1,6 @@
 // eslint-disable-next-line
 import * as Ariakit from '@ariakit/react';
-// eslint-disable-next-line
+
 import { useStoreState } from '@ariakit/react';
 
 /**

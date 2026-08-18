@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { RestAttachment } from '@mexp/media-utils';
+import type { RestAttachment } from '@mexp/upload-media';
 
 /**
  * WordPress dependencies

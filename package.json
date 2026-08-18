@@ -19,7 +19,7 @@
 		"url": "https://github.com/swissspidy/media-experiments/issues"
 	},
 	"engines": {
-		"node": ">=20"
+		"node": ">=22"
 	},
 	"workspaces": {
 		"packages": [
@@ -27,40 +27,36 @@
 		]
 	},
 	"devDependencies": {
-		"@playwright/test": "^1.56.1",
+		"@playwright/test": "^1.62.1",
 		"@shopify/web-worker": "^6.4.0",
-		"@testing-library/jest-dom": "^6.9.1",
-		"@testing-library/react": "^16.3.1",
+		"@testing-library/jest-dom": "^7.0.1",
+		"@testing-library/react": "^16.3.2",
 		"@types/jest": "^30.0.0",
-		"@types/mime": "^3.0.4",
-		"@types/node": "^25.6.0",
-		"@types/wordpress__blocks": "^12.5.18",
-		"@wordpress/dependency-extraction-webpack-plugin": "^6.36.0",
-		"@wordpress/docgen": "^2.36.0",
-		"@wordpress/env": "^10.36.0",
-		"@wordpress/eslint-plugin": "^22.22.0",
-		"@wordpress/scripts": "^31.1.0",
-		"@wp-now/wp-now": "^0.1.74",
-		"babel-plugin-react-compiler": "^19.0.0-beta-714736e-20250131",
-		"eslint": "^8.57.1",
-		"eslint-plugin-oxlint": "^1.31.0",
-		"eslint-plugin-react-compiler": "^19.0.0-beta-714736e-20250131",
-		"mini-css-extract-plugin": "^2.9.4",
-		"monocart-reporter": "^2.9.23",
+		"@types/node": "^26.2.0",
+		"@wordpress/dependency-extraction-webpack-plugin": "^6.53.0",
+		"@wordpress/docgen": "^2.53.0",
+		"@wordpress/env": "^11.13.0",
+		"@wordpress/eslint-plugin": "^25.9.0",
+		"@wordpress/prettier-config": "^4.53.0",
+		"@wordpress/scripts": "^34.1.0",
+		"babel-plugin-react-compiler": "^1.0.0",
+		"eslint": "^10.8.1",
+		"eslint-plugin-oxlint": "^1.78.0",
+		"eslint-plugin-react-hooks": "^7.1.1",
+		"globals": "^17.11.0",
+		"mini-css-extract-plugin": "^2.10.2",
+		"monocart-reporter": "^2.12.5",
 		"npm-run-all": "^4.1.5",
-		"oxlint": "^1.31.0",
+		"oxlint": "~1.78.0",
 		"patch-package": "^8.0.1",
 		"prettier": "npm:wp-prettier@3.0.3",
 		"typescript": "^5.9.3",
-		"uuid": "^11.1.0",
-		"webpack": "^5.99.9",
-		"webpack-cli": "^6.0.1",
+		"uuid": "^14.0.1",
+		"webpack": "^5.109.2",
+		"webpack-cli": "^7.2.2",
 		"webpack-virtual-modules": "^0.6.2"
 	},
 	"overrides": {
-		"@wordpress/components": "^29.3.0",
-		"@wordpress/data": "^10.17.0",
-		"@wordpress/editor": "^14.17.1",
 		"@playwright/test": "$@playwright/test"
 	},
 	"scripts": {
@@ -101,6 +97,6 @@
 		"test:unit:watch": "wp-scripts test-unit-js --watch",
 		"test:unit:debug": "wp-scripts --inspect-brk test-unit-js --runInBand --no-cache",
 		"wp-env": "wp-env",
-		"wp-now": "wp-now start --port=8889 --php=8.2 --blueprint=blueprints/wp-now.json"
+		"wp-env:playground": "wp-env start --runtime=playground"
 	}
 }

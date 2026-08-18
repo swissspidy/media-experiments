@@ -108,8 +108,8 @@ test.describe( 'Videos', () => {
 				window.wp.data.select( 'core/block-editor' ).getSelectedBlock()
 					?.attributes ?? {}
 		);
-		await expect( blockAttributes.src ).toMatch( /\.mp4$/ );
-		await expect( blockAttributes.poster ).toMatch( /-poster\.jpeg$/ );
+		expect( blockAttributes.src ).toMatch( /\.mp4$/ );
+		expect( blockAttributes.poster ).toMatch( /-poster\.jpeg$/ );
 
 		await expect(
 			page.getByRole( 'button', { name: 'Remove audio channel' } )

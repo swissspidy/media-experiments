@@ -1,4 +1,7 @@
-import type { BlockInstance } from '@wordpress/blocks';
+/**
+ * WordPress dependencies
+ */
+import type { Block } from '@wordpress/blocks';
 import type {
 	EntityRecord,
 	Page,
@@ -42,7 +45,7 @@ export function getActivePostLock(): string | undefined;
  *                from the '@wordpress/core-data' package and access properties on the returned
  *                autosave object using getPostRawValue.
  *
- * @param attributeName - Autosave attribute name.
+ * @param      attributeName - Autosave attribute name.
  */
 export function getAutosaveAttribute(
 	attributeName: string
@@ -115,7 +118,7 @@ export function getEditedPostVisibility(): 'password' | 'private' | 'public';
 /**
  * Return the current block list.
  */
-export function getEditorBlocks(): BlockInstance[];
+export function getEditorBlocks(): Block[];
 
 interface EditorBaseSetting {
 	name: string;
