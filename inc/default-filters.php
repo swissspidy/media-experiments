@@ -26,7 +26,6 @@ add_action( 'load-widgets.php', __NAMESPACE__ . '\set_up_cross_origin_isolation_
 add_action( 'wp_enqueue_media', __NAMESPACE__ . '\override_media_templates' );
 
 add_action( 'init', __NAMESPACE__ . '\register_media_source_taxonomy', 5 );
-add_action( 'init', __NAMESPACE__ . '\register_assets' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_block_editor_assets' );
 add_action( 'enqueue_block_assets', __NAMESPACE__ . '\enqueue_block_assets' );
 
@@ -54,14 +53,6 @@ add_action( 'rest_after_insert_attachment', __NAMESPACE__ . '\rest_after_insert_
 // Blurred placeholders on the frontend.
 
 add_filter( 'wp_content_img_tag', __NAMESPACE__ . '\filter_wp_content_img_tag_add_placeholders', 100, 3 );
-
-// Upload requests, see https://github.com/swissspidy/media-experiments/issues/246.
-
-add_action( 'init', __NAMESPACE__ . '\register_upload_request_post_type' );
-add_filter( 'template_include', __NAMESPACE__ . '\load_upload_request_template' );
-add_filter( 'cron_schedules', __NAMESPACE__ . '\add_quarter_hourly_cron_interval' );
-add_action( 'mexp_upload_requests_cleanup', __NAMESPACE__ . '\delete_old_upload_requests' );
-add_filter( 'rest_route_for_post', __NAMESPACE__ . '\filter_rest_route_for_post_for_upload_requests', 10, 2 );
 
 // Plugin compat.
 

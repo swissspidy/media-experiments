@@ -12,9 +12,10 @@ all powered by new web platform features like [WebAssembly](https://developer.mo
 * Convert HEIC images (typically from iPhone) to more web-safe formats such as JPEG or AVIF.
 * Effortlessly optimize existing images and videos in your content.
 * Convert animated GIFs to videos for improved performance.
-* Easily upload images from another device (nice AirDrop alternative!).
 
 Want to see it in action? [Check out my demo tweet](https://twitter.com/swissspidy/status/1733138082591912154) or [this interview](https://wpshout.com/pascal-birchler-interview-wordpress-media-experiements/). Detailed feature descriptions, including for upcoming features, are further below.
+
+> **Looking for "upload from another device"?** It graduated into a plugin of its own: [Upload from Phone](https://github.com/swissspidy/upload-from-phone). Install it alongside this one.
 
 ## Quick Start
 
@@ -213,8 +214,3 @@ Use AI to automatically generate alt text for images and videos to improve acces
 
 Show all in-progress items for easier inspection, and allow cancelling individual uploads.
 
-### Upload from another device
-
-Allows uploading media to the current post from an entirely different device, such as a mobile phone, even when not logged in.
-
-https://github.com/swissspidy/media-experiments/assets/841956/b0b63f19-7f78-4a8d-9255-b59ad996368a

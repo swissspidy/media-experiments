@@ -37,10 +37,6 @@ module.exports = {
 			__dirname,
 			'packages/editor/src/index.ts'
 		),
-		'view-upload-request': resolve(
-			__dirname,
-			'packages/view-upload-request/src/index.tsx'
-		),
 	},
 	output: {
 		filename: '[name].js',

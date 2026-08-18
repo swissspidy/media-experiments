@@ -18,7 +18,6 @@ import { ImportMedia } from './import-media';
 import { DebugInfo } from './debug-info';
 import type { ImageBlock } from '../types';
 import { AnimatedGifConverter } from './animated-gif-converter';
-import { UploadRequestControls } from './upload-requests/controls';
 import { GenerateCaptions } from './generate-caption';
 import { BulkOptimization } from '../components/bulk-optimization';
 import { useBlockAttachments } from '../utils/hooks';
@@ -51,18 +50,6 @@ export function ImageControls( props: ImageControlsProps ) {
 		}
 	}
 
-	function onInsertFromUploadRequest( [ media ]: Partial< Attachment >[] ) {
-		if ( ! media || ! media.url ) {
-			return;
-		}
-		props.setAttributes( {
-			id: media.id,
-			url: media.url,
-			caption: media.caption,
-			alt: media.alt,
-		} );
-	}
-
 	function onUpdateCaption( caption: string ) {
 		props.setAttributes( {
 			caption,
@@ -93,13 +80,6 @@ export function ImageControls( props: ImageControlsProps ) {
 				onInsert={ onInsertRecording }
 				recordingTypes={ [ 'image' ] }
 			/>
-			{ ! props.attributes.url ? (
-				<UploadRequestControls
-					onInsert={ onInsertFromUploadRequest }
-					allowedTypes={ [ 'image' ] }
-					accept={ [ 'image/*' ] }
-				/>
-			) : null }
 			{ ! props.attributes.id ? (
 				<ImportMedia
 					url={ props.attributes.url }

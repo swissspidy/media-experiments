@@ -83,10 +83,6 @@ function needs_cross_origin_isolation(): bool {
 		return false;
 	}
 
-	if ( is_singular( 'mexp-upload-request' ) ) {
-		return true;
-	}
-
 	$user_id = get_current_user_id();
 	if ( 0 === $user_id ) {
 		return false;
@@ -250,24 +246,6 @@ function override_media_templates(): void {
 }
 
 /**
- * Filters the path of the queried template for single upload requests.
- *
- * @codeCoverageIgnore
- *
- * @param string $template Template path.
- * @return string Filtered template path.
- */
-function load_upload_request_template( string $template ): string {
-	if ( is_singular( 'mexp-upload-request' ) ) {
-		start_cross_origin_isolation_output_buffer();
-
-		return __DIR__ . '/templates/upload-request.php';
-	}
-
-	return $template;
-}
-
-/**
  * Returns the given user's persisted media preferences.
  *
  * @param int $user_id User ID.
@@ -422,40 +400,6 @@ function filter_wp_check_filetype_and_ext( array $wp_check_filetype_and_ext, str
 	}
 
 	return $wp_check_filetype_and_ext;
-}
-
-/**
- * Register assets used by editor integration and others.
- *
- * @return void
- */
-function register_assets(): void {
-	$asset_file = dirname( __DIR__ ) . '/build/view-upload-request.asset.php';
-	$asset      = is_readable( $asset_file ) ? require $asset_file : [];
-
-	$asset['dependencies'] = $asset['dependencies'] ?? [];
-	$asset['version']      = $asset['version'] ?? '';
-
-	wp_register_script(
-		'media-experiments-view-upload-request',
-		plugins_url( 'build/view-upload-request.js', __DIR__ ),
-		$asset['dependencies'],
-		$asset['version'],
-		array(
-			'strategy' => 'defer',
-		)
-	);
-
-	wp_set_script_translations( 'media-experiments-view-upload-request', 'media-experiments' );
-
-	wp_register_style(
-		'media-experiments-view-upload-request',
-		plugins_url( 'build/view-upload-request-view.css', __DIR__ ),
-		array( 'wp-components' ),
-		$asset['version']
-	);
-
-	wp_style_add_data( 'media-experiments-view-upload-request', 'rtl', 'replace' );
 }
 
 /**
@@ -1187,218 +1131,6 @@ function filter_wp_content_img_tag_add_placeholders( string $content, string $co
 }
 
 /**
- * Registers post type and post meta for upload requests.
-
- * @return void
- */
-function register_upload_request_post_type(): void {
-	require_once __DIR__ . '/class-rest-upload-requests-controller.php';
-
-	register_post_type(
-		'mexp-upload-request',
-		[
-			'labels'                => [
-				'name'                     => _x( 'Upload Requests', 'post type general name', 'media-experiments' ),
-				'singular_name'            => _x( 'Upload Request', 'post type singular name', 'media-experiments' ),
-				'add_new'                  => __( 'Add New Upload Request', 'media-experiments' ),
-				'add_new_item'             => __( 'Add New Upload Request', 'media-experiments' ),
-				'edit_item'                => __( 'Edit Upload Request', 'media-experiments' ),
-				'new_item'                 => __( 'New Upload Request', 'media-experiments' ),
-				'view_item'                => __( 'View Upload Request', 'media-experiments' ),
-				'view_items'               => __( 'View Upload Requests', 'media-experiments' ),
-				'search_items'             => __( 'Search Upload Requests', 'media-experiments' ),
-				'not_found'                => __( 'No upload requests found.', 'media-experiments' ),
-				'not_found_in_trash'       => __( 'No upload requests found in Trash.', 'media-experiments' ),
-				'all_items'                => __( 'All Upload Requests', 'media-experiments' ),
-				'archives'                 => __( 'Upload Request Archives', 'media-experiments' ),
-				'attributes'               => __( 'Upload Request Attributes', 'media-experiments' ),
-				'insert_into_item'         => __( 'Insert into upload request', 'media-experiments' ),
-				'uploaded_to_this_item'    => __( 'Uploaded to this upload request', 'media-experiments' ),
-				'featured_image'           => _x( 'Featured Image', 'upload request', 'media-experiments' ),
-				'set_featured_image'       => _x( 'Set featured image', 'upload request', 'media-experiments' ),
-				'remove_featured_image'    => _x( 'Remove featured image', 'upload request', 'media-experiments' ),
-				'use_featured_image'       => _x( 'Use as featured image', 'upload request', 'media-experiments' ),
-				'filter_items_list'        => __( 'Filter upload requests list', 'media-experiments' ),
-				'filter_by_date'           => __( 'Filter by date', 'media-experiments' ),
-				'items_list_navigation'    => __( 'Upload Requests list navigation', 'media-experiments' ),
-				'items_list'               => __( 'Upload Requests list', 'media-experiments' ),
-				'item_published'           => __( 'Upload Request published.', 'media-experiments' ),
-				'item_published_privately' => __( 'Upload Request published privately.', 'media-experiments' ),
-				'item_reverted_to_draft'   => __( 'Upload Request reverted to draft.', 'media-experiments' ),
-				'item_scheduled'           => __( 'Upload Request scheduled', 'media-experiments' ),
-				'item_updated'             => __( 'Upload Request updated.', 'media-experiments' ),
-				'menu_name'                => _x( 'Upload Requests', 'admin menu', 'media-experiments' ),
-				'name_admin_bar'           => _x( 'Upload Request', 'add new on admin bar', 'media-experiments' ),
-				'item_link'                => _x( 'Upload Request Link', 'navigation link block title', 'media-experiments' ),
-				'item_link_description'    => _x( 'A link to a upload request.', 'navigation link block description', 'media-experiments' ),
-				'item_trashed'             => __( 'Upload Request trashed.', 'media-experiments' ),
-			],
-			'supports'              => [
-				'author',
-				'custom-fields',
-			],
-			'map_meta_cap'          => true,
-			'capabilities'          => [
-				// You need to be able to upload media in order to create upload requests.
-				'create_posts'           => 'upload_files',
-				// Anyone can read an upload request to upload files.
-				'read'                   => 'read',
-				// You need to be able to publish posts, in order to create blocks.
-				'edit_posts'             => 'edit_posts',
-				'edit_published_posts'   => 'edit_published_posts',
-				'delete_published_posts' => 'delete_published_posts',
-				// Enables trashing draft posts as well.
-				'delete_posts'           => 'delete_posts',
-				'edit_others_posts'      => 'edit_others_posts',
-				'delete_others_posts'    => 'delete_others_posts',
-			],
-			'rewrite'               => [
-				'slug'       => 'upload',
-				'with_front' => false,
-				'feeds'      => false,
-			],
-			'public'                => false,
-			'has_archive'           => false,
-			'show_ui'               => false,
-			'can_export'            => false,
-			'exclude_from_search'   => true,
-			'publicly_queryable'    => true,
-			'show_in_rest'          => true,
-			'delete_with_user'      => true,
-			'rest_base'             => 'upload-requests',
-			'rest_controller_class' => REST_Upload_Requests_Controller::class,
-		]
-	);
-
-	register_post_meta(
-		'mexp-upload-request',
-		'mexp_attachment_id',
-		[
-			'type'         => 'number',
-			'description'  => __( 'Associated attachment ID.', 'media-experiments' ),
-			'show_in_rest' => [
-				'schema' => [
-					'type' => 'number',
-				],
-			],
-		]
-	);
-
-	register_post_meta(
-		'mexp-upload-request',
-		'mexp_allowed_types',
-		[
-			'type'         => 'string',
-			'description'  => __( 'Allowed media types.', 'media-experiments' ),
-			'show_in_rest' => [
-				'schema' => [
-					'type'  => 'array',
-					'items' => [
-						'type' => 'string',
-						'enum' => [ 'image', 'video', 'audio' ],
-					],
-				],
-			],
-			'single'       => true,
-		]
-	);
-
-	// See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#Unique_file_type_specifiers.
-	register_post_meta(
-		'mexp-upload-request',
-		'mexp_accept',
-		[
-			'type'         => 'string',
-			'description'  => __( 'List of allowed file types.', 'media-experiments' ),
-			'show_in_rest' => [
-				'schema' => [
-					'type'  => 'array',
-					'items' => [
-						'type' => 'string',
-					],
-				],
-			],
-			'single'       => true,
-		]
-	);
-
-	register_post_meta(
-		'mexp-upload-request',
-		'mexp_multiple',
-		[
-			'type'         => 'string',
-			'description'  => __( 'Whether multiple files are allowed.', 'media-experiments' ),
-			'show_in_rest' => [
-				'schema' => [
-					'type' => 'boolean',
-				],
-			],
-			'single'       => true,
-		]
-	);
-}
-
-/**
- * Filters the REST API route for a post.
-
- * @param string  $route The route path.
- * @param WP_Post $post  The post object.
- * @return string Filtered route path.
- */
-function filter_rest_route_for_post_for_upload_requests( string $route, WP_Post $post ): string {
-	if ( 'mexp-upload-request' === $post->post_type ) {
-		$post_type_route = rest_get_route_for_post_type_items( $post->post_type );
-
-		return sprintf( '%s/%s', $post_type_route, $post->post_name );
-	}
-
-	return $route;
-}
-
-/**
- * Adds a new cron schedule for running every 15 minutes.
- *
- * @param array $schedules Cron schedules.
- * @return array Filtered cron schedules.
- * @phpstan-param array<string, array{interval: int, display: string}> $schedules
- * @phpstan-return array<string, array{interval: int, display: string}>
- */
-function add_quarter_hourly_cron_interval( array $schedules ): array {
-	$schedules['quarter_hourly'] = [
-		'interval' => 15 * MINUTE_IN_SECONDS,
-		'display'  => __( 'Every 15 Minutes', 'media-experiments' ),
-	];
-
-	return $schedules;
-}
-
-/**
- * Delete unresolved upload requests that are older than 15 minutes.
- *
- * @return void
- */
-function delete_old_upload_requests(): void {
-	$args = [
-		'post_type'        => 'mexp-upload-request',
-		'post_status'      => 'publish',
-		'numberposts'      => -1,
-		'date_query'       => [
-			[
-				'before'    => '15 minutes ago',
-				'inclusive' => true,
-			],
-		],
-		'suppress_filters' => false,
-	];
-
-	$posts = get_posts( $args );
-
-	foreach ( $posts as $post ) {
-		wp_delete_post( $post->ID, true );
-	}
-}
-
-/**
  * Plugin activation hook.
  *
  * @codeCoverageIgnore
@@ -1406,13 +1138,7 @@ function delete_old_upload_requests(): void {
  * @return void
  */
 function activate_plugin(): void {
-	register_upload_request_post_type();
-
 	flush_rewrite_rules( false );
-
-	if ( false === wp_next_scheduled( 'mexp_upload_requests_cleanup' ) ) {
-		wp_schedule_event( time(), 'quarter_hourly', 'mexp_upload_requests_cleanup' );
-	}
 }
 
 /**
@@ -1423,10 +1149,10 @@ function activate_plugin(): void {
  * @return void
  */
 function deactivate_plugin(): void {
-	unregister_post_type( 'mexp-upload-request' );
-
 	flush_rewrite_rules( false );
 
+	// Left over from the upload request feature, which now lives in the
+	// Upload from Phone plugin. Harmless, but no reason to keep scheduling it.
 	$timestamp = wp_next_scheduled( 'mexp_upload_requests_cleanup' );
 	if ( false !== $timestamp ) {
 		wp_unschedule_event( $timestamp, 'mexp_upload_requests_cleanup' );
