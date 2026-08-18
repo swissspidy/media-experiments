@@ -19,7 +19,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                wp: ['trunk']
+                wp: ['7.1-RC4']
                 shard: ['1/4', '2/4', '3/4', '4/4']
         steps:
             - name: Checkout

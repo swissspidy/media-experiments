@@ -30,6 +30,10 @@ import type {
 	VideoBlock,
 } from '../types';
 
+// The `root`/`site` entity is a singleton: core-data expects no record ID,
+// which its types do not express.
+const SITE_RECORD_ID = undefined as unknown as number;
+
 export function useIsUploadingByUrl( url?: string ) {
 	return useSelect(
 		( select ) => {
@@ -193,15 +197,15 @@ export function useBlockAttachments( clientIds?: string | string[] ) {
 		postId as number
 	) as [ number | undefined, ( id: number ) => void, unknown ];
 
-	// The `root`/`site` entity is a singleton: core-data expects no record ID,
-	// which its types do not express.
-	const siteRecordId = undefined as unknown as number;
-
 	const siteLogoId = useSelect( ( select ) => {
 		const { canUser, getEditedEntityRecord } = select( coreStore );
 		const canUserEdit = canUser( 'update', 'settings' );
 		const siteSettings = canUserEdit
-			? ( getEditedEntityRecord( 'root', 'site', siteRecordId ) as Settings )
+			? ( getEditedEntityRecord(
+					'root',
+					'site',
+					SITE_RECORD_ID
+			  ) as Settings )
 			: undefined;
 		return canUserEdit ? siteSettings?.site_logo : undefined;
 	}, [] );
@@ -328,12 +332,12 @@ export function useBlockAttachments( clientIds?: string | string[] ) {
 					}
 
 					if ( block.attributes.shouldSyncIcon ) {
-						void editEntityRecord( 'root', 'site', siteRecordId, {
+						void editEntityRecord( 'root', 'site', SITE_RECORD_ID, {
 							site_icon: media.id,
 						} );
 					}
 
-					void editEntityRecord( 'root', 'site', siteRecordId, {
+					void editEntityRecord( 'root', 'site', SITE_RECORD_ID, {
 						site_logo: media.id,
 					} );
 				};

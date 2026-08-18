@@ -1,8 +1,5 @@
 declare module '@wordpress/block-editor' {
-	import type {
-		ReduxStoreConfig,
-		StoreDescriptor,
-	} from '@wordpress/data';
+	import type { ReduxStoreConfig, StoreDescriptor } from '@wordpress/data';
 
 	import type {
 		ComponentType,

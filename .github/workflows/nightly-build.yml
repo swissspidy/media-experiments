@@ -36,7 +36,15 @@ jobs:
               with:
                   php-version: latest
                   coverage: none
-                  tools: wp-cli
+                  tools: composer
+
+            - name: Install WP-CLI (v3 nightly)
+              if: ${{ env.CURRENT_TAG != 'nightly' }}
+              run: |
+                  curl -sSL -o "${RUNNER_TEMP}/wp-cli.phar" https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli-nightly.phar
+                  chmod +x "${RUNNER_TEMP}/wp-cli.phar"
+                  sudo mv "${RUNNER_TEMP}/wp-cli.phar" /usr/local/bin/wp
+                  wp --version
 
             - name: Install latest version of dist-archive-command
               if: ${{ env.CURRENT_TAG != 'nightly' }}
@@ -74,7 +82,7 @@ jobs:
                         "version": "0.1.$CURRENT_DATE-${GITHUB_SHA::7}",
                         "url": "https://github.com/swissspidy/media-experiments",
                         "package": "https://swissspidy.github.io/media-experiments/nightly.zip",
-                        "tested": "6.8",
+                        "tested": "7.1",
                         "requires_php": "8.0",
                         "autoupdate": true
                     }

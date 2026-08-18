@@ -22,7 +22,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                wp: ['latest']
+                wp: ['7.1-RC4']
                 shard: ['1/4', '2/4', '3/4', '4/4']
                 experimental: [false]
                 include:
@@ -84,6 +84,7 @@ jobs:
                     echo "Using WordPress trunk"
                     echo "{\"core\":\"WordPress/WordPress#master\"}" >> .wp-env.override.json
                   fi
+                  # Otherwise .wp-env.json pins the WordPress version under test.
 
                   chmod -R 767 ./
                   npm run wp-env start
@@ -100,7 +101,7 @@ jobs:
               run: |
                   npm run test:e2e -- --shard=${{ matrix.shard }}
               env:
-                  COLLECT_COVERAGE: ${{ matrix.wp == 'latest' }}
+                  COLLECT_COVERAGE: ${{ matrix.wp == '7.1-RC4' }}
 
             - name: Upload code coverage report
               uses: codecov/codecov-action@v7.0.0
@@ -108,7 +109,7 @@ jobs:
                   files: artifacts/e2e-coverage/coverage/codecov.json
                   flags: e2e
                   token: ${{ secrets.CODECOV_TOKEN }}
-              if: ${{ matrix.wp == 'latest' }}
+              if: ${{ matrix.wp == '7.1-RC4' }}
 
             - name: Get debug artifact name
               if: always()

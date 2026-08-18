@@ -36,7 +36,7 @@
 	</rule>
 
 	<!-- We only support the latest major WordPress release. -->
-	<config name="minimum_supported_wp_version" value="6.6" />
+	<config name="minimum_supported_wp_version" value="7.1" />
 	<rule ref="WordPress.WP.DeprecatedFunctions" />
 
 	<!-- Check all PHP files in directory tree by default. -->

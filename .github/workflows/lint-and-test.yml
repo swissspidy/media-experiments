@@ -143,12 +143,12 @@ jobs:
         strategy:
             matrix:
                 php: ['8.2', '8.1', '8.0', '7.4']
-                wp: ['latest']
+                wp: ['7.1-RC4']
                 coverage: [false]
                 experimental: [false]
                 include:
                     - php: '8.3'
-                      wp: 'latest'
+                      wp: '7.1-RC4'
                       coverage: true
                       experimental: false
 
@@ -254,7 +254,14 @@ jobs:
               with:
                   php-version: latest
                   coverage: none
-                  tools: wp-cli
+                  tools: composer
+
+            - name: Install WP-CLI (v3 nightly)
+              run: |
+                  curl -sSL -o "${RUNNER_TEMP}/wp-cli.phar" https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli-nightly.phar
+                  chmod +x "${RUNNER_TEMP}/wp-cli.phar"
+                  sudo mv "${RUNNER_TEMP}/wp-cli.phar" /usr/local/bin/wp
+                  wp --version
 
             - name: Install latest version of dist-archive-command
               run: wp package install wp-cli/dist-archive-command:dev-main

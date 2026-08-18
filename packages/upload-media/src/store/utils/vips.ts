@@ -29,9 +29,13 @@ function toFile(
 ) {
 	// `@wordpress/vips` widens its return type to `ArrayBufferLike`, which also
 	// covers `SharedArrayBuffer`. Only a plain `ArrayBuffer` is a valid BlobPart.
-	return new File( [ new Blob( [ buffer as ArrayBuffer ], { type } ) ], name, {
-		type,
-	} );
+	return new File(
+		[ new Blob( [ buffer as ArrayBuffer ], { type } ) ],
+		name,
+		{
+			type,
+		}
+	);
 }
 
 export async function vipsConvertImageFormat(
