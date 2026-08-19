@@ -9,6 +9,7 @@ import { store as preferencesStore } from '@wordpress/preferences';
  */
 import { store as uploadStore } from '..';
 import { ItemStatus, OperationType, type QueueItem } from '../types';
+import { vipsTerminateWorker } from '../utils/vips';
 
 type WPDataRegistry = ReturnType< typeof createRegistry >;
 
@@ -327,6 +328,39 @@ describe( 'actions', () => {
 			expect( registry.select( uploadStore ).getItems()[ 0 ] ).toBe(
 				item
 			);
+		} );
+	} );
+
+	describe( 'removeItem', () => {
+		beforeEach( () => {
+			( vipsTerminateWorker as jest.Mock ).mockClear();
+		} );
+
+		it( 'terminates the vips worker once the queue is fully empty', async () => {
+			registry.dispatch( uploadStore ).addItem( { file: jpegFile } );
+
+			const [ item ] = registry.select( uploadStore ).getItems();
+
+			await registry.dispatch( uploadStore ).removeItem( item.id );
+
+			expect( registry.select( uploadStore ).getItems() ).toHaveLength(
+				0
+			);
+			expect( vipsTerminateWorker ).toHaveBeenCalledTimes( 1 );
+		} );
+
+		it( 'does not terminate the vips worker while other items remain queued', async () => {
+			registry.dispatch( uploadStore ).addItem( { file: jpegFile } );
+			registry.dispatch( uploadStore ).addItem( { file: mp4File } );
+
+			const [ first ] = registry.select( uploadStore ).getItems();
+
+			await registry.dispatch( uploadStore ).removeItem( first.id );
+
+			expect( registry.select( uploadStore ).getItems() ).toHaveLength(
+				1
+			);
+			expect( vipsTerminateWorker ).not.toHaveBeenCalled();
 		} );
 	} );
 } );

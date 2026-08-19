@@ -17,7 +17,17 @@ import type { ImageSizeCrop, QueueItemId } from '../types';
 // terminate.
 let vipsLoaded = false;
 
+// The in-flight `vipsTerminateWorker()` call, if any. Terminating rejects
+// any RPC still in flight on that worker, so every other vips call waits
+// for a pending termination to finish first -- guaranteeing a newly started
+// operation always gets a freshly (re)created worker rather than racing
+// terminate() on the one about to be torn down.
+let pendingTermination: Promise< void > | undefined;
+
 async function loadVips() {
+	if ( pendingTermination ) {
+		await pendingTermination;
+	}
 	const vips = await import(
 		/* webpackChunkName: 'vips' */ '@wordpress/vips/worker'
 	);
@@ -183,6 +193,24 @@ export async function vipsTerminateWorker() {
 	if ( ! vipsLoaded ) {
 		return;
 	}
-	const { terminateVipsWorker } = await loadVips();
-	terminateVipsWorker();
+
+	// Already terminating (e.g. the queue emptied twice in quick
+	// succession) -- join the existing call rather than start a second one.
+	if ( pendingTermination ) {
+		return pendingTermination;
+	}
+
+	// Import directly rather than via `loadVips()`, which would await
+	// `pendingTermination` -- the very promise being assigned here.
+	pendingTermination = import(
+		/* webpackChunkName: 'vips' */ '@wordpress/vips/worker'
+	).then( ( { terminateVipsWorker } ) => {
+		terminateVipsWorker();
+	} );
+
+	try {
+		await pendingTermination;
+	} finally {
+		pendingTermination = undefined;
+	}
 }
