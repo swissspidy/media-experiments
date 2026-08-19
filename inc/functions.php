@@ -232,7 +232,8 @@ function override_media_templates(): void {
 		static function (): void {
 			ob_start();
 			wp_print_media_templates();
-			$html = ob_get_clean();
+			// ob_get_clean() cannot return false here: a buffer was just started.
+			$html = ob_get_clean() ?: '';
 
 			$tags = [
 				'audio',
@@ -693,7 +694,6 @@ function filter_rest_index( WP_REST_Response $response ): WP_REST_Response {
 
 	$default_image_output_formats = get_default_image_output_formats();
 
-	// @phpstan-ignore function.internal (false positive)
 	$media_source_terms = get_terms(
 		[
 			'taxonomy'   => 'mexp_media_source',

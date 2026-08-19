@@ -68,6 +68,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		// Used for PDF thumbnails.
 		$valid_image_sizes[] = 'full';
 
+		// @phpstan-ignore argument.type ($this->namespace is never empty in practice)
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)/sideload',
@@ -261,7 +262,6 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		foreach ( $links as $rel => $rel_links ) {
 			foreach ( $rel_links as $link ) {
-				// @phpstan-ignore method.internal (false positive)
 				$response->add_link( $rel, $link['href'], $link['attributes'] );
 			}
 		}
