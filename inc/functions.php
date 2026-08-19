@@ -232,8 +232,9 @@ function override_media_templates(): void {
 		static function (): void {
 			ob_start();
 			wp_print_media_templates();
+			$html = ob_get_clean();
 			// ob_get_clean() cannot return false here: a buffer was just started.
-			$html = ob_get_clean() ?: '';
+			$html = false === $html ? '' : $html;
 
 			$tags = [
 				'audio',
