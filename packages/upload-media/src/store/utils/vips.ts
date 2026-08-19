@@ -202,11 +202,12 @@ export async function vipsTerminateWorker() {
 
 	// Import directly rather than via `loadVips()`, which would await
 	// `pendingTermination` -- the very promise being assigned here.
-	pendingTermination = import(
-		/* webpackChunkName: 'vips' */ '@wordpress/vips/worker'
-	).then( ( { terminateVipsWorker } ) => {
+	pendingTermination = ( async () => {
+		const { terminateVipsWorker } = await import(
+			/* webpackChunkName: 'vips' */ '@wordpress/vips/worker'
+		);
 		terminateVipsWorker();
-	} );
+	} )();
 
 	try {
 		await pendingTermination;
