@@ -2,19 +2,21 @@
  * External dependencies
  */
 import {
-	validateFileSize,
-	validateMimeType,
 	sideloadMedia as originalSideloadMedia,
-	uploadMedia as originalUploadMedia,
+	store as uploadStore,
 	type Attachment,
-} from '@mexp/media-utils';
-import { store as uploadStore } from '@mexp/upload-media';
+} from '@mexp/upload-media';
 import type { ChangeEvent } from 'react';
 
 /**
  * WordPress dependencies
  */
 import { dispatch, useDispatch, useSelect } from '@wordpress/data';
+import {
+	uploadMedia as originalUploadMedia,
+	validateFileSize,
+	validateMimeType,
+} from '@wordpress/media-utils';
 import { useEffect, useRef, useState } from '@wordpress/element';
 import { store as noticesStore } from '@wordpress/notices';
 import { __ } from '@wordpress/i18n';
@@ -37,7 +39,7 @@ import './view.css';
  * Upload a media file when the file upload button is activated.
  *
  * Similar to the mediaUpload() function from `@wordpress/editor`,
- * this is a wrapper around uploadMedia() from `@mexp/media-utils`.
+ * this is a wrapper around uploadMedia() from `@wordpress/media-utils`.
  *
  * @param $0
  * @param $0.additionalData

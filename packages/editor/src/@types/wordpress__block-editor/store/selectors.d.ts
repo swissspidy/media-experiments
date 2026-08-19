@@ -1,10 +1,13 @@
-import type { BlockInstance } from '@wordpress/blocks';
+/**
+ * WordPress dependencies
+ */
+import type { Block } from '@wordpress/blocks';
 
 /**
  * Determines if the given block type is allowed to be inserted into the block list.
  *
  * @param state
- * @param blockName - The name of the block type, e.g.' core/paragraph'.
+ * @param blockName    - The name of the block type, e.g.' core/paragraph'.
  * @param rootClientId - Optional root client ID of block list.
  *
  * @returns Whether the given block type is allowed to be inserted.
@@ -22,7 +25,7 @@ export function canInsertBlockType(
  *
  * @param state
  * @param startClientId - Optional client ID of block from which to search.
- * @param modifier - Directionality multiplier (1 next, -1 previous).
+ * @param modifier      - Directionality multiplier (1 next, -1 previous).
  *
  * @returns Return the client ID of the block, or null if none exists.
  */
@@ -45,7 +48,7 @@ export function getAdjacentBlockClientId(
 export function getBlock(
 	state: Record< string, unknown >,
 	clientId: string
-): BlockInstance | null;
+): Block | null;
 
 /**
  * Returns a block's attributes given its client ID, or null if no block exists with the client ID.
@@ -92,7 +95,7 @@ export function getBlockHierarchyRootClientId(
  * block order, or `-1` if the block does not exist.
  *
  * @param state
- * @param clientId - Block client ID.
+ * @param clientId     - Block client ID.
  * @param rootClientId - Optional root client ID of block list.
  *
  * @returns Index at which block exists in order.
@@ -218,7 +221,7 @@ export function getBlockSelectionStart(
 export function getBlocks(
 	state: Record< string, unknown >,
 	rootClientId?: string
-): BlockInstance[];
+): Block[];
 
 /**
  * Given an array of block client IDs, returns the corresponding array of block objects or `null`.
@@ -227,7 +230,7 @@ export function getBlocks(
  */
 export function getBlocksByClientId(
 	clientIds: string | string[]
-): Array< BlockInstance | null >;
+): Array< Block | null >;
 
 /**
  * Returns an array containing the clientIds of all descendants of the blocks given.
@@ -335,7 +338,7 @@ export function getMultiSelectedBlockClientIds(
  */
 export function getMultiSelectedBlocks(
 	state: Record< string, unknown >
-): BlockInstance[];
+): Block[];
 
 /**
  * Returns the client ID of the block which ends the multi-selection set, or `null` if there is no
@@ -400,7 +403,7 @@ export function getPreviousBlockClientId(
  */
 export function getSelectedBlock(
 	state: Record< string, unknown >
-): BlockInstance | null;
+): Block | null;
 
 /**
  * Returns the currently selected block client ID, or `null` if there is no selected block.
@@ -514,7 +517,7 @@ export function hasSelectedBlock( state: Record< string, unknown > ): boolean;
  *
  * @param state
  * @param clientId - Block client ID.
- * @param deep - Perform a deep check. (default: `true`)
+ * @param deep     - Perform a deep check. (default: `true`)
  *
  * @returns Whether the block as an inner block selected
  */

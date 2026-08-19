@@ -3,7 +3,7 @@
  */
 import { addFilter } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
-import type { Block } from '@wordpress/blocks';
+import type { BlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -11,7 +11,7 @@ import type { Block } from '@wordpress/blocks';
 import type { VideoBlock } from '../types';
 
 type Writable< T > = { -readonly [ P in keyof T ]: Writable< T[ P ] > };
-type FilterableBlock = Writable< Block >;
+type FilterableBlock = Writable< BlockType >;
 
 function isGifVariation(
 	blockAttributes: VideoBlock[ 'attributes' ]

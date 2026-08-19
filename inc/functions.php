@@ -232,7 +232,7 @@ function override_media_templates(): void {
 		static function (): void {
 			ob_start();
 			wp_print_media_templates();
-			$html = (string) ob_get_clean();
+			$html = ob_get_clean();
 
 			$tags = [
 				'audio',
@@ -703,6 +703,7 @@ function filter_rest_index( WP_REST_Response $response ): WP_REST_Response {
 		]
 	);
 
+	// @phpstan-ignore argument.type (stubs don't narrow get_terms() by 'fields')
 	$media_source_terms = ! is_wp_error( $media_source_terms ) ? array_flip( $media_source_terms ) : [];
 
 	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
@@ -889,6 +890,10 @@ function register_media_source_taxonomy(): void {
 	register_taxonomy(
 		'mexp_media_source',
 		'attachment',
+		// 'label' is a legitimate register_taxonomy() arg (used as the default
+		// for unset 'labels' sub-keys), but the stub's array shape only knows
+		// about 'labels', so it flags this as an unrecognized key.
+		// @phpstan-ignore argument.type
 		[
 			'label'        => __( 'Source', 'media-experiments' ),
 			'public'       => false,

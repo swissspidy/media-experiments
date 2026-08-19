@@ -27,24 +27,32 @@
 		</properties>
 	</rule>
 
-	<rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
-		<exclude-pattern>media-experiments.php</exclude-pattern>
-	</rule>
-
 	<rule ref="WordPress.Files.FileName">
 		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
 
 	<!-- We only support the latest major WordPress release. -->
-	<config name="minimum_supported_wp_version" value="6.6" />
+	<config name="minimum_supported_wp_version" value="7.1" />
 	<rule ref="WordPress.WP.DeprecatedFunctions" />
 
 	<!-- Check all PHP files in directory tree by default. -->
 	<arg name="extensions" value="php"/>
 	<file>.</file>
 
-	<!-- File Layout: Declare symbols or run code, but not both. -->
-	<rule ref="PSR1.Files.SideEffects" />
+	<!--
+	File Layout: Declare symbols or run code, but not both.
+
+	inc/*.php files legitimately mix the two: every one of them opens with
+	the standard `if ( ! defined( 'ABSPATH' ) ) { exit; }` guard alongside
+	its function/class declarations, which is the side effect this sniff
+	means to catch. media-experiments.php is excluded for the same reason
+	(the plugin bootstrap file both defines constants and requires the
+	inc/ files).
+	-->
+	<rule ref="PSR1.Files.SideEffects">
+		<exclude-pattern>media-experiments.php</exclude-pattern>
+		<exclude-pattern>inc/*.php</exclude-pattern>
+	</rule>
 
 	<!-- Prevent false positives for IDE annotations. -->
 	<rule ref="Squiz.PHP.CommentedOutCode">

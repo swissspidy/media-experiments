@@ -2,13 +2,13 @@
  * WordPress dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
+import { transformAttachment } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies
  */
-import type { CreateSideloadFile, RestAttachment } from './types';
+import type { Attachment, CreateSideloadFile, RestAttachment } from '../types';
 import { flattenFormData } from './flatten-form-data';
-import { transformAttachment } from './transform-attachment';
 
 /**
  * Uploads a file to the server without creating an attachment.
@@ -44,5 +44,5 @@ export async function sideloadToServer(
 			method: 'POST',
 			signal,
 		} )
-	);
+	) as Attachment;
 }

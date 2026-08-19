@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { uploadMedia as originalUploadMedia } from '@mexp/media-utils';
 import { store as uploadStore } from '@mexp/upload-media';
 
 /**
@@ -9,6 +8,7 @@ import { store as uploadStore } from '@mexp/upload-media';
  */
 import { select, dispatch } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
+import type { uploadMedia as originalUploadMedia } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies

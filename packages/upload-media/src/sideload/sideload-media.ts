@@ -11,9 +11,9 @@ import type {
 	OnErrorHandler,
 	CreateSideloadFile,
 	RestAttachment,
-} from './types';
+} from '../types';
+import { UploadError } from '../upload-error';
 import { sideloadToServer } from './sideload-to-server';
-import { UploadError } from './upload-error';
 
 const noop = () => {};
 
@@ -35,6 +35,9 @@ interface SideloadMediaArgs {
 /**
  * Uploads a file to the server without creating an attachment.
  *
+ * Sideloading is not part of the public `@wordpress/media-utils` API, so this
+ * plugin talks to its own `/wp/v2/media/<id>/sideload` endpoint directly.
+ *
  * @param $0                Parameters object passed to the function.
  * @param $0.file           Media File to Save.
  * @param $0.attachmentId   Parent attachment ID.
@@ -51,8 +54,6 @@ export async function sideloadMedia( {
 	onFileChange,
 	onError = noop,
 }: SideloadMediaArgs ) {
-	// TODO: Also do file validation here?
-
 	try {
 		const attachment = await sideloadToServer(
 			file,

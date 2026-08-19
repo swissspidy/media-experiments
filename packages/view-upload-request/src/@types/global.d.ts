@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import type { ImageSizeCrop } from '@mexp/upload-media';
 
 declare global {

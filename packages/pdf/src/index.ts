@@ -49,7 +49,8 @@ export async function getImageFromPdf(
 	type: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/jpeg',
 	quality = 0.82
 ): Promise< File > {
-	const pdf = await getDocument( url ).promise;
+	// pdf.js 6 no longer accepts a bare URL string.
+	const pdf = await getDocument( { url } ).promise;
 	const pdfPage = await pdf.getPage( 1 );
 
 	const viewport = pdfPage.getViewport( { scale: 1.5 } );

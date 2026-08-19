@@ -5,12 +5,20 @@
 		"declarationDir": "dist-types"
 	},
 	"references": [
-		{ "path": "../ai" },
-		{ "path": "../ffmpeg" },
-		{ "path": "../heif" },
-		{ "path": "../log" },
-		{ "path": "../pdf" },
-		{ "path": "../vips" }
+		{
+			"path": "../ai"
+		},
+		{
+			"path": "../ffmpeg"
+		},
+		{
+			"path": "../log"
+		},
+		{
+			"path": "../pdf"
+		}
 	],
-	"include": [ "src/**/*" ]
+	"include": [
+		"src/**/*"
+	]
 }

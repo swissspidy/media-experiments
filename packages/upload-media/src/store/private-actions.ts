@@ -35,12 +35,12 @@ import {
 } from '../utils';
 import { PREFERENCES_NAME } from '../constants';
 import { StubFile } from '../stub-file';
-import { transcodeHeifImage } from './utils/heif';
 import {
 	vipsCompressImage,
 	vipsConvertImageFormat,
 	vipsHasTransparency,
 	vipsResizeImage,
+	vipsTranscodeHeifImage,
 } from './utils/vips';
 import {
 	compressImage as canvasCompressImage,
@@ -1564,7 +1564,6 @@ export function optimizeVideoItem(
 			const isChunkLoadError =
 				error instanceof Error && error.name === 'ChunkLoadError';
 			if ( isChunkLoadError ) {
-				// eslint-disable-next-line no-console -- Deliberately log errors here.
 				console.error( error );
 			}
 
@@ -1742,7 +1741,6 @@ export function convertGifItem( id: QueueItemId ) {
 			} );
 		} catch ( error ) {
 			if ( error instanceof Error && error.name === 'ChunkLoadError' ) {
-				// eslint-disable-next-line no-console -- Deliberately log errors here.
 				console.error( error );
 			}
 			dispatch.cancelItem(
@@ -1768,7 +1766,7 @@ export function convertHeifItem( id: QueueItemId ) {
 		const item = select.getItem( id ) as QueueItem;
 
 		try {
-			const file = await transcodeHeifImage( item.file );
+			const file = await vipsTranscodeHeifImage( id, item.file );
 
 			const blobUrl = createBlobURL( file );
 			dispatch< CacheBlobUrlAction >( {

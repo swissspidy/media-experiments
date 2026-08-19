@@ -20,7 +20,7 @@
 		"url": "https://github.com/swissspidy/media-experiments/issues"
 	},
 	"engines": {
-		"node": ">=20"
+		"node": ">=22"
 	},
 	"main": "dist/index.js",
 	"source": "src/index.ts",
@@ -31,12 +31,15 @@
 	},
 	"types": "dist-types/index.d.ts",
 	"dependencies": {
-		"@mexp/media-utils": "file:../media-utils",
 		"@mexp/upload-media": "file:../upload-media",
-		"@wordpress/components": "^29.3.0",
-		"@wordpress/compose": "^7.36.0",
-		"@wordpress/core-data": "^7.36.0",
-		"@wordpress/data": "^10.11.0",
-		"@wordpress/preferences": "^4.13.0"
+		"@wordpress/components": "^39.0.0",
+		"@wordpress/compose": "^8.6.0",
+		"@wordpress/core-data": "^7.53.0",
+		"@wordpress/data": "^10.53.0",
+		"@wordpress/element": "^8.5.0",
+		"@wordpress/i18n": "^6.26.0",
+		"@wordpress/media-utils": "^5.53.0",
+		"@wordpress/notices": "^5.53.0",
+		"@wordpress/preferences": "^4.53.0"
 	}
 }

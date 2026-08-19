@@ -6,7 +6,11 @@
 		"jsx": "preserve",
 		"target": "esnext",
 		"module": "esnext",
-		"lib": [ "dom", "dom.iterable", "esnext" ],
+		"lib": [
+			"dom",
+			"dom.iterable",
+			"esnext"
+		],
 		"declaration": true,
 		"declarationMap": true,
 		"composite": true,
@@ -28,8 +32,18 @@
 		"noEmitOnError": true,
 		"pretty": true,
 		"sourceMap": true,
-		"typeRoots": [ "./@types", "./node_modules/@types" ],
-		"types": [ "jest", "node" ]
+		"typeRoots": [
+			"./@types",
+			"./node_modules/@types"
+		],
+		"types": [
+			"jest",
+			"node"
+		],
+		"skipLibCheck": true
 	},
-	"exclude": [ "packages/*/dist-types/**", "packages/*/dist/**" ]
+	"exclude": [
+		"packages/*/dist-types/**",
+		"packages/*/dist/**"
+	]
 }

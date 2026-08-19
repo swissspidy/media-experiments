@@ -8,8 +8,23 @@
 		"restriction": "error",
 		"suspicious": "error"
 	},
-	"plugins": [ "import", "jest", "jsdoc", "promise", "react-perf" ],
-	"ignorePatterns": [ "@types" ],
+	"plugins": [
+		"import",
+		"jest",
+		"jsdoc",
+		"promise",
+		"react-perf"
+	],
+	"ignorePatterns": [
+		"@types",
+		"artifacts",
+		"build",
+		"dist",
+		"node_modules",
+		"packages/*/dist",
+		"packages/*/dist-types",
+		"vendor"
+	],
 	"settings": {
 		"jsdoc": {
 			"tagNamePreference": {
@@ -20,24 +35,13 @@
 	},
 	"rules": {
 		"class-methods-use-this": "off",
+		"complexity": "off",
 		"default-case": "off",
-		"max-classes-per-file": "off",
-		"max-lines": "off",
-		"max-lines-per-function": "off",
-		"no-case-declarations": "off",
-		"no-empty-function": "off",
-		"no-negated-condition": "off",
-		"no-param-reassign": "off",
-		"no-plusplus": "off",
-		"no-undef": "off",
-		"no-undefined": "off",
-		"no-void": [ "error", { "allowAsStatement": true } ],
-		"no-warning-comments": "off",
-		"require-await": "off",
 		"import/extensions": "off",
 		"import/max-dependencies": "off",
 		"import/no-commonjs": "off",
 		"import/no-default-export": "off",
+		"import/no-relative-parent-imports": "off",
 		"import/no-unassigned-import": "off",
 		"import/unambiguous": "off",
 		"jest/no-conditional-in-test": "off",
@@ -46,7 +50,31 @@
 		"jsdoc/require-param-type": "off",
 		"jsdoc/require-returns": "off",
 		"jsdoc/require-returns-type": "off",
+		"max-classes-per-file": "off",
+		"max-lines": "off",
+		"max-lines-per-function": "off",
+		"no-case-declarations": "off",
+		"no-console": "off",
+		"no-empty-function": "off",
+		"no-implicit-globals": "off",
+		"no-inline-comments": "off",
+		"no-negated-condition": "off",
+		"no-param-reassign": "off",
+		"no-plusplus": "off",
+		"no-undef": "off",
+		"no-undefined": "off",
+		"no-underscore-dangle": "off",
+		"no-use-before-define": "off",
+		"no-void": [
+			"error",
+			{
+				"allowAsStatement": true
+			}
+		],
+		"no-warning-comments": "off",
 		"promise/catch-or-return": "off",
-		"promise/no-multiple-resolved": "off"
+		"promise/no-multiple-resolved": "off",
+		"require-await": "off",
+		"require-unicode-regexp": "off"
 	}
 }

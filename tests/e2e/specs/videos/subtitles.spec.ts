@@ -56,8 +56,8 @@ test.describe( 'Videos', () => {
 				window.wp.data.select( 'core/block-editor' ).getSelectedBlock()
 					?.attributes?.tracks?.[ 0 ]?.src
 		);
-		await expect( vttUrl ).not.toBeNull();
-		await expect( vttUrl ).toMatch( /\.vtt$/ );
+		expect( vttUrl ).not.toBeNull();
+		expect( vttUrl ).toMatch( /\.vtt$/ );
 
 		const vttContents = await ( await fetch( vttUrl ) ).text();
 		expect( vttContents ).toContain( 'WEBVTT' );
