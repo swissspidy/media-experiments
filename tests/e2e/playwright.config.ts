@@ -77,7 +77,18 @@ const config = defineConfig( {
 		},
 		{
 			name: 'webkit',
-			use: { ...devices[ 'Desktop Safari' ] },
+			// WebKit consistently takes longer than Chromium/Firefox to get
+			// the block editor's canvas iframe interactive with this
+			// plugin's bundle size, causing spurious timeouts on the
+			// default 5s expect() / 10s actionTimeout in CI.
+			expect: {
+				timeout: 20_000,
+			},
+			use: {
+				...devices[ 'Desktop Safari' ],
+				actionTimeout: 20_000,
+				navigationTimeout: 30_000,
+			},
 		},
 		{
 			name: 'firefox',
