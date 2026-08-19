@@ -182,6 +182,7 @@ jobs:
                   done
 
             - name: Install svn
+              timeout-minutes: 10
               run: |
                   sudo apt update -y --allow-releaseinfo-change
                   sudo apt install -y subversion
