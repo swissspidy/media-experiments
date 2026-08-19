@@ -57,6 +57,28 @@ function getSourceMapForEntry( entry: V8CoverageEntry ) {
 
 export const test = base.extend< E2EFixture, {} >( {
 	page: async ( { page, browserName }, use ) => {
+		if ( browserName === 'webkit' ) {
+			// Diagnostic instrumentation: webkit consistently fails to ever
+			// render content inside the editor-canvas iframe, even with
+			// generous timeouts, and CI doesn't otherwise surface browser
+			// console/network errors. Log them so the next run's job log
+			// shows what's actually going wrong client-side.
+			page.on( 'console', ( message ) => {
+				if ( message.type() === 'error' ) {
+					console.log( `[webkit console.error] ${ message.text() }` );
+				}
+			} );
+			page.on( 'pageerror', ( error ) => {
+				console.log( `[webkit pageerror] ${ error.message }` );
+			} );
+			page.on( 'requestfailed', ( request ) => {
+				console.log(
+					`[webkit requestfailed] ${ request.url() } ${ request.failure()
+						?.errorText }`
+				);
+			} );
+		}
+
 		if (
 			browserName !== 'chromium' ||
 			process.env.COLLECT_COVERAGE !== 'true'
