@@ -90,8 +90,12 @@ jobs:
                   npm run wp-env start
 
                   if [[ $GUTENBERG != 'true' ]]; then
-                    echo "Deactivating Gutenberg plugin"
-                    npm run wp-env --silent -- run tests-cli wp plugin deactivate gutenberg || echo "Gutenberg plugin was already inactive or not installed."
+                    if npm run wp-env --silent -- run tests-cli wp plugin is-installed gutenberg; then
+                      echo "Deactivating Gutenberg plugin"
+                      npm run wp-env --silent -- run tests-cli wp plugin deactivate gutenberg
+                    else
+                      echo "Gutenberg plugin is not installed; nothing to deactivate."
+                    fi
                   fi
               env:
                   WP_VERSION: ${{ matrix.wp }}
