@@ -94,7 +94,18 @@ jobs:
                       echo "Deactivating Gutenberg plugin"
                       npm run wp-env --silent -- run tests-cli wp plugin deactivate gutenberg
                     else
-                      echo "Gutenberg plugin is not installed; nothing to deactivate."
+                      # `wp plugin is-installed` is a boolean-check command that
+                      # WP-CLI documents as exiting 1 specifically when the
+                      # plugin isn't installed. Any other exit code means the
+                      # check itself failed (wp-env/WP-CLI/container error),
+                      # so only exit 1 is safe to treat as "nothing to do".
+                      status=$?
+                      if [[ $status -eq 1 ]]; then
+                        echo "Gutenberg plugin is not installed; nothing to deactivate."
+                      else
+                        echo "Failed to check whether the Gutenberg plugin is installed (exit code $status)." >&2
+                        exit "$status"
+                      fi
                     fi
                   fi
               env:
