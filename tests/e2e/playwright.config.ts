@@ -18,6 +18,14 @@ const config = defineConfig( {
 	...baseConfig,
 	reporter: [
 		...baseConfig.reporter,
+		// In CI, @wordpress/scripts' base config uses only the `github`
+		// reporter, which deliberately does not print worker stdout/stderr
+		// to the job log (its `printsToStdio()` returns false) — so
+		// `console.log`/page console/pageerror diagnostics never show up
+		// there, they're silently captured for the (unreachable) HTML
+		// report only. Add `list` alongside it so that output is actually
+		// visible in the CI log.
+		process.env.CI && [ 'list' ],
 		process.env.COLLECT_COVERAGE === 'true' && [
 			'monocart-reporter',
 			{
