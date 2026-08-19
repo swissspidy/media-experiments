@@ -52,7 +52,7 @@
 		"oxlint": "~1.79.0",
 		"patch-package": "^8.0.1",
 		"prettier": "npm:wp-prettier@3.0.3",
-		"typescript": "^5.9.3",
+		"typescript": "^7.0.2",
 		"uuid": "^14.0.1",
 		"webpack": "^5.109.2",
 		"webpack-cli": "^7.2.2",
