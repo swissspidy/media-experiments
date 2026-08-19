@@ -188,6 +188,7 @@ export type MediaPreferences = {
 	keepOriginal: boolean;
 	convertUnsafe: boolean;
 	useAi: boolean;
+	image_autoSelectFormat: boolean;
 	// Formats.
 	default_outputFormat: ImageFormat;
 	default_quality: number;

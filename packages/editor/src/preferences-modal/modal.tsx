@@ -143,6 +143,14 @@ function DefaultFormatSection() {
 					) }
 				/>
 			) : null }
+			<EnableFeature
+				featureName="image_autoSelectFormat"
+				help={ __(
+					'Automatically select the best image format based on file size when optimizing images.',
+					'media-experiments'
+				) }
+				label={ __( 'Auto-select best format', 'media-experiments' ) }
+			/>
 			<FeatureNumberControl
 				className="interface-preferences-modal__option interface-preferences-modal__option--number"
 				label={ __( 'Big image size threshold', 'media-experiments' ) }
