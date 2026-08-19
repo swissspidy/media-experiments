@@ -28,14 +28,11 @@ function toFile(
 	type: string
 ) {
 	// `@wordpress/vips` widens its return type to `ArrayBufferLike`, which also
-	// covers `SharedArrayBuffer`. Only a plain `ArrayBuffer` is a valid BlobPart.
-	return new File(
-		[ new Blob( [ buffer as ArrayBuffer ], { type } ) ],
-		name,
-		{
-			type,
-		}
-	);
+	// covers `SharedArrayBuffer` (wasm-vips uses shared WebAssembly memory).
+	// `Blob` rejects buffers backed by shared memory, so copy the bytes into a
+	// plain, non-shared buffer via `Uint8Array#slice()` before creating it.
+	const bytes = new Uint8Array( buffer ).slice();
+	return new File( [ new Blob( [ bytes ], { type } ) ], name, { type } );
 }
 
 export async function vipsConvertImageFormat(
