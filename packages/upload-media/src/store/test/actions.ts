@@ -30,6 +30,7 @@ jest.mock( '@mexp/pdf', () => ( {
 
 jest.mock( '../utils/vips', () => ( {
 	vipsCancelOperations: jest.fn( () => true ),
+	vipsTerminateWorker: jest.fn( () => undefined ),
 } ) );
 
 function createRegistryWithStores() {

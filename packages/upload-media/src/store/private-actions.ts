@@ -40,6 +40,7 @@ import {
 	vipsConvertImageFormat,
 	vipsHasTransparency,
 	vipsResizeImage,
+	vipsTerminateWorker,
 	vipsTranscodeHeifImage,
 } from './utils/vips';
 import {
@@ -638,6 +639,14 @@ export function removeItem( id: QueueItemId ) {
 			type: Type.Remove,
 			id,
 		} );
+
+		// Once the whole queue -- including children/sub-sizes -- is empty,
+		// free the vips WASM worker's memory rather than let it accumulate
+		// for the rest of the page's lifetime; a later upload spins it back
+		// up lazily on demand.
+		if ( select.getAllItems().length === 0 ) {
+			void vipsTerminateWorker();
+		}
 	};
 }
 

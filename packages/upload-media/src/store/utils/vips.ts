@@ -11,8 +11,18 @@ import type { ImageSizeCrop, QueueItemId } from '../types';
  * worker; all this module does is adapt between `File` objects and the
  * `ArrayBuffer`s the package works with.
  */
-function loadVips() {
-	return import( /* webpackChunkName: 'vips' */ '@wordpress/vips/worker' );
+
+// Whether `loadVips()` has resolved at least once, so `vipsTerminateWorker()`
+// can skip fetching the ~3.8MB WASM chunk just to find there's no worker to
+// terminate.
+let vipsLoaded = false;
+
+async function loadVips() {
+	const vips = await import(
+		/* webpackChunkName: 'vips' */ '@wordpress/vips/worker'
+	);
+	vipsLoaded = true;
+	return vips;
 }
 
 /*
@@ -156,4 +166,23 @@ export async function vipsResizeImage(
 export async function vipsCancelOperations( id: QueueItemId ) {
 	const { vipsCancelOperations: cancelOperations } = await loadVips();
 	return cancelOperations( id );
+}
+
+/**
+ * Terminates the vips worker, if one exists, freeing its WASM memory.
+ *
+ * libvips' WASM linear memory only ever grows, never shrinks, for as long
+ * as the worker lives, so a page that processes many images can end up
+ * holding a large amount of memory even once fully idle. Call this once
+ * the upload queue is empty; a later upload lazily spins the worker back
+ * up on demand.
+ */
+export async function vipsTerminateWorker() {
+	// Bail if vips was never loaded in the first place -- importing it here
+	// would load ~3.8MB of WASM for nothing.
+	if ( ! vipsLoaded ) {
+		return;
+	}
+	const { terminateVipsWorker } = await loadVips();
+	terminateVipsWorker();
 }
