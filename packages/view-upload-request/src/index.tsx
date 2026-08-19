@@ -23,20 +23,22 @@ function getExtension( mimeType: string ): ImageFormat {
 	return ( mimeType.split( '/' )[ 1 ] || 'jpeg' ) as ImageFormat;
 }
 
+const siteDataFields: Array< keyof RestBaseRecord > = [
+	'image_size_threshold',
+	'video_size_threshold',
+	'image_output_formats',
+	'jpeg_interlaced',
+	'png_interlaced',
+	'gif_interlaced',
+	'image_sizes',
+];
+
 function fetchBaseRecord() {
 	return select( coreStore ).getEntityRecord<
 		// @ts-ignore
 		RestBaseRecord | undefined
 	>( 'root', '__unstableBase', undefined, {
-		_fields: [
-			'image_size_threshold',
-			'video_size_threshold',
-			'image_output_formats',
-			'jpeg_interlaced',
-			'png_interlaced',
-			'gif_interlaced',
-			'image_sizes',
-		],
+		_fields: siteDataFields,
 	} );
 }
 
@@ -48,6 +50,18 @@ const unsubscribeCoreStore = subscribe( () => {
 	const siteData = fetchBaseRecord();
 
 	if ( ! siteData ) {
+		return;
+	}
+
+	// The fields can be returned before they're actually resolved, with
+	// some or all of them still `undefined` -- reading e.g.
+	// `siteData.image_output_formats[ 'image/jpeg' ]` below would then
+	// throw. Wait until every requested field has a value.
+	if (
+		siteDataFields.some(
+			( field ) => typeof siteData[ field ] === 'undefined'
+		)
+	) {
 		return;
 	}
 
