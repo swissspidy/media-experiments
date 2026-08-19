@@ -705,7 +705,7 @@ function filter_rest_index( WP_REST_Response $response ): WP_REST_Response {
 
 	// The stubs don't narrow get_terms()'s return type based on 'fields',
 	// so PHPStan otherwise sees the generic WP_Term[] shape here.
-	/** @var array<int, string>|WP_Error $media_source_terms */
+	// @var array<int, string>|WP_Error $media_source_terms
 
 	$media_source_terms = ! is_wp_error( $media_source_terms ) ? array_flip( $media_source_terms ) : [];
 
