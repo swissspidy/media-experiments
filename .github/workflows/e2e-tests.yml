@@ -91,11 +91,17 @@ jobs:
 
                   if [[ $GUTENBERG != 'true' ]]; then
                     echo "Deactivating Gutenberg plugin"
-                    npm run wp-env --silent -- run tests-cli wp plugin deactivate gutenberg
+                    npm run wp-env --silent -- run tests-cli wp plugin deactivate gutenberg || echo "Gutenberg plugin was already inactive or not installed."
                   fi
               env:
                   WP_VERSION: ${{ matrix.wp }}
-                  GUTENBERG: ${{ matrix.gb == 'true' }}
+                  # matrix.gb is a boolean; comparing it to the string 'true' via
+                  # `matrix.gb == 'true'` always evaluates to false in GitHub
+                  # Actions expression syntax (mismatched-type comparisons coerce
+                  # to numbers, and 'true' isn't numeric). Use the boolean value
+                  # directly instead, which GitHub Actions renders as the string
+                  # "true"/"false" (or empty, when unset) in this string context.
+                  GUTENBERG: ${{ matrix.gb }}
 
             - name: Run tests
               run: |

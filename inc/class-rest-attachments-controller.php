@@ -68,8 +68,8 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		// Used for PDF thumbnails.
 		$valid_image_sizes[] = 'full';
 
-		// @phpstan-ignore argument.type ($this->namespace is never empty in practice)
 		register_rest_route(
+			// @phpstan-ignore argument.type ($this->namespace is never empty in practice)
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)/sideload',
 			[

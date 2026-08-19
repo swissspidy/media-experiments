@@ -34,8 +34,8 @@ class REST_Upload_Requests_Controller extends WP_REST_Posts_Controller {
 	 * @see register_rest_route()
 	 */
 	public function register_routes(): void {
-		// @phpstan-ignore argument.type ($this->namespace is never empty in practice)
 		register_rest_route(
+			// @phpstan-ignore argument.type ($this->namespace is never empty in practice)
 			$this->namespace,
 			'/' . $this->rest_base,
 			[
@@ -50,8 +50,8 @@ class REST_Upload_Requests_Controller extends WP_REST_Posts_Controller {
 			]
 		);
 
-		// @phpstan-ignore argument.type (same false positive as above)
 		register_rest_route(
+			// @phpstan-ignore argument.type (same false positive as above)
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<slug>[\w]+)',
 			[
