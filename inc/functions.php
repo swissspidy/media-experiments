@@ -703,11 +703,9 @@ function filter_rest_index( WP_REST_Response $response ): WP_REST_Response {
 		]
 	);
 
-	/**
-	 * Narrows the return type, since the stubs don't reflect 'fields' => 'id=>slug'.
-	 *
-	 * @var array<int, string>|WP_Error $media_source_terms
-	 */
+	// The stubs don't narrow get_terms()'s return type based on 'fields',
+	// so PHPStan otherwise sees the generic WP_Term[] shape here.
+	// @phpstan-ignore argument.type
 	$media_source_terms = ! is_wp_error( $media_source_terms ) ? array_flip( $media_source_terms ) : [];
 
 	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
