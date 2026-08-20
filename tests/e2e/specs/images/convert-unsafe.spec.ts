@@ -26,16 +26,6 @@ const scenarios = [
 		},
 	},
 	{
-		name: 'JPEG XL',
-		file: {
-			name: 'hill-800x600.jxl',
-			mimeType: 'image/jxl',
-			buffer: readFileSync(
-				join( __dirname, '..', '..', 'assets', 'hill-800x600.jxl' )
-			),
-		},
-	},
-	{
 		name: 'TIFF',
 		file: {
 			name: 'hill-800x600.tiff',

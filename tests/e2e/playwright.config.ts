@@ -18,6 +18,14 @@ const config = defineConfig( {
 	...baseConfig,
 	reporter: [
 		...baseConfig.reporter,
+		// In CI, @wordpress/scripts' base config uses only the `github`
+		// reporter, which deliberately does not print worker stdout/stderr
+		// to the job log (its `printsToStdio()` returns false) — so
+		// `console.log`/page console/pageerror diagnostics never show up
+		// there, they're silently captured for the (unreachable) HTML
+		// report only. Add `list` alongside it so that output is actually
+		// visible in the CI log.
+		process.env.CI && [ 'list' ],
 		process.env.COLLECT_COVERAGE === 'true' && [
 			'monocart-reporter',
 			{
@@ -77,7 +85,18 @@ const config = defineConfig( {
 		},
 		{
 			name: 'webkit',
-			use: { ...devices[ 'Desktop Safari' ] },
+			// WebKit consistently takes longer than Chromium/Firefox to get
+			// the block editor's canvas iframe interactive with this
+			// plugin's bundle size, causing spurious timeouts on the
+			// default 5s expect() / 10s actionTimeout in CI.
+			expect: {
+				timeout: 20_000,
+			},
+			use: {
+				...devices[ 'Desktop Safari' ],
+				actionTimeout: 20_000,
+				navigationTimeout: 30_000,
+			},
 		},
 		{
 			name: 'firefox',

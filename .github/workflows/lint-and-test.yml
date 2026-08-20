@@ -68,7 +68,7 @@ jobs:
               # that GitHub resolves by branch name and dropped the implicit
               # `npm run` prefix for build-script, breaking this build-script
               # value. v2 is the latest actual release line.
-              uses: preactjs/compressed-size-action@v3
+              uses: preactjs/compressed-size-action@v2
               with:
                   pattern: 'build/*.{js,css,wasm}'
                   strip-hash: "\\.(\\w{8})\\.wasm$"
@@ -146,7 +146,7 @@ jobs:
         continue-on-error: ${{ matrix.experimental }}
         strategy:
             matrix:
-                php: ['8.2', '8.1', '8.0', '7.4']
+                php: ['8.5', '8.2', '8.1', '8.0', '7.4']
                 wp: ['7.1-RC4']
                 coverage: [false]
                 experimental: [false]
@@ -186,6 +186,8 @@ jobs:
                   done
 
             - name: Install svn
+              # This step has been observed hanging on a slow/unresponsive apt
+              # mirror; fail fast instead of burning the whole job timeout.
               timeout-minutes: 10
               run: |
                   sudo apt update -y --allow-releaseinfo-change

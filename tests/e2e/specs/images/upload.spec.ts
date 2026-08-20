@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { ImageFormat, ImageLibrary } from '@mexp/upload-media';
-import { RestAttachment } from '@mexp/media-utils';
+import { ImageFormat, ImageLibrary, RestAttachment } from '@mexp/upload-media';
 
 /**
  * Internal dependencies

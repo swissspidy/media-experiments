@@ -90,12 +90,33 @@ jobs:
                   npm run wp-env start
 
                   if [[ $GUTENBERG != 'true' ]]; then
-                    echo "Deactivating Gutenberg plugin"
-                    npm run wp-env --silent -- run tests-cli wp plugin deactivate gutenberg
+                    if npm run wp-env --silent -- run tests-cli wp plugin is-installed gutenberg; then
+                      echo "Deactivating Gutenberg plugin"
+                      npm run wp-env --silent -- run tests-cli wp plugin deactivate gutenberg
+                    else
+                      # `wp plugin is-installed` is a boolean-check command that
+                      # WP-CLI documents as exiting 1 specifically when the
+                      # plugin isn't installed. Any other exit code means the
+                      # check itself failed (wp-env/WP-CLI/container error),
+                      # so only exit 1 is safe to treat as "nothing to do".
+                      status=$?
+                      if [[ $status -eq 1 ]]; then
+                        echo "Gutenberg plugin is not installed; nothing to deactivate."
+                      else
+                        echo "Failed to check whether the Gutenberg plugin is installed (exit code $status)." >&2
+                        exit "$status"
+                      fi
+                    fi
                   fi
               env:
                   WP_VERSION: ${{ matrix.wp }}
-                  GUTENBERG: ${{ matrix.gb == 'true' }}
+                  # matrix.gb is a boolean; comparing it to the string 'true' via
+                  # `matrix.gb == 'true'` always evaluates to false in GitHub
+                  # Actions expression syntax (mismatched-type comparisons coerce
+                  # to numbers, and 'true' isn't numeric). Use the boolean value
+                  # directly instead, which GitHub Actions renders as the string
+                  # "true"/"false" (or empty, when unset) in this string context.
+                  GUTENBERG: ${{ matrix.gb }}
 
             - name: Run tests
               run: |
