@@ -280,7 +280,11 @@ export async function getPosterFromVideo(
  * Preloads the video and seeks to a very early offset before attempting
  * to capture the frame.
  *
+ * Uses requestVideoFrameCallback for accurate frame capture that's synchronized
+ * with the video's frame presentation.
+ *
  * @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
+ * @see https://web.dev/articles/requestvideoframecallback-rvfc
  *
  * @param src     Video URL.
  * @param type    Desired output mime type, as supported by HTMLCanvasElement.toBlob().
@@ -293,7 +297,17 @@ export async function getFirstFrameOfVideo(
 ) {
 	const video = await preloadVideo( src );
 	await seekVideo( video );
-	return getImageFromVideo( video, type, quality );
+
+	// Use requestVideoFrameCallback for accurate frame capture
+	return new Promise< Blob >( ( resolve, reject ) => {
+		video.requestVideoFrameCallback!( () => {
+			try {
+				resolve( getImageFromVideo( video, type, quality ) );
+			} catch ( error ) {
+				reject( error );
+			}
+		} );
+	} );
 }
 
 /**
