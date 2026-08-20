@@ -1228,8 +1228,6 @@ export function generateThumbnails( id: QueueItemId ) {
 						// Sideloading does not use the parent post ID but the
 						// attachment ID as the image sizes need to be added to it.
 						post: attachment.id,
-						// Reference the same upload_request if needed.
-						upload_request: item.additionalData.upload_request,
 						image_size: name,
 						convert_format: false,
 					},
@@ -1288,8 +1286,6 @@ export function uploadOriginal( id: QueueItemId, args?: UploadOriginalArgs ) {
 					// Sideloading does not use the parent post ID but the
 					// attachment ID as the image sizes need to be added to it.
 					post: attachment.id,
-					// Reference the same upload_request if needed.
-					upload_request: item.additionalData.upload_request,
 					image_size: 'original',
 					convert_format: false,
 				},

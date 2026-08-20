@@ -8,7 +8,6 @@ use WP_REST_Server;
 use WP_UnitTest_Factory;
 use WP_UnitTestCase;
 use function MediaExperiments\add_crossorigin_attributes;
-use function MediaExperiments\delete_old_upload_requests;
 use function MediaExperiments\enqueue_block_assets;
 use function MediaExperiments\enqueue_block_editor_assets;
 use function MediaExperiments\filter_attachment_post_type_args;
@@ -19,10 +18,8 @@ use function MediaExperiments\get_user_media_preferences;
 use function MediaExperiments\is_upload_screen;
 use function MediaExperiments\needs_cross_origin_isolation;
 use function MediaExperiments\override_media_templates;
-use function MediaExperiments\register_assets;
 use function MediaExperiments\register_attachment_post_meta;
 use function MediaExperiments\register_media_source_taxonomy;
-use function MediaExperiments\register_upload_request_post_type;
 use function MediaExperiments\rest_get_attachment_blurhash;
 use function MediaExperiments\rest_get_attachment_dominant_color;
 use function MediaExperiments\rest_get_attachment_filename;
@@ -247,16 +244,6 @@ HTML;
 	}
 
 	/**
-	 * @covers \MediaExperiments\register_assets
-	 */
-	public function test_register_assets() {
-		register_assets();
-
-		$this->assertTrue( wp_script_is( 'media-experiments-view-upload-request', 'registered' ) );
-		$this->assertTrue( wp_style_is( 'media-experiments-view-upload-request', 'registered' ) );
-	}
-
-	/**
 	 * @covers \MediaExperiments\enqueue_block_editor_assets
 	 */
 	public function test_enqueue_block_editor_assets() {
@@ -348,45 +335,6 @@ HTML;
 	}
 
 	/**
-	 * @covers \MediaExperiments\add_quarter_hourly_cron_interval
-	 */
-	public function test_add_quarter_hourly_cron_interval() {
-		$schedules = wp_get_schedules();
-		$this->assertArrayHasKey( 'quarter_hourly', $schedules );
-	}
-
-	/**
-	 * @covers \MediaExperiments\delete_old_upload_requests
-	 */
-	public function test_delete_old_upload_requests() {
-		$post_1 = $this->factory()->post->create(
-			[
-				'post_type' => 'mexp-upload-request',
-			]
-		);
-		$post_2 = $this->factory()->post->create(
-			[
-				'post_type' => 'mexp-upload-request',
-				'post_date' => '2020-01-01 00:00:00',
-			]
-		);
-
-		delete_old_upload_requests();
-
-		$this->assertNotNull( get_post( $post_1 ) );
-		$this->assertNull( get_post( $post_2 ) );
-	}
-
-	/**
-	 * @covers \MediaExperiments\register_upload_request_post_type
-	 */
-	public function test_register_upload_request_post_type() {
-		register_upload_request_post_type();
-
-		$this->assertTrue( post_type_exists( 'mexp-upload-request' ) );
-	}
-
-	/**
 	 * @covers \MediaExperiments\filter_attachment_post_type_args
 	 */
 	public function test_filter_attachment_post_type_args() {
@@ -435,22 +383,6 @@ HTML;
 	public function test_get_default_image_output_formats() {
 		$input_output_formats = get_default_image_output_formats();
 		$this->assertEmpty( $input_output_formats );
-	}
-
-	/**
-	 * @covers \MediaExperiments\filter_rest_route_for_post_for_upload_requests
-	 */
-	public function test_filter_rest_route_for_post_for_upload_requests() {
-		$upload_request = $this->factory()->post->create(
-			[
-				'post_type'   => 'mexp-upload-request',
-				'post_status' => 'publish',
-				'post_name'   => 'someslug',
-			]
-		);
-
-		$actual = rest_get_route_for_post( $upload_request );
-		$this->assertSame( '/wp/v2/upload-requests/someslug', $actual );
 	}
 
 	/**
