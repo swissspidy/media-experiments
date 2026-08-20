@@ -47,10 +47,10 @@ interface AudioAnalyzerProps {
 
 function AudioAnalyzer( { source }: AudioAnalyzerProps ) {
 	const [ data, setData ] = useState< Uint8Array >( new Uint8Array( [] ) );
-	const rafRef = useRef< number >();
-	const audioContextRef = useRef< AudioContext >();
-	const analyzerRef = useRef< AnalyserNode >();
-	const prevRafTimeRef = useRef< number >();
+	const rafRef = useRef< number | undefined >( undefined );
+	const audioContextRef = useRef< AudioContext | undefined >( undefined );
+	const analyzerRef = useRef< AnalyserNode | undefined >( undefined );
+	const prevRafTimeRef = useRef< number | undefined >( undefined );
 
 	useEffect( () => {
 		if ( ! analyzerRef.current ) {
