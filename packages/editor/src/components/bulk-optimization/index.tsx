@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { ComponentProps, ComponentType, MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { store as uploadStore, UploadError } from '@mexp/upload-media';
 
@@ -35,17 +35,9 @@ import { useState } from '@wordpress/element';
 import type { BulkOptimizationAttachmentData } from '../../types';
 import { ReactComponent as CompressIcon } from '../../icons/compress.svg';
 import { ApprovalDialog } from '../approval-dialog';
+import { useMediaSourceTerms } from '../../utils/hooks';
 
 import './editor.css';
-
-/*
- * `Item` applies `wrapperClassName` to the list item wrapper at runtime, but
- * the prop is missing from the published types.
- */
-const ItemWithWrapper = Item as ComponentType<
-	ComponentProps< typeof Item > & { wrapperClassName?: string }
->;
-import { useMediaSourceTerms } from '../../utils/hooks';
 
 const numberFormatter = Intl.NumberFormat( 'en', {
 	notation: 'compact',
@@ -273,14 +265,14 @@ export function BulkOptimization( {
 			</BaseControl.VisualLabel>
 			<ItemGroup>
 				{ attachments.map( ( data ) => (
-					<ItemWithWrapper
+					<Item
 						key={ data.id }
 						role="listitem"
-						wrapperClassName="mexp-bulk-optimization-row"
+						className="mexp-bulk-optimization-row"
 					>
 						<Row isBulkUploading={ isBulkUploading } { ...data } />
 						<ApprovalDialog id={ data.id } />
-					</ItemWithWrapper>
+					</Item>
 				) ) }
 			</ItemGroup>
 			{ attachments.length > 1 ? (
