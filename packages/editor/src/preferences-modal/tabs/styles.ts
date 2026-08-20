@@ -1,6 +1,6 @@
 // eslint-disable-next-line
 import styled from '@emotion/styled';
-// eslint-disable-next-line
+
 import * as Ariakit from '@ariakit/react';
 
 export const TabListWrapper = styled.div`

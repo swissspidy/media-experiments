@@ -23,7 +23,7 @@ jobs:
               uses: actions/checkout@v7
 
             - name: Setup Node
-              uses: actions/setup-node@v6
+              uses: actions/setup-node@v7
               with:
                   node-version-file: '.nvmrc'
                   cache: npm
@@ -56,7 +56,7 @@ jobs:
               uses: actions/checkout@v7
 
             - name: Setup Node
-              uses: actions/setup-node@v6
+              uses: actions/setup-node@v7
               with:
                   node-version-file: '.nvmrc'
                   cache: npm
@@ -64,7 +64,11 @@ jobs:
             - name: Install dependencies
               run: npm ci
             - name: Bundle size check
-              uses: preactjs/compressed-size-action@v3
+              # v3 is an unreleased development branch (no v3 tag exists yet)
+              # that GitHub resolves by branch name and dropped the implicit
+              # `npm run` prefix for build-script, breaking this build-script
+              # value. v2 is the latest actual release line.
+              uses: preactjs/compressed-size-action@v2
               with:
                   pattern: 'build/*.{js,css,wasm}'
                   strip-hash: "\\.(\\w{8})\\.wasm$"
@@ -107,7 +111,7 @@ jobs:
               uses: actions/checkout@v7
 
             - name: Setup Node
-              uses: actions/setup-node@v6
+              uses: actions/setup-node@v7
               with:
                   node-version-file: '.nvmrc'
                   cache: npm
@@ -142,13 +146,13 @@ jobs:
         continue-on-error: ${{ matrix.experimental }}
         strategy:
             matrix:
-                php: ['8.2', '8.1', '8.0', '7.4']
-                wp: ['latest']
+                php: ['8.5', '8.2', '8.1', '8.0', '7.4']
+                wp: ['7.1-RC4']
                 coverage: [false]
                 experimental: [false]
                 include:
                     - php: '8.3'
-                      wp: 'latest'
+                      wp: '7.1-RC4'
                       coverage: true
                       experimental: false
 
@@ -182,6 +186,9 @@ jobs:
                   done
 
             - name: Install svn
+              # This step has been observed hanging on a slow/unresponsive apt
+              # mirror; fail fast instead of burning the whole job timeout.
+              timeout-minutes: 10
               run: |
                   sudo apt update -y --allow-releaseinfo-change
                   sudo apt install -y subversion
@@ -254,13 +261,20 @@ jobs:
               with:
                   php-version: latest
                   coverage: none
-                  tools: wp-cli
+                  tools: composer
+
+            - name: Install WP-CLI (v3 nightly)
+              run: |
+                  curl -sSL -o "${RUNNER_TEMP}/wp-cli.phar" https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli-nightly.phar
+                  chmod +x "${RUNNER_TEMP}/wp-cli.phar"
+                  sudo mv "${RUNNER_TEMP}/wp-cli.phar" /usr/local/bin/wp
+                  wp --version
 
             - name: Install latest version of dist-archive-command
               run: wp package install wp-cli/dist-archive-command:dev-main
 
             - name: Setup Node
-              uses: actions/setup-node@v6
+              uses: actions/setup-node@v7
               with:
                   node-version-file: '.nvmrc'
                   cache: npm

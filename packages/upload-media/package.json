@@ -19,7 +19,7 @@
 		"url": "https://github.com/swissspidy/media-experiments/issues"
 	},
 	"engines": {
-		"node": ">=20"
+		"node": ">=22"
 	},
 	"main": "dist/index.js",
 	"source": "src/index.ts",
@@ -33,21 +33,21 @@
 		"@audapolis/webvtt-writer": "^1.0.6",
 		"@mexp/ai": "file:../ai",
 		"@mexp/ffmpeg": "file:../ffmpeg",
-		"@mexp/heif": "file:../heif",
 		"@mexp/log": "file:../log",
 		"@mexp/pdf": "file:../pdf",
-		"@mexp/vips": "file:../vips",
 		"@shopify/web-worker": "^6.4.0",
-		"@wordpress/api-fetch": "^7.13.0",
-		"@wordpress/blob": "^4.36.0",
-		"@wordpress/data": "^10.11.0",
-		"@wordpress/i18n": "^6.1.0",
-		"@wordpress/preferences": "^4.13.0",
-		"@wordpress/url": "^4.13.0",
+		"@wordpress/api-fetch": "^7.53.0",
+		"@wordpress/blob": "^4.53.0",
+		"@wordpress/data": "^10.53.0",
+		"@wordpress/i18n": "^6.26.0",
+		"@wordpress/media-utils": "^5.53.0",
+		"@wordpress/preferences": "^4.53.0",
+		"@wordpress/url": "^4.53.0",
+		"@wordpress/vips": "^3.1.0",
 		"blurhash": "^2.0.5",
-		"fast-average-color": "^9.5.0",
-		"mime": "^3.0.0",
-		"uuid": "^11.1.0",
+		"fast-average-color": "^9.5.2",
+		"mime": "^4.1.0",
+		"uuid": "^14.0.1",
 		"vosk-browser": "^0.0.8"
 	}
 }

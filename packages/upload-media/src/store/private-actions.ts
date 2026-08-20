@@ -35,12 +35,13 @@ import {
 } from '../utils';
 import { PREFERENCES_NAME } from '../constants';
 import { StubFile } from '../stub-file';
-import { transcodeHeifImage } from './utils/heif';
 import {
 	vipsCompressImage,
 	vipsConvertImageFormat,
 	vipsHasTransparency,
 	vipsResizeImage,
+	vipsTerminateWorker,
+	vipsTranscodeHeifImage,
 } from './utils/vips';
 import {
 	compressImage as canvasCompressImage,
@@ -638,6 +639,14 @@ export function removeItem( id: QueueItemId ) {
 			type: Type.Remove,
 			id,
 		} );
+
+		// Once the whole queue -- including children/sub-sizes -- is empty,
+		// free the vips WASM worker's memory rather than let it accumulate
+		// for the rest of the page's lifetime; a later upload spins it back
+		// up lazily on demand.
+		if ( select.getAllItems().length === 0 ) {
+			void vipsTerminateWorker();
+		}
 	};
 }
 
@@ -1560,7 +1569,6 @@ export function optimizeVideoItem(
 			const isChunkLoadError =
 				error instanceof Error && error.name === 'ChunkLoadError';
 			if ( isChunkLoadError ) {
-				// eslint-disable-next-line no-console -- Deliberately log errors here.
 				console.error( error );
 			}
 
@@ -1738,7 +1746,6 @@ export function convertGifItem( id: QueueItemId ) {
 			} );
 		} catch ( error ) {
 			if ( error instanceof Error && error.name === 'ChunkLoadError' ) {
-				// eslint-disable-next-line no-console -- Deliberately log errors here.
 				console.error( error );
 			}
 			dispatch.cancelItem(
@@ -1764,7 +1771,7 @@ export function convertHeifItem( id: QueueItemId ) {
 		const item = select.getItem( id ) as QueueItem;
 
 		try {
-			const file = await transcodeHeifImage( item.file );
+			const file = await vipsTranscodeHeifImage( id, item.file );
 
 			const blobUrl = createBlobURL( file );
 			dispatch< CacheBlobUrlAction >( {

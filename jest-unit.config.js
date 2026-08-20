@@ -27,4 +27,24 @@ module.exports = {
 	moduleNameMapper: {
 		'.+\\.wasm$': '<rootDir>/tests/js/wasm-stub.js',
 	},
+	/*
+	 * These dependencies are published as ESM only, so Jest has to transform
+	 * them instead of skipping everything under `node_modules`. The default
+	 * transform only covers `.js`/`.ts`, hence the added `.mjs` entry.
+	 */
+	transform: {
+		...defaultConfig.transform,
+		'\\.mjs$': require.resolve(
+			'@wordpress/scripts/config/babel-transform'
+		),
+	},
+	/*
+	 * `.*` before the allowlist (rather than anchoring right after
+	 * `node_modules/`) so this also matches these packages when npm nests a
+	 * second copy inside another package's own `node_modules/`, e.g.
+	 * `node_modules/@wordpress/ui/node_modules/@wordpress/theme/`.
+	 */
+	transformIgnorePatterns: [
+		'node_modules/(?!.*(mime|uuid|@wordpress/theme)/)',
+	],
 };

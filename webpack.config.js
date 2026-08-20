@@ -9,8 +9,57 @@ const { WebWorkerPlugin } = require( '@shopify/web-worker/webpack' );
 /**
  * WordPress dependencies
  */
+const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
+const {
+	defaultRequestToExternal,
+	defaultRequestToHandle,
+} = require( '@wordpress/dependency-extraction-webpack-plugin/lib/util' );
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 const { hasBabelConfig, hasArgInCLI } = require( '@wordpress/scripts/utils' );
+
+/*
+ * WordPress packages that are not (yet) shipped with WordPress core and
+ * therefore have no `wp-*` script handle to depend on. They have to be
+ * bundled instead of turned into an external.
+ */
+const BUNDLED_WORDPRESS_PACKAGES = [
+	'@wordpress/vips',
+	'@wordpress/worker-threads',
+];
+
+/**
+ * Decides whether a module request becomes a WordPress script external.
+ *
+ * Returning `undefined` normally makes the plugin fall back to its own
+ * defaults, so those defaults are applied here instead and `useDefaults` is
+ * turned off. That way `undefined` really does mean "bundle this".
+ *
+ * @param {string} request Module request.
+ * @return {string|string[]|undefined} External definition, or `undefined` to bundle.
+ */
+function requestToExternal( request ) {
+	if (
+		BUNDLED_WORDPRESS_PACKAGES.some(
+			( pkg ) => request === pkg || request.startsWith( `${ pkg }/` )
+		)
+	) {
+		return undefined;
+	}
+
+	return defaultRequestToExternal( request );
+}
+
+/**
+ * Maps a module request to the WordPress script handle it depends on.
+ *
+ * Needed because `useDefaults` is turned off for `requestToExternal`.
+ *
+ * @param {string} request Module request.
+ * @return {string|undefined} Script handle.
+ */
+function requestToHandle( request ) {
+	return defaultRequestToHandle( request );
+}
 
 const isProduction = process.env.NODE_ENV === 'production';
 const hasReactFastRefresh = hasArgInCLI( '--hot' ) && ! isProduction;
@@ -110,8 +159,15 @@ module.exports = {
 	},
 	plugins: [
 		...defaultConfig.plugins.filter(
-			( plugin ) => ! ( plugin instanceof MiniCSSExtractPlugin )
+			( plugin ) =>
+				! ( plugin instanceof MiniCSSExtractPlugin ) &&
+				! ( plugin instanceof DependencyExtractionWebpackPlugin )
 		),
+		new DependencyExtractionWebpackPlugin( {
+			requestToExternal,
+			requestToHandle,
+			useDefaults: false,
+		} ),
 		new WebWorkerPlugin(),
 		new MiniCSSExtractPlugin( {
 			filename: '[name].css',

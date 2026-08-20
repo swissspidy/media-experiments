@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Attachment } from '@mexp/media-utils';
+import type { Attachment } from '@mexp/upload-media';
 import type {
 	AudioFormat,
 	ImageFormat,
@@ -14,9 +14,9 @@ import type {
 /**
  * WordPress dependencies
  */
-import type { BlockInstance, BlockEditProps } from '@wordpress/blocks';
+import type { Block, BlockEditProps } from '@wordpress/blocks';
 
-export type ImageBlock = BlockInstance< {
+export type ImageBlock = Block< {
 	id: number;
 	url: string;
 	// New local attribute in WordPress 6.7.
@@ -25,14 +25,14 @@ export type ImageBlock = BlockInstance< {
 	alt: string;
 } > & { name: 'core/image' };
 
-export type AudioBlock = BlockInstance< {
+export type AudioBlock = Block< {
 	id: number;
 	src: string;
 	// New local attribute in WordPress 6.7.
 	blob: string;
 } > & { name: 'core/audio' };
 
-export type VideoBlock = BlockInstance< {
+export type VideoBlock = Block< {
 	id: number;
 	src: string;
 	// New local attribute in WordPress 6.7.
@@ -52,13 +52,13 @@ export type VideoBlock = BlockInstance< {
 	playsInline: boolean;
 } > & { name: 'core/video' };
 
-export type MediaTextBlock = BlockInstance< {
+export type MediaTextBlock = Block< {
 	mediaId: number;
 	mediaUrl: string;
 	mediaType: string;
 } > & { name: 'core/media-text' };
 
-export type GalleryBlock = BlockInstance< {
+export type GalleryBlock = Block< {
 	images: Array< {
 		id: number;
 		url: string;
@@ -67,24 +67,24 @@ export type GalleryBlock = BlockInstance< {
 	} >;
 } > & { name: 'core/gallery' };
 
-export type CoverBlock = BlockInstance< {
+export type CoverBlock = Block< {
 	id: number;
 	url: string;
 	useFeaturedImage: boolean;
 	backgroundType: string;
 } > & { name: 'core/cover' };
 
-export type PostFeaturedImageBlock = BlockInstance< {} > & {
+export type PostFeaturedImageBlock = Block< {} > & {
 	name: 'core/post-featured-image';
 };
 
-export type SiteLogoBlock = BlockInstance< {
+export type SiteLogoBlock = Block< {
 	shouldSyncIcon: boolean;
 } > & {
 	name: 'core/site-logo';
 };
 
-export type EmbedBlock = BlockInstance< {
+export type EmbedBlock = Block< {
 	url: string;
 	providerNameSlug: string;
 } > & {

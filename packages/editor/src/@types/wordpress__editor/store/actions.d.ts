@@ -1,4 +1,7 @@
-import type { BlockInstance, TemplateArray } from '@wordpress/blocks';
+/**
+ * WordPress dependencies
+ */
+import type { Block, TemplateArray } from '@wordpress/blocks';
 
 /**
  * Action generator used in signalling that the post should autosave.
@@ -69,11 +72,11 @@ export function refreshPost(): { type: 'DO_NOTHING' };
 /**
  * Signals that the blocks have been updated.
  *
- * @param blocks - Block Array.
+ * @param blocks  - Block Array.
  * @param options - Optional options.
  */
 export function resetEditorBlocks(
-	blocks: BlockInstance[],
+	blocks: Block[],
 	options?: Record< string, any >
 ): IterableIterator< void >;
 
@@ -94,8 +97,8 @@ export function savePost(
 /**
  * Signals that editor has initialized with the specified post object and editor settings.
  *
- * @param post - Post object.
- * @param edits - Initial edited attributes object.
+ * @param post     - Post object.
+ * @param edits    - Initial edited attributes object.
  * @param template - Block Template.
  */
 export function setupEditor(
@@ -147,7 +150,9 @@ export function updatePost( edits: Record< string, any > ): void;
 /**
  * Used to lock the editor.
  *
- * @param lock - Details about the post lock status, user, and nonce.
+ * @param lock          - Details about the post lock status, user, and nonce.
+ * @param lock.isLocked - Whether the post is locked.
+ * @param lock.user     - User holding the lock, if any.
  */
 export function updatePostLock( lock: {
 	isLocked: boolean;

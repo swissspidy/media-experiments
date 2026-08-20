@@ -605,7 +605,7 @@ export function cancelItem( id: QueueItemId, error: Error, silent = false ) {
 			onError?.( error ?? new Error( 'Upload cancelled' ) );
 			if ( ! onError && error ) {
 				// TODO: Find better way to surface errors with sideloads etc.
-				// eslint-disable-next-line no-console -- Deliberately log errors here.
+
 				console.error( 'Upload cancelled', error );
 			}
 		}

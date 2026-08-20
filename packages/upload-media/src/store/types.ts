@@ -3,6 +3,11 @@
  */
 import type { MeasureOptions } from '@mexp/log';
 
+/**
+ * Internal dependencies
+ */
+import type { Attachment } from '../types';
+
 export type QueueItemId = string;
 
 export type QueueStatus = 'active' | 'paused';
@@ -158,29 +163,7 @@ export interface Settings {
 	imageSizes: Record< string, ImageSizeCrop >;
 }
 
-// Must match the Attachment type from the media-utils package.
-export interface Attachment {
-	id: number;
-	alt: string;
-	caption: string;
-	title: string;
-	url: string;
-	mexp_filename: string | null;
-	mexp_filesize: number | null;
-	meta: {
-		mexp_generated_poster_id?: number;
-		mexp_original_id?: number;
-	};
-	mexp_blurhash?: string;
-	mexp_dominant_color?: string;
-	mexp_is_muted?: boolean;
-	mexp_has_transparency?: boolean;
-	media_type: 'image' | 'file';
-	mime_type: string;
-	featured_media?: number;
-	missing_image_sizes?: string[];
-	poster?: string;
-}
+export type { Attachment } from '../types';
 
 export type OnChangeHandler = ( attachments: Partial< Attachment >[] ) => void;
 export type OnSuccessHandler = ( attachments: Partial< Attachment >[] ) => void;

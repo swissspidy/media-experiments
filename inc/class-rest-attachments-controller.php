@@ -67,6 +67,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		$valid_image_sizes[] = 'full';
 
 		register_rest_route(
+			// @phpstan-ignore argument.type ($this->namespace is never empty in practice)
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)/sideload',
 			[
@@ -102,13 +103,13 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 *                       on `EDITABLE` requests. Default WP_REST_Server::CREATABLE.
 	 * @return array Endpoint arguments.
 	 *
-	 * @phpstan-return array{string: array<string,mixed>}
+	 * @phpstan-return array<string, array<string,mixed>>
 	 */
 	public function get_endpoint_args_for_item_schema( $method = WP_REST_Server::CREATABLE ) {
 		/**
 		 * Endpoint arguments.
 		 *
-		 * @phpstan-var array{string: array<string,mixed>} $args
+		 * @phpstan-var array<string, array<string,mixed>> $args
 		 */
 		$args = rest_get_endpoint_args_for_schema( $this->get_item_schema(), $method );
 
@@ -207,7 +208,6 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 
 		foreach ( $links as $rel => $rel_links ) {
 			foreach ( $rel_links as $link ) {
-				// @phpstan-ignore method.internal (false positive)
 				$response->add_link( $rel, $link['href'], $link['attributes'] );
 			}
 		}

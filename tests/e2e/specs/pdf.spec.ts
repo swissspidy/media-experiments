@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { RestAttachment } from '@mexp/media-utils';
+import { RestAttachment } from '@mexp/upload-media';
 
 /**
  * Internal dependencies

@@ -10,9 +10,6 @@
 			"path": "packages/ffmpeg"
 		},
 		{
-			"path": "packages/heif"
-		},
-		{
 			"path": "packages/interface"
 		},
 		{
@@ -22,16 +19,10 @@
 			"path": "packages/media-recording"
 		},
 		{
-			"path": "packages/media-utils"
-		},
-		{
 			"path": "packages/pdf"
 		},
 		{
 			"path": "packages/upload-media"
-		},
-		{
-			"path": "packages/vips"
 		}
 	],
 	"files": []

@@ -5,7 +5,7 @@ import {
 	ReactCompareSlider,
 	ReactCompareSliderImage,
 } from 'react-compare-slider';
-import type { RestAttachment } from '@mexp/media-utils';
+import type { RestAttachment } from '@mexp/upload-media';
 import { store as uploadStore } from '@mexp/upload-media';
 
 /**

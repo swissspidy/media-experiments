@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { store as uploadStore } from '@mexp/upload-media';
-import type { RestAttachment } from '@mexp/media-utils';
+import type { RestAttachment } from '@mexp/upload-media';
 
 /**
  * WordPress dependencies

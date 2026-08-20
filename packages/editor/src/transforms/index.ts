@@ -3,11 +3,11 @@
  */
 import { addFilter } from '@wordpress/hooks';
 import { createBlobURL } from '@wordpress/blob';
-import { type Block, type BlockInstance, createBlock } from '@wordpress/blocks';
+import { type Block, type BlockType, createBlock } from '@wordpress/blocks';
 
 type Writable< T > = { -readonly [ P in keyof T ]: Writable< T[ P ] > };
 
-type FilterableBlock = Writable< Block >;
+type FilterableBlock = Writable< BlockType >;
 
 function addMultiFileTransformToBlock(
 	settings: FilterableBlock,
@@ -47,7 +47,7 @@ function addMultiFileTransformToBlock(
 					);
 				},
 				transform( files: File[] ) {
-					const blocks: BlockInstance< {} >[] = [];
+					const blocks: Block< {} >[] = [];
 
 					files.forEach( ( file ) => {
 						if ( file.type.startsWith( 'video/' ) ) {

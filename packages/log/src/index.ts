@@ -25,7 +25,6 @@ export type { MeasureOptions };
  * ```
  */
 export function log( message: string ) {
-	// eslint-disable-next-line no-console
 	return _log( message, console.log );
 }
 
@@ -47,7 +46,6 @@ export function log( message: string ) {
  * ```
  */
 export function warn( message: string ) {
-	// eslint-disable-next-line no-console
 	return _log( message, console.warn );
 }
 
@@ -69,7 +67,6 @@ export function warn( message: string ) {
  * ```
  */
 export function error( message: string ) {
-	// eslint-disable-next-line no-console
 	return _log( message, console.error );
 }
 
@@ -99,7 +96,6 @@ export function start( message: string ): undefined | ( () => void ) {
 	return () => {
 		const elapsed = performance.now() - before;
 
-		// eslint-disable-next-line no-console
 		console.log(
 			`${ message } | %c${ elapsed.toFixed( 3 ) } ms`,
 			'color: lime;'
@@ -194,7 +190,6 @@ function isDev() {
 	return typeof SCRIPT_DEBUG !== 'undefined' && SCRIPT_DEBUG;
 }
 
-// eslint-disable-next-line no-console
 function _log( message: string, logFunc: typeof console.log = console.log ) {
 	if ( ! isDev() ) {
 		return;
@@ -205,7 +200,6 @@ function _log( message: string, logFunc: typeof console.log = console.log ) {
 		return;
 	}
 
-	// eslint-disable-next-line no-console
 	logFunc( message );
 
 	// Throwing an error and catching it immediately to improve debugging

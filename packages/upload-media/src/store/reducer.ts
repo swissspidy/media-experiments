@@ -206,7 +206,7 @@ function reducer(
 						],
 					};
 				} ),
-				// eslint-disable-next-line no-nested-ternary
+
 				pendingApproval: state.pendingApproval
 					? state.pendingApproval
 					: action.item.status === ItemStatus.PendingApproval
