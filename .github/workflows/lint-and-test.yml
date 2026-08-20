@@ -68,7 +68,7 @@ jobs:
               # that GitHub resolves by branch name and dropped the implicit
               # `npm run` prefix for build-script, breaking this build-script
               # value. v2 is the latest actual release line.
-              uses: preactjs/compressed-size-action@v2
+              uses: preactjs/compressed-size-action@v3
               with:
                   pattern: 'build/*.{js,css,wasm}'
                   strip-hash: "\\.(\\w{8})\\.wasm$"
