@@ -16,7 +16,7 @@ parameters:
 		- tests/phpstan/bootstrap.php
 	reportMaybesInMethodSignatures: false
 	WPCompat:
-		requiresAtLeast: '7.1'
+		pluginFile: media-experiments.php
 	strictRules:
 		disallowedEmpty: false
 		strictArrayFilter: false
