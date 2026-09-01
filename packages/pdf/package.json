@@ -32,6 +32,6 @@
 	},
 	"types": "dist-types/index.d.ts",
 	"dependencies": {
-		"pdfjs-dist": "^6.2.108"
+		"pdfjs-dist": "^6.3.289"
 	}
 }
