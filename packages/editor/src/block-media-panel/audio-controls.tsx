@@ -17,7 +17,6 @@ import { RecordingControls } from './recording-controls';
 import { ImportMedia } from './import-media';
 import type { AudioBlock } from '../types';
 import { DebugInfo } from './debug-info';
-import { UploadRequestControls } from './upload-requests/controls';
 
 type AudioControlsProps = AudioBlock &
 	Pick< BlockEditProps< AudioBlock[ 'attributes' ] >, 'setAttributes' >;
@@ -45,16 +44,6 @@ export function AudioControls( props: AudioControlsProps ) {
 		}
 	}
 
-	function onInsertFromUploadRequest( [ media ]: Partial< Attachment >[] ) {
-		if ( ! media || ! media.url ) {
-			return;
-		}
-		props.setAttributes( {
-			id: media.id,
-			src: media.url,
-		} );
-	}
-
 	return (
 		<>
 			<UploadIndicator
@@ -67,13 +56,6 @@ export function AudioControls( props: AudioControlsProps ) {
 				onInsert={ onInsertRecording }
 				recordingTypes={ [ 'audio' ] }
 			/>
-			{ ! props.attributes.src ? (
-				<UploadRequestControls
-					onInsert={ onInsertFromUploadRequest }
-					allowedTypes={ [ 'audio' ] }
-					accept={ [ 'audio/*' ] }
-				/>
-			) : null }
 			{ ! props.attributes.id ? (
 				<ImportMedia
 					url={ props.attributes.src }

@@ -33,7 +33,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  *   context: string,
  *   id?: int,
  *   post: int,
- *   upload_request?: string,
  *   author?: int,
  *   sticky?: bool,
  *   caption?: string,
@@ -47,7 +46,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  *   context: string,
  *   id: int,
  *   image_size: string,
- *   upload_request?: string,
  *   convert_format: bool,
  *   _fields?: string|string[],
  * }
@@ -78,19 +76,15 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 					'callback'            => [ $this, 'sideload_item' ],
 					'permission_callback' => [ $this, 'sideload_item_permissions_check' ],
 					'args'                => [
-						'id'             => array(
+						'id'         => array(
 							'description' => __( 'Unique identifier for the attachment.', 'media-experiments' ),
 							'type'        => 'integer',
 						),
-						'image_size'     => [
+						'image_size' => [
 							'description' => __( 'Image size.', 'media-experiments' ),
 							'type'        => 'string',
 							'enum'        => $valid_image_sizes,
 							'required'    => true,
-						],
-						'upload_request' => [
-							'description' => __( 'Upload request this file is for.', 'media-experiments' ),
-							'type'        => 'string',
 						],
 					],
 				],
@@ -142,55 +136,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 	 * @phpstan-return array<string, mixed>
 	 */
 	public function get_collection_params(): array {
-		$params = parent::get_collection_params();
-
-		$params['upload_request'] = [
-			'default'     => null,
-			'description' => __( 'Limit result set to attachments associated with a given upload request.', 'media-experiments' ),
-			'type'        => 'string',
-		];
-
-		return $params;
-	}
-
-	/**
-	 * Determines the allowed query_vars for a get_items() response and
-	 * prepares for WP_Query.
-	 *
-	 * @param array           $prepared_args Optional. Array of prepared arguments. Default empty array.
-	 * @param WP_REST_Request $request       Optional. Request to prepare items for.
-	 * @return array Array of query arguments.
-	 * @phpstan-param array<string, mixed> $prepared_args
-	 * @phpstan-param WP_REST_Request<Upload> $request
-	 * @phpstan-return array<string, mixed>
-	 */
-	protected function prepare_items_query( $prepared_args = [], $request = null ): array {
-		$query_args = parent::prepare_items_query( $prepared_args, $request );
-
-		if ( ! empty( $request['upload_request'] ) ) {
-			$upload_request = $this->get_upload_request_post( $request );
-
-			if ( $upload_request instanceof WP_Post ) {
-				$attachment_ids = get_post_meta(
-					$upload_request->ID,
-					'mexp_attachment_id'
-				);
-
-				if ( ! empty( $attachment_ids ) ) {
-					$query_args['post__in'] = $attachment_ids;
-				} else {
-					// Upload has not been completed yet.
-					// Trick into returning an empty list.
-					$query_args['post__in'] = [ 0 ];
-				}
-			} else {
-				// The upload request was probably already deleted.
-				// Trick into returning an empty list.
-				$query_args['post__in'] = [ 0 ];
-			}
-		}
-
-		return $query_args;
+		return parent::get_collection_params();
 	}
 
 	/**
@@ -303,30 +249,6 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			}
 		}
 
-		$upload_request = $this->get_upload_request_post( $request );
-
-		$grant_meta_update = static function ( $caps, $cap, $user_id, $args ) {
-			if ( 'edit_post_meta' !== $cap ) {
-				return $caps;
-			}
-
-			// $args[0] is the attachment ID, $args[1] the meta key.
-			if ( str_starts_with( $args[1], 'mexp_' ) ) {
-				$caps = [ 'exist' ];
-			}
-
-			return $caps;
-		};
-
-		if ( $upload_request instanceof WP_Post ) {
-			add_filter( 'map_meta_cap', $grant_meta_update, 10, 4 );
-
-			// Set the attachment's parent post to the one associated with the upload request.
-			if ( $upload_request->post_parent > 0 ) {
-				$request['post'] = $upload_request->post_parent;
-			}
-		}
-
 		$before_upload   = microtime( true );
 		$before_metadata = 0;
 
@@ -361,41 +283,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		}
 		// @codeCoverageIgnoreEnd
 
-		$filter_upload_mimes = null;
-
-		if ( $upload_request instanceof WP_Post ) {
-			/**
-			 * Allowed file types.
-			 *
-			 * @var string[] $allowed_types
-			 */
-			$allowed_types = get_post_meta( $upload_request->ID, 'mexp_allowed_types', true );
-
-			/**
-			 * Filters list of mime types based on upload request restrictions.
-			 *
-			 * @param array $types Mime types keyed by the file extension regex corresponding to those types.
-			 *
-			 * @return array Filtered list of mime types.
-			 */
-			$filter_upload_mimes = static function ( array $types ) use ( $allowed_types ) {
-				return array_filter(
-					$types,
-					static function ( $mime_type ) use ( $allowed_types ) {
-						$file_type = explode( '/', $mime_type )[0];
-						return in_array( $file_type, $allowed_types, true );
-					}
-				);
-			};
-
-			add_filter( 'upload_mimes', $filter_upload_mimes );
-		}
-
 		$response = parent::create_item( $request );
-
-		if ( $upload_request instanceof WP_Post ) {
-			remove_filter( 'upload_mimes', $filter_upload_mimes );
-		}
 
 		// @codeCoverageIgnoreStart
 		if ( function_exists( 'perflab_server_timing_register_metric' ) && ! empty( $before_metadata ) ) {
@@ -414,29 +302,6 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		remove_filter( 'intermediate_image_sizes_advanced', '__return_empty_array', 100 );
 		remove_filter( 'fallback_intermediate_image_sizes', '__return_empty_array', 100 );
 		remove_filter( 'image_editor_output_format', '__return_empty_array', 100 );
-		remove_filter( 'map_meta_cap', $grant_meta_update );
-
-		if ( $upload_request instanceof WP_Post && $response instanceof WP_REST_Response ) {
-			/**
-			 * Response data
-			 *
-			 * @phpstan-var array{id: int} $response_data
-			 */
-			$response_data = $response->get_data();
-
-			/**
-			 * Uploaded attachment ID.
-			 *
-			 * @var int $attachment_id
-			 */
-			$attachment_id = $response_data['id'];
-
-			add_post_meta(
-				$upload_request->ID,
-				'mexp_attachment_id',
-				$attachment_id
-			);
-		}
 
 		return $response;
 	}
@@ -483,7 +348,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			);
 		}
 
-		if ( ! current_user_can( $post_type->cap->create_posts ) && ! $this->is_valid_upload_request( $request ) ) {
+		if ( ! current_user_can( $post_type->cap->create_posts ) ) {
 			return new WP_Error(
 				'rest_cannot_create',
 				__( 'Sorry, you are not allowed to create posts as this user.', 'media-experiments' ),
@@ -499,7 +364,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			);
 		}
 
-		if ( ! current_user_can( 'upload_files' ) && ! $this->is_valid_upload_request( $request ) ) {
+		if ( ! current_user_can( 'upload_files' ) ) {
 			return new WP_Error(
 				'rest_cannot_create',
 				__( 'Sorry, you are not allowed to upload media on this site.', 'media-experiments' ),
@@ -507,15 +372,10 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			);
 		}
 
-		// Attaching media to a post requires ability to edit said post,
-		// unless it's for an upload request and the post matches the request.
-
-		$upload_request = $this->get_upload_request_post( $request );
-
+		// Attaching media to a post requires ability to edit said post.
 		if (
 			! empty( $request['post'] ) &&
-			! current_user_can( 'edit_post', $request['post'] ) &&
-			( ! $upload_request instanceof WP_Post || $upload_request->post_parent !== $request['post'] )
+			! current_user_can( 'edit_post', $request['post'] )
 		) {
 			return new WP_Error(
 				'rest_cannot_edit',
@@ -525,49 +385,6 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 		}
 
 		return true;
-	}
-
-	/**
-	 * Determines whether this request is for a valid media upload request.
-	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return bool Whether this request is for a valid media upload request.
-	 * @phpstan-param WP_REST_Request<Upload>|WP_REST_Request<Sideload> $request
-	 */
-	protected function is_valid_upload_request( WP_REST_Request $request ): bool {
-		$post = $this->get_upload_request_post( $request );
-
-		return (bool) $post;
-	}
-
-	/**
-	 * Returns the upload request instance associated with this request.
-	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 *
-	 * @return WP_Post|null Media upload request if valid, null otherwise.
-	 * @phpstan-param WP_REST_Request<Upload>|WP_REST_Request<Sideload> $request
-	 */
-	protected function get_upload_request_post( WP_REST_Request $request ): ?WP_Post {
-		if ( empty( $request['upload_request'] ) ) {
-			return null;
-		}
-
-		$args = [
-			'name'             => $request['upload_request'],
-			'post_type'        => 'mexp-upload-request',
-			'post_status'      => 'publish',
-			'numberposts'      => 1,
-			'suppress_filters' => false,
-		];
-
-		$posts = get_posts( $args );
-
-		if ( empty( $posts ) ) {
-			return null;
-		}
-
-		return $posts[0];
 	}
 
 	/**
@@ -587,7 +404,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			return $post;
 		}
 
-		if ( ! $this->check_update_permission( $post ) && ! $this->is_valid_upload_request( $request ) ) {
+		if ( ! $this->check_update_permission( $post ) ) {
 			return new WP_Error(
 				'rest_cannot_edit',
 				__( 'Sorry, you are not allowed to edit this post.', 'media-experiments' ),
@@ -595,7 +412,7 @@ class REST_Attachments_Controller extends WP_REST_Attachments_Controller {
 			);
 		}
 
-		if ( ! current_user_can( 'upload_files' ) && ! $this->is_valid_upload_request( $request ) ) {
+		if ( ! current_user_can( 'upload_files' ) ) {
 			return new WP_Error(
 				'rest_cannot_create',
 				__( 'Sorry, you are not allowed to upload media on this site.', 'media-experiments' ),
