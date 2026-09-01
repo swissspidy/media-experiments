@@ -33,7 +33,7 @@
 	},
 	"types": "dist-types/index.d.ts",
 	"dependencies": {
-		"@ariakit/react": "^0.4.37",
+		"@ariakit/react": "^0.4.38",
 		"@mexp/ai": "file:../ai",
 		"@mexp/interface": "file:../interface",
 		"@mexp/media-recording": "file:../media-recording",
