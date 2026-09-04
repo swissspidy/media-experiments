@@ -71,6 +71,7 @@ export function getComparisonDataForApproval(
 	newSize: number;
 	newUrl: string | undefined;
 	sizeDiff: number;
+	currentQuality: number;
 } | null {
 	const foundItem = state.queue.find(
 		( item ) =>
@@ -83,12 +84,18 @@ export function getComparisonDataForApproval(
 		return null;
 	}
 
+	// Use the actual quality used during optimization if available.
+	// Fallback to 80 (the default in optimizeImageItem) if not present.
+	const currentQuality =
+		typeof foundItem.quality === 'number' ? foundItem.quality : 80;
+
 	return {
 		oldUrl: foundItem.sourceUrl,
 		oldSize: foundItem.sourceFile.size,
 		newSize: foundItem.file.size,
 		newUrl: foundItem.attachment?.url,
 		sizeDiff: foundItem.file.size / foundItem.sourceFile.size - 1,
+		currentQuality,
 	};
 }
 
