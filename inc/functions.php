@@ -438,9 +438,16 @@ function register_assets(): void {
 	$asset['dependencies'] = $asset['dependencies'] ?? [];
 	$asset['version']      = $asset['version'] ?? '';
 
+	/**
+	 * URL to the script.
+	 *
+	 * @var non-empty-string $src
+	 */
+	$src = plugins_url( 'build/view-upload-request.js', __DIR__ );
+
 	wp_register_script(
 		'media-experiments-view-upload-request',
-		plugins_url( 'build/view-upload-request.js', __DIR__ ),
+		$src,
 		$asset['dependencies'],
 		$asset['version'],
 		array(
@@ -552,15 +559,18 @@ function enqueue_block_assets(): void {
  * Returns a list of all available image sizes.
  *
  * @return array Existing image sizes.
- * @phpstan-return array<string, array<string,string|int>>
+ * @phpstan-return array<string, array{
+ *     width: non-negative-int,
+ *     height: non-negative-int,
+ *     crop: array{'left'|'center'|'right', 'top'|'center'|'bottom'}|bool,
+ *     name: string,
+ * }>
  */
 function get_all_image_sizes(): array {
 	$sizes = wp_get_registered_image_subsizes();
 
 	foreach ( $sizes as $name => &$size ) {
-		$size['height'] = (int) $size['height'];
-		$size['width']  = (int) $size['width'];
-		$size['name']   = $name;
+		$size['name'] = $name;
 	}
 	unset( $size );
 
@@ -704,7 +714,6 @@ function filter_rest_index( WP_REST_Response $response ): WP_REST_Response {
 		]
 	);
 
-	// @phpstan-ignore argument.type (stubs don't narrow get_terms() by 'fields')
 	$media_source_terms = ! is_wp_error( $media_source_terms ) ? array_flip( $media_source_terms ) : [];
 
 	/** This filter is documented in wp-includes/class-wp-image-editor-imagick.php */
