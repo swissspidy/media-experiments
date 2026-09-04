@@ -438,11 +438,16 @@ function register_assets(): void {
 	$asset['dependencies'] = $asset['dependencies'] ?? [];
 	$asset['version']      = $asset['version'] ?? '';
 
+	/**
+	 * URL to the script.
+	 *
+	 * @var non-empty-string $src
+	 */
 	$src = plugins_url( 'build/view-upload-request.js', __DIR__ );
 
 	wp_register_script(
 		'media-experiments-view-upload-request',
-		'' !== $src ? $src : false,
+		$src,
 		$asset['dependencies'],
 		$asset['version'],
 		array(
