@@ -172,6 +172,7 @@ export type BulkOptimizationAttachmentData = {
 	url: string;
 	filesize: number | null;
 	filename: string | null;
+	poster?: string;
 	onChange: ( media: Partial< Attachment > ) => void;
 	additionalData?: Record< string, unknown >;
 };
