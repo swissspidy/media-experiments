@@ -1,25 +1,5 @@
-// See https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-9.html#more-libdomdts-refinements
-
-interface AudioTrack {
-	enabled: boolean;
-	id: string;
-	kind:
-		| 'alternative'
-		| 'descriptions'
-		| 'main'
-		| 'main-desc'
-		| 'translation'
-		| 'commentary'
-		| '';
-	label: string;
-	language: string;
-	sourceBuffer: SourceBuffer | null;
-}
-
-interface AudioTrackList {
-	[Symbol.iterator](): IterableIterator< AudioTrack >;
-	length: number;
-}
+// Type definitions for requestVideoFrameCallback API
+// See https://wicg.github.io/video-rvfc/
 
 interface VideoFrameMetadata {
 	presentationTime: DOMHighResTimeStamp;
@@ -42,9 +22,6 @@ interface VideoFrameRequestCallback {
 }
 
 interface HTMLVideoElement {
-	readonly audioTracks?: AudioTrackList;
-	readonly mozHasAudio?: boolean;
-	readonly webkitAudioDecodedByteCount?: number;
 	requestVideoFrameCallback?(
 		callback: VideoFrameRequestCallback
 	): number;

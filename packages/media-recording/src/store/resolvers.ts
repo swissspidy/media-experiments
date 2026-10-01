@@ -190,6 +190,7 @@ export function getMediaStream() {
 				};
 
 				selfieSegmentation.onResults( onSelfieSegmentationResults );
+
 				const sendFrame = async () => {
 					if (
 						select.getVideoEffect() !== 'blur' ||
@@ -214,7 +215,7 @@ export function getMediaStream() {
 						// We can't do much about the WASM memory issue.
 					}
 
-					requestAnimationFrame( sendFrame );
+					video.requestVideoFrameCallback!( sendFrame );
 				};
 				await sendFrame();
 			} else {
@@ -242,7 +243,7 @@ export function getMediaStream() {
 
 					ctx.restore();
 
-					requestAnimationFrame( sendFrame );
+					video.requestVideoFrameCallback!( sendFrame );
 				};
 				sendFrame();
 			}
