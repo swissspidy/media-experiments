@@ -175,16 +175,16 @@
         },
         {
             "name": "johnbillion/wp-compat",
-            "version": "2.0.0",
+            "version": "2.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/johnbillion/wp-compat.git",
-                "reference": "687656425d016891babe4092dffcbc488470034a"
+                "reference": "b2e32bd91716a98bc6fc527c525b979652a4a567"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/johnbillion/wp-compat/zipball/687656425d016891babe4092dffcbc488470034a",
-                "reference": "687656425d016891babe4092dffcbc488470034a",
+                "url": "https://api.github.com/repos/johnbillion/wp-compat/zipball/b2e32bd91716a98bc6fc527c525b979652a4a567",
+                "reference": "b2e32bd91716a98bc6fc527c525b979652a4a567",
                 "shasum": ""
             },
             "require": {
@@ -199,7 +199,7 @@
                 "phpstan/phpstan-phpunit": "^1.0 || ^2.0",
                 "phpstan/phpstan-strict-rules": "^1.0 || ^2.0",
                 "phpunit/phpunit": "^8.5 || ^9.0",
-                "roots/wordpress": "^7.1",
+                "roots/wordpress": "*",
                 "wp-coding-standards/wpcs": "3.4.1"
             },
             "suggest": {
@@ -246,7 +246,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-08-24T01:19:53+00:00"
+            "time": "2026-08-29T17:12:02+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -1045,11 +1045,11 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.2.12",
+            "version": "2.2.16",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/174b0d88710f00a42598886504dd7a146f91ace5",
-                "reference": "174b0d88710f00a42598886504dd7a146f91ace5",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/46a6d9060e5a7763adfcc21ebcb8b504ebdbcb92",
+                "reference": "46a6d9060e5a7763adfcc21ebcb8b504ebdbcb92",
                 "shasum": ""
             },
             "require": {
@@ -1105,7 +1105,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-08-31T19:09:43+00:00"
+            "time": "2026-09-25T09:31:51+00:00"
         },
         {
             "name": "phpstan/phpstan-deprecation-rules",
