@@ -165,7 +165,9 @@ export interface Settings {
 
 export type { Attachment } from '../types';
 
-export type OnChangeHandler = ( attachments: Partial< Attachment >[] ) => void;
+export type OnChangeHandler = (
+	attachments: Partial< Attachment >[]
+) => void | Promise< void >;
 export type OnSuccessHandler = ( attachments: Partial< Attachment >[] ) => void;
 export type OnErrorHandler = ( error: Error ) => void;
 export type OnBatchSuccessHandler = () => void;
