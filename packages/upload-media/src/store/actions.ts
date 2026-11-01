@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
  */
 import type { createRegistry } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
+import { isBlobURL, revokeBlobURL } from '@wordpress/blob';
 
 import { type MeasureOptions } from '@mexp/log';
 
@@ -30,6 +31,7 @@ import type {
 	OnChangeHandler,
 	OnErrorHandler,
 	OnSuccessHandler,
+	OperationFinishAction,
 	QueueItem,
 	QueueItemId,
 	State,
@@ -38,6 +40,7 @@ import type {
 import { ItemStatus, OperationType, Type } from './types';
 import type {
 	addItem,
+	optimizeImageItem,
 	processItem,
 	removeItem,
 	revokeBlobUrls,
@@ -51,9 +54,11 @@ type ActionCreators = {
 	addItemFromUrl: typeof addItemFromUrl;
 	removeItem: typeof removeItem;
 	processItem: typeof processItem;
+	optimizeImageItem: typeof optimizeImageItem;
 	cancelItem: typeof cancelItem;
 	rejectApproval: typeof rejectApproval;
 	grantApproval: typeof grantApproval;
+	reoptimizeItem: typeof reoptimizeItem;
 	muteExistingVideo: typeof muteExistingVideo;
 	addSubtitlesForExistingVideo: typeof addSubtitlesForExistingVideo;
 	addPosterForExistingVideo: typeof addPosterForExistingVideo;
@@ -557,6 +562,47 @@ export function grantApproval( id: number ) {
 		} );
 
 		dispatch.processItem( item.id );
+	};
+}
+
+/**
+ * Re-optimizes an item that is pending approval with a new quality setting.
+ *
+ * @param id                    Item ID.
+ * @param options               Options object.
+ * @param options.outputQuality New quality setting (1-100).
+ */
+export function reoptimizeItem(
+	id: QueueItemId,
+	{ outputQuality }: { outputQuality: number }
+) {
+	return async ( { select, dispatch }: ThunkArgs ) => {
+		const item = select.getItem( id );
+		if ( ! item || ! item.sourceFile ) {
+			return;
+		}
+
+		// Revoke the old blob URL if it exists to free memory.
+		if ( item.attachment?.url && isBlobURL( item.attachment.url ) ) {
+			revokeBlobURL( item.attachment.url );
+		}
+
+		// Temporarily restore the file to the source file so we re-optimize from the original.
+		// This is necessary because optimizeImageItem uses item.file as input.
+		dispatch< OperationFinishAction >( {
+			type: Type.OperationFinish,
+			id,
+			item: {
+				file: item.sourceFile,
+			},
+		} );
+
+		// Re-run the optimization with the new quality setting.
+		// Keep requireApproval true so it stays in pending approval state.
+		await dispatch.optimizeImageItem( id, {
+			outputQuality,
+			requireApproval: true,
+		} );
 	};
 }
 

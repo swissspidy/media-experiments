@@ -11,11 +11,23 @@ import { store as uploadStore } from '@mexp/upload-media';
 /**
  * WordPress dependencies
  */
-import { Button, Modal } from '@wordpress/components';
+import {
+	Button,
+	Modal,
+	RangeControl,
+	ToggleControl,
+} from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
-import { createInterpolateElement, useState } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useCallback,
+	useEffect,
+	useMemo,
+	useState,
+} from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEntityRecord } from '@wordpress/core-data';
+import { debounce } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -48,7 +60,7 @@ export function ApprovalDialog( { id }: ApprovalDialogProps ) {
 		'attachment',
 		id
 	);
-	const { isPendingApproval, comparison } = useSelect(
+	const { isPendingApproval, comparison, item } = useSelect(
 		( select ) => ( {
 			// This allows showing only one approval modal at a time if there
 			// are multiple pending items.
@@ -58,12 +70,25 @@ export function ApprovalDialog( { id }: ApprovalDialogProps ) {
 			comparison: id
 				? select( uploadStore ).getComparisonDataForApproval( id )
 				: null,
+			item: id ? select( uploadStore ).getItemByAttachmentId( id ) : null,
 		} ),
 		[ id ]
 	);
 
-	const { rejectApproval, grantApproval } = useDispatch( uploadStore );
+	const { rejectApproval, grantApproval, reoptimizeItem } =
+		useDispatch( uploadStore );
 	const [ , setOpen ] = useState( false );
+	const [ showAdvanced, setShowAdvanced ] = useState( false );
+	const [ quality, setQuality ] = useState( 82 );
+	const [ isReoptimizing, setIsReoptimizing ] = useState( false );
+
+	// Sync quality state when comparison data becomes available
+	useEffect( () => {
+		if ( comparison?.currentQuality ) {
+			setQuality( comparison.currentQuality );
+		}
+	}, [ comparison?.currentQuality ] );
+
 	const closeModal = () => setOpen( false );
 	const onApprove = () => {
 		closeModal();
@@ -74,6 +99,37 @@ export function ApprovalDialog( { id }: ApprovalDialogProps ) {
 		closeModal();
 		void rejectApproval( id );
 	};
+
+	// Debounced reoptimization function
+	const debouncedReoptimize = useMemo(
+		() =>
+			debounce( async ( itemId: string, newQuality: number ) => {
+				setIsReoptimizing( true );
+				try {
+					await reoptimizeItem( itemId, {
+						outputQuality: newQuality,
+					} );
+				} finally {
+					setIsReoptimizing( false );
+				}
+			}, 500 ),
+		[ reoptimizeItem ]
+	);
+
+	const handleQualityChange = useCallback(
+		( newQuality: number | undefined ) => {
+			if ( ! newQuality || ! item ) {
+				return;
+			}
+
+			// Update quality state immediately for responsive UI
+			setQuality( newQuality );
+
+			// Debounce the actual reoptimization
+			debouncedReoptimize( item.id, newQuality );
+		},
+		[ item, debouncedReoptimize ]
+	);
 
 	if ( ! post || ! isPendingApproval || ! comparison ) {
 		return null;
@@ -146,6 +202,37 @@ export function ApprovalDialog( { id }: ApprovalDialogProps ) {
 						/>
 					}
 				/>
+			</div>
+			<div className="mexp-comparison-modal__advanced">
+				<ToggleControl
+					__nextHasNoMarginBottom
+					label={ __( 'Advanced options', 'media-experiments' ) }
+					checked={ showAdvanced }
+					onChange={ setShowAdvanced }
+				/>
+				{ showAdvanced && (
+					<div className="mexp-comparison-modal__quality-control">
+						<RangeControl
+							__nextHasNoMarginBottom
+							label={ __( 'Quality', 'media-experiments' ) }
+							value={ quality }
+							onChange={ handleQualityChange }
+							min={ 1 }
+							max={ 100 }
+							help={
+								isReoptimizing
+									? __(
+											'Reoptimizing image…',
+											'media-experiments'
+									  )
+									: __(
+											'Adjust the quality to find the best balance between file size and visual fidelity.',
+											'media-experiments'
+									  )
+							}
+						/>
+					</div>
+				) }
 			</div>
 			<div className="mexp-comparison-modal__buttons">
 				<Button variant="secondary" onClick={ onReject }>
