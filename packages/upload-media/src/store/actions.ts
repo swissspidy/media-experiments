@@ -497,12 +497,13 @@ export function optimizeExistingItem( {
 				operations: [
 					[
 						OperationType.FetchRemoteFile,
-						{ url, fileName, newFileName },
+						{ url, fileName, newFileName, posterUrl: poster },
 					],
 					[ OperationType.Compress, { requireApproval } ],
 					OperationType.GenerateMetadata,
 					OperationType.Upload,
 					OperationType.ThumbnailGeneration,
+					OperationType.UploadPoster,
 				],
 				abortController,
 				timings,

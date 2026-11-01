@@ -236,6 +236,7 @@ describe( 'actions', () => {
 								url: 'https://example.com/awesome-video.mp4',
 								fileName: 'awesome-video.mp4',
 								newFileName: 'awesome-video-optimized.mp4',
+								posterUrl: undefined,
 							},
 						],
 						[
@@ -245,6 +246,7 @@ describe( 'actions', () => {
 						OperationType.GenerateMetadata,
 						OperationType.Upload,
 						OperationType.ThumbnailGeneration,
+						OperationType.UploadPoster,
 					],
 				} )
 			);
